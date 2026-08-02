@@ -1,0 +1,1 @@
+- [Vô Danh Lục concept](project_vo-danh-luc-concept.md) — Vietnamese xianxia AI-narrated RPG; core risk = LLM narrator sycophancy vs "objective world, no plot armor" pillar

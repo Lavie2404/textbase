@@ -1,0 +1,2 @@
+- [Vô Danh Lục project overview](project_vo-danh-luc-overview.md) — solo xianxia interactive-fiction RPG, Godot 4.6, concept stage as of 2026-08-01
+- [AI-narrative test-evidence gap](finding_ai-narrative-test-evidence-gap.md) — 5-type test-evidence table doesn't cover non-deterministic AI narration; proposed 2-layer split (mechanical=Logic/BLOCKING, narrative=Visual-Feel-like/ADVISORY)

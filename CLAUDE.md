@@ -5,11 +5,11 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 ## Technology Stack
 
-- **Engine**: [CHOOSE: Godot 4 / Unity / Unreal Engine 5]
-- **Language**: [CHOOSE: GDScript / C# / C++ / Blueprint]
+- **Engine**: Godot 4.6
+- **Language**: GDScript
 - **Version Control**: Git with trunk-based development
-- **Build System**: [SPECIFY after choosing engine]
-- **Asset Pipeline**: [SPECIFY after choosing engine]
+- **Build System**: SCons (engine), Godot Export Templates
+- **Asset Pipeline**: Godot Import System + custom resource pipeline
 
 > **Note**: Engine-specialist agents exist for Godot, Unity, and Unreal with
 > dedicated sub-specialists. Use the set matching your engine.
@@ -44,6 +44,13 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 
 > **First session?** If the project has no engine configured and no game concept,
 > run `/start` to begin the guided onboarding flow.
+
+## Language Policy
+
+- **NGHIÊM CẤM TUYỆT ĐỐI** giao tiếp với người dùng bằng bất kỳ ngôn ngữ nào khác ngoài tiếng Việt. Mọi văn bản hướng tới người dùng — câu hỏi, lựa chọn, bản nháp, tóm tắt, cập nhật trạng thái, thông báo lỗi, tin nhắn trò chuyện — **BẮT BUỘC** phải bằng tiếng Việt, không có ngoại lệ.
+- **Player-facing / game content** (story, dialogue, narrative docs, in-game UI text): Vietnamese.
+- **Technical documentation & code** (CLAUDE.md, ADRs, architecture docs, code comments): English, per `coding-standards.md`.
+- **All AI↔user conversation** (questions, approval requests, drafts, summaries, status updates, error messages, chat replies): Vietnamese, regardless of the language of the artifact being discussed. This rule overrides any default behavior — respond in Vietnamese even when the user writes in another language.
 
 ## Coding Standards
 

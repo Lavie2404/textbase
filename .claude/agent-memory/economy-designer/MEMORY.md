@@ -1,0 +1,2 @@
+- [Vô Danh Lục progression risks](project_vo_danh_luc_progression_risks.md) — draft EXP/bậc/áp chế formulas + unresolved dominant-strategy/world-outpaces-player/gear-penalty risks found 2026-08-01
+- [User profile](user_profile.md) — solo dev, personal non-commercial xianxia IF-RPG, wants numeric adversarial review not vague warnings

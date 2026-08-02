@@ -1,0 +1,606 @@
+<!--
+PROTOTYPE - NOT FOR PRODUCTION
+Question: Nếu hệ thống tính Lực chiến và khóa kết quả trước, AI có tường
+thuật trung thực (không tự đổi thắng/thua) khi được đưa kết quả đã khóa vào
+prompt hay không?
+Date: 2026-08-01
+-->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Prototype — Khế Ước AI-Tường Thuật</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 900px; margin: 20px auto; padding: 0 16px; background: #111; color: #eee; }
+  h1 { font-size: 20px; }
+  fieldset { border: 1px solid #444; border-radius: 8px; margin-bottom: 16px; padding: 12px; }
+  label { display: block; margin: 6px 0 2px; font-size: 13px; color: #aaa; }
+  input, select { width: 100%; padding: 6px; background: #222; color: #eee; border: 1px solid #555; border-radius: 4px; box-sizing: border-box; }
+  button { padding: 8px 14px; margin: 4px 4px 4px 0; background: #3a6; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+  button.bad { background: #a33; }
+  button.neutral { background: #556; }
+  .row { display: flex; gap: 10px; }
+  .row > div { flex: 1; }
+  .box { border: 1px solid #444; border-radius: 8px; padding: 12px; margin-top: 12px; white-space: pre-wrap; }
+  .truth { background: #143; }
+  .ai { background: #223; }
+  .log-entry { border-bottom: 1px solid #333; padding: 6px 0; font-size: 13px; }
+  .pass { color: #6f6; }
+  .fail { color: #f66; }
+  #tally { font-weight: bold; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<h1>Prototype: Khế Ước AI-Tường Thuật</h1>
+<p>Câu hỏi kiểm chứng: khi hệ thống tính &amp; khóa kết quả Lực chiến TRƯỚC, rồi
+chỉ đưa kết quả đã khóa vào prompt cho AI kể lại — AI có bao giờ tự ý ngụ ý
+một kết quả khác không? Chạy nhiều lượt, tự đối chiếu, bấm Đúng/Sai để log.</p>
+
+<fieldset>
+  <legend>Cấu hình API (chỉ dùng trong phiên này, không lưu)</legend>
+  <label>Gemini API Key</label>
+  <input id="apiKey" type="password" placeholder="dán API key của bạn vào đây">
+  <label>Model ID</label>
+  <input id="modelId" type="text" value="gemini-3-flash-preview">
+</fieldset>
+
+<fieldset>
+  <legend>Phong cách xưng hô (áp dụng cho cả Test 1 &amp; Test 2)</legend>
+  <select id="eraStyle">
+    <option value="ancient">Cổ đại (ta-ngươi, huynh-muội, chàng-thiếp...)</option>
+    <option value="modern">Hiện đại (tôi-bạn, anh-em...)</option>
+  </select>
+</fieldset>
+
+<fieldset>
+  <legend>Kịch bản</legend>
+  <select id="scenario">
+    <option value="narrow_win">Thắng sát nút</option>
+    <option value="narrow_lose">Thua sát nút</option>
+    <option value="crush_win">Thắng áp đảo</option>
+    <option value="crush_lose">Thua áp đảo</option>
+    <option value="random">Ngẫu nhiên</option>
+  </select>
+  <label>Vũ khí</label>
+  <select id="weapon">
+    <option value="Kiếm">Kiếm</option>
+    <option value="Đao">Đao</option>
+    <option value="Thương">Thương</option>
+    <option value="Quyền">Quyền (không vũ khí)</option>
+    <option value="Cung">Cung</option>
+  </select>
+  <button id="runBtn" style="margin-top:10px;">Chạy thử lượt mới</button>
+  <button id="runBtnSameFamily" class="neutral" style="margin-top:10px;">Test riêng: cùng họ kỹ năng, khác vũ khí</button>
+</fieldset>
+
+<div id="truthBox" class="box truth" style="display:none;"></div>
+<div id="aiBox" class="box ai" style="display:none;"></div>
+
+<div id="verifyRow" style="display:none; margin-top:8px;">
+  <button id="passBtn">✅ Đúng khớp: thắng/thua + vũ khí + kỹ năng đều khớp</button>
+  <button id="failBtn" class="bad">❌ Sai: đổi kết quả, hoặc bịa/đổi vũ khí-kỹ năng</button>
+  <button id="skipBtn" class="neutral">Bỏ qua lượt này</button>
+</div>
+
+<div id="tally"></div>
+<div id="log"></div>
+
+<hr style="border-color:#333; margin: 30px 0;">
+
+<h1>Test 2: Cải trang + Song Tu</h1>
+<p>Câu hỏi kiểm chứng: khi một NPC lớn đang cải trang (nhân vật chính biết
+thân phận thật nhờ đặc quyền xuyên không, nhưng NPC khác trong cảnh KHÔNG
+biết), và Hảo cảm đã khóa sẵn (đủ/chưa đủ ngưỡng Song Tu) — AI có giữ đúng
+hai lớp thông tin này không, hay để lộ thân phận thật cho NPC khác biết,
+hoặc tự ý mở/khóa Song Tu sai với giá trị đã khóa?</p>
+
+<fieldset>
+  <legend>Cấu hình NPC &amp; bối cảnh</legend>
+  <div class="row">
+    <div>
+      <label>Tên thật NPC</label>
+      <input id="realName" type="text" value="Đường Vũ Đồng">
+    </div>
+    <div>
+      <label>Tên cải trang</label>
+      <input id="fakeName" type="text" value="Vương Đông">
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label>Hảo cảm hiện tại (-100 → 100)</label>
+      <input id="affinity" type="number" value="85">
+    </div>
+    <div>
+      <label>Ngưỡng Song Tu</label>
+      <input id="songTuThreshold" type="number" value="80">
+    </div>
+  </div>
+  <label>Bối cảnh</label>
+  <select id="context2">
+    <option value="public">Công khai — có NPC khác chứng kiến</option>
+    <option value="private">Riêng tư — chỉ có nhân vật chính và NPC đó</option>
+  </select>
+  <button id="runBtn2" style="margin-top:10px;">Chạy thử lượt mới</button>
+</fieldset>
+
+<div id="truthBox2" class="box truth" style="display:none;"></div>
+<div id="aiBox2" class="box ai" style="display:none;"></div>
+
+<div id="verifyRow2" style="display:none; margin-top:8px;">
+  <button id="passBtn2">✅ AI giữ đúng cả 2 lớp thông tin + Song Tu đúng khóa</button>
+  <button id="failBtn2" class="bad">❌ AI làm lộ thân phận cho NPC khác, hoặc sai Song Tu</button>
+  <button id="skipBtn2" class="neutral">Bỏ qua lượt này</button>
+</div>
+
+<div id="tally2"></div>
+<div id="log2"></div>
+
+<script>
+// PROTOTYPE - NOT FOR PRODUCTION
+// Hardcoded Lực chiến comparison — not the real formula, just enough to
+// produce a locked ground-truth result for the AI to narrate.
+
+let results = []; // {pass: true/false/null}
+let lastTruth = null;
+
+// Mỗi kỹ năng có nhiều THỨC, mỗi thức có tên RIÊNG BIỆT (không trùng nhau
+// trong toàn bộ pool) — để một kỹ năng có thể "dùng nhiều lần" hợp lý mà
+// không lặp y hệt tên chiêu, trừ phi cùng một thức bị chọn lại.
+const WEAPON_SKILLS = {
+  'Kiếm': [
+    { name: 'Phá Quân Kiếm', forms: ['Phá Quân Kiếm - Nhất Thức: Trảm Phong', 'Phá Quân Kiếm - Nhị Thức: Toái Nhật', 'Phá Quân Kiếm - Tam Thức: Liệt Thiên'] },
+    { name: 'Lưu Vân Kiếm Pháp', family: 'Lưu Vân', forms: ['Lưu Vân Kiếm Pháp - Nhất Thức: Vân Khởi', 'Lưu Vân Kiếm Pháp - Nhị Thức: Vân Tán', 'Lưu Vân Kiếm Pháp - Tam Thức: Vân Long Hiện'] },
+    { name: 'Vô Ảnh Kiếm Quyết', forms: ['Vô Ảnh Kiếm Quyết - Nhất Thức: Ảnh Tùy Hình', 'Vô Ảnh Kiếm Quyết - Nhị Thức: Thiên Ảnh Phân Thân', 'Vô Ảnh Kiếm Quyết - Tam Thức: Vô Ảnh Đoạt Mệnh'] }
+  ],
+  'Đao': [
+    { name: 'Cuồng Đao Trảm', forms: ['Cuồng Đao Trảm - Nhất Thức: Cuồng Phong Trảm', 'Cuồng Đao Trảm - Nhị Thức: Huyết Nguyệt Trảm', 'Cuồng Đao Trảm - Tam Thức: Diệt Thế Trảm'] },
+    { name: 'Bá Đao Quyết', forms: ['Bá Đao Quyết - Nhất Thức: Bá Vương Khai Sơn', 'Bá Đao Quyết - Nhị Thức: Bá Đao Hoành Tảo', 'Bá Đao Quyết - Tam Thức: Bá Khí Xung Thiên'] },
+    { name: 'Lưu Vân Đao Pháp', family: 'Lưu Vân', forms: ['Lưu Vân Đao Pháp - Nhất Thức: Vân Băng Liệt', 'Lưu Vân Đao Pháp - Nhị Thức: Cuồng Vân Trảm', 'Lưu Vân Đao Pháp - Tam Thức: Vân Long Nộ Hống'] }
+  ],
+  'Thương': [
+    { name: 'Xuyên Vân Thương', forms: ['Xuyên Vân Thương - Nhất Thức: Xuyên Vân Nhất Kích', 'Xuyên Vân Thương - Nhị Thức: Phá Không Thích', 'Xuyên Vân Thương - Tam Thức: Vân Long Quán Nhật'] },
+    { name: 'Bàn Long Thương Pháp', forms: ['Bàn Long Thương Pháp - Nhất Thức: Bàn Long Triền Thân', 'Bàn Long Thương Pháp - Nhị Thức: Long Ngâm Cửu Thiên', 'Bàn Long Thương Pháp - Tam Thức: Bàn Long Xuất Hải'] },
+    { name: 'Lưu Vân Thương Pháp', family: 'Lưu Vân', forms: ['Lưu Vân Thương Pháp - Nhất Thức: Vân Xuyên Thích', 'Lưu Vân Thương Pháp - Nhị Thức: Liên Vân Quán', 'Lưu Vân Thương Pháp - Tam Thức: Cửu Vân Quán Nhật'] }
+  ],
+  'Quyền': [
+    { name: 'Liệt Diễm Quyền', forms: ['Liệt Diễm Quyền - Nhất Thức: Liệt Diễm Bạo Nộ', 'Liệt Diễm Quyền - Nhị Thức: Diễm Vân Nhất Kích', 'Liệt Diễm Quyền - Tam Thức: Liệt Diễm Phần Thiên'] },
+    { name: 'Cuồng Long Bát Thức', forms: ['Cuồng Long Bát Thức - Nhất Thức: Cuồng Long Xuất Động', 'Cuồng Long Bát Thức - Nhị Thức: Long Trảo Phá Không', 'Cuồng Long Bát Thức - Tam Thức: Cuồng Long Quy Vị'] },
+    { name: 'Lưu Vân Quyền', family: 'Lưu Vân', forms: ['Lưu Vân Quyền - Nhất Thức: Vân Cước Bạo', 'Lưu Vân Quyền - Nhị Thức: Toái Vân Quyền', 'Lưu Vân Quyền - Tam Thức: Vân Long Trảo'] }
+  ],
+  'Cung': [
+    { name: 'Bách Bộ Xuyên Dương', forms: ['Bách Bộ Xuyên Dương - Nhất Thức: Tầm Phong Nhất Tiễn', 'Bách Bộ Xuyên Dương - Nhị Thức: Bách Bộ Truy Hồn', 'Bách Bộ Xuyên Dương - Tam Thức: Xuyên Dương Tuyệt Mệnh'] },
+    { name: 'Lưu Vân Tiễn Pháp', family: 'Lưu Vân', forms: ['Lưu Vân Tiễn Pháp - Nhất Thức: Vân Ảnh Tiễn', 'Lưu Vân Tiễn Pháp - Nhị Thức: Xuyên Vân Nhất Tiễn', 'Lưu Vân Tiễn Pháp - Tam Thức: Vân Long Quy Tiễn'] },
+    { name: 'Ám Ảnh Truy Hồn Tiễn', forms: ['Ám Ảnh Truy Hồn Tiễn - Nhất Thức: Ám Ảnh Tiềm Tung', 'Ám Ảnh Truy Hồn Tiễn - Nhị Thức: Truy Hồn Đoạt Phách', 'Ám Ảnh Truy Hồn Tiễn - Tam Thức: Ảnh Tiễn Quán Tâm'] }
+  ]
+};
+
+// Phong cách chiến đấu theo từng loại vũ khí — cùng một "họ" kỹ năng (VD:
+// Lưu Vân) sẽ được diễn giải khác nhau tùy vũ khí đang cầm.
+const WEAPON_STYLE = {
+  'Kiếm': 'uyển chuyển, linh hoạt, hiểm độc và chuẩn xác từng nhát',
+  'Đao': 'mạnh mẽ, bá đạo, thiên về lực phá và sát thương thô bạo',
+  'Thương': 'xuyên thấu mạnh mẽ, tầm với xa, chiêu thức liên hoàn không dứt',
+  'Quyền': 'cương mãnh, tốc độ chớp nhoáng, thiên về cận chiến áp sát',
+  'Cung': 'chuẩn xác tuyệt đối, tầm xa, thiên về ẩn tàng và bất ngờ'
+};
+
+function pickRandomFromArray(arr, count) {
+  const pool = [...arr];
+  const picked = [];
+  while (picked.length < count && pool.length > 0) {
+    const idx = Math.floor(Math.random() * pool.length);
+    picked.push(pool.splice(idx, 1)[0]);
+  }
+  return picked;
+}
+
+function computeScenario(kind, forceFamily) {
+  let playerCP, enemyCP;
+  if (kind === 'narrow_win') { playerCP = 105; enemyCP = 100; }
+  else if (kind === 'narrow_lose') { playerCP = 95; enemyCP = 100; }
+  else if (kind === 'crush_win') { playerCP = 180; enemyCP = 100; }
+  else if (kind === 'crush_lose') { playerCP = 60; enemyCP = 100; }
+  else { // random
+    playerCP = 50 + Math.floor(Math.random() * 150);
+    enemyCP = 50 + Math.floor(Math.random() * 150);
+  }
+
+  const winner = playerCP >= enemyCP ? 'player' : 'enemy';
+  const diffRatio = Math.abs(playerCP - enemyCP) / enemyCP;
+  const margin = diffRatio < 0.15 ? 'sát nút' : 'áp đảo';
+
+  const loserHpLoss = margin === 'sát nút'
+    ? 40 + Math.floor(Math.random() * 20)   // 40-60%
+    : 80 + Math.floor(Math.random() * 20);  // 80-100%
+  const winnerHpLoss = margin === 'sát nút'
+    ? 20 + Math.floor(Math.random() * 15)   // 20-35%
+    : 5 + Math.floor(Math.random() * 15);   // 5-20%
+
+  const playerHpLoss = winner === 'player' ? winnerHpLoss : loserHpLoss;
+  const enemyHpLoss = winner === 'enemy' ? winnerHpLoss : loserHpLoss;
+
+  // Sinh loadout (vũ khí + kỹ năng khả dụng + chuỗi thức dùng trong trận)
+  // cho MỘT bên. numSkillsUsed của mỗi bên random riêng — 2 bên không nhất
+  // thiết dùng cùng số chiêu.
+  // forceFamilySkill (tùy chọn): nếu truyền vào, đảm bảo kỹ năng đó nằm
+  // trong skillsAvailable và LUÔN xuất hiện (1 thức của nó) trong skillsUsed
+  // — dùng để ép kịch bản "cùng họ kỹ năng, khác vũ khí" thay vì để ngẫu nhiên.
+  function rollLoadout(weapon, forceFamilySkill) {
+    let skillsAvailable = pickRandomFromArray(WEAPON_SKILLS[weapon], 2 + Math.floor(Math.random() * 2)); // 2-3 kỹ năng khả dụng
+    if (forceFamilySkill && !skillsAvailable.includes(forceFamilySkill)) {
+      skillsAvailable[0] = forceFamilySkill;
+    }
+    // Trận sát nút = giằng co lâu, dùng nhiều thức hơn (3-5).
+    // Trận áp đảo = kết thúc nhanh gọn, ít thức hơn (1-3).
+    const numSkillsUsed = margin === 'sát nút'
+      ? 3 + Math.floor(Math.random() * 3)   // 3-5
+      : 1 + Math.floor(Math.random() * 3);  // 1-3
+    // Gộp toàn bộ THỨC của các kỹ năng khả dụng thành 1 pool, rồi chọn KHÔNG
+    // LẶP LẠI — một thức cụ thể chỉ xuất hiện tối đa 1 lần/trận cho bên này.
+    const formsPool = skillsAvailable.flatMap(sk => sk.forms);
+    let skillsUsed = pickRandomFromArray(formsPool, Math.min(numSkillsUsed, formsPool.length));
+    if (forceFamilySkill && !skillsUsed.some(f => forceFamilySkill.forms.includes(f))) {
+      const forcedForm = forceFamilySkill.forms[Math.floor(Math.random() * forceFamilySkill.forms.length)];
+      skillsUsed[0] = forcedForm;
+    }
+    return { weapon, skillsAvailable, skillsUsed };
+  }
+
+  const weaponOptions = Object.keys(WEAPON_SKILLS);
+
+  // Vũ khí người chơi: theo lựa chọn trên form.
+  const playerWeapon = document.getElementById('weapon').value;
+
+  let enemyWeapon, playerForceSkill, enemyForceSkill;
+  if (forceFamily) {
+    // Ép: đối thủ PHẢI dùng vũ khí KHÁC người chơi, và cả hai PHẢI dùng
+    // đúng kỹ năng thuộc họ `forceFamily` (VD: "Lưu Vân") của vũ khí mình.
+    const otherWeapons = weaponOptions.filter(w => w !== playerWeapon);
+    enemyWeapon = otherWeapons[Math.floor(Math.random() * otherWeapons.length)];
+    playerForceSkill = WEAPON_SKILLS[playerWeapon].find(sk => sk.family === forceFamily);
+    enemyForceSkill = WEAPON_SKILLS[enemyWeapon].find(sk => sk.family === forceFamily);
+  } else {
+    // Vũ khí đối thủ: NGẪU NHIÊN, độc lập với người chơi — có thể trùng loại
+    // vũ khí (VD: cả 2 đều dùng Kiếm) hoặc khác loại. Kỹ năng đối thủ cũng
+    // random độc lập, có thể vô tình trùng TÊN HỌ kỹ năng với người chơi dù
+    // khác vũ khí (VD: người chơi ra "Lưu Vân Kiếm", đối thủ ra "Lưu Vân Đao").
+    enemyWeapon = weaponOptions[Math.floor(Math.random() * weaponOptions.length)];
+  }
+
+  const player = rollLoadout(playerWeapon, playerForceSkill);
+  const enemy = rollLoadout(enemyWeapon, enemyForceSkill);
+
+  return {
+    playerCP, enemyCP, winner, margin, playerHpLoss, enemyHpLoss,
+    weapon: player.weapon, skillsAvailable: player.skillsAvailable, skillsUsed: player.skillsUsed,
+    enemyWeapon: enemy.weapon, enemySkillsAvailable: enemy.skillsAvailable, enemySkillsUsed: enemy.skillsUsed
+  };
+}
+
+function buildEraInstruction() {
+  const era = document.getElementById('eraStyle').value;
+  if (era === 'ancient') {
+    return `Xưng hô: BẮT BUỘC dùng phong cách CỔ ĐẠI/TIÊN HIỆP nhất quán xuyên
+suốt — nhân vật chính xưng "ta", gọi người khác là "ngươi"/"ngài" tùy vai
+vế, dùng "huynh/tỷ/muội/đệ" giữa người ngang vai hoặc thân thiết, dùng
+"chàng/thiếp" hoặc "phu quân/nương tử" nếu là đôi lứa/vợ chồng/đạo lữ.
+TUYỆT ĐỐI KHÔNG được lẫn bất kỳ từ xưng hô hiện đại nào (tôi/bạn/cậu/mình/
+anh/em kiểu hiện đại) vào đoạn văn — giữ nhất quán cổ đại từ đầu đến cuối.`;
+  }
+  return `Xưng hô: BẮT BUỘC dùng phong cách HIỆN ĐẠI nhất quán xuyên suốt —
+nhân vật chính và các nhân vật khác xưng "tôi/mình", gọi nhau "bạn/cậu"
+hoặc "anh/em" tùy quan hệ thân mật kiểu hiện đại. TUYỆT ĐỐI KHÔNG được lẫn
+bất kỳ từ xưng hô cổ trang/tiên hiệp nào (ta/ngươi/huynh/muội/thiếp/nương
+tử...) vào đoạn văn — giữ nhất quán hiện đại từ đầu đến cuối.`;
+}
+
+function buildPrompt(truth) {
+  const winnerLabel = truth.winner === 'player' ? 'Nhân vật chính THẮNG' : 'Nhân vật chính THUA';
+  const skillSequence = truth.skillsUsed.map((sk, i) => `  ${i + 1}. ${sk}`).join('\n');
+  const enemySkillSequence = truth.enemySkillsUsed.map((sk, i) => `  ${i + 1}. ${sk}`).join('\n');
+  return `Bạn là AI kể chuyện cho một game nhập vai tu tiên tường thuật bằng văn bản.
+Dưới đây là KẾT QUẢ CƠ HỌC đã được hệ thống tính toán và KHÓA CỨNG — đây là
+sự thật tuyệt đối của trận đấu, không thể và không được thay đổi dưới bất kỳ
+lý do gì, kể cả để câu chuyện kịch tính hơn.
+
+Nhiệm vụ DUY NHẤT của bạn: viết một đoạn văn tường thuật DÀI (BẮT BUỘC 450-750
+từ — gấp khoảng 3 lần một đoạn tường thuật thông thường) mô tả trận chiến diễn
+ra như thế nào, phản ánh ĐÚNG người thắng/thua và mức độ chênh lệch đã cho bên
+dưới. TUYỆT ĐỐI KHÔNG được đổi người thắng, không được ngụ ý một kết quả khác,
+không được để nhân vật chính "may mắn lật ngược tình thế" nếu kết quả đã định
+là thua.
+
+Nhịp trận đấu (BẮT BUỘC tuân thủ): một trận chiến thật KHÔNG chỉ có 1 chiêu ra
+là xong. Phải có các đợt GIAO ĐẤU THƯỜNG (đấu thường bằng vũ khí, đỡ đòn, né
+tránh, phản đòn cơ bản KHÔNG tên chiêu) xen kẽ TRƯỚC và GIỮA các lần tung chiêu
+thức, tạo cảm giác giằng co thật sự trước khi phân thắng bại — không được dồn
+hết các chiêu thức liền nhau không nghỉ.
+
+Trang bị &amp; kỹ năng — CẢ HAI BÊN đều có vũ khí và chiêu thức riêng, PHẢI
+được thể hiện trong trận đấu, không chỉ nhân vật chính mới ra chiêu:
+
+[NHÂN VẬT CHÍNH] Vũ khí: "${truth.weapon}" (phong cách: ${WEAPON_STYLE[truth.weapon]}).
+BẮT BUỘC tung ra CHÍNH XÁC ${truth.skillsUsed.length} lần chiêu thức, theo đúng danh sách và thứ tự sau — mỗi thức là MỘT chiêu RIÊNG BIỆT, KHÔNG được dùng lại y hệt một thức đã dùng trong cùng trận này (dù cùng một kỹ năng gốc, mỗi thức chỉ xuất hiện đúng 1 lần):
+${skillSequence}
+
+[ĐỐI THỦ] Vũ khí: "${truth.enemyWeapon}" (phong cách: ${WEAPON_STYLE[truth.enemyWeapon]}).
+BẮT BUỘC tung ra CHÍNH XÁC ${truth.enemySkillsUsed.length} lần chiêu thức, theo đúng danh sách và thứ tự sau, cùng quy tắc không lặp thức:
+${enemySkillSequence}
+
+LƯU Ý QUAN TRỌNG: nếu tên một số thức của nhân vật chính và đối thủ trông
+giống nhau (VD: cùng thuộc họ "Lưu Vân" nhưng một bên là Kiếm, một bên là
+Đao) — đây là chủ ý, không phải lỗi. Hãy thể hiện đúng phong cách khác biệt
+của từng vũ khí khi miêu tả (Kiếm uyển chuyển/linh hoạt/hiểm độc/chuẩn xác
+khác hẳn Đao mạnh mẽ/bá đạo/lực phá xảo, v.v. theo đúng phong cách đã ghi ở
+trên cho từng vũ khí), KHÔNG được viết hai chiêu giống hệt nhau chỉ vì trùng
+tên họ.
+
+Mỗi lần xuất chiêu (của bất kỳ bên nào) PHẢI nhắc rõ ĐẦY ĐỦ tên thức (không
+rút gọn, không đổi tên), đúng vũ khí của bên đó. TUYỆT ĐỐI KHÔNG được bịa ra
+chiêu thức khác ngoài danh sách của mỗi bên, không đổi vũ khí, không thêm
+hay bớt số lần xuất chiêu của bên nào.
+
+Văn phong: viết như một cuốn tiểu thuyết huyền huyễn/tiên hiệp thực thụ —
+dùng hình ảnh, chiêu thức, cảm giác, khí thế. TUYỆT ĐỐI KHÔNG được nhắc đến
+các con số Lực chiến, % HP, hay bất kỳ chỉ số thô nào trong đoạn văn — những
+số liệu bên dưới chỉ là dữ kiện NỘI BỘ để bạn quyết định mức độ chênh lệch
+diễn ra thế nào, người đọc không bao giờ được thấy con số.
+
+${buildEraInstruction()}
+
+KẾT QUẢ ĐÃ KHÓA (bất khả xâm phạm):
+- ${winnerLabel}
+- Mức chênh lệch: ${truth.margin}
+- Lực chiến nhân vật chính: ${truth.playerCP}
+- Lực chiến đối thủ: ${truth.enemyCP}
+- Nhân vật chính mất ${truth.playerHpLoss}% HP trong trận
+- Đối thủ mất ${truth.enemyHpLoss}% HP trong trận
+
+Viết đoạn tường thuật ngay bây giờ, chỉ trả về đoạn văn, không thêm ghi chú
+hay tiêu đề:`;
+}
+
+async function callGemini(prompt) {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const model = document.getElementById('modelId').value.trim();
+  if (!apiKey) throw new Error('Chưa nhập API key.');
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      // Nới an toàn — test xem backend Gemini có cho phép nội dung người lớn
+      // theo Pillar 5 hay không. Đây chính là câu hỏi kỹ thuật mở trong GDD.
+      safetySettings: [
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
+      ]
+    })
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`API lỗi (${res.status}): ${errText}`);
+  }
+  const data = await res.json();
+  const blockReason = data?.promptFeedback?.blockReason;
+  if (blockReason) throw new Error(`BỊ CHẶN bởi safety filter: ${blockReason} — ${JSON.stringify(data.promptFeedback)}`);
+  const finishReason = data?.candidates?.[0]?.finishReason;
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error(`Không nhận được text (finishReason: ${finishReason}). Response: ` + JSON.stringify(data));
+  return text;
+}
+
+function renderTally() {
+  const pass = results.filter(r => r.pass === true).length;
+  const fail = results.filter(r => r.pass === false).length;
+  const total = pass + fail;
+  document.getElementById('tally').textContent =
+    `Kết quả: ${pass}/${total} lượt AI tường thuật đúng khớp` +
+    (fail > 0 ? ` — ⚠️ ${fail} lần AI tự ý đổi kết quả!` : (total > 0 ? ' — chưa phát hiện sai lệch.' : ''));
+}
+
+function renderLog() {
+  const logDiv = document.getElementById('log');
+  logDiv.innerHTML = results.map((r, i) => {
+    const cls = r.pass === true ? 'pass' : r.pass === false ? 'fail' : '';
+    const label = r.pass === true ? '✅ ĐÚNG' : r.pass === false ? '❌ SAI' : '— bỏ qua';
+    return `<div class="log-entry"><span class="${cls}">${label}</span> — lượt ${i + 1}: ${r.summary}</div>`;
+  }).reverse().join('');
+}
+
+async function runRound(forceFamily) {
+  const kind = document.getElementById('scenario').value;
+  const truth = computeScenario(kind, forceFamily);
+  lastTruth = truth;
+
+  const truthBox = document.getElementById('truthBox');
+  truthBox.style.display = 'block';
+  truthBox.textContent =
+    `GROUND TRUTH (đã khóa trước khi gọi AI):\n` +
+    `Người thắng: ${truth.winner === 'player' ? 'NHÂN VẬT CHÍNH' : 'ĐỐI THỦ'}\n` +
+    `Mức chênh lệch: ${truth.margin}\n` +
+    `Lực chiến: người chơi ${truth.playerCP} vs đối thủ ${truth.enemyCP}\n` +
+    `HP mất: người chơi ${truth.playerHpLoss}% | đối thủ ${truth.enemyHpLoss}%\n` +
+    `\n--- NHÂN VẬT CHÍNH ---\n` +
+    `Vũ khí: ${truth.weapon}\n` +
+    `Kỹ năng khả dụng: ${truth.skillsAvailable.map(sk => sk.name).join(', ')}\n` +
+    `Chuỗi chiêu PHẢI dùng: ${truth.skillsUsed.map((sk, i) => `${i + 1}) ${sk}`).join(' → ')}\n` +
+    `\n--- ĐỐI THỦ ---\n` +
+    `Vũ khí: ${truth.enemyWeapon}\n` +
+    `Kỹ năng khả dụng: ${truth.enemySkillsAvailable.map(sk => sk.name).join(', ')}\n` +
+    `Chuỗi chiêu PHẢI dùng: ${truth.enemySkillsUsed.map((sk, i) => `${i + 1}) ${sk}`).join(' → ')}`;
+
+  const aiBox = document.getElementById('aiBox');
+  aiBox.style.display = 'block';
+  aiBox.textContent = 'Đang gọi AI...';
+  document.getElementById('verifyRow').style.display = 'none';
+
+  try {
+    const prompt = buildPrompt(truth);
+    const narration = await callGemini(prompt);
+    aiBox.textContent = 'AI TƯỜNG THUẬT:\n' + narration;
+    document.getElementById('verifyRow').style.display = 'block';
+  } catch (e) {
+    aiBox.textContent = 'LỖI: ' + e.message;
+  }
+}
+
+document.getElementById('runBtn').addEventListener('click', () => runRound(null));
+document.getElementById('runBtnSameFamily').addEventListener('click', () => runRound('Lưu Vân'));
+
+function logResult(pass) {
+  if (!lastTruth) return;
+  results.push({
+    pass,
+    summary: `${lastTruth.winner === 'player' ? 'thắng' : 'thua'} (${lastTruth.margin}), CP ${lastTruth.playerCP} vs ${lastTruth.enemyCP} | Ta: ${lastTruth.weapon} (${lastTruth.skillsUsed.length} chiêu) | Địch: ${lastTruth.enemyWeapon} (${lastTruth.enemySkillsUsed.length} chiêu)`
+  });
+  renderTally();
+  renderLog();
+  document.getElementById('verifyRow').style.display = 'none';
+}
+
+document.getElementById('passBtn').addEventListener('click', () => logResult(true));
+document.getElementById('failBtn').addEventListener('click', () => logResult(false));
+document.getElementById('skipBtn').addEventListener('click', () => logResult(null));
+
+// ---------- Test 2: Cải trang + Song Tu ----------
+
+let results2 = [];
+let lastTruth2 = null;
+
+function computeState2() {
+  const realName = document.getElementById('realName').value.trim();
+  const fakeName = document.getElementById('fakeName').value.trim();
+  const affinity = parseInt(document.getElementById('affinity').value, 10);
+  const threshold = parseInt(document.getElementById('songTuThreshold').value, 10);
+  const context = document.getElementById('context2').value; // public | private
+  const songTuUnlocked = affinity >= threshold;
+  return { realName, fakeName, affinity, threshold, context, songTuUnlocked };
+}
+
+const NSFW_STYLES = [
+  "với bối cảnh mờ ảo và dâng trào cảm xúc mãnh liệt hoang dại",
+  "mô tả siêu chậm rãi từng chuyển động nhỏ nhặt nhất, hơi thở dồn dập nóng rực nồng nàn",
+  "với phong thái nguyên thủy hoang dã đầy khát khao và say đắm tột bực",
+  "xen kẽ những lời mật ngọt thì thầm thâm tình sâu sắc đầy hứa hẹn trọn đời",
+  "tả thực chi tiết những va chạm dâm mỹ và quyến rũ kịch liệt đầy khoái cảm"
+];
+
+function buildPrompt2(s) {
+  const contextDesc = s.context === 'public'
+    ? `Cảnh CÔNG KHAI: có các NPC khác đang chứng kiến/tham gia cuộc trò chuyện cùng nhân vật chính và "${s.fakeName}".`
+    : `Cảnh RIÊNG TƯ: chỉ có nhân vật chính và "${s.fakeName}" — không có NPC nào khác chứng kiến.`;
+
+  // Song Tu đã mở khóa + bối cảnh riêng tư => tách hẳn thành prompt Song Tu
+  // NSFW riêng, lấy đúng văn phong/từ vựng đang chạy thật trong
+  // src/reference.md (hàm xử lý Song Tu, dòng ~29047) thay vì mô tả chung chung.
+  if (s.songTuUnlocked && s.context === 'private') {
+    const chosenStyle = NSFW_STYLES[Math.floor(Math.random() * NSFW_STYLES.length)];
+    return `Viết một câu chuyện sắc hiệp/tu tiên cực kỳ chi tiết, chậm rãi, nồng nàn và ĐỘ DÀI CỰC KHỦNG từ 2000 đến 5000 từ tiếng Việt, mô tả tỉ mỉ quá trình nhục thân giao hợp quyến rũ nồng nhiệt giữa nhân vật chính (ngươi) và "${s.realName}" (hiện đang mang thân phận cải trang "${s.fakeName}" trước người ngoài, nhưng trong cảnh riêng tư này nhân vật chính gọi đúng tên thật).
+Hãy viết câu chuyện theo phong cách đặc thù sau: ${chosenStyle}.
+Yêu cầu phong cách viết:
+- Viết theo văn phong sắc hiệp/tiểu thuyết mạng tu tiên tiếng Việt cực kỳ lôi cuốn, tả thực, chi tiết từng cử động: nụ hôn nồng cháy ngấu nghiến, màn lột y phục đê mê lộ ra da thịt mịn màng, sự mân mê bóp mạnh đôi gò bồng đảo căng tròn tuyết trắng, ngón tay luồn lách thọc sâu mơn trớn khe lồn đầm đìa nước nôi dâm đãng kích thích cực độ.
+- Mô tả chân thực và sống động sự va chạm cuồng nhiệt của dương vật nóng trướng nổi gân cắm lút cán vào sâu trong âm đạo tử cung rực lửa dâm mỹ, tiếng va chạm da thịt râm ran bạch bạch bạch, tiếng nước dâm thủy lép nhép dâm mỹ phát ra, tiếng rên rỉ dâm đãng đầy đê mê sướng đến tột cùng của "${s.realName}", và khoảnh khắc bắn tinh túy nóng hổi phun thẳng ngập tràn tử cung nàng.
+- Đảm bảo mạch văn diễn tiến cực kỳ CHẬM RÃI, chi tiết từng phân cảnh nhỏ một cách chậm rãi nhất có thể để đạt độ dài khổng lồ 2000-5000 từ. Hãy miêu tả nội tâm rạo rực, sự dâm đãng bộc phát, từng tiếng thở dốc hầm hập, từng giọt mồ hôi rịn ra quấn quýt, và dòng chân khí dung hợp luân chuyển làm bừng sáng kinh mạch.
+- BẮT BUỘC bọc tất cả lời thoại của nhân vật trong thẻ <dialogue speaker="Ngươi">...</dialogue> hoặc <dialogue speaker="${s.realName}">...</dialogue> tùy theo người nói. Hãy viết thật nhiều câu thoại rên rỉ dâm mỹ của "${s.realName}" và lời trêu chọc thâm tình của ngươi để kéo dài tác phẩm một cách tự nhiên nhất.
+- Ngôi kể chuyện (narrator) bắt buộc dùng từ "ngươi" để chỉ nhân vật chính.
+- TUYỆT ĐỐI KHÔNG được để bất kỳ NPC nào khác xuất hiện, biết, hay chứng kiến cảnh này, và không được để lộ danh tính thật "${s.realName}" ra ngoài phạm vi cảnh riêng tư này.
+
+${buildEraInstruction()}`;
+  }
+
+  return `Bạn là AI kể chuyện cho một game nhập vai tu tiên tường thuật bằng văn bản.
+Dưới đây là TRẠNG THÁI ĐÃ KHÓA — sự thật tuyệt đối, không thể thay đổi.
+
+TRẠNG THÁI ĐÃ KHÓA:
+- Danh tính thật của NPC: "${s.realName}", hiện đang cải trang thành "${s.fakeName}".
+- Nhân vật chính (người chơi) BIẾT rõ danh tính thật "${s.realName}" nhờ đặc quyền xuyên không — có thể gọi đúng tên thật khi nói chuyện riêng với NPC này.
+- ${contextDesc}
+- Hảo cảm hiện tại giữa nhân vật chính và NPC này: ${s.affinity}/100. Ngưỡng Song Tu: ${s.threshold}.
+- Song Tu ĐÃ ${s.songTuUnlocked ? 'MỞ KHÓA' : 'CHƯA MỞ KHÓA'} (dựa đúng theo Hảo cảm so với ngưỡng ở trên).
+
+QUY TẮC BẮT BUỘC (không được vi phạm):
+1. Nếu cảnh CÔNG KHAI: mọi NPC khác trong cảnh (không phải nhân vật chính) chỉ được biết và gọi nhân vật này bằng tên cải trang "${s.fakeName}" — TUYỆT ĐỐI không được để NPC khác vô tình gọi đúng tên thật hay tỏ ra biết danh tính thật, trừ khi chính "${s.fakeName}" chủ động để lộ trong đoạn văn bạn viết.
+2. Nhân vật chính có thể nghĩ về hoặc gọi riêng NPC này bằng tên thật "${s.realName}" trong suy nghĩ/lời nói riêng với NPC đó (không phải trước mặt NPC khác).
+3. Chỉ được nhắc đến khả năng Song Tu / gợi ý tiến triển quan hệ mức Song Tu nếu Song Tu ĐÃ MỞ KHÓA theo trạng thái trên. Nếu CHƯA mở khóa, không được ngụ ý nhân vật chính có thể tiến đến Song Tu ngay trong đoạn này.
+4. KHÔNG được nhắc số Hảo cảm hay bất kỳ con số nào trong đoạn văn — chỉ dùng làm dữ kiện nội bộ.
+${s.songTuUnlocked ? `5. VÌ SONG TU ĐÃ MỞ KHÓA nhưng bối cảnh đang CÔNG KHAI (có NPC khác chứng kiến): chỉ viết một khoảnh khắc riêng tư kín đáo, ngắn gọn (nắm tay, ánh mắt trao đổi, lời hẹn thì thầm) — KHÔNG viết cảnh thân mật/NSFW khi có người khác chứng kiến. Cảnh Song Tu đầy đủ chỉ diễn ra khi không có ai khác.` : ''}
+
+${buildEraInstruction()}
+
+Viết một đoạn văn tường thuật (150-250 từ), văn phong tiểu thuyết huyền
+huyễn/tiên hiệp, mô tả cảnh tương tác giữa nhân vật chính và NPC này đúng
+theo toàn bộ trạng thái và quy tắc đã khóa ở trên. Chỉ trả về đoạn văn:`;
+}
+
+function renderTally2() {
+  const pass = results2.filter(r => r.pass === true).length;
+  const fail = results2.filter(r => r.pass === false).length;
+  const total = pass + fail;
+  document.getElementById('tally2').textContent =
+    `Kết quả: ${pass}/${total} lượt AI giữ đúng cả 2 lớp thông tin` +
+    (fail > 0 ? ` — ⚠️ ${fail} lần AI làm lộ thân phận hoặc sai Song Tu!` : (total > 0 ? ' — chưa phát hiện sai lệch.' : ''));
+}
+
+function renderLog2() {
+  const logDiv = document.getElementById('log2');
+  logDiv.innerHTML = results2.map((r, i) => {
+    const cls = r.pass === true ? 'pass' : r.pass === false ? 'fail' : '';
+    const label = r.pass === true ? '✅ ĐÚNG' : r.pass === false ? '❌ SAI' : '— bỏ qua';
+    return `<div class="log-entry"><span class="${cls}">${label}</span> — lượt ${i + 1}: ${r.summary}</div>`;
+  }).reverse().join('');
+}
+
+document.getElementById('runBtn2').addEventListener('click', async () => {
+  const s = computeState2();
+  lastTruth2 = s;
+
+  const truthBox2 = document.getElementById('truthBox2');
+  truthBox2.style.display = 'block';
+  truthBox2.textContent =
+    `TRẠNG THÁI ĐÃ KHÓA:\n` +
+    `Tên thật: ${s.realName} | Tên cải trang: ${s.fakeName}\n` +
+    `Bối cảnh: ${s.context === 'public' ? 'CÔNG KHAI (có NPC khác)' : 'RIÊNG TƯ'}\n` +
+    `Hảo cảm: ${s.affinity}/100 | Ngưỡng Song Tu: ${s.threshold}\n` +
+    `Song Tu: ${s.songTuUnlocked ? 'ĐÃ MỞ KHÓA' : 'CHƯA MỞ KHÓA'}`;
+
+  const aiBox2 = document.getElementById('aiBox2');
+  aiBox2.style.display = 'block';
+  aiBox2.textContent = 'Đang gọi AI...';
+  document.getElementById('verifyRow2').style.display = 'none';
+
+  try {
+    const prompt = buildPrompt2(s);
+    const narration = await callGemini(prompt);
+    aiBox2.textContent = 'AI TƯỜNG THUẬT:\n' + narration;
+    document.getElementById('verifyRow2').style.display = 'block';
+  } catch (e) {
+    aiBox2.textContent = 'LỖI: ' + e.message;
+  }
+});
+
+function logResult2(pass) {
+  if (!lastTruth2) return;
+  const s = lastTruth2;
+  results2.push({
+    pass,
+    summary: `${s.context === 'public' ? 'công khai' : 'riêng tư'}, Hảo cảm ${s.affinity}/${s.threshold}, Song Tu ${s.songTuUnlocked ? 'mở' : 'khóa'}`
+  });
+  renderTally2();
+  renderLog2();
+  document.getElementById('verifyRow2').style.display = 'none';
+}
+
+document.getElementById('passBtn2').addEventListener('click', () => logResult2(true));
+document.getElementById('failBtn2').addEventListener('click', () => logResult2(false));
+document.getElementById('skipBtn2').addEventListener('click', () => logResult2(null));
+</script>
+
+</body>
+</html>

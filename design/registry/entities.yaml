@@ -37,7 +37,7 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 
 version: 1
-last_updated: ""
+last_updated: "2026-08-03"
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -106,7 +106,322 @@ items: []
 #   output_range[min, max], added
 # Optional: expression (the actual formula), notes
 
-formulas: []
+formulas:
+  - name: world_time_advancement
+    status: active
+    source: design/gdd/turn-manager.md
+    referenced_by:
+      - design/gdd/turn-manager.md
+      - design/gdd/persistence-save-system.md
+    variables:
+      - world_time
+      - confirmed
+      - undone
+    output_range: [0, null]
+    expression: "world_time' = world_time + confirmed(turn) * (1 - undone(turn))"
+    notes: "world_time only advances on turns that are confirmed AND not
+      undone. Read by World Memory & Context Management (NPC/world
+      progression) and Persistence/Save System. Undo makes a turn 'never
+      have happened' for this counter."
+    added: 2026-08-02
+    revised: ""
+
+  - name: ai_call_budget_per_turn
+    status: active
+    source: design/gdd/turn-manager.md
+    referenced_by:
+      - design/gdd/turn-manager.md
+      - design/gdd/mechanic-narration-contract-enforcement.md
+      - design/gdd/world-memory-context-management.md
+      - design/gdd/ai-llm-integration-layer.md
+    variables:
+      - suggestion_call
+      - suggestion_retry_call
+      - narration_call
+    output_range: [0, 3]
+    expression: "calls_per_turn = suggestion_call + suggestion_retry_call + narration_call"
+    notes: "Hard invariant, not a tuning knob — a 4th AI call in the same
+      turn is a bug. 3 (not 2) is the max: 1 suggestion-retry call is
+      permitted when the AI returns <4/duplicate suggestions. Relevant to
+      AI/LLM Integration Layer design.
+      (Revised 2026-08-02 via /design-review: old expression was
+      suggestion_call + narration_call, output_range [0,2] — the design
+      review found this contradicted the GDD's own retry edge case.)"
+    added: 2026-08-02
+    revised: "2026-08-02"
+
+  - name: numeric_leak_detection
+    status: active
+    source: design/gdd/mechanic-narration-contract-enforcement.md
+    referenced_by:
+      - design/gdd/mechanic-narration-contract-enforcement.md
+    variables:
+      - locked_result
+      - narration_text
+      - leak_count
+      - leak_flag
+    output_range: [0, null]
+    expression: "leak_matches(turn) = { f in fields(locked_result) : is_numeric(f.value) AND f.value != 0 AND digits(f.value) in extract_numerals(narration_text) }; leak_count = |leak_matches(turn)|; leak_flag = 1 if leak_count > 0 else 0"
+    notes: "QA/monitoring formula, not gameplay balance. Regex-based
+      (digits only, not Vietnamese number-words) detection of raw numeric
+      values leaking into AI narration text. Zero-valued fields excluded
+      (avoids '0' token false positives). n=0 (no numeric fields in
+      locked_result) must be logged distinctly from '0 leaks, system
+      correct'. Only applies to narration_call, not suggestion_call. Feeds
+      session_violation_count below."
+    added: 2026-08-02
+    revised: ""
+
+  - name: session_violation_count
+    status: active
+    source: design/gdd/mechanic-narration-contract-enforcement.md
+    referenced_by:
+      - design/gdd/mechanic-narration-contract-enforcement.md
+    variables:
+      - V
+      - T
+      - violation_rate
+    output_range: [0, 1]
+    expression: "V = sum(leak_flag(turn)) for turn in session; T = count(narrated turns in session); violation_rate = V / T (T >= 1)"
+    notes: "Direct operationalization of game-concept.md's MVP core
+      hypothesis (zero-tolerance: AI must never alter a locked mechanical
+      result). Gate condition is V=0 over T>=90 turns across >=3 sessions
+      — an absolute count, NOT a rate threshold (any V>0 fails regardless
+      of how low violation_rate is). T=0 -> violation_rate is 'N/A', never
+      divide by zero. Turns that were later undone (Turn Manager Core Rule
+      #9) are excluded from T, consistent with 'an undone turn never
+      happened'."
+    added: 2026-08-02
+    revised: ""
+
+  - name: thuc_pool_sufficiency
+    status: active
+    source: design/gdd/equipment-skill-data-system.md
+    referenced_by:
+      - design/gdd/equipment-skill-data-system.md
+      - design/gdd/combat-system.md
+    variables:
+      - thuc_count
+      - max_invocations_per_battle
+    output_range: [0, 1]
+    expression: "is_pool_sufficient(skill) = thuc_count(skill) >= max_invocations_per_battle"
+    notes: "Data-integrity/authoring-time check, not gameplay balance math.
+      max_invocations_per_battle is an EXTERNAL variable owned by Combat
+      System (not yet designed) — this formula is provisional until that
+      GDD defines it. When Combat System is designed, cross-check this
+      value against actual thuc_count per skill in the data set."
+    added: 2026-08-02
+    revised: ""
+
+  - name: undo_availability_window
+    status: active
+    source: design/gdd/turn-manager.md
+    referenced_by:
+      - design/gdd/turn-manager.md
+      - design/gdd/world-memory-context-management.md
+    variables:
+      - turn_id
+      - last_confirmed_turn_id
+      - no_newer_turn_confirmed
+      - has_confirmed_turn
+      - is_death_turn
+    output_range: [0, 1]
+    expression: "undo_available = (turn_id == last_confirmed_turn_id) AND (no_newer_turn_confirmed) AND (has_confirmed_turn) AND (NOT is_death_turn)"
+    notes: "Boolean, not continuous. At most one turn_id has
+      undo_available=true at any time. Non-chainable: using undo requires a
+      new confirmed action before it becomes available again. A turn whose
+      result is a true death (Death & Consequence, deep-hostility threshold)
+      is never undo-available, even as the most recent turn — this is the
+      sole exception, see turn-manager.md Core Rules #9.
+      (Revised 2026-08-02 via /design-review: added has_confirmed_turn to
+      fix a sentinel-value edge case, and is_death_turn for the death
+      exception — neither existed in the original formula.)"
+    added: 2026-08-02
+    revised: "2026-08-02"
+
+  - name: recency_window_membership
+    status: active
+    source: design/gdd/world-memory-context-management.md
+    referenced_by:
+      - design/gdd/world-memory-context-management.md
+    variables:
+      - turn_id
+      - last_confirmed_turn_id
+      - recency_window_turns
+    output_range: [0, 1]
+    expression: "in_window(turn_id) = (last_confirmed_turn_id - turn_id) < recency_window_turns"
+    notes: "Boolean. A turn falls out of the recency window (raw
+      narration_text + locked_result) into extracted-facts-only form when
+      a new turn is confirmed and (last_confirmed_turn_id - turn_id) >=
+      recency_window_turns. Exactly one turn_id transitions per newly
+      confirmed turn in steady state (see the batch-load edge case for
+      resuming a save far ahead)."
+    added: 2026-08-02
+    revised: ""
+
+  - name: fact_extraction_count
+    status: active
+    source: design/gdd/world-memory-context-management.md
+    referenced_by:
+      - design/gdd/world-memory-context-management.md
+    variables:
+      - locked_result fields
+      - has_signal
+      - facts_extracted
+    output_range: [0, null]
+    expression: "facts_extracted(turn) = count of locked_result fields where has_signal(f) is true; has_signal(f) = (numeric(f) AND f.value != 0) OR (boolean(f) AND f.value = true) OR (event(f) AND f.value != null)"
+    notes: "One fact record per signaled field (not one fact per turn),
+      each tagged with entity_id derived from the field's own naming
+      convention (e.g. affinity_delta_[npc_id] -> entity_id=[npc_id];
+      non-NPC-specific fields -> entity_id='global'). Extraction is
+      100% rule-based on locked_result, never on narration_text (matches
+      mechanic-narration-contract-enforcement.md Core Rule #3), and costs
+      zero AI calls."
+    added: 2026-08-02
+    revised: ""
+
+  - name: entity_fact_selection
+    status: active
+    source: design/gdd/world-memory-context-management.md
+    referenced_by:
+      - design/gdd/world-memory-context-management.md
+    variables:
+      - entity_id
+      - facts
+      - max_facts_per_entity
+    output_range: [0, null]
+    expression: "selected_facts(entity_id) = top_K(facts(entity_id), key=world_time, order=desc, K=max_facts_per_entity)"
+    notes: "|selected_facts(entity_id)| <= max_facts_per_entity always
+      holds regardless of how large the underlying fact store grows.
+      Default ordering is recency (world_time desc), an intentional MVP
+      choice — Setting & Canon Integration (not yet designed) may later
+      swap key=world_time for key=importance_score without changing the
+      formula's structure. An entity_id with zero facts returns an empty
+      set, not an error."
+    added: 2026-08-02
+    revised: ""
+
+  - name: ai_context_view_size_bound
+    status: active
+    source: design/gdd/world-memory-context-management.md
+    referenced_by:
+      - design/gdd/world-memory-context-management.md
+      - design/gdd/persistence-save-system.md
+    variables:
+      - recency_window_turns
+      - avg_turn_tokens
+      - max_entities_per_prompt
+      - max_facts_per_entity
+      - avg_fact_tokens
+    output_range: [0, null]
+    expression: "context_size(prompt) <= recency_window_turns * avg_turn_tokens + max_entities_per_prompt * max_facts_per_entity * avg_fact_tokens = C (a constant independent of world_time)"
+    notes: "The proof that resolves this system's HIGH-RISK flag: raw
+      data (Full Narrative Log + all extracted facts) grows O(world_time)
+      unbounded, but what actually goes into an AI prompt is O(1) bounded.
+      Zero AI calls involved in computing this or the 3 formulas above —
+      all rule-based, runs before any AI call in the turn, does not affect
+      calls_per_turn (source: turn-manager.md, calls_per_turn_max=3) or
+      ai_call_timeout_seconds=30 (no network I/O)."
+    added: 2026-08-02
+    revised: ""
+
+  - name: combat_power_estimate
+    status: active
+    source: design/gdd/combat-system.md
+    referenced_by:
+      - design/gdd/combat-system.md
+    variables:
+      - HP
+      - ATK
+      - DEF
+      - SPD
+      - ACC
+      - Né tránh
+      - CritRate
+      - CritDamage
+      - Amp (Khuếch đại sát thương)
+      - Mitigation (Chống chịu)
+      - Lifesteal
+      - HPRegen
+      - w_* (trọng số từng chỉ số, tuning knob)
+      - Điểm_Kỹ_Năng(C) (external, chưa có hệ sở hữu công thức)
+      - Điểm_Trang_Bị(C) (external, chưa có hệ sở hữu công thức)
+    output_range: "(0,∞) bình thường; sentinel \"N/A\" khi cả 2 bên Lực_chiến=0, \"+∞\" khi chỉ đối thủ=0"
+    expression: "Điểm_Chỉ_Số(C) = Σ w_X · X (12 chỉ số quy đổi cùng thang); Lực_chiến(C) = Điểm_Chỉ_Số(C) + Điểm_Kỹ_Năng(C) + Điểm_Trang_Bị(C); estimate_ratio(self,opponent) = Lực_chiến(self)/Lực_chiến(opponent), với sentinel \"N/A\" khi cả 2 = 0 và \"+∞\" khi chỉ opponent = 0"
+    notes: "Công thức D.13 của combat-system.md — CHỈ dùng ước tính hiển thị
+      trước trận (Character Card), KHÔNG BAO GIỜ quyết định thắng/thua thật
+      (Combat Core Rule #7 — thắng/thua do HP về 0 qua nhiều pha giao đấu,
+      không phải phép so sánh Lực chiến tổng). Điểm_Kỹ_Năng/Điểm_Trang_Bị là
+      input mờ, mặc định 0 cho đến khi hệ sở hữu (chưa xác định — xem Open
+      Questions của combat-system.md) định nghĩa công thức riêng. Trọng số
+      w_* (đặc biệt w_HP=0.25) là placeholder tạm, cần đối chiếu khi EXP &
+      Realm Progression định nghĩa đường cong tăng trưởng chỉ số thật."
+    added: 2026-08-02
+    revised: ""
+
+  - name: tier_from_level
+    status: active
+    source: design/gdd/exp-realm-progression.md
+    referenced_by:
+      - design/gdd/exp-realm-progression.md
+      - design/gdd/combat-system.md
+    variables:
+      - level
+    output_range: [1, null]
+    expression: "tier(level) = floor((level - 1) / 10) + 1"
+    notes: "10 cấp = 1 bậc/cảnh giới (game-concept.md Core Mechanics #3).
+      Combat System Formula D.1 đọc tier(C) làm input trực tiếp (áp chế
+      cảnh giới) — trước đây ghi 'nguồn: EXP & Realm Progression, chưa
+      thiết kế', nay đã có công thức chính thức."
+    added: 2026-08-03
+    revised: ""
+
+  - name: exp_threshold
+    status: active
+    source: design/gdd/exp-realm-progression.md
+    referenced_by:
+      - design/gdd/exp-realm-progression.md
+    variables:
+      - level
+      - BASE_EXP_THRESHOLD
+      - EXP_THRESHOLD_INCREMENT
+    output_range: [100, null]
+    expression: "exp_threshold(level) = BASE_EXP_THRESHOLD + EXP_THRESHOLD_INCREMENT * (level - 1)"
+    notes: "Đường cong EXP-lên-cấp, cố ý chọn TUYẾN TÍNH (không phải
+      exponential/stepped) — quyết định thiết kế cho dự án solo/MVP nhỏ,
+      ưu tiên người chơi tự nhẩm được tiến độ (Pillar 4). Dùng làm mẫu số
+      chung cho combat_loss_exp, song_tu_exp_bonus, và nguồn EXP thụ động
+      (đóng Open Question 'multi-source EXP cùng lượt' của game-concept.md).
+      Đăng ký sớm vì Character Card & Identity và Persistence (cả 2 chưa
+      thiết kế) nhiều khả năng cần hiển thị 'còn X EXP nữa'."
+    added: 2026-08-03
+    revised: ""
+
+  - name: stat_growth
+    status: active
+    source: design/gdd/exp-realm-progression.md
+    referenced_by:
+      - design/gdd/exp-realm-progression.md
+      - design/gdd/combat-system.md
+    variables:
+      - base_X0
+      - level
+      - tier
+      - LEVEL_GROWTH_X
+      - BREAKTHROUGH_BONUS_X
+      - PERCENT_STAT_CAP
+    output_range: "[base_X0, ∞) cho chỉ số thô; [0, PERCENT_STAT_CAP] cho chỉ số dạng %"
+    expression: "stat_value(C, X) = base_X0 + LEVEL_GROWTH_X * (level(C) - 1) + BREAKTHROUGH_BONUS_X * (tier(C) - 1); chỉ số % thêm clamp(., 0, PERCENT_STAT_CAP)"
+    notes: "Tăng đều mỗi cấp + nhảy vọt riêng mỗi lần đột phá (tier tăng).
+      Là nguồn THẬT cho base_ATK/base_HP/... mà Combat System Formula D.1
+      dùng làm input trước khi áp áp chế cảnh giới (combat-system.md hiện
+      chỉ ví dụ 'base_ATK=50' không trích nguồn). Trực tiếp đóng placeholder
+      w_HP=0.25 của combat_power_estimate (D.13) — combat-system.md cần
+      đối chiếu lại trọng số w_* với scale thật này (xem Open Questions của
+      exp-realm-progression.md). GDD này chỉ hand-tune ví dụ cho HP/ATK/
+      Crit Rate; 9 chỉ số còn lại cần 1 pass cân bằng riêng (Open Questions)."
+    added: 2026-08-03
+    revised: ""
 
 # Example:
 #
@@ -139,7 +454,124 @@ formulas: []
 #
 # Required fields: name, status, source, referenced_by, value, unit, added
 
-constants: []
+constants:
+  - name: suggested_action_count
+    status: active
+    source: design/gdd/turn-manager.md
+    referenced_by:
+      - design/gdd/turn-manager.md
+      - design/gdd/combat-system.md
+    value: 4
+    unit: choices
+    added: 2026-08-02
+    revised: ""
+
+  - name: undo_depth
+    status: active
+    source: design/gdd/turn-manager.md
+    referenced_by:
+      - design/gdd/turn-manager.md
+    value: 1
+    unit: turns
+    added: 2026-08-02
+    revised: ""
+
+  - name: ai_call_timeout_seconds
+    status: active
+    source: design/gdd/turn-manager.md
+    referenced_by:
+      - design/gdd/turn-manager.md
+      - design/gdd/world-memory-context-management.md
+      - design/gdd/ai-llm-integration-layer.md
+      - design/gdd/persistence-save-system.md
+    value: 30
+    unit: seconds
+    added: 2026-08-02
+    revised: ""
+
+  - name: min_thuc_per_skill
+    status: active
+    source: design/gdd/equipment-skill-data-system.md
+    referenced_by:
+      - design/gdd/equipment-skill-data-system.md
+      - design/gdd/combat-system.md
+    value: 3
+    unit: thức (moves) per skill
+    added: 2026-08-02
+    revised: ""
+
+  - name: max_known_skills_per_character
+    status: active
+    source: design/gdd/equipment-skill-data-system.md
+    referenced_by:
+      - design/gdd/equipment-skill-data-system.md
+      - design/gdd/combat-system.md
+    value: 6
+    unit: skills
+    added: 2026-08-02
+    revised: ""
+
+  - name: calls_per_turn_max
+    status: active
+    source: design/gdd/turn-manager.md
+    referenced_by:
+      - design/gdd/turn-manager.md
+      - design/gdd/world-memory-context-management.md
+      - design/gdd/ai-llm-integration-layer.md
+      - design/gdd/combat-system.md
+    value: 3
+    unit: AI calls
+    # old value: 2 — revised 2026-08-02 via /design-review (turn-manager.md
+    # Formula #2 self-contradicted its own retry edge case; now 2 base + 1
+    # permitted suggestion-retry call)
+    added: 2026-08-02
+    revised: "2026-08-02"
+
+  - name: recency_window_turns
+    status: active
+    source: design/gdd/world-memory-context-management.md
+    referenced_by:
+      - design/gdd/world-memory-context-management.md
+    value: 5
+    unit: turns
+    # absolute floor = 1 (Core Rule #5) — the sole undo-eligible turn must
+    # always stay in the recency window in full form
+    added: 2026-08-02
+    revised: ""
+
+  - name: max_facts_per_entity
+    status: active
+    source: design/gdd/world-memory-context-management.md
+    referenced_by:
+      - design/gdd/world-memory-context-management.md
+    value: 8
+    unit: facts
+    added: 2026-08-02
+    revised: ""
+
+  - name: max_entities_per_prompt
+    status: active
+    source: design/gdd/world-memory-context-management.md
+    referenced_by:
+      - design/gdd/world-memory-context-management.md
+    value: 4
+    unit: entities
+    added: 2026-08-02
+    revised: ""
+
+  - name: max_invocations_per_battle
+    status: active
+    source: design/gdd/combat-system.md
+    referenced_by:
+      - design/gdd/combat-system.md
+      - design/gdd/equipment-skill-data-system.md
+    value: 5
+    unit: lần gọi/kỹ năng/trận
+    # dẫn xuất: ceil(MAX_EXCHANGE_COUNT=30 / max_known_skills_per_character=6)
+    # = 5 (combat-system.md Formula D.12) — đóng AC-11 (equipment-skill-data-system.md,
+    # trước đó BLOCKED chờ giá trị này)
+    added: 2026-08-02
+    revised: ""
 
 # Example:
 #
