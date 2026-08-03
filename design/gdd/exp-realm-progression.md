@@ -457,9 +457,9 @@ số — chờ `breakthrough_requirement_met(tier=2)=true` ở 1 lượt sau đ�
 |---|---|---|---|
 | Combat System | This depends on Combat | Nhận EXP source events (thắng/thua) qua hand-off Core Rule #12; Combat đọc ngược `tier(C)` (2 chiều) | Hard |
 | Turn Manager | This depends on Turn Manager | Vòng đời xác nhận/undo (Core Rule #7/#8); trigger EXP thụ động mỗi lượt | Hard |
-| NPC Affinity & Relationship (chưa thiết kế) | This depends on NPC Affinity | Trạng thái "quan hệ Song Tu active" cho nguồn EXP #4 | Soft — thiếu thì mất 1 nguồn EXP phụ, hệ vẫn hoạt động |
+| NPC Affinity & Relationship (Designed 2026-08-03) | This depends on NPC Affinity | Trạng thái "quan hệ Song Tu active" cho nguồn EXP #4 — interface đã chốt: danh sách NPC ID, EXP đọc boolean derived "khác rỗng", bonus KHÔNG cộng dồn theo số NPC (registry `song_tu_active`) | Soft — thiếu thì mất 1 nguồn EXP phụ, hệ vẫn hoạt động |
 | Death & Consequence (chưa thiết kế) | This depends on Death & Consequence | Cờ "phế đan điền/võ công" chặn tích lũy EXP | Soft — edge interaction, không chặn core loop |
-| Setting & Canon Integration (chưa thiết kế) | This depends on Setting & Canon | Dữ liệu `breakthrough_requirement` cụ thể theo bối cảnh | **Hard** — thiếu thì KHÔNG bao giờ đột phá bậc được (dù cấp trong 1 bậc vẫn lên bình thường) |
+| Setting & Canon Integration (Designed 2026-08-03) | This depends on Setting & Canon | Dữ liệu `breakthrough_requirement` cụ thể theo bối cảnh — interface đã chốt: `breakthrough_requirement_met(tier)` (registry), predicate data thuần theo setting pack, thiếu data tier → false cứng + warning "content gap"; thứ tự trong lượt: canon resolve TRƯỚC resolve_turn_exp | **Hard** — thiếu data authoring thì KHÔNG bao giờ đột phá bậc được (dù cấp trong 1 bậc vẫn lên bình thường) |
 | Character Card & Identity (chưa thiết kế) | Character Card depends on this | Đọc `level`, `tier` để hiển thị "Cấp độ - Bậc" | Hard (chiều ngược) |
 | Situation/Encounter Generation (chưa thiết kế) | Situation Gen depends on this | Đọc `level` cho ngưỡng chênh lệch 20 cấp | Soft (chiều ngược) — Situation Gen còn hoạt động được mà không cần ngưỡng này ở MVP tối giản |
 
@@ -766,11 +766,16 @@ AC-35 phản ánh quyết định đã chốt, không phải mô tả gap.)*
 
 ## Open Questions
 
-- **Interface cụ thể "quan hệ Song Tu active" từ NPC Affinity &
+- ~~**Interface cụ thể "quan hệ Song Tu active" từ NPC Affinity &
   Relationship** (boolean đơn giản, hay cần NPC ID cụ thể để hỗ trợ
   multi-NPC Song Tu sau này?) chưa được định nghĩa — chỉ mới giả định 1
-  boolean `SONG_TU_ACTIVE`. *(Owner: systems-designer, target: `/design-system
-  npc-affinity-relationship`)*
+  boolean `SONG_TU_ACTIVE`.~~ — **đã giải quyết**:
+  `npc-affinity-relationship.md` Core Rule #7 định nghĩa interface trả
+  DANH SÁCH NPC ID đang có quan hệ Song Tu active (hỗ trợ đa NPC đồng
+  thời); hệ này tiêu thụ boolean derived `SONG_TU_ACTIVE = (tập ≠ rỗng)`
+  — giả định boolean của D.4 vẫn đúng nguyên trạng, bonus KHÔNG cộng
+  dồn theo số NPC (registry `song_tu_active`). *(Đóng tại
+  `/design-system npc-affinity-relationship` 2026-08-03)*
 - **Cơ chế cụ thể của "phế đan điền/võ công" và điều kiện khôi phục** (đại
   cơ duyên, tiên thảo dị bảo...) — hệ này chỉ đọc 1 cờ boolean
   `death_and_consequence_blocked`, toàn bộ trigger/khôi phục do Death &
@@ -779,9 +784,13 @@ AC-35 phản ánh quyết định đã chốt, không phải mô tả gap.)*
 - **Dữ liệu `breakthrough_requirement` cụ thể theo từng bối cảnh** (VD: Hồn
   Hoàn ở Đấu La Đại Lục) và cơ chế tiêu thụ/hoàn trả tài nguyên đó khi
   Undo — hệ này chỉ định nghĩa cơ chế kiểm tra boolean, không sở hữu nội
-  dung hay việc rollback tài nguyên ngoài (đã flag rõ ở AC-34). *(Owner:
-  narrative-director + technical-director, target: `/design-system
-  setting-and-canon-integration`)*
+  dung hay việc rollback tài nguyên ngoài (đã flag rõ ở AC-34). **Cập
+  nhật 2026-08-03**: CƠ CHẾ đã chốt tại `setting-canon-integration.md`
+  (registry `breakthrough_requirement_met` — predicate data thuần theo
+  setting pack, thiếu data → false cứng + warning content-gap); phần còn
+  mở chỉ là DATA authoring cụ thể cho từng tier (Open Question của GDD
+  đó, target trước vertical slice). *(Owner còn lại:
+  narrative-director + world-builder — authoring content)*
 - **Đối chiếu lại `w_HP=0.25` (và các `w_*` khác) của `combat_power_estimate`**
   (combat-system.md D.13) với scale thật của D.5 (VD HP~100-400 ở level
   1-25 theo default hiện tại) — D.5 chỉ định nghĩa hình dạng/scale, việc

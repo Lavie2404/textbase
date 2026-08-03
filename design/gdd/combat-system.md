@@ -204,9 +204,10 @@ sách thức đã dùng theo Core Rule #5.)*
   hand-off (Core Rule #12) khi `battle_active=false`, tự tính EXP; Combat
   không sở hữu công thức EXP.
 - **Death & Consequence** (Feature, chưa thiết kế) — đọc tín hiệu thua
-  trận + ngưỡng Hảo cảm đối thủ (từ NPC Affinity, chưa thiết kế) để
-  quyết định hậu quả (chết thật hay không); Combat chỉ báo "đã thua",
-  không tự quyết định mức độ hậu quả.
+  trận + ngưỡng Hảo cảm đối thủ (từ NPC Affinity, Designed 2026-08-03 —
+  cờ thù địch sâu sắc `affinity ≤ -80`, registry
+  `deep_hostility_threshold`) để quyết định hậu quả (chết thật hay
+  không); Combat chỉ báo "đã thua", không tự quyết định mức độ hậu quả.
 - **NPC Affinity & Relationship** (Feature, chưa thiết kế) — Combat
   không trực tiếp đọc/ghi Hảo cảm; ngưỡng 20 cấp chênh lệch (điều kiện
   NPC chủ động địch ý) thuộc phạm vi Situation/Encounter Generation
@@ -757,12 +758,15 @@ liệu cụ thể:
   phiên).
 - **Death & Consequence** (Feature, chưa thiết kế) — **hard khi được
   thiết kế**: đọc tín hiệu `outcome="lose"` để quyết định mức độ hậu quả
-  (kết hợp với ngưỡng Hảo cảm từ NPC Affinity, chưa thiết kế) — Combat
-  chỉ báo "đã thua", không tự quyết định mức độ.
-- **NPC Affinity & Relationship** (Feature, chưa thiết kế) — **soft**:
-  không đọc/ghi trực tiếp qua Combat, nhưng kết quả trận (thắng/thua/
-  margin) là input tự nhiên cho các hệ thay đổi Hảo cảm sau trận — giao
-  diện cụ thể chưa cố định, để ngỏ khi GDD đó được thiết kế.
+  (kết hợp với ngưỡng Hảo cảm từ NPC Affinity, Designed 2026-08-03 — cờ
+  thù địch sâu sắc `affinity ≤ -80`, registry `deep_hostility_threshold`)
+  — Combat chỉ báo "đã thua", không tự quyết định mức độ.
+- **NPC Affinity & Relationship** (Feature, Designed 2026-08-03) —
+  **soft**: không đọc/ghi trực tiếp qua Combat; giao diện đã cố định tại
+  `npc-affinity-relationship.md` D.1: hand-off của Combat (`outcome`,
+  `hp_after`/`max_HP` → `margin_ratio`) được hệ đó ánh xạ thành sự kiện
+  `combat_win_vs_npc`/`combat_loss_vs_npc` — Combat không cần thay đổi
+  gì, đúng như đã để ngỏ.
 - **Situation/Encounter Generation** (Narrative, chưa thiết kế) —
   **soft**: quyết định KHI NÀO 1 tình huống dẫn đến giao chiến (bao gồm
   kiểm tra ngưỡng 20 cấp chênh lệch của `game-concept.md`) — Combat chỉ

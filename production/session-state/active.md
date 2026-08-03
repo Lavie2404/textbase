@@ -1,7 +1,10 @@
 <!-- STATUS -->
 Epic: Systems Design
-Feature: EXP & Realm Progression
-Task: GDD complete (Designed — Pending Review), 8/15 MVP systems designed
+Feature: Situation/Encounter Generation
+Task: Situation/Encounter Generation GDD complete (Designed — Pending Review), 11/15 MVP systems designed. All 11 sections + UX Flag; registry +4 formulas +2 constants +7 referenced_by; systems-index updated (gap footnote #10). Next system: Death & Consequence (#12)
+File: design/gdd/situation-encounter-generation.md
+Prior: Setting & Canon Integration complete (Designed — Pending Review), 10/15
+File: design/gdd/setting-canon-integration.md
 <!-- /STATUS -->
 
 <!-- CONSISTENCY-CHECK: 2026-08-02 | GDDs checked: 2 | Conflicts found: 0 -->
@@ -10,6 +13,7 @@ Task: GDD complete (Designed — Pending Review), 8/15 MVP systems designed
 <!-- CONSISTENCY-CHECK: 2026-08-02 | GDDs checked: 5 (post World Memory GDD) | Conflicts found: 0 (1 stale Open Question fixed in turn-manager.md) -->
 <!-- CONSISTENCY-CHECK: 2026-08-02 | GDDs checked: 6 (post Persistence/Save System GDD) | Conflicts found: 0 (6 referenced_by metadata gaps fixed in entities.yaml) -->
 <!-- CONSISTENCY-CHECK: 2026-08-02 | GDDs checked: 7 (post Combat System GDD) | Conflicts found: 2 (combat_power_estimate registry entry missing variables + wrong output_range, both self-authored errors, fixed; 5 referenced_by metadata gaps also fixed) -->
+<!-- CONSISTENCY-CHECK: 2026-08-03 | GDDs checked: 9 (post NPC Affinity + Setting & Canon GDDs) | Conflicts found: 0 (6 stale "(chưa thiết kế)" prose refs flagged in exp/combat/world-memory GDDs + 1 resolved Open Question in exp GDD pending strike-through) -->
 
 ## Current Task (updated)
 
@@ -478,9 +482,17 @@ Recommend running `/consistency-check` before designing the next system
 self-authored registry errors fixed — NOT yet re-run since
 `exp-realm-progression.md` was added, which touched the registry 3 times).
 
-Next system in design order (from `systems-index.md`): **NPC Affinity &
-Relationship** (Feature, #9 of 15) — depends on Turn Manager (Approved),
-World Memory (Designed). Will need to define the exact "Song Tu active"
-interface that `exp-realm-progression.md` left provisional (Open
-Questions), and the Hảo cảm propagation/decay rates flagged as a
-High-Risk System in `systems-index.md`.
+Next system in design order (from `systems-index.md`): **Death &
+Consequence** (Gameplay, #12 of 15) — depends on Combat System
+(Designed), NPC Affinity (Designed). Provisional interfaces waiting on
+it: `alive(X)` premise + `death_flag_*` (Setting & Canon), cờ "phế đan
+điền" (EXP), `kill_witnessed` hand-off (NPC Affinity), presence/
+provoked cleanup + hook `npc_in_danger` + witness list (Situation Gen
+#11 — designed 2026-08-03 this session: 11 sections, intent-chip +
+envelope whitelist, deterministic scheduler, location graph; NOT yet
+reviewed; suggestion_call schema change flagged for
+ai-llm-integration-layer.md in its Open Questions).
+
+Recommend `/consistency-check` before designing #12 — NOT yet re-run
+since situation-encounter-generation.md was added (registry touched: +4
+formulas, +2 constants, 7 referenced_by).

@@ -38,6 +38,16 @@
 
 version: 1
 last_updated: "2026-08-03"
+# 2026-08-03: +2 formulas, +4 constants from npc-affinity-relationship.md;
+# referenced_by updated on fact_extraction_count
+# 2026-08-03 (later): +3 formulas from setting-canon-integration.md;
+# referenced_by updated on entity_fact_selection, fact_extraction_count,
+# song_tu_active
+# 2026-08-03 (later 2): +4 formulas + 2 constants from
+# situation-encounter-generation.md; referenced_by updated on
+# song_tu_threshold, song_tu_active, max_entities_per_prompt,
+# resolve_turn_canon, resolve_turn_affinity, fact_extraction_count,
+# deep_hostility_threshold
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -264,6 +274,9 @@ formulas:
     source: design/gdd/world-memory-context-management.md
     referenced_by:
       - design/gdd/world-memory-context-management.md
+      - design/gdd/npc-affinity-relationship.md
+      - design/gdd/setting-canon-integration.md
+      - design/gdd/situation-encounter-generation.md
     variables:
       - locked_result fields
       - has_signal
@@ -285,6 +298,11 @@ formulas:
     source: design/gdd/world-memory-context-management.md
     referenced_by:
       - design/gdd/world-memory-context-management.md
+      - design/gdd/setting-canon-integration.md
+    # 2026-08-03: setting-canon-integration.md D.5 (canon_importance_tier)
+    # cung cấp key thay thế (importance_tier DESC, world_time DESC) đúng
+    # khe cắm "importance_score" mà notes bên dưới đã để ngỏ — cấu trúc
+    # top_K không đổi, tương thích ngược khi mọi fact cùng tier.
     variables:
       - entity_id
       - facts
@@ -397,6 +415,153 @@ formulas:
     added: 2026-08-03
     revised: ""
 
+  - name: song_tu_active
+    status: active
+    source: design/gdd/npc-affinity-relationship.md
+    referenced_by:
+      - design/gdd/npc-affinity-relationship.md
+      - design/gdd/exp-realm-progression.md
+      - design/gdd/setting-canon-integration.md
+      - design/gdd/situation-encounter-generation.md
+    variables:
+      - active_song_tu_set
+      - SONG_TU_ACTIVE
+    output_range: [0, 1]
+    expression: "SONG_TU_ACTIVE = 1 if |active_song_tu_set| >= 1 else 0;
+      interface trả DANH SÁCH NPC ID đang có quan hệ Song Tu active"
+    notes: "Đóng Open Question của exp-realm-progression.md (boolean đơn
+      hay NPC ID): interface là danh sách NPC ID, EXP tiêu thụ boolean
+      derived 'khác rỗng'. EXP bonus KHÔNG cộng dồn theo số NPC (chặn
+      dominant strategy harem — quyết định 2026-08-03). Đánh giá theo
+      trạng thái ĐẦU LƯỢT: lượt Song Tu đầu tiên thiết lập quan hệ thì
+      bonus bắt đầu từ lượt KẾ TIẾP. Quan hệ active bền: thiết lập bởi
+      hành động Song Tu đầu tiên (đòi affinity >= song_tu_threshold),
+      hủy khi affinity < song_tu_break_threshold, Ended khi NPC chết."
+    added: 2026-08-03
+    revised: ""
+
+  - name: resolve_turn_affinity
+    status: active
+    source: design/gdd/npc-affinity-relationship.md
+    referenced_by:
+      - design/gdd/npc-affinity-relationship.md
+      - design/gdd/world-memory-context-management.md
+      - design/gdd/situation-encounter-generation.md
+    variables:
+      - classified_event
+      - A_before
+      - A_after
+      - locked_delta
+      - CAP_POSITIVE_PER_TURN
+      - PROPAGATION_RATE
+      - PROPAGATION_SEVERITY_MIN
+      - CRUELTY_REP_DELTA
+      - link_strength
+      - perpetrator_known
+    output_range: "mỗi field affinity_delta_[npc_id] là SỐ NGUYÊN, bó bởi
+      clamp per-NPC — A_after luôn trong [-100, 100]"
+    expression: "Pipeline D.6: base_delta (D.1) -> diminish (D.2, chỉ
+      dương) -> fatigue (D.3, cửa sổ trượt 3 lượt, chỉ dương) ->
+      propagation one-hop (D.5, cần severity >= min AND perpetrator_known)
+      -> cộng dồn per-NPC -> cap phần dương (D.4) ->
+      round-half-away-from-zero 1 lần -> clamp [-100,100] -> locked_delta
+      = A_after - A_before; locked_delta = 0 thì KHÔNG ghi field"
+    notes: "Sở hữu schema field affinity_delta_[npc_id] (khớp quy ước
+      entity_id của World Memory — fact_extraction_count trích 1 fact/
+      field có tín hiệu). Song Tu action (+random int 1-10 uniform) MIỄN
+      TRỪ D.2-D.4. Delta âm không diminish/không cap (không có sàn an
+      toàn). KHÔNG lan truyền bậc 2 — không có rủi ro clamp dây chuyền
+      (đóng cờ HIGH-RISK của systems-index cho hệ này). Giết không nhân
+      chứng: 0 field (tội ác hoàn hảo hợp lệ, quyết định 2026-08-03)."
+    added: 2026-08-03
+    revised: ""
+
+  - name: breakthrough_requirement_met
+    status: active
+    source: design/gdd/setting-canon-integration.md
+    referenced_by:
+      - design/gdd/setting-canon-integration.md
+      - design/gdd/exp-realm-progression.md
+    variables:
+      - tier
+      - setting_pack.breakthrough_requirement
+      - world_state
+    output_range: [0, 1]
+    expression: "breakthrough_requirement_met(tier) =
+      premise_satisfied(setting_pack.breakthrough_requirement[tier],
+      world_state); nếu setting KHÔNG định nghĩa requirement cho tier đó
+      -> false CỨNG + log warning 'content gap'"
+    notes: "Đóng interface provisional mà exp-realm-progression.md Core
+      Rule #6 chờ (dependency HARD của hệ đó). Predicate là DATA thuần
+      theo setting pack (VD Đấu La: hấp thụ Hồn Hoàn phù hợp tier) —
+      code không hard-code logic setting-specific. Thứ tự trong lượt:
+      resolve_turn_canon STEP 3 tính giá trị này TRƯỚC resolve_turn_exp
+      (khớp Edge Case 'đột phá trước, EXP sau' của exp GDD). 2 code path
+      false phân biệt được: thiếu data (warning) vs chưa đủ điều kiện."
+    added: 2026-08-03
+    revised: ""
+
+  - name: resolve_turn_canon
+    status: active
+    source: design/gdd/setting-canon-integration.md
+    referenced_by:
+      - design/gdd/setting-canon-integration.md
+      - design/gdd/world-memory-context-management.md
+      - design/gdd/situation-encounter-generation.md
+    variables:
+      - classified_event
+      - premise_satisfied
+      - event_due
+      - substitute_selection
+      - cascade_vanish_check
+      - CASCADE_MAX_DEPTH
+    output_range: "field int/bool/enum; số field/lượt <= (event active ×
+      premise + số nhân vật Chờ Đột Phá)"
+    expression: "Pipeline 5 bước: (1) eager check premise không-đảo-được
+      tới fixpoint (on_break=vanish -> Suspended, người chơi cứu được);
+      (1b) canon_role_rescue từ hành động tự do — phán quyết cơ học qua
+      eligible D.3; (2) phán quyết event Due theo (earliest_world_time,
+      event_id), tie-break chính sách vanish > branch > substitute; (3)
+      breakthrough_requirement_met; (4) khóa field canon_break_flag_[event_id]
+      (entity 'global'), canon_event_[event_id]_status ('global'),
+      canon_role_filled_[npc_id] ([npc_id]); (5) TM Core Rule #8"
+    notes: "Sở hữu 3 field-pattern canon_* (khớp quy ước entity_id của WM
+      — fact_extraction_count trích 1 fact/field). Mọi phán quyết
+      deterministic, 0 AI call. Thứ tự trong lượt: SAU Combat/Death &
+      Consequence/NPC Affinity, TRƯỚC resolve_turn_exp. State Suspended:
+      premise lõi bị phá vĩnh viễn -> treo chờ người chơi cứu (quyết
+      định 2026-08-03, 'ưu tiên trải nghiệm người chơi'); đến hạn vai
+      lõi còn trống -> Vanished + cascade chạy TẠI ĐÓ (không eager)."
+    added: 2026-08-03
+    revised: ""
+
+  - name: canon_importance_tier
+    status: active
+    source: design/gdd/setting-canon-integration.md
+    referenced_by:
+      - design/gdd/setting-canon-integration.md
+      - design/gdd/world-memory-context-management.md
+    variables:
+      - fact.field_name
+      - fact.field_value
+      - AFFINITY_MAGNITUDE_TIER2
+    output_range: [0, 3]
+    expression: "importance_tier(fact) = 3 nếu canon_event_*_status
+      terminal / canon_break_flag_*=true / death_flag_*=true; 2 nếu
+      breakthrough_flag_*=true hoặc |affinity_delta_*| >=
+      AFFINITY_MAGNITUDE_TIER2; 1 nếu battle_result_*; 0 còn lại. Key
+      chọn fact WM = (importance_tier DESC, world_time DESC)"
+    notes: "Pure function O(1) trên field_name/field_value — không đọc
+      world-state ngoài (giữ trích xuất WM rule-based thuần). Thay key
+      của entity_fact_selection đúng khe cắm WM Formula #3 để ngỏ; tương
+      thích ngược: mọi fact cùng tier -> suy biến thành recency thuần.
+      'Vượt ngưỡng affinity' dùng BIÊN ĐỘ delta làm proxy (fact không
+      chứa A_before/A_after) — compromise có chủ đích. 3 tên field
+      provisional (death_flag, breakthrough_flag, battle_result) chờ
+      Death & Consequence/EXP/Combat chốt schema."
+    added: 2026-08-03
+    revised: ""
+
   - name: stat_growth
     status: active
     source: design/gdd/exp-realm-progression.md
@@ -420,6 +585,110 @@ formulas:
       đối chiếu lại trọng số w_* với scale thật này (xem Open Questions của
       exp-realm-progression.md). GDD này chỉ hand-tune ví dụ cho HP/ATK/
       Crit Rate; 9 chỉ số còn lại cần 1 pass cân bằng riêng (Open Questions)."
+    added: 2026-08-03
+    revised: ""
+
+  - name: hostile_initiative_allowed
+    status: active
+    source: design/gdd/situation-encounter-generation.md
+    referenced_by:
+      - design/gdd/situation-encounter-generation.md
+      - design/gdd/exp-realm-progression.md
+    variables:
+      - level(npc)
+      - level(player)
+      - HOSTILE_INITIATIVE_LEVEL_GAP_MAX
+      - provoked_flag
+    output_range: [0, 1]
+    expression: "hostile_initiative_allowed(npc) = (level(npc) − level(player)
+      ≤ HOSTILE_INITIATIVE_LEVEL_GAP_MAX) OR provoked_flag(npc)"
+    notes: "Đóng vai 'hệ khác sở hữu ngưỡng 20 cấp' mà
+      exp-realm-progression.md Rule #10/AC-17 chờ (EXP chỉ cung cấp level
+      thô). MỘT CHIỀU, không phải trị tuyệt đối — NPC yếu hơn tấn công
+      lên hợp pháp. Thù địch sâu sắc (affinity ≤ -80) KHÔNG bypass gap;
+      chỉ provoked_flag (D.3, severity ≥ PROVOKE_SEVERITY_MIN=3, không
+      decay — tiêu thụ hoặc hòa giải affinity ≥ -10) mới bypass.
+      provoked mở QUYỀN, không mở ĐỘNG CƠ — D.4 vẫn đòi affinity ≤ -40
+      mới thành hostile candidate."
+    added: 2026-08-03
+    revised: ""
+
+  - name: encounter_level_range
+    status: active
+    source: design/gdd/situation-encounter-generation.md
+    referenced_by:
+      - design/gdd/situation-encounter-generation.md
+      - design/gdd/combat-system.md
+    variables:
+      - player_level
+      - AMBIENT_LEVEL_BAND_DOWN
+      - AMBIENT_HOSTILE_LEVEL_CAP
+    output_range: "[max(1, player_level − 15), player_level + 15] mặc định;
+      biên trên không bao giờ vượt player_level + 20"
+    expression: "encounter_level_range(player_level) = [max(1, player_level −
+      AMBIENT_LEVEL_BAND_DOWN), player_level + AMBIENT_HOSTILE_LEVEL_CAP];
+      AMBIENT_HOSTILE_LEVEL_CAP trần cứng ≤ 20"
+    notes: "CHỈ cho đối thủ ambient vô danh sinh thủ tục — NPC/canon có
+      char_id dùng level data cố định. Trần cứng 20 là hệ quả logic bắt
+      buộc từ hostile_initiative_allowed (đối thủ vừa sinh không thể có
+      provoked_flag). Combat (provisional) dùng level sinh ra + stat_growth
+      (EXP) để dựng chỉ số đối thủ — xem Open Questions của GDD nguồn."
+    added: 2026-08-03
+    revised: ""
+
+  - name: entities_in_scope
+    status: active
+    source: design/gdd/situation-encounter-generation.md
+    referenced_by:
+      - design/gdd/situation-encounter-generation.md
+      - design/gdd/world-memory-context-management.md
+      - design/gdd/npc-affinity-relationship.md
+    variables:
+      - hook_participants
+      - canon_role_npcs
+      - other_present_npcs
+      - MAX_NPC_PER_SCENE
+    output_range: "1 ≤ |entities_in_scope| ≤ MAX_NPC_PER_SCENE + 1 = 4"
+    expression: "entities_in_scope(scene) = {\"global\"} ∪
+      top_K(candidates(scene), key=(tier, -|affinity|, npc_id),
+      K=MAX_NPC_PER_SCENE); tier: hook_participants=0 < canon_role_npcs=1
+      < còn lại=2"
+    notes: "Đóng trách nhiệm 'NPC nào có mặt trong cảnh' mà
+      world-memory-context-management.md đã khai chờ (Formula #4 bên đó
+      tiêu thụ biến này). Cũng là danh sách nhân chứng cho lan truyền
+      Hảo cảm (npc-affinity D.5) và kill_witnessed. Luôn ≤
+      max_entities_per_prompt=4 theo cấu trúc."
+    added: 2026-08-03
+    revised: ""
+
+  - name: allowed_envelope_menu
+    status: active
+    source: design/gdd/situation-encounter-generation.md
+    referenced_by:
+      - design/gdd/situation-encounter-generation.md
+      - design/gdd/ai-llm-integration-layer.md
+      - design/gdd/npc-affinity-relationship.md
+    variables:
+      - ENVELOPE_TYPES
+      - scene
+      - POSITIVE_SOCIAL_COOLDOWN_TURNS
+      - last_used
+    output_range: "tập con ENVELOPE_TYPES × ({npc_id} ∪ {null}); luôn chứa
+      rp_only, investigate"
+    expression: "allowed_envelope_menu(turn) = { t ∈ ENVELOPE_TYPES :
+      gate(t, turn, npc?) }; ENVELOPE_TYPES = {gift, small_help, save_life,
+      insult, threaten, betray, combat_challenge(spar_friendly),
+      song_tu_action, canon_role_rescue, move_to, investigate, rp_only}"
+    notes: "SỞ HỮU taxonomy sự kiện xã hội chuẩn hóa mà
+      npc-affinity-relationship.md chờ (đóng Open Question 'taxonomy
+      chính thức' + cờ spar_friendly). Whitelist deterministic gửi vào
+      suggestion_call — nhãn AI trả ngoài menu hạ cứng rp_only; văn tự do
+      phân loại DUY NHẤT qua intent chip người chơi khai. Gating chống
+      ratchet (economy-designer 2026-08-03): gift/small_help cooldown per
+      (loại, NPC) + cấm cảnh dangerous; save_life hook-gated hoàn toàn;
+      song_tu cần private + willing. CẦN sửa schema suggestion_call của
+      ai-llm-integration-layer.md: array[4] string → array[4]
+      {text, envelope} (Open Question, chưa sửa)."
     added: 2026-08-03
     revised: ""
 
@@ -554,6 +823,7 @@ constants:
     source: design/gdd/world-memory-context-management.md
     referenced_by:
       - design/gdd/world-memory-context-management.md
+      - design/gdd/situation-encounter-generation.md
     value: 4
     unit: entities
     added: 2026-08-02
@@ -571,6 +841,88 @@ constants:
     # = 5 (combat-system.md Formula D.12) — đóng AC-11 (equipment-skill-data-system.md,
     # trước đó BLOCKED chờ giá trị này)
     added: 2026-08-02
+    revised: ""
+
+  - name: song_tu_threshold
+    status: active
+    source: design/gdd/npc-affinity-relationship.md
+    referenced_by:
+      - design/gdd/npc-affinity-relationship.md
+      - design/gdd/situation-encounter-generation.md
+    value: 60
+    unit: điểm Hảo cảm (bao gồm — nút Song Tu hiện khi affinity >= 60)
+    # hằng số thiết kế đã khóa, KHÔNG phải tuning knob (đổi = re-review).
+    # Character Card & Identity (chưa thiết kế) sẽ đọc để render nút.
+    added: 2026-08-03
+    revised: ""
+
+  - name: song_tu_break_threshold
+    status: active
+    source: design/gdd/npc-affinity-relationship.md
+    referenced_by:
+      - design/gdd/npc-affinity-relationship.md
+    value: 40
+    unit: điểm Hảo cảm (quan hệ Song Tu active hủy khi affinity < 40)
+    # hysteresis với song_tu_threshold: tái lập đòi leo lại >= 60
+    added: 2026-08-03
+    revised: ""
+
+  - name: deep_hostility_threshold
+    status: active
+    source: design/gdd/npc-affinity-relationship.md
+    referenced_by:
+      - design/gdd/npc-affinity-relationship.md
+      - design/gdd/game-concept.md
+      - design/gdd/combat-system.md
+      - design/gdd/turn-manager.md
+      - design/gdd/situation-encounter-generation.md
+    value: -80
+    unit: điểm Hảo cảm (BAO GỒM -80 — thù địch sâu sắc khi affinity <= -80)
+    # cờ mà Death & Consequence (chưa thiết kế) đọc để quyết định nguy cơ
+    # chết thật khi thua trận. game-concept ghi "-100 đến -80"; GDD chủ
+    # sở hữu chốt tính bao gồm tại -80 (đóng câu hỏi từ review log).
+    added: 2026-08-03
+    revised: ""
+
+  - name: affinity_range
+    status: active
+    source: design/gdd/npc-affinity-relationship.md
+    referenced_by:
+      - design/gdd/npc-affinity-relationship.md
+      - design/gdd/game-concept.md
+    value: "[-100, 100]"
+    unit: điểm Hảo cảm (số nguyên, clamp trước khi khóa locked_result)
+    added: 2026-08-03
+    revised: ""
+
+  - name: MAX_NPC_PER_SCENE
+    status: active
+    source: design/gdd/situation-encounter-generation.md
+    referenced_by:
+      - design/gdd/situation-encounter-generation.md
+      - design/gdd/world-memory-context-management.md
+    value: 3
+    unit: NPC/cảnh
+    # ràng buộc cấu trúc: |entities_in_scope| = MAX_NPC_PER_SCENE + 1
+    # ("global") ≤ max_entities_per_prompt=4 (World Memory) luôn đúng.
+    # Hằng khóa ở Core Rule #1 GDD nguồn, KHÔNG phải tuning knob.
+    added: 2026-08-03
+    revised: ""
+
+  - name: HOSTILE_INITIATIVE_LEVEL_GAP_MAX
+    status: active
+    source: design/gdd/situation-encounter-generation.md
+    referenced_by:
+      - design/gdd/situation-encounter-generation.md
+      - design/gdd/game-concept.md
+      - design/gdd/exp-realm-progression.md
+    value: 20
+    unit: cấp (một chiều — level(npc) − level(player))
+    # từ game-concept.md ("chênh lệch không quá 20 cấp mới có thể mang
+    # địch ý chủ động"). Hằng khóa, KHÔNG phải tuning knob — đổi cần
+    # re-review toàn game. AMBIENT_HOSTILE_LEVEL_CAP (knob nội bộ GDD
+    # nguồn) bị trần cứng bởi giá trị này.
+    added: 2026-08-03
     revised: ""
 
 # Example:

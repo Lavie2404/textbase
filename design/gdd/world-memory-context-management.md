@@ -137,10 +137,13 @@ Không có state machine — thay vào đó là bảng các thao tác (operation
 - **AI/LLM Integration Layer**: cung cấp Khung ngữ cảnh AI cho Checkpoint
   2 (dựng prompt) của cả `narration_call` và `suggestion_call` — đây
   chính là "ngữ cảnh World Memory" mà GDD đó đã tham chiếu.
-- **NPC Affinity & Relationship, Setting & Canon Integration,
-  Situation/Encounter Generation** (chưa thiết kế): sẽ truy vấn Sự kiện
-  đã trích xuất theo entity_id khi được thiết kế — giao diện truy vấn đã
-  cố định ở GDD này.
+- **NPC Affinity & Relationship, Setting & Canon Integration** (Designed
+  2026-08-03) và **Situation/Encounter Generation** (chưa thiết kế):
+  truy vấn Sự kiện đã trích xuất theo entity_id — giao diện truy vấn đã
+  cố định ở GDD này và 2 hệ đầu đã tiêu thụ đúng như khai (field
+  `affinity_delta_[npc_id]`, `canon_*`); Setting & Canon còn cung cấp
+  `canon_importance_tier` cho khe cắm key của Công thức #3 (xem ghi chú
+  registry `entity_fact_selection`).
 - **Persistence/Save System** (chưa thiết kế): sẽ đọc/ghi cả Nhật ký đầy
   đủ lẫn Khung ngữ cảnh AI khi save/load; quyết định nén-lưu-trữ vật lý
   (Core Rule #6) thuộc phạm vi GDD đó.
@@ -383,10 +386,11 @@ không bao giờ vượt quá **~2230 token** — hằng số này không đổi
 - **AI/LLM Integration Layer** (Core, Designed — Pending Review) — tiêu
   thụ Khung ngữ cảnh AI (Cửa sổ gần đây + fact theo entity) để dựng
   prompt cho `narration_call`/`suggestion_call`.
-- **NPC Affinity & Relationship, Setting & Canon Integration,
-  Situation/Encounter Generation** (Feature/Narrative, chưa thiết kế) —
-  sẽ truy vấn fact theo `entity_id` qua giao diện đã cố định ở Core Rule
-  #4 khi được thiết kế.
+- **NPC Affinity & Relationship, Setting & Canon Integration**
+  (Feature/Narrative, Designed 2026-08-03) — đã tiêu thụ giao diện truy
+  vấn fact theo `entity_id` (Core Rule #4) đúng như khai; **Situation/
+  Encounter Generation** (Narrative, chưa thiết kế) — sẽ truy vấn khi
+  được thiết kế.
 - **Persistence/Save System** (Core, chưa thiết kế) — đọc/ghi Nhật ký đầy
   đủ (bắt buộc) và có thể tùy chọn cache Khung ngữ cảnh AI (không bắt
   buộc, xem Edge Cases) khi save/load.

@@ -35,9 +35,9 @@ verdict PROCEED).
 | 6 | Persistence / Save System | Persistence | MVP | Designed | [persistence-save-system.md](persistence-save-system.md) | Turn Manager |
 | 7 | Combat System | Gameplay | MVP | Designed | [combat-system.md](combat-system.md) | Equipment & Skill Data, AI Integration Layer, Turn Manager, Contract Enforcement |
 | 8 | EXP & Realm Progression | Progression | MVP | Designed | [exp-realm-progression.md](exp-realm-progression.md) | Combat System, Turn Manager |
-| 9 | NPC Affinity & Relationship | Progression | MVP | Not Started | — | Turn Manager, World Memory |
-| 10 | Setting & Canon Integration | Narrative | MVP | Not Started | — | World Memory |
-| 11 | Situation/Encounter Generation (inferred) | Narrative | MVP | Not Started | — | AI Integration Layer, Turn Manager, World Memory |
+| 9 | NPC Affinity & Relationship | Progression | MVP | Designed | [npc-affinity-relationship.md](npc-affinity-relationship.md) | Turn Manager, World Memory |
+| 10 | Setting & Canon Integration | Narrative | MVP | Designed | [setting-canon-integration.md](setting-canon-integration.md) | World Memory |
+| 11 | Situation/Encounter Generation (inferred) | Narrative | MVP | Designed | [situation-encounter-generation.md](situation-encounter-generation.md) | AI Integration Layer, Turn Manager, World Memory |
 | 12 | Death & Consequence | Gameplay | MVP | Not Started | — | Combat System, NPC Affinity |
 | 13 | Character Continuation (inferred) | Gameplay | MVP | Not Started | — | Death & Consequence |
 | 14 | Character Card & Identity | UI | MVP | Not Started | — | Equipment & Skill Data, NPC Affinity, Setting & Canon Integration |
@@ -122,8 +122,66 @@ thức, giống cách xử lý 3 cạnh trước.)*
 1. **Combat System** — depends on: Equipment & Skill Data, AI Integration Layer, Turn Manager, Contract Enforcement
 2. **EXP & Realm Progression** — depends on: Combat System (nguồn EXP), Turn Manager
 3. **NPC Affinity & Relationship** — depends on: Turn Manager, World Memory (lan truyền xã hội cần lịch sử)
+
+*(Phát hiện từ `/design-system` hệ #9, 2026-08-03, cùng dạng với các ghi
+chú phía trên: `npc-affinity-relationship.md` (Designed) có các phụ
+thuộc chưa được liệt kê tường minh ở bảng Systems Enumeration (hàng hệ
+#9 vẫn giữ "Depends On: Turn Manager, World Memory" theo phạm vi phụ
+thuộc chính) — (a) **Combat System** (hard, upstream: hand-off
+`outcome`/`margin_ratio` → sự kiện `combat_win/loss_vs_npc`), (b)
+**Mechanic/Narration Contract Enforcement** (hard, upstream: khóa
+`affinity_delta_[npc_id]` trước tường thuật), (c) Death & Consequence
+(2 chiều: đọc cờ `deep_hostility_threshold=-80`, phát sự kiện
+`kill_witnessed`), (d) EXP & Realm Progression (chiều ngược, đọc
+`song_tu_active` — đóng Open Question interface của GDD đó), (e)
+Character Card & Identity (chiều ngược, đọc Hảo cảm/dải thái độ/nút
+Song Tu 5 trạng thái), (f) Persistence (chiều ngược, serialize affinity
++ tập Song Tu + streak trackers + link_strength graph), (g)
+Situation/Encounter Generation (soft, provisional: phân loại sự kiện xã
+hội + `entities_in_scope` làm danh sách nhân chứng — kèm RÀNG BUỘC
+content-gating chống ratchet ghi ở Dependencies của GDD hệ #9). Ghi
+nhận ở đây làm nguồn tham chiếu chính thức, giống cách xử lý 5 gap
+trước.)*
 4. **Setting & Canon Integration** — depends on: World Memory (luật tiền đề nhân quả phá vỡ cần theo dõi lịch sử)
+
+*(Phát hiện từ `/design-system` hệ #10, 2026-08-03, cùng dạng các ghi
+chú trên: `setting-canon-integration.md` (Designed) có các phụ thuộc
+chưa liệt kê tường minh ở Systems Enumeration — (a) **Turn Manager** +
+**Contract Enforcement** (hard, upstream), (b) **NPC Affinity &
+Relationship** (hard cho premise loại affinity/song_tu), (c) Death &
+Consequence (hard khi thiết kế — nguồn premise `alive`), (d) Equipment
+& Skill Data (soft — premise `possesses`, cần bổ sung cờ `destroyed`),
+(e) EXP & Realm Progression (chiều ngược — `breakthrough_requirement_met`,
+đóng dependency HARD của hệ #8), (f) Situation/Encounter Generation (2
+chiều, provisional — nhận event Due/Resolved, cung cấp phân loại
+`canon_role_rescue` + `location`), (g) Character Card (chiều ngược —
+hồ sơ danh tính thật/cải trang), (h) Persistence (chiều ngược —
+serialize status event kể cả Suspended), (i) World Memory chiều ngược
+bổ sung: hệ #10 cung cấp `canon_importance_tier` thay key chọn fact.
+Ghi nhận ở đây làm nguồn tham chiếu chính thức.)*
 5. **Situation/Encounter Generation** — depends on: AI Integration Layer, Turn Manager, World Memory
+
+*(Phát hiện từ `/design-system` hệ #11, 2026-08-03, cùng dạng các ghi
+chú trên: `situation-encounter-generation.md` (Designed) có các phụ
+thuộc chưa liệt kê tường minh ở Systems Enumeration — (a) **Mechanic/
+Narration Contract Enforcement** (hard, upstream: mọi field khóa trước
+narration, `rp_only` = 0 field), (b) **NPC Affinity & Relationship**
+(hard 2 chiều: cung cấp taxonomy sự kiện xã hội chuẩn hóa +
+`entities_in_scope` làm nhân chứng — đóng Open Question bên đó; đọc
+affinity/severity/`song_tu_active`; tôn trọng ràng buộc content-gating
+chống ratchet của economy-designer qua Core Rule #5 + D.1), (c)
+**Setting & Canon Integration** (hard 2 chiều: nhận event Due/Resolved
++ `canon_outcome`; cung cấp `canon_role_rescue` + `location(X)` — đóng
+2 interface provisional bên đó), (d) EXP & Realm Progression (soft,
+upstream: đọc `level` thô — hệ #11 sở hữu ngưỡng 20 cấp, registry
+`hostile_initiative_allowed`), (e) Combat System (chiều ngược:
+`combat_challenge`+`spar_friendly` khởi tạo trận, `encounter_level_range`
+sinh level đối thủ ambient), (f) Death & Consequence (2 chiều,
+provisional), (g) Persistence (chiều ngược: serialize scene + tracker
+trong `turn_snapshot`), (h) Character Card (chiều ngược, đọc location),
+(i) Core UI (chiều ngược: chip intent + header cảnh — đã có UX Flag).
+Ghi nhận ở đây làm nguồn tham chiếu chính thức, gap thứ 10 cùng
+pattern.)*
 6. **Death & Consequence** — depends on: Combat System (kích hoạt "phải chết"), NPC Affinity (ngưỡng thù địch sâu sắc -100→-80)
 7. **Character Continuation** — depends on: Death & Consequence (chỉ kích hoạt khi cái chết thật xảy ra)
 
@@ -189,8 +247,8 @@ gap trước.)*
 | System | Risk Type | Risk Description | Mitigation |
 |--------|-----------|-------------------|------------|
 | World Memory & Context Management | Technical | "Nhật ký thế giới vô hạn" xung đột trực tiếp với giới hạn context window của LLM — cảnh báo từ technical-director tại `/gate-check` 2026-08-01 | Đặc tả chiến lược nén/rotate NGAY trong GDD, không hoãn; cần ADR riêng trước `/create-architecture` |
-| Setting & Canon Integration | Design | Luật "tiền đề nhân quả cố định vs. có thể phá vỡ" hiện chỉ có 1 ví dụ minh họa, chưa có rubric tổng quát — phát hiện từ narrative-director tại `/design-review` | Định nghĩa rubric tường minh (không chỉ ví dụ) trong Detailed Rules; playtest với ≥2-3 tình huống canon khác nhau trước khi chốt |
-| NPC Affinity & Relationship | Design | Chưa có tốc độ tăng/giảm/suy giảm Hảo cảm, rủi ro clamp qua chuỗi lan truyền — phát hiện từ systems-designer tại `/design-review` | Định nghĩa rate + toàn bộ test case biên (đã liệt kê trong `design/gdd/reviews/game-concept-review-log.md`) trong Formulas section |
+| Setting & Canon Integration | Design | ~~Luật "tiền đề nhân quả cố định vs. có thể phá vỡ" chỉ có 1 ví dụ, chưa có rubric tổng quát~~ — **đã giải quyết 2026-08-03** tại `/design-system` hệ #10: rubric tổng quát hóa (Core Rule #4/#4b — mọi event phá được qua premise cơ học, on_break substitute/vanish/branch, người chơi cứu được sự kiện bị phá lõi qua state Suspended); phán quyết 100% rule-based, 0 AI call | Còn lại: playtest rubric với ≥2–3 tình huống canon (Open Questions, target vertical slice) + authoring 2–3 event MVP thật |
+| NPC Affinity & Relationship | Design | ~~Chưa có tốc độ tăng/giảm/suy giảm Hảo cảm, rủi ro clamp qua chuỗi lan truyền~~ — **đã giải quyết 2026-08-03** tại `/design-system` hệ #9: bảng sự kiện D.1 + diminishing/fatigue/cap (D.2–D.4, quyết định KHÔNG decay), lan truyền one-hop + clamp độc lập per-NPC loại bỏ cấu trúc rủi ro clamp dây chuyền (D.5), property-based AC-11 kiểm 1.000 tổ hợp | Còn lại: kiểm chứng pacing thật ở Vertical Slice (NPC bắt đầu từ Hảo cảm = 0) + ràng buộc content-gating chống ratchet lên Situation Gen (ghi ở Dependencies GDD hệ #9) |
 | Combat System | Design | Rủi ro biên công thức (0/0 khi 2 bên đều 0 điểm, floor khi chồng phạt vượt bậc + áp chế cảnh giới) — đã flag từ `/design-review`, MỘT PHẦN đã kiểm chứng qua prototype (thức/nhịp trận) | Dùng nguyên bộ test case biên trong review log làm Acceptance Criteria của GDD |
 | AI/LLM Integration Layer | Technical | Backend AI/LLM chưa chốt; ToS Gemini cho nội dung NSFW (Pillar 5) chưa xác minh | Resolve qua ADR trước `/create-architecture`; kiến trúc pattern (one-way lock, safetySettings) đã kiểm chứng khả thi qua prototype — chỉ còn vấn đề pháp lý/nhà cung cấp |
 
@@ -201,10 +259,10 @@ gap trước.)*
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 15 |
-| Design docs started | 8 |
+| Design docs started | 11 |
 | Design docs reviewed | 3 |
 | Design docs approved | 3 |
-| MVP systems designed | 8/15 |
+| MVP systems designed | 11/15 |
 | Vertical Slice systems designed | 0/0 |
 
 ---
