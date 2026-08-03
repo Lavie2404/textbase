@@ -126,8 +126,10 @@ Formulas/Acceptance Criteria bắt buộc spawn specialist ở lean mode.)*
   cấp dữ liệu `breakthrough_requirement` cụ thể theo bối cảnh.
 - **Character Card & Identity** (chưa thiết kế, downstream) — đọc `level`,
   `tier` để hiển thị mục "Cấp độ - Bậc".
-- **Situation/Encounter Generation** (chưa thiết kế, downstream) — đọc
-  `level` để áp dụng ngưỡng chênh lệch 20 cấp.
+- **Situation/Encounter Generation** (Designed 2026-08-03, downstream) —
+  đọc `level` để áp dụng ngưỡng chênh lệch 20 cấp (registry
+  `hostile_initiative_allowed`/`HOSTILE_INITIATIVE_LEVEL_GAP_MAX=20`) và
+  để sinh `level` đối thủ ambient trong khoảng `encounter_level_range`.
 
 *(Nhiều interaction ở trên là provisional vì hệ phụ thuộc chưa thiết kế —
 cùng pattern các GDD trước đã dùng, sẽ đối chiếu lại khi các hệ đó được
@@ -461,7 +463,7 @@ số — chờ `breakthrough_requirement_met(tier=2)=true` ở 1 lượt sau đ�
 | Death & Consequence (chưa thiết kế) | This depends on Death & Consequence | Cờ "phế đan điền/võ công" chặn tích lũy EXP | Soft — edge interaction, không chặn core loop |
 | Setting & Canon Integration (Designed 2026-08-03) | This depends on Setting & Canon | Dữ liệu `breakthrough_requirement` cụ thể theo bối cảnh — interface đã chốt: `breakthrough_requirement_met(tier)` (registry), predicate data thuần theo setting pack, thiếu data tier → false cứng + warning "content gap"; thứ tự trong lượt: canon resolve TRƯỚC resolve_turn_exp | **Hard** — thiếu data authoring thì KHÔNG bao giờ đột phá bậc được (dù cấp trong 1 bậc vẫn lên bình thường) |
 | Character Card & Identity (chưa thiết kế) | Character Card depends on this | Đọc `level`, `tier` để hiển thị "Cấp độ - Bậc" | Hard (chiều ngược) |
-| Situation/Encounter Generation (chưa thiết kế) | Situation Gen depends on this | Đọc `level` cho ngưỡng chênh lệch 20 cấp | Soft (chiều ngược) — Situation Gen còn hoạt động được mà không cần ngưỡng này ở MVP tối giản |
+| Situation/Encounter Generation (Designed 2026-08-03) | Situation Gen depends on this | Đọc `level` cho ngưỡng chênh lệch 20 cấp (registry `hostile_initiative_allowed`) và cho sinh `level` đối thủ ambient (`encounter_level_range`) | Soft (chiều ngược) — Situation Gen còn hoạt động được mà không cần ngưỡng này ở MVP tối giản |
 
 *(`systems-index.md` hiện chỉ liệt kê Combat System + Turn Manager là
 dependency của hệ #8 — 5 dependency còn lại ở trên (đều với hệ chưa thiết

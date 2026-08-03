@@ -1149,11 +1149,23 @@ level, trả fallback cố định định nghĩa sẵn trong code, không crash
   tiết kỳ vọng dùng `stat_growth` (EXP, registry) với level đó — Combat
   cần xác nhận pipeline sinh đối thủ này khi implement. *(Owner:
   systems-designer, target: `/consistency-check` + `/create-architecture`)*
-- **Interface Death & Consequence** (provisional): dọn presence +
-  `provoked_flag` khi NPC chết; nguồn hook `npc_in_danger`; tiêu thụ
-  witness list (`entities_in_scope`) cho `kill_witnessed`. *(Owner:
-  game-designer, target: `/design-system death-and-consequence` — hệ
-  #12, kế tiếp trong design order)*
+- **~~Interface Death & Consequence~~** (provisional) — **đã thiết kế
+  2026-08-03** (`death-and-consequence.md`, hệ #12): dọn presence +
+  `provoked_flag` khi NPC chết; tiêu thụ witness list
+  (`entities_in_scope`) cho `kill_witnessed`. Interface khớp đúng những
+  gì hệ này đã để ngỏ — không có xung đột.
+- **Điều kiện trigger `external_abort_signal` cho Combat** (mới
+  2026-08-03, từ sửa đổi `combat-system.md` Core Rule #8/#13 — bỏ trần
+  cứng `MAX_EXCHANGE_COUNT`, thay bằng đường "tình huống khẩn cấp xen
+  ngang trận đấu"): hệ này SỞ HỮU quyết định KHI NÀO set
+  `requested:true` (VD: một sự kiện canon/scene nghiêm trọng cần ngắt
+  trận đang diễn ra) — Combat chỉ định nghĩa phía lắng nghe, không định
+  nghĩa điều kiện trigger. Cần: (a) danh sách tình huống nào đủ "khẩn
+  cấp" để ngắt trận, (b) hệ này gọi API nào của Combat để set tín hiệu,
+  (c) `reason_tag` (opaque với Combat) nên chứa gì để tường thuật hợp
+  lý. *(Owner: narrative-director + game-designer, target:
+  `/design-system` retrofit hoặc chỉnh sửa trực tiếp cho hệ này trước
+  khi `combat-system.md` qua `/design-review`)*
 - **UX spec cho chip intent + nudge heuristic + header cảnh**: cần
   `/ux-design` cho màn hình chơi chính trước khi viết epics (xem UX Flag
   ở UI Requirements). *(Owner: ux-designer, target: Pre-Production)*

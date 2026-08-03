@@ -119,7 +119,7 @@ thay vào đó là bảng thao tác kích hoạt bởi sự kiện từ hệ kh�
 |---|---|---|
 | Auto-save (xác nhận lượt) | Turn Manager: chuyển sang Turn Confirmed | Gom blob từ mọi hệ đã đăng ký, ghi atomic vào slot hiện tại; thất bại → Core Rule #4 |
 | Auto-save (sau Undo) | Turn Manager: Undoing hoàn tất, về Awaiting Action | Ghi lại bundle đã hoàn tác (state đã rollback), atomic giống hệt |
-| Tạo slot mới | Người chơi: "Bắt đầu mới" HOẶC Death & Consequence: "Chơi lại" | Khởi tạo slot rỗng mới với `slot_id` riêng, không đụng đến slot cũ |
+| Tạo slot mới | Người chơi: "Bắt đầu mới" HOẶC Character Continuation: "Chơi lại" (sửa 2026-08-03, trước ghi nhầm Death & Consequence) | Khởi tạo slot rỗng mới với `slot_id` riêng, không đụng đến slot cũ |
 | Khóa slot | Death & Consequence: lượt `is_death_turn=true` đã ghi | Đánh dấu slot hiện tại là "đã khép" (read-only) — không còn auto-save lượt mới vào slot này |
 | Load slot | Người chơi: chọn slot từ màn hình chọn slot | Đọc bundle mới nhất của slot, khôi phục trạng thái mọi hệ theo `schema_version`; không khớp version → từ chối, báo lỗi (Core Rule #8) |
 | Xuất QA log | QA/người chơi: yêu cầu export | Trả về Nhật ký đầy đủ của slot hiện tại dạng JSON, không sửa đổi save gốc |
@@ -139,11 +139,14 @@ thay vào đó là bảng thao tác kích hoạt bởi sự kiện từ hệ kh�
   chứa `known_skill_ids`, trang bị đã sở hữu/đang mặc của nhân vật
   chính.
 - **NPC Affinity & Relationship, Combat System, EXP & Realm Progression,
-  Death & Consequence, Setting & Canon Integration** (chưa thiết kế) —
+  Death & Consequence, Setting & Canon Integration** (nay đã Designed) —
   sẽ đăng ký blob riêng khi được thiết kế; danh sách hệ đăng ký KHÔNG cố
   định trước (interface mở, đúng vai trò Foundation/Infrastructure).
-- **Death & Consequence** (chưa thiết kế) — kích hoạt thao tác "Khóa
-  slot" + "Tạo slot mới" khi người chơi chọn "Chơi lại".
+- **Character Continuation** (Designed 2026-08-03) — **sửa 2026-08-03**:
+  kích hoạt thao tác "Khóa slot" + "Tạo slot mới" khi người chơi chọn
+  "Chơi lại" — trước đây ghi nhầm là Death & Consequence (hệ đó chỉ phát
+  tín hiệu `death_confirmed`, không tự xử lý lựa chọn tiếp tục, xem
+  `character-continuation.md` Core Rule #5).
 - **Core UI/Screen Navigation** (chưa thiết kế) — cung cấp màn hình chọn
   slot (Bắt đầu mới / Tiếp tục / Xem lại slot đã khép).
 

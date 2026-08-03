@@ -37,6 +37,18 @@ choice was pending user decision at time of this memory — verify current
 state of `design/gdd/game-concept.md` Visual Identity Anchor section (or
 `/art-bible` output) before assuming this is still the live direction.
 
+Update 2026-08-03: confirmed live — `game-concept.md` Visual Identity Anchor
+now locks "Mực Chưa Khô" as the anchor (numbers always inside an ink-stamp
+frame, never bare; strictly rationed color system — đỏ son/vermillion for
+ALL permanent/serious consequences [trọng thương/chết/hậu quả], xanh ngọc/
+jade ONLY for realm breakthrough, never elsewhere). `/art-bible` still not
+formally run — this anchor paragraph is the only authored source; individual
+GDDs (`combat-system.md`, `death-and-consequence.md`) are already spending
+this color budget per-system ahead of the full bible, so check each GDD's
+own Visual/Audio Requirements section for precedent before proposing new
+đỏ son/xanh ngọc usage, to avoid contradicting an already-locked spend.
+See [[reference_color-rationing-precedents]] for the specific precedent log.
+
 Related: game-concept doc also references `src/reference.md`, a prior React/
 Firebase AI-narrative project by the same user, used as a UI/stat structure
 touchstone (not a visual style touchstone — no visual style was defined for it

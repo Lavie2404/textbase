@@ -48,6 +48,12 @@ last_updated: "2026-08-03"
 # song_tu_threshold, song_tu_active, max_entities_per_prompt,
 # resolve_turn_canon, resolve_turn_affinity, fact_extraction_count,
 # deep_hostility_threshold
+# 2026-08-03 (later 3): +2 formulas (alive, death_and_consequence_blocked)
+# from death-and-consequence.md; referenced_by updated on
+# deep_hostility_threshold, resolve_turn_affinity, entities_in_scope,
+# suggested_action_count, undo_availability_window
+# 2026-08-03 (later 4): +2 formulas (reset_completeness_check,
+# continuation_choice_eligible) from character-continuation.md
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -229,6 +235,7 @@ formulas:
     referenced_by:
       - design/gdd/turn-manager.md
       - design/gdd/world-memory-context-management.md
+      - design/gdd/death-and-consequence.md
     variables:
       - turn_id
       - last_confirmed_turn_id
@@ -447,6 +454,7 @@ formulas:
       - design/gdd/npc-affinity-relationship.md
       - design/gdd/world-memory-context-management.md
       - design/gdd/situation-encounter-generation.md
+      - design/gdd/death-and-consequence.md
     variables:
       - classified_event
       - A_before
@@ -643,6 +651,7 @@ formulas:
       - design/gdd/situation-encounter-generation.md
       - design/gdd/world-memory-context-management.md
       - design/gdd/npc-affinity-relationship.md
+      - design/gdd/death-and-consequence.md
     variables:
       - hook_participants
       - canon_role_npcs
@@ -692,6 +701,103 @@ formulas:
     added: 2026-08-03
     revised: ""
 
+  - name: alive
+    status: active
+    source: design/gdd/death-and-consequence.md
+    referenced_by:
+      - design/gdd/death-and-consequence.md
+      - design/gdd/setting-canon-integration.md
+    variables:
+      - char_id
+      - alive_flag
+      - death_flag_[char_id]
+    output_range: "[0, 1] — boolean per-nhân vật (chính hoặc NPC)"
+    expression: "alive(char_id) = true mặc định (lazy-init, chưa từng ghi
+      thì đọc = true); chuyển false VĨNH VIỄN chỉ qua 2 code path: Nhánh
+      A bước c (nhân vật chính chết thật, death_roll=death) hoặc Nhánh B
+      Kết liễu (NPC bị người chơi giết). Cùng lúc khóa field
+      death_flag_[char_id]=true (entity_id=char_id, khớp quy ước World
+      Memory)."
+    notes: "Đóng interface provisional mà setting-canon-integration.md
+      D.3 (predicate alive(X)) chờ — nguồn premise-break eager quan
+      trọng nhất của hệ đó. KHÔNG đảo được (chết là chết thật, Anti-
+      Pillar) — false thì false mãi, khớp bảng predicate D.3 của Setting
+      & Canon. death_flag_[char_id] cũng đóng field name provisional mà
+      world-memory-context-management.md's canon_importance_tier
+      (registry) đã dùng tạm."
+    added: 2026-08-03
+    revised: ""
+
+  - name: death_and_consequence_blocked
+    status: active
+    source: design/gdd/death-and-consequence.md
+    referenced_by:
+      - design/gdd/death-and-consequence.md
+      - design/gdd/exp-realm-progression.md
+    variables:
+      - character
+      - severity_tier
+      - forced_severe
+    output_range: [0, 1]
+    expression: "death_and_consequence_blocked(character) = true khi
+      severity_tier(character)=\"severe\" (phế đan điền/võ công, Formula
+      D.2 của GDD nguồn) vừa khóa; false mặc định; gỡ CHỈ qua Formula
+      D.3 (recovery_attempt) thành công — không tự hết hạn theo thời
+      gian."
+    notes: "Đóng interface provisional mà exp-realm-progression.md Core
+      Rule #9 đã dùng TÊN CHÍNH XÁC này để chặn tích lũy EXP (cả 4
+      nguồn) — không đổi tên khi hệ nguồn được thiết kế, tránh sửa chéo
+      file không cần thiết. Idempotent: thua tiếp khi đang true không
+      đổi gì thêm (death-and-consequence.md Edge Case #2)."
+    added: 2026-08-03
+    revised: ""
+
+  - name: reset_completeness_check
+    status: active
+    source: design/gdd/character-continuation.md
+    referenced_by:
+      - design/gdd/character-continuation.md
+    variables:
+      - N
+      - s
+      - ok(s)
+      - completeness_ratio
+      - reset_complete
+      - handoff_allowed
+    output_range: [0, 1]
+    expression: "completeness_ratio(reset) = (1/N) × Σ(s=1→N) ok(s);
+      reset_complete = 1 nếu completeness_ratio = 1 else 0;
+      handoff_allowed = reset_complete AND (N≥1)"
+    notes: "Invariant boolean tất-cả-hoặc-không-gì, không phải công
+      thức cân bằng gameplay — gate bắt buộc trước khi chuyển
+      `Processing Chơi Lại → New Playthrough Started`. N=5 hiện tại
+      (EXP & Realm Progression, NPC Affinity, Setting & Canon
+      Integration, Death & Consequence [alive/death_and_consequence_blocked],
+      Equipment & Skill Data System) — danh sách mở, tăng khi hệ mới
+      tham gia ràng buộc reset. handoff_allowed=0 → state Reset Failed
+      (chặn + báo lỗi, không retry ngầm)."
+    added: 2026-08-03
+    revised: ""
+
+  - name: continuation_choice_eligible
+    status: active
+    source: design/gdd/character-continuation.md
+    referenced_by:
+      - design/gdd/character-continuation.md
+    variables:
+      - turn
+      - is_death_turn(turn)
+      - death_confirmed(turn)
+    output_range: [0, 1]
+    expression: "continuation_choice_eligible(turn) = is_death_turn(turn) AND death_confirmed(turn)"
+    notes: "Invariant phòng thủ 2 lớp giữa Turn Manager
+      (is_death_turn, registry undo_availability_window) và Death &
+      Consequence (death_confirmed) — 2 flag luôn khóa cùng lúc theo
+      thiết kế nguồn, công thức tồn tại để bắt lỗi đồng bộ nếu có bug.
+      Điều kiện DUY NHẤT chuyển Idle → Awaiting Continuation Choice."
+    added: 2026-08-03
+    revised: ""
+
 # Example:
 #
 # formulas:
@@ -730,6 +836,7 @@ constants:
     referenced_by:
       - design/gdd/turn-manager.md
       - design/gdd/combat-system.md
+      - design/gdd/death-and-consequence.md
     value: 4
     unit: choices
     added: 2026-08-02
@@ -837,9 +944,12 @@ constants:
       - design/gdd/equipment-skill-data-system.md
     value: 5
     unit: lần gọi/kỹ năng/trận
-    # dẫn xuất: ceil(MAX_EXCHANGE_COUNT=30 / max_known_skills_per_character=6)
+    # dẫn xuất: ceil(CONTENT_EXCHANGE_ESTIMATE=30 / max_known_skills_per_character=6)
     # = 5 (combat-system.md Formula D.12) — đóng AC-11 (equipment-skill-data-system.md,
-    # trước đó BLOCKED chờ giá trị này)
+    # trước đó BLOCKED chờ giá trị này). CONTENT_EXCHANGE_ESTIMATE đổi tên
+    # từ MAX_EXCHANGE_COUNT 2026-08-03 (bỏ vai trò trần runtime, tách
+    # riêng TECHNICAL_EXCHANGE_CAP=200 kỹ thuật) — giá trị 30 và kết quả
+    # dẫn xuất =5 KHÔNG đổi.
     added: 2026-08-02
     revised: ""
 
@@ -876,6 +986,7 @@ constants:
       - design/gdd/combat-system.md
       - design/gdd/turn-manager.md
       - design/gdd/situation-encounter-generation.md
+      - design/gdd/death-and-consequence.md
     value: -80
     unit: điểm Hảo cảm (BAO GỒM -80 — thù địch sâu sắc khi affinity <= -80)
     # cờ mà Death & Consequence (chưa thiết kế) đọc để quyết định nguy cơ

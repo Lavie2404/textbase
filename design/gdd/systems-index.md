@@ -38,8 +38,8 @@ verdict PROCEED).
 | 9 | NPC Affinity & Relationship | Progression | MVP | Designed | [npc-affinity-relationship.md](npc-affinity-relationship.md) | Turn Manager, World Memory |
 | 10 | Setting & Canon Integration | Narrative | MVP | Designed | [setting-canon-integration.md](setting-canon-integration.md) | World Memory |
 | 11 | Situation/Encounter Generation (inferred) | Narrative | MVP | Designed | [situation-encounter-generation.md](situation-encounter-generation.md) | AI Integration Layer, Turn Manager, World Memory |
-| 12 | Death & Consequence | Gameplay | MVP | Not Started | — | Combat System, NPC Affinity |
-| 13 | Character Continuation (inferred) | Gameplay | MVP | Not Started | — | Death & Consequence |
+| 12 | Death & Consequence | Gameplay | MVP | Designed | [death-and-consequence.md](death-and-consequence.md) | Combat System, NPC Affinity |
+| 13 | Character Continuation (inferred) | Gameplay | MVP | Designed | [character-continuation.md](character-continuation.md) | Death & Consequence |
 | 14 | Character Card & Identity | UI | MVP | Not Started | — | Equipment & Skill Data, NPC Affinity, Setting & Canon Integration |
 | 15 | Core UI/Screen Navigation (inferred) | UI | MVP | Not Started | — | Combat System, Character Card, Situation Generation |
 
@@ -198,6 +198,40 @@ Situation/Encounter Generation (chiều ngược, đọc `level` cho ngưỡng 2
 cấp). Ghi nhận ở đây làm nguồn tham chiếu chính thức, giống cách xử lý 4
 gap trước.)*
 
+*(Phát hiện từ `/design-system` hệ #12, 2026-08-03, cùng dạng các ghi
+chú trên: `death-and-consequence.md` (Designed) có 6 dependency chưa
+liệt kê tường minh ở Systems Enumeration (hàng hệ #12 vẫn giữ "Depends
+On: Combat System, NPC Affinity" theo phạm vi phụ thuộc cứng chính) —
+(a) **Turn Manager** (hard 2 chiều: đọc `current_turn`/
+`suggested_action_count`, cung cấp `is_death_turn` cho
+`undo_availability_window`), (b) **Setting & Canon Integration** (hard,
+chiều ngược: cung cấp `alive(X)`/`death_flag_[char_id]` — đóng interface
+provisional bên đó), (c) EXP & Realm Progression (soft, chiều ngược:
+cung cấp `death_and_consequence_blocked(self)`, đúng tên provisional GDD
+đó đã dùng), (d) Situation/Encounter Generation (hard 2 chiều: phát
+thông tin chết để dọn presence/`provoked_flag`, nhận witness list
+`entities_in_scope` cho `kill_witnessed`), (e) Character Continuation
+(hard, chiều ngược, chưa thiết kế — nhận hand-off `death_confirmed`),
+(f) Equipment & Skill Data System (soft — đọc field `efficacy` trên
+item cho `recovery_attempt`, field này CHƯA tồn tại trên schema, xem
+Open Questions GDD đó). Ghi nhận ở đây làm nguồn tham chiếu chính thức,
+gap thứ 11 cùng pattern.)*
+
+*(Phát hiện từ `/design-system` hệ #13, 2026-08-03, cùng dạng các ghi
+chú trên: `character-continuation.md` (Designed) có 6 dependency chưa
+liệt kê tường minh ở Systems Enumeration (hàng hệ #13 vẫn giữ "Depends
+On: Death & Consequence" theo phạm vi phụ thuộc cứng chính) — (a) **Turn
+Manager** (hard 2 chiều: đọc `is_death_turn`, cung cấp quyền điều khiển
+trở lại "Awaiting Action" ở slot mới), (b) **Persistence/Save System**
+(hard — TRIGGER thật của "Khóa slot"/"Tạo slot mới", sửa lại điểm quy
+thuộc sai trước đây gán cho Death & Consequence), (c) Setting & Canon
+Integration (soft — reset event states cho playthrough mới), (d) NPC
+Affinity & Relationship (soft — reset Hảo cảm mọi NPC), (e) EXP & Realm
+Progression (soft — khởi tạo `level=1`/`EXP=0`), (f) Equipment & Skill
+Data System (soft — khởi tạo loadout khởi điểm), (g) Character Card &
+Identity (chiều ngược, chưa thiết kế — hiển thị màn hình 3 lối). Ghi
+nhận ở đây làm nguồn tham chiếu chính thức, gap thứ 12 cùng pattern.)*
+
 ### Presentation Layer (depends on features)
 
 1. **Character Card & Identity** — depends on: Equipment & Skill Data, NPC Affinity, Setting & Canon Integration (quy tắc cải trang/xuyên không)
@@ -259,10 +293,10 @@ gap trước.)*
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 15 |
-| Design docs started | 11 |
+| Design docs started | 13 |
 | Design docs reviewed | 3 |
 | Design docs approved | 3 |
-| MVP systems designed | 11/15 |
+| MVP systems designed | 13/15 |
 | Vertical Slice systems designed | 0/0 |
 
 ---

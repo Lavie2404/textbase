@@ -69,8 +69,12 @@ nhưng định nghĩa đầy đủ ở Section D với `systems-designer`.)*
    `in_combat=true` = đúng 1 **pha giao đấu** (exchange), đánh số bằng
    `exchange_id` — bộ đếm nguyên bắt đầu từ 1, tăng dần theo TỪNG TRẬN
    (KHÔNG xuyên suốt phiên chơi), reset về 1 khi 1 trận mới bắt đầu.
-   `exchange_id` dùng làm seed cho `coin_flip` khi SPD hòa (D.2) và làm
-   đơn vị đếm cho trần an toàn `MAX_EXCHANGE_COUNT` (D.12).
+   `exchange_id` dùng làm seed cho `coin_flip` khi SPD hòa (D.2) và cho
+   tiebreak kỹ thuật D.9c, và làm đơn vị đếm cho trần an toàn KỸ THUẬT
+   `TECHNICAL_EXCHANGE_CAP` (D.9c) — KHÔNG còn liên quan tới D.12; D.12
+   giờ dùng `CONTENT_EXCHANGE_ESTIMATE`, một hằng số THIẾT KẾ tách biệt
+   hoàn toàn khỏi bộ đếm runtime này (sửa 2026-08-03, xem Open
+   Questions).
 
 2. **Mỗi pha giao đấu: cả hai bên ra đòn theo thứ tự SPD, có thể ngắt sớm**:
    người chơi chọn hành động (dùng 1 thức từ `known_skill_ids` chưa dùng
@@ -130,11 +134,27 @@ nhưng định nghĩa đầy đủ ở Section D với `systems-designer`.)*
    (EXP scaling theo chênh lệch, ngưỡng 20 cấp) — nhưng KHÔNG tự nó quyết
    định kết quả từng pha hay toàn trận. Đây là điểm làm rõ (và thu hẹp
    phạm vi nghĩa) so với cách `game-concept.md` mô tả ở tầng concept.
+   **Ngoại lệ DUY NHẤT** (sửa 2026-08-03, xem Open Questions): Lực chiến
+   pre-battle được dùng làm ĐIỀU KIỆN ĐỦ (eligibility gate, D.9b) để
+   PHÂN LOẠI LẠI một kết quả win/lose ĐÃ ĐƯỢC D.9 xác định theo HP=0
+   thành `no_outcome`, CHỈ khi trận là `spar_friendly`. Đây không phải
+   "Lực chiến quyết định ai thắng" — HP=0 vẫn là điều kiện DUY NHẤT D.9
+   dùng để xác định `nominal_winner`; Lực chiến chỉ quyết định kết quả
+   đó có được HIỂN THỊ dưới nhãn hòa hay không, phạm vi hẹp trong giao
+   hữu.
 
-8. **Điều kiện kết thúc trận**: (a) HP của 1 bên chạm 0 → bên đó thua;
-   (b) hành động "Bỏ chạy" thành công (Core Rule #9) → trận kết thúc
-   không phân thắng bại; không có điều kiện hòa (draw) — luôn có 1 kết
-   quả rõ ràng trừ trường hợp (b).
+8. **Điều kiện kết thúc trận** (sửa 2026-08-03 — bỏ trần thiết kế
+   `MAX_EXCHANGE_COUNT`, xem Open Questions): (a) HP của 1 bên chạm 0 →
+   bên đó thua qua D.9, TRỪ KHI bị D.9b phân loại lại thành hòa (chỉ
+   trong `spar_friendly`, xem dưới); (b) hành động "Bỏ chạy" thành công
+   (Core Rule #9) → `no_outcome`; (c) tín hiệu KHẨN CẤP xen ngang từ hệ
+   ngoài (`external_abort_signal`, Core Rule #13) được nhận đúng thời
+   điểm Combat kiểm tra → `no_outcome` ngay lập tức; (d) trần an toàn KỸ
+   THUẬT `TECHNICAL_EXCHANGE_CAP` bị chạm (D.9c) → nếu `is_spar_friendly`,
+   `no_outcome`; NẾU KHÔNG, D.9c BẮT BUỘC ra `win`/`lose` qua tiebreak,
+   không có `no_outcome` ở nhánh này. **Ngoài (a)-(d), và ngoài
+   `spar_friendly`: HP về 0 luôn luôn ra 1 kết quả win/lose rõ ràng —
+   không có "bế tắc kỹ thuật" nào tạo hòa nữa.**
 
 9. **Bỏ chạy — có tỉ lệ thành công, không phải luôn khả dụng**: hành động
    "Bỏ chạy" xác suất thành công dựa trên chênh lệch `SPD` hai bên (công
@@ -156,9 +176,10 @@ nhưng định nghĩa đầy đủ ở Section D với `systems-designer`.)*
     `outcome` với schema THỐNG NHẤT cố định:
     `{ type: "win" | "lose" | "no_outcome", winner_id: string | null,
     loser_id: string | null }` — `winner_id`/`loser_id` đều `null` khi
-    `type="no_outcome"` (bỏ chạy thành công hoặc chạm trần
-    `MAX_EXCHANGE_COUNT`); không có hình dạng dữ liệu nào khác cho field
-    này ở bất kỳ nhánh kết thúc trận nào.
+    `type="no_outcome"` (bỏ chạy thành công, hòa giao hữu D.9b, tín hiệu
+    khẩn cấp xen ngang, hoặc chạm `TECHNICAL_EXCHANGE_CAP` trong
+    `spar_friendly` — sửa 2026-08-03, xem Open Questions); không có hình
+    dạng dữ liệu nào khác cho field này ở bất kỳ nhánh kết thúc trận nào.
 
 12. **Chỉ pha KẾT THÚC trận mới phát tín hiệu hand-off**: `battle_active=false`
     kèm `outcome` (win/lose), margin liên quan (chênh lệch HP còn lại, số
@@ -166,6 +187,20 @@ nhưng định nghĩa đầy đủ ở Section D với `systems-designer`.)*
     Affinity & Relationship (chưa thiết kế) tự đọc tín hiệu này để tính
     hệ quả riêng; Combat System không tự tính EXP/hậu quả cái chết/thay
     đổi Hảo cảm.
+
+13. **2 field trạng thái trận MỚI** (sửa 2026-08-03, xem Open Questions):
+    `is_spar_friendly` (bool) — đọc ĐÚNG 1 LẦN khi trận khởi tạo từ cờ
+    `spar_friendly` của `combat_challenge(target, spar_friendly)`
+    (Situation/Encounter Generation), KHÔNG đổi trong suốt trận;
+    `external_abort_signal` (`{ requested: bool, reason_tag: string|null }
+    | null`, mặc định `null`) — có thể được 1 hệ ngoài set BẤT KỲ LÚC NÀO
+    giữa trận, Combat CHỈ kiểm tra đúng 1 lần tại đầu state "In Combat —
+    Awaiting Exchange" (TRƯỚC khi build gợi ý hành động cho Turn Manager),
+    KHÔNG kiểm tra giữa lúc D.9 đang resolve (giữ nguyên tính atomic của
+    D.9/Core Rule #2-3). `reason_tag` là field MỜ với Combat — không diễn
+    giải, chỉ truyền nguyên văn vào `narration_call` làm ngữ cảnh phong
+    cách (như `style_descriptor`), không thuộc phạm vi Numeric Leak
+    Detection (không phải field số).
 
 ### States and Transitions
 
@@ -212,6 +247,11 @@ sách thức đã dùng theo Core Rule #5.)*
   không trực tiếp đọc/ghi Hảo cảm; ngưỡng 20 cấp chênh lệch (điều kiện
   NPC chủ động địch ý) thuộc phạm vi Situation/Encounter Generation
   quyết định KHI NÀO kích hoạt Combat, không phải Combat tự kiểm tra.
+- **Situation/Encounter Generation** (provisional, sửa 2026-08-03) —
+  Combat lắng nghe `external_abort_signal` (Core Rule #13) để ngắt trận
+  khẩn cấp giữa chừng; ĐIỀU KIỆN gì khiến hệ đó set tín hiệu này KHÔNG
+  thuộc phạm vi GDD này — flag Open Question tương ứng ở
+  `situation-encounter-generation.md`.
 
 ## Formulas
 
@@ -469,7 +509,7 @@ resolve_exchange(A, B):
     # NGẮT SỚM — đòn đi sau KHÔNG thực thi (Core Rule #2)
     r2 = { hit:null, crit:null, damage:0, heal:0, executed:false }
     battle_active = false
-    outcome = { winner: first, loser: second }
+    outcome = D.9b.reclassify_outcome(nominal_winner=first, nominal_loser=second)
     # KHÔNG áp dụng D.10 (Core Rule #3)
   else:
     r2 = D.8(second, first, hp[first])
@@ -477,7 +517,7 @@ resolve_exchange(A, B):
     hp[first] = r2.hp_defender_after
     if hp[first] == 0:
       battle_active = false
-      outcome = { winner: second, loser: first }
+      outcome = D.9b.reclassify_outcome(nominal_winner=second, nominal_loser=first)
       # vẫn KHÔNG áp dụng D.10 — pha này đã kết thúc trận
     else:
       battle_active = true
@@ -507,6 +547,101 @@ THI → trúng, `final_damage=30`, npc hp 40→10 (≠0) → `battle_active=true
 `final_damage=60`, player hp 50→`max(0,-10)=0` → **player's đòn KHÔNG
 thực thi** (`r2={hit:null, executed:false}`) → `battle_active=false`,
 `outcome={winner:npc, loser:player}` → không có D.10 pha này.
+
+---
+
+**D.9b — Hòa giao hữu: Parity Gate & Phân loại lại** (sửa 2026-08-03,
+đóng Core Rule #7 ngoại lệ + Core Rule #8(a) — chỉ áp dụng
+`is_spar_friendly=true`)
+
+```
+# Tính 1 LẦN khi trận khởi tạo, is_spar_friendly=true, cache suốt trận:
+parity_diff(A,B)      = |Lực_chiến(A) - Lực_chiến(B)| / max(Lực_chiến(A), Lực_chiến(B), 1)
+spar_parity_eligible  = is_spar_friendly
+                         AND NOT (Lực_chiến(A)==0 AND Lực_chiến(B)==0)
+                         AND (parity_diff(A,B) <= SPAR_PARITY_TOLERANCE)
+
+# Gọi từ CẢ HAI nhánh HP==0 của D.9, THAY cho outcome={winner,loser} gốc:
+reclassify_outcome(nominal_winner, nominal_loser):
+  hp_pct(C) = hp(C) / max_HP(C)
+  if spar_parity_eligible AND hp_pct(nominal_winner) <= SPAR_LOW_HP_THRESHOLD:
+    return { type:"no_outcome", winner_id:null, loser_id:null }
+  else:
+    return { type: (nominal_winner==self ? "win" : "lose"),
+             winner_id: nominal_winner, loser_id: nominal_loser }
+```
+
+| Symbol | Type | Range | Description |
+|---|---|---|---|
+| `Lực_chiến(A)`, `Lực_chiến(B)` | float | 0–∞ | D.13, tính 1 lần đầu trận |
+| `parity_diff` | float | `[0,1)` | Chênh lệch tương đối; mẫu số floor tại 1 (tránh chia 0) |
+| `SPAR_PARITY_TOLERANCE` | float (knob) | 0–1 | Mặc định **0.15** |
+| `spar_parity_eligible` | bool | — | Cache 1 lần/trận, không tính lại mỗi pha; `false` cứng nếu CẢ HAI `Lực_chiến=0` (coi là chưa đủ dữ liệu, KHÔNG eligible) |
+| `nominal_winner/loser` | enum {A,B} | — | Kết quả D.9 gốc TRƯỚC khi D.9b can thiệp |
+| `hp_pct(C)` | float | `[0,1]` | HP% tại thời điểm trận kết luận — bên thua LUÔN =0 (chính là điều kiện D.9 vừa xác định), chỉ cần kiểm bên thắng |
+| `SPAR_LOW_HP_THRESHOLD` | float (knob) | 0–1 | Mặc định **0.15** |
+| `outcome` | struct | `{win/lose}` hoặc `{no_outcome}` | Ghi vào `locked_result.outcome`, schema Core Rule #11 KHÔNG đổi |
+
+**Output range**: khi `is_spar_friendly=false`, `spar_parity_eligible`
+luôn `false` → D.9b không bao giờ can thiệp, hành vi giống hệt D.9 gốc
+— đúng ranh giới hẹp của Core Rule #7's ngoại lệ.
+
+**Ví dụ dương (hòa)**: `Lực_chiến(A)=310, Lực_chiến(B)=280` →
+`parity_diff = 30/310 ≈ 0.097 ≤ 0.15` → eligible. Pha 12, A hạ B về 0,
+nhưng `hp_pct(A) ≈ 0.082 ≤ 0.15` lúc đó → `outcome=no_outcome`.
+
+**Ví dụ âm 1 (không đủ parity)**: `Lực_chiến(A)=400, Lực_chiến(B)=280`
+→ `parity_diff ≈ 0.30 > 0.15` → không eligible → `outcome=win(A)/lose(B)`
+bình thường dù `hp_pct(A)` thấp thế nào.
+
+**Ví dụ âm 2 (đủ parity nhưng thắng khỏe)**: parity như ví dụ dương,
+nhưng `hp_pct(A)=0.55` lúc kết luận → không thỏa `SPAR_LOW_HP_THRESHOLD`
+→ `outcome=win(A)/lose(B)` bình thường, dù là giao hữu.
+
+**Ví dụ biên 0/0**: cả 2 `Lực_chiến=0` → `spar_parity_eligible=false`
+CỨNG (khác D.13's `estimate_ratio` coi 0/0 là "N/A" — ở đây là "không
+đủ điều kiện", không phải sentinel hiển thị) → không bao giờ hòa qua
+đường này.
+
+---
+
+**D.9c — Tiebreak khi chạm trần kỹ thuật `TECHNICAL_EXCHANGE_CAP`**
+(sửa 2026-08-03, van an toàn KỸ THUẬT thuần túy — không phải cơ chế
+gameplay)
+
+```
+if exchange_id >= TECHNICAL_EXCHANGE_CAP AND battle_active == true:
+  if is_spar_friendly:
+    outcome = { type:"no_outcome", winner_id:null, loser_id:null }
+  else:
+    winner = tiebreak_winner(A, B)
+    outcome = { type: (winner==self ? "win" : "lose"),
+                winner_id: winner, loser_id: other }
+  battle_active = false
+
+tiebreak_winner(A,B):
+  hp_pct(C) = hp(C) / max_HP(C)
+  if hp_pct(A) != hp_pct(B):  return argmax(hp_pct)
+  else:                        return coin_flip(seed=exchange_id)   # tái dùng D.2
+```
+
+| Symbol | Type | Range | Description |
+|---|---|---|---|
+| `TECHNICAL_EXCHANGE_CAP` | int (knob, kỹ thuật) | >0 | Trần runtime cứng, mặc định **200** — KHÔNG hiển thị người chơi, chỉ tránh runaway `narration_call` cost |
+| `hp_pct(C)` | float | `[0,1]` | Tiebreak bậc 1 |
+| `coin_flip(seed)` | bool→{A,B} | 50/50 | Tiebreak bậc 2 (hp_pct trùng tuyệt đối) — tái dùng đúng cơ chế D.2, KHÔNG dùng Lực chiến (giữ Core Rule #7 sạch ở nhánh này) |
+
+**Output range**: ngoài `spar_friendly`, D.9c luôn ra đúng 1 `win`/`lose`
+— không nhánh nào của D.9c trả `no_outcome` khi `is_spar_friendly=false`.
+Đóng trực tiếp yêu cầu "còn lại bắt buộc phân thắng thua".
+
+**Ví dụ**: `TECHNICAL_EXCHANGE_CAP=200` chạm, `is_spar_friendly=false`,
+`hp_pct(A)=0.31, hp_pct(B)=0.18` → A thắng (hp_pct cao hơn), không cần
+coin_flip.
+
+**Ví dụ biên (hp_pct trùng tuyệt đối)**: `hp_pct(A)=hp_pct(B)=0.20`
+chính xác → `coin_flip(seed=200)` quyết định, 50/50 nhưng deterministic
+theo seed (test lại được).
 
 ---
 
@@ -566,16 +701,17 @@ diff=-7.5 → `P_flee=0.425` → roll 0.5 → 0.5 ≥ 0.425 → thất bại.
 `equipment-skill-data-system.md`)
 
 ```
-max_invocations_per_battle = ceil(MAX_EXCHANGE_COUNT / max_known_skills_per_character)
+max_invocations_per_battle = ceil(CONTENT_EXCHANGE_ESTIMATE / max_known_skills_per_character)
 ```
 
 | Symbol | Type | Range | Description |
 |---|---|---|---|
-| `MAX_EXCHANGE_COUNT` | int (knob, MỚI — Combat sở hữu) | >0 | Trần an toàn cứng: số pha tối đa/trận (chặn giằng co vô hạn lý thuyết) — đề xuất mặc định **30** |
+| `CONTENT_EXCHANGE_ESTIMATE` | int (knob, MỚI — Combat sở hữu; đổi tên từ `MAX_EXCHANGE_COUNT` 2026-08-03, xem Open Questions) | >0 | Ước tính THIẾT KẾ số pha điển hình/trận, CHỈ dùng cho content-sufficiency (`is_pool_sufficient`) — KHÔNG còn là trần runtime nào (đã tách khỏi `TECHNICAL_EXCHANGE_CAP`, D.9c) — mặc định **30**, giữ nguyên giá trị cũ để `max_invocations_per_battle` KHÔNG đổi |
 | `max_known_skills_per_character` | int (registry, LOCKED) | =6 | Từ `equipment-skill-data-system.md`, không đổi |
 | `max_invocations_per_battle` | int | ≥1 | Hằng số THIẾT KẾ, tính 1 lần, không tính lại theo trận cụ thể |
 
-`= ceil(30/6) = 5`.
+`= ceil(30/6) = 5` — **giá trị không đổi** so với trước sửa đổi
+2026-08-03; `equipment-skill-data-system.md` AC-11 không bị ảnh hưởng.
 
 **Output**: hằng số nguyên duy nhất áp dụng cho MỌI kỹ năng, không phải
 per-battle runtime value — đây là mục tiêu content-authoring ("mỗi kỹ
@@ -665,8 +801,11 @@ năng/trang bị) đối đầu 1 NPC khác cùng trạng thái → cả 2 `Lự
 *(Hằng số/knob MỚI do GDD này giới thiệu, chính thức hóa với safe range
 đầy đủ ở Tuning Knobs: `PENALTY_PER_TIER`, `FLOOR_LAYER`, `FLOOR_TOTAL`,
 `K_HIT`, `P_MIN`, `P_MAX`, `MIN_DMG_MULT`, `K_FLEE`, `P_MIN_FLEE`,
-`P_MAX_FLEE`, `MAX_EXCHANGE_COUNT`, `max_invocations_per_battle` (dẫn
-xuất, không phải knob độc lập), `w_HP` và các `w_*` khác của D.13.)*
+`P_MAX_FLEE`, `CONTENT_EXCHANGE_ESTIMATE` (đổi tên từ
+`MAX_EXCHANGE_COUNT` 2026-08-03), `TECHNICAL_EXCHANGE_CAP`,
+`SPAR_PARITY_TOLERANCE`, `SPAR_LOW_HP_THRESHOLD` (3 hằng số mới
+2026-08-03, D.9b/D.9c), `max_invocations_per_battle` (dẫn xuất, không
+phải knob độc lập), `w_HP` và các `w_*` khác của D.13.)*
 
 ## Edge Cases
 
@@ -707,12 +846,27 @@ quán.)*
   biệt `outcome="no_outcome"` (KHÁC `"win"`/`"lose"`) — EXP & Realm
   Progression và Death & Consequence (chưa thiết kế) không được phép
   diễn giải bỏ chạy thành thắng hoặc thua khi tự xử lý hệ quả riêng.
-- **Nếu trận chạm trần an toàn `MAX_EXCHANGE_COUNT` (30 pha) mà chưa bên
-  nào về 0 HP** (bế tắc do 2 bên quá tanky): trận buộc kết thúc ngay tại
-  pha thứ 30 với `outcome="no_outcome"` — xử lý giống hệt Bỏ chạy thành
-  công cho cả 2 bên (không phân thắng bại), bất kể %HP còn lại của mỗi
-  bên. Đây là van an toàn kỹ thuật (tránh giằng co vô hạn lý thuyết),
-  không phải một cơ chế gameplay được thiết kế để người chơi khai thác.
+- **(sửa 2026-08-03) Nếu trận `is_spar_friendly=false` chạm
+  `TECHNICAL_EXCHANGE_CAP` mà chưa bên nào về 0 HP**: D.9c BẮT BUỘC ra
+  `win`/`lose` qua tiebreak (hp_pct cao hơn thắng; trùng tuyệt đối →
+  coin_flip theo `exchange_id`) — KHÔNG BAO GIỜ `no_outcome` ở nhánh
+  này, đúng yêu cầu "ngoài giao hữu luôn bắt buộc phân thắng thua". Đây
+  là van an toàn KỸ THUẬT thuần túy (tránh giằng co vô hạn về mặt
+  `narration_call` cost), không phải cơ chế gameplay thiết kế để người
+  chơi khai thác.
+- **(sửa 2026-08-03) Nếu trận `is_spar_friendly=true` chạm
+  `TECHNICAL_EXCHANGE_CAP` mà D.9b chưa từng kích hoạt trước đó**: kết
+  thúc với `outcome="no_outcome"` cho cả 2 bên — cùng xử lý như Bỏ chạy
+  thành công.
+- **(sửa 2026-08-03) Nếu `is_spar_friendly=true` nhưng parity (D.9b)
+  hoặc ngưỡng HP-thấp không thỏa khi HP về 0**: `outcome` vẫn
+  `win`/`lose` bình thường — KHÔNG tự động hòa chỉ vì là trận giao hữu.
+- **(sửa 2026-08-03) Nếu `external_abort_signal.requested=true` tại
+  thời điểm Combat kiểm tra** (đầu state "In Combat — Awaiting
+  Exchange"): trận kết thúc NGAY, `outcome="no_outcome"`, D.2–D.10
+  KHÔNG được gọi cho lượt đó (không tính là 1 pha giao đấu bình thường,
+  cùng tiền lệ D.11 dùng cho bỏ chạy thành công) — tín hiệu là one-shot,
+  bị Combat clear ngay sau khi tiêu thụ.
 - **Nếu người chơi cố dùng lại 1 thức đã dùng trong trận** (qua input tự
   do, bỏ qua danh sách gợi ý): hệ thống từ chối, không cho hành động đó
   tính là 1 pha hợp lệ — yêu cầu chọn lại (không tính vào lượt đã dùng,
@@ -767,11 +921,20 @@ liệu cụ thể:
   `hp_after`/`max_HP` → `margin_ratio`) được hệ đó ánh xạ thành sự kiện
   `combat_win_vs_npc`/`combat_loss_vs_npc` — Combat không cần thay đổi
   gì, đúng như đã để ngỏ.
-- **Situation/Encounter Generation** (Narrative, chưa thiết kế) —
-  **soft**: quyết định KHI NÀO 1 tình huống dẫn đến giao chiến (bao gồm
-  kiểm tra ngưỡng 20 cấp chênh lệch của `game-concept.md`) — Combat chỉ
+- **Situation/Encounter Generation** (Narrative, Designed 2026-08-03) —
+  **soft**: quyết định KHI NÀO 1 tình huống dẫn đến giao chiến (registry
+  `hostile_initiative_allowed`/`HOSTILE_INITIATIVE_LEVEL_GAP_MAX=20`,
+  đóng ngưỡng 20 cấp chênh lệch của `game-concept.md`) — Combat chỉ
   tiêu thụ quyết định "đã vào trận", không tự kiểm tra điều kiện kích
-  hoạt.
+  hoạt. Với đối thủ ambient vô danh (không có `char_id`), Situation/
+  Encounter Generation cũng cấp `level` sinh ra trong khoảng registry
+  `encounter_level_range` — Combat dùng level đó + `stat_growth` (EXP &
+  Realm Progression) để dựng chỉ số đối thủ; thuật toán dựng chỉ số cụ
+  thể chưa hình thức hóa thành công thức riêng của Combat (xem Open
+  Questions). **(sửa 2026-08-03)** Combat cũng lắng nghe
+  `external_abort_signal` (Core Rule #13) từ hệ này để ngắt trận khẩn
+  cấp giữa chừng — điều kiện gì khiến hệ đó set tín hiệu này thuộc
+  phạm vi `situation-encounter-generation.md`, chưa thiết kế ở đây.
 - **Character Card & Identity** (Presentation, chưa thiết kế) —
   **soft**: sẽ hiển thị "Điểm Chỉ số"/Lực chiến ước tính (Formula D.13)
   trên thẻ nhân vật.
@@ -787,12 +950,16 @@ liệu cụ thể:
 | `P_MIN` / `P_MAX` | 0.05 / 0.95 | 0.01–0.10 / 0.90–0.99 | Sàn/trần xác suất trúng đòn (D.3). Nới rộng khoảng này (P_MIN thấp hơn, P_MAX cao hơn) làm tăng tính "chắc chắn" ở 2 cực — cân nhắc kỹ vì đây là nơi trực tiếp thể hiện triết lý "không có gì tuyệt đối" của game. |
 | `MIN_DMG_MULT` | 0.1 | 0.05–0.2 | Sàn multiplier sát thương cuối sau Khuếch đại/Chống chịu (D.6). Quá thấp → gần như miễn nhiễm sát thương khả thi với Chống chịu cực cao; quá cao → Chống chịu mất tác dụng phòng thủ thực chất. |
 | `K_FLEE` / `P_MIN_FLEE` / `P_MAX_FLEE` | 0.01 / 0.05 / 0.95 | (cùng logic K_HIT/P_MIN/P_MAX) | Xác suất bỏ chạy thành công (D.11) — tune độc lập với trúng/hụt đòn đánh dù cùng công thức hiệu số, vì "né đòn" và "thoát khỏi trận" là 2 quyết định khác bản chất. |
-| `MAX_EXCHANGE_COUNT` | 30 | 15–50 | Trần an toàn số pha/trận (D.12, Edge Case bế tắc). Quá thấp → cắt ngang những trận đấu cân sức hợp lý thành "hòa" sớm, mất cảm giác giằng co thật; quá cao → trận đấu giữa 2 bên quá tanky có thể kéo rất dài trước khi hòa, tốn nhiều lệnh gọi AI (mỗi pha = 1 `narration_call`). |
+| `CONTENT_EXCHANGE_ESTIMATE` | 30 | 15–50 | (Đổi tên từ `MAX_EXCHANGE_COUNT` 2026-08-03) Ước tính THIẾT KẾ số pha điển hình/trận — CHỈ ảnh hưởng `max_invocations_per_battle` qua D.12 (content-authoring), KHÔNG còn là trần runtime. Đổi số này SẼ đổi hằng số LOCKED downstream `max_invocations_per_battle` — cần review lại `equipment-skill-data-system.md` AC-11 nếu chỉnh. |
+| `TECHNICAL_EXCHANGE_CAP` | 200 | 100–500 | (Mới 2026-08-03) Van an toàn KỸ THUẬT thuần túy (D.9c) — không ảnh hưởng nội dung/authoring. Quá thấp → có thể cắt ngang trận đấu cân sức hợp lệ thành tiebreak cưỡng bức (mất "trận giằng co thật"); quá cao → rủi ro cost `narration_call` runaway thực sự nếu bug logic khiến trận không bao giờ tự kết thúc. |
+| `SPAR_PARITY_TOLERANCE` | 0.15 | 0.05–0.25 | (Mới 2026-08-03) Ngưỡng "ngang sức" cho hòa giao hữu (D.9b). Quá thấp → gần như không bao giờ hòa được (chỉ 2 bên gần như y hệt mới đủ điều kiện); quá cao → giao hữu chênh lệch rõ vẫn có thể hòa, làm nhạt "Sức Mạnh Có Logic". |
+| `SPAR_LOW_HP_THRESHOLD` | 0.15 | 0.05–0.25 | (Mới 2026-08-03) Ngưỡng "nguy kịch" cho bên thắng danh nghĩa (D.9b). Quá thấp → hầu như không bao giờ kích hoạt hòa; quá cao → dễ hòa ngay cả khi bên thắng còn khá nhiều HP, làm hòa mất cảm giác "cả 2 kiệt sức thật". |
 | `w_HP`, `w_ATK`, `w_DEF`, `w_SPD`, `w_ACC`, `w_Né`, `w_CR`, `w_CD`, `w_AMP`, `w_MIT`, `w_LSTL`, `w_REGEN` | `w_HP=0.25`, còn lại =1 | ≥0 | Trọng số "Điểm Chỉ số" (D.13) — CHỈ ảnh hưởng con số ước tính hiển thị trước trận, KHÔNG ảnh hưởng thắng/thua thật (Core Rule #7). `w_HP` thấp hơn hẳn vì thang giá trị HP thường lớn hơn nhiều lần các chỉ số khác — placeholder tạm, cần đối chiếu lại khi EXP & Realm Progression định nghĩa đường cong tăng trưởng chỉ số thật (xem Open Questions). |
 
 *(`max_invocations_per_battle=5` KHÔNG phải tuning knob độc lập — là giá
-trị DẪN XUẤT từ `MAX_EXCHANGE_COUNT` và `max_known_skills_per_character`
-đã khóa registry, xem Formula D.12.)*
+trị DẪN XUẤT từ `CONTENT_EXCHANGE_ESTIMATE` (đổi tên từ
+`MAX_EXCHANGE_COUNT` 2026-08-03) và `max_known_skills_per_character` đã
+khóa registry, xem Formula D.12.)*
 
 ## Visual/Audio Requirements
 
@@ -825,10 +992,11 @@ vật kiểu game hành động.
   - `lose` (gồm cả nhánh ngắt sớm D.9): khung "con dấu" chuyển sang viền
     đỏ son mảnh — đây là ranh giới bàn giao cho Death & Consequence:
     Combat chỉ đóng dấu "đã thua", không tự vẽ thêm hệ quả nặng hơn.
-  - `no_outcome` (bỏ chạy thành công HOẶC chạm `MAX_EXCHANGE_COUNT`):
-    khung "con dấu" của CẢ HAI bên mờ dần rồi biến mất, không đóng hoàn
-    chỉnh — tránh người chơi hiểu nhầm 2 trường hợp rất khác nhau này
-    thành "thắng nhẹ".
+  - `no_outcome` (bỏ chạy thành công, hòa giao hữu D.9b, tín hiệu khẩn
+    cấp xen ngang, hoặc chạm `TECHNICAL_EXCHANGE_CAP` trong giao hữu —
+    sửa 2026-08-03): khung "con dấu" của CẢ HAI bên mờ dần rồi biến
+    mất, không đóng hoàn chỉnh — tránh người chơi hiểu nhầm những
+    trường hợp rất khác nhau này thành "thắng nhẹ".
 - **Ngắt sớm (kết liễu giữa pha)**: dùng đúng khung `lose` ở trên nhưng
   đóng dấu NGAY LẬP TỨC, tốc độ nhanh hơn hẳn so với kết thúc trận ở
   cuối pha đủ 2 đòn — khác biệt duy nhất là tốc độ, không phải hiệu ứng
@@ -970,18 +1138,27 @@ phẩm" ở pha 4 cùng trận, THEN hành động đó không khả dụng; res
 *(Logic test.)*
 
 **AC-07** (Rule #7 — Lực chiến/`estimate_ratio` KHÔNG quyết định
-thắng/thua): GIVEN 2 lần gọi `resolve_exchange` với `effective_stat`
-giống hệt nhau nhưng `w_*` (D.13) hoặc `Điểm_Kỹ_Năng`/`Điểm_Trang_Bị`
-khác nhau, WHEN so sánh outcome/HP trả về, THEN kết quả `resolve_exchange`
-giống hệt nhau tuyệt đối — thay đổi trọng số D.13 không làm thay đổi bất
-kỳ output nào của D.2–D.10. *(Logic test, architecture-contract.)*
+thắng/thua, ngoại trừ vai trò eligibility-gate của D.9b): GIVEN 2 lần
+gọi `resolve_exchange` với `effective_stat` giống hệt nhau nhưng `w_*`
+(D.13) hoặc `Điểm_Kỹ_Năng`/`Điểm_Trang_Bị` khác nhau, VÀ
+`is_spar_friendly=false` (loại trừ nhánh D.9b), WHEN so sánh outcome/HP
+trả về, THEN kết quả `resolve_exchange` giống hệt nhau tuyệt đối — thay
+đổi trọng số D.13 không làm thay đổi bất kỳ output nào của D.2–D.10.
+Ai THẮNG (`nominal_winner`) luôn do HP=0 quyết định, không bao giờ do
+Lực chiến — D.9b (khi `is_spar_friendly=true`) chỉ có thể đổi NHÃN kết
+quả đã có (`win`/`lose` → `no_outcome`), không bao giờ đổi AI là
+`nominal_winner`. *(Logic test, architecture-contract; xem AC mới cho
+D.9b ở phần Formulas.)*
 
-**AC-08** (Rule #8 — không có kết quả hòa/null): GIVEN các nhánh kết
-thúc trận có thể xảy ra: HP=0, bỏ chạy thành công, chạm trần
-`MAX_EXCHANGE_COUNT`, WHEN duyệt hết cả 3 nhánh bằng test riêng, THEN
-`outcome` luôn nhận đúng 1 trong 3 giá trị `{"win","lose","no_outcome"}`
-— không bao giờ `null`/`undefined`/hòa. *(Logic test tổng hợp 3 kịch
-bản.)*
+**AC-08** (Rule #8 — không có kết quả hòa/null NGOÀI 4 đường đã định
+nghĩa): GIVEN các nhánh kết thúc trận có thể xảy ra: HP=0 (không
+spar-eligible), bỏ chạy thành công, hòa giao hữu (D.9b), tín hiệu khẩn
+cấp xen ngang, chạm `TECHNICAL_EXCHANGE_CAP` (spar và non-spar), WHEN
+duyệt hết các nhánh bằng test riêng, THEN `outcome` luôn nhận đúng 1
+trong 3 giá trị `{"win","lose","no_outcome"}` — không bao giờ
+`null`/`undefined`; VÀ khi `is_spar_friendly=false`, HP=0 không qua
+D.9b/D.9c-cap-nhánh-spar KHÔNG BAO GIỜ cho ra `no_outcome`. *(Logic
+test tổng hợp nhiều kịch bản.)*
 
 **AC-09** (Rule #11 — `locked_result` đủ field + không rò số ra
 `narration_text`): GIVEN 1 pha đã resolve xong, WHEN kiểm tra
@@ -1105,9 +1282,11 @@ chính xác, không exception. *(Logic test.)*
 tấn công ở pha đó. *(Logic test.)*
 
 **AC-31** (D.12 — dẫn xuất `max_invocations_per_battle` +
-`is_pool_sufficient`): GIVEN `MAX_EXCHANGE_COUNT=30`,
+`is_pool_sufficient`): GIVEN `CONTENT_EXCHANGE_ESTIMATE=30` (đổi tên từ
+`MAX_EXCHANGE_COUNT` 2026-08-03, giá trị không đổi),
 `max_known_skills_per_character=6`, WHEN tính
-`max_invocations_per_battle`, THEN kết quả = `ceil(30/6) = 5` chính xác;
+`max_invocations_per_battle`, THEN kết quả = `ceil(30/6) = 5` chính xác
+(bất biến so với trước sửa đổi);
 VÀ với 1 kỹ năng author ở `min_thuc_per_skill=3` (LOCKED),
 `is_pool_sufficient(skill) = (3>=5) = false` — coi là CẢNH BÁO
 AUTHORING, không phải lỗi chặn build. *(Logic test, arithmetic thuần.)*
@@ -1160,10 +1339,65 @@ test.)*
 WHEN trận kết thúc, THEN `outcome="no_outcome"` (KHÁC `"win"`/`"lose"`),
 `battle_active=false`. *(Logic test.)*
 
-**AC-41** (chạm trần `MAX_EXCHANGE_COUNT`): GIVEN 30 pha đã diễn ra liên
-tiếp mà chưa bên nào HP=0, WHEN pha thứ 30 kết thúc, THEN trận buộc kết
-thúc ngay với `outcome="no_outcome"` cho CẢ HAI bên, bất kể %HP còn lại.
-*(Logic test — xem Open Questions về định nghĩa bộ đếm pha.)*
+**AC-41a** (chạm `TECHNICAL_EXCHANGE_CAP`, KHÔNG spar — bắt buộc
+win/lose qua D.9c): GIVEN `TECHNICAL_EXCHANGE_CAP=200`,
+`is_spar_friendly=false`, 200 pha đã diễn ra liên tiếp mà chưa bên nào
+HP=0, `hp_pct(A)=0.31, hp_pct(B)=0.18`, WHEN pha thứ 200 kết thúc, THEN
+trận buộc kết thúc ngay với `outcome="win"` cho A (`hp_pct` cao hơn) —
+KHÔNG BAO GIỜ `no_outcome` ở nhánh này. *(Logic test.)*
+
+**AC-41b** (chạm `TECHNICAL_EXCHANGE_CAP`, CÓ spar — hòa): GIVEN
+`TECHNICAL_EXCHANGE_CAP=200`, `is_spar_friendly=true`, D.9b chưa từng
+kích hoạt trước đó, 200 pha đã diễn ra mà chưa bên nào HP=0, WHEN pha
+thứ 200 kết thúc, THEN trận buộc kết thúc ngay với `outcome="no_outcome"`
+cho CẢ HAI bên, bất kể %HP còn lại. *(Logic test.)*
+
+**AC-41c** (tiebreak D.9c — biên hp_pct trùng tuyệt đối): GIVEN cùng
+điều kiện AC-41a nhưng `hp_pct(A)=hp_pct(B)=0.20` chính xác, WHEN
+tiebreak chạy, THEN kết quả quyết định bởi `coin_flip(seed=exchange_id)`
+— deterministic, test lại được với cùng seed. *(Logic test, boundary.)*
+
+**AC-41d** (D.9b — hòa giao hữu, ca dương): GIVEN
+`SPAR_PARITY_TOLERANCE=0.15, SPAR_LOW_HP_THRESHOLD=0.15`,
+`is_spar_friendly=true`, `Lực_chiến(A)=310, Lực_chiến(B)=280`
+(`parity_diff≈0.097≤0.15`), A hạ B về 0 ở pha 12 với `hp_pct(A)≈0.082`
+lúc đó, WHEN D.9 gọi D.9b, THEN `outcome="no_outcome"` (KHÔNG phải
+`win=A`). *(Logic test, regression neo số — khớp ví dụ GDD.)*
+
+**AC-41e** (D.9b — ca âm, parity không đủ): GIVEN cùng điều kiện AC-41d
+nhưng `Lực_chiến(A)=400, Lực_chiến(B)=280` (`parity_diff≈0.30>0.15`),
+WHEN D.9b chạy, THEN `outcome="win"` cho A bình thường — KHÔNG hòa dù
+`hp_pct(A)` thấp. *(Logic test, boundary — negative case.)*
+
+**AC-41f** (D.9b — ca âm, HP bên thắng không đủ thấp): GIVEN parity
+thỏa như AC-41d nhưng `hp_pct(A)=0.55` lúc kết luận (>
+`SPAR_LOW_HP_THRESHOLD`), WHEN D.9b chạy, THEN `outcome="win"` cho A
+bình thường dù là giao hữu — KHÔNG hòa chỉ vì context spar.
+*(Logic test, negative case.)*
+
+**AC-41g** (D.9b — boundary cả 2 Lực chiến = 0, KHÔNG eligible): GIVEN
+`is_spar_friendly=true`, `Lực_chiến(A)=Lực_chiến(B)=0`, WHEN tính
+`spar_parity_eligible`, THEN = `false` CỨNG (không tính `parity_diff`
+trivially = 0) — HP=0 sau đó luôn ra `win`/`lose` bình thường, không
+bao giờ hòa qua đường D.9b khi cả 2 chưa có dữ liệu Lực chiến thật.
+*(Logic test, boundary.)*
+
+**AC-41h** (`external_abort_signal` — kiểm tra đầu state Awaiting
+Exchange, D.2–D.10 không chạy): GIVEN `external_abort_signal=
+{requested:true, reason_tag:"canon_event"}` được set TRƯỚC khi Combat
+kiểm tra ở đầu "In Combat — Awaiting Exchange", WHEN lượt đó xử lý,
+THEN `outcome="no_outcome"` ngay lập tức, `battle_active=false`; D.2–D.10
+KHÔNG được gọi (spy đếm=0 cho toàn bộ chuỗi resolve); tín hiệu bị clear
+ngay sau tiêu thụ (đọc lại = `null`). *(unit + spy, provisional-interface
+— nguồn trigger thuộc Situation/Encounter Generation.)*
+
+**AC-41i** (`external_abort_signal` — set GIỮA lúc D.9 đang resolve,
+KHÔNG áp dụng cho pha đang chạy): GIVEN pha N đang resolve
+(`resolve_exchange` đã bắt đầu), signal được set NGAY GIỮA quá trình
+đó (mock timing), WHEN pha N hoàn tất bình thường theo D.9 (không bị
+ngắt atomic), THEN tín hiệu CHỈ được Combat kiểm tra và áp dụng ở ĐẦU
+pha N+1 (nếu `battle_active` vẫn `true` sau pha N) — giữ nguyên tính
+atomic của D.9/Core Rule #2-3. *(unit, provisional-interface.)*
 
 **AC-42** (dùng lại thức đã dùng qua input tự do): GIVEN thức X đã nằm
 trong danh sách "đã dùng trong trận", WHEN người chơi cố chọn thức X qua
@@ -1216,9 +1450,38 @@ cảm không làm thay đổi bất kỳ output nào của `resolve_exchange` kh
 - **Schema `outcome` — đã chốt trong Core Rule #11** (`{type, winner_id,
   loser_id}` thống nhất cho mọi nhánh kết thúc trận) — không còn là open
   question, đóng gap thứ 2 do `qa-lead` phát hiện.
+- **~~Yêu cầu người dùng (2026-08-03, nêu khi đang thiết kế
+  `death-and-consequence.md`): xem lại cơ chế `outcome="no_outcome"`
+  qua `MAX_EXCHANGE_COUNT=30`~~ — đã giải quyết CÙNG NGÀY 2026-08-03**:
+  `MAX_EXCHANGE_COUNT` loại bỏ hoàn toàn vai trò "trần thiết kế → hòa".
+  Core Rule #8 viết lại 4 đường kết thúc trận (a-d); D.9b (hòa giao hữu,
+  eligibility gate Lực chiến trong `spar_friendly` — parity ≤
+  `SPAR_PARITY_TOLERANCE=0.15` AND HP bên thắng ≤
+  `SPAR_LOW_HP_THRESHOLD=0.15`) + D.9c (tiebreak `TECHNICAL_EXCHANGE_CAP=200`
+  KỸ THUẬT thuần, ngoài spar luôn ra win/lose) là 2 formula mới. Core
+  Rule #7 thêm 1 ngoại lệ tường minh (Lực chiến chỉ đổi NHÃN kết quả đã
+  có, không đổi AI thắng). `CONTENT_EXCHANGE_ESTIMATE=30` (đổi tên từ
+  `MAX_EXCHANGE_COUNT`, giá trị KHÔNG đổi) giữ nguyên
+  `max_invocations_per_battle=5` — `equipment-skill-data-system.md`
+  AC-11 không bị ảnh hưởng. AC-07/08/31/41(a-i) cập nhật/thêm mới.
+  **Còn lại CHƯA đóng**: đường (c) "tín hiệu khẩn cấp xen ngang" — Combat
+  chỉ định nghĩa phía LẮNG NGHE (`external_abort_signal`, Core Rule #13,
+  interface provisional); ĐIỀU KIỆN gì khiến Situation/Encounter
+  Generation set tín hiệu này thuộc phạm vi GDD đó, chưa thiết kế.
+  *(Owner: narrative-director + game-designer, target:
+  `/design-system` hoặc chỉnh sửa trực tiếp cho
+  `situation-encounter-generation.md`)*
 - **`max_invocations_per_battle` không có cơ chế enforcement runtime —
   xác nhận đây là ĐÚNG THIẾT KẾ, không phải gap**: hằng số này chỉ phục
   vụ content-authoring (`is_pool_sufficient`), giới hạn thật chặn runtime
   là quy tắc không-lặp-thức (Core Rule #5) đã tự nhiên giới hạn qua
   `thuc_count` của từng kỹ năng. Ghi nhận theo `qa-lead` để tránh nhầm
   lẫn sau này.
+- **Thuật toán dựng chỉ số đối thủ ambient (vô danh, không có `char_id`)
+  chưa có công thức riêng** — Situation/Encounter Generation cấp `level`
+  sinh ra (registry `encounter_level_range`), nhưng cách map `level` đó
+  qua `stat_growth` (EXP & Realm Progression) thành bộ 12 chỉ số đầy đủ
+  của đối thủ (D.1–D.10 input) chưa được Combat hình thức hóa. *(Owner:
+  systems-designer, target: khi vertical slice cần đối thủ ambient thật
+  đầu tiên — không chặn MVP vì NPC/canon có `char_id` dùng level data cố
+  định, không qua path này)*
