@@ -62,7 +62,7 @@ Formulas/Acceptance Criteria bắt buộc spawn specialist ở lean mode.)*
      EXP cấp hiện tại→kế tiếp, vô điều kiện, không cần hành động cụ thể.
    - **Song Tu**: bonus EXP mỗi lượt khi (a) nhân vật sở hữu Tâm Pháp loại
      song-tu VÀ (b) đang trong quan hệ Song Tu active với 1 NPC (nguồn: NPC
-     Affinity & Relationship — **chưa thiết kế, interface provisional**).
+     Affinity & Relationship — **đã Designed, interface provisional**).
 3. **Tâm Pháp** (sở hữu tối thiểu ở GDD này, không thiết kế đầy đủ 1 hệ Tâm
    Pháp riêng): mỗi nhân vật có đúng 1 Tâm Pháp active tại một thời điểm —
    field tối thiểu `tam_phap_id`, `exp_multiplier` (float ≥ 1, mặc định 1.0
@@ -82,8 +82,8 @@ Formulas/Acceptance Criteria bắt buộc spawn specialist ở lean mode.)*
    do bối cảnh/Setting cung cấp — hệ này chỉ định nghĩa cơ chế kiểm tra
    boolean `breakthrough_requirement_met(tier)`, không sở hữu nội dung điều
    kiện (tương tự cách `persistence-save-system.md` coi `turn_snapshot` là
-   opaque blob). Nguồn cụ thể: Setting & Canon Integration — **chưa thiết
-   kế, interface provisional**.
+   opaque blob). Nguồn cụ thể: Setting & Canon Integration — **đã
+   Designed, interface provisional**.
 7. Khi `breakthrough_requirement_met=true` (kiểm tra lại mỗi lượt trong khi
    ở trạng thái Chờ Đột Phá): đột phá xảy ra ngay lập tức trong lượt đó —
    `level +1`, `tier +1`, EXP reset về 0 cho cấp mới (phần "trần" trước đó
@@ -92,7 +92,7 @@ Formulas/Acceptance Criteria bắt buộc spawn specialist ở lean mode.)*
 8. **Rollback** (Turn Manager Core Rule #8): mọi thay đổi `level`/`tier`/EXP/
    trạng thái Chờ Đột Phá do 1 lượt gây ra — kể cả một lần đột phá vừa xảy
    ra trong chính lượt đó — phải hoàn tác được TOÀN BỘ nếu lượt đó bị Undo.
-9. Nếu Death & Consequence (**chưa thiết kế**) đánh dấu nhân vật ở trạng
+9. Nếu Death & Consequence (**đã Designed**) đánh dấu nhân vật ở trạng
    thái "phế đan điền/võ công": hệ này DỪNG toàn bộ tích lũy EXP (cả 4
    nguồn ở Rule 2) cho đến khi trạng thái đó được gỡ. Cơ chế gỡ bỏ (đại cơ
    duyên, tiên thảo dị bảo...) do Death & Consequence sở hữu — hệ này chỉ
@@ -118,20 +118,21 @@ Formulas/Acceptance Criteria bắt buộc spawn specialist ở lean mode.)*
 - **Turn Manager** (upstream, hard) — mọi thay đổi EXP/level/tier chỉ
   "final" khi lượt xác nhận và không undo (Core Rule #8); passive EXP
   trigger mỗi lượt xác nhận.
-- **NPC Affinity & Relationship** (chưa thiết kế, soft/provisional) — cung
+- **NPC Affinity & Relationship** (đã Designed, soft/provisional) — cung
   cấp trạng thái "quan hệ Song Tu active" cho nguồn EXP #4.
-- **Death & Consequence** (chưa thiết kế, soft/provisional) — cung cấp cờ
+- **Death & Consequence** (đã Designed, soft/provisional) — cung cấp cờ
   "phế đan điền/võ công" chặn tích lũy EXP.
-- **Setting & Canon Integration** (chưa thiết kế, soft/provisional) — cung
+- **Setting & Canon Integration** (đã Designed, soft/provisional) — cung
   cấp dữ liệu `breakthrough_requirement` cụ thể theo bối cảnh.
-- **Character Card & Identity** (chưa thiết kế, downstream) — đọc `level`,
+- **Character Card & Identity** (đã Designed, downstream) — đọc `level`,
   `tier` để hiển thị mục "Cấp độ - Bậc".
 - **Situation/Encounter Generation** (Designed 2026-08-03, downstream) —
   đọc `level` để áp dụng ngưỡng chênh lệch 20 cấp (registry
   `hostile_initiative_allowed`/`HOSTILE_INITIATIVE_LEVEL_GAP_MAX=20`) và
   để sinh `level` đối thủ ambient trong khoảng `encounter_level_range`.
 
-*(Nhiều interaction ở trên là provisional vì hệ phụ thuộc chưa thiết kế —
+*(Nhiều interaction ở trên là provisional vì hệ phụ thuộc lúc viết chưa
+thiết kế — nay các hệ đó đã Designed —
 cùng pattern các GDD trước đã dùng, sẽ đối chiếu lại khi các hệ đó được
 thiết kế.)*
 
@@ -370,7 +371,7 @@ resolve_turn_exp(self, turn):
 
 | Variable | Symbol | Type | Range | Description |
 |---|---|---|---|---|
-| Cờ chặn tích lũy | `death_and_consequence_blocked(self)` | bool | {0,1} | Nguồn: Death & Consequence (chưa thiết kế, Core Rule #9) |
+| Cờ chặn tích lũy | `death_and_consequence_blocked(self)` | bool | {0,1} | Nguồn: Death & Consequence (đã Designed, Core Rule #9) |
 | Cờ chết thật | `turn.is_death_turn` | bool | {0,1} | Nguồn: Turn Manager (Core Rule #9 của `turn-manager.md`) — short-circuit TOÀN CỤC thứ 2, độc lập với `death_and_consequence_blocked` |
 | EXP thô combat | `raw_combat` | float | `[0, ∞)` | Từ D.2 (thắng) hoặc D.3 (thua, trừ death turn) hoặc 0 (không có trận nào kết thúc lượt này) |
 | EXP thô thụ động | `raw_passive` | float | `[PASSIVE_EXP_RATE * BASE_EXP_THRESHOLD, ∞)` | `PASSIVE_EXP_RATE=0.01` theo Core Rule #2, luôn > 0 mọi lượt xác nhận |
@@ -460,9 +461,9 @@ số — chờ `breakthrough_requirement_met(tier=2)=true` ở 1 lượt sau đ�
 | Combat System | This depends on Combat | Nhận EXP source events (thắng/thua) qua hand-off Core Rule #12; Combat đọc ngược `tier(C)` (2 chiều) | Hard |
 | Turn Manager | This depends on Turn Manager | Vòng đời xác nhận/undo (Core Rule #7/#8); trigger EXP thụ động mỗi lượt | Hard |
 | NPC Affinity & Relationship (Designed 2026-08-03) | This depends on NPC Affinity | Trạng thái "quan hệ Song Tu active" cho nguồn EXP #4 — interface đã chốt: danh sách NPC ID, EXP đọc boolean derived "khác rỗng", bonus KHÔNG cộng dồn theo số NPC (registry `song_tu_active`) | Soft — thiếu thì mất 1 nguồn EXP phụ, hệ vẫn hoạt động |
-| Death & Consequence (chưa thiết kế) | This depends on Death & Consequence | Cờ "phế đan điền/võ công" chặn tích lũy EXP | Soft — edge interaction, không chặn core loop |
+| Death & Consequence (đã Designed) | This depends on Death & Consequence | Cờ "phế đan điền/võ công" chặn tích lũy EXP | Soft — edge interaction, không chặn core loop |
 | Setting & Canon Integration (Designed 2026-08-03) | This depends on Setting & Canon | Dữ liệu `breakthrough_requirement` cụ thể theo bối cảnh — interface đã chốt: `breakthrough_requirement_met(tier)` (registry), predicate data thuần theo setting pack, thiếu data tier → false cứng + warning "content gap"; thứ tự trong lượt: canon resolve TRƯỚC resolve_turn_exp | **Hard** — thiếu data authoring thì KHÔNG bao giờ đột phá bậc được (dù cấp trong 1 bậc vẫn lên bình thường) |
-| Character Card & Identity (chưa thiết kế) | Character Card depends on this | Đọc `level`, `tier` để hiển thị "Cấp độ - Bậc" | Hard (chiều ngược) |
+| Character Card & Identity (đã Designed) | Character Card depends on this | Đọc `level`, `tier` để hiển thị "Cấp độ - Bậc" | Hard (chiều ngược) |
 | Situation/Encounter Generation (Designed 2026-08-03) | Situation Gen depends on this | Đọc `level` cho ngưỡng chênh lệch 20 cấp (registry `hostile_initiative_allowed`) và cho sinh `level` đối thủ ambient (`encounter_level_range`) | Soft (chiều ngược) — Situation Gen còn hoạt động được mà không cần ngưỡng này ở MVP tối giản |
 
 *(`systems-index.md` hiện chỉ liệt kê Combat System + Turn Manager là
@@ -517,7 +518,7 @@ SONG_TU_EXP_RATE=0.02, PERCENT_STAT_CAP=0.95`) làm fixture — không random.
 phải được **inject** như tham số/mock (dependency injection over
 singleton, theo `coding-standards.md`), KHÔNG gọi Combat/NPC Affinity/
 Setting thật — giữ toàn bộ test suite deterministic dù các hệ phụ thuộc đó
-chưa được thiết kế.
+nay đã Designed (lúc viết chưa thiết kế).
 
 ### Core Rules
 

@@ -81,7 +81,7 @@ chỉ giữ được sức nặng chừng nào con số không bao giờ nói d�
    qua Death & Consequence, hành động Song Tu); (b) **sự kiện xã hội đã
    phân loại** (tặng quà, giúp đỡ, cứu mạng, xúc phạm, phản bội, đe
    dọa...) do Situation/Encounter Generation phân loại từ hành động
-   người chơi (**interface provisional** — hệ đó chưa thiết kế). Hệ này
+   người chơi (**interface provisional** — hệ đó nay đã Designed). Hệ này
    chỉ sở hữu bảng ánh xạ **loại sự kiện → delta cơ bản** (Formulas D.1)
    — không tốn AI call, không vi phạm Khế Ước.
 3. **Hiệu suất giảm dần, không decay**: delta dương giảm hiệu lực khi
@@ -190,7 +190,7 @@ instance):
   sự kiện Hảo cảm (thua/thắng trước NPC, mức độ theo margin). Combat
   không đọc/ghi Hảo cảm (ranh giới đã vẽ ở `combat-system.md` Section D
   đầu mục).
-- **Death & Consequence** (downstream+upstream, chưa thiết kế,
+- **Death & Consequence** (downstream+upstream, đã Designed,
   provisional): ĐỌC cờ thù địch sâu sắc (`affinity ≤ -80`) để quyết
   định nguy cơ chết thật; PHÁT sự kiện "NPC bị giết bởi nhân vật chính"
   (kèm cờ có nhân chứng) để hệ này xử lý lan truyền.
@@ -201,12 +201,12 @@ instance):
 - **World Memory** (upstream, hard): schema field
   `affinity_delta_[npc_id]` khớp quy ước entity_id; hệ này truy vấn
   fact theo `entity_id` khi cần lịch sử tương tác của 1 NPC.
-- **Situation/Encounter Generation** (upstream, chưa thiết kế,
+- **Situation/Encounter Generation** (upstream, đã Designed,
   **provisional**): cung cấp (a) phân loại sự kiện xã hội từ hành động
   người chơi, (b) danh sách NPC trong cảnh (`entities_in_scope`) làm
   danh sách nhân chứng. Cho đến khi hệ đó được thiết kế, MVP có thể
   chạy bằng bảng sự kiện cơ học cứng (nguồn a của Core Rule #2).
-- **Character Card & Identity** (downstream, chưa thiết kế): đọc Hảo
+- **Character Card & Identity** (downstream, đã Designed): đọc Hảo
   cảm (số), dải thái độ, trạng thái nút Song Tu.
 - **Mechanic/Narration Contract Enforcement** (upstream, hard): mọi
   delta khóa trước khi AI tường thuật; AI nhận dải thái độ + hướng thay
@@ -544,10 +544,10 @@ affinity_delta_D: +5}` → `A_after`: A=-17, C=29, D=25 — 3 field trong
 | Mechanic/Narration Contract Enforcement | Hệ này phụ thuộc | Khóa `affinity_delta_[npc_id]` trước narration_call; AI nhận dải thái độ + hướng thay đổi, không nhận số thô | Hard |
 | World Memory & Context Management | Hệ này phụ thuộc | Schema field `affinity_delta_[npc_id]` khớp quy ước entity_id (đóng Open Question "quy ước đặt tên entity_id" của GDD đó cho hệ này); truy vấn fact theo `entity_id` | Hard |
 | Combat System | Hệ này phụ thuộc Combat | Nhận hand-off (`outcome`, `hp_after`/`max_HP` cho `margin_ratio`) khi `battle_active=false` → sự kiện `combat_win/loss_vs_npc` | Hard |
-| Death & Consequence (chưa thiết kế) | 2 chiều | ĐỌC cờ thù địch sâu sắc (`affinity ≤ -80`); PHÁT sự kiện `kill_witnessed` kèm danh sách nhân chứng | Hard (chiều đọc cờ) / Soft (chiều phát kill — thiếu thì mất 1 loại sự kiện) |
+| Death & Consequence (đã Designed) | 2 chiều | ĐỌC cờ thù địch sâu sắc (`affinity ≤ -80`); PHÁT sự kiện `kill_witnessed` kèm danh sách nhân chứng | Hard (chiều đọc cờ) / Soft (chiều phát kill — thiếu thì mất 1 loại sự kiện) |
 | EXP & Realm Progression | EXP phụ thuộc hệ này | `SONG_TU_ACTIVE` = (tập quan hệ active ≠ rỗng); interface trả danh sách NPC ID — đóng Open Question của GDD đó; bonus không cộng dồn; đánh giá theo trạng thái đầu lượt | Soft (chiều ngược — thiếu thì EXP mất nguồn #4, đã khai sẵn bên đó) |
-| Situation/Encounter Generation (chưa thiết kế) | Hệ này phụ thuộc | (a) Phân loại sự kiện xã hội từ hành động tự do; (b) `entities_in_scope` làm danh sách nhân chứng. **Ràng buộc bắt buộc từ thẩm định kinh tế (economy-designer 2026-08-03)**: hệ đó KHÔNG được cung cấp lựa chọn sự kiện tích cực (tặng quà/giúp đỡ) on-demand mọi lượt, và hành động Song Tu nên gate qua bối cảnh tường thuật (địa điểm riêng tư, NPC sẵn lòng) — nếu không, ratchet Hảo cảm chắc chắn xảy ra bất kể fatigue/cap | Soft (MVP chạy được bằng sự kiện cơ học cứng) |
-| Character Card & Identity (chưa thiết kế) | Character Card phụ thuộc hệ này | Đọc Hảo cảm (số), dải thái độ, trạng thái nút Song Tu (5 state) | Hard (chiều ngược) |
+| Situation/Encounter Generation (đã Designed) | Hệ này phụ thuộc | (a) Phân loại sự kiện xã hội từ hành động tự do; (b) `entities_in_scope` làm danh sách nhân chứng. **Ràng buộc bắt buộc từ thẩm định kinh tế (economy-designer 2026-08-03)**: hệ đó KHÔNG được cung cấp lựa chọn sự kiện tích cực (tặng quà/giúp đỡ) on-demand mọi lượt, và hành động Song Tu nên gate qua bối cảnh tường thuật (địa điểm riêng tư, NPC sẵn lòng) — nếu không, ratchet Hảo cảm chắc chắn xảy ra bất kể fatigue/cap | Soft (MVP chạy được bằng sự kiện cơ học cứng) |
+| Character Card & Identity (đã Designed) | Character Card phụ thuộc hệ này | Đọc Hảo cảm (số), dải thái độ, trạng thái nút Song Tu (5 state) | Hard (chiều ngược) |
 | Persistence/Save System | Persistence phụ thuộc hệ này | Serialize: bảng affinity per NPC, tập quan hệ Song Tu active, streak trackers (D.3), `link_strength` graph — nằm trong `turn_snapshot` theo Core Rule #8 của Turn Manager | Hard (chiều ngược) |
 
 *(Ghi chú đối chiếu ngược: `systems-index.md` hiện ghi "Depends On: Turn
@@ -599,7 +599,7 @@ chết — thuộc khẩu phần màu đỏ son, quyết định cụ thể ở 
 ## UI Requirements
 
 Hệ này không sở hữu màn hình riêng, nhưng định nghĩa 3 hành vi UI mà
-Character Card & Identity (chưa thiết kế) BẮT BUỘC tôn trọng:
+Character Card & Identity (đã Designed) BẮT BUỘC tôn trọng:
 
 1. **Nút Song Tu** trên thẻ NPC: hiển thị/ẩn đúng theo bảng 5 trạng thái
    ở Section C (Locked/Available/Active/Broken/Ended — cột "Nút Song

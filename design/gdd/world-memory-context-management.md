@@ -106,7 +106,7 @@ cảnh đã rơi khỏi cửa sổ token từ lâu.
    tầng lưu trữ vật lý"**: Nhật ký đầy đủ có thể được nén ở tầng lưu trữ
    (gzip-style, không mất thông tin) để tiết kiệm dung lượng trình
    duyệt/mobile quota — đây là quyết định của Persistence/Save System (hệ
-   #6, chưa thiết kế), KHÔNG thuộc phạm vi GDD này. GDD này chỉ đảm bảo
+   #6, đã Designed), KHÔNG thuộc phạm vi GDD này. GDD này chỉ đảm bảo
    NỘI DUNG logic không bao giờ bị tóm tắt/mất mát ở tầng Nhật ký đầy đủ.
 7. **Không có state machine riêng**: giống Contract Enforcement/Equipment
    Data System, đây là một kho dữ liệu + tập quy tắc trích xuất, không
@@ -138,13 +138,13 @@ Không có state machine — thay vào đó là bảng các thao tác (operation
   2 (dựng prompt) của cả `narration_call` và `suggestion_call` — đây
   chính là "ngữ cảnh World Memory" mà GDD đó đã tham chiếu.
 - **NPC Affinity & Relationship, Setting & Canon Integration** (Designed
-  2026-08-03) và **Situation/Encounter Generation** (chưa thiết kế):
+  2026-08-03) và **Situation/Encounter Generation** (đã Designed):
   truy vấn Sự kiện đã trích xuất theo entity_id — giao diện truy vấn đã
   cố định ở GDD này và 2 hệ đầu đã tiêu thụ đúng như khai (field
   `affinity_delta_[npc_id]`, `canon_*`); Setting & Canon còn cung cấp
   `canon_importance_tier` cho khe cắm key của Công thức #3 (xem ghi chú
   registry `entity_fact_selection`).
-- **Persistence/Save System** (chưa thiết kế): sẽ đọc/ghi cả Nhật ký đầy
+- **Persistence/Save System** (đã Designed): sẽ đọc/ghi cả Nhật ký đầy
   đủ lẫn Khung ngữ cảnh AI khi save/load; quyết định nén-lưu-trữ vật lý
   (Core Rule #6) thuộc phạm vi GDD đó.
 
@@ -246,7 +246,8 @@ playthrough dài. Đây là công thức tách biệt với `recency_window_turn
 đưa vào 1 prompt — hai cơ chế nén độc lập, cộng dồn tác dụng ở Công thức
 #4. Chiến lược sắp xếp mặc định là **theo độ mới (recency)**, không theo
 độ lớn ảnh hưởng — vì Setting & Canon Integration (hệ chấm điểm "tầm quan
-trọng" của 1 sự kiện) chưa được thiết kế; đây là lựa chọn MVP có chủ đích,
+trọng" của 1 sự kiện) lúc viết chưa được thiết kế (nay đã Designed); đây
+là lựa chọn MVP có chủ đích,
 để ngỏ khả năng thay bằng `key = importance_score` sau này mà không đổi
 cấu trúc công thức.
 
@@ -320,8 +321,8 @@ không bao giờ vượt quá **~2230 token** — hằng số này không đổi
 - Số NPC THỰC TẾ trong game vượt xa `max_entities_per_prompt` (VD: 50 NPC
   đã từng xuất hiện, nhưng 1 cảnh chỉ có 3 NPC): `entities_in_scope` chỉ
   lấy 3 NPC có mặt + "global" = 4, KHÔNG lấy cả 50 — việc "NPC nào có mặt
-  trong cảnh" là trách nhiệm của Situation/Encounter Generation (chưa
-  thiết kế), GDD này chỉ tiêu thụ danh sách đó, không tự quyết định.
+  trong cảnh" là trách nhiệm của Situation/Encounter Generation (đã
+  Designed), GDD này chỉ tiêu thụ danh sách đó, không tự quyết định.
 
 ## Edge Cases
 
@@ -335,7 +336,7 @@ không bao giờ vượt quá **~2230 token** — hằng số này không đổi
   đồng bộ, không cần đồng bộ hóa thủ công.
 - **Khung ngữ cảnh AI hoàn toàn có thể tái tạo lại từ Nhật ký đầy đủ**: vì
   Công thức #1-#2 là hàm xác định (deterministic) trên dữ liệu của Nhật
-  ký đầy đủ, Persistence/Save System (chưa thiết kế) có thể chọn KHÔNG
+  ký đầy đủ, Persistence/Save System (đã Designed) có thể chọn KHÔNG
   serialize riêng Khung ngữ cảnh AI — chỉ cần lưu Nhật ký đầy đủ và tái
   tạo lại Khung ngữ cảnh khi load, hoặc lưu như một cache tùy chọn để
   tăng tốc — quyết định thuộc GDD đó, không phải ràng buộc bắt buộc của
@@ -389,9 +390,9 @@ không bao giờ vượt quá **~2230 token** — hằng số này không đổi
 - **NPC Affinity & Relationship, Setting & Canon Integration**
   (Feature/Narrative, Designed 2026-08-03) — đã tiêu thụ giao diện truy
   vấn fact theo `entity_id` (Core Rule #4) đúng như khai; **Situation/
-  Encounter Generation** (Narrative, chưa thiết kế) — sẽ truy vấn khi
+  Encounter Generation** (Narrative, đã Designed) — sẽ truy vấn khi
   được thiết kế.
-- **Persistence/Save System** (Core, chưa thiết kế) — đọc/ghi Nhật ký đầy
+- **Persistence/Save System** (Core, đã Designed) — đọc/ghi Nhật ký đầy
   đủ (bắt buộc) và có thể tùy chọn cache Khung ngữ cảnh AI (không bắt
   buộc, xem Edge Cases) khi save/load.
 

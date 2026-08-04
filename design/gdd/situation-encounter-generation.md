@@ -165,7 +165,7 @@ người chơi.
 | Setting & Canon (#10) | 2 chiều hard | NHẬN event Due/Resolved + `canon_outcome` → dựng cảnh; CUNG CẤP `canon_role_rescue` + `location(X)` (đóng 2 interface provisional bên đó) |
 | EXP (#8) | upstream soft | Đọc `level` thô cho ngưỡng 20 cấp (hệ này sở hữu logic ngưỡng) |
 | Combat (#7) | downstream | `combat_challenge(target, spar_friendly)` khởi tạo trận; cảnh cung cấp đối thủ/nhân chứng |
-| Death & Consequence (#12, chưa thiết kế) | 2 chiều provisional | Nhận thông tin chết để cập nhật presence/cảnh; witness list cho `kill_witnessed` |
+| Death & Consequence (#12, đã Designed) | 2 chiều provisional | Nhận thông tin chết để cập nhật presence/cảnh; witness list cho `kill_witnessed` |
 | Contract Enforcement (#2) | upstream hard | Mọi field của hệ này khóa trước narration; `rp_only` = không field nào được ghi |
 | Persistence (#6) | downstream (chiều ngược) | Serialize: scene, presence, cooldowns, `provoked_*`, trạng thái hook — trong `turn_snapshot` |
 | Core UI (#15, chưa thiết kế) | downstream | Render chip intent theo menu; header cảnh (location) |
@@ -640,9 +640,9 @@ player_level + AMBIENT_HOSTILE_LEVEL_CAP]` với cap ≤ 20 luôn đúng.
 | Setting & Canon Integration (Designed) | 2 chiều | NHẬN event Due/Resolved + `canon_outcome` (hook ưu tiên 1, D.4); CUNG CẤP `canon_role_rescue` (envelope) + `location(X)` (đồ thị location + presence — đóng 2 interface provisional/Open Questions của GDD đó) | Hard (2 chiều) |
 | EXP & Realm Progression (Designed) | Hệ này phụ thuộc | Đọc `level` thô cho D.2/D.7 — hệ này sở hữu logic ngưỡng 20 cấp (khớp AC-17 GDD đó) | Soft (thiếu thì D.2 mặc định cho phép, D.7 không scale) |
 | Combat System (Designed) | Combat phụ thuộc hệ này | `combat_challenge(target, spar_friendly)` khởi tạo trận; D.7 cung cấp level đối thủ ambient (input cho `stat_growth` sinh chỉ số) | Soft (chiều ngược — Combat vẫn chạy khi trận đến từ nguồn khác) |
-| Death & Consequence (chưa thiết kế) | 2 chiều, provisional | NHẬN thông tin chết → cập nhật presence + dọn `provoked_flag`; CUNG CẤP witness list (`entities_in_scope`) cho `kill_witnessed` | Hard khi được thiết kế |
+| Death & Consequence (đã Designed) | 2 chiều, provisional | NHẬN thông tin chết → cập nhật presence + dọn `provoked_flag`; CUNG CẤP witness list (`entities_in_scope`) cho `kill_witnessed` | Hard (hệ đó đã Designed) |
 | Persistence/Save System (Designed) | Persistence phụ thuộc hệ này | Serialize trong `turn_snapshot`: scene, presence, `last_used` cooldowns, `provoked_*`, `npc_last_initiated[hostile/friendly]` (2 tracker/NPC), lịch sử hook cửa sổ D.5 | Hard (chiều ngược) |
-| Character Card & Identity (chưa thiết kế) | Card phụ thuộc hệ này | Đọc `location` hiện tại (hiển thị hồ sơ/bối cảnh) — interface nhỏ | Soft (chiều ngược) |
+| Character Card & Identity (đã Designed) | Card phụ thuộc hệ này | Đọc `location` hiện tại (hiển thị hồ sơ/bối cảnh) — interface nhỏ | Soft (chiều ngược) |
 | Core UI/Screen Navigation (chưa thiết kế) | UI phụ thuộc hệ này | Render chip intent theo menu; header cảnh (location); nudge heuristic client | Hard (chiều ngược) |
 
 *(Ghi chú đối chiếu ngược: `systems-index.md` hiện ghi "Depends On: AI
@@ -819,7 +819,7 @@ NPC_INITIATED_WINDOW_TURNS=3, NPC_INITIATED_WINDOW_CAP=1,
 AMBIENT_LEVEL_BAND_DOWN=15, AMBIENT_HOSTILE_LEVEL_CAP=15`) cùng hằng số
 khóa (`HOSTILE_INITIATIVE_LEVEL_GAP_MAX=20, MAX_NPC_PER_SCENE=3,
 song_tu_threshold=60`). RNG (D.7) phải inject được (seeded stub) để test
-deterministic. AC dùng interface Death & Consequence (chưa thiết kế)
+deterministic. AC dùng interface Death & Consequence (đã Designed)
 đánh dấu **provisional-interface**, rà lại khi hệ đó được thiết kế.
 
 ### Core Rules

@@ -373,7 +373,7 @@ H.)*
 | Setting & Canon Integration (Designed) | Setting & Canon phụ thuộc hệ này | CUNG CẤP `alive(X)` + `death_flag_[char_id]` — đóng interface provisional bên đó, hệ này resolve TRƯỚC trong cùng lượt | Hard (chiều ngược) |
 | EXP & Realm Progression (Designed) | EXP phụ thuộc hệ này | CUNG CẤP `death_and_consequence_blocked(self)` — đúng tên provisional GDD đó đã dùng | Soft (chiều ngược) — thiếu thì EXP không bị chặn, hệ vẫn hoạt động |
 | Situation/Encounter Generation (Designed) | 2 chiều | PHÁT thông tin chết để hệ đó dọn presence/`provoked_flag`; NHẬN witness list (`entities_in_scope`) cho `kill_witnessed` | Hard |
-| Character Continuation (chưa thiết kế, hệ #13) | Character Continuation phụ thuộc hệ này | Bàn giao tín hiệu `death_confirmed` khi chết thật — hệ này KHÔNG tự xử lý Quỷ tu/Chuyển sinh/Chơi lại | Hard (chiều ngược) |
+| Character Continuation (đã Designed, hệ #13) | Character Continuation phụ thuộc hệ này | Bàn giao tín hiệu `death_confirmed` khi chết thật — hệ này KHÔNG tự xử lý Quỷ tu/Chuyển sinh/Chơi lại | Hard (chiều ngược) |
 | Equipment & Skill Data System (Approved) | Hệ này phụ thuộc (mềm) | Đọc field `efficacy` trên item cho `recovery_attempt` nhánh tiên thảo dị bảo — field này CHƯA tồn tại trên schema hiện tại (xem Open Questions) | Soft |
 
 *(`systems-index.md` hiện chỉ liệt kê Combat System + NPC Affinity là
@@ -471,7 +471,7 @@ trị default ở Tuning Knobs làm fixture, cùng hằng số khóa
 theo nhánh — Nhánh A dùng của **đối thủ** (người thắng), Nhánh B "Tha
 mạng" dùng của **nhân vật chính** (người thắng) — mọi fixture phải ghi
 rõ chủ thể để tránh nhầm lẫn khi viết test. Các AC dùng interface
-provisional (Character Continuation — chưa thiết kế; Equipment & Skill
+provisional (Character Continuation — đã Designed; Equipment & Skill
 Data — `efficacy` chưa có schema) đánh dấu "provisional-interface", rà
 lại khi hệ nguồn được thiết kế/bổ sung field.
 
@@ -742,7 +742,7 @@ GIVEN nhân vật chính CŨ chết thật trong khi
 của `char_id` MỚI lần đầu, THEN `alive=true`,
 `death_and_consequence_blocked=false` (lazy-init, khớp AC-13/AC-15) —
 KHÔNG có đường đọc nào trả về giá trị của `char_id` CŨ. *(unit,
-provisional-interface — Character Continuation chưa thiết kế)*
+provisional-interface — Character Continuation đã Designed)*
 
 **AC-37** (Edge Case #9 — NPC Song Tu active bị Kết liễu, không cần
 logic riêng): GIVEN NPC đang có quan hệ Song Tu active (mock trạng thái

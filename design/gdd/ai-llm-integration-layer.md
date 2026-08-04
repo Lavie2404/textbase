@@ -165,7 +165,7 @@ riêng) — mỗi lệnh gọi có một vòng đời độc lập:
   phong cách thi triển thức) được tầng này chèn vào prompt của
   `narration_call` khi trận đấu liên quan — đây là context data, không
   phải `locked_result`, không chịu Checkpoint 1.
-- **Combat System, Situation/Encounter Generation** (chưa thiết kế): sẽ
+- **Combat System, Situation/Encounter Generation** (đã Designed): sẽ
   gọi qua cùng wrapper này khi được thiết kế — hợp đồng giao diện (2 loại
   call_type, format input/output) đã cố định ở GDD này, các hệ đó chỉ cần
   cung cấp đúng `locked_result`/tình huống theo đúng call_type phù hợp.
@@ -361,10 +361,10 @@ ra (AI trả về <4 gợi ý ở lần gọi đầu), `calls_per_turn = 3` — 
   payload)` tối đa 3 lần/lượt; nhận về text (narration) hoặc JSON 4 gợi ý
   (suggestion), hoặc tín hiệu Failed để kích hoạt Edge Case "lệnh gọi AI
   thất bại" của chính nó.
-- **Combat System** (Feature, chưa thiết kế) — sẽ gọi `narration_call` với
+- **Combat System** (Feature, đã Designed) — sẽ gọi `narration_call` với
   `locked_result` chiến đấu + `style_descriptor` (từ Equipment & Skill
   Data System) khi được thiết kế.
-- **Situation/Encounter Generation** (Feature, chưa thiết kế) — sẽ gọi
+- **Situation/Encounter Generation** (Feature, đã Designed) — sẽ gọi
   `suggestion_call`/tạo tình huống mở qua cùng wrapper khi được thiết kế.
 
 *(Phát hiện tương tự đã gặp 2 lần trước, cùng dạng với cạnh Turn Manager ↔

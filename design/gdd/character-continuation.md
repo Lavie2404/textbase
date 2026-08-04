@@ -134,7 +134,7 @@ chỉ có cách viết tiếp.
 - **Equipment & Skill Data System** (soft) — nhân vật mới khởi tạo
   `known_skill_ids`/`equipped_weapon_id` về loadout khởi điểm mẫu
   chuẩn MVP (Core Rule #6).
-- **Character Card & Identity** (downstream, soft, chưa thiết kế) — sẽ
+- **Character Card & Identity** (downstream, soft, đã Designed) — sẽ
   hiển thị màn hình 3 lối tiếp tục (UI component).
 
 ## Formulas
@@ -272,7 +272,7 @@ H.)*
 | NPC Affinity & Relationship (Designed) | Hệ này phụ thuộc (mềm) | Reset Hảo cảm mọi NPC về preset mặc định setting pack | Soft |
 | EXP & Realm Progression (Designed) | Hệ này phụ thuộc (mềm) | Khởi tạo `level=1`, `EXP=0` cho nhân vật mới | Soft |
 | Equipment & Skill Data System (Approved) | Hệ này phụ thuộc (mềm) | Khởi tạo `known_skill_ids`/`equipped_weapon_id` về loadout khởi điểm mẫu chuẩn MVP | Soft |
-| Character Card & Identity (chưa thiết kế, hệ #14) | Card phụ thuộc hệ này | Hiển thị màn hình 3 lối tiếp tục (UI component) | Hard (chiều ngược) |
+| Character Card & Identity (đã Designed, hệ #14) | Card phụ thuộc hệ này | Hiển thị màn hình 3 lối tiếp tục (UI component) | Hard (chiều ngược) |
 
 ## Tuning Knobs
 

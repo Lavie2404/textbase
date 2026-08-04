@@ -429,11 +429,11 @@ liệu cụ thể:
 - **Equipment & Skill Data System** (Foundation, Approved) — **hard**:
   blob đối chứa `known_skill_ids`, trang bị sở hữu/đang mặc.
 - **NPC Affinity & Relationship, Combat System, EXP & Realm Progression,
-  Death & Consequence, Setting & Canon Integration** (chưa thiết kế) —
-  **hard khi được thiết kế**: mỗi hệ sẽ đăng ký blob riêng qua interface
+  Death & Consequence, Setting & Canon Integration** (đã Designed) —
+  **hard (hệ đó đã Designed)**: mỗi hệ sẽ đăng ký blob riêng qua interface
   mở của Persistence (Core Rule #2); tới khi đó Công thức #2 (`N` = số hệ
   đã đăng ký) không tính các hệ này.
-- **Death & Consequence** (chưa thiết kế) — **hard khi được thiết kế**:
+- **Death & Consequence** (đã Designed) — **hard (hệ đó đã Designed)**:
   kích hoạt trực tiếp thao tác "Khóa slot" + "Tạo slot mới" (Core Rule
   #5-6).
 - **Core UI/Screen Navigation** (chưa thiết kế) — **soft**: cung cấp màn

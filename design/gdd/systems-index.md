@@ -2,7 +2,7 @@
 
 > **Status**: Draft
 > **Created**: 2026-08-01
-> **Last Updated**: 2026-08-03
+> **Last Updated**: 2026-08-04
 > **Source Concept**: design/gdd/game-concept.md
 
 ---
@@ -40,8 +40,8 @@ verdict PROCEED).
 | 11 | Situation/Encounter Generation (inferred) | Narrative | MVP | Designed | [situation-encounter-generation.md](situation-encounter-generation.md) | AI Integration Layer, Turn Manager, World Memory |
 | 12 | Death & Consequence | Gameplay | MVP | Designed | [death-and-consequence.md](death-and-consequence.md) | Combat System, NPC Affinity |
 | 13 | Character Continuation (inferred) | Gameplay | MVP | Designed | [character-continuation.md](character-continuation.md) | Death & Consequence |
-| 14 | Character Card & Identity | UI | MVP | Not Started | — | Equipment & Skill Data, NPC Affinity, Setting & Canon Integration |
-| 15 | Core UI/Screen Navigation (inferred) | UI | MVP | Not Started | — | Combat System, Character Card, Situation Generation |
+| 14 | Character Card & Identity | UI | MVP | Designed | [character-card-identity.md](character-card-identity.md) | Equipment & Skill Data, NPC Affinity, Setting & Canon Integration |
+| 15 | Core UI/Screen Navigation (inferred) | UI | MVP | Designed | [core-ui-screen-navigation.md](core-ui-screen-navigation.md) | Combat System, Character Card, Situation Generation |
 
 ---
 
@@ -235,7 +235,48 @@ nhận ở đây làm nguồn tham chiếu chính thức, gap thứ 12 cùng pat
 ### Presentation Layer (depends on features)
 
 1. **Character Card & Identity** — depends on: Equipment & Skill Data, NPC Affinity, Setting & Canon Integration (quy tắc cải trang/xuyên không)
+
+*(Phát hiện từ `/design-system` hệ #14, 2026-08-04, cùng dạng các ghi
+chú trên: `character-card-identity.md` (Designed) có các phụ thuộc chưa
+liệt kê tường minh ở Systems Enumeration (hàng hệ #14 giữ "Depends On:
+Equipment & Skill Data, NPC Affinity, Setting & Canon Integration" theo
+phạm vi phụ thuộc cứng chính) — (a) **Turn Manager** (hard 2 chiều: nút
+Song Tu/Hồi phục gửi action qua đường chuẩn, đọc trạng thái khóa input +
+undo cho `card_exists` D.1), (b) **World Memory** (hard: entity record là
+nguồn `card_exists` + storage instance hồ sơ/`base_X0`/`npc_tag`/
+`concealment`), (c) **Combat System** (hard 2 chiều: đọc
+`combat_power_estimate`/khối giao đấu; cung cấp `base_X(C)` thật cho D.1
+Combat), (d) **Death & Consequence** (hard 2 chiều: đọc `alive`/
+`blocked`/`pending_fate`; cung cấp schema `npc_tag.medium_override` —
+đóng Open Question bên đó), (e) **EXP & Realm Progression** (hard 2
+chiều: đọc `level`/`tier`/`stat_growth`/`exp_threshold`; cung cấp
+`base_X0` — đóng ownership hand-off bên đó), (f) **Character
+Continuation** (hard: render màn hình 3 lối), (g) **Mechanic/Narration
+Contract Enforcement** (hard: Card là bề mặt số liệu hợp lệ duy nhất —
+mặt ngược Core Rule #4 bên đó), (h) Situation Gen (soft: `location`;
+nhận bàn giao Open Question cơ chế điều tra lộ `concealment`). Ghi nhận
+ở đây làm nguồn tham chiếu chính thức, gap thứ 13 cùng pattern.)*
 2. **Core UI/Screen Navigation** — depends on: Combat System, Character Card, Situation/Encounter Generation
+
+*(Phát hiện từ `/design-system` hệ #15, 2026-08-04, cùng dạng các ghi
+chú trên: `core-ui-screen-navigation.md` (Designed) có các phụ thuộc
+chưa liệt kê tường minh ở Systems Enumeration (hàng hệ #15 giữ "Depends
+On: Combat System, Character Card, Situation Generation" theo phạm vi
+phụ thuộc cứng chính) — (a) **Turn Manager** (hard 2 chiều: đọc
+`tm_state`/`undo_available` cho D.1/D.2, gửi action/Undo qua đường
+chuẩn), (b) **Mechanic/Narration Contract Enforcement** (hard: hệ #15
+là mặt thực thi hiển thị của Core Rule #4 bên đó), (c) **World Memory**
+(hard: API phân trang `(anchor_turn_id, count, direction)` cho Story
+Log — interface yêu cầu mới, xem Open Question #7 GDD hệ #15), (d)
+**Combat System** (hard, ràng buộc kiến trúc: Combat không bao giờ tự
+kích hoạt chuyển màn hình — bên đó chỉ mô tả bằng văn UI Requirements,
+chưa có row Dependencies), (e) **Character Continuation** (hard: đọc
+`continuation_choice_eligible` kích takeover màn 3 lối + cờ
+`reset_in_progress` — cờ này GDD #13 chưa định nghĩa tường minh, xem
+Open Question #8 GDD hệ #15). Gap thứ 14 cùng pattern. Hệ #15 cũng
+ĐÓNG 3 interface chiều ngược đã khai sẵn: #6 Persistence (row soft),
+#11 Situation Gen (row downstream), #14 Character Card (Hard
+provisional). Ghi nhận ở đây làm nguồn tham chiếu chính thức.)*
 
 ### Polish Layer (depends on everything)
 
@@ -293,10 +334,10 @@ nhận ở đây làm nguồn tham chiếu chính thức, gap thứ 12 cùng pat
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 15 |
-| Design docs started | 13 |
+| Design docs started | 15 |
 | Design docs reviewed | 3 |
 | Design docs approved | 3 |
-| MVP systems designed | 13/15 |
+| MVP systems designed | 15/15 |
 | Vertical Slice systems designed | 0/0 |
 
 ---

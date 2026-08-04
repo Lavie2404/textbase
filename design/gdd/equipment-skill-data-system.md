@@ -104,19 +104,19 @@ Ràng buộc toàn vẹn: không được tồn tại 1 Thức không có Kỹ n
 
 ### Interactions with Other Systems
 
-- **Combat System** (Feature, chưa thiết kế): đọc dữ liệu vũ khí/kỹ
+- **Combat System** (Feature, đã Designed): đọc dữ liệu vũ khí/kỹ
   năng/thức để tính Lực chiến (Điểm Trang bị + Điểm Kỹ năng, theo Core
   Mechanics #2 của `game-concept.md`) và chọn thức khi tường thuật;
   triển khai runtime rule "không lặp thức trong 1 trận" dựa trên ID ổn
   định hệ này cung cấp.
-- **Character Card & Identity** (Presentation, chưa thiết kế): đọc
+- **Character Card & Identity** (Presentation, đã Designed): đọc
   `equipped_weapon` + `known_skill_ids` để hiển thị trên thẻ nhân vật.
 - **Mechanic/Narration Contract Enforcement** (Foundation, đã Designed):
   `style_descriptor` là dữ liệu ngữ cảnh (context) được đưa vào prompt
   qua wrapper — KHÔNG phải `locked_result` cơ học, nên nằm NGOÀI phạm vi
   leak-detection (Formula 1 của hệ đó chỉ áp dụng cho số liệu cơ học đã
   khóa, không áp dụng cho text mô tả phong cách).
-- **EXP & Realm Progression** (Feature, chưa thiết kế): ý nghĩa đầy đủ
+- **EXP & Realm Progression** (Feature, đã Designed): ý nghĩa đầy đủ
   của trường `tier` (bậc) — hệ này chỉ lưu số nguyên, không định nghĩa ý
   nghĩa/công thức. Không phải phụ thuộc bắt buộc (hệ này hoạt động độc
   lập với 1 số nguyên đơn giản), nhưng cần đối chiếu khi EXP GDD được
@@ -213,11 +213,11 @@ hệ thống Foundation, zero dependencies (khớp `systems-index.md`).
 **Các hệ thống phụ thuộc vào Equipment & Skill Data System** (downstream),
 kèm giao diện dữ liệu cụ thể:
 
-- **Combat System** (Feature, chưa thiết kế) — đọc `weapon.tier`,
+- **Combat System** (Feature, đã Designed) — đọc `weapon.tier`,
   `skill.tier`, `skill.style_descriptor`, danh sách `thức` (kèm
   `thuc_id` duy nhất) để tính Lực chiến và chọn thức khi tường thuật; đọc
   `is_pool_sufficient` làm tín hiệu QA khi author nội dung kỹ năng mới.
-- **Character Card & Identity** (Presentation, chưa thiết kế) — đọc
+- **Character Card & Identity** (Presentation, đã Designed) — đọc
   `equipped_weapon_id` + `known_skill_ids` của 1 Character để hiển thị
   trên thẻ nhân vật.
 

@@ -125,12 +125,12 @@ Turn Manager (2 lần/lượt bình thường, tối đa 3 nếu có retry gợi
 - **Turn Manager**: Core Rule #4/#8 của Turn Manager định nghĩa THỜI ĐIỂM
   khóa — hệ thống này định nghĩa CƠ CHẾ enforcement. Turn Manager gọi vào
   pipeline này ở mọi lời gọi AI của nó.
-- **AI/LLM Integration Layer** (chưa thiết kế): phải triển khai interface
+- **AI/LLM Integration Layer** (đã Designed): phải triển khai interface
   wrapper mà Core Rule #5-6 yêu cầu — ràng buộc BẮT BUỘC cho GDD đó, không
   phải gợi ý.
 - **Combat, EXP & Realm Progression, NPC Affinity & Relationship, Death &
-  Consequence, Situation/Encounter Generation** (Feature layer, chưa thiết
-  kế): mỗi hệ phải (a) tự tính và khóa kết quả trước, (b) gọi wrapper
+  Consequence, Situation/Encounter Generation** (Feature layer, đã
+  Designed): mỗi hệ phải (a) tự tính và khóa kết quả trước, (b) gọi wrapper
   chung thay vì gọi AI trực tiếp, (c) không bao giờ đọc lại text AI trả về
   để suy ra trạng thái.
 - **World Memory & Context Management**: cung cấp ngữ cảnh lịch sử cho
@@ -266,14 +266,14 @@ lập.
   trước, AI chỉ kể). `systems-index.md` hiện CHƯA liệt kê cạnh phụ thuộc
   này tường minh trong Dependency Map — đây là phụ thuộc một chiều cần
   sửa (xem Open Questions).
-- **AI/LLM Integration Layer** (Core, chưa thiết kế) — phải triển khai
+- **AI/LLM Integration Layer** (Core, đã Designed) — phải triển khai
   interface wrapper theo Core Rule #5-6; đây là ràng buộc bắt buộc, không
   phải gợi ý.
 - **Combat System, EXP & Realm Progression, NPC Affinity & Relationship,
-  Death & Consequence, Situation/Encounter Generation** (Feature, chưa
-  thiết kế) — mỗi hệ phải: tự khóa kết quả trước, gọi qua wrapper thay vì
+  Death & Consequence, Situation/Encounter Generation** (Feature, đã
+  Designed) — mỗi hệ phải: tự khóa kết quả trước, gọi qua wrapper thay vì
   gọi AI trực tiếp, không đọc lại narration_text để suy ra trạng thái.
-- **World Memory & Context Management** (Core, chưa thiết kế) — lưu
+- **World Memory & Context Management** (Core, đã Designed) — lưu
   `locked_result` + `narration_text` đã qua enforcement pipeline; không
   lưu bất kỳ suy luận nào rút ra từ `narration_text`.
 

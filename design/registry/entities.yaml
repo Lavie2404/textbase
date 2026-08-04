@@ -236,6 +236,7 @@ formulas:
       - design/gdd/turn-manager.md
       - design/gdd/world-memory-context-management.md
       - design/gdd/death-and-consequence.md
+      - design/gdd/core-ui-screen-navigation.md
     variables:
       - turn_id
       - last_confirmed_turn_id
@@ -355,6 +356,7 @@ formulas:
     source: design/gdd/combat-system.md
     referenced_by:
       - design/gdd/combat-system.md
+      - design/gdd/character-card-identity.md
     variables:
       - HP
       - ATK
@@ -390,6 +392,7 @@ formulas:
     referenced_by:
       - design/gdd/exp-realm-progression.md
       - design/gdd/combat-system.md
+      - design/gdd/character-card-identity.md
     variables:
       - level
     output_range: [1, null]
@@ -406,6 +409,7 @@ formulas:
     source: design/gdd/exp-realm-progression.md
     referenced_by:
       - design/gdd/exp-realm-progression.md
+      - design/gdd/character-card-identity.md
     variables:
       - level
       - BASE_EXP_THRESHOLD
@@ -418,7 +422,9 @@ formulas:
       chung cho combat_loss_exp, song_tu_exp_bonus, và nguồn EXP thụ động
       (đóng Open Question 'multi-source EXP cùng lượt' của game-concept.md).
       Đăng ký sớm vì Character Card & Identity và Persistence (cả 2 chưa
-      thiết kế) nhiều khả năng cần hiển thị 'còn X EXP nữa'."
+      thiết kế) nhiều khả năng cần hiển thị 'còn X EXP nữa' — dự đoán đã
+      đúng: character-card-identity.md D.3 (exp_to_next) tiêu thụ trực
+      tiếp từ 2026-08-04, kèm sentinel 'chờ đột phá' cho ca kẹp trần."
     added: 2026-08-03
     revised: ""
 
@@ -576,6 +582,7 @@ formulas:
     referenced_by:
       - design/gdd/exp-realm-progression.md
       - design/gdd/combat-system.md
+      - design/gdd/character-card-identity.md
     variables:
       - base_X0
       - level
@@ -707,6 +714,7 @@ formulas:
     referenced_by:
       - design/gdd/death-and-consequence.md
       - design/gdd/setting-canon-integration.md
+      - design/gdd/character-card-identity.md
     variables:
       - char_id
       - alive_flag
@@ -734,6 +742,7 @@ formulas:
     referenced_by:
       - design/gdd/death-and-consequence.md
       - design/gdd/exp-realm-progression.md
+      - design/gdd/character-card-identity.md
     variables:
       - character
       - severity_tier
@@ -751,6 +760,32 @@ formulas:
       đổi gì thêm (death-and-consequence.md Edge Case #2)."
     added: 2026-08-03
     revised: ""
+
+  - name: card_exists
+    status: active
+    source: design/gdd/character-card-identity.md
+    referenced_by:
+      - design/gdd/character-card-identity.md
+      - design/gdd/core-ui-screen-navigation.md
+    variables:
+      - char_id
+      - entities_appearing(t)
+      - confirmed(t)
+      - undone(t)
+    output_range: [0, 1]
+    expression: "card_exists(char_id) = OR over all turns t of [
+      (char_id in entities_appearing(t)) AND confirmed(t)=1 AND
+      undone(t)=0 ]"
+    notes: "Formula D.1 của character-card-identity.md — thẻ nhân vật tồn
+      tại khi nhân vật xuất hiện trong >=1 lượt confirm-và-không-undo (có
+      entity record World Memory). Undo đúng lượt tạo thẻ hủy tạo thẻ
+      (an toàn vì undo_depth=1). Giữ true vĩnh viễn kể cả khi nhân vật
+      chết (thẻ mang triện alive=false). Đăng ký vì Core UI/Screen
+      Navigation (hệ #15, đã Designed 2026-08-04) cần để render điểm vào
+      tap-tên trong văn tường thuật (tên nào mở được thẻ) — Core Rule #8
+      + AC-29 bên đó."
+    added: 2026-08-04
+    revised: "2026-08-04"
 
   - name: reset_completeness_check
     status: active
@@ -784,6 +819,7 @@ formulas:
     source: design/gdd/character-continuation.md
     referenced_by:
       - design/gdd/character-continuation.md
+      - design/gdd/core-ui-screen-navigation.md
     variables:
       - turn
       - is_death_turn(turn)
@@ -837,6 +873,7 @@ constants:
       - design/gdd/turn-manager.md
       - design/gdd/combat-system.md
       - design/gdd/death-and-consequence.md
+      - design/gdd/core-ui-screen-navigation.md
     value: 4
     unit: choices
     added: 2026-08-02
@@ -847,6 +884,7 @@ constants:
     source: design/gdd/turn-manager.md
     referenced_by:
       - design/gdd/turn-manager.md
+      - design/gdd/core-ui-screen-navigation.md
     value: 1
     unit: turns
     added: 2026-08-02
@@ -860,6 +898,7 @@ constants:
       - design/gdd/world-memory-context-management.md
       - design/gdd/ai-llm-integration-layer.md
       - design/gdd/persistence-save-system.md
+      - design/gdd/core-ui-screen-navigation.md
     value: 30
     unit: seconds
     added: 2026-08-02
@@ -959,10 +998,12 @@ constants:
     referenced_by:
       - design/gdd/npc-affinity-relationship.md
       - design/gdd/situation-encounter-generation.md
+      - design/gdd/character-card-identity.md
     value: 60
     unit: điểm Hảo cảm (bao gồm — nút Song Tu hiện khi affinity >= 60)
     # hằng số thiết kế đã khóa, KHÔNG phải tuning knob (đổi = re-review).
-    # Character Card & Identity (chưa thiết kế) sẽ đọc để render nút.
+    # Character Card & Identity (Designed 2026-08-04) đọc để render nút
+    # (Core Rule #3 khối ④, Visual/Audio: khung tròn rỗng/tô đặc).
     added: 2026-08-03
     revised: ""
 
@@ -975,6 +1016,39 @@ constants:
     unit: điểm Hảo cảm (quan hệ Song Tu active hủy khi affinity < 40)
     # hysteresis với song_tu_threshold: tái lập đòi leo lại >= 60
     added: 2026-08-03
+    revised: ""
+
+  - name: TOUCH_TARGET_MIN
+    status: active
+    source: design/gdd/core-ui-screen-navigation.md
+    referenced_by:
+      - design/gdd/core-ui-screen-navigation.md
+      - design/gdd/character-card-identity.md
+    value: 44
+    unit: px (CSS-equivalent)
+    # hằng KHÓA theo chuẩn accessibility ngoài (WCAG 2.5.5 / Apple HIG /
+    # Material) — KHÔNG phải tuning knob, đổi = re-review chuẩn ngoài.
+    # Formula D.4 (core-ui): phần tử độc lập (chip/nút/bút tích) bắt buộc
+    # >= 44px; tap-name nhúng trong prose = best-effort có trần. Đăng ký
+    # vì character-card-identity.md có phần tử tương tác riêng (nút Song
+    # Tu, Hồi phục, đóng overlay) phải tuân cùng chuẩn.
+    added: 2026-08-04
+    revised: ""
+
+  - name: card_transition_ms
+    status: active
+    source: design/gdd/character-card-identity.md
+    referenced_by:
+      - design/gdd/character-card-identity.md
+      - design/gdd/core-ui-screen-navigation.md
+    value: 200
+    unit: ms (range 0-400, tuning knob của hệ #14)
+    # nâng từ knob nội bộ #14 lên registry 2026-08-04 vì Formula D.6
+    # (core-ui) đặt bất biến thứ tự phụ thuộc giá trị chính xác này:
+    # DURATION_MS[banner=120] <= [overlay_settings=150] <= [overlay_card
+    # = card_transition_ms] <= [screen=260]. Nếu #14 tune giá trị, phải
+    # kiểm lại bất biến D.6 (AC-27 core-ui, smoke-check).
+    added: 2026-08-04
     revised: ""
 
   - name: deep_hostility_threshold

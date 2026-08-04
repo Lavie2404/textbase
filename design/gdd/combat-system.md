@@ -184,7 +184,7 @@ nhưng định nghĩa đầy đủ ở Section D với `systems-designer`.)*
 12. **Chỉ pha KẾT THÚC trận mới phát tín hiệu hand-off**: `battle_active=false`
     kèm `outcome` (win/lose), margin liên quan (chênh lệch HP còn lại, số
     pha đã đấu...) — EXP & Realm Progression, Death & Consequence, NPC
-    Affinity & Relationship (chưa thiết kế) tự đọc tín hiệu này để tính
+    Affinity & Relationship (đã Designed) tự đọc tín hiệu này để tính
     hệ quả riêng; Combat System không tự tính EXP/hậu quả cái chết/thay
     đổi Hảo cảm.
 
@@ -235,15 +235,15 @@ sách thức đã dùng theo Core Rule #5.)*
   mọi field số trong `locked_result` mỗi pha (damage, HP...) chịu Numeric
   Leak Detection; Combat không bao giờ đọc lại `narration_text` để suy ra
   kết quả.
-- **EXP & Realm Progression** (Feature, chưa thiết kế) — đọc tín hiệu
+- **EXP & Realm Progression** (Feature, đã Designed) — đọc tín hiệu
   hand-off (Core Rule #12) khi `battle_active=false`, tự tính EXP; Combat
   không sở hữu công thức EXP.
-- **Death & Consequence** (Feature, chưa thiết kế) — đọc tín hiệu thua
+- **Death & Consequence** (Feature, đã Designed) — đọc tín hiệu thua
   trận + ngưỡng Hảo cảm đối thủ (từ NPC Affinity, Designed 2026-08-03 —
   cờ thù địch sâu sắc `affinity ≤ -80`, registry
   `deep_hostility_threshold`) để quyết định hậu quả (chết thật hay
   không); Combat chỉ báo "đã thua", không tự quyết định mức độ hậu quả.
-- **NPC Affinity & Relationship** (Feature, chưa thiết kế) — Combat
+- **NPC Affinity & Relationship** (Feature, đã Designed) — Combat
   không trực tiếp đọc/ghi Hảo cảm; ngưỡng 20 cấp chênh lệch (điều kiện
   NPC chủ động địch ý) thuộc phạm vi Situation/Encounter Generation
   quyết định KHI NÀO kích hoạt Combat, không phải Combat tự kiểm tra.
@@ -264,7 +264,7 @@ Enforcement. Đề xuất bởi `systems-designer`.)*
 
 *(**Ranh giới phạm vi bắt buộc nêu rõ**: KHÔNG có formula nào dưới đây
 nhận Hảo cảm làm input — ngưỡng -80 (thù địch sâu sắc) thuộc Death &
-Consequence + NPC Affinity (chưa thiết kế). Combat chỉ xuất tín hiệu
+Consequence + NPC Affinity (đã Designed). Combat chỉ xuất tín hiệu
 thắng/thua + `hp_after` qua `locked_result`/hand-off (Core Rule #12);
 việc ngưỡng -80 có tính bao gồm hay không là quyết định của hệ đó, không
 phải hệ này.)*
@@ -297,7 +297,7 @@ weapon_tier(C) - tier(C))` (bỏ số hạng kỹ năng).
 
 | Symbol | Type | Range | Description |
 |---|---|---|---|
-| `tier(C)` | int | 0–∞ | Bậc/cảnh giới hiện tại của C (nguồn: EXP & Realm Progression, chưa thiết kế — Combat chỉ đọc) |
+| `tier(C)` | int | 0–∞ | Bậc/cảnh giới hiện tại của C (nguồn: EXP & Realm Progression, đã Designed — Combat chỉ đọc) |
 | `weapon_tier(C)` | int | 0–∞ | `tier` vũ khí đang trang bị (nguồn: Equipment & Skill Data System) |
 | `skill_tier_used(C)` | int | 0–∞ (optional) | `tier` kỹ năng gốc của thức vừa dùng trong pha |
 | `gap_realm`, `gap_gear` | int | 0–∞ | Số bậc chênh lệch bất lợi (0 nếu C không thua kém) |
@@ -757,12 +757,12 @@ estimate_ratio(self, opponent):
 | `HP, ATK, DEF, SPD, ACC, Né` | float | 0–∞ | Chỉ số GỐC (base), không phải effective — Điểm Chỉ số hiển thị năng lực TIỀM NĂNG, không phải sau áp chế 1 trận cụ thể |
 | `CritRate, CritDamage, Amp, Mitigation, Lifesteal, HPRegen` | float | như D.1–D.10 | Nhân ×100 để quy về cùng thang "điểm" với chỉ số phẳng |
 | `w_*` | float (knob) | ≥0 | Trọng số từng chỉ số — đề xuất mặc định **1** cho mọi chỉ số TRỪ `w_HP = 0.25`* |
-| `Điểm_Kỹ_Năng(C)`, `Điểm_Trang_Bị(C)` | float | 0–∞ (external) | Sở hữu bởi hệ khác (chưa thiết kế) — Combat coi là input mờ, mặc định 0 nếu chưa có |
+| `Điểm_Kỹ_Năng(C)`, `Điểm_Trang_Bị(C)` | float | 0–∞ (external) | Sở hữu bởi hệ khác (đã Designed) — Combat coi là input mờ, mặc định 0 nếu chưa có |
 | `estimate_ratio` | float \| sentinel | `(0,∞)` hoặc `{"N/A","+∞"}` | CHỈ dùng hiển thị ước tính trước trận — **KHÔNG BAO GIỜ dùng để quyết định thắng/thua** (Core Rule #7) |
 
 *`w_HP=0.25` là **placeholder tạm** vì HP thường có thang giá trị lớn
 hơn nhiều lần các chỉ số khác trong ví dụ minh họa — trọng số thật cần
-đối chiếu lại khi EXP & Realm Progression (chưa thiết kế) định nghĩa
+đối chiếu lại khi EXP & Realm Progression (đã Designed) định nghĩa
 đường cong tăng trưởng chỉ số thật. Cần ghi vào Open Questions.
 
 **Output range**: `estimate_ratio ∈ (0,∞)` bình thường, hoặc sentinel
@@ -773,7 +773,7 @@ thực chất chưa đủ dữ liệu so sánh), theo đúng tiền lệ sentine
 đã dùng ở `session_violation_count` (registry).
 
 **Ví dụ thường**: `Điểm_Chỉ_Số(self)=310`,
-`Điểm_Kỹ_Năng=Điểm_Trang_Bị=0` (chưa thiết kế) → `Lực_chiến(self)=310`;
+`Điểm_Kỹ_Năng=Điểm_Trang_Bị=0` (đã Designed) → `Lực_chiến(self)=310`;
 đối thủ `Lực_chiến=250` → `estimate_ratio=1.24` → hiển thị "nhỉnh hơn
 ~24%".
 
@@ -844,7 +844,7 @@ quán.)*
   đúng.
 - **Nếu Bỏ chạy thành công**: trận kết thúc với tín hiệu hand-off riêng
   biệt `outcome="no_outcome"` (KHÁC `"win"`/`"lose"`) — EXP & Realm
-  Progression và Death & Consequence (chưa thiết kế) không được phép
+  Progression và Death & Consequence (đã Designed) không được phép
   diễn giải bỏ chạy thành thắng hoặc thua khi tự xử lý hệ quả riêng.
 - **(sửa 2026-08-03) Nếu trận `is_spar_friendly=false` chạm
   `TECHNICAL_EXCHANGE_CAP` mà chưa bên nào về 0 HP**: D.9c BẮT BUỘC ra
@@ -905,13 +905,13 @@ nào lần này, khác 5 lần trước trong phiên.)*
 
 **Các hệ thống phụ thuộc vào Combat** (downstream), kèm giao diện dữ
 liệu cụ thể:
-- **EXP & Realm Progression** (Feature, chưa thiết kế) — **hard khi
-  được thiết kế**: đọc tín hiệu hand-off (`outcome` ∈ {win, lose,
+- **EXP & Realm Progression** (Feature, đã Designed) — **hard (hệ đó
+  đã Designed)**: đọc tín hiệu hand-off (`outcome` ∈ {win, lose,
   no_outcome}, HP còn lại, margin) khi `battle_active=false`; tự tính
   EXP — Combat không sở hữu công thức EXP (đã xác nhận phạm vi đầu
   phiên).
-- **Death & Consequence** (Feature, chưa thiết kế) — **hard khi được
-  thiết kế**: đọc tín hiệu `outcome="lose"` để quyết định mức độ hậu quả
+- **Death & Consequence** (Feature, đã Designed) — **hard (hệ đó đã
+  Designed)**: đọc tín hiệu `outcome="lose"` để quyết định mức độ hậu quả
   (kết hợp với ngưỡng Hảo cảm từ NPC Affinity, Designed 2026-08-03 — cờ
   thù địch sâu sắc `affinity ≤ -80`, registry `deep_hostility_threshold`)
   — Combat chỉ báo "đã thua", không tự quyết định mức độ.
@@ -935,7 +935,7 @@ liệu cụ thể:
   `external_abort_signal` (Core Rule #13) từ hệ này để ngắt trận khẩn
   cấp giữa chừng — điều kiện gì khiến hệ đó set tín hiệu này thuộc
   phạm vi `situation-encounter-generation.md`, chưa thiết kế ở đây.
-- **Character Card & Identity** (Presentation, chưa thiết kế) —
+- **Character Card & Identity** (Presentation, đã Designed) —
   **soft**: sẽ hiển thị "Điểm Chỉ số"/Lực chiến ước tính (Formula D.13)
   trên thẻ nhân vật.
 
@@ -1441,8 +1441,8 @@ cảm không làm thay đổi bất kỳ output nào của `resolve_exchange` kh
   cần chính xác hơn placeholder, không chặn MVP vì không ảnh hưởng
   thắng/thua thật)*
 - **Trọng số `w_*` của Điểm Chỉ số (D.13, đặc biệt `w_HP=0.25`) là
-  placeholder tạm** — cần đối chiếu lại khi EXP & Realm Progression (chưa
-  thiết kế) định nghĩa đường cong tăng trưởng chỉ số thật. *(Owner:
+  placeholder tạm** — cần đối chiếu lại khi EXP & Realm Progression (đã
+  Designed) định nghĩa đường cong tăng trưởng chỉ số thật. *(Owner:
   systems-designer, target: `/design-system exp-realm-progression`)*
 - **`exchange_id` — đã chốt trong Core Rule #1** (bộ đếm per-battle,
   reset mỗi trận mới) — không còn là open question, ghi nhận ở đây để

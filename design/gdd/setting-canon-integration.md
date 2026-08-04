@@ -142,7 +142,7 @@ nhưng không bất biến trước một người chơi đủ giỏi."
    earliest_world_time` → hệ này phán quyết trạng thái cuối (Canon
    nguyên bản / Substituted / Vanished / Branched) trong cùng lượt,
    khóa kết quả, phát cho Situation/Encounter Generation dựng tình
-   huống tương ứng (provisional — hệ đó chưa thiết kế).
+   huống tương ứng (provisional — hệ đó nay đã Designed).
 8. **`breakthrough_requirement` data**: mỗi setting định nghĩa predicate
    cơ học theo tier (VD Đấu La: đã hấp thụ Hồn Hoàn phù hợp cho tier
    kế). Hệ này cung cấp evaluation `breakthrough_requirement_met(tier)`
@@ -184,14 +184,14 @@ Mỗi canon event một instance:
 - **NPC Affinity & Relationship** (upstream, Designed): đọc `affinity`,
   `song_tu_active`, cờ thù địch sâu sắc làm predicate premise (VD tiền
   đề "Tiểu Vũ chưa thuộc về ai" phá bằng quan hệ Song Tu).
-- **Death & Consequence** (upstream, chưa thiết kế, provisional): nguồn
+- **Death & Consequence** (upstream, đã Designed, provisional): nguồn
   premise-break "chết" quan trọng nhất — sự kiện NPC chết kích hoạt
   kiểm tra eager mọi premise `alive(X)`.
-- **Situation/Encounter Generation** (downstream, chưa thiết kế,
+- **Situation/Encounter Generation** (downstream, đã Designed,
   provisional): tiêu thụ trạng thái sự kiện Due/Resolved để dựng tình
   huống đúng dòng canon; nhận `canon_outcome` narrative summary làm
   nguyên liệu.
-- **Character Card & Identity** (downstream, chưa thiết kế): đọc hồ sơ
+- **Character Card & Identity** (downstream, đã Designed): đọc hồ sơ
   nhân vật nguyên tác — danh tính thật (major canon), trạng thái cải
   trang, hồ sơ tier.
 - **Turn Manager / Mechanic-Narration Contract Enforcement** (upstream,
@@ -213,7 +213,7 @@ sở hữu dữ liệu — đúng vai "trọng tài", không phải "chủ đấ
 
 | Predicate | Hệ sở hữu thật | Interface đọc |
 |---|---|---|
-| `alive(X)` | Death & Consequence (chưa thiết kế) | cờ boolean per-char |
+| `alive(X)` | Death & Consequence (đã Designed) | cờ boolean per-char |
 | `affinity(X) so ngưỡng` | NPC Affinity & Relationship | `A_after` sau `resolve_turn_affinity` |
 | `possesses(X, item)` | Equipment/Inventory | cờ sở hữu + cờ `destroyed` |
 | `location(X)` | Situation Gen (provisional) | vị trí hiện tại |
@@ -539,11 +539,11 @@ phép trừ âm; (7) breakthrough thiếu data tier → false cứng + warning
 | Mechanic/Narration Contract Enforcement | Hệ này phụ thuộc | Mọi phán quyết (break/cứu/resolve/substitute) khóa vào `locked_result` trước tường thuật; AI nhận kết quả + `canon_outcome` summary, không quyết | Hard |
 | World Memory & Context Management | 2 chiều | ĐỌC fact theo `entity_id` (premise cần lịch sử); GHI field `canon_break_flag_[event_id]`/`canon_event_[event_id]_status` (entity "global") + `canon_role_filled_[npc_id]` — khớp quy ước entity_id; CUNG CẤP `importance_tier` thay key chọn fact (khe cắm Formula #3 của WM) | Hard |
 | NPC Affinity & Relationship | Hệ này phụ thuộc | Predicate `affinity_at_least/at_most`, `song_tu_active`, cờ thù địch sâu sắc | Hard (cho premise loại affinity) |
-| Death & Consequence (chưa thiết kế) | Hệ này phụ thuộc, provisional | Cờ `alive(X)` — nguồn premise-break eager quan trọng nhất; field `death_flag_[char]` (tên provisional) | Hard khi được thiết kế |
+| Death & Consequence (đã Designed) | Hệ này phụ thuộc, provisional | Cờ `alive(X)` — nguồn premise-break eager quan trọng nhất; field `death_flag_[char]` (tên provisional) | Hard (hệ đó đã Designed) |
 | Equipment & Skill Data / Inventory | Hệ này phụ thuộc | Predicate `possesses` + cờ `destroyed` (GDD equipment hiện chưa có cờ destroyed — cần đối chiếu, xem Open Questions) | Soft (chỉ event dùng premise possesses cần) |
 | EXP & Realm Progression | EXP phụ thuộc hệ này | `breakthrough_requirement_met(tier)` — đóng dependency HARD của GDD đó; thứ tự trong lượt: canon resolve TRƯỚC EXP | Hard (chiều ngược) |
-| Situation/Encounter Generation (chưa thiết kế) | 2 chiều, provisional | NHẬN trạng thái event Due/Resolved + `canon_outcome` để dựng tình huống; CUNG CẤP phân loại `canon_role_rescue` từ hành động tự do + `location(X)` cho premise `at_location` | Soft (MVP chạy được không có rescue/location) |
-| Character Card & Identity (chưa thiết kế) | Character Card phụ thuộc hệ này | Hồ sơ nhân vật nguyên tác: danh tính thật (`is_major_canon` → đặc quyền xuyên không), trạng thái cải trang, tier profile | Hard (chiều ngược) |
+| Situation/Encounter Generation (đã Designed) | 2 chiều, provisional | NHẬN trạng thái event Due/Resolved + `canon_outcome` để dựng tình huống; CUNG CẤP phân loại `canon_role_rescue` từ hành động tự do + `location(X)` cho premise `at_location` | Soft (MVP chạy được không có rescue/location) |
+| Character Card & Identity (đã Designed) | Character Card phụ thuộc hệ này | Hồ sơ nhân vật nguyên tác: danh tính thật (`is_major_canon` → đặc quyền xuyên không), trạng thái cải trang, tier profile | Hard (chiều ngược) |
 | Persistence/Save System | Persistence phụ thuộc hệ này | Serialize: status mọi event (kể cả Suspended), vai đã rebind; setting pack là data tĩnh không cần lưu | Hard (chiều ngược) |
 
 ## Tuning Knobs
@@ -980,7 +980,7 @@ khi prompt/model đổi. *(manual — ADVISORY)*
 build thật có nhân vật major canon đang cải trang xuất hiện, WHEN mở
 Character Card, THEN UI hiển thị danh tính thật (và "đang che giấu" cho
 NPC thường). Tầng cơ học đã kiểm ở AC-02; tầng hiển thị thuộc Character
-Card & Identity (chưa thiết kế) — **FLAG: manual walkthrough** khi hệ
+Card & Identity (đã Designed) — **FLAG: manual walkthrough** khi hệ
 đó có UI, ADVISORY, deferred. *(manual — ADVISORY, deferred)*
 
 ## Open Questions
