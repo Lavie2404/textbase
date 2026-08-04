@@ -278,6 +278,30 @@ Open Question #8 GDD hệ #15). Gap thứ 14 cùng pattern. Hệ #15 cũng
 #11 Situation Gen (row downstream), #14 Character Card (Hard
 provisional). Ghi nhận ở đây làm nguồn tham chiếu chính thức.)*
 
+*(Cập nhật 2026-08-04, sau 5 vòng `/design-review` cùng phiên trên
+`core-ui-screen-navigation.md`: (1) **Ghi chú trên đã LỖI THỜI ở 2 điểm**
+— Open Question #7 (interface `get_turn_page` World Memory) và Open
+Question #8 (cờ `reset_in_progress`/#13) đều đã **ĐÓNG** ngay từ vòng 1
+revision cùng phiên (không phải gap còn treo); GDD #15 hiện ghi
+"reset_in_progress ≡ state='Processing Chơi Lại' của #13", không định
+nghĩa cờ song song. (2) **Phụ thuộc số MỚI phát hiện vòng 4-5** (chưa
+từng khai trước đó): #15 phụ thuộc **Combat System (#7)** không chỉ ở
+ràng buộc kiến trúc "không tự chuyển màn hình" (đã khai) mà còn ở mức
+**invariant liên-GDD tường minh** — `live_window_turns` (#15, D.3b,
+mặc định 30) PHẢI `≥ CONTENT_EXCHANGE_ESTIMATE` (#7, mặc định 30, dải
+15–50). Đây là phụ thuộc HARD mới, cần route sang `technical-director`
+khi `/create-architecture` đăng ký cả 2 hằng số vào registry cùng lúc
+(tương tự cảnh báo đã có cho `card_transition_ms`/#14). (3) **Trạng
+thái review**: 5 vòng `/design-review` hoàn tất cùng phiên (2026-08-04)
+— verdict NEEDS REVISION mỗi vòng (10→7→6→9→14 blocking), nhưng kiến
+trúc khái niệm (mô hình 3 tầng, D.1-D.6) chưa từng bị đánh đổ ở bất kỳ
+vòng nào. GDD hiện ở trạng thái "Designed — Revised, chờ re-review
+(vòng 6)" — Status ở bảng Systems Enumeration GIỮ NGUYÊN "Designed"
+(chưa Approved). Creative-director khuyến nghị vòng 6 dùng chiến lược
+3 nhịp (vệ sinh cấu trúc → sửa → prototype throwaway D.3b) thay vì tiếp
+tục review-thuần-văn-bản — xem chi tiết
+`design/gdd/reviews/core-ui-screen-navigation-review-log.md`.)*
+
 ### Polish Layer (depends on everything)
 
 *(Chưa có hệ thống nào ở layer này trong scope hiện tại — tutorial/accessibility/analytics chưa được đề cập trong game-concept.md)*

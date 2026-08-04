@@ -2,7 +2,7 @@
 
 > **Status**: Designed — Pending Review
 > **Author**: user + agents
-> **Last Updated**: 2026-08-02
+> **Last Updated**: 2026-08-04 (chốt interface phân trang Story Log — đóng Open Question tương ứng của `core-ui-screen-navigation.md` #15, xem UI Requirements)
 > **Implements Pillar**: Pillar 2 (Hệ Quả Thực Sự), Pillar 1 (Thế Giới Khách Quan)
 
 ## Overview
@@ -122,7 +122,7 @@ Không có state machine — thay vào đó là bảng các thao tác (operation
 | Ghi turn record | Turn Manager: lượt xác nhận VÀ không undo | Append vào Nhật ký đầy đủ; nếu lượt vượt ra khỏi `recency_window_turns` (lượt mới xác nhận đẩy lượt cũ nhất trong cửa sổ ra ngoài), trích xuất sự kiện từ `locked_result` của lượt bị đẩy ra và lưu vào Sự kiện đã trích xuất theo entity_id liên quan |
 | Xóa turn record | Turn Manager: lượt bị Undo | Xóa record khỏi Nhật ký đầy đủ VÀ khỏi Cửa sổ gần đây nếu còn ở đó (lượt vừa undo luôn là lượt mới nhất, luôn còn trong cửa sổ — xem Core Rule #5) |
 | Dựng Khung ngữ cảnh AI | AI/LLM Integration Layer: chuẩn bị prompt cho `narration_call`/`suggestion_call` | Trả về: Cửa sổ gần đây (nguyên văn) + Sự kiện đã trích xuất liên quan đến entity đang tham gia tình huống hiện tại (không trả TOÀN BỘ sự kiện đã trích xuất của cả game — chỉ phần liên quan) |
-| Truy vấn Nhật ký đầy đủ | UI người chơi: mở màn hình đọc lại lịch sử | Trả về toàn bộ Nhật ký đầy đủ theo thứ tự `world_time`, dạng văn bản gốc |
+| Truy vấn Nhật ký đầy đủ (phân trang) | UI người chơi: mở màn hình đọc lại lịch sử (`Core UI/Screen Navigation`, #15) | Trả về **1 trang** turn record theo `(anchor_turn_id, count, direction)` — KHÔNG BAO GIỜ trả toàn bộ Nhật ký đầy đủ trong 1 lệnh gọi (bắt buộc hiệu năng mobile, xem UI Requirements bên dưới) |
 | Truy vấn sự kiện theo entity | NPC Affinity & Relationship, Setting & Canon Integration (khi được thiết kế) | Trả về danh sách sự kiện đã trích xuất khớp `entity_id` yêu cầu |
 
 ### Interactions with Other Systems
@@ -395,6 +395,12 @@ không bao giờ vượt quá **~2230 token** — hằng số này không đổi
 - **Persistence/Save System** (Core, đã Designed) — đọc/ghi Nhật ký đầy
   đủ (bắt buộc) và có thể tùy chọn cache Khung ngữ cảnh AI (không bắt
   buộc, xem Edge Cases) khi save/load.
+- **Core UI/Screen Navigation** (Presentation, Designed) — chiều ngược,
+  Mềm (World Memory chạy được không cần UI): tiêu thụ interface phân
+  trang `get_turn_page(anchor_turn_id, count, direction)` (mục UI
+  Requirements bên dưới) để dựng màn hình Story Log; #15 sở hữu
+  `log_page_size`/`log_max_loaded_pages`/`log_prefetch_threshold`, GDD
+  này chỉ đảm bảo trả đúng trang được yêu cầu.
 
 *(Cùng dạng phụ thuộc một chiều đã gặp 3 lần trước trong phiên này: Turn
 Manager đọc trực tiếp từ World Memory nhưng bảng Systems Enumeration của
@@ -439,6 +445,18 @@ trăm/nghìn lượt ở Full Vision), màn hình này bắt buộc phải **t�
 trang/lazy-load** (không load toàn bộ vào bộ nhớ UI cùng lúc) — đây là yêu
 cầu hiệu năng bắt buộc trên di động, không phải tùy chọn polish. Mặc định
 mở ra ở lượt gần nhất, có nút "về đầu câu chuyện".
+
+**Interface phân trang (chốt 2026-08-04, đóng Open Question tương ứng của
+`core-ui-screen-navigation.md` #15)**: `get_turn_page(anchor_turn_id, count,
+direction)` — `direction ∈ {older, newer}`, trả về tối đa `count` turn
+record liên tiếp tính từ `anchor_turn_id` theo hướng đó (không bao gồm
+chính `anchor_turn_id` nếu nó đã được tải trước đó), cộng cờ `has_more`
+(bool) báo còn trang xa hơn theo hướng đó hay không. `count` và ngưỡng tải
+trước cụ thể (`log_page_size`, `log_prefetch_threshold`) do #15 sở hữu —
+World Memory chỉ đảm bảo trả đúng số lượng yêu cầu, không áp đặt page
+size của riêng mình. Dòng "Truy vấn Nhật ký đầy đủ" ở bảng Thao tác phía
+trên phản ánh đúng interface này — KHÔNG có đường trả toàn bộ Nhật ký
+trong 1 lệnh gọi ở GDD này.
 
 Lượt đã bị Undo (đã xóa khỏi Nhật ký đầy đủ, Core Rule #2) hiển nhiên
 không xuất hiện trong màn hình này — không cần xử lý đặc biệt.

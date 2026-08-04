@@ -1,10 +1,10 @@
 # Core UI / Screen Navigation
 
-> **Status**: Designed — Pending Review
+> **Status**: Designed — Revised, chờ re-review (vòng 6)
 > **Author**: duchx + Claude Code agents (systems-designer: Formulas; art-director: Visual/Audio; qa-lead: Acceptance Criteria)
-> **Last Updated**: 2026-08-04
+> **Last Updated**: 2026-08-04 — revised through 5 rounds of `/design-review` in one session (see `design/gdd/reviews/core-ui-screen-navigation-review-log.md` for the full history of blocking items and fixes).
 > **Implements Pillar**: Pillar 4 (Tường Thuật Sống Động), Pillar 2 (Hệ Quả Thực Sự)
-> **Creative Director Review (CD-GDD-ALIGN)**: skipped — Lean mode
+> **Creative Director Review (CD-GDD-ALIGN)**: NEEDS REVISION (2026-08-04, 5 rounds of full `/design-review`, see `design/gdd/reviews/core-ui-screen-navigation-review-log.md`) — core architecture (D.1/D.2/D.3/D.5/D.6, 3-tier display model) has held stable across all 5 adversarial rounds; remaining blocking items have shifted from design flaws to bookkeeping-class issues (duplicated constants, count mismatches — the kind a static consistency script catches better than an agent). Recommended strategy for round 6: **3 passes** — (1) structural cleanup (this revision history dedup + a single source-of-truth table for repeated constants + a consistency-check script); (2) content fixes per already-locked decisions; (3) a throwaway prototype for D.3b (the one area that produced blocking findings across 4 consecutive rounds). Round 6 itself only needs a 2-agent pass (`ux-designer` + `qa-lead`).
 
 ## Overview
 
@@ -36,7 +36,9 @@ Người chơi không bao giờ có cảm giác "chuyển màn hình". Mở Th�
 
 **#2 — Save Slot Screen là gốc.** Mở game → luôn vào Save Slot Screen (hệ #6 sở hữu nội dung). Từ đây: "Tiếp tục"/"Bắt đầu mới" → Màn chơi chính; "Xem lại" (slot đã khép) → Story Log ở **chế độ read-only**.
 
-**#3 — Màn chơi chính là mặc định trong phiên.** Gồm: khung tường thuật (cuộn dọc), header cảnh (nội dung thuộc Situation Gen — tên địa điểm + triện nguy hiểm, không sticky), và khu nhập hành động (4 thẻ gợi ý + hàng chip intent + ô tự do — nội dung thuộc Situation Gen/Turn Manager). **Điểm vào điều hướng gộp vào lề cạnh header cảnh** dưới dạng 3 bút tích nhỏ: 「Thẻ」 (thẻ bản thân — vị trí mà hệ #14 ủy quyền cho hệ này), 「Lục」 (Story Log), 「Mục」 (menu: Về danh sách sổ / Settings). Không thêm bất kỳ thanh chrome thường trực nào khác.
+**#3 — Màn chơi chính là mặc định trong phiên.** Gồm: khung tường thuật (cuộn dọc, cửa sổ trượt tối đa `LIVE_WINDOW_TURNS` lượt resident — D.3b), header cảnh (nội dung thuộc Situation Gen — tên địa điểm + triện nguy hiểm, không sticky), và khu nhập hành động (4 thẻ gợi ý + hàng chip intent + ô tự do — nội dung thuộc Situation Gen/Turn Manager). **Điểm vào điều hướng lặp lại ở CẢ HAI đầu luồng cuộn**: 3 bút tích nhỏ 「Thẻ」 (thẻ bản thân — vị trí mà hệ #14 ủy quyền cho hệ này), 「Lục」 (Story Log), 「Mục」 (menu: Về danh sách sổ / Settings) — xuất hiện ở lề header cảnh (đỉnh, không sticky) VÀ nhân bản cạnh khu nhập hành động (đáy luồng cuộn, cùng ngôn ngữ marginalia, không sticky) — không cần cuộn ngược lên đỉnh để mở Thẻ/Log/Menu khi đang ở trạng thái đọc-hành động ổn định (đáy trang). Không thêm bất kỳ thanh chrome thường trực nào khác ngoài 2 vị trí lặp này.
+
+**#3b — Pending Fate (Kết liễu/Tha mạng) mang trọng lượng thị giác riêng.** Gợi ý Kết liễu/Tha mạng (#12 Death & Consequence) đi qua đúng khung 4-gợi-ý chuẩn — KHÔNG UI riêng, KHÔNG xác nhận 2 bước — nhưng thẻ đó render **đậm mực hơn 1 bậc** so với 3 thẻ còn lại, VÀ **KHÔNG có chip intent đi kèm** (không có đường vòng qua chip cho đúng lượt đó — buộc tap trực tiếp thẻ hoặc gõ ô tự do). Đây là ứng dụng đầu tiên và duy nhất của triết lý "màu khẩu phần — hiếm mới có nghĩa" (mục 10 Visual/Audio) vào chính khung 4-gợi-ý, đúng đúng chỗ Player Fantasy gọi là "trọng lượng của thao tác — chấp bút" (không phải danh sách chọn nhanh đồng dạng). Ai sở hữu: #12 sở hữu nội dung/điều kiện kích hoạt; #15 sở hữu luật hiển thị trọng lượng này.
 
 **#4 — Khóa input có một nguồn sự thật duy nhất.** UI đọc trạng thái Turn Manager (Awaiting Action / Resolving / Undoing) và áp dụng luật:
 
@@ -46,13 +48,13 @@ Người chơi không bao giờ có cảm giác "chuyển màn hình". Mở Th�
 
 **#5 — Nút Undo hiện/ẩn theo đúng `undo_availability_window`.** Khi `undo_available=false` nút **biến mất hoàn toàn** (không phải disabled) — kể cả ngay sau lượt `is_death_turn=true`. Đây là biểu hiện UI của Pillar 2: nút tồn tại = mực còn ướt.
 
-**#6 — Takeover 3 lối.** Khi `continuation_choice_eligible=true`: Màn hình 3 lối **thay thế** Màn chơi chính; khu nhập hành động + chip + gợi ý bị gỡ hoàn toàn (Turn Manager không hoạt động, đúng hệ #13). Điểm vào 「Lục」 và 「Thẻ」 **vẫn còn** (read-only — xem lại đời vừa kết thúc, thẻ mang triện `alive=false`); 「Mục」 chỉ còn "Về danh sách sổ". Chọn "Chơi lại" thành công → về Màn chơi chính trên slot mới.
+**#6 — Takeover 3 lối.** Khi `continuation_choice_eligible=true`: khu nhập hành động + chip + gợi ý bị gỡ hoàn toàn ngay (Turn Manager không hoạt động, đúng hệ #13), NHƯNG Màn hình 3 lối KHÔNG thay thế Màn chơi chính ngay lập tức — S2 hiện tiếp đoạn văn lượt chết vừa resolve, kèm 1 dòng dẫn cuối đoạn chờ người chơi **CHẠM** để tiếp tục. Dòng dẫn thuộc **Họ B** của ngôn ngữ marginalia (mục 1, Visual/Audio — đậm hơn thân văn 1 bậc, không phải nhạt hơn như 3 bút tích thường trực), nội dung **"… (chạm để tiếp tục)"** kèm 1 nhịp "thở" alpha chậm (xem Visual/Audio mục 2). **Auto-scroll bắt buộc tới dòng dẫn**: NGAY khi `continuation_choice_eligible=true` được set (đoạn văn lượt chết vừa render xong), S2 tự cuộn xuống đúng vị trí dòng dẫn — không chờ người chơi tự cuộn (S2 vốn "không sticky footer, cuộn xuống để hành động", nhưng đây là hành động BẮT BUỘC DUY NHẤT không auto-timeout, nên là 1 ngoại lệ tường minh cho đúng khoảnh khắc cao-stakes nhất game; khác mọi trường hợp khác của S2 nơi cuộn luôn do người chơi chủ động). Đây là exception DUY NHẤT của luật "không sticky/không auto-scroll" toàn game. **Nếu người chơi thoát về S1 qua 「Mục」 trước khi chạm dòng dẫn**: slot GIỮ NGUYÊN trạng thái "đang chơi" (đúng bảng States S1: mọi slot không đang Resolving đều khả dụng "Tiếp tục") — `continuation_choice_eligible` vẫn `true` trong dữ liệu slot; mở lại qua "Tiếp tục" → về đúng S2, đoạn văn lượt chết + dòng dẫn (kèm auto-scroll + nhịp thở) render lại y hệt, KHÔNG coi slot là "đã khép" (đó chỉ xảy ra sau khi thật sự vào S5 và chọn xong 1 trong 3 lối). Chạm dòng dẫn đó mới kích hoạt takeover thật: Màn hình 3 lối thay thế Màn chơi chính. Điểm vào 「Lục」 và 「Thẻ」 **vẫn còn** (read-only — xem lại đời vừa kết thúc, thẻ mang triện `alive=false`); 「Mục」 chỉ còn "Về danh sách sổ". Chọn "Chơi lại" thành công → về Màn chơi chính trên slot mới. **Rationale nhịp chạm**: bảo toàn "trọng lượng của thao tác" (Player Fantasy, Pillar 2) — chuyển sang màn 3 lối là cú chấp bút cuối cùng của một đời, không phải side-effect tự động của 1 cờ hệ thống; đối xứng với luật hoãn takeover đã có sẵn khi người chơi đang đọc Story Log (xem Edge Cases).
 
 **#7 — Chế độ read-only (slot đã khép).** Vào từ "Xem lại": chỉ có Story Log + overlay Thẻ (tap-tên hoạt động bình thường); không có khu nhập, không có đường vào Màn chơi chính; mọi nút ghi-trạng-thái không render. Thoát duy nhất → Save Slot Screen.
 
-**#8 — Điểm vào Thẻ Nhân Vật.** Hai điểm vào MVP: (a) **tap-tên trong văn tường thuật** — mọi tên có `card_exists=true` là tap target, hoạt động ở cả Màn chơi chính, Story Log (kể cả read-only), và Màn hình 3 lối; (b) **bút tích 「Thẻ」** (thẻ bản thân) — ở lề header cảnh (S2, S5) VÀ trên thanh chrome Story Log (S4/S4-RO — mở thẻ nhân vật chính của đời đang xem; GAP-3, qa-lead: nếu thiếu, người đang đọc Log không có đường mở thẻ bản thân). Danh sách nhân vật/địa điểm làm điểm vào thứ 3 — **ngoài scope MVP** (đúng ủy quyền hệ #14 đã hoãn).
+**#8 — Điểm vào Thẻ Nhân Vật.** Hai điểm vào MVP: (a) **tap-tên trong văn tường thuật** — mọi tên có `card_exists=true` là tap target, hoạt động ở cả Màn chơi chính, Story Log (kể cả read-only), và Màn hình 3 lối; (b) **bút tích 「Thẻ」** (thẻ bản thân) — ở lề header cảnh (S2, S5) VÀ trên thanh chrome Story Log (S4/S4-RO — mở thẻ nhân vật chính của đời đang xem; GAP-3: nếu thiếu, người đang đọc Log không có đường mở thẻ bản thân). Danh sách nhân vật/địa điểm làm điểm vào thứ 3 — **ngoài scope MVP** (đúng ủy quyền hệ #14 đã hoãn).
 
-**#9 — Trạng thái chờ AI.** Trong Resolving, khung tường thuật hiển thị chỉ báo "thế giới đang viết" (nét mực đang kéo dài — không phải spinner). Quá `ai_call_timeout_seconds=30` → AI layer báo lỗi → UI trả người chơi về Awaiting Action với thông báo trong khung tường thuật (không banner, không mất world_time — đúng AC-13 Turn Manager).
+**#9 — Trạng thái chờ AI.** Trong Resolving, khung tường thuật hiển thị chỉ báo "thế giới đang viết" (nét mực đang kéo dài — không phải spinner). Quá `ai_call_timeout_seconds=30` → AI layer báo lỗi → UI trả người chơi về Awaiting Action với thông báo trong khung tường thuật (không banner, không mất world_time — đúng AC-13 Turn Manager). **Ô tự do GIỮ NGUYÊN nội dung người chơi đã gõ qua timeout** — không xóa, không reset; nguyên tắc UX cơ bản là không hủy input người dùng khi hệ thống lỗi, đặc biệt khi hành động tự do đã được Player Fantasy gán ý nghĩa "chấp bút" (mất công gõ lại là frustration không cần thiết).
 
 **#10 — Settings tối thiểu (MVP).** Overlay mở từ 「Mục」 (có mặt ở cả Save Slot Screen và Màn chơi chính), gồm đúng 2 nhóm: (a) **Cỡ chữ** — 3 nấc S/M/L, áp dụng toàn cục qua Theme scale, lưu ở cấu hình cấp-thiết-bị (ngoài slot bundle — không thuộc Persistence, xem Dependencies); (b) **Cấu hình AI** — ô nhập API key; danh sách field chính xác **do ADR backend AI quyết định**, GDD này chỉ giữ chỗ nhóm mục.
 
@@ -64,7 +66,7 @@ Người chơi không bao giờ có cảm giác "chuyển màn hình". Mở Th�
 | S2 | Màn chơi chính — Awaiting Action | S1; S2-R xong; S2-U xong; S5 (Chơi lại OK); S4 (lật về) | S2-R (submit), S4 (「Lục」), S1 (menu), S2-U (Undo) | theo Turn Manager |
 | S2-R | Màn chơi chính — Resolving | S2 submit | S2 (thành công/lỗi AI), S2-D | khóa ghi-trạng-thái (#4) |
 | S2-U | Màn chơi chính — Undoing | S2 bấm Undo | S2 | khóa như S2-R |
-| S2-D | Turn Confirmed, `is_death_turn=true` | S2-R | S5 | Undo ẩn vĩnh viễn (#5); tự chuyển khi `continuation_choice_eligible=true` |
+| S2-D | Turn Confirmed, `is_death_turn=true` | S2-R | S5 | Undo ẩn vĩnh viễn (#5); khi `continuation_choice_eligible=true` hiện dòng dẫn cuối đoạn văn, chuyển sang S5 khi người chơi CHẠM dòng dẫn đó — không tự động |
 | S4 | Story Log (live) | S2 「Lục」 (cả ở Awaiting Action lẫn trong Resolving — đọc trong lúc chờ được phép, #4) | S2 (lật về) | chỉ-đọc |
 | S4-RO | Story Log (read-only) | S1 "Xem lại"; S5 「Lục」 | S1 (hoặc S5 nếu vào từ S5) | không nút ghi-trạng-thái (#7) |
 | S5 | Màn hình 3 lối | S2-D | S2 (slot mới), S1 (menu), S4-RO (「Lục」) | takeover (#6); Reset Failed hiện inline + Thử lại |
@@ -78,12 +80,12 @@ Người chơi không bao giờ có cảm giác "chuyển màn hình". Mở Th�
 | Turn Manager | đọc + gửi | Đọc state machine (Awaiting/Resolving/Undoing/`is_death_turn`) + `undo_available`; gửi action submit + lệnh Undo qua đường chuẩn | Turn Manager sở hữu state; hệ này sở hữu cách thể hiện |
 | Contract Enforcement | ràng buộc | Hệ này là **mặt thực thi hiển thị** của Core Rule #4 bên đó: số liệu chỉ render trong khung con dấu ở các bề mặt UI, không bao giờ trong văn tường thuật | Contract Enforcement sở hữu luật |
 | Situation Gen | đọc | Menu chip intent + nhóm theo NPC, header cảnh (location + triện), nudge heuristic (1 dòng gợi ý, không auto-activate) | Situation Gen sở hữu nội dung; hệ này sở hữu khung render |
-| Combat | ràng buộc | Ràng buộc áp cho HỆ THỐNG: Combat không bao giờ tự kích hoạt chuyển màn hình (không màn combat riêng/mode-switch); điều hướng do người chơi trong trận vẫn theo D.1/D.2 chuẩn (an toàn nhờ auto-save + `turn_snapshot` serialize trạng thái trận — GAP-2, qa-lead); danh sách hành động trận đấu đi qua đúng khung 4-gợi-ý chuẩn | Combat sở hữu nội dung |
+| Combat | ràng buộc | Ràng buộc áp cho HỆ THỐNG: Combat không bao giờ tự kích hoạt chuyển màn hình (không màn combat riêng/mode-switch); điều hướng do người chơi trong trận vẫn theo D.1/D.2 chuẩn (an toàn nhờ auto-save + `turn_snapshot` serialize trạng thái trận — GAP-2); danh sách hành động trận đấu đi qua đúng khung 4-gợi-ý chuẩn | Combat sở hữu nội dung |
 | Character Card (#14) | cung cấp | Điểm vào tap-tên (query `card_exists`) + bút tích 「Thẻ」 + tầng overlay; timing mở thẻ theo knob `card_transition_ms` bên đó | Hệ này sở hữu điểm vào; #14 sở hữu nội dung thẻ |
 | World Memory | đọc | Nội dung Story Log qua API phân trang (lazy-load bắt buộc); marker "Lượt N" | World Memory sở hữu dữ liệu |
 | Persistence | đọc + hiển thị | Danh sách slot + metadata; banner quota/lỗi ghi (tầng banner, #1); auto-save vô hình với UI | Persistence sở hữu logic; hệ này sở hữu chỗ đặt banner |
 | Character Continuation | đọc | Cờ `continuation_choice_eligible` kích takeover S5; trạng thái Reset Failed + retry | #13 sở hữu nội dung màn 3 lối |
-| Death & Consequence | pass-through | Gợi ý Kết liễu/Tha mạng (Pending Fate) đi qua khung 4-gợi-ý chuẩn — không UI riêng | #12 sở hữu nội dung |
+| Death & Consequence | pass-through | Gợi ý Kết liễu/Tha mạng (Pending Fate) đi qua khung 4-gợi-ý chuẩn — **KHÔNG UI riêng, nhưng thẻ mang trọng lượng thị giác riêng** (đậm mực hơn 1 bậc, KHÔNG chip intent đi kèm, xem Core Rule #3b) | #12 sở hữu nội dung; #15 sở hữu luật hiển thị trọng lượng |
 | AI/LLM Layer | gián tiếp | Chỉ báo "đang viết" trong Resolving; ngưỡng `ai_call_timeout_seconds=30` | AI layer sở hữu timeout |
 | Setting & Canon / NPC Affinity / EXP | gián tiếp | Mọi hiển thị đi qua Card hoặc khung tường thuật — không interface trực tiếp | các hệ tương ứng |
 
@@ -91,42 +93,48 @@ Người chơi không bao giờ có cảm giác "chuyển màn hình". Mở Th�
 
 *(Đề xuất bởi `systems-designer`, duyệt 2026-08-04. D.6 giữ dạng formula theo quyết định người dùng; `TOUCH_TARGET_MIN` + `card_transition_ms` sẽ đăng ký registry.)*
 
-### D.1 — `write_action_allowed(action, tm_state)`
+### D.1 — `write_action_allowed(action, tm_state, screen)`
 
 ```
-class(action) ∈ {mutating, readonly}   // bảng phân loại cố định bên dưới
-write_action_allowed(action, tm_state) =
+class(action) ∈ {mutating, readonly}   // bảng phân loại cố định bên dưới — KHÔNG đổi theo screen
+write_action_allowed(action, tm_state, screen) =
     1                                          if class(action) = readonly
-    (tm_state = awaiting_action)               if class(action) = mutating
+    1                                          if action = tap_back_to_slots ∧ screen = S5
+    (tm_state = awaiting_action)               otherwise  // mọi action mutating khác, VÀ tap_back_to_slots khi screen ≠ S5
 ```
 
-**Bảng phân loại action** (dữ liệu hỗ trợ, để QA lặp hết mọi cặp):
+**Bảng phân loại action** (dữ liệu hỗ trợ, để QA lặp hết mọi cặp) — `class` không đổi theo `screen`; carve-out `screen=S5` cho riêng `tap_back_to_slots` nằm ở nhánh thứ 2 của formula trên, không phải ngoại lệ nằm ngoài bảng:
 
-| `class = mutating` (khóa khi Resolving/Undoing) | `class = readonly` (luôn tự do) |
+| `class = mutating` (khóa khi Resolving/Undoing, TRỪ carve-out `screen=S5` ở trên) | `class = readonly` (luôn tự do) |
 |---|---|
 | `submit_action`, `tap_suggestion_card`, `tap_intent_chip` | `open_card`, `close_card`, `tap_name_link` (mở Card) |
 | `tap_undo` | `open_story_log`, `scroll_story_log` |
 | `tap_song_tu_button`, `tap_recovery_button` (trên Card, luật hệ #14) | `open_settings`, `close_settings` |
 | `tap_back_to_slots`, `tap_delete_slot` | — |
 
-*Ghi chú (GAP-4, qa-lead 2026-08-04): `tap_retry_reset` (nút "Thử lại" ở S5) KHÔNG thuộc bảng này — Turn Manager không hoạt động tại S5 nên `tm_state` vô nghĩa ở đó. Nút Thử lại khóa theo cờ riêng `reset_in_progress` do Character Continuation (#13) sở hữu (xem Edge Cases).*
+*Ghi chú (GAP-4): 3 hành động KHÔNG được D.1 gate thuần theo `tm_state`:*
+
+- *`tap_retry_reset` (nút "Thử lại" ở S5) — khóa theo `state` của Character Continuation (#13): mờ mực khi `state = "Processing Chơi Lại"`, mở khóa khi `state = "Reset Failed"` — KHÔNG phải cờ boolean riêng (`reset_in_progress` là tên gọi tắt/derived, không phải field mới do #13 phải định nghĩa thêm; xem Edge Cases).*
+- *`tap_back_to_slots` — gate hình thức hóa trực tiếp trong chữ ký hàm (nhánh 2): `screen=S5` → luôn `1` (khớp cạnh D.2 `S5→S1` guard `true`); mọi `screen` khác kể cả S2 → theo `tm_state` như mọi action `mutating` khác (khớp cạnh D.2 `S2→S1` guard `tm_state=awaiting_action`). KHÔNG phải 2 action khác nhau — 1 action, gating phụ thuộc `screen` được khai tường minh trong domain của hàm.*
+- *`tap_continue_to_fate` (dòng dẫn tap-to-continue trước S5 takeover — xem Core Rule #6): xuất hiện SAU khi lượt chết đã confirm, Turn Manager đã kết thúc vòng lượt đó — không có `tm_state` nào đang chờ ghi. Luôn khả dụng khi dòng dẫn hiện (không khóa, không mờ mực); test riêng ở AC-57.*
 
 **Variables:**
 
 | Variable | Symbol | Type | Range | Description |
 |---|---|---|---|---|
 | Hành động đang xét | `action` | enum | 15 giá trị bảng trên (8 mutating + 7 readonly) | Sự kiện input người chơi gửi tới UI |
-| Lớp hành động | `class(action)` | enum | `{mutating, readonly}` | Tra bảng tĩnh, không đổi runtime |
-| Trạng thái Turn Manager | `tm_state` | enum | `{awaiting_action, resolving, undoing}` | Nguồn sự thật duy nhất (Core Rule #4), đọc trực tiếp từ Turn Manager |
+| Lớp hành động | `class(action)` | enum | `{mutating, readonly}` | Tra bảng tĩnh, không đổi runtime, KHÔNG phụ thuộc `screen` |
+| Trạng thái Turn Manager | `tm_state` | enum | `{awaiting_action, resolving, undoing}` | Nguồn sự thật duy nhất (Core Rule #4); vô nghĩa khi `screen=S5` (Turn Manager không hoạt động, Core Rule #6) nhưng formula không cần đọc nó trong nhánh đó |
+| Màn hình nguồn | `screen` | enum | `{S1,S2,S4,S4-RO,S5}` | Chỉ ảnh hưởng kết quả khi `action=tap_back_to_slots`; bị bỏ qua cho 14 action còn lại |
 | Kết quả | `write_action_allowed` | bool | `{0,1}` | `1` = UI cho phép gửi hành động này ngay bây giờ |
 
-**Output Range:** Boolean thuần, hàm tổng (total function) — mọi cặp `(action, tm_state)` hợp lệ luôn có đúng 1 kết quả. 15 action × 3 trạng thái = **45 tổ hợp** = ma trận test case đầy đủ cho QA (số đã sửa theo GAP-1, qa-lead 2026-08-04).
+**Output Range:** Boolean thuần, hàm tổng (total function) — mọi bộ ba `(action, tm_state, screen)` hợp lệ luôn có đúng 1 kết quả. Ma trận test đầy đủ: 15 action × 3 `tm_state` = 45 tổ hợp cơ bản (đúng cho 14/15 action bất kể `screen`, và đúng cho `tap_back_to_slots` khi `screen≠S5`) **CỘNG** 1 tổ hợp bổ sung `tap_back_to_slots @ screen=S5` (kết quả `1` bất kể `tm_state`, vì `tm_state` không được đọc trong nhánh đó) = **46 tổ hợp có kết quả riêng biệt**.
 
-**Example:** `write_action_allowed(tap_undo, resolving) = 0`; `write_action_allowed(open_card, resolving) = 1` (mở Card lúc AI đang viết vẫn được); `write_action_allowed(tap_back_to_slots, awaiting_action) = 1`.
+**Example:** `write_action_allowed(tap_undo, resolving, S2) = 0`; `write_action_allowed(open_card, resolving, S2) = 1` (mở Card lúc AI đang viết vẫn được); `write_action_allowed(tap_back_to_slots, awaiting_action, S2) = 1`; `write_action_allowed(tap_back_to_slots, resolving, S5) = 1` (carve-out — `tm_state` bị bỏ qua vì Turn Manager không hoạt động tại S5, khác kết quả nếu cùng `tm_state=resolving` mà `screen=S2` thì phải là `0`).
 
 **Edge cases:**
-- Formula này **không** kiêm việc ẩn/hiện nút Undo — đó là `undo_availability_window` (registry, Turn Manager). Nút Undo phải thỏa **CẢ HAI**: `undo_available=true` (output của formula `undo_availability_window` — mới render nút) AND `write_action_allowed(tap_undo, tm_state)=1` (mới bấm được) — khi `is_death_turn=true`, vế đầu đã false nên không bao giờ có trạng thái "nút hiện nhưng bấm không phản hồi".
-- Submit lần 2 trong lúc Resolving: `write_action_allowed(submit_action, resolving)=0` — đúng Core Rule #4 "từ chối ở tầng UI". Khóa đệ quy cây node khu nhập chỉ là **cách hiện thực hóa**; formula là nguồn sự thật. QA test cả hai (formula đúng + UI thật sự chặn) như 2 AC tách biệt.
+- Formula này **không** kiêm việc ẩn/hiện nút Undo — đó là `undo_availability_window` (registry, Turn Manager). Nút Undo phải thỏa **CẢ HAI**: `undo_available=true` (output của formula `undo_availability_window` — mới render nút) AND `write_action_allowed(tap_undo, tm_state, S2)=1` (mới bấm được — `tap_undo` chỉ xuất hiện tại S2, `screen` luôn `=S2`) — khi `is_death_turn=true`, vế đầu đã false nên không bao giờ có trạng thái "nút hiện nhưng bấm không phản hồi".
+- Submit lần 2 trong lúc Resolving: `write_action_allowed(submit_action, resolving, S2)=0` — đúng Core Rule #4 "từ chối ở tầng UI" (`submit_action` chỉ xuất hiện tại S2). Khóa đệ quy cây node khu nhập chỉ là **cách hiện thực hóa**; formula là nguồn sự thật. QA test cả hai (formula đúng + UI thật sự chặn) như 2 AC tách biệt.
 
 **Rationale:** Hình thức hóa Core Rule #4 thành 1 predicate thuần túy, unit-test được không cần dựng scene Godot. Không phải tuning knob — invariant logic.
 
@@ -148,7 +156,7 @@ else 0
 | S2 | S4 | `true` | 「Lục」— luôn được kể cả Resolving (đọc-only, D.1) |
 | S4 | S2 | `true` | lật về |
 | S2 | S1 | `tm_state = awaiting_action` | menu, gated bởi D.1 (`tap_back_to_slots`) |
-| S2 | S5 | `continuation_choice_eligible = true` | takeover tự động (Core Rule #6), KHÔNG do người chơi tap |
+| S2 | S5 | `continuation_choice_eligible = true` | tap dòng dẫn cuối đoạn văn lượt chết (Core Rule #6) |
 | S5 | S2 | `new_slot_created = true` | "Chơi lại" thành công |
 | S5 | S1 | `true` | menu |
 | S5 | S4-RO | `true` | 「Lục」 từ S5 |
@@ -174,7 +182,7 @@ else 0
 **Example 2 (bắt lỗi bằng cấu trúc):** `screen_transition_valid(S4-RO, S1, {origin_screen: S5}) = 0` nhưng `screen_transition_valid(S4-RO, S5, {origin_screen: S5}) = 1` — mở 「Lục」 từ Màn hình 3 lối rồi thoát → **phải** quay lại S5, không rơi về Save Slot Screen.
 
 **Edge cases:**
-- Cạnh `(S2, S5)` là hệ thống tự kích hoạt — formula vẫn dùng được làm assertion: nếu code cố route sang S5 mà `continuation_choice_eligible=false` → trả `0` → integrity check trong state machine.
+- Cạnh `(S2, S5)`: KHÔNG do hệ thống tự kích hoạt — do người chơi CHẠM dòng dẫn cuối đoạn văn lượt chết (Core Rule #6). Formula vẫn dùng được làm assertion y hệt: nếu code cố route sang S5 mà `continuation_choice_eligible=false` (VD chạm nhầm trước khi cờ set) → trả `0` → integrity check trong state machine; dòng dẫn không được phép hiện/hoạt động khi cờ chưa `true`.
 - `(S1, S2)` luôn `true` ở tầng màn hình — slot có tồn tại/hợp lệ để mở hay không là trách nhiệm Persistence, **ngoài phạm vi** formula này.
 - Tầng overlay: `O-Card` mở được từ mọi `from ∈ {S2,S4,S4-RO,S5}` khi `card_exists(char_id)=true`; `O-Set` mở được từ `{S1,S2}` — overlay là tầng độc lập (Core Rule #1), không gộp vào đồ thị màn hình.
 
@@ -188,9 +196,12 @@ else 0
 total_pages(slot)        = ceil(total_turns(slot) / PAGE_SIZE)
 default_page_index(slot) = total_pages(slot) − 1                      // trang chứa lượt gần nhất
 ui_memory_bound          = MAX_LOADED_PAGES × PAGE_SIZE                // hằng số, ĐỘC LẬP total_turns
+distance_to_window_edge(scroll_position, direction) =
+    turns_between(scroll_position, edge_turn_id(direction))            // số lượt còn lại tới biên cửa sổ đã tải, theo hướng cuộn
 should_prefetch(scroll_position, direction) =
     1  if distance_to_window_edge(scroll_position, direction) ≤ PREFETCH_THRESHOLD
     0  otherwise
+INVARIANT: PREFETCH_THRESHOLD < PAGE_SIZE                              // = hoặc > → luôn prefetch, xem Tuning Knobs
 ```
 
 **Variables:**
@@ -201,10 +212,14 @@ should_prefetch(scroll_position, direction) =
 | Tổng lượt confirmed-không-undone | `total_turns(slot)` | int | `[0, ∞)` | Nguồn World Memory (lượt undo không tính) |
 | Số lượt/trang | `PAGE_SIZE` | int const | ≥1 | Tuning knob `log_page_size`, mặc định **20** |
 | Số trang tối đa resident | `MAX_LOADED_PAGES` | int const | ≥1 | Tuning knob `log_max_loaded_pages`, mặc định **3** |
-| Ngưỡng tải trước | `PREFETCH_THRESHOLD` | int const | ≥0 | Tuning knob `log_prefetch_threshold`, mặc định **5** (lượt) |
+| Ngưỡng tải trước | `PREFETCH_THRESHOLD` | int const | ≥0, `< PAGE_SIZE` | Tuning knob `log_prefetch_threshold`, mặc định **5** (lượt) |
 | Tổng số trang | `total_pages(slot)` | int | `[0, ∞)` | |
 | Trang mặc định khi mở | `default_page_index(slot)` | int | `[0, total_pages−1]` | |
 | Trần bộ nhớ UI | `ui_memory_bound` | int const | = `MAX_LOADED_PAGES × PAGE_SIZE` | **Chứng minh O(1)** — không phụ thuộc `total_turns` |
+| Vị trí cuộn hiện tại | `scroll_position` | turn_id | trong cửa sổ đã tải | Lượt đang ở giữa viewport tại thời điểm xét |
+| Hướng cuộn | `direction` | enum | `{older, newer}` | Cuộn về lượt cũ hơn hay mới hơn |
+| Lượt biên của cửa sổ đã tải | `edge_turn_id(direction)` | turn_id | trong cửa sổ đã tải | Lượt cũ nhất (nếu `direction=older`) hoặc mới nhất (nếu `direction=newer`) hiện đang resident |
+| Khoảng cách tới biên | `distance_to_window_edge` | int | `≥0` (lượt) | Số lượt còn lại trước khi chạm biên cửa sổ đã tải theo `direction` |
 | Cờ tải thêm | `should_prefetch` | bool | `{0,1}` | |
 
 **Output Range:** `ui_memory_bound` là **hằng số cố định** (mặc định 60 lượt resident) bất kể `total_turns` lớn tới đâu — mảnh ghép cuối cho "UI memory O(1) độc lập world_time", cùng cấu trúc chứng minh World Memory đã dùng cho AI context.
@@ -212,12 +227,74 @@ should_prefetch(scroll_position, direction) =
 **Example:** Slot `total_turns=842`, `PAGE_SIZE=20` → `total_pages=43`, `default_page_index=42` (lượt 821–842). `ui_memory_bound = 3×20 = 60` — dù slot 842 hay 8.420 lượt, số vẫn là 60. Cuộn lên tới lượt 825 (cách biên trên cửa sổ đã tải 4 lượt `< 5`) → `should_prefetch=1` → tải trang 41 (lượt 801–820), evict trang xa nhất.
 
 **Edge cases:**
-- `total_turns=0` (vừa "Bắt đầu mới") → `total_pages=ceil(0/20)=0` — Story Log hiện trạng thái rỗng, không cần nhánh chống chia-0. **`default_page_index` KHÔNG được gọi khi `total_pages=0`** — UI rẽ nhánh empty-state trước khi truy vấn trang (tránh giá trị −1 ngoài range khai báo; GAP-5, qa-lead).
+- `total_turns=0` (vừa "Bắt đầu mới") → `total_pages=ceil(0/20)=0` — Story Log hiện trạng thái rỗng, không cần nhánh chống chia-0. **`default_page_index` KHÔNG được gọi khi `total_pages=0`** — UI rẽ nhánh empty-state trước khi truy vấn trang (tránh giá trị −1 ngoài range khai báo; GAP-5).
 - `total_turns < PAGE_SIZE` → `total_pages=1`; `ui_memory_bound` là **trần**, không phải giá trị luôn-đầy.
 - Undo xảy ra khi lượt bị undo nằm trong trang đang tải (mở 「Lục」 lúc Resolving rồi Undo) → trang đó **invalidate và tải lại**, không patch tại chỗ; `total_turns` giảm 1, có thể kéo `total_pages` giảm.
 - Chế độ S4-RO (slot đã khép): `total_turns` là giá trị tĩnh đóng băng — công thức không đổi, không bao giờ cần invalidate do ghi mới.
 
-**Rationale:** Đóng gap World Memory + chứng minh trực tiếp yêu cầu hiệu năng mobile (memory-constrained, 60 FPS). **Interface yêu cầu World Memory expose**: API phân trang theo `(anchor_turn_id, count, direction)`, không trả nguyên Nhật ký đầy đủ (ghi ở Dependencies).
+**Rationale:** Đóng gap World Memory + chứng minh trực tiếp yêu cầu hiệu năng mobile (memory-constrained, 60 FPS). **Interface World Memory expose (đã chốt)**: `get_turn_page(anchor_turn_id, count, direction) → {records, has_more}`, không trả nguyên Nhật ký đầy đủ (ghi ở Dependencies).
+
+### D.3b — Cửa sổ hiển thị Màn chơi chính (S2)
+
+*D.3 chặn bộ nhớ cho Story Log (S4) nhưng không chặn Màn chơi chính (S2), màn hình dùng nhiều nhất trong game. Rủi ro thật: `RichTextLabel` phình vô hạn theo `world_time` trên mobile, trầm trọng hơn mỗi khi đổi cỡ chữ (D.5) trigger relayout toàn buffer. Công thức dưới đây neo theo `total_turns(slot)` — cùng nguồn dữ liệu D.3 dùng — chứ KHÔNG neo theo đại lượng phụ thuộc phiên chơi (số lượt đã trôi kể từ khi mở màn hình): nếu neo theo phiên, mở lại 1 slot có lịch sử dài (VD 400 lượt) qua "Tiếp tục" sẽ cho `s2_resident_turns=0` ngay khi vừa vào màn hình — khung tường thuật S2 trắng trơn, phản đúng lời hứa "không tồn tại đường đi nào từ lúc mở game đến lượt chơi đầu tiên" ở Overview.*
+
+```
+s2_resident_turns(slot)          = min(total_turns(slot), LIVE_WINDOW_TURNS)
+INVARIANT: LIVE_WINDOW_TURNS ≥ CONTENT_EXCHANGE_ESTIMATE                  // liên-GDD với #7 Combat, mirror D.3/D.6
+s2_oldest_resident_turn_id(slot) = turn_id của bản ghi CŨ NHẤT hiện đang resident trong buffer hiển thị S2
+                                    (state DUY TRÌ BỞI buffer qua cold-start/append/evict — KHÔNG suy ra
+                                    bằng số học từ last_confirmed_turn_id)
+```
+
+**Variables:**
+
+| Variable | Symbol | Type | Range | Description |
+|---|---|---|---|---|
+| Slot đang xem (live) | `slot` | id | hợp lệ | Cùng nguồn `total_turns`/`last_confirmed_turn_id` với D.3 — không phải đại lượng mới |
+| Tổng lượt confirmed-không-undone | `total_turns(slot)` | int | `[0, ∞)` | Nguồn World Memory, định nghĩa giống hệt D.3 |
+| Lượt confirmed gần nhất | `last_confirmed_turn_id(slot)` | turn_id | `[1, ∞)`; undefined khi `total_turns=0` | ID lượt mới nhất đã khóa |
+| Số lượt còn resident trong S2 | `s2_resident_turns(slot)` | int | `[0, LIVE_WINDOW_TURNS]` | Số lượt văn bản còn giữ trong khung tường thuật S2 tại thời điểm xét — tính từ DỮ LIỆU slot, không từ thời lượng phiên chơi |
+| Trần cửa sổ sống | `LIVE_WINDOW_TURNS` | int const | ≥1, **PHẢI ≥ `CONTENT_EXCHANGE_ESTIMATE` (#7 Combat)** | Tuning knob `live_window_turns`, mặc định **30** (xem Rationale) |
+| Lượt resident cũ nhất | `s2_oldest_resident_turn_id(slot)` | turn_id | tồn tại trong tập turn_id thật của slot, khi `s2_resident_turns≥1` | State do buffer tự duy trì (KHÔNG phải giá trị suy ra bằng công thức số học) — KHÔNG được gọi khi `s2_resident_turns=0` (cùng nguyên tắc `default_page_index` ở D.3). Định nghĩa state-based (thay vì công thức `last_confirmed_turn_id − s2_resident_turns + 1`) giữ D.3b tự-đủ (self-contained), không phụ thuộc chi tiết implementation của World Memory. `turn-manager.md` và `world-memory-context-management.md` xác nhận `turn_id` liền mạch và được tái sử dụng sau Undo — sự thật này cho phép AC-66 dùng công thức số học trên làm tripwire invariant để bắt buffer drift, dù định nghĩa chính thức vẫn là state-based. |
+| Lượt gần nhất đã đồng bộ vào buffer S2 | `s2_last_synced_turn_id(slot)` | turn_id | `[0, last_confirmed_turn_id]`; `0` = chưa cold-start | Turn_id gần nhất đã thực sự phản ánh trong buffer hiển thị S2 — có thể khác `last_confirmed_turn_id` khi S2 đang ẩn (`visible=false`), xem "Vòng đời nội dung S2" bên dưới |
+
+**Output Range:** `s2_resident_turns` là hằng số trần — bất kể slot có bao nhiêu lượt (`total_turns` lớn tới đâu), S2 tại mọi thời điểm chỉ giữ tối đa `LIVE_WINDOW_TURNS` lượt gần nhất trong cấu trúc hiển thị. Cùng cấu trúc chứng minh O(1) với `ui_memory_bound` (D.3). Vì công thức neo theo `total_turns(slot)` (không đổi theo số lần vào/ra màn hình), giá trị `s2_resident_turns` giống nhau dù người chơi vừa mở slot lần đầu trong phiên hay đã lật S4↔S2 mười lần — tránh rebuild buffer không cần thiết mỗi lần lật trang.
+
+**Vòng đời nội dung S2** — S2 dùng LẠI đúng interface `get_turn_page` đã chốt ở D.3 (Dependencies World Memory), không phải interface riêng.
+
+| Sự kiện | S2 đang hiển thị? | Hành động | Nguồn dữ liệu |
+|---|---|---|---|
+| Cold-start (mở slot / lật vào S2 lần đầu trong phiên) | — (luôn hiển thị khi cold-start chạy) | Gọi 1 lần `get_turn_page(last_confirmed_turn_id, LIVE_WINDOW_TURNS, older)`, dựng đủ `s2_resident_turns` lượt; `s2_last_synced_turn_id ← last_confirmed_turn_id` | `get_turn_page` |
+| Lượt mới confirm | Có (`visible=true`) | Append trực tiếp qua tín hiệu Turn Manager (không gọi lại `get_turn_page`), evict lượt cũ nhất nếu chạm trần; `s2_last_synced_turn_id` cập nhật theo | Turn Manager confirm signal |
+| Lượt mới confirm | Không (`visible=false` — người chơi đang ở S4/S5/overlay) | KHÔNG render (tiết kiệm chi phí node/relayout cho màn hình không nhìn thấy) — buffer hiển thị giữ nguyên; `s2_last_synced_turn_id` KHÔNG cập nhật cho tới khi render | Turn Manager confirm signal (ghi nhận, không render) |
+| Quay lại S2, **CÙNG slot**, `last_confirmed_turn_id = s2_last_synced_turn_id` (không có gì mới trong lúc ẩn) | — | Dùng nguyên buffer cache, KHÔNG rebuild (đúng luật hiện có "lật S4↔S2 nhiều lần không rebuild") | Không gọi API |
+| Quay lại S2, **CÙNG slot**, `last_confirmed_turn_id ≠ s2_last_synced_turn_id` (có lượt confirm trong lúc ẩn) | — | Hòa giải bằng DELTA: `get_turn_page(anchor=s2_last_synced_turn_id, count=(last_confirmed_turn_id − s2_last_synced_turn_id), newer)`, append đúng phần còn thiếu vào buffer hiện có, evict nếu chạm trần; `s2_last_synced_turn_id ← last_confirmed_turn_id`. KHÔNG cold-start lại toàn bộ. | `get_turn_page` (delta) |
+| **Chuyển sang SLOT KHÁC** (bao gồm S5→S2 qua "Chơi lại" tạo slot mới, `new_slot_created=true`) | — | LUÔN force cold-start (hàng 1 của bảng này), BẤT KỂ giá trị `s2_last_synced_turn_id` cũ còn lại từ slot trước và bất kể Control S2 không bị free (Open Question #5a — cache Control ≠ cache dữ liệu lượt). `s2_last_synced_turn_id` reset về `last_confirmed_turn_id` của slot MỚI trước khi tính bất kỳ delta nào | `get_turn_page` (cold-start, không phải delta) |
+| **Undo khi window đã đầy** (`s2_resident_turns = LIVE_WINDOW_TURNS` ngay trước Undo) | Có (`visible=true`, Undo chỉ khả dụng ở S2 — Core Rule #5) | Gỡ lượt bị Undo (như bình thường) **CỘNG** backfill 1 lượt cũ hơn qua `get_turn_page(anchor=s2_oldest_resident_turn_id_cũ, count=1, older)` nếu `total_turns` sau Undo vẫn `≥ LIVE_WINDOW_TURNS` — giữ buffer luôn đủ `LIVE_WINDOW_TURNS` khi dữ liệu cho phép, khớp đúng công thức `s2_resident_turns=min(total_turns, LIVE_WINDOW_TURNS)` ở MỌI thời điểm, không chỉ giữa 2 lần Undo. Nếu `total_turns` sau Undo `< LIVE_WINDOW_TURNS`, không cần backfill (công thức tự đúng) | `get_turn_page` (backfill 1 lượt, O(1) — không phá chứng minh D.3b) |
+
+**Chặn delta phình to:** delta ở dòng cuối LUÔN `≤ 1` (chỉ áp dụng khi CÙNG slot — xem guard đổi-slot ngay dưới) — hành động submit tiếp theo chỉ có thể xảy ra từ khu nhập của chính S2 (Core Rule #3), nên không tồn tại đường nào khiến >1 lượt confirm trong khi S2 đang ẩn (Turn Manager cần 1 action mới từ đúng màn hình đó để tiến lượt tiếp theo). Vì vậy hòa giải delta không bao giờ cần tải nhiều hơn 1 lượt, giữ nguyên chi phí O(1) của toàn D.3b.
+
+**Guard bắt buộc — kiểm slot identity TRƯỚC khi chọn nhánh delta vs cold-start**: điều kiện `last_confirmed_turn_id ≠ s2_last_synced_turn_id` (dùng để chọn nhánh "delta" ở bảng trên) **ĐÚNG trong cả 2 trường hợp** — (a) có lượt mới confirm trong lúc ẩn CÙNG slot, VÀ (b) vừa chuyển sang MỘT SLOT KHÁC hoàn toàn (VD "Chơi lại" tạo slot mới) — vì `s2_last_synced_turn_id` không tự reset khi đổi slot (Control S2 được cache xuyên phiên, không free). Nếu code chỉ kiểm điều kiện bất-đẳng-thức mà không kiểm slot identity trước, case (b) sẽ rơi nhầm vào nhánh delta: **phản chứng cụ thể** — slot cũ chết ở `total_turns=400` (`s2_last_synced_turn_id=400`), "Chơi lại" tạo slot mới `total_turns=1` → nhánh delta sai sẽ gọi `get_turn_page(anchor=400, count=(1−400)=−399, newer)` — `count` ÂM, vô nghĩa. **Luật bắt buộc**: PHẢI kiểm `slot_id hiện tại = slot_id lúc `s2_last_synced_turn_id` được ghi` TRƯỚC KHI so sánh `turn_id` — nếu khác, luôn đi nhánh cold-start (hàng "Chuyển sang SLOT KHÁC" ở trên), không bao giờ tính delta bằng phép trừ `turn_id` giữa 2 slot khác nhau.
+
+**Cơ chế eviction (phạm vi node tách bạch khỏi tầng-màn-hình):** khi lượt mới được confirm và `s2_resident_turns` đã đạt trần, lượt cũ nhất (`s2_oldest_resident_turn_id`) bị **gỡ THẬT khỏi cấu trúc hiển thị S2** — không chỉ ẩn (`visible=false`). Ranh giới này PHẢI tách bạch khỏi luật tầng-màn-hình ở Open Question #5(a) ("Autoload cache/ẩn-hiện 5 Control màn hình, không free node"): luật đó chỉ áp cho 5 Control gốc của TẦNG MÀN HÌNH (S1/S2/S4/S4-RO/S5) — KHÔNG áp cho nội dung lượt bên trong S2. Nội dung lượt phải được gỡ thật (node `queue_free()`, hoặc đoạn text cắt khỏi buffer nếu dùng 1 RichTextLabel buffer chung — kiến trúc cụ thể quyết ở ADR, nhưng "gỡ" luôn phải giải phóng bộ nhớ thật, không chỉ ẩn). Nếu lẫn 2 luật, toàn bộ chứng minh O(1) của D.3b vô hiệu mà việc chỉ đếm biến số logic không bắt được (xem AC-48/49 đã siết lại). KHÔNG xóa dữ liệu gốc — lượt đó vẫn nguyên vẹn ở World Memory/Story Log (D.3).
+
+**Neo vị trí cuộn khi eviction:** cùng nguyên tắc đã dùng cho resize ở Edge Cases toàn cục ("vị trí cuộn neo theo block đang đọc") — nếu lượt sắp bị evict đang nằm trong viewport (người chơi đang đọc gần biên cửa sổ resident), eviction bù trừ vị trí cuộn để nội dung đang xem KHÔNG nhảy dưới mắt người chơi.
+
+Nếu người chơi cuộn lên chạm biên cửa sổ, hiện 1 dòng dẫn "— đọc tiếp về trước, mở 「Lục」 —" dẫn sang Story Log thay vì cố tải thêm vào S2 — củng cố đúng phân vai Core Rule #2/#3: **S2 = đang viết (cửa sổ trượt), S4 = đã viết (toàn bộ, phân trang)**. Đây là tap-target thật (AC-49 yêu cầu chạm được), không phải trạng thái thụ động — styling dùng cùng ngôn ngữ thị giác bút tích marginalia (Visual/Audio mục 1 — đậm hơn thân văn 1 bậc, không khung), KHÔNG dùng -1 bậc alpha thụ động của empty-state; vùng chạm thật ≥44px theo D.4 nhóm (b) — đây là 1 dòng độc lập, không nhúng trong prose đang chảy nên KHÔNG compliant-by-exception, phải đạt tuyệt đối.
+
+**Edge cases:**
+- `total_turns(slot)=0` (slot thực sự mới, "Bắt đầu mới" chưa có lượt nào): `s2_resident_turns=0`, khung tường thuật rỗng (công thức empty-state chung, mục 8 Visual/Audio) — KHÔNG hiện dòng "đọc tiếp về trước" (chưa có gì để dẫn tới); `s2_oldest_resident_turn_id` KHÔNG được gọi.
+- Mở lại 1 slot có lịch sử (`total_turns(slot)>0`, VD 400): `s2_resident_turns=min(400,30)=30` NGAY LẬP TỨC — khung tường thuật hiện đủ 30 lượt gần nhất qua cold-start `get_turn_page`, KHÔNG rỗng, KHÔNG chờ có lượt mới confirm (xem Rationale).
+- Lật S4↔S2 nhiều lần trong cùng phiên: `s2_resident_turns` không đổi giữa các lần lật (neo theo `total_turns`, không theo "đã ở S2 bao lâu") — không rebuild buffer không cần thiết, nhất quán với Open Question #5(a) (Control màn hình được cache, không free).
+- Undo xóa đúng lượt đang resident trong S2: gỡ khỏi cấu trúc hiển thị S2 cùng lúc gỡ khỏi World Memory (Turn Manager Core Rule #7) — không patch tại chỗ, cùng nguyên tắc AC-18 (D.3); `total_turns(slot)` giảm 1 nên `s2_resident_turns` tự tính lại đúng qua công thức. **Backfill bắt buộc khi window đã đầy trước Undo** (xem hàng 7 "Undo khi window đầy" trong bảng "Vòng đời nội dung S2"): nếu `s2_resident_turns = LIVE_WINDOW_TURNS` NGAY TRƯỚC Undo (window đã đầy), chỉ gỡ lượt bị Undo là KHÔNG ĐỦ — phải bù thêm đúng 1 lượt cũ hơn từ World Memory để buffer trở lại đủ `LIVE_WINDOW_TURNS` (nếu `total_turns` sau Undo vẫn `≥ LIVE_WINDOW_TURNS`), mirror đúng cơ chế "hòa giải delta" đã có (dòng 268). **Phản chứng nếu bỏ qua bước này**: slot `total_turns=400`, window đầy `[371,400]`, Undo lượt 400 → `total_turns=399` → công thức `s2_resident_turns=min(399,30)=30` nhưng buffer THẬT chỉ còn 29 lượt `[371,399]` nếu không backfill — `s2_oldest_resident_turn_id` thực tế vẫn `371` trong khi tripwire AC-66 đòi `399−30+1=370` → **AC-66 fail ngay ở luồng chơi bình thường** (Undo là core mechanic, không phải edge case hiếm). Backfill 1 lượt (370) qua `get_turn_page(anchor=371, count=1, older)` khôi phục đúng `[370,399]`, công thức và buffer khớp lại.
+- Đổi cỡ chữ (D.5) khi S2 đang ở trần `LIVE_WINDOW_TURNS`: relayout chỉ áp dụng cho tối đa `LIVE_WINDOW_TURNS` lượt resident, KHÔNG BAO GIỜ toàn bộ Nhật ký — đây chính là cơ chế chặn rủi ro relayout vô hạn mà `godot-specialist` đã cảnh báo.
+- `LIVE_WINDOW_TURNS` là trần hiển thị, không phải trần world-state — không ảnh hưởng `undo_availability_window` (Turn Manager) hay `recency_window_turns` (World Memory), 2 khái niệm độc lập dù cùng là "cửa sổ".
+
+**Rationale:** Mirror tinh thần O(1) của D.3/World Memory cho chính màn hình có tần suất dùng cao nhất — trước bản sửa này, hệ chứng minh chặt bộ nhớ ở Story Log (dùng ít hơn) nhưng bỏ ngỏ ở S2 (dùng nhiều nhất). Không phải tuning knob giá trị nghệ thuật — là invariant hiệu năng.
+
+**Ràng buộc liên-hệ với Combat System — `live_window_turns ≥ CONTENT_EXCHANGE_ESTIMATE`:** đối chiếu trực tiếp `combat-system.md`: mỗi pha giao đấu = 1 lượt Turn Manager, và `CONTENT_EXCHANGE_ESTIMATE=30` là ước tính THIẾT KẾ (không phải worst-case) cho số pha điển hình/trận. Nếu `LIVE_WINDOW_TURNS < CONTENT_EXCHANGE_ESTIMATE`, MỘT TRẬN ĐIỂN HÌNH (không phải trận dài bất thường) sẽ chắc chắn evict hết bối cảnh trước trận trước khi trận kết thúc — tiêu chí nghiệm thu tự đặt ("không lần nào người chơi cuộn tìm bối cảnh giữa 1 trận mà chạm biên cửa sổ") bị bảo đảm thất bại bằng chính số của Combat.
+
+**Xử lý**: mặc định `live_window_turns` = **30** (khớp đúng `CONTENT_EXCHANGE_ESTIMATE`), dải an toàn Tuning Knobs **8–50** (khớp dải Combat 15–50), kèm **INVARIANT liên-hệ tường minh**: `LIVE_WINDOW_TURNS ≥ CONTENT_EXCHANGE_ESTIMATE (#7)` — nếu Combat tune ước tính lên cao hơn cửa sổ S2 đang hiệu lực, đây là vi phạm invariant cần CI chặn (mirror đúng khuôn D.6). Đánh đổi chấp nhận: buffer S2 tăng gấp đôi (30 lượt thay vì 15) — route sang `technical-director` để đối chiếu với mục "trần bộ nhớ TỔNG khi D.3+D.3b+O-Card cùng active" đang treo ở Open Questions. Playtest thật vẫn cần thiết để XÁC NHẬN 30 là đủ cho trận trên-trung-bình (Combat dải tới 50).
 
 ### D.4 — Kích thước vùng chạm tối thiểu (tap-name & chip)
 
@@ -245,9 +322,10 @@ hit_height ≥ TOUCH_TARGET_MIN  AND  hit_width ≥ TOUCH_TARGET_MIN
 | Khoảng trắng dọc khả dụng | `line_gap` | float px | ≥0 | Giữa dòng chứa tên và dòng liền kề |
 | Khoảng trắng ngang tới ký tự gần nhất | `gap_to_neighbor` | float px | ≥0 hoặc ∞ (cuối dòng) | |
 | Đệm tính được | `pad_v`, `pad_h` | float px | ≥0 | |
-| Vùng chạm cuối | `hit_height`, `hit_width` | float px | `[w hoặc h, TOUCH_TARGET_MIN]` | |
+| Vùng chạm cuối | `hit_height` | float px | `[h, max(h, TOUCH_TARGET_MIN)]` | Cận dưới tách riêng theo từng biến (không dùng chung 1 cận cho cả `hit_height`/`hit_width`) — phản chứng: nếu dùng chung cận `max(w,h)`, case `w=18,h=24,gap_to_neighbor=2` → `pad_h=0` → `hit_width=18 < max(w,h)=24`, vi phạm chính range đó. `hit_height` không bao giờ nhỏ hơn `h`, `hit_width` không bao giờ nhỏ hơn `w`. |
+| Vùng chạm cuối | `hit_width` | float px | `[w, max(w, TOUCH_TARGET_MIN)]` | VD tên dài `w=120` → `pad_h=0` → `hit_width=120`, đúng và mong muốn (44 chỉ là trần khi glyph nhỏ hơn nó, không phải trần tuyệt đối), không phải lỗi |
 
-**Output Range:** Nhóm (a) **KHÔNG đảm bảo** đạt đúng 44px — best-effort có trần bởi văn bản xung quanh. Nhóm (b) đảm bảo tuyệt đối `≥44px`.
+**Output Range:** Nhóm (a) **KHÔNG đảm bảo tối thiểu 44px** khi glyph + khoảng trắng xung quanh không đủ chỗ — nhưng đây là **compliant-by-exception** theo miễn trừ "Inline" cho tap-target nhúng trong câu/khối văn bản, tồn tại ở CẢ HAI: **SC 2.5.5 Target Size (Enhanced)** — Level **AAA**, WCAG **2.1** — và **SC 2.5.8 Target Size (Minimum)** — Level **AA**, nhưng chỉ tồn tại từ WCAG **2.2** (không có trong 2.1). 44px vẫn vượt xa cả 2 ngưỡng (2.5.8 chỉ yêu cầu 24×24px) nên kết luận không đổi theo version nào, nhưng nếu dự án chỉ target baseline WCAG 2.1 AA, chỉ 2.5.5 (AAA, tự nguyện vượt chuẩn) là căn cứ hợp lệ — viện dẫn 2.5.8 đòi hỏi xác nhận dự án mở rộng baseline sang WCAG 2.2. Nhóm (b) đảm bảo tuyệt đối `≥44px`, không có ngoại lệ.
 
 **Example:** Tên 1 ký tự "Vệ" tại M scale: `w=18, h=24`; `line_gap=12`, `gap_to_neighbor=10` hai bên. `pad_v = min((44−24)/2, 12/2) = 6` → `hit_height=36`. `pad_h = min((44−18)/2, (10−4)/2) = 3` → `hit_width=24`. Vùng chạm `24×36` — nhỏ hơn lý tưởng nhưng đã tối đa trong ràng buộc typography, **không bao giờ lấn** sang từ liền kề.
 
@@ -255,6 +333,12 @@ hit_height ≥ TOUCH_TARGET_MIN  AND  hit_width ≥ TOUCH_TARGET_MIN
 - Hai tên sát nhau → `gap_to_neighbor` nhỏ → `pad_h≈0` → chấp nhận "chật" để 2 tap-target không bao giờ chồng lấn (đánh đổi có chủ đích: chính xác > thoải mái).
 - Tên cuối dòng trước wrap → cạnh không giáp chữ có `gap_to_neighbor = ∞` → công thức áp dụng **theo từng cạnh riêng**, cạnh trống dùng đủ đệm mong muốn.
 - Font scale L (×1.25) làm glyph lớn hơn → đệm mong muốn tự giảm — công thức tự điều chỉnh, không cần nhánh theo font scale.
+- **Đường lui nếu engine không đệm được vùng chạm ảo — TÁCH 2 NHÁNH**: `RichTextLabel` meta tag native không có cơ chế padding built-in cho từng đoạn text — hiện thực `pad_v`/`pad_h` nhóm (a) có thể cần 1 Control overlay riêng định vị theo tọa độ glyph (quyết ở ADR).
+  - **Nhánh (i) — miễn trừ HỢP LỆ**: với các fragment mà công thức D.4(a) *đằng nào cũng* cho `pad≈0` do ràng buộc VẬT LÝ thật (hàng xóm sát cạnh, `gap_to_neighbor` nhỏ — xem case "2 tên sát nhau" ở trên), route pad=0 chỉ xác nhận lại kết quả công thức đã tính — đây đúng tinh thần miễn trừ "Inline" của WCAG 2.5.5/2.5.8 (xem Output Range).
+  - **Nhánh (ii) — KHÔNG được dán nhãn "compliant-by-exception"**: nếu ADR chọn `pad_v=pad_h=0` áp dụng TOÀN CỤC (mọi fragment, kể cả fragment có `gap_to_neighbor` dư dả mà công thức lẽ ra tính được `pad>0`) chỉ vì lý do RÀNG BUỘC KỸ THUẬT (engine không đệm được, không phải thiếu chỗ vật lý) — đây là **regression tự chọn vì lý do kỹ thuật**, không phải áp dụng đúng tinh thần miễn trừ WCAG. Phải gọi đúng tên trong ADR, không dán nhãn "hợp chuẩn" cho trường hợp này.
+  - **Rủi ro kỹ thuật bổ sung nếu chọn route Control-overlay trên nền single-buffer D.3b**: mỗi lần eviction (D.3b) trigger `remove_paragraph()` reflow TOÀN BỘ đoạn phía sau — không chỉ TỐN chi phí (đã ghi ở Godot notes) mà overlay hit-box đã định vị theo tọa độ glyph CŨ có thể **TRÔI khỏi glyph thật** sau mỗi lần evict, trừ khi kiến trúc chủ động recompute vị trí cho MỌI turn còn resident (không chỉ turn mới). ADR phải coi đây là hạng mục bắt buộc nếu chọn route này, kèm 1 test riêng xác nhận overlay không trôi sau N lần evict liên tiếp (mở rộng AC-49).
+  - **Ngưỡng chấp nhận UX còn thiếu**: dù nhánh (i) hợp chuẩn WCAG, GDD hiện chưa có tiêu chí đo tỷ lệ chạm-hụt thực tế cho tap-tên ngắn (1–2 ký tự) trên thiết bị cảm ứng thật — cần 1 tripwire playtest riêng trước khi chấp nhận production, không chỉ dừng ở "đã hợp chuẩn WCAG nên không cần re-review".
+  - Đường lui này không cần re-review D.4 mỗi lần chọn, chỉ cần ghi rõ NHÁNH nào được chọn vào ADR — NHƯNG nếu route này được chọn, AC-21 (regression "Vệ") phải cập nhật kỳ vọng theo route pad=0 (xem AC-21) — không tự động re-review GDD, nhưng AC phải theo route thật, không giữ số cũ.
 
 **Rationale:** Mobile Web là platform chính (touch, không hover) và tap-tên là điểm vào MVP xuyên 4 bề mặt (Core Rule #8) — phải chạm chính xác được. Không phải tuning knob — hằng khóa theo chuẩn accessibility, đổi cần re-review chuẩn ngoài.
 
@@ -262,9 +346,11 @@ hit_height ≥ TOUCH_TARGET_MIN  AND  hit_width ≥ TOUCH_TARGET_MIN
 
 ```
 theme_scale(setting) = FONT_SCALE_STEP[setting],  setting ∈ {S, M, L}
-two_column_layout(viewport_width_px, setting) =
-    1  if viewport_width_px ≥ 2 × BASE_COLUMN_WIDTH_PX × theme_scale(setting) + COLUMN_GUTTER_PX
+two_column_layout(viewport_width_px, setting, is_touch_primary) =
+    0  if is_touch_primary = true
+    1  if is_touch_primary = false ∧ viewport_width_px ≥ 2 × BASE_COLUMN_WIDTH_PX × theme_scale(setting) + COLUMN_GUTTER_PX
     0  otherwise
+INVARIANT: FONT_SCALE_STEP[S] < FONT_SCALE_STEP[M] < FONT_SCALE_STEP[L]        // tên nấc phải khớp thứ tự hiển thị thật
 ```
 
 **Variables:**
@@ -275,7 +361,8 @@ two_column_layout(viewport_width_px, setting) =
 | Hệ số nhân | `FONT_SCALE_STEP` | float const | `{0.875, 1.0, 1.25}` | Tuning knob `font_scale_steps` — đúng 3 giá trị |
 | Bề rộng cột cơ sở | `BASE_COLUMN_WIDTH_PX` | int const | ≥0 | Tuning knob `base_column_width_px`, mặc định **360** |
 | Khoảng cách 2 cột | `COLUMN_GUTTER_PX` | int const | ≥0 | Tuning knob `column_gutter_px`, mặc định **24** |
-| Bề rộng viewport | `viewport_width_px` | float px | `(0, ∞)` | Runtime, từ device |
+| Bề rộng viewport | `viewport_width_px` | float px | `(0, ∞)` | Runtime, từ device; bị bỏ qua khi `is_touch_primary=true` |
+| Input chính là cảm ứng | `is_touch_primary` | bool | `{0,1}` | Runtime, từ device — `true` cho mọi thiết bị cảm ứng cầm tay bất kể bề rộng (điện thoại, tablet), `false` cho desktop/mouse-primary |
 | Kết quả | `two_column_layout` | bool | `{0,1}` | `1` = đủ chỗ 2 cột (VD Character Card desktop) |
 
 **Output Range:** Boolean. `theme_scale` chỉ nhận đúng 3 giá trị rời rạc (không phải slider).
@@ -290,11 +377,14 @@ two_column_layout(viewport_width_px, setting) =
 
 **Rationale:** Vận hành hóa Core Rule #10 + yêu cầu responsive (technical-preferences.md) thành predicate kiểm được, thay vì media-query rải rác không giải thích được ngưỡng.
 
+**Quyết định UX cho Open Question #1:** thay vì chờ chốt "dải viewport Mobile Web chính thức" (câu hỏi phân loại thiết bị, vẫn hoãn hợp lý tới `/create-architecture`), phần quyết định UX được tách ra và đóng ngay: **mọi thiết bị cảm ứng cầm tay (`is_touch_primary=true`) mặc định 1-cột bất kể bề rộng** — 2-cột trên touch (kể cả tablet rộng) chưa từng được kiểm chứng tốt về Fitts's Law (ngón tay khó với hết bề ngang 2 cột khi cầm 1 tay), trong khi 1-cột luôn hoạt động an toàn trên mọi thiết bị. Câu hỏi phân loại "tablet 768px là Mobile hay không" trở thành vô nghĩa cho riêng quyết định 2-cột này — chỉ còn liên quan tới các quyết định responsive khác chưa nêu ở đây.
+
 ### D.6 — Họ thời lượng chuyển cảnh
 
 ```
 rank(banner)=1 < rank(overlay_settings)=2 < rank(overlay_card)=3 < rank(screen)=4
 transition_duration(tier) = DURATION_MS[tier]
+DURATION_MS[overlay_card] = card_transition_ms                     // registry, sở hữu #14 — không tune độc lập ở đây
 INVARIANT: DURATION_MS[banner] ≤ DURATION_MS[overlay_settings] ≤ DURATION_MS[overlay_card] ≤ DURATION_MS[screen]
 ```
 
@@ -304,10 +394,10 @@ INVARIANT: DURATION_MS[banner] ≤ DURATION_MS[overlay_settings] ≤ DURATION_MS
 |---|---|---|---|---|
 | Tầng chuyển cảnh | `tier` | enum | `{banner, overlay_settings, overlay_card, screen}` | 4 loại chuyển động UI |
 | Hạng trọng lượng thị giác | `rank(tier)` | int | `1–4` | Cố định, banner nhẹ nhất → screen nặng nhất |
-| Thời lượng | `DURATION_MS[tier]` | int ms | `[80, 400]` | Tuning knob; `overlay_card` = `card_transition_ms` (hệ #14, không tạo bản sao) |
+| Thời lượng | `DURATION_MS[tier]` | int ms | `[80, 400]` | Tuning knob (banner/settings/screen); `overlay_card` KHÔNG tự do trong dải này — luôn khóa bằng `card_transition_ms` (hệ #14) |
 | Kết quả | `transition_duration` | int ms | tra bảng | Thời lượng animation |
 
-**Output Range:** Giá trị rời rạc theo `tier`; ràng buộc là **bất biến thứ tự** (monotonic theo `rank`).
+**Output Range:** Giá trị rời rạc theo `tier`; ràng buộc là **bất biến thứ tự** (monotonic theo `rank`) — đây là ràng buộc LIÊN-KNOB, không phải 4 khoảng độc lập (xem Tuning Knobs bên dưới: tune trong đúng "dải an toàn" đã khai của từng knob riêng lẻ vẫn có thể phá invariant này nếu không đối chiếu với các knob khác).
 
 **Example:** `DURATION_MS = {banner: 120, overlay_settings: 150, overlay_card: 200, screen: 260}` — mở Story Log (screen) lật trang 260ms; mở Card 200ms (khóa theo #14); banner quota fade 120ms — nhanh nhất, không giành chú ý với page-flip bên dưới.
 
@@ -315,18 +405,21 @@ INVARIANT: DURATION_MS[banner] ≤ DURATION_MS[overlay_settings] ≤ DURATION_MS
 
 **Rationale:** Mở rộng tiền lệ `card_transition_ms` (#14) thành họ nhất quán. Vì bất biến phụ thuộc giá trị chính xác của `card_transition_ms`, hằng số đó sẽ được **đăng ký registry** (`source: #14`, `referenced_by: #14, #15`) để thay đổi bên #14 có dấu vết.
 
+**Lưu ý liên-knob:** 3 knob `transition_banner/settings/screen_ms` (Tuning Knobs bên dưới) có dải an toàn RIÊNG nhưng INVARIANT ở trên là LIÊN-KNOB — tune đúng trong dải riêng của từng knob (VD `banner=200`, `settings=80`, cả hai đều "trong dải an toàn" riêng) vẫn có thể phá bất biến (`200 > 80`). Luôn đối chiếu cả 4 giá trị cùng lúc khi tune, không chỉ kiểm từng knob độc lập với dải của chính nó.
+
 ## Edge Cases
 
-- **Nếu lượt resolve thành cái chết trong lúc người chơi đang đọc Story Log (S4, vào lúc Resolving)**: KHÔNG giật người chơi về giữa chừng — takeover S5 hoãn đến khi người chơi lật về; hành động "lật về" lúc này route đến **S5 thay vì S2** (chuỗi hợp lệ theo D.2: S4→S2→S5 tự động, người chơi chỉ thấy 1 lần lật). Lượt chết đã hiện trong Log họ đang đọc — đúng, vì lượt đã confirmed.
+- **Nếu lượt resolve thành cái chết trong lúc người chơi đang đọc Story Log (S4, vào lúc Resolving)**: KHÔNG giật người chơi về giữa chừng — hành động "lật về" route đúng luật chuẩn D.2 (S4→S2), KHÔNG tự chain sang S5 nữa (S5 chỉ kích hoạt khi người chơi chạm dòng dẫn tap-to-continue, giống hệt luồng đọc trực tiếp ở S2 — xem Core Rule #6). Người chơi lật về thấy đúng đoạn văn lượt chết tại S2 (đã hiện trong Log họ đang đọc — đúng, vì lượt đã confirmed), kèm dòng dẫn chờ chạm.
 - **Nếu một chuyển màn hình xảy ra khi overlay đang mở** (VD: takeover S5 kích hoạt khi Thẻ đang mở): mọi chuyển tầng-màn-hình **tự đóng overlay đang mở** trước khi lật. Overlay thuộc về màn hình bên dưới, không sống sót qua lật trang.
 - **Nếu người chơi mở overlay thứ hai khi overlay thứ nhất đang mở** (VD: đang xem Thẻ, bấm 「Mục」→Settings): overlay mới **tự đóng overlay cũ** (không xếp chồng — Core Rule #1: tối đa 1 overlay). Không thông báo, hành vi như "lật sang tờ ghi chú khác".
-- **Nếu người chơi tap 2 lần liên tiếp cực nhanh vào thẻ gợi ý** (double-fire trên touch): tap thứ nhất chuyển `tm_state=resolving` **đồng bộ ngay trong frame đó**; tap thứ hai rơi vào `write_action_allowed(submit_action, resolving)=0` → bị nuốt. Không cần debounce timer riêng — D.1 là đủ nếu chuyển trạng thái đồng bộ.
+- **Nếu người chơi tap 2 lần liên tiếp cực nhanh vào thẻ gợi ý** (double-fire trên touch): tap thứ nhất chuyển `tm_state=resolving` **đồng bộ ngay trong frame đó**; tap thứ hai rơi vào `write_action_allowed(submit_action, resolving, S2)=0` → bị nuốt. Không cần debounce timer riêng — D.1 là đủ nếu chuyển trạng thái đồng bộ.
 - **Nếu tên nhân vật xuất hiện trong văn tường thuật nhưng `card_exists=false`** (nhân vật được AI nhắc đến nhưng chưa từng xuất hiện trong lượt confirm): tên đó render như chữ thường — **không phải tap target, không gạch chân, không styling link**. Không có trạng thái "link chết".
 - **Nếu Undo xóa đúng lượt đầu tiên làm một nhân vật tồn tại** (`card_exists` chuyển true→false): văn tường thuật của lượt đó biến mất theo Undo (Turn Manager), tap-target biến mất cùng văn bản — không cần xử lý riêng. Nếu Thẻ của nhân vật đó **đang mở** khi Undo hoàn tất: Thẻ tự đóng (không còn nguồn tồn tại), người chơi về S2 bình thường.
 - **Nếu AI timeout (30s) trong lúc người chơi không ở S2** (đang đọc S4): xử lý lỗi theo Core Rule #9 diễn ra ở S2 (thông báo trong khung tường thuật); người chơi lật về thấy thông báo + khu nhập đã mở khóa. Không banner, không kéo người chơi về.
 - **Nếu người chơi bấm nút back của trình duyệt** (HTML5 export): **ngoài phạm vi kiểm soát MVP** — browser back rời khỏi trang game; auto-save 2-checkpoint của Persistence đảm bảo không mất gì ngoài lượt đang Resolving dở (lượt chưa khóa → không tồn tại, đúng ngữ nghĩa). KHÔNG bind lịch sử điều hướng in-app vào browser history ở MVP — ghi thành Open Question cho ADR web export.
 - **Nếu xoay màn hình / resize viewport khi overlay 2-cột đang mở**: D.5 tính lại ngay → Thẻ reflow 1↔2 cột live, vị trí cuộn neo theo block đang đọc (block đầu tiên visible giữ nguyên).
-- **Nếu bấm "Thử lại" (Reset Failed) liên tục**: nút disabled (mờ mực) khi lần reset đang chạy — khóa theo cờ `reset_in_progress` do Character Continuation (#13) sở hữu, KHÔNG qua D.1/`tm_state` vì Turn Manager không hoạt động tại S5 (GAP-4, qa-lead).
+- **Nếu bấm "Thử lại" (Reset Failed) liên tục**: nút disabled (mờ mực) khi `state = "Processing Chơi Lại"` (Character Continuation #13 — không phải cờ `reset_in_progress` riêng, ánh xạ thẳng vào state đã tồn tại của #13, xem D.1), mở khóa lại khi `state = "Reset Failed"` — KHÔNG qua D.1/`tm_state` vì Turn Manager không hoạt động tại S5 (GAP-4).
+- **Nếu S2 đang ở trần `LIVE_WINDOW_TURNS` (D.3b) và người chơi cuộn lên hết cỡ**: hiện dòng "đọc tiếp về trước, mở 「Lục」" thay vì cố tải thêm lượt vào S2 — không có trạng thái loading/spinner nào ở biên này (khác Resolving, đây là biên hiển thị thuần, không chờ AI).
 - **Nếu banner quota xuất hiện khi đang ở Màn hình 3 lối (S5)**: tầng banner render trên **mọi** màn hình kể cả S5 — cảnh báo dung lượng vẫn hợp lệ lúc đang chọn lối tiếp tục (slot mới sắp được tạo cần chỗ).
 - **Nếu mở Story Log khi `total_turns=0`** (vừa Bắt đầu mới, chưa confirm lượt nào): `total_pages=0` (D.3) → trạng thái rỗng: trang giấy trắng + một dòng "Chưa có trang nào được viết" — không lỗi, không placeholder khung xám.
 - **Nếu Esc được bấm trên desktop**: tầng cao nhất đang mở tiêu thụ sự kiện — overlay mở → đóng overlay; không overlay → **không làm gì** (không có pause menu — game turn-based không cần pause). Esc không bao giờ thoát màn hình tầng-screen.
@@ -347,10 +440,10 @@ INVARIANT: DURATION_MS[banner] ≤ DURATION_MS[overlay_settings] ≤ DURATION_MS
 |---|---|---|---|
 | **Turn Manager (#1)** | 2 chiều | Đọc `tm_state` + `undo_available` (input cho D.1/D.2); gửi action submit + Undo qua đường chuẩn | **Cứng** |
 | **Contract Enforcement (#2)** | ràng buộc | #15 là mặt thực thi hiển thị của Core Rule #4 bên đó (số liệu chỉ trong khung con dấu) | **Cứng** |
-| **World Memory (#5)** | đọc | **Interface yêu cầu**: API phân trang `(anchor_turn_id, count, direction)` — KHÔNG trả nguyên Nhật ký (điều kiện để D.3 giữ trần bộ nhớ O(1)); `total_turns(slot)` | **Cứng** |
+| **World Memory (#5)** | đọc | **Interface đã chốt (2026-08-04)**: `get_turn_page(anchor_turn_id, count, direction) → {records, has_more}` — KHÔNG trả nguyên Nhật ký (điều kiện để D.3 giữ trần bộ nhớ O(1)); `total_turns(slot)` | **Cứng** |
 | **Persistence (#6)** | đọc + hiển thị | Danh sách slot + metadata (tên, cảnh giới, world_time, trạng thái, timestamp); banner quota/lỗi ghi | **Cứng** (chiều #15→#6; bên đó đã khai chiều ngược là Mềm — nhất quán: #6 chạy được không cần UI, #15 không chạy được thiếu #6) |
 | **Character Continuation (#13)** | đọc | Cờ `continuation_choice_eligible` (kích takeover S5) + trạng thái Reset Failed/retry | **Cứng** |
-| **Death & Consequence (#12)** | pass-through | Gợi ý Pending Fate đi qua khung 4-gợi-ý chuẩn | Mềm |
+| **Death & Consequence (#12)** | pass-through | Gợi ý Pending Fate đi qua khung 4-gợi-ý chuẩn, mang trọng lượng thị giác riêng do #15 sở hữu (Core Rule #3b) | Mềm |
 | **AI/LLM Layer (#4)** | gián tiếp | Chỉ báo "đang viết" + `ai_call_timeout_seconds=30` | Mềm |
 | EXP (#8) / NPC Affinity (#9) / Setting & Canon (#10) | gián tiếp | Mọi hiển thị đi qua Thẻ hoặc khung tường thuật — không interface trực tiếp | — |
 
@@ -366,19 +459,43 @@ INVARIANT: DURATION_MS[banner] ≤ DURATION_MS[overlay_settings] ≤ DURATION_MS
 
 | Knob | Mặc định | Dải an toàn | Quá cao thì sao | Quá thấp thì sao | Tương tác |
 |---|---|---|---|---|---|
-| `log_page_size` (D.3) | 20 lượt | 10–50 | Mỗi lần tải trang khựng thấy rõ trên mobile (nhiều node RichText/lần) | Prefetch xoay vòng liên tục, nhiều lần gọi World Memory | Trần bộ nhớ UI = tích với `log_max_loaded_pages` — chỉnh 1 trong 2 phải nhìn tích |
+| `log_page_size` (D.3) | 20 lượt | 10–50 | Mỗi lần tải trang khựng thấy rõ trên mobile (nhiều node RichText/lần) | Prefetch xoay vòng liên tục, nhiều lần gọi World Memory | Trần bộ nhớ UI = tích với `log_max_loaded_pages` — chỉnh 1 trong 2 phải nhìn tích. **PHẢI** giữ `> log_prefetch_threshold` (INVARIANT D.3) |
 | `log_max_loaded_pages` (D.3) | 3 trang | 2–5 | Trần bộ nhớ phình (5×50=250 lượt resident ở biên trên cả hai knob) | <2 thì cửa sổ không giữ nổi trang-hiện-tại + trang-kề → thrash tải/evict | Như trên; 2 là sàn cứng logic |
-| `log_prefetch_threshold` (D.3) | 5 lượt | 0–`log_page_size`/2 | Prefetch tham lam — tải trang mới khi vừa cuộn nhẹ | 0 = khựng thấy được đúng lúc chạm biên trang | Vô nghĩa nếu ≥ `log_page_size` (luôn prefetch) |
-| `font_scale_steps` (D.5) | {0.875, 1.0, 1.25} | mỗi nấc ±0.125; **đúng 3 nấc** (Core Rule #10) | Nấc L quá lớn → hàng chip wrap gãy, tên dài tràn khung con dấu | Nấc S quá nhỏ → vi phạm mục đích accessibility của chính knob này | Đầu vào của D.4 (glyph size) và D.5 (ngưỡng 2 cột) |
+| `log_prefetch_threshold` (D.3) | 5 lượt | 0–`log_page_size`/2 | Prefetch tham lam — tải trang mới khi vừa cuộn nhẹ | 0 = khựng thấy được đúng lúc chạm biên trang | **PHẢI** `< log_page_size` (INVARIANT hình thức trong D.3) — vi phạm = luôn prefetch, mất hết lợi ích lazy-load |
+| `live_window_turns` (D.3b) | **30 lượt** | **`CONTENT_EXCHANGE_ESTIMATE` (#7) hiện hành – 50** (sàn TƯƠNG ĐỐI, không phải số cố định — phải neo theo giá trị #7 đang hiệu lực để không vô tình cho phép giá trị vi phạm invariant liên-hệ `≥ CONTENT_EXCHANGE_ESTIMATE`, mirror cách D.6 xử lý `transition_screen_ms`) | Buffer S2 phình, gần lại đúng rủi ro relayout vô hạn mà knob này tồn tại để chặn — trần bộ nhớ TỔNG cần đối chiếu `technical-director` | Cuộn lên chạm biên "đọc tiếp về trước" quá sớm, cảm giác S2 "quên" ngay cả những gì vừa đọc — VÀ nếu thấp hơn `CONTENT_EXCHANGE_ESTIMATE` (#7), vi phạm invariant liên-hệ mới | Độc lập với `log_*` (D.3 — Story Log) và `undo_availability_window`/`recency_window_turns` — 3 khái niệm "cửa sổ" khác nhau, không dùng chung hằng số. **PHẢI `≥ CONTENT_EXCHANGE_ESTIMATE` (#7 Combat)** — invariant liên-GDD hình thức hóa trong code block D.3b + CI-check ở AC-67 (mirror AC-27/AC-52) |
+| `font_scale_steps` (D.5) | {0.875, 1.0, 1.25} | mỗi nấc ±0.125; **đúng 3 nấc** (Core Rule #10) | Nấc L quá lớn → hàng chip wrap gãy, tên dài tràn khung con dấu | Nấc S quá nhỏ → vi phạm mục đích accessibility của chính knob này | Đầu vào của D.4 (glyph size) và D.5 (ngưỡng 2 cột). **PHẢI** giữ `S < M < L` (INVARIANT D.5) |
 | `base_column_width_px` (D.5) | 360 | 320–420 | 2-cột hiếm khi kích hoạt kể cả desktop rộng | 2 cột bị bóp hẹp, dòng chữ gãy vụn | Cặp với `column_gutter_px`; hệ #14 cần đối chiếu khi khóa layout thẻ thật (note chéo) |
 | `column_gutter_px` (D.5) | 24 | 12–48 | Lãng phí bề ngang, đẩy ngưỡng 2-cột lên cao | 2 cột dính nhau, mất ranh giới thị giác | Như trên |
-| `transition_banner_ms` (D.6) | 120 | 80–200 | Banner giành chú ý với nội dung chính | Xuất hiện đột ngột như glitch | **Bất biến D.6**: ≤ settings ≤ card ≤ screen — chỉnh knob nào cũng phải giữ chuỗi |
-| `transition_settings_ms` (D.6) | 150 | 80–300 | Settings "sang trọng" quá mức tiện ích | — | Như trên |
-| `transition_screen_ms` (D.6) | 260 | 150–400 | Lật trang chậm gây ức chế khi qua lại Log↔Chơi nhiều lần | Mất cảm giác "lật trang", thành cắt cảnh khô | Như trên; luôn ≥ `card_transition_ms` (#14) |
+| `transition_banner_ms` (D.6) | 120 | 80 – `transition_settings_ms` hiện hành | Banner giành chú ý với nội dung chính; > `transition_settings_ms` → phá INVARIANT D.6 | Xuất hiện đột ngột như glitch | **LIÊN-KNOB**, không phải khoảng cố định — VD `banner=200 ∧ settings=80` có thể mỗi giá trị "trong dải" riêng nhưng vẫn phá bất biến `banner ≤ settings`. Bất biến D.6: banner ≤ settings ≤ card ≤ screen |
+| `transition_settings_ms` (D.6) | 150 | `transition_banner_ms` hiện hành – `card_transition_ms` (#14, mặc định 200) | Settings "sang trọng" quá mức tiện ích; > `card_transition_ms` → phá INVARIANT | < `transition_banner_ms` → phá INVARIANT | Như trên |
+| `transition_screen_ms` (D.6) | 260 | ≥ `card_transition_ms` (#14, mặc định 200) – 400 | Lật trang chậm gây ức chế khi qua lại Log↔Chơi nhiều lần | Mất cảm giác "lật trang", thành cắt cảnh khô; < `card_transition_ms` → phá INVARIANT | Đáy dải phải neo theo giá trị `card_transition_ms` (#14) đang hiệu lực, không phải hằng số cố định — nếu #14 tune giá trị đó lên, đáy dải ở đây phải tune theo |
 
 **Không phải knob** (hằng khóa, đổi = re-review chuẩn ngoài): `TOUCH_TARGET_MIN=44`, `MIN_ADJACENT_GAP_PX=4` (D.4).
 
 **Knob thuộc hệ khác, không nhân bản** (trỏ nguồn): `card_transition_ms=200` (#14 — tầng `overlay_card` của D.6), `quota_warn_threshold` (#6 — ngưỡng kích banner), `suggested_action_count=4` (hằng registry #1, không phải knob).
+
+### Registry hằng số dùng chung — Visual/Audio + hằng khóa khác
+
+*Bảng này là NGUỒN DUY NHẤT cho mọi giá trị placeholder/hằng khóa dùng lặp lại trong Visual/Audio + Formulas — mọi nơi khác trong GDD PHẢI tham chiếu tên biến, KHÔNG lặp lại số. Khi sửa 1 giá trị, sửa Ở ĐÂY trước, rồi grep toàn văn tên biến để xác nhận không còn số cũ nào sót lại.*
+
+| Hằng số | Giá trị hiện hành | Định nghĩa gốc | Dùng bởi | Trạng thái |
+|---|---|---|---|---|
+| Alpha — mực đầy | `1.0` | Mục 9 (bảng feedback) | Văn tường thuật mặc định, dòng mời cỡ chữ (AC-63b) | Khóa |
+| Alpha — "-1 bậc" (nhạt) | `0.68` | Mục 9 | Chỉ báo "đang viết" (mục 3), empty-state (mục 8) | Placeholder — `art-director` xác nhận khi khóa bảng màu |
+| Alpha — mờ mực (disabled) | `0.38` | Mục 9 | Trạng thái Disabled (D.1 mutating khi resolving/undoing), nút "Thử lại" khi `state="Processing Chơi Lại"` | Placeholder, dựa miễn trừ WCAG 1.4.3 |
+| Alpha — nhịp thở tap-to-continue | `[0.85, 1.0]` | Mục 2 (S5 takeover) | AC-61a | Placeholder — khóa đáy trên ngưỡng 0.68 có chủ đích |
+| Focus indicator — độ dày | `2px` | Mục 9 | Mọi phần tử focusable qua bàn phím | Khóa, không co theo `theme_scale` |
+| Font-weight — thân văn | `400` | Mục 11 | Baseline so sánh cho tap-tên | Placeholder |
+| Font-weight — tap-tên (Họ B đậm hơn) | `600` | Mục 11 | AC-53 `[Unit]` | Placeholder |
+| Desaturation — S4-RO vs S4 live | `-40%` (giữ nguyên lightness) | Mục 7 | Phân biệt S4/S4-RO khi cả 2 cùng có nút "«..." | Placeholder |
+| `TOUCH_TARGET_MIN` | `44px` | D.4 | Mọi phần tử độc lập nhóm (b), AC-20/22 | Hằng khóa (không phải knob) |
+| `MIN_ADJACENT_GAP_PX` | `4px` | D.4 | AC-22 | Hằng khóa |
+| `undo_depth` | `1` | Turn Manager #1 (registry) | Core Rule #5, mục 12 | Trỏ nguồn #1 |
+| `ai_call_timeout_seconds` | `30` | AI/LLM Layer #4 (registry) | Core Rule #9, AC-33/34 | Trỏ nguồn #4 |
+| `live_window_turns` | `30` | D.3b (Tuning Knobs ở trên) | AC-48/50/61a | Tuning knob #15, PHẢI `≥ CONTENT_EXCHANGE_ESTIMATE` |
+| `CONTENT_EXCHANGE_ESTIMATE` | `30` (mặc định), dải `15–50` | Combat #7 (registry) | Invariant D.3b (AC-67) | Trỏ nguồn #7, không nhân bản |
+
+⚠️ **Rủi ro liên-GDD đã xác nhận — CẢ 2 CHIỀU**: dải an toàn của `card_transition_ms` khai ở #14 (0–400ms) là **độc lập**, không hề tham chiếu invariant liên-knob D.6 (`banner ≤ settings ≤ card ≤ screen`) của #15 — invariant có thể vỡ theo **2 hướng độc lập**, không chỉ 1: (a) nếu #14 tune `card_transition_ms` XUỐNG dưới `transition_banner_ms` hiện hành, phá `banner ≤ card`; (b) nếu #14 tune `card_transition_ms` LÊN cao — VD 300, vẫn hoàn toàn hợp lệ trong dải riêng 0–400 của #14 — trong khi `transition_screen_ms` mặc định của #15 chỉ là 260, phá `card ≤ screen` ngay cả khi #15 KHÔNG tune gì cả. Cả 2 chiều đều là rủi ro độc lập, không trùng nhau. AC-27 (registry-based, BLOCKING) là lưới an toàn CI đủ mạnh để chặn CẢ 2 chiều khi merge — không blocking cho approve GDD này — nhưng khi `/create-architecture` đăng ký `card_transition_ms` vào registry (đã cam kết ở D.6 Rationale), cần thêm dòng ghi chú chéo trong chính `character-card-identity.md` nêu rõ CẢ 2 chiều rủi ro để người tune biết ràng buộc tồn tại trước khi CI báo đỏ.
 
 ## Visual/Audio Requirements
 
@@ -388,16 +505,26 @@ INVARIANT: DURATION_MS[banner] ≤ DURATION_MS[overlay_settings] ≤ DURATION_MS
 
 - **Thuần typography** — chính 3 chữ LÀ icon, không asset icon riêng (tái dùng nguyên tắc badge 「che giấu」 hệ #14). Font họ "văn Hồ sơ" (bút lông, cùng family chữ tường thuật) — KHÔNG dùng family "số trong seal". Trọng lượng NHẸ HƠN thân văn 1 bậc — bút tích lùi vào hậu cảnh nhưng đọc được ngay.
 - **Không khung bao** ở trạng thái mặc định — không viền tròn/vuông/pill (khác hẳn ngôn ngữ "nav bar icon"). Vùng chạm thật (D.4 nhóm (b), ≥44px) vô hình, mở rộng ngoài glyph.
-- **Bố trí**: xếp dọc lề phải header cảnh, mỗi bút tích 1 dòng riêng, tôn trọng `MIN_ADJACENT_GAP_PX`.
+- **Bố trí — 2 vị trí lặp lại tại S2**: (a) bản trên — xếp dọc lề phải header cảnh, mỗi bút tích 1 dòng riêng, tôn trọng `MIN_ADJACENT_GAP_PX`; (b) bản dưới — cùng 3 chữ, cùng ngôn ngữ thị giác (không khung, trọng lượng nhẹ hơn thân văn), xếp NGANG cạnh khu nhập hành động, cùng hàng với nút Undo. Hai bản là cùng 1 điểm vào chức năng (không phải 2 hệ thống riêng) — chỉ lặp vị trí để luôn có 1 bản trong tầm tay bất kể người chơi đang cuộn ở đâu. S4/S4-RO/S5 giữ nguyên 1 vị trí (thanh chrome đầu màn hình) vì các màn hình đó không có khu nhập hành động ở đáy.
 - **Trạng thái "không có"** phân biệt 2 loại: khóa tạm bởi Turn Manager → chỉ áp cho hành động MUTATING bên trong overlay (mờ mực alpha); không áp dụng về cấu trúc cho màn hình hiện tại (VD 「Mục」 ở S4-RO) → **ẩn hoàn toàn**, không ghost (cùng logic nút Undo biến mất). Bút tích tự nó không bao giờ mờ mực — cả 3 đều readonly, luôn tự do.
 - Ở S5, 「Mục」 chỉ còn "Về danh sách sổ" — bút tích không đổi hình, chỉ nội dung menu đổi.
+**Hai họ con của "ngôn ngữ marginalia" — KHÔNG cùng hướng đậm/nhạt**:
 
-→ **Art Bible**: "Marginalia, not chrome" — điểm vào điều hướng toàn cục đọc như ghi chú tay, không bao giờ dùng ngôn ngữ button/icon-badge kiểu app.
+- **Họ A — bút tích thường trực** (「Thẻ」「Lục」「Mục」, mục này): **NHẸ HƠN** thân văn 1 bậc — xuất hiện lặp lại hàng trăm lần mỗi phiên chơi, người chơi HỌC vị trí cố định của chúng qua lặp lại, nên được phép "lùi vào hậu cảnh" mà không mất khả năng tìm thấy.
+- **Họ B — tap-target chủ động hiếm gặp** (tap-tên trong văn tường thuật — mục 11; dòng dẫn biên cửa sổ S2 "đọc tiếp về trước" — D.3b; dòng tap-to-continue trước S5 takeover — Core Rule #6): **ĐẬM HƠN** thân văn 1 bậc, cùng chiều với mục 11 — các phần tử này KHÔNG có vị trí cố định để học qua lặp lại (trôi nổi trong dòng chảy văn bản, hoặc chỉ xuất hiện 1 lần/hiếm), nên cần tự nổi bật ngay lần đầu thay vì dựa vào trí nhớ vị trí của người chơi.
+
+Cả 2 họ đều dùng chung: font "văn Hồ sơ", không khung bao, không màu, vùng chạm thật ≥44px vô hình mở rộng ngoài glyph — khác nhau DUY NHẤT ở hướng đậm/nhạt, vì lý do phát hiện (discoverability) khác nhau đã nêu trên. Dòng dẫn biên cửa sổ S2 (D.3b) và dòng tap-to-continue trước S5 (Core Rule #6) đều thuộc **Họ B** — không phải hằng số riêng, không phải empty-state (mục 8), và không cùng hướng với 3 bút tích của chính mục này.
+
+**Onboarding lần đầu**: quy ước "chữ đậm/nhạt hơn 1 bậc = tap target" (Họ A/B ở trên) là 1 quy ước thị giác hoàn toàn riêng của game này — không giống bất kỳ mental model "nav = icon/nút/khung" nào người chơi mang sẵn. Để tránh người chơi lần đầu bỏ lỡ hoàn toàn cả 3 bút tích lẫn tap-tên: lần ĐẦU TIÊN S2 render **trên toàn bộ thiết bị** (per-device, đọc field `has_seen_marginalia_onboarding` trong `app_config` — CÙNG cơ chế lưu trữ đã dùng cho cỡ chữ, xem mục 4), 3 bút tích Họ A chạy 1 nhịp **"vừa được viết ra"** (ink-reveal — nét mực hiện dần từ trong suốt tới trọng lượng bình thường, ~1 lần duy nhất, không lặp) để mắt tự nhiên chú ý mà không cần tooltip/bong bóng chỉ dẫn kiểu app — giữ đúng tinh thần diegetic. *(Trigger per-device, không theo slot — nếu neo theo slot, mỗi lần chết+"Chơi lại"/"Bắt đầu mới" tạo slot MỚI [D.3b, hàng "Chuyển sang SLOT KHÁC"] sẽ khiến ink-reveal replay ở MỌI slot mới, người chơi chết 20 lần thấy animation 20 lần — ngược nguyên tắc "không lặp lại điều đã học" mà GDD áp dụng nhất quán ở mọi nơi khác. Set `has_seen_marginalia_onboarding=true` ngay sau lần chạy đầu tiên, không phụ thuộc slot.)* Xem thêm mục 4 (Save Slot Screen) cho phần hỏi cỡ chữ chủ động — vì 「Mục」→Settings là nơi DUY NHẤT chứa tính năng cỡ chữ (accessibility), không thể chỉ dựa vào việc người chơi tự phát hiện quy ước ẩn này.
+
+→ **Art Bible**: "Marginalia, not chrome" — điểm vào điều hướng toàn cục đọc như ghi chú tay, không bao giờ dùng ngôn ngữ button/icon-badge kiểu app. Trong họ ghi chú tay đó, đậm/nhạt mã hóa tần suất-học-được: cái gì người chơi gặp lại thường xuyên được phép nhạt; cái gì hiếm/trôi nổi phải tự đậm.
 
 ### 2. Họ chuyển cảnh lật trang (D.6)
 
 - **Tầng `screen` (260ms)**: màn hình ĐI skew nhẹ + scale_x co (1.0→~0.85) pivot tại cạnh "gáy" trong 60% đầu, fade 40% cuối; màn hình ĐẾN nằm sẵn layer dưới, KHÔNG tự animate — chỉ 1 Control cần animate, rẻ.
 - **Hướng lật mã hóa chiều điều hướng**: tiến (vào sâu) lật từ phải; lùi/đóng lật từ trái — wayfinding tự nhiên không cần breadcrumb/nút back.
+- **Takeover S5 (Core Rule #6) KHÔNG dùng page-flip**: đây là chuyển cảnh DUY NHẤT trong game không do người chơi tap — luật "tiến lật phải/lùi lật trái" không có ý nghĩa ở đây (không có "chiều điều hướng" do người chơi chọn). Chữ ký riêng: trang S2 hiện hành **mực nhòe/lặng đi tại chỗ** (không skew/scale_x, không dịch chuyển ngang) rồi S5 hiện ra — tách biệt rõ ràng "đây không phải một lần điều hướng nữa" cho đúng khoảnh khắc cao-stakes nhất của game. Chi tiết animate (tween alpha + nhòe nhẹ, ~`transition_screen_ms`) giao `technical-artist`, không blocking.
+- **Nhịp "thở" cho dòng dẫn tap-to-continue TRƯỚC takeover** — khác với chính animation takeover ở trên (xảy ra SAU khi tap): dòng dẫn "… (chạm để tiếp tục)" (Core Rule #6, Họ B mục 1) tự mang 1 nhịp alpha dao động chậm và đều (chu kỳ ~2s, KHÔNG nhấp nháy nhanh — không kích hoạt vestibular/seizure trigger), lặp liên tục cho tới khi được chạm — mục đích DUY NHẤT là kéo mắt người chơi về đúng chỗ cần tap ngay sau khi đọc xong đoạn văn cảm xúc cao, không phải trang trí. **Biên độ neo số**: dao động alpha trong khoảng **`[0.85, 1.0]`** (KHÔNG xuống tới bậc "-1" 0.68 đã khóa ở mục 9 cho text thụ động) — đáy chu kỳ (0.85) vẫn giữ contrast rõ ràng trên nền `#F5EFE0` (ước tính ~11:1, xa trên ngưỡng AA 4.5:1), đảm bảo dòng dẫn KHÔNG BAO GIỜ mất khả năng đọc/phát hiện tại bất kỳ điểm nào trong chu kỳ thở. Không map theo `%` thời gian thật (khác chỉ báo "đang viết" mục 3 — dòng này không có deadline). Dừng nhịp thở ngay khi chạm, chuyển thẳng sang animation takeover ở bullet trên.
 - **Không fade-to-black** — nền giấy kem là base xuyên suốt; degradation xấu nhất là cắt cứng giấy-sang-giấy.
 - Highlight mép giấy đang lật (gradient chéo alpha thấp) = polish tùy chọn, giao `technical-artist`, không blocking.
 - **Mỗi tầng có 1 chữ ký chuyển động riêng** (không tái dùng chéo): `screen` = lật trang; `overlay_card` = mực loang (#14 sở hữu, không định nghĩa lại); `overlay_settings` = trượt dọc từ mép trên + fade, KHÔNG mực loang (Settings là hành chính, không "sống"); `banner` = fade + rơi nhẹ 1 nấc.
@@ -422,6 +549,9 @@ INVARIANT: DURATION_MS[banner] ≤ DURATION_MS[overlay_settings] ≤ DURATION_MS
 - **"Bắt đầu mới"**: đầu danh sách, gáy nét đứt rất nhạt, không cue mở/dấu khép — "cuốn sổ trắng chưa viết".
 - **Xóa slot**: xác nhận giữ style con dấu đen-xám, KHÔNG nút đỏ/danger — thao tác menu ≠ hệ quả cơ học.
 - **Nhiều slot**: virtualize danh sách (cùng tinh thần trần bộ nhớ D.3).
+- **Hỏi cỡ chữ chủ động lần đầu mở app**: lần Save Slot Screen render mà `app_config` CHƯA có field cỡ chữ đã-chọn (`font_size_setting` chưa tồn tại — tách biệt tường minh khỏi field `has_seen_marginalia_onboarding` ở mục 1, xem dưới), hiện 1 dòng diegetic đơn giản mời chọn cỡ chữ (3 tap target S/M/L, cùng style đã đặc tả ở mục 6 Settings) ngay tại màn hình — KHÔNG phải modal ép buộc, không chặn "Bắt đầu mới"/"Tiếp tục".
+  - **Ngữ nghĩa trigger — CHỦ ĐÍCH lặp lại tới khi CHỌN, không phải tới khi THẤY**: nếu người chơi bỏ qua dòng mời (không tap S/M/L nào) rồi thoát app, `font_size_setting` không được ghi → dòng mời hiện LẠI ở lần mở Save Slot Screen kế tiếp, lặp lại cho tới khi người chơi thực sự CHỌN 1 nấc. Đây là quyết định có chủ đích (không phải bug): tính năng accessibility không nên bị "đã xem 1 lần rồi thôi" — người chơi có thể bỏ qua nhiều lần vì đang vội, nhưng cơ hội chọn cỡ chữ phù hợp không nên biến mất vĩnh viễn sau đúng 1 lần lướt qua.
+  - **Contrast/size tối thiểu ở cấu hình MẶC ĐỊNH — bắt buộc, không phụ thuộc `theme_scale`**: dòng mời PHẢI tự đạt **alpha bậc 1.0 (mực đầy, KHÔNG dùng ngôn ngữ marginalia Họ A nhạt hơn)**, cỡ glyph **≥ cỡ thân văn tại nấc M** (không phụ thuộc `theme_scale` hiện hành — luôn render ở nấc M bất kể setting đã lưu trước đó, vì đây là bước THIẾT LẬP cỡ chữ, chưa có setting nào đáng tin để dựa vào), và 3 tap-target S/M/L mỗi cái `≥ TOUCH_TARGET_MIN` theo D.4 nhóm (b). Lý do: đây là đường dẫn DUY NHẤT giúp người thị lực kém tìm ra tính năng khắc phục cho chính họ — nếu dòng mời tự nó khó đọc, tạo đúng vòng lặp thất bại accessibility mà onboarding được sinh ra để tránh (nguyên tắc bootstrapping: affordance dẫn tới 1 tính năng accessibility phải tự đạt ngưỡng accessibility ở cấu hình mặc định).
 
 → **Art Bible**: "Mỗi 'kho chứa' trong ẩn dụ nhật ký có 1 hình khối riêng — organic-blot = dữ liệu sống; geometric-spine = vật thể chứa; seal góc cạnh = sự thật đã khóa."
 
@@ -439,7 +569,7 @@ INVARIANT: DURATION_MS[banner] ≤ DURATION_MS[overlay_settings] ≤ DURATION_MS
 ### 6. Settings overlay
 
 - Nền giấy kem + typography chuẩn — KHÔNG bảng điều khiển xám/xanh kiểu app.
-- **Ngoại lệ hình học phẳng duy nhất toàn game**: 1 tấm giấy chữ nhật phẳng, list dọc nhãn+control — không khung mực loang (dành riêng Card), không drop-shadow, không bo góc app hiện đại.
+- **Ngoại lệ hình học PHI-DIEGETIC duy nhất toàn game**: game có 2 trục hình khối khác nhau — trục 1 (diegetic, đã dùng ở nơi khác): gáy sách Save Slot (mục 4), seal góc cạnh (Persistence) — đều hình học NHƯNG vẫn là vật thể/con dấu có thật trong ẩn dụ nhật ký; trục 2 (phi-diegetic): Settings là **ngoại lệ DUY NHẤT ở trục này** — 1 tấm giấy chữ nhật phẳng, list dọc nhãn+control — không khung mực loang (dành riêng Card), không drop-shadow, không bo góc app hiện đại, và KHÔNG giả vờ là một vật thể trong thế giới (khác gáy sách/seal, vốn giả vờ là vật thật).
 - **Cỡ chữ S/M/L**: 3 tap target ngang hàng, mỗi ô hiển thị CHÍNH glyph mẫu ở kích thước thật sẽ áp dụng (xem trước bằng mắt); ô đang chọn = 1 chấm mực đặc nhỏ bên dưới (KHÔNG gạch chân — đã mang nghĩa "hậu quả thoáng qua" ở hệ #12).
 - **Cấu hình AI**: hàng nhãn+input đơn dòng cùng style — field cụ thể do ADR backend quyết.
 
@@ -449,8 +579,9 @@ INVARIANT: DURATION_MS[banner] ≤ DURATION_MS[overlay_settings] ≤ DURATION_MS
 
 - Chuyển cảnh vào/ra: page-flip tầng `screen`, tiến khi vào từ S2, lùi khi lật về.
 - **"về đầu câu chuyện"**: bút tích nhỏ cùng family mục 1, ở thanh chrome mỏng đầu màn hình; ký hiệu mũi tên = 1 nét mực hất chéo tay vẽ, KHÔNG chevron UI chuẩn. Tap → `default_page_index → 0`, reload theo D.3.
-- **S4 vs S4-RO**: S4-RO mang 1 con dấu tĩnh góc trên-trái (TÁI DÙNG con dấu "đã khép" mục 4); toàn chrome + văn bản S4-RO **khử bão hòa xuyên suốt** — "cuốn sách đã đóng đọc xám hơn", không chỉ 1 badge. S4 live giữ full-contrast.
+- **S4 vs S4-RO**: S4-RO mang 1 con dấu tĩnh góc trên-trái (TÁI DÙNG con dấu "đã khép" mục 4); toàn chrome + văn bản S4-RO **khử bão hòa xuyên suốt** — "cuốn sách đã đóng đọc xám hơn", không chỉ 1 badge. **Số neo (khử bão hòa là tín hiệu CHÍNH phân biệt S4/S4-RO khi cả 2 đều có nút "«...")**: giảm saturation **-40%** so với màu gốc (placeholder kỹ thuật, `art-director` xác nhận khi khóa bảng màu — cùng tinh thần placeholder alpha ở mục 9), giữ nguyên độ sáng (lightness không đổi, chỉ giảm bão hòa) để không đụng ngưỡng contrast đã khóa. S4 live giữ full-contrast (saturation gốc, 0% khử).
 - S4 mở trong Resolving: cuộn tới cuối thấy đúng chỉ báo "thế giới đang viết" (mục 3) — nhất quán với S2.
+- **Exit ở S4 (live)**: bút tích văn bản tĩnh "« Chơi tiếp" cùng thanh chrome, cùng family mục 1 (Họ A — nhẹ hơn, vì đây là vị trí cố định người chơi học được qua lặp lại). KHÔNG cần adaptive theo `origin_screen` như S4-RO — S4 (live) chỉ có đúng 1 nguồn mở (S2 qua 「Lục」, Core Rule #3), nên đích quay về luôn là S2.
 - **Exit ở S4-RO**: bút tích văn bản thích ứng theo `origin_screen` (D.2): "« về danh sách sổ" (từ S1) / "« về [tên nhân vật]" (từ S5).
 
 → **Art Bible**: "Sách đã đóng đọc xám hơn sách đang mở — bằng tông màu xuyên suốt bề mặt, không phải badge phụ."
@@ -476,6 +607,16 @@ INVARIANT: DURATION_MS[banner] ≤ DURATION_MS[overlay_settings] ≤ DURATION_MS
 
 → **Art Bible**: "3 kênh phản hồi input tách biệt: pressed (bắt buộc, mọi input), hover (bonus, mouse), focus (bắt buộc, bàn phím) — không kênh nào thay thế kênh kia."
 
+**Giá trị alpha/contrast (placeholder)** — mô tả nghệ thuật ("mờ mực", "-1 bậc alpha") dùng lặp lại ≥4 nơi (Disabled ở đây; chỉ báo "đang viết" mục 3; empty state mục 8; banner mục 5); số dưới đây tính bằng công thức WCAG relative luminance + alpha-composite (sRGB space) trên 2 mã màu đã khai `#F5EFE0`/`#2B2620` — làm **placeholder kỹ thuật**, `art-director` xác nhận/điều chỉnh khi khóa bảng màu chính thức (art bible):
+
+| Bậc | Alpha (trên nền giấy kem #F5EFE0-tương đương) | Mực gốc (thân văn) | Contrast ratio đạt được | Dùng cho |
+|---|---|---|---|---|
+| Mực đầy (100%) | 1.0 | Mực đen-xám thân văn (~#2B2620) | ≈13.1:1 | Văn tường thuật mặc định |
+| -1 bậc (nhạt) | **0.68** | Cùng mực gốc, alpha 0.68 | **≈4.9:1** | Chỉ báo "đang viết" (mục 3), empty-state (mục 8) — TEXT ĐANG HOẠT ĐỘNG, không có miễn trừ, phải đạt AA thật. (Dòng "đọc tiếp về trước" D.3b KHÔNG ở bậc này — nó là tap-target, dùng styling bút tích marginalia mục 1, không phải bậc alpha thụ động này.) |
+| Mờ mực (disabled) | 0.38 | Cùng mực gốc, alpha 0.38 | **≈2.2:1** | Trạng thái Disabled (bảng trên), nút "Thử lại" khi `state="Processing Chơi Lại"` — dựa vào miễn trừ WCAG 1.4.3 (text của inactive UI component), KHÔNG tự nhận đạt AA |
+
+Bậc 100% và bậc "-1" (0.68) đạt **≥4.5:1** (WCAG AA cho text thường) trên nền giấy kem đã mô tả. Bậc "mờ mực" (0.38) hụt AA về số nhưng hợp lệ nhờ miễn trừ 1.4.3 cho thành phần vô hiệu hóa — không hạ alpha thấp hơn 0.38 nếu nền giữ nguyên độ sáng hiện tại (đã là sàn thực nghiệm, không phải sàn lý thuyết). Toàn bộ 3 số vẫn là **placeholder kỹ thuật** — `art-director` xác nhận/điều chỉnh khi khóa bảng màu chính thức; số đã sửa chỉ đảm bảo placeholder không tự mâu thuẫn với chuẩn nó tuyên bố đạt. Viền focus (dòng "Focus" ở bảng trên) chốt cố định **2px** (không còn dải "1–2px" mơ hồ), không co theo `theme_scale` (D.5) — độ dày viền là hằng số độc lập cỡ chữ.
+
 ### 10. Khẩu phần màu — #15 hoàn toàn MONO
 
 Mọi bề mặt #15 **tự sở hữu** (bút tích, page-flip, chỉ báo đang-viết, chrome Save Slot, banner, Settings, chrome Story Log) đều MONO — giống hệ #13, không phát sinh cách dùng đỏ son/xanh ngọc mới. Hai màu accent chỉ xuất hiện khi #15 làm **sân khấu** cho nội dung hệ khác (Card mở từ 「Thẻ」 mang nguyên badge đỏ son của #14/#12; văn tường thuật trong khung #15 mang nét đỏ thoáng qua của #12) — #15 không restyle, không nhân bản.
@@ -483,6 +624,27 @@ Mọi bề mặt #15 **tự sở hữu** (bút tích, page-flip, chỉ báo đan
 **Mở rộng precedent log màu** (được duyệt): con dấu "đã khép" trên Save Slot/Story Log read-only dùng **khử bão hòa, KHÔNG đỏ son** — dù slot khép tương ứng `alive=false` và Card nhân vật đó hợp lệ mang triện đỏ. Không mâu thuẫn: Card = "soi 1 đời cụ thể" (màu khẩu phần hợp lệ, hiếm); Save Slot = "mục lục nhiều đời cùng lúc" — tô đỏ ở đây nhân bản tần suất màu, phá cơ chế hiếm-mới-có-nghĩa.
 
 → **Art Bible**: "Cùng 1 sự thật cơ học có thể có 2 biểu đạt thị giác tùy MẬT ĐỘ bề mặt — bề mặt 'soi 1 mục tiêu' dùng màu khẩu phần; bề mặt 'liệt kê nhiều mục tiêu' dùng khử bão hòa."
+
+### 11. Tap-tên trong văn tường thuật — styling dương tính (D.4a)
+
+Edge Cases đã đặc tả kỹ trường hợp PHỦ ĐỊNH (`card_exists=false` → chữ thường, không gạch chân/styling — "không có link chết"), nhưng chưa từng nói tên tap-được (`card_exists=true`) trông ra sao — dù đây là tương tác lặp lại nhiều nhất trong toàn game (Core Rule #8, xuyên 4 bề mặt). Không phải chỗ trống dễ điền: gạch chân đã bị hệ #12 chiếm nghĩa ("hậu quả thoáng qua", xem mục 6), đỏ son bị cấm ở #15 (mục 10 — MONO hoàn toàn), khung bao bị cấm (ngôn ngữ nav-bar, xem mục 1). Trục còn khả dụng duy nhất: **độ đậm mực**.
+
+- **Tên `card_exists=true` render đậm mực hơn thân văn xung quanh đúng 1 bậc** (font-weight nặng hơn 1 nấc so với văn tường thuật mặc định) — không gạch chân, không khung, không màu. Đủ phân biệt ở trạng thái mặc định (không cần hover để phát hiện — hover là kênh "Bonus", theo mục 9), nhất quán ngôn ngữ "mực" toàn game thay vì mượn ngôn ngữ "link" web chuẩn.
+- **Giá trị font-weight placeholder**: thân văn mặc định = **400** (Regular); tên `card_exists=true` (Họ B, đậm hơn 1 bậc) = **600** (SemiBold) — cùng tinh thần placeholder kỹ thuật đã dùng cho bảng alpha/contrast (mục 9): `art-director` xác nhận/điều chỉnh khi khóa bảng font chính thức, nhưng đặt số ngay để AC-53 có ngưỡng đo được thay vì "1 bậc" định tính (2 bản dựng khác nhau có thể tự nhận "đậm hơn 1 bậc" dù chênh lệch hoàn toàn nếu không có số neo).
+- Trạng thái Pressed/Hover/Focus (mục 9) áp dụng CHỒNG lên độ đậm nền này (tăng thêm 1 bậc đậm tạm thời khi pressed/hover; viền focus 2px khi Tab) — không thay thế nó.
+- Ranh giới rõ với gạch chân của hệ #12: 2 hệ ngôn ngữ thị giác không chồng lấn (đậm mực = "đây là cửa vào Thẻ"; gạch chân = "đây là hệ quả narrative đã xảy ra") — không có văn bản nào cần cả 2 cùng lúc trong scope MVP.
+
+→ **Art Bible**: "Trục thị giác duy nhất còn trống cho tap-target nhúng-trong-văn sau khi gạch chân/màu/khung đã bị các hệ khác chiếm nghĩa: độ đậm mực — nặng nét hơn 1 bậc, không mượn ngôn ngữ 'link' web chuẩn."
+
+### 12. Nút Undo — chữ ký lúc biến mất
+
+Player Fantasy hứa tường minh: "khi nó biến mất, người chơi hiểu ngay: mực đã khô". GDD đặc tả cả ĐIỀU KIỆN biến mất (`undo_available=false`, Core Rule #5) VÀ CÁCH biến mất — mọi tầng UI khác trong game đều có 1 chữ ký chuyển động riêng (D.6 cho tầng screen/overlay/banner; mục 2 cho page-flip; mục 3 cho "đang viết") nhưng Undo — biểu tượng trung tâm nhất của Pillar 2 — lại không có.
+
+- **Chữ ký**: khi `undo_available` chuyển `true→false`, nút KHÔNG snap biến mất giữa 2 frame — mực nhạt dần (fade alpha 1.0→0) trong ≤150ms (cùng ngân sách "hard cut hoặc fade ≤150ms" đã khóa ở mục 9), sau đó gỡ khỏi layout (không để lại khoảng trống — khu nhập co lại mượt theo).
+- **Không phải 1 tier mới của D.6** (Undo không phải tầng điều hướng screen/overlay/banner) — đây là 1 tín hiệu trạng thái cục bộ, ngân sách thời lượng mượn từ mục 9, không đăng ký thêm tier vào D.6.
+- Khi biến mất do `is_death_turn=true` (không phải do lượt kế tiếp confirm bình thường): CÙNG fade, không có biến thể riêng — sự kiện cái chết đã có trọng lượng riêng qua chính đoạn văn + nhịp chạm tap-to-continue (mục "S5 takeover", Core Rule #6), không cần Undo "diễn" thêm.
+
+→ **Art Bible**: "Mọi trạng thái biến mất trong ẩn dụ nhật ký đều có 1 khoảnh khắc mờ dần — không có gì snap ra khỏi tồn tại; ngay cả sự vắng mặt cũng được viết ra, không bị xóa."
 
 > 📌 **Asset Spec** — Visual/Audio requirements đã định nghĩa. Sau khi art bible được duyệt, chạy `/asset-spec system:core-ui-screen-navigation` để sinh mô tả per-asset, kích thước, và generation prompt từ section này.
 
@@ -492,9 +654,9 @@ Mọi bề mặt #15 **tự sở hữu** (bút tích, page-flip, chỉ báo đan
 
 | Vùng | Mobile portrait (1 cột) | Desktop/landscape |
 |---|---|---|
-| Header cảnh + 3 bút tích lề | Đầu trang, cuộn theo nội dung (không sticky — hệ #11 đã khóa) | Như mobile, bút tích lề phải |
-| Khung tường thuật | Chiếm toàn bề ngang, cuộn dọc, tối đa ~70ch/dòng để dễ đọc | Cột giữa tối đa `readable_width` (~65–75ch), căn giữa, 2 lề giấy trống |
-| Khu nhập hành động | Dưới cùng luồng cuộn (KHÔNG sticky footer — người chơi cuộn xuống để hành động, như viết tiếp trang giấy) | Như mobile, cùng cột với khung tường thuật |
+| Header cảnh + 3 bút tích lề (bản trên) | Đầu trang, cuộn theo nội dung (không sticky — hệ #11 đã khóa) | Như mobile, bút tích lề phải |
+| Khung tường thuật | Chiếm toàn bề ngang, cuộn dọc, tối đa ~70ch/dòng để dễ đọc, cửa sổ trượt tối đa `LIVE_WINDOW_TURNS=30` lượt resident (D.3b) — cuộn lên chạm biên hiện dòng dẫn "đọc tiếp về trước → 「Lục」" | Cột giữa tối đa `readable_width` (~65–75ch), căn giữa, 2 lề giấy trống |
+| Khu nhập hành động + 3 bút tích lề (bản dưới) | Dưới cùng luồng cuộn (KHÔNG sticky footer — người chơi cuộn xuống để hành động, như viết tiếp trang giấy); 3 bút tích 「Thẻ」「Lục」「Mục」 nhân bản ngay cạnh khu nhập (xem Core Rule #3) | Như mobile, cùng cột với khung tường thuật |
 | Nút Undo | Cạnh khu nhập, chỉ render khi `undo_available=true` | Như mobile |
 
 - Thứ tự trong khu nhập (trên→xuống): 4 thẻ gợi ý → hàng chip intent (wrap theo nội dung, nhóm theo NPC) → ô tự do + nút gửi (+ dòng nudge heuristic khi có).
@@ -507,7 +669,7 @@ Mọi bề mặt #15 **tự sở hữu** (bút tích, page-flip, chỉ báo đan
 
 ### Story Log (S4/S4-RO)
 
-- Thanh chrome mỏng đầu màn hình: bút tích "về đầu câu chuyện" + bút tích 「Thẻ」 (thẻ bản thân — GAP-3) + (S4-RO) con dấu đã-khép + nút thoát thích ứng `origin_screen`.
+- Thanh chrome mỏng đầu màn hình: bút tích "về đầu câu chuyện" + bút tích 「Thẻ」 (thẻ bản thân — GAP-3) + **(S4 live) bút tích "« Chơi tiếp"** + (S4-RO) con dấu đã-khép + nút thoát thích ứng `origin_screen`.
 - Nội dung phân trang theo D.3; scroll container duy nhất; marker "Lượt N" thuộc World Memory.
 
 ### Settings (O-Set)
@@ -516,24 +678,28 @@ Mọi bề mặt #15 **tự sở hữu** (bút tích, page-flip, chỉ báo đan
 
 ### Trách nhiệm responsive (toàn cục)
 
-- Breakpoint duy nhất được phép: ngưỡng `two_column_layout` (D.5) — không media-query rải rác. Mobile luôn 1 cột (đã chứng minh ở D.5).
+- Breakpoint duy nhất được phép: ngưỡng `two_column_layout` (D.5) — không media-query rải rác: 1-cột **đã chứng minh bất biến ở D.5 chỉ trong dải `viewport ≤ 480px`** — hành vi ở dải 481–1024px (tablet) chưa có quyết định UX tường minh, phụ thuộc Open Question #1 (dải viewport target chính thức cho "Mobile Web").
 - Xoay màn hình/resize: reflow live, neo cuộn theo block đầu tiên đang thấy (Edge Cases).
-- Safe-area insets (notch/home bar trên mobile web): padding tự động vùng header + khu nhập — không phần tử tương tác nào nằm dưới home indicator.
+- Safe-area insets (notch/home bar trên mobile web): padding **tính tay** từ safe-area insets — KHÔNG có sẵn tự động từ engine trên Web export (không phải `DisplayServer.get_display_safe_area()`, chỉ dùng được cho native; trên Web cần CSS `viewport-fit=cover` + đọc qua `JavaScriptBridge`, xem Open Question #5) — không phần tử tương tác nào nằm dưới home indicator.
 
 ### Godot notes (→ ADR khi vào architecture)
 
 - Tap-tên qua `RichTextLabel` meta tag (đã flag ADR từ hệ #14 — dùng chung).
-- Khóa đệ quy cây node khu nhập (Godot 4.5+ recursive disable) cho D.1.
+- Khóa đệ quy cây node khu nhập (Godot 4.5+ recursive disable) cho D.1. **Ràng buộc kiến trúc bắt buộc**: 3 bút tích 「Thẻ」「Lục」「Mục」 (bản dưới, đặc tả "cùng hàng với Undo" ở Visual/Audio mục 1 và UI Requirements) PHẢI nằm NGOÀI subtree bị recursive-disable, dù đặt cạnh nhau về mặt layout — chúng thuộc `class=readonly` (D.1), không bao giờ được khóa. Cây node khu nhập bị khóa đệ quy chỉ được bao đúng: 4 thẻ gợi ý, hàng chip intent, ô tự do + nút gửi, nút Undo — không bao gồm 3 bút tích dù chúng đứng cùng hàng thị giác. **API — CHƯA XÁC MINH BỀN**: một nguồn (WebSearch, không tái lập được trong phiên hiện tại) khẳng định recursive-disable là **2 property độc lập** trên `Control` (Godot 4.5+, PR #97495): `mouse_behavior_recursive` VÀ `focus_behavior_recursive`. Đối chiếu trực tiếp `docs/engine-reference/godot/modules/ui.md` + `current-best-practices.md` (tài liệu curated CHÍNH THỨC của dự án) cho kết quả **NGƯỢC LẠI** — cả hai mô tả recursive-disable là "a single property" kèm code mẫu dùng `mouse_filter` CŨ, không hề nêu 2 tên property trên. Hai nguồn NỘI BỘ của chính dự án đang tự mâu thuẫn — GDD này không đóng vai trò phân xử đúng/sai. **Hành động bắt buộc trước khi ADR khóa pattern**: verify trực tiếp trong Godot 4.6 Editor đang pin (`Help → Search Help → Control`, tìm property có chữ `recursive`). Nếu xác nhận đúng là 2 property: **Rủi ro thật** nếu ADR/implementation chỉ set 1 trong 2 (thường là `mouse_behavior_recursive`, "cái rõ ràng hơn"), Tab+Enter có thể XUYÊN QUA khóa D.1 hoàn toàn trong lúc Resolving → double-submit action — ADR PHẢI set CẢ HAI, và smoke-test cả 2 kênh dual-focus (mouse/touch focus lẫn keyboard focus, xem dòng dual-focus bên dưới). Báo cáo lỗi #105221 cũng CHƯA thể tái xác minh — không giả định "đọc docs [curated hay GDD] là đủ", chỉ Editor + WebSearch trực tiếp mới đóng được câu hỏi này. **Riêng cho `docs/engine-reference/godot/`**: mâu thuẫn nội bộ này là 1 task sửa tài liệu curated, route sang `technical-director`, ngoài phạm vi GDD #15.
+- **Phạm vi vòng đời node — 2 tầng KHÔNG được lẫn** (xem D.3b "Cơ chế eviction"): (1) 5 Control tầng-màn-hình (S1/S2/S4/S4-RO/S5) — cache/ẩn-hiện suốt phiên, KHÔNG free (Open Question #5a); (2) node/text nội dung lượt bên trong S2 (D.3b) và trang bên trong S4 (D.3) — PHẢI gỡ thật khi evict, KHÔNG chỉ `visible=false`, nếu không phá chứng minh O(1) của cả 2 formula. **Xác nhận kỹ thuật**: API `RichTextLabel.remove_paragraph(paragraph, no_invalidate=false)` tồn tại và hoạt động đúng — gỡ THẬT 1 đoạn giữa buffer (không phải rebuild toàn bộ), làm kiến trúc single-shared-buffer cho D.3b khả thi kỹ thuật thật (không chỉ giả thuyết). Lưu ý kèm theo: mặc định `remove_paragraph` invalidate/reflow cache của MỌI đoạn phía sau — chi phí này bị chặn trần bởi `LIVE_WINDOW_TURNS` (không phụ thuộc `total_turns`, không phá O(1) của D.3b) nhưng vẫn là chi phí hằng số thật mỗi lần evict, cần đưa vào cùng đợt profile Web export đã yêu cầu bên dưới. **Rủi ro mới nếu chọn route buffer chung**: `RichTextLabel` không có API chính thức để lấy bounding rect của 1 meta span riêng lẻ — D.4(a) (tính `pad_v`/`pad_h` theo bounding box từng fragment tên) có thể cần hit-testing tự viết hoặc Control overlay riêng nếu route này được chọn; thêm vào danh mục rủi ro khi viết ADR.
+- **Ownership bắt buộc cho signal Turn Manager confirm trong D.3b**: kết nối signal `on_turn_confirmed` (nguồn cập nhật `s2_last_synced_turn_id`) PHẢI thuộc về **S2 root controller** (tầng không-free, Open Question #5a) — TUYỆT ĐỐI không gắn vào bất kỳ node nội dung lượt nào (tầng evictable, "Cơ chế eviction" ở trên). Rủi ro nếu vi phạm: `visible=false` không tự ngắt signal connection (đúng), nhưng nếu listener vô tình gắn vào 1 node nội dung lượt bị `queue_free()`/`remove_paragraph()` ở lần evict đầu tiên, kết nối bị ngắt VĨNH VIỄN, S2 ngừng nhận lượt mới, và không có tín hiệu lỗi nào phát ra (fail-silent, cùng loại rủi ro với safe-area bên dưới) — do AC-58 giả định delta luôn `≤1`, không có cơ chế tự phát hiện desync này.
 - Screen stack: cấu trúc scene/Autoload cho tầng màn hình + overlay → **ADR riêng khi `/create-architecture`** (không quyết trong GDD).
 - Dual-focus 4.6: test cả mouse/touch focus lẫn keyboard focus cho mọi phần tử (bảng kênh feedback ở Visual/Audio mục 9).
+- **Cảnh báo phương pháp luận profiling**: đo hiệu năng `RichTextLabel`/relayout trong Godot Editor trên Windows (chạy D3D12 mặc định từ 4.6) KHÔNG đại diện cho hiệu năng thật trên Web export (Compatibility/WebGL2) — luôn profile D.3b/D.5 trên bản export Web thật hoặc ép Editor chạy Compatibility renderer khi đo, trước khi kết luận `LIVE_WINDOW_TURNS`/relayout đã đủ mượt. Phạm vi profile PHẢI bao gồm cả chi phí per-append/per-evict của D.3b (không chỉ relayout do đổi cỡ chữ D.5) — 2 kiến trúc hợp lệ (multi-node vs single-buffer `remove_paragraph`) có chi phí khác nhau, đo cả 2 nếu ADR còn phân vân giữa chúng.
+- **Safe-area insets — xác nhận cơ chế + hạng mục còn thiếu**: `JavaScriptBridge.eval()` là cách đúng (và duy nhất) để đọc `env(safe-area-inset-*)` qua JS trên Web export — không có API Godot built-in nào khác cho việc này (đúng như Open Question #5b đã ghi). Hạng mục còn thiếu trước đó: Godot stock Web export template KHÔNG có sẵn `<meta name="viewport" content="viewport-fit=cover">` trong HTML shell — thiếu dòng này, mọi giá trị `env(safe-area-inset-*)` **fail-silent** (lặng lẽ trả về `0px`, không báo lỗi) bất kể thiết bị có notch/home-bar thật hay không. ADR web export PHẢI liệt "custom HTML export shell + `viewport-fit=cover`" như 1 hạng mục công việc tường minh, không phải "có sẵn miễn phí".
 
 > **📌 UX Flag — Core UI / Screen Navigation**: Hệ này sở hữu nhiều màn hình. Ở Phase 4 (Pre-Production), chạy `/ux-design` cho **từng màn hình** trước khi viết epic: `design/ux/main-play-screen.md` (màn chơi chính — gộp yêu cầu hệ #11 + #1), `design/ux/save-slot-screen.md` (đã được hệ #6 flag), `design/ux/story-log.md` (đã được hệ #5 flag), `design/ux/settings.md`. Story tham chiếu UI phải trích file `design/ux/*.md`, không trích GDD trực tiếp.
 
 ## Acceptance Criteria
 
-*(Đề xuất bởi `qa-lead` 2026-08-04, duyệt cùng ngày sau khi khép GAP-1..5, GAP-8. Hệ Presentation/Navigation đọc phần lớn trạng thái từ nơi khác — mặc định **ADVISORY** (bằng chứng: walkthrough/screenshot tại `production/qa/evidence/core-ui-screen-navigation/`). NGOẠI LỆ BLOCKING: mọi AC gắn **[Unit]** (D.1–D.5 là hàm tất định) — bắt buộc file test tại `tests/unit/core-ui-screen-navigation/` (naming `core_ui_[feature]_test.gd`, hàm `test_[scenario]_[expected]`) trước khi story tương ứng Complete. **[Integration]** = ADVISORY, bắt buộc trước QA sign-off build. **[Manual]** = walkthrough/screenshot. **[Config]** = smoke-check.)*
+*(Đề xuất bởi `qa-lead`, duyệt sau khi khép GAP-1..5, GAP-8 — xem review log cho lịch sử sửa đổi. Hệ Presentation/Navigation đọc phần lớn trạng thái từ nơi khác — mặc định **ADVISORY** (bằng chứng: walkthrough/screenshot tại `production/qa/evidence/core-ui-screen-navigation/`). NGOẠI LỆ BLOCKING: mọi AC gắn **[Unit]** (D.1–D.3b, D.6 là hàm/invariant tất định; D.4/D.5 cũng thuần hàm) — bắt buộc file test tại `tests/unit/core-ui-screen-navigation/` (naming `core_ui_[feature]_test.gd`, hàm `test_[scenario]_[expected]`) trước khi story tương ứng Complete. **[Integration]** = ADVISORY, bắt buộc trước QA sign-off build. **[Manual]** = walkthrough/screenshot. **[Config]** = smoke-check.)*
 
-**Ghi chú test setup**: Mọi phụ thuộc ngoài (Turn Manager `tm_state`/`undo_available`, World Memory `total_turns`/API phân trang, Character Continuation `continuation_choice_eligible`/`reset_in_progress`, Combat `in_combat`) phải **inject** qua mock/fixture — không gọi hệ thật, không AI, không mạng, không đồng hồ thật, không random không-seed (property test dùng seed cố định). Hằng số tham chiếu registry (`TOUCH_TARGET_MIN=44`, `card_transition_ms=200`, `suggested_action_count=4`, `undo_depth=1`, `ai_call_timeout_seconds=30`) — import từ nguồn, không định nghĩa lại.
+**Ghi chú test setup**: Mọi phụ thuộc ngoài (Turn Manager `tm_state`/`undo_available`/`is_death_turn` — dùng bởi AC-59a/59b, World Memory `total_turns`/`last_confirmed_turn_id`/API phân trang `get_turn_page`, Character Continuation `continuation_choice_eligible`/`state`, Combat `in_combat`, Character Card `card_exists(char_id)` — dùng bởi AC-28/29/30/31/53; `new_slot_created` — dùng bởi AC-11/47, nguồn hệ sở hữu (Persistence #6 hay Character Continuation #13) chưa chốt, cần làm rõ ở `/create-architecture`, không chặn việc mock; `screen` (màn hình nguồn) — dùng bởi AC-04; `is_touch_primary` (device capability) — dùng bởi AC-24/25 `[Unit]` BLOCKING) phải **inject** qua mock/fixture — không gọi hệ thật, không AI, không mạng, không đồng hồ thật, không random không-seed (property test dùng seed cố định). Hằng số tham chiếu registry (`TOUCH_TARGET_MIN=44`, `card_transition_ms=200`, `suggested_action_count=4`, `undo_depth=1`, `ai_call_timeout_seconds=30`, `live_window_turns=30`, `CONTENT_EXCHANGE_ESTIMATE` (#7, dùng bởi AC-67), font-weight `400`/`600` (mục 11, dùng bởi AC-53 `[Unit]` BLOCKING)) — import từ nguồn, không định nghĩa lại. Đường dẫn evidence theo mức: `[Unit]` → `tests/unit/core-ui-screen-navigation/`; `[Integration]` → `tests/integration/core-ui-screen-navigation/`; `[Manual]` → `production/qa/evidence/core-ui-screen-navigation/`; `[Config]` → `production/qa/smoke-[date].md` (theo `coding-standards.md`).
 
 ### 1. Tầng hiển thị & bất biến toàn cục (Core Rule #1)
 
@@ -543,7 +709,7 @@ Mọi bề mặt #15 **tự sở hữu** (bút tích, page-flip, chỉ báo đan
 
 ### 2. Khóa input — `write_action_allowed` (D.1)
 
-- **AC-04** [Unit] (ma trận đầy đủ 15×3=45): GIVEN toàn bộ 15 action × 3 `tm_state`, WHEN chạy `write_action_allowed` từng cặp, THEN khớp bảng phân loại: 8 action `mutating` → `0` khi `resolving`/`undoing`, `1` khi `awaiting_action`; 7 action `readonly` → luôn `1`. *(parametrized 45 case — regression anchor GAP-1)*
+- **AC-04** [Unit] (ma trận đầy đủ 46, chữ ký hàm 3 biến `(action, tm_state, screen)`): GIVEN 15 action × 3 `tm_state` tại `screen≠S5` (45 tổ hợp, khớp bảng phân loại: 8 action `mutating` → `0` khi `resolving`/`undoing`, `1` khi `awaiting_action`; 7 action `readonly` → luôn `1`) CỘNG GIVEN `action=tap_back_to_slots, screen=S5` qua cả 3 `tm_state` (1 tổ hợp kết quả riêng biệt — luôn `1`, chứng minh `tm_state` bị bỏ qua đúng như formula khai), WHEN chạy `write_action_allowed`, THEN toàn bộ 46 tổ hợp khớp đúng. *(parametrized — regression anchor GAP-1)*
 - **AC-05** [Integration] (UI thật sự chặn submit lần 2): GIVEN `tm_state=resolving`, WHEN cố submit lần 2 (thẻ gợi ý/chip/ô tự do), THEN request KHÔNG đến Turn Manager (spy=0) — verify cây node khu nhập bị khóa đệ quy thật, không chỉ formula.
 - **AC-06** [Integration] (double-tap swallow): GIVEN tap 2 lần cực nhanh cùng 1 thẻ gợi ý, WHEN tap 1 chuyển `tm_state→resolving` đồng bộ trong frame, THEN tap 2 bị nuốt — Turn Manager nhận đúng 1 action (spy=1).
 - **AC-07** [Unit + Manual] (Undo dual-condition — ẩn vs mờ là 2 cơ chế): GIVEN 4 tổ hợp `(undo_available, tm_state)`: (a) `false, awaiting`; (b) `true, awaiting`; (c) `true, resolving`; (d) `false, resolving`, WHEN dựng UI nút Undo, THEN (a)(d) **không render**; (b) render + bấm được; (c) render + mờ mực + không bấm được — không bao giờ có "nút hiện, bấm không phản hồi, không mờ". *(logic [Unit]; render mờ mực [Manual] screenshot)*
@@ -552,9 +718,9 @@ Mọi bề mặt #15 **tự sở hữu** (bút tích, page-flip, chỉ báo đan
 
 - **AC-08** [Unit] (11 cạnh hợp lệ + cạnh cấm): GIVEN 11 cạnh EDGES với `ctx` thỏa guard, WHEN chạy formula, THEN tất cả trả `1`; GIVEN ≥5 cặp ngoài EDGES (S1→S5, S4→S1, S4-RO→S2...), THEN tất cả trả `0`, không ném lỗi.
 - **AC-09** [Unit] (guard `tm_state` cạnh S2→S1): GIVEN `from=S2, to=S1, tm_state=resolving`, THEN `0`; đối chứng `awaiting_action` → `1`.
-- **AC-10** [Unit] (S4-RO thoát đúng `origin_screen`): GIVEN `from=S4-RO, origin_screen=S5`, THEN `to=S1→0`, `to=S5→1` — Log read-only mở từ S5 PHẢI thoát về S5, không rơi về Save Slot.
-- **AC-11** [Unit] (S2→S5 là integrity check): GIVEN `continuation_choice_eligible=false`, WHEN thử `screen_transition_valid(S2, S5, ctx)`, THEN `0` — assertion chặn code route sai.
-- **AC-12** [Integration] (chuỗi S4→S2→S5 khi chết confirm lúc đọc Log): GIVEN người chơi ở S4 khi lượt resolve thành `is_death_turn=true` + `continuation_choice_eligible=true`, WHEN bấm "lật về", THEN engine chạy S4→S2 rồi NGAY S2→S5 trong cùng thao tác — người chơi thấy đúng 1 lần chuyển cảnh.
+- **AC-10** [Unit] (S4-RO thoát đúng `origin_screen`): GIVEN `from=S4-RO, origin_screen=S5`, THEN `to=S1→0`, `to=S5→1` — Log read-only mở từ S5 PHẢI thoát về S5, không rơi về Save Slot; đối chứng GIVEN `from=S4-RO, origin_screen=S1`, THEN `to=S1→1`, `to=S5→0` — mở từ S1 PHẢI thoát về S1, không rơi vào màn 3 lối.
+- **AC-11** [Unit] (S2→S5 là integrity check): GIVEN `continuation_choice_eligible=false`, WHEN thử `screen_transition_valid(S2, S5, ctx)`, THEN `0` — assertion chặn code route sai. *(guard `new_slot_created` của cạnh S5→S2 kiểm ở AC-47, mục 15 — 3 guard trên đều có case âm-tính riêng)*
+- **AC-12** [Integration] (S4→S2 khi chết confirm lúc đọc Log, KHÔNG tự chain sang S5): GIVEN người chơi ở S4 khi lượt resolve thành `is_death_turn=true` + `continuation_choice_eligible=true`, WHEN bấm "lật về", THEN engine chạy đúng cạnh chuẩn S4→S2 (KHÔNG tự động sang S5); người chơi thấy đoạn văn lượt chết + dòng dẫn tap-to-continue tại S2, giống hệt trường hợp đang đọc trực tiếp ở S2 khi lượt chết confirm; S2→S5 chỉ xảy ra khi người chơi chạm dòng dẫn đó (test riêng ở AC-57).
 - **AC-13** [Integration] (chuyển màn hình tự đóng overlay): GIVEN O-Card mở trên S2, WHEN takeover S5 kích hoạt, THEN O-Card đóng TRƯỚC khi S5 hiện.
 
 ### 4. Story Log — pagination D.3
@@ -568,27 +734,27 @@ Mọi bề mặt #15 **tự sở hữu** (bút tích, page-flip, chỉ báo đan
 
 ### 5. Vùng chạm — D.4
 
-- **AC-20** [Unit] (nhóm (b) ≥44px tuyệt đối): GIVEN 5 loại phần tử độc lập (chip, card gợi ý, bút tích, Undo, Song Tu) với glyph gốc <44px, THEN `hit_height`/`hit_width` LUÔN `≥ TOUCH_TARGET_MIN` (đọc registry, không hardcode).
-- **AC-21** [Unit] (regression ví dụ "Vệ"): GIVEN `w=18, h=24, line_gap=12, gap_to_neighbor=10`, THEN `pad_v=6, hit_height=36; pad_h=3, hit_width=24`.
+- **AC-20** [Unit] (nhóm (b) ≥44px tuyệt đối): GIVEN 5 loại phần tử độc lập (chip, card gợi ý, bút tích, Undo, Song Tu) với glyph gốc <44px, THEN `hit_height`/`hit_width` LUÔN `≥ TOUCH_TARGET_MIN` (đọc registry, không hardcode). **Phạm vi cho "Song Tu"**: test chỉ cần mock kích thước glyph theo D.4 nhóm (b) — nút Song Tu thuộc scene sở hữu bởi Character Card (#14), #15 chỉ định nghĩa LUẬT `≥44px` áp dụng cho nó; test này KHÔNG cần dựng UI thật của #14, không kiểm hành vi Song Tu (đó thuộc test của #14).
+- **AC-21** [Unit] (regression ví dụ "Vệ", CHỈ áp dụng nếu ADR chọn route đệm thật): GIVEN `w=18, h=24, line_gap=12, gap_to_neighbor=10`, THEN `pad_v=6, hit_height=36; pad_h=3, hit_width=24`. **Điều kiện tiên quyết**: test này kiểm CÔNG THỨC D.4(a), không phải hit-box thật — nếu ADR chọn "đường lui" `pad_v=pad_h=0` (D.4 Edge Cases — RichTextLabel không đệm được vùng chạm ảo), test phải đổi kỳ vọng thành `hit_height=24, hit_width=18` (glyph box thuần, vẫn compliant-by-exception hợp lệ) — KHÔNG được giữ nguyên số cũ và coi route pad=0 là FAIL.
 - **AC-22** [Unit] (never-overlap property test): GIVEN `gap_to_neighbor` ngẫu nhiên `[0,20]` (seed cố định, 50 case) cho 2 tap-target liền kề, THEN tổng vùng chạm 2 bên KHÔNG BAO GIỜ lấn vào khoảng `MIN_ADJACENT_GAP_PX`, kể cả gap→0.
 
 ### 6. Cỡ chữ & 2 cột — D.5
 
 - **AC-23** [Unit] (3 nấc chính xác): GIVEN `setting ∈ {S,M,L}`, THEN `theme_scale` trả đúng `{0.875, 1.0, 1.25}` — không nấc thứ 4.
-- **AC-24** [Unit] (regression ngưỡng 2-cột): GIVEN `(1280,M)`, `(1280,L)`, `(820,L)`, THEN lần lượt `1, 1, 0`.
-- **AC-25** [Unit] (bất biến 1-cột, scope ≤480px theo GAP-6): GIVEN `viewport=480` × cả 3 `setting`, THEN `two_column_layout` LUÔN `=0`. *(KHÔNG khẳng định cho viewport >480px — chờ dải viewport target chính thức, xem Open Questions)*
+- **AC-24** [Unit] (regression ngưỡng 2-cột, `is_touch_primary=false`): GIVEN `(1280,M,false)`, `(1280,L,false)`, `(820,L,false)`, THEN lần lượt `1, 1, 0`; đối chứng GIVEN `(1280,M,true)`, THEN `0` — cùng viewport/setting nhưng `is_touch_primary=true` luôn ép về 1-cột.
+- **AC-25** [Unit] (bất biến 1-cột, scope ≤480px theo GAP-6, `is_touch_primary=false`): GIVEN `viewport=480, is_touch_primary=false` × cả 3 `setting`, THEN `two_column_layout` LUÔN `=0`. *(KHÔNG khẳng định cho viewport >480px khi is_touch_primary=false — chờ dải viewport target chính thức cho input KHÔNG cảm ứng, xem Open Questions; khi is_touch_primary=true, luôn =0 bất kể viewport — đã đóng ở OQ#1)*
 - **AC-26** [Integration] (reflow tức thời): GIVEN màn hình 2-cột đang mở, WHEN đổi `setting`, THEN reflow NGAY — đối lập có chủ đích với luật "không re-render giữa chừng" của Card (world-state).
 
 ### 7. Chuyển cảnh — D.6
 
-- **AC-27** [Config] (bất biến thứ tự): GIVEN bộ `DURATION_MS` hiện hành, WHEN smoke-check đọc từ data file/registry, THEN `banner ≤ overlay_settings ≤ overlay_card ≤ screen`; `overlay_card` PHẢI khớp `card_transition_ms` registry (không bản sao). *(chạy lại mỗi lần tune)*
+- **AC-27** [Unit] (bất biến thứ tự — so sánh 4 số nguyên tĩnh, không cần mock/scene): GIVEN bộ `DURATION_MS` hiện hành, WHEN chạy test đọc từ data file/registry, THEN `banner ≤ overlay_settings ≤ overlay_card ≤ screen`; `overlay_card` PHẢI khớp `card_transition_ms` registry (không bản sao). *(chạy lại mỗi lần tune — vẫn giữ song song 1 smoke-check `[Config]` cho môi trường CI nhẹ)*
 
 ### 8. Điểm vào Character Card (Core Rule #8)
 
-- **AC-28** [Manual] (tap-name 4 màn hình, tap=click parity): GIVEN tên `card_exists=true` ở S2/S4/S4-RO/S5, WHEN tap (mobile) hoặc click (desktop), THEN O-Card mở đúng `char_id` ở cả 4 nơi, cả 2 phương thức.
+- **AC-28** [Integration] (tap-name 4 màn hình, tap=click parity): GIVEN tên `card_exists=true` ở S2/S4/S4-RO/S5, WHEN tap (mobile) hoặc click (desktop), THEN O-Card mở đúng `char_id` ở cả 4 nơi, cả 2 phương thức.
 - **AC-29** [Unit] (tên không tap được): GIVEN `card_exists(char_id)=false`, WHEN dựng style đoạn text chứa tên, THEN không meta tag/link styling/gạch chân — chữ thường, không "link chết".
 - **AC-30** [Integration] (Card tự đóng khi Undo xóa nguồn tồn tại): GIVEN O-Card mở cho X, WHEN Undo xóa lượt làm `card_exists(X)→false`, THEN O-Card tự đóng, về S2 bình thường — không crash.
-- **AC-31** [Manual] (「Thẻ」 4 nơi — GAP-3 đã khép): GIVEN S2, S5 (lề header) và S4, S4-RO (chrome Story Log), WHEN kiểm tra bút tích 「Thẻ」, THEN có mặt và mở đúng thẻ ở cả 4 màn hình.
+- **AC-31** [Integration] (「Thẻ」 4 màn hình / 5 vị trí render — GAP-3): GIVEN S2 (2 vị trí: header + cạnh khu nhập), S5 (lề header), và S4, S4-RO (chrome Story Log), WHEN kiểm tra bút tích 「Thẻ」, THEN có mặt và mở đúng thẻ ở cả 5 vị trí trên 4 màn hình — đặc biệt xác nhận 2 render ở S2 luôn đồng bộ trạng thái (không có TH nào 1 bản khóa/1 bản mở khi Resolving).
 
 ### 9. Chờ AI & timeout (Core Rule #9)
 
@@ -599,7 +765,7 @@ Mọi bề mặt #15 **tự sở hữu** (bút tích, page-flip, chỉ báo đan
 ### 10. Settings (Core Rule #10)
 
 - **AC-35** [Integration] (persist cấp thiết bị): GIVEN đổi cỡ chữ, WHEN reload app và mở SLOT KHÁC, THEN giá trị giữ nguyên — xác nhận `app_config` ngoài slot blob.
-- **AC-36** [Manual] (nguồn mở giới hạn): GIVEN S4, S4-RO, S5, THEN không tồn tại đường vào Settings ở 3 màn hình này.
+- **AC-36** [Integration] (nguồn mở giới hạn): GIVEN S4, S4-RO, S5, THEN không tồn tại đường vào Settings ở 3 màn hình này.
 
 ### 11. Chế độ read-only S4-RO (Core Rule #7)
 
@@ -609,31 +775,76 @@ Mọi bề mặt #15 **tự sở hữu** (bút tích, page-flip, chỉ báo đan
 ### 12. Takeover 3 lối S5 (Core Rule #6)
 
 - **AC-39** [Unit] (khu nhập không tồn tại): GIVEN màn hình = S5, WHEN dựng layout, THEN không node nào của khu nhập (4 thẻ/chip/ô tự do) được TẠO trong scene tree — không phải ẩn.
-- **AC-40** [Manual] (bút tích ở S5): GIVEN S5, THEN 「Lục」「Thẻ」 đầy đủ chức năng (read-only); 「Mục」 chỉ còn "Về danh sách sổ".
-- **AC-41** [Integration] (retry-lock theo `reset_in_progress` — GAP-4 đã khép): GIVEN `reset_in_progress=true` (cờ hệ #13, KHÔNG dùng `tm_state`), WHEN bấm "Thử lại" liên tục, THEN nút mờ mực + không phản hồi tới khi `reset_in_progress=false`.
+- **AC-40** [Integration] (bút tích ở S5): GIVEN màn hình = S5, WHEN tap 「Lục」, THEN mở Story Log ở S4-RO đúng slot hiện hành, không tiêu lượt; WHEN tap 「Thẻ」, THEN mở O-Card đúng `char_id` bản thân, không tiêu lượt; cả hai KHÔNG render bất kỳ phần tử `class=mutating` nào bên trong (đúng #7); 「Mục」 chỉ còn "Về danh sách sổ".
+- **AC-41** [Integration] (retry-lock theo `state` #13 — GAP-4): GIVEN `state = "Processing Chơi Lại"` (Character Continuation #13, KHÔNG dùng `tm_state`), WHEN bấm "Thử lại" liên tục, THEN nút mờ mực + không phản hồi; GIVEN `state = "Reset Failed"`, THEN nút mở khóa trở lại.
 
 ### 13. Banner tier & empty states
 
 - **AC-42** [Manual] (banner mọi màn hình): GIVEN banner quota kích hoạt khi ở S5, THEN banner hiện đúng vị trí tầng banner.
 - **AC-43** [Unit] (không auto-timeout): GIVEN banner đang hiển thị, WHEN mock clock trôi dài, THEN banner KHÔNG tự biến mất nếu điều kiện gốc chưa hết và chưa tap X.
-- **AC-44** [Manual] (2 empty state): GIVEN `total_turns=0` và GIVEN 0 slot, THEN mỗi nơi hiện đúng 1 dòng đã khóa ("Chưa có trang nào được viết" / "Chưa có sổ nào — hãy bắt đầu cuốn đầu tiên"), Save Slot VẪN giữ CTA "Bắt đầu mới" phía trên.
-- **AC-45** [Manual] (Esc layering): GIVEN overlay mở, WHEN Esc, THEN overlay đóng; GIVEN không overlay, WHEN Esc, THEN không hành động nào (không pause menu, không thoát tầng screen).
+- **AC-44** [Integration] (2 empty state): GIVEN `total_turns=0` và GIVEN 0 slot, THEN mỗi nơi hiện đúng 1 dòng đã khóa ("Chưa có trang nào được viết" / "Chưa có sổ nào — hãy bắt đầu cuốn đầu tiên"), Save Slot VẪN giữ CTA "Bắt đầu mới" phía trên.
+- **AC-45** [Integration] (Esc layering): GIVEN overlay mở, WHEN Esc, THEN overlay đóng; GIVEN không overlay, WHEN Esc, THEN không hành động nào (không pause menu, không thoát tầng screen).
 
 ### 14. Cross-system — Combat inline
 
 - **AC-46** [Integration] (hệ thống không tự đổi màn hình khi in_combat — GAP-2 đã khép theo ngữ nghĩa hệ-thống): GIVEN `in_combat` chuyển `false→true→false` (mock Combat), WHEN quan sát tầng màn hình, THEN không chuyển màn hình nào do HỆ THỐNG tự kích hoạt (mọi chuyển màn hình trong trận đều truy về được 1 thao tác người chơi hợp lệ theo D.1/D.2); danh sách hành động trận render đúng trong 4 slot gợi ý chuẩn, không UI riêng.
 
-**Tổng**: 46 AC (AC-38 là cross-ref) — 21 [Unit] BLOCKING; [Integration]/[Manual]/[Config] ADVISORY.
+### 15. AC bổ sung — nhóm A (AC-47–56b)
+
+- **AC-47** [Unit] (guard `new_slot_created` — case âm-tính còn thiếu ở D.2): GIVEN `from=S5, to=S2, new_slot_created=false`, WHEN chạy `screen_transition_valid`, THEN `0` — đối chứng `new_slot_created=true` → `1`. Đóng gap: 3 guard khác của D.2 (`tm_state`, `continuation_choice_eligible`, `origin_screen`) đều có AC test cả 2 nhánh (AC-09, AC-11, AC-10); guard này trước đó chỉ được gộp chung trong AC-08, không có case âm-tính riêng.
+- **AC-48** [Unit] (D.3b — O(1) property test, mirror AC-15): GIVEN `total_turns(slot) ∈ {0,1,29,30,500,8420,999999}` (seed cố định), `LIVE_WINDOW_TURNS=30`, THEN `s2_resident_turns` LUÔN `≤30` — hằng số trần, không phụ thuộc `total_turns` lớn tới đâu; GIVEN `total_turns=0`, THEN `s2_oldest_resident_turn_id` KHÔNG được gọi (spy=0), mirror AC-17.
+- **AC-49** [Integration] (D.3b — eviction THẬT + neo cuộn + lối dẫn Story Log): GIVEN S2 đã ở trần `LIVE_WINDOW_TURNS`, WHEN 1 lượt mới confirm, THEN lượt cũ nhất bị gỡ THẬT khỏi cấu trúc hiển thị — đo bằng đơn vị KHỚP kiến trúc ADR đã chọn (đếm node hiển thị nếu route multi-node-per-turn, HOẶC độ dài buffer/số paragraph nếu route single-`RichTextLabel` — không cứng đơn vị "node" nếu ADR chọn route kia; ghi rõ route đã chọn khi viết test) PHẢI giảm đúng 1 lượt (không chỉ spy `evict=1` — chặn regression "chỉ set `visible=false`") — NHƯNG vẫn truy vấn được nguyên vẹn qua Story Log (D.3); GIVEN lượt sắp evict đang nằm trong viewport khi eviction xảy ra, THEN vị trí cuộn được bù trừ, nội dung đang đọc không nhảy; WHEN người chơi cuộn lên chạm biên cửa sổ resident, THEN hiện dòng "đọc tiếp về trước → 「Lục」" — render đúng ngôn ngữ bút tích marginalia (Visual/Audio mục 1), KHÔNG dùng style empty-state (mục 8), vùng chạm thật ≥44px theo D.4 nhóm (b) — tap dòng đó mở đúng **S4** tại lượt kế tiếp phía trước biên (S2 chỉ tồn tại cho slot đang mở/live, nên đích luôn là S4, không phải S4-RO).
+- **AC-50** [Integration] (D.3b — cold-start resume không rỗng): GIVEN slot có `total_turns=400`, WHEN mở slot qua "Tiếp tục" (S1→S2), THEN S2 hiện ngay 30 lượt gần nhất (371–400) qua cold-start `get_turn_page(last_confirmed_turn_id, LIVE_WINDOW_TURNS, older)` — KHÔNG rỗng, KHÔNG chờ lượt mới confirm; đối chứng GIVEN `total_turns=0` ("Bắt đầu mới"), THEN S2 hiện đúng empty-state (mục 8), không gọi `get_turn_page`.
+- **AC-51** [Unit] (boot luôn vào S1): GIVEN ứng dụng khởi động (không có phiên Turn Manager nào active), WHEN màn hình đầu tiên render, THEN màn hình luôn là S1 — không phụ thuộc slot cuối cùng đã chơi, không phụ thuộc bất kỳ trạng thái nào khác.
+- **AC-52** [Unit] (D.3 — invariant liên-knob `PREFETCH_THRESHOLD < PAGE_SIZE`, mirror AC-27): GIVEN registry hiện hành (`log_prefetch_threshold`, `log_page_size`), WHEN đọc từ config/registry, THEN `log_prefetch_threshold < log_page_size` — so sánh 2 số tĩnh, chạy lại mỗi lần tune, cùng cấp BLOCKING với AC-27.
+- **AC-53** [Unit + Manual] (tap-tên — styling dương tính): GIVEN tên `card_exists=true` trong văn tường thuật ở trạng thái mặc định (không hover/focus/pressed), THEN font-weight = **600** (registry, không phải "1 bậc" định tính — kiểm bằng code, `[Unit]`), không gạch chân/khung/màu; VÀ phân biệt được bằng mắt so với thân văn (font-weight 400) mà không cần tương tác thử (`[Manual]` — screenshot + lead sign-off, visual fidelity không tự động hóa hoàn toàn).
+- **AC-54** [Integration + Manual] (Pending Fate — trọng lượng thị giác): GIVEN gợi ý Kết liễu/Tha mạng (#12) xuất hiện trong khung 4-gợi-ý, THEN KHÔNG có chip intent nào đi kèm thẻ đó (kiểm cấu trúc — `[Integration]`); VÀ thẻ đó render đậm mực hơn 1 bậc so với 3 thẻ còn lại (kiểm thị giác — `[Manual]` screenshot).
+- **AC-55** [Integration + Manual] (S5 takeover — chữ ký chuyển động riêng, cùng khuôn AC-54): GIVEN `continuation_choice_eligible=true` VÀ người chơi vừa chạm dòng dẫn tap-to-continue (B5), WHEN chuyển cảnh S2→S5 diễn ra, THEN engine gọi ĐÚNG transition path/tween riêng cho takeover (KHÔNG dùng chung tween `screen`-tier có skew/scale_x/dịch ngang — kiểm cấu trúc, `[Integration]`); VÀ chuyển cảnh render bằng chữ ký riêng (mực nhòe/trang lặng đi tại chỗ), phân biệt được bằng mắt với mọi lần lật trang khác trong game (kiểm thị giác, `[Manual]` screenshot).
+- **AC-56a** [Integration] (keyboard-only traversal — TRỪ tap-tên): GIVEN chỉ dùng Tab/Shift+Tab/Enter/Esc (không chuột, không touch), WHEN đi từ S1 qua toàn bộ luồng chơi chuẩn (mở slot → S2 → submit action → mở Card **qua bút tích 「Thẻ」**, KHÔNG qua tap-tên → đóng → mở Log → mở Settings → đổi cỡ chữ → thoát), THEN mọi bước tới được và mọi overlay mở bằng Tab đều đóng lại được bằng bàn phím thuần (no keyboard trap) — không cần chạm chuột/touch lần nào. AC này có PASS/FAIL ổn định ngay bây giờ, không phụ thuộc OQ#11.
+- **AC-56b** [Integration, **BLOCKED — không tính vào tổng pass/fail cho tới khi OQ#11 đóng**] (mở Card qua tap-tên bằng bàn phím): GIVEN chỉ dùng bàn phím, WHEN cố mở Card của 1 nhân vật `card_exists=true` xuất hiện trong văn tường thuật (không qua bút tích 「Thẻ」), THEN [chưa định nghĩa được — phụ thuộc giải pháp OQ#11 cho việc `RichTextLabel` meta tag tham gia Tab-focus chain]. Đánh dấu tường minh trạng thái BLOCKED thay vì lẫn vào AC-56a — không được đóng story cho tới khi OQ#11 có ít nhất 1 hướng giải pháp thiết kế (xem OQ#11, đã bổ sung fallback tạm qua 「Thẻ」 ở AC-56a).
+
+### 16. AC bổ sung — nhóm B (AC-57–59b)
+
+- **AC-57** [Integration] (S5 takeover chờ nhịp chạm, không tự động — xem AC-61 cho phần discoverability/nhịp thở): GIVEN `continuation_choice_eligible=true` vừa được set (lượt chết vừa confirm), WHEN quan sát màn hình NGAY sau đó (chưa có tap nào), THEN màn hình vẫn là S2 (không tự chuyển sang S5), dòng dẫn "… (chạm để tiếp tục)" hiện ở cuối đoạn văn; WHEN người chơi chạm dòng dẫn đó, THEN màn hình chuyển sang S5 (`screen_transition_valid(S2,S5,ctx)` chỉ được gọi đúng lúc chạm, không lúc cờ set); GIVEN mock clock trôi dài (≥30s) mà không có tap nào, THEN màn hình VẪN là S2 — không có auto-timeout nào tự kích hoạt takeover; GIVEN chạm 1 điểm NGOÀI vùng chạm thật của dòng dẫn (VD vào đoạn văn phía trên), THEN màn hình vẫn S2, `screen_transition_valid` không được gọi.
+- **AC-58** [Integration] (D.3b — hòa giải buffer S2 khi lượt confirm lúc S2 đang ẩn): GIVEN người chơi ở S4 khi 1 lượt confirm (không phải lượt chết), S2 KHÔNG render lượt đó trong lúc `visible=false` (spy `append`=0), WHEN người chơi lật về S2, THEN buffer hòa giải đúng đủ delta 1 lượt qua `get_turn_page(anchor=s2_last_synced_turn_id, count=1, newer)` (spy=1, KHÔNG gọi cold-start lại toàn bộ `LIVE_WINDOW_TURNS`), S2 hiển thị đúng lượt mới nhất — không stale.
+- **AC-59a** [Integration]: GIVEN nút Undo đang render (`undo_available=true`), WHEN `undo_available` chuyển `false` (lượt kế tiếp confirm HOẶC `is_death_turn=true`), THEN tween alpha 1.0→0 chạy đúng thứ tự VÀ đúng thời lượng `≤150ms` (đọc property tween, spy timing) TRƯỚC KHI node bị gỡ khỏi layout (spy thứ tự: tween hoàn tất → remove, không phải remove trước) — không snap biến mất giữa 2 frame.
+- **AC-59b** [Manual]: xác nhận bằng mắt cảm giác mờ dần mượt mà (không giật, không snap) khi Undo biến mất, cả 2 nguyên nhân (lượt kế tiếp confirm / `is_death_turn=true`) đều render CÙNG hiệu ứng, không có biến thể riêng. *(screenshot/video + lead sign-off — chất lượng cảm giác chuyển động không tự động hóa được, khác AC-59a chỉ đo timing/thứ tự)*
+
+### 17. AC bổ sung — nhóm C (AC-60–66)
+
+- **AC-60** [Integration] (D.3b — đổi slot buộc cold-start, không tính delta sai): GIVEN S2 đang hiển thị slot A (`s2_last_synced_turn_id=400`), WHEN người chơi chuyển sang slot B qua "Chơi lại" (`new_slot_created=true`, `total_turns(slot B)=1`), THEN buffer S2 force cold-start (spy `get_turn_page` gọi với `anchor=last_confirmed_turn_id(slot B)`, KHÔNG gọi delta với `count` âm), `s2_last_synced_turn_id` reset đúng theo slot B trước khi bất kỳ so sánh `turn_id` nào diễn ra — chặn regression `get_turn_page(count=-399,...)`.
+- **AC-61a** [Integration] (S5 tap-to-continue — cơ chế auto-scroll + biên độ thở): GIVEN `continuation_choice_eligible=true` vừa được set, THEN S2 tự cuộn tới đúng vị trí dòng dẫn trong cùng frame/tween ngắn (spy vị trí cuộn = vị trí dòng dẫn, không cần người chơi tự cuộn — Core Rule #6); VÀ alpha dòng dẫn dao động đúng khoảng `[0.85, 1.0]` (đọc property tween, không đo thời gian thực), chu kỳ ~2s, không vượt ra ngoài khoảng đã khóa.
+- **AC-61b** [Manual — playtest thật, KHÔNG phải lead sign-off qua video] ("curse of knowledge": lead đã biết quy ước marginalia nên xem video không kiểm chứng được discoverability thật) (S5 tap-to-continue — discoverability với người chơi MỚI): GIVEN ≥3 người chơi CHƯA từng thấy build/quy ước marginalia của game này trước đó, WHEN mỗi người tới đúng khoảnh khắc lượt chết lần đầu tiên (không có hướng dẫn/gợi ý thêm từ người quan sát), THEN đo (a) tỷ lệ tự nhận ra cần chạm dòng dẫn trong ≤10 giây kể từ khi đoạn văn render xong, (b) không ai tự thoát ra ngoài (「Mục」/back) vì tưởng màn hình bị treo. Ngưỡng PASS: ≥2/3 người đạt (a) và 0/3 người xảy ra (b). *(protocol thay thế cho "screenshot + lead sign-off" — ghi vào `production/qa/evidence/core-ui-screen-navigation/`)*
+- **AC-62** [Integration] (S4 live — control lật về S2): GIVEN màn hình = S4 (mở từ S2 qua 「Lục」, KHÔNG phải S4-RO), WHEN tap bút tích "« Chơi tiếp", THEN màn hình chuyển đúng về S2 (`screen_transition_valid(S4,S2,ctx)=1`), không tiêu lượt, không mất vị trí cuộn của S2 trước đó.
+- **AC-63a** [Integration] (onboarding marginalia — trigger per-device): GIVEN `app_config.has_seen_marginalia_onboarding` chưa tồn tại, WHEN S2 render lần đầu (bất kỳ slot nào), THEN 3 bút tích Họ A chạy nhịp ink-reveal VÀ `has_seen_marginalia_onboarding` được set `true`; GIVEN field đã `true` (kể cả sau khi chết + "Chơi lại" tạo slot mới nhiều lần), THEN KHÔNG chạy lại ink-reveal — chặn regression "replay mỗi slot" đã sửa ở B11. GIVEN `app_config.font_size_setting` chưa tồn tại, WHEN Save Slot Screen render, THEN hiện dòng mời chọn cỡ chữ; GIVEN người chơi BỎ QUA (không tap S/M/L) rồi thoát app, WHEN mở lại Save Slot Screen, THEN dòng mời HIỆN LẠI (chủ đích — lặp tới khi CHỌN, không phải tới khi THẤY, xem B12); GIVEN `font_size_setting` đã được set (đã chọn ít nhất 1 lần), THEN dòng mời KHÔNG hiện lại.
+- **AC-63b** [Unit] (dòng mời cỡ chữ — contrast/size tối thiểu ở cấu hình mặc định): GIVEN dòng mời đang render (bất kể `theme_scale` đã lưu trước đó, nếu có), THEN alpha = **1.0** (không phải bậc "-1" 0.68 của Họ A/empty-state), cỡ glyph = cỡ thân văn tại **nấc M** (không đọc `theme_scale` runtime cho riêng dòng này), VÀ mỗi tap-target S/M/L có `hit_height`/`hit_width ≥ TOUCH_TARGET_MIN` — đọc registry, kiểm bằng code, không cần screenshot.
+- **AC-63c** [Manual] (dòng mời cỡ chữ — xác nhận thị giác): screenshot xác nhận dòng mời không dùng ngôn ngữ marginalia (không nhạt hơn thân văn), đủ nổi bật so với text nền tại Save Slot Screen. *(screenshot + lead sign-off — bổ sung cho AC-63b, không thay thế)*
+- **AC-64** [Integration] (overlay tự đóng — ma trận đầy đủ, TÁCH theo overlay vì O-Card/O-Set không cùng tập nguồn mở): 
+  - **O-Card** (mở được từ `{S2,S4,S4-RO,S5}`, KHÔNG từ S1 — Core Rule #8): GIVEN O-Card đang mở, WHEN thực hiện LẦN LƯỢT 9 cạnh có `from ∈ {S2,S4,S4-RO,S5}` trong bảng EDGES (D.2) — tức toàn bộ 11 cạnh TRỪ 2 cạnh xuất phát từ S1 (S1→S2, S1→S4-RO), THEN O-Card đóng TRƯỚC khi màn đích hiện, ở TẤT CẢ 9 cạnh.
+  - **O-Set** (mở được từ `{S1,S2}` — Core Rule #10): GIVEN O-Set đang mở, WHEN thực hiện LẦN LƯỢT 5 cạnh có `from ∈ {S1,S2}` trong bảng EDGES (S1→S2, S1→S4-RO, S2→S4, S2→S1, S2→S5), THEN O-Set đóng TRƯỚC khi màn đích hiện, ở TẤT CẢ 5 cạnh.
+  - (AC-13 — S2→S5 với O-Card — là 1 case con của danh sách O-Card ở trên, không test lặp.)
+- **AC-65** [Integration] (resize/rotate — neo cuộn, TRIGGER KHÁC eviction D.3b): GIVEN màn hình 2-cột (D.5) hoặc S2/S4 đang cuộn giữa chừng, WHEN viewport resize/rotate (KHÔNG phải lượt mới confirm — khác trigger của AC-49), THEN vị trí cuộn neo theo block đầu tiên đang thấy (Edge Cases), reflow không làm nội dung đang đọc nhảy khỏi tầm nhìn.
+- **AC-66** [Unit] (D.3b — tripwire invariant `s2_oldest_resident_turn_id`, xem D.3b Variables): GIVEN buffer S2 NGAY SAU KHI bất kỳ thao tác nào trong bảng "Vòng đời nội dung S2" (cold-start/append/quay lại/đổi slot/Undo — bao gồm backfill ở hàng 7) đã trả quyền điều khiển lại (không kiểm giữa thân hàm xử lý), THEN `s2_oldest_resident_turn_id(slot) == last_confirmed_turn_id(slot) − s2_resident_turns(slot) + 1` LUÔN đúng — invariant hợp lệ nhờ World Memory (#5) bảo đảm `turn_id` liền mạch/tái sử dụng sau Undo (xác nhận qua `turn-manager.md` + `world-memory-context-management.md`) VÀ nhờ backfill bắt buộc ở hàng 7 (nếu thiếu backfill, AC này fail ngay sau Undo đầu tiên trên slot đã đầy window); vi phạm invariant này (buffer drift) phải fail loud, không im lặng.
+### 18. AC bổ sung — nhóm D (AC-67–68)
+
+- **AC-67** [Unit] (D.3b — invariant liên-GDD `LIVE_WINDOW_TURNS ≥ CONTENT_EXCHANGE_ESTIMATE`): GIVEN registry hiện hành (`live_window_turns` #15, `CONTENT_EXCHANGE_ESTIMATE` #7), THEN `live_window_turns ≥ CONTENT_EXCHANGE_ESTIMATE` — so sánh 2 số tĩnh liên-GDD, cùng cấp BLOCKING với AC-27/AC-52.
+- **AC-68** [Integration] (D.3b — guard đổi-slot áp dụng mọi đường, không chỉ "Chơi lại"): GIVEN S2 cache slot A, WHEN mở thẳng slot C khác từ S1 (không qua "Chơi lại"), THEN force cold-start theo guard slot-identity, không tính delta âm.
+
+**Tổng**: 68 AC (AC-38 là cross-ref; AC-56→56a/56b, AC-59→59a/59b, AC-61→61a/61b, AC-63→63a/63b/63c — tách nhãn/tách nội dung kiểm theo gate level, không phải AC hoàn toàn mới trừ AC-63b) — 34 [Unit] BLOCKING; [Integration]/[Manual]/[Config] ADVISORY. (Lịch sử sửa đổi đầy đủ: `design/gdd/reviews/core-ui-screen-navigation-review-log.md`.)
 
 ## Open Questions
 
 | # | Câu hỏi | Chủ sở hữu | Mục tiêu giải quyết |
 |---|---|---|---|
-| 1 | **Dải viewport target cho "Mobile Web"** (GAP-6, qa-lead): tablet 768px thuộc nhóm nào? Bất biến 1-cột hiện chỉ chứng minh ≤480px; cần chốt dải chính thức trong `technical-preferences.md` (cùng chỗ Memory Ceiling đang TBD) | technical-director | Trước `/create-architecture` |
+| 1 | ~~**Dải viewport target cho "Mobile Web"** — phần UX~~ **ĐÃ ĐÓNG PHẦN UX**: D.5 nay nhận thêm `is_touch_primary` — mọi thiết bị cảm ứng cầm tay mặc định 1-cột bất kể bề rộng, không cần biết tablet 768px "là Mobile hay không" để quyết định 2-cột. **CÒN MỞ — phần phân loại thiết bị/kỹ thuật khác** (GAP-6, qa-lead): dải viewport chính thức cho các quyết định responsive KHÁC (không phải 2-cột) vẫn cần chốt trong `technical-preferences.md` (cùng chỗ Memory Ceiling đang TBD). | technical-director | Trước `/create-architecture` |
 | 2 | **Browser back / history binding** (HTML5 export): MVP không bind — có cần intercept `beforeunload` cảnh báo khi đang Resolving không? | technical-director | ADR web export tại `/create-architecture` |
 | 3 | **Danh sách field nhóm "Cấu hình AI"** trong Settings (API key, chọn model?): phụ thuộc ADR backend AI | technical-director | ADR backend AI tại `/create-architecture` |
 | 4 | **Cơ chế lưu `app_config`** (cỡ chữ, cấp thiết bị): localStorage riêng hay góc nhỏ trong hệ lưu trữ Persistence? Không nằm trong slot bundle — cần ghi vào ADR persistence HTML5 đã dự kiến | technical-director | ADR persistence tại `/create-architecture` |
-| 5 | **Kiến trúc screen stack** (scene tree/Autoload cho 3 tầng màn hình-overlay-banner): quyết định implementation, không thuộc GDD | godot-specialist | ADR tại `/create-architecture` |
+| 5 | **Kiến trúc screen stack** (scene tree/Autoload cho 3 tầng màn hình-overlay-banner): quyết định implementation, không thuộc GDD. **2 cảnh báo bắt buộc đưa vào ADR**: (a) KHÔNG dùng `SceneTree.change_scene_to_file/packed()` — API này free toàn bộ scene tree hiện tại, không tương thích yêu cầu overlay đè lên màn hình bên dưới + giữ nguyên vị trí cuộn; pattern khuyến nghị: Autoload sở hữu các CanvasLayer riêng theo 3 tầng, màn hình là Control con được cache/ẩn-hiện (`visible=true/false`), không free node. (b) Safe-area insets (notch, mục "Trách nhiệm responsive") **KHÔNG phải API Godot built-in cho Web export** (chỉ có cho native qua `DisplayServer.get_display_safe_area()`) — trên Web cần CSS `viewport-fit=cover` + đọc giá trị qua `JavaScriptBridge`, PHẢI custom HTML export shell (Godot stock template không có sẵn `viewport-fit=cover` — thiếu nó, giá trị fail-silent về `0px`), phải là hạng mục công việc thật trong ADR web export, không phải "padding tự động miễn phí" | godot-specialist | ADR tại `/create-architecture` |
 | 6 | **Duyệt câu chữ empty-state mới** "Chưa có sổ nào — hãy bắt đầu cuốn đầu tiên" (giả định (j) của art-director — chữ mới, chưa qua narrative) | writer / narrative-director | Trước `/ux-design save-slot-screen` |
-| 7 | **Interface phân trang World Memory** `(anchor_turn_id, count, direction)`: yêu cầu từ D.3 hệ này — GDD World Memory (Designed) chưa mô tả API shape này; cần bên đó xác nhận khi rà chéo | game-designer | `/review-all-gdds` |
-| 8 | **Cờ `reset_in_progress`**: D.1/AC-41 tham chiếu cờ này thuộc sở hữu Character Continuation (#13), nhưng GDD #13 chưa định nghĩa tường minh — cần bổ sung bên đó khi rà chéo | game-designer | `/review-all-gdds` |
+| 7 | ~~**Interface phân trang World Memory** `(anchor_turn_id, count, direction)`~~ — **ĐÃ ĐÓNG 2026-08-04** (`/design-review`): World Memory GDD (#5) đã chốt `get_turn_page(anchor_turn_id, count, direction)` + cờ `has_more`, xóa mâu thuẫn nội bộ đã phát hiện (bảng Thao tác cũ ghi "trả toàn bộ", UI Requirements lại bắt buộc lazy-load). | game-designer | ~~`/review-all-gdds`~~ đã đóng |
+| 8 | ~~**Cờ `reset_in_progress`**~~ — **ĐÃ ĐÓNG 2026-08-04** (`/design-review`): không phải cờ mới — ánh xạ trực tiếp vào state đã tồn tại ở #13: `reset_in_progress ≡ (state = "Processing Chơi Lại")`; `state = "Reset Failed"` → `reset_in_progress=false` (nút "Thử lại" mở khóa). Đã sửa mọi tham chiếu trong D.1/Edge Cases/AC-41 sang state thật của #13, không định nghĩa cờ song song. | game-designer | ~~`/review-all-gdds`~~ đã đóng |
+| 9 | **Cơ chế truy vấn trạng thái chéo hệ** (signal vs poll vs Autoload) cho `tm_state`/`undo_available`/`card_exists`/`continuation_choice_eligible`/`state` (#13) — chưa GDD nào trả lời, ảnh hưởng trực tiếp cách viết D.1/D.2 thành code thật | technical-director / godot-specialist | ADR tại `/create-architecture` |
+| 10 | ~~**Số phận nội dung ô tự do khi AI timeout**~~ — **ĐÃ ĐÓNG**: Core Rule #9 nay chốt tường minh — giữ nguyên text người chơi đã gõ qua timeout, không xóa, không reset. | ux-designer | ~~Trước `/ux-design main-play-screen`~~ đã đóng |
+| 11 | **Giải pháp accessibility KHÔNG-AccessKit cho tap-name + 3 bút tích marginalia trên Web export**: AccessKit (Godot 4.5+) đã xác nhận là **native-desktop-only**, KHÔNG hoạt động trên HTML5/Web export (target platform duy nhất của game) — câu hỏi cũ "in/out scope AccessKit" hỏi sai, vì không có nhánh "in scope" nào khả thi qua cơ chế này. Câu hỏi đúng: ARIA injection qua DOM overlay, lớp TTS riêng, hay tuyên bố tường minh ngoài-scope-MVP? Đây liên quan trực tiếp **SC 4.1.2 (Name/Role/Value) và SC 1.3.1 (Info/Relationships) — cả 2 đều Level A**, tầng compliance cơ bản nhất (thấp hơn cả AA đang audit ở nơi khác trong GDD này) — **nâng mức ưu tiên**: quyết định TRƯỚC KHI pattern `RichTextLabel`-meta-tag bị khóa làm chuẩn dùng chung #14/#15 (không chỉ "trước `/create-architecture`" nói chung), vì thêm accessibility sau khi kiến trúc buffer-chung/meta-tag đã khóa có thể cần tái cấu trúc cách render tap-target, không chỉ "thêm 1 lớp". **Fallback tạm** (chi phí rẻ, không cần chờ ADR): cho tới khi giải pháp chi tiết (ARIA injection / TTS layer / khác) được chọn, người dùng bàn phím/screen reader mở Character Card qua bút tích 「Thẻ」 (đã là Control chuẩn, tự nhiên tham gia Tab-focus chain) — tap-tên-qua-bàn-phím tường minh NGOÀI SCOPE MVP tạm thời (xem AC-56a/56b). Đây chỉ đóng câu hỏi "làm gì trong lúc chờ", KHÔNG đóng câu hỏi kỹ thuật chính (ARIA/TTS/khác) — vẫn cần quyết trước khi khóa pattern. | accessibility-specialist / ux-designer / godot-specialist | **Trước khi khóa pattern RichTextLabel-meta-tag dùng chung #14/#15** (sớm hơn mốc `/create-architecture` cũ) |
+| 12 | **SC 1.4.4 Resize Text (200%) có thể không bao giờ đạt được**: D.5 chỉ cung cấp 3 nấc cỡ chữ rời rạc, trần `FONT_SCALE_STEP[L]=1.25` (125%). Nếu Godot Web export template khóa `user-scalable=no` ở HTML shell (phổ biến ở export mặc định) VÀ trần in-game chỉ 125%, sản phẩm không có cách nào đạt ngưỡng 200% mà SC 1.4.4 (Level AA) yêu cầu. Cần xác nhận: HTML wrapper export có cho phép browser-native zoom hay không? Nếu KHÔNG, D.5 phải nâng trần lên 200% HOẶC GDD phải ghi tường minh đây là 1 deviation có chủ đích khỏi SC 1.4.4 kèm rationale — hiện đang là khoảng trống im lặng, chưa từng được đặt câu hỏi trước vòng 3. Liên quan: viền focus 2px cố định (mục 9) không co theo `theme_scale` — nếu `theme_scale` là phương tiện phóng to DUY NHẤT (không có browser zoom thật), viền có thể co lại tương đối so với ngữ cảnh đã phóng to ở nấc L. **Nhánh quyết định** (phần kỹ thuật vẫn hoãn prototype, phần "chọn nhánh nào" đã chốt): NẾU prototype xác nhận browser zoom bị khóa → D.5 PHẢI thêm 1 nấc scale cao hơn (VD XL, `theme_scale≈2.0`) để đạt 200%; NẾU browser zoom khả dụng → giữ nguyên 3 nấc hiện tại, ghi nhận tường minh "SC 1.4.4 đạt được qua browser-native zoom, không qua `theme_scale` riêng" (không phải deviation, chỉ cần nói rõ cơ chế). Đồng thời bổ sung 1 dòng kiểm chứng cụ thể cho focus 2px ở nấc L: verify contrast viền/nền liền kề ≥3:1 (SC 1.4.11, AA) tại đúng độ dày tuyệt đối 2px — không giả định "phần tử lớn hơn thì viền tự ổn". | accessibility-specialist / godot-specialist | Trước `/create-architecture` — có thể cần prototype để verify trần font trên canvas Web thật |
