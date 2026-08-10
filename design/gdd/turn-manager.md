@@ -1,8 +1,8 @@
 # Turn Manager / Core Game Loop
 
-> **Status**: Designed — Pending Review
+> **Status**: **Approved** (`/design-review` 2026-08-02 — 2 blocking sửa cùng phiên, không cần re-review; xem `reviews/turn-manager-review-log.md`). Header trước đó ghi nhầm "Pending Review" dù review đã đóng từ 2026-08-02 — sửa lại cho khớp review-log, 2026-08-10.
 > **Author**: user + agents
-> **Last Updated**: 2026-08-02
+> **Last Updated**: 2026-08-06 (mô hình write-ahead cho checkpoint ghi, `/design-review persistence-save-system.md`)
 > **Implements Pillar**: Foundation for all pillars (esp. Pillar 2: Hệ Quả Thực Sự)
 
 ## Overview
@@ -60,7 +60,18 @@ phép người chơi được thử vận may lần nữa, không đảm bảo h
 4. Khi xác nhận: hệ thống xác định hành động có kích hoạt hệ thống cơ học
    nào không (Combat, EXP, Hảo cảm...) → nếu có, hệ thống đó tính & khóa
    kết quả trước → AI tường thuật lại kết quả đã khóa → lượt được ghi vào
-   World Memory → nút Undo xuất hiện cho lượt vừa xác nhận.
+   World Memory → **Persistence ghi atomic toàn bộ save bundle của lượt
+   (`persistence-save-system.md` Core Rule #1/#3)** → CHỈ SAU KHI
+   `durability_confirmed = true` (Core Rule #3 của `persistence-save-system.md`
+   — không phải chỉ lời gọi ghi trả về), lượt chuyển sang Turn Confirmed,
+   nút Undo xuất hiện cho lượt vừa xác nhận. **Sửa 2026-08-06** (`/design-review`
+   `persistence-save-system.md`, đóng mâu thuẫn: bản cũ để Turn Confirmed
+   xảy ra TRƯỚC khi biết ghi có thành công hay không, khiến UI phải "rút
+   lại" 1 trạng thái đã hiển thị đầy đủ (narration, nút Undo, 4 gợi ý mới)
+   nếu ghi thất bại — không có transition nào cho việc đó trong state
+   machine cũ. Ghi atomic giờ là điều kiện GATE của việc vào Turn
+   Confirmed, không phải hệ quả xảy ra sau đó): nếu ghi atomic thất bại,
+   xử lý giống hệt Edge Case "lệnh gọi AI thất bại" — xem Edge Cases.
 5. Bấm Undo: hoàn tác TOÀN BỘ (kết quả cơ học + trí nhớ AI) của lượt vừa
    xác nhận, quay lại đúng tình huống trước đó — hệ thống sinh lại 4 gợi ý
    mới cho tình huống đó (không tái sử dụng gợi ý cũ, để tránh cảm giác
@@ -96,10 +107,10 @@ phép người chơi được thử vận may lần nữa, không đảm bảo h
 | State | Mô tả | Chuyển sang |
 |---|---|---|
 | Awaiting Action | Hiển thị 4 gợi ý + ô nhập tự do, chờ người chơi | → Resolving (khi gửi hành động) |
-| Resolving | Xác định + gọi hệ thống cơ học liên quan để tính & khóa kết quả, gọi AI tường thuật | → Turn Confirmed (khi AI trả lời xong) |
-| Turn Confirmed (is_death_turn=false) | Lượt đã ghi vào World Memory, nút Undo khả dụng, hệ thống sinh 4 gợi ý mới cho lượt kế | → Awaiting Action (lượt mới — Undo lượt cũ khóa vĩnh viễn) HOẶC → Undoing (nếu bấm Undo) |
-| Turn Confirmed (is_death_turn=true) | Lượt đã ghi vào World Memory, `undo_available` khóa cứng `false` (Core Rule #9), KHÔNG sinh 4 gợi ý lượt kế — nhân vật chính đã chết thật | → [Ngoài phạm vi Turn Manager] bàn giao cho Character Continuation để người chơi chọn Quỷ tu/Chuyển sinh/Chơi lại |
-| Undoing | Hoàn tác kết quả cơ học + xóa trí nhớ AI của lượt đó | → Awaiting Action (quay lại tình huống trước lượt đó) |
+| Resolving | Xác định + gọi hệ thống cơ học liên quan để tính & khóa kết quả, gọi AI tường thuật, rồi Persistence ghi atomic toàn bộ bundle của lượt (**sửa 2026-08-06** — ghi atomic nay là gate của transition, xem Core Rule #4; **sửa lại 2026-08-06 vòng re-review tiếp theo** — gate chính xác là `durability_confirmed`, không phải "ghi atomic thành công" chung chung, xem `persistence-save-system.md` Core Rule #3) | → Turn Confirmed (khi AI trả lời xong VÀ `durability_confirmed = true`) HOẶC → Awaiting Action (nếu ghi atomic thất bại — xem Edge Cases) |
+| Turn Confirmed (is_death_turn=false) | Lượt đã ghi vào World Memory VÀ `durability_confirmed = true` (Persistence), nút Undo khả dụng, hệ thống sinh 4 gợi ý mới cho lượt kế | → Awaiting Action (lượt mới — Undo lượt cũ khóa vĩnh viễn) HOẶC → Undoing (nếu bấm Undo) |
+| Turn Confirmed (is_death_turn=true) | Lượt đã ghi vào World Memory VÀ `durability_confirmed = true`, `undo_available` khóa cứng `false` (Core Rule #9), KHÔNG sinh 4 gợi ý lượt kế — nhân vật chính đã chết thật | → [Ngoài phạm vi Turn Manager] bàn giao cho Character Continuation để người chơi chọn Quỷ tu/Chuyển sinh/Chơi lại |
+| Undoing | Hoàn tác kết quả cơ học + xóa trí nhớ AI của lượt đó, rồi Persistence ghi atomic phản ánh trạng thái đã rollback (**sửa 2026-08-06** — cùng nguyên tắc gate; **sửa lại 2026-08-06 vòng re-review tiếp theo** — gate = `durability_confirmed`) | → Awaiting Action (quay lại tình huống trước lượt đó, khi `durability_confirmed = true`) HOẶC → Turn Confirmed KHÔNG đổi (nếu ghi atomic thất bại — Undo coi như chưa xảy ra, xem Edge Cases) |
 
 ### Interactions with Other Systems
 
@@ -118,9 +129,29 @@ phép người chơi được thử vận may lần nữa, không đảm bảo h
   thuật kết quả đã khóa → ghi vào World Memory. Các hệ thống này phải tuân
   thủ Core Rules #8: kết quả tính ra chưa "final" cho đến khi lượt được xác
   nhận và không bị undo — cơ chế cụ thể chốt qua ADR (xem Open Questions).
-- **Persistence/Save System**: đọc/ghi trạng thái lượt hiện tại (bao gồm
-  việc lượt gần nhất có còn undo được không) để khôi phục đúng khi tải lại
-  game.
+- **Persistence/Save System** — **sửa 2026-08-06** (`/design-review`
+  `persistence-save-system.md`, đóng mâu thuẫn Turn Confirmed/write-
+  failure): không chỉ đọc/ghi trạng thái để khôi phục khi tải lại — giờ
+  còn là 1 GATE bắt buộc trên chính transition Resolving→Turn Confirmed
+  và Undoing→Awaiting Action (Core Rule #4, States and Transitions). Đây
+  là 1 phụ thuộc thật của Turn Manager vào Persistence, cùng dạng với 3
+  phụ thuộc ẩn khác của Turn Manager đã ghi nhận ở `systems-index.md`
+  (Contract Enforcement, AI Integration Layer, World Memory) — xem ghi
+  chú tương ứng ở đó.
+- **Death & Consequence** (Feature, đã Designed) — bổ sung 2026-08-05,
+  đóng gap `/design-review` gộp 11 GDD: khi `pending_fate=true` (cửa sổ
+  quyết định Kết liễu/Tha mạng), 2 trong 4 ô gợi ý ĐÓNG CỨNG cho "Kết
+  liễu [NPC]"/"Tha mạng [NPC]" — sinh trực tiếp từ Death & Consequence,
+  KHÔNG qua AI. 2 ô còn lại vẫn gọi AI sinh bình thường (không đổi ngân
+  sách `calls_per_turn`); Turn Manager ghi đè đúng 2/4 vị trí trước khi
+  hiển thị.
+- **Character Continuation** (Feature, đã Designed) — bổ sung
+  2026-08-05, đóng gap `/design-review` gộp 11 GDD (hard, 2 chiều): sau
+  `is_death_turn=true` đã ghi, Turn Manager bàn giao quyền điều khiển
+  cho Character Continuation (Idle → Awaiting Continuation Choice); SAU
+  KHI `handoff_allowed=1` (D.1 của hệ đó), Character Continuation trả
+  quyền điều khiển lại Turn Manager ở `slot_id` MỚI, state `Awaiting
+  Action`.
 
 ## Formulas
 
@@ -156,8 +187,21 @@ world_time=11 lại.
 
 **Output Range**: {0, 1, 2, 3} — 2 là số lần gọi bình thường (sinh gợi ý +
 tường thuật); 3 chỉ xảy ra khi Edge Case "AI trả về <4 gợi ý hoặc trùng
-lặp" kích hoạt đúng 1 lần retry. KHÔNG BAO GIỜ vượt quá 3. Gọi AI lần thứ 4
-trong cùng 1 lượt là bug.
+lặp" kích hoạt đúng 1 lần retry. KHÔNG BAO GIỜ vượt quá 3. **Đếm theo
+LOẠI call_type đã dùng trong lượt (mỗi biến trên là 1 bool, không phải bộ
+đếm số lần thử)** — "Gọi AI lần thứ 4" nghĩa là dùng tới **LOẠI** call_type
+thứ 4 không tồn tại (chỉ có đúng 3 loại), KHÔNG PHẢI lần gọi `request_ai`
+thứ 4 về mặt số lượng instance (chốt 2026-08-08
+`/design-review ai-llm-integration-layer.md` vòng 2, đóng gap
+`systems-designer`: resubmit `narration_call` sau khi tầng AI/LLM trả
+Failed — VD 2 lần lỗi mạng liên tiếp, hoàn toàn khả dĩ trên Mobile Web —
+KHÔNG làm tăng biến `narration_call` thêm lần nữa, vì nó đã là bool=1 từ
+lần gọi đầu; xem `ai-llm-integration-layer.md` Formula 4 cho lý do đầy
+đủ. Nếu đọc "lần thứ 4" theo nghĩa đếm-instance sẽ mâu thuẫn trực tiếp
+Edge Case "lệnh gọi AI thất bại" bên dưới, vốn tuyên bố Failed KHÔNG tính
+là 1 lượt đã dùng — và mâu thuẫn Player Fantasy của `ai-llm-integration-layer.md`
+[chưa từng mất lượt vì 1 lần gọi API thất bại], vì 2 lỗi mạng liên tiếp
+là chuyện bình thường, không phải trường hợp biên hiếm gặp).
 **Example**: Lượt bình thường = 1 (đầu lượt, sinh gợi ý) + 1 (sau xác nhận,
 tường thuật) = 2. Lượt có gợi ý lỗi ở lần gọi đầu = 1 (sinh gợi ý) + 1
 (retry bù gợi ý) + 1 (tường thuật) = 3.
@@ -208,7 +252,63 @@ chết" → undo_available(20)=false ngay cả khi nó là lượt gần nhất.
 - **Nếu lệnh gọi AI (sinh gợi ý hoặc tường thuật) thất bại** (lỗi mạng/
   API): lượt KHÔNG được coi là đã xác nhận — world_time không tăng, hệ
   thống báo lỗi và cho phép nhập lại hành động (không tính là 1 lượt đã
-  dùng, không tính là 1 lần undo).
+  dùng, không tính là 1 lần undo). **Ràng buộc bổ sung 2026-08-07**
+  (`/design-review ai-llm-integration-layer.md`, đóng gap `game-designer`
+  — PHÂN BIỆT RÕ với Edge Case "xác nhận lại đúng hành động vừa bị undo"
+  ở trên, vốn CHO PHÉP kết quả khác vì đó là lựa chọn CHỦ ĐỘNG của người
+  chơi [Undo]): nếu `narration_call` Failed SAU KHI kết quả cơ học của
+  hành động đó ĐÃ được tính và khóa (`locked_result` tồn tại — VD Combat
+  đã resolve xong 1 lượt trao đổi trước khi AI tường thuật thất bại), và
+  người chơi sau đó thao tác lại (gõ lại/gửi lại đúng hành động vừa bị
+  chặn), Turn Manager **BẮT BUỘC truyền lại ĐÚNG `locked_result` đã tính
+  trước đó cho lệnh `narration_call` mới — KHÔNG được tính toán lại (không
+  reroll RNG)**. Một lần lỗi mạng/API thuần hạ tầng — hoàn toàn không liên
+  quan tới quyết định của người chơi — KHÔNG được phép đổi kết quả cơ học
+  đã tính, nếu không sẽ mở exploit "ngắt mạng khi sắp thua để câu reroll"
+  và vi phạm Pillar 3 (Sức Mạnh Có Logic)/Khế Ước Cơ Học-Tường Thuật.
+  `locked_result` treo này được giữ trong bộ nhớ tạm (không phải
+  Persistence — chưa "final" cho tới khi lượt xác nhận, Core Rule #8) cho
+  tới khi: (a) retry thành công (lượt xác nhận, giải phóng), (b) người
+  chơi gửi 1 hành động KHÁC (không phải đúng hành động vừa bị chặn —
+  `locked_result` treo bị hủy, tính lại từ đầu cho hành động mới), hoặc
+  (c) người chơi rời màn hình/slot hiện tại. *(Cascade từ `/design-review`
+  `ai-llm-integration-layer.md` vòng 1 — xem GDD đó Interactions với Turn
+  Manager để biết phần tầng AI/LLM tự đảm bảo.)*
+- **Nếu `request_ai` trả `error_code=BUSY`** (thêm 2026-08-08
+  `/design-review ai-llm-integration-layer.md` vòng 2, đóng gap
+  `game-designer` — hợp đồng "phía caller" của tầng AI/LLM, chỉ có thể
+  xảy ra do bug caller vì input đã khóa suốt Resolving/Undoing): xử lý
+  HỆT như Edge Case "lệnh gọi AI thất bại" ở trên về phía người chơi
+  (world_time không đổi, cho nhập lại) NHƯNG log dưới nhãn lý do RIÊNG
+  BIỆT với lỗi mạng — KHÔNG gộp chung nhánh xử lý, vì `BUSY` là tín hiệu
+  bug caller cần lộ ra để sửa, không phải sự cố hạ tầng bình thường. Xem
+  AC-13c.
+- **Nếu Persistence ghi atomic thất bại ngay sau khi AI tường thuật xong
+  (Resolving) hoặc ngay sau khi Undoing hoàn tất tính toán rollback**
+  (bổ sung 2026-08-06, `/design-review` `persistence-save-system.md` —
+  đóng mâu thuẫn giữa Core Rule #4 cũ và States and Transitions, nơi Turn
+  Confirmed từng render đầy đủ trước khi biết ghi có thành công hay
+  không): xử lý theo đúng nguyên tắc "lệnh gọi AI thất bại" ở trên — lượt/
+  Undo đó KHÔNG được coi là đã xảy ra. Cụ thể: (a) ghi thất bại sau
+  Resolving → world_time KHÔNG tăng, hệ thống báo lỗi (theo đúng Error
+  Taxonomy của `persistence-save-system.md`), quay về Awaiting Action,
+  người chơi nhập lại hành động — kết quả cơ học vừa tính (Combat/EXP/
+  Hảo cảm...) KHÔNG được merge (đúng Core Rule #8); (b) ghi thất bại sau
+  khi Undoing hoàn tất rollback → Undo đó bị coi là CHƯA xảy ra, trạng
+  thái Turn Confirmed trước đó (lượt sắp bị undo) giữ nguyên KHÔNG đổi,
+  nút Undo vẫn khả dụng để người chơi thử lại thao tác Undo. **Bổ sung
+  2026-08-06 vòng re-review tiếp theo** (`/design-review persistence-save-system.md`
+  — đóng gap `game-designer`: nguyên nhân gốc của `WRITE_FAILED_QUOTA`/
+  `WRITE_FAILED_UNSUPPORTED` KHÔNG tự biến mất giữa các lần thử, khác hẳn
+  lỗi mạng thoáng qua): "người chơi nhập lại hành động" ở nhánh (a) KHÔNG
+  luôn kéo theo 1 lệnh gọi AI narration MỚI — nếu người chơi gửi lại ĐÚNG
+  cùng hành động ngay lập tức, Turn Manager PHẢI gọi Persistence theo cơ
+  chế retry-chỉ-ghi (`pending_write_cache`, xem `persistence-save-system.md`
+  Edge Cases/Tuning Knob `max_write_retry_before_escalation`) thay vì
+  chạy lại toàn bộ Resolving — tránh đốt thêm AI call thật cho mỗi lần
+  thử khi nguyên nhân gốc (quota) không đổi. Chỉ khi người chơi gửi 1
+  hành động KHÁC, Resolving mới chạy lại đầy đủ từ đầu (gồm 1 AI call
+  narration mới) như bình thường.
 - **Nếu người chơi gửi hành động mới trong khi lượt trước còn ở trạng thái
   Resolving**: hệ thống khóa ô nhập/nút chọn trong suốt Resolving — không
   nhận hành động thứ 2 song song.
@@ -224,8 +324,12 @@ chết" → undo_available(20)=false ngay cả khi nó là lượt gần nhất.
   quay về Awaiting Action, người chơi nhập lại hành động.
 - **Nếu AI trả về ít hơn 4 gợi ý hoặc có gợi ý trùng lặp**: hệ thống tự
   động gọi lại AI tối đa 1 lần để bù đủ 4 gợi ý duy nhất; nếu vẫn thất bại,
-  dùng gợi ý dự phòng chung chung (VD: "Quan sát xung quanh", "Chờ đợi",
-  "Rời đi") để lấp chỗ trống — không được hiển thị ít hơn 4 ô.
+  dùng gợi ý dự phòng chung chung (VD: `{text: "Quan sát xung quanh",
+  envelope: "observe"}`, `{text: "Chờ đợi", envelope: "wait"}`, `{text:
+  "Rời đi", envelope: "leave"}` — cập nhật 2026-08-05 sang shape
+  `{text, envelope}` khớp schema `suggestion_call` mới, xem
+  `ai-llm-integration-layer.md` Core Rule #2) để lấp chỗ trống — không
+  được hiển thị ít hơn 4 ô.
 
 ## Dependencies
 
@@ -333,6 +437,44 @@ tuning knob — đây là hard invariant kiến trúc (xem Formulas #2), không 
 - **AC-13** (lỗi mạng): GIVEN gọi AI lỗi (giả lập timeout), THEN world_time
   không đổi, không tốn turn_id, không tính vào lượt undo, người chơi quay
   lại màn nhập.
+- **AC-13b** (vòng đời `locked_result` treo — 3 trigger a/b/c, đối xứng
+  trực tiếp với AC-12; thêm 2026-08-08 `/design-review
+  ai-llm-integration-layer.md` vòng 2, đóng gap `qa-lead`: `combat-system.md`
+  đã có AC-54 test hành vi phía Combat, nhưng `turn-manager.md` — nơi
+  thực sự giữ `locked_result` treo — trước bản này chỉ có văn xuôi dòng
+  256-263, không AC-numbered test nào; AC-12 [PHẢI reroll khi undo-rồi-
+  xác-nhận-lại] và Edge Case "lệnh gọi AI thất bại" [CẤM reroll khi
+  Failed-rồi-resubmit] là 2 hành vi ĐỐI NGHỊCH kích hoạt bởi 2 đường gần
+  như không phân biệt được ở code — chỉ 1 trong 2 có test trước khi sửa
+  này là cấu hình dễ sinh bug): GIVEN 1 hành động Combat có `locked_result
+  =X` treo sau `narration_call` Failed, RNG source mock/seed để trả giá
+  trị khác nhau ở mỗi lần gọi, WHEN test lần lượt 3 nhánh: (a) retry NỘI
+  BỘ (tầng AI/LLM) thành công → `locked_result` treo được giải phóng,
+  KHÔNG còn tồn tại để tái dùng cho lượt sau (kiểm bằng cách thử đọc lại
+  sau khi lượt đã xác nhận — không tìm thấy state treo); (b) người chơi
+  gửi 1 HÀNH ĐỘNG KHÁC (không phải hành động vừa bị chặn) → `locked_result
+  =X` bị hủy, Resolving chạy lại từ đầu cho hành động mới, RNG source
+  ĐƯỢC GỌI LẠI (spy đếm ≥1 lệnh gọi mới — đối xứng trực tiếp AC-12); (c)
+  người chơi gửi lại ĐÚNG hành động vừa bị chặn (resubmit) → `locked_result`
+  truyền lại **byte-for-byte = X**, RNG source KHÔNG được gọi (spy đếm =
+  0 lệnh gọi mới) — ĐỐI NGHỊCH TRỰC TIẾP với AC-12, chủ đích: (b)/(c) chỉ
+  khác nhau ở việc hành động gửi lại có ĐÚNG hành động vừa bị chặn hay
+  không, THEN hành vi RNG phải khác nhau tương ứng như trên. *(unit +
+  mock RNG source, cross-ref AC-12)*
+- **AC-13c** (`error_code=BUSY` — thêm 2026-08-08
+  `/design-review ai-llm-integration-layer.md` vòng 2, đóng gap
+  `game-designer`: hợp đồng "phía caller" của tầng AI/LLM chưa có ai
+  nhận trước bản này): GIVEN `request_ai` trả `error_code=BUSY` (chỉ có
+  thể do bug caller — input đã khóa suốt Resolving/Undoing nên đường này
+  về lý thuyết không đạt được ở luồng chuẩn), WHEN Turn Manager xử lý,
+  THEN hành vi phía người chơi GIỐNG HỆT Edge Case "lệnh gọi AI thất bại"
+  (world_time không đổi, không tốn turn_id, cho nhập lại) NHƯNG log/
+  telemetry ghi nhãn lý do `BUSY` DƯỚI NHÃN RIÊNG BIỆT, KHÔNG gộp chung
+  với nhãn "lỗi mạng"/timeout — vì `BUSY` là tín hiệu bug caller cần lộ
+  ra để sửa (implementer gọi `request_ai` lần 2 khi lần 1 chưa xong),
+  không phải sự cố hạ tầng bình thường; gộp nhãn sẽ giấu đúng loại bug mà
+  cơ chế reject-ngay của tầng AI/LLM tồn tại để lộ ra. *(unit, spy trên
+  nhãn log)*
 - **AC-14** (save/load giữa Resolving): GIVEN tải lại giữa Resolving, THEN
   state = Awaiting Action, không còn locked_result dở dang.
 - **AC-15** (save/load giữa Turn Confirmed): GIVEN tải lại giữa Turn

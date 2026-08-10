@@ -47,7 +47,14 @@
 ## Forbidden Patterns
 
 <!-- Add patterns that should never appear in this project's codebase -->
-- [None configured yet — add as architectural decisions are made]
+- **`JavaScriptBridge.eval()`** (bổ sung 2026-08-08, technical spike
+  `docs/engine-reference/godot/modules/web-export.md` §Q9): đây là API
+  DUY NHẤT trong `JavaScriptBridge` cần CSP `unsafe-eval` — mọi nhu cầu
+  thực tế của dự án (Web Locks, `StorageManager.estimate()`, IndexedDB
+  transaction cho Persistence) đều làm được qua `get_interface()`,
+  `create_object()`, `create_callback()` mà KHÔNG cần eval. Cấm dùng
+  `eval()` biến 1 rủi ro môi trường host (CSP có thể chặn) thành 1 quy
+  tắc code review kiểm tra được tĩnh.
 
 ## Allowed Libraries / Addons
 

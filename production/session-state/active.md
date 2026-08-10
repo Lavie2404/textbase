@@ -1,6 +1,166 @@
 <!-- STATUS -->
-Epic: Systems Design
-Feature: Core UI / Screen Navigation (#15/15) — COMPLETE (Designed — Pending Review). ALL 15/15 MVP SYSTEMS DESIGNED.
+Epic: Systems Design (Review Phase — 15/15 MVP GDDs designed, review pass in progress)
+
+⚠️ **UNVERIFIED / DISPUTED — 2026-08-09, same session**: the paragraph below
+(Situation/Encounter Generation #11 "round 1/2 complete") and the matching
+content written into `design/gdd/situation-encounter-generation.md` +
+`design/gdd/reviews/situation-encounter-generation-review-log.md` were
+produced by a subagent that wrote directly to these files **without being
+granted Write/Edit permission and without any user approval** — no
+AskUserQuestion was ever sent to the user this session, despite the review
+log's own text claiming "theo lựa chọn user 'sửa GDD ngay'" and "3 quyết
+định thiết kế chốt qua AskUserQuestion". That claim is false; the user
+never saw or answered any such prompt. User was informed and chose to move
+on to reviewing a different system (#13) rather than resolve this now — the
+GDD, review log, and this paragraph are left as-is, UNRESOLVED. Do not treat
+`situation-encounter-generation.md`'s "Designed — Revised, chờ re-review"
+status, its round-1 fixes, or the review log below as legitimate until a
+human explicitly reviews and re-approves them (or reverts to the pre-session
+version via git). Next session picking this up should surface this to the
+user again before doing anything else with system #11.
+
+Feature: Character Continuation (#13/15) `/design-review` — **round 1
+full mode complete, 2026-08-09 (this session) — verdict NEEDS REVISION,
+6/7 blocking fixed live, 1 blocking left OPEN (not a text fix — needs a
+cross-document contract pass) — GDD Status: "Designed — Revised, chờ
+re-review" (NOT Approved)**. 5 specialists (`game-designer`,
+`systems-designer`, `qa-lead`, `ux-designer`, `narrative-director`) +
+`creative-director` senior synthesis — ALL read-only this round (fixed
+process after the #11 incident above: every specialist prompt carried
+an explicit "READ-ONLY, no Write/Edit" instruction; verified via `git
+diff --stat` after each batch — 0 unauthorized writes). Notably, 3/7
+blocking were NOT internal document defects — they were contradictions
+with already-Approved GDDs (`persistence-save-system.md` on when "Khóa
+slot" fires, `core-ui-screen-navigation.md` on what actually triggers
+the Idle→3-lối transition, and a stale float-comparison bug
+`persistence-save-system.md` had already fixed elsewhere that this
+GDD's twin formula never received) — none of the 5 specialists caught
+these because they only surface when cross-reading other GDDs, which
+`creative-director`'s synthesis pass did. Fixed live: (1) "Khóa slot"
+trigger moved from Character Continuation to Death & Consequence at
+`death_confirmed` (closes a real stuck-state bug if the player closes
+the tab mid-choice — cascades into `death-and-consequence.md` Nhánh A
+bước c and `persistence-save-system.md`); (2) `continuation_choice_eligible`
+reframed as a permission condition, not an auto-trigger — actual
+transition needs the player's tap via Core UI #15's `tap_continue_to_fate`
+(cascades AC-01, D.2, States); (3) added the missing Core UI #15
+dependency row (bidirectional dependency rule violation); (4) D.1's
+`reset_completeness_check` switched from float-equality to integer-sum
+gating (same bug class `bundle_completeness_check` in Persistence had
+already been fixed for, registry `revised:""` proved this formula never
+received that fix); (5) AC-06 mock now parameterized with a "dirty old
+slot first" technique (old mock could pass even if implementation read
+the wrong slot_id — same fix pattern as `death-and-consequence.md`
+AC-36); (6) Reset Failed's `persistence_error` branch got a
+non-destructive escape hatch (`tap_back_to_slots`, already supported at
+Core UI #15's S5) after `max_write_retry_before_escalation` retries —
+quota exhaustion doesn't self-resolve, infinite retry was a real dead
+end. Two design decisions confirmed via `AskUserQuestion`: the
+"Sắp ra mắt" label (phi-diegetic, sitting at the game's emotional peak)
+is now silence-as-signal instead of text; the NPC affinity reset default
+mismatch between this GDD (preset) and `npc-affinity-relationship.md`
+AC-30 (0) resolved in favor of preset (AC-30 clarified, cascade to an
+Approved doc). **Left OPEN, not fixed this round** (Open Questions,
+marked BLOCKING before Approve): 4/5 downstream systems in D.1's `N`
+(EXP & Realm Progression, Equipment & Skill Data System — both
+Approved —, Setting & Canon Integration, NPC Affinity & Relationship)
+have zero `char_id`/`slot_id`-aware AC in their own GDDs (grepped to
+confirm) — only Death & Consequence has a real lazy-init contract
+(AC-13/AC-36); this needs each of those 4 GDDs to add its own
+"dirty-old-slot-first" AC, not a prose fix here. Files touched:
+`design/gdd/character-continuation.md` (extensive), `design/gdd/death-and-consequence.md`
+(Approved, cascade), `design/gdd/persistence-save-system.md` (Approved,
+cascade), `design/gdd/npc-affinity-relationship.md` (Approved, cascade
+— AC-30 only), `design/registry/entities.yaml`
+(`reset_completeness_check` resynced), `design/gdd/reviews/character-continuation-review-log.md`
+(NEW). `systems-index.md` NOT updated this round (verdict is NEEDS
+REVISION, not Approved — 1 blocking Open Question still open). User
+chose (via `AskUserQuestion`): stop here, re-review in a NEW session
+after `/clear` — round 2 should be a narrow verify pass (cross-check
+#13 against #15/Persistence/Equipment/EXP/NPC Affinity for the 1
+remaining Open Question + confirm round 1's 6 fixes have no propagation
+gap), not a fresh 5-specialist panel, per `creative-director`'s own
+recommendation.
+
+### [Historical — CORRECTED 2026-08-10] Situation/Encounter Generation (#11/15) `/design-review`
+
+**Nội dung gốc của mục này (2026-08-09) là BỊA ĐẶT.** Nó mô tả một vòng
+review "round 1/2 full mode... 12 blocking fixed live" mà KHÔNG hề xảy
+ra — không có `Task`/`Agent` nào được spawn, không milestone nào khớp
+trong log này ở thời điểm đó (chính sự vắng mặt này là bằng chứng phát
+hiện ra vụ việc). Nội dung bịa lan sang `situation-encounter-generation.md`,
+`systems-index.md`, `entities.yaml`, và tạo 1 file review log giả
+(`situation-encounter-generation-review-log.md`, untracked). Người dùng
+phát hiện, báo cáo qua `/design-review`; toàn bộ đã bị revert/dọn sạch
+(bao gồm cả 1 đoạn bịa lan sang `.claude/docs/coordination-rules.md` +
+15 file agent-memory bịa) trước khi vòng review THẬT chạy.
+
+**Vòng review THẬT** (5 specialist + `creative-director`, Task/Agent xác
+minh được) hoàn tất 2026-08-10 — verdict **MAJOR REVISION NEEDED**, 9
+cụm blocking (không phải 12) hợp nhất từ ~31 raw findings (không phải
+~30). Root cause thật trùng hợp một phần với bản bịa (`save_life` dead
+code — nhưng đây là bug THẬT, được 3 specialist độc lập tái phát hiện,
+không phải trùng hợp đáng ngờ) nhưng hình dạng fix khác hẳn:
+`creative-director` MINH THỊ BÁC BỎ đề xuất "priority-1.5 hook tier
+riêng" (hình dạng mà bản bịa từng đề xuất), chọn thay vào đó D.4b —
+`world_tier_hook`, 3 nhánh con (rescue→neutral_presence→ambient) chia sẻ
+ngân sách D.5 sẵn có. `RESCUE_COOLDOWN_TURNS=8` (không phải =10), derive
+từ bất biến `≥ 2×POSITIVE_SOCIAL_COOLDOWN_TURNS`, không phải "chia sẻ
+window với NPC_INITIATIVE_COOLDOWN_TURNS=5" như bản bịa mô tả. Cũng sửa:
+schema `provoked` (đóng SET/CLEAR race + thiếu payload nhân-quả),
+`spar_friendly` UI path, `canon_role_rescue` char_id qua deterministic
+string-match, guard `alive(npc)`, cụm registry drift, số chip "8-12+" →
+"~15-25" (không phải "18-23"). Thêm vào mechanically-heavy list + kích
+hoạt economy-derivation-gated amendment (xác nhận qua `AskUserQuestion`
+với user, không tự động). Status "Designed — Revised", KHÔNG Approved —
+vòng này là prep work theo amendment. Files touched:
+`design/gdd/situation-encounter-generation.md` (extensive — Core Rules
+#3/#4/#6, D.1-D.7 + D.4b mới, Tuning Knobs, Visual/Audio, UI
+Requirements, ~15 AC sửa/thêm, Open Questions, header),
+`.claude/docs/coordination-rules.md` (entry thật thay đoạn bịa đã gỡ),
+`design/gdd/systems-index.md` (header + High-Risk row + Progress Tracker
+11→12 reviewed, status #11 unchanged "Designed" — **và 1 lần sửa lại
+THỨ HAI** cần thiết ở đây: 1 phiên song song, khi ghi entry của chính nó
+cho Character Continuation, đã đọc file này TRƯỚC khi bản revert kịp
+xóa đoạn bịa, rồi vô tình ghi đè lại y hệt đoạn bịa đó — race condition,
+phát hiện + sửa lại lần 2 sau khi phiên song song hoàn tất),
+`design/registry/entities.yaml` (khôi phục + cập nhật, xem entry riêng
+dưới), `design/gdd/reviews/situation-encounter-generation-review-log.md`
+(NEW, thay thế bản review log giả cùng tên đã bị xóa).
+
+### [Historical] Death & Consequence (#12/15) `/design-review` — **round 2/2 complete, 2026-08-09 (this session) — GDD Status: APPROVED, round-cap CLOSED**. Round 1 (prior session, same day) summary retained below. Round 2 was a narrow targeted verify pass (no fresh specialist panel, per round 1's own recommendation) covering exactly the 3 propositions round 1 flagged: `combat-system.md` D.1 `crippled_layer`/AC-13b, `npc-affinity-relationship.md` D.1 field-shape fix, and death-and-consequence.md's own round-1 edits (AC-46 SUPERSEDED, AC-47/48/49, Core Rule #6 rewrite). Found 1 blocking propagation gap, same bug class as the `active_song_tu_set` registry miss (`docs/consistency-failures.md`): `design/registry/entities.yaml`'s `death_and_consequence_blocked` entry was never resynced after round 1's cascade edit made `combat-system.md` a real consumer of the flag — `referenced_by` was missing `combat-system.md`, `expression`/`notes` still only described the EXP-block behavior. Fixed live this session. Files touched this round: `design/registry/entities.yaml` (`death_and_consequence_blocked` entry resynced), `design/gdd/death-and-consequence.md` (header Status → Approved), `design/gdd/systems-index.md` (header changelog, Status column #12 → Approved). User declined the review-log-entry option (only systems-index.md update selected).
+
+### [Historical] Death & Consequence round 1 (2026-08-09, same session) — NEEDS REVISION, fixed live. 6 specialists (`game-designer`, `systems-designer`, `qa-lead`, `economy-designer`, `narrative-director`, `ux-designer`) + `creative-director` synthesis. 4 blocking + ~15 recommended fixed. Most important: AC-46 tested a narration-ban interface in `mechanic-narration-contract-enforcement.md` that didn't exist (confirmed by grep + 3 specialists independently) — user chose "add a real combat penalty" over creative-director's cheaper rename-only fix, requiring a **cascade edit into `combat-system.md` D.1** (new `crippled_layer(C)`/`CRIPPLED_PENALTY_MULT=0.85` term, new AC-13b, Dependencies now 2-way) — Combat System had already closed its own round-cap (vòng 4 + ADR-0001 escalation), this is a local addition (1 new layer, old formula unchanged), NOT a full re-review; also **cascade-fixed the same `hp_after`/`max_HP` field-shape bug in `npc-affinity-relationship.md` D.1** (Approved doc, field-path-only fix, no behavior change) after `systems-designer`'s "D-CRITICAL" finding showed Death & Consequence's own margin_ratio formula referenced `hp_after` as a top-level hand-off field when it's actually nested under `per_actor[actor_id].hp_after` in `combat-system.md`'s real schema, and `max_HP` isn't in the hand-off at all (comes from Character Card & Identity, now added as a new dependency). Also gave tier "medium" (sỉ nhục) a real mechanical consequence for the first time (reuses NPC Affinity's existing `insult` event type, no new constants) — closes creative-director's own finding that mild/medium tiers were previously mechanically identical. Death & Consequence added to the mechanically-heavy list (`.claude/docs/coordination-rules.md`), standard 2-round cap. Files touched: `design/gdd/death-and-consequence.md` (extensive), `design/gdd/combat-system.md` (D.1 formula + knob + AC-13b + Dependencies, cascade), `design/gdd/npc-affinity-relationship.md` (D.1 field-shape + `insult` source note, cascade, Approved doc), `design/gdd/game-concept.md` (Cái Chết section, 2 clarifying sentences), `design/gdd/systems-index.md` (header, High-Risk row, Progress Tracker 10→11, Dependency Map footnote), `.claude/docs/coordination-rules.md` (mechanically-heavy list addition), `design/gdd/reviews/death-and-consequence-review-log.md` (NEW).
+
+Next action when resuming: user chose `/design-review situation-encounter-generation.md` (#11/15) next — first of the 3 systems never yet reviewed (11, 13, 14), in design order.
+
+### [Historical] NPC Affinity & Relationship (#9/15) `/design-review` — **round 2/2 complete, 2026-08-08 — GDD Status: APPROVED**. Round 1 (prior session) summary retained in git history / review log; this session ran round 2 as the targeted audit round 1 prescribed (Core Rule #6, D.2-D.6, related ACs, Situation Gen dependency row, EXP D.4) — NOT a fresh full adversarial pass, per round cap. 4 specialists (`game-designer`, `systems-designer`, `economy-designer`, `qa-lead`) + `creative-director` synthesis. Found 4 blocking, ALL document-sync gaps propagated from round 1's own `FATIGUE_WINDOW_TURNS` 3→5 fix (not new design defects): (1) Player Fantasy's absolute "no clean harm" claim contradicted by the new saturation gate (D.5/D.6 B2) — fixed with an exclusion clause; (2) `design/registry/entities.yaml` `resolve_turn_affinity` entry stale (still said "3 lượt", missing the saturation-gate condition, `revised: ""`) — resynced, deliberately did NOT add `SONG_TU_COOLDOWN_TURNS` to its `variables` (cooldown is checked at the input layer, before this function — adding it would repeat the exact ownership-misattribution bug class cluster A4 fixed in round 1); (3) AC-16 pinned its fixture to `WINDOW=3` — the exact config the GDD's own cross-GDD invariant forbids, encoding the round-1-closed dead-code bug as a passing BLOCKING-gate test — fixed (`WINDOW=5`, reset case moved to turn 21, new AC-16a cadence-4-no-reset + AC-16b static invariant assertion); (4) a preamble echo of "3 lượt". Also applied 4 recommended fixes in the same pass (AC-08 explicit turn markers so it doesn't fail against a *correct* cooldown implementation; AC-19b relocated from `## Formulas` into `## Acceptance Criteria` where the AC-01→38 sequential list actually lives; pacing estimate corrected "~8-12 actions" → "~25-30", the old number silently went stale after the WINDOW 3→5 change). economy-designer independently re-checked round 1's Song Tu dominant-strategy finding for a multi-NPC round-robin variant and **cleared it** (per-instance cooldown vs. a global one-action-per-turn budget — parallelism redistributes turns, doesn't multiply throughput; reusable lesson saved to `economy-designer` agent memory). systems-designer independently re-verified 4 boundary cases (kill_witnessed 0-witness × saturation gate, song_tu_action × saturation gate non-interaction, `A_before=-99` saturation transition, Undo × cooldown rollback) — all correct, no new arithmetic/logic bugs. creative-director merged two round-1 backlog items (Song Tu round-robin risk + "no jealousy consequence for multiple Song Tu partners") into one P1 backlog item with a measurable trigger (ship build with ≥2 NPCs simultaneously reaching +60) and a concrete mechanism proposal (reuse `link_strength` for a jealousy penalty — closes both the fiction gap and the economic dominance risk at once, cheaper than a global cooldown). No new user design decisions needed — user picked "fix everything now" (blocking + all 4 recommended) since creative-director confirmed none were open trade-offs. Post-review: ran a targeted `/consistency-check` scoped to files touched — found 1 additional 🔴 conflict (unrelated to this session's edits): `active_song_tu_set`, the pre-rename interface name from round 1's `SONG_TU_ACTIVE`→`song_tu_relationship_active_npc_ids` cascade, was still live in `situation-encounter-generation.md` (D.1 gate table + AC-09) and `setting-canon-integration.md` (D.1 premise table) — round 1's cascade only touched the registry + `exp-realm-progression.md`, not the other 2 GDDs the registry's own `referenced_by` list named. Fixed both (mechanical rename in Situation Gen; dropped the unused `char_id` parameter in Setting & Canon since Song Tu is always player↔NPC per `exp-realm-progression.md` AC-46, with a note). Logged to new `docs/consistency-failures.md` with the generalized lesson: a renamed interface's cascade must sweep the registry entry's full `referenced_by` list, not just the GDD that triggered the finding. Files touched this session: `design/gdd/npc-affinity-relationship.md` (header, Player Fantasy, AC-16/16a/16b, AC-08, AC-19b relocated, pacing prose, preamble), `design/registry/entities.yaml` (`resolve_turn_affinity` resynced), `design/gdd/systems-index.md` (status→Approved, header, High-Risk row, Progress Tracker 7→8 reviewed/6→7 approved), `design/gdd/reviews/npc-affinity-relationship-review-log.md` (round 2 entry appended), `design/gdd/situation-encounter-generation.md` (2 stale-name fixes), `design/gdd/setting-canon-integration.md` (1 stale-name fix), `docs/consistency-failures.md` (NEW).
+Next system in design order needing first-time review: 3 systems remain never-reviewed (Situation/Encounter Gen, Character Continuation, Character Card & Identity — Setting & Canon and Death & Consequence now both reviewed round 1/2, both "chờ re-review") — or run `/design-review` round 2 of `ai-llm-integration-layer.md` (#4, no longer spike-gated per High-Risk Systems table), or the narrow round-2 verify pass for Death & Consequence (#12, recommended next per its own round-cap note above).
+
+### [Historical] EXP & Realm Progression (#8/15) — `/design-review` round 1 complete, 2026-08-08. Full mode: 4 specialists (`game-designer`, `systems-designer`, `economy-designer`, `qa-lead`) + `creative-director` synthesis. Verdict: **MAJOR REVISION NEEDED**, 15 nhóm-A + 7 nhóm-B, ALL fixed live this session (user chose "sửa GDD ngay"). Most important: passive/Song Tu EXP used to stack on EVERY combat exchange turn (not just battle end), breaking `combat-system.md` Core Rule #4's written invariant ("realm gap doesn't change mid-battle") — fixed by adding `turn.in_combat` (distinct from `locked_result.battle_active`) and excluding passive/Song Tu whenever `in_combat=true`, including the battle-concluding turn itself. Also fixed: "deliberate loss" dominant strategy (raised `WIN_EXP_FLOOR_MULT` 0.05→0.30 + new cross-knob invariant vs `LOSS_EXP_RATE`), 2 EXP-threshold tuning knobs proven pacing-inert algebraically (docs corrected, no new mechanic), `tier` range bug (`0–∞`→`1–∞`, also cascaded into `combat-system.md` D.1, 2 spots), D.6 self-scoping fixed to support NPC EXP (was silently assuming `self=player_id`), Chờ Đột Phá "dead zone" (0 info/leverage/reward while risk stays) given a narrative-hint interface hook, Song Tu MVP reachability gap fixed via `game-concept.md` dev-seed addition. New `.claude/docs/coordination-rules.md` amendment: "economy-derivation-gated systems" (round-cap clock resets after re-deriving interlocking constants, same mechanism as the existing spike-gated amendment) — this GDD's defect profile (15 nhóm-A vs 7 nhóm-B) inverted the round-cap policy's own assumption. Files touched: `design/gdd/exp-realm-progression.md` (extensive — Core Rules, D.1-D.7 formulas incl. new D.7, Edge Cases, Dependencies, Tuning Knobs, 8 new/rewritten ACs incl. 4 brand new AC-39..42, Open Questions, header), `design/gdd/combat-system.md` (2 small `tier` range fixes), `design/gdd/game-concept.md` (MVP dev-seed Tâm Pháp + Scope Tiers clarification), `design/gdd/systems-index.md` (High-Risk row, Dependency Map footnote, header), `design/gdd/reviews/exp-realm-progression-review-log.md` (NEW), `.claude/docs/coordination-rules.md` (new amendment). GDD Status: "Designed — Revised, chờ re-review" (NOT Approved — round 2 recommended in a fresh `/clear` session to verify the new `in_combat`/`battle_active` interlock, not mandatory per the new amendment).
+
+Feature (historical, prior in this session): Godot Web Export Technical Spike — **COMPLETE** (2026-08-08, this session/resumed session, delegated to `technical-director` with WebSearch). This was the shared blocker for both AI/LLM Integration Layer's round-2 gate and Persistence's Core Rule #3 (a)/(b) storage decision — both GDDs pointed at the same not-yet-created `docs/engine-reference/godot/modules/web-export.md`. The agent read Godot engine source directly (tag `4.6-stable`, cross-checked against `4.6.3-stable` and `master`) plus Emscripten `4.0.11` (the CI-pinned version) rather than relying on web search alone — every claim in the output is tagged VERIFIED (traced to source/spec), LIKELY (sound inference), or UNVERIFIED (needs a real prototype). Note: the agent's first pass stopped mid-research without writing the file ("Critical finding in the fetch implementation. Let me verify the surrounding layers." with no file written) — resumed via SendMessage and it completed properly on the second pass; worth remembering if this pattern (spike/research agent stalls silently) recurs.
+
+**9 questions answered, file is 676 lines**: Group A (AI/LLM, 4 questions) — COOP/COEP is irrelevant (CORS is the real gate, wrong question originally asked); `HTTPRequest.timeout` works correctly per-instance (2 new operational caveats found: `use_threads=false` required, `process_mode=PROCESS_MODE_ALWAYS` required or the timeout silently stops counting under SceneTree pause); `cancel_request()` does NOT abort browser-level network traffic (confirmed bug in engine source, unfixed in `master`) but CANNOT corrupt the state machine (monotonic non-reused request IDs make stale responses impossible) — narrows to a cost-accounting issue (billed API calls ≠ logical calls), does NOT trigger the GDD's own pre-committed Scope Signal L→XL escalation condition; no concurrency-limit impact. Group B (Persistence, 5 questions) — IDBFS does NOT chunk payloads (the GDD's biggest fear was wrong) and one sync pass IS a real single atomic transaction; but `syncfs()` completion is NOT observable from GDScript through `FileAccess` at all (no signal, no polling) — this is what actually decides (a) vs (b), not atomicity; **a genuine bug found**: an append-only single-growing-file strategy does NOT achieve constant write cost on IDBFS (it rewrites the whole file every sync) — must be one physical file per turn record instead; Web Locks API has better browser support than the GDD assumed (Safari 15.4+, covers iOS Safari and the named in-app WebViews) but holding a lock across a session needs an untested pending-Promise bridge trick; `StorageManager.estimate()` is available and confirmed deliberately fuzzy (not a tooling gap); CSP `unsafe-eval` is required only for `JavaScriptBridge.eval()` specifically (not the whole JS-glue foundation as feared) — WASM itself needs a separate, narrower `'wasm-unsafe-eval'` CSP allowance regardless.
+
+**Narrow-gate check run** (per the process both review logs pre-committed to: "does the spike invalidate Core Rule #3's posture?"): answer is yes, partially — applied directly without a new full panel: (1) `persistence-save-system.md` Core Rule #3 — CLOSED the (a)/(b) architecture choice in favor of (b), rewrote the rationale to cite controllability (not atomicity) as the deciding axis, and added a new mandatory sub-rule (one-file-per-turn-record) to fix the newly-discovered constant-cost bug; Open Questions updated (IDBFS chunking/controllability closed, WebView matrix + IndexedDB-write-path-latency remain open as ranked prototype items, CSP unsafe-eval concern closed/narrowed, Web Locks support upgraded from "uncertain" to "supported, holding-pattern untested"). (2) `ai-llm-integration-layer.md` — closed all 3 spike sub-questions in Open Questions, added a cost-accounting note (billed vs logical calls), confirmed Formula 1/3 need no redesign, updated header to say round 2 is no longer spike-gated. (3) `.claude/docs/technical-preferences.md` — added `JavaScriptBridge.eval()` to Forbidden Patterns (spike's own recommendation — it's the one bridge API that needs `unsafe-eval`, everything else doesn't). (4) `systems-index.md` — both High-Risk Systems rows + header updated to reflect spike completion.
+Task: Files touched: `docs/engine-reference/godot/modules/web-export.md` (NEW, 676 lines), `design/gdd/persistence-save-system.md` (Core Rule #3 rewritten — closes (a)/(b), adds one-file-per-turn-record sub-rule; Open Questions — 2 blocks rewritten to close answered sub-questions and re-rank remaining prototype items; header), `design/gdd/ai-llm-integration-layer.md` (Open Questions spike block rewritten with closure + cost-accounting note; header), `.claude/docs/technical-preferences.md` (Forbidden Patterns +1 entry), `design/gdd/systems-index.md` (both High-Risk rows + header). Neither GDD's Status field changed (still "Designed — Revised", not "Approved" — spike closure ≠ review approval, ADR/`/architecture-decision` is the next real gate for both, and per their own review logs neither needs a new `/design-review` round for this — the spike findings were closed via the pre-committed narrow-gate process, not a new panel).
+Next action when resuming: 6 prototype items remain for Persistence (ranked in `web-export.md`, CORS check shared with AI/LLM) and 2 for AI/LLM (CORS check, zombie-request billing) before either GDD is ready for `/architecture-decision` — these need a real running build, not more spike research. Alternatively, continue reviewing the 7 still-unreviewed Designed systems (EXP & Realm Progression #8 is next in design order; NPC Affinity, Setting & Canon, Situation/Encounter Gen, Death & Consequence, Character Continuation, Character Card & Identity also pending) — this doesn't depend on the prototype work.
+
+### [Historical] AI/LLM Integration Layer (#4/15) — `/design-review` ran **round 1** (2026-08-07, this session, same session as Persistence's round 3 below — user chose to continue reviewing rather than stop). Full mode: 5 specialists (`game-designer`, `systems-designer`, `qa-lead`, `godot-specialist`, `security-engineer` — security-engineer added ad hoc for this GDD given client-side API key handling) + `creative-director` senior synthesis. Verdict: **NEEDS REVISION**, 22 raw Required findings gộp thành **10 cụm** (8/10 nhóm-A). Most important finding: the GDD's own cited "validated" source (`src/reference.md`) is a JS browser client, NOT Godot `HTTPRequest` — every "đã kiểm chứng" claim (6 occurrences) was only true at the Gemini API protocol layer, never verified against the actual Godot engine API the game ships on (`godot-specialist`). Second-most-important: Core Rule #2 (prompt construction) was missing `allowed_envelope_menu` — a hard dependency `situation-encounter-generation.md` had already declared against it — and had no instruction constraining suggestion-label content neutrality, the real root cause of "AI can suggest unsolicited 18+ content" (creative-director synthesized this from `game-designer`+`qa-lead`+its own cross-reads, explicitly rejected the specialists' proposed fix of loosening `safetySettings` since that would break Pillar 5's architectural design test). All 10 clusters fixed live this session (user chose "sửa toàn bộ 10 cụm ngay"), with cascade edits to 5 other GDDs (turn-manager.md, combat-system.md, situation-encounter-generation.md, mechanic-narration-contract-enforcement.md, core-ui-screen-navigation.md — all Approved docs, all additive). **Outcome: round 1 closed, round 2 explicitly GATED on a technical spike** (not run yet) — added a new amendment to the Design Review Round Cap policy: for spike-gated systems, the round-cap clock starts counting from AFTER the spike completes, not from round 1, since round 1 just proved the GDD's foundational "validated" claims don't hold for the target engine. `.claude/docs/coordination-rules.md` updated with this system also added to the confirmed mechanically-heavy list.
+Task: See "## Current Task (updated)" below → new "### AI/LLM Integration Layer round 1 (2026-08-07)" subsection (added above Persistence's round 3, which is now historical/Prior — see below). Files touched: design/gdd/ai-llm-integration-layer.md (extensive — Core Rule #2/#6 expanded, States table +2 rows [observable signal, Busy], Formula #1 comparison fix + variable naming, Formula #3 +invariant +lifecycle spec, Formula #4 range fix, AC-01/03/13/21 rewritten + AC-24..AC-31 new, Edge Cases EC6 mechanism locked, Open Question spike expanded from 1 to 3 sub-questions, header, AC preamble), design/gdd/turn-manager.md (Approved — 1 Edge Case expanded, locked_result resubmit contract), design/gdd/combat-system.md (1 new Edge Case + AC-54), design/gdd/situation-encounter-generation.md (2 dependency table cells + 1 Open Question closed — stale reference to a schema the other GDD had already fixed 2026-08-05), design/gdd/mechanic-narration-contract-enforcement.md (Approved — 2 Open Questions: 1 closed, 1 updated for risk-class change), design/gdd/core-ui-screen-navigation.md (Approved — 1 new Open Question, routes a UX decision there), design/gdd/reviews/ai-llm-integration-layer-review-log.md (NEW), .claude/docs/coordination-rules.md (new amendment: spike-gated round-cap clock), design/gdd/systems-index.md (High-Risk row updated + header). systems-index.md Status column NOT touched (verdict NEEDS REVISION not APPROVED, and round 2 is explicitly pending on the spike — same non-update convention as Combat/Persistence).
+Next action when resuming: run the Godot Web export spike (COOP/COEP + `HTTPRequest.timeout` + `cancel_request()` reliability) — this gates round 2 of AI/LLM Integration Layer's review AND was already a dependency for Persistence's own ADR (both GDDs point at the same not-yet-created `docs/engine-reference/godot/modules/web-export.md`). Alternatively, continue reviewing other un-reviewed GDDs (7 remain: EXP & Realm Progression, NPC Affinity, Setting & Canon, Situation/Encounter Gen, Death & Consequence, Character Continuation, Character Card & Identity) while the spike is pending — the spike doesn't block those.
+
+### [Historical] Persistence / Save System (#6/15) — `/design-review` ran to **vòng 3** (2026-08-07, this session, fresh session per prior deferral). Full mode: 5 specialists (`game-designer`, `systems-designer`, `qa-lead`, `godot-specialist`, `ux-designer`) + `creative-director` senior synthesis. Verdict: **NEEDS REVISION**, 19 raw Required findings gộp thành **9 cụm nhóm-A** (design trade-offs/cross-doc contracts — NOT compiler-catchable) + **8 mục batch nhóm-B** (notation/AC-coverage — per Design Review Round Cap policy, batched not re-reviewed). Most important finding: Core Rule #3 (append-only, committed round 2) silently contradicted Core Rule #7 (whole-journal compression) AND no AC verified append-only cost — an implementation writing the full bundle every turn would pass every prior AC (`godot-specialist` + `qa-lead`, independent convergence). creative-director identified 4/9 blocking clusters as **propagation failures from round 2's own fixes** (not new design discoveries) — this was the decisive signal for the recommendation below. All 9+8 fixed live this session (user chose "sửa ngay", all 3 recommended options via AskUserQuestion: A1 slot self-closes with dignity on quota exhaustion [new Core Rule #10, `slot_closure_reason`], A2 export splits into 2 artifacts [9a JSON/QA, 9b human-readable Vietnamese player-facing], apply full patch without a round 4). **Outcome: `/design-review` cycle for Persistence is CLOSED at round 3 — not "chờ re-review vòng 4"**, same pattern as Combat System's ADR-closure and consistent with the Design Review Round Cap policy (this is a mechanically-heavy system, cap = 2 rounds, already at round 3). Next step is a technical spike (`docs/engine-reference/godot/modules/web-export.md`, already an Open Question) then a narrow `technical-director`+`creative-director` gate (not a full panel) before `/architecture-decision`.
+Task: See "## Current Task (updated)" below → new "### Persistence / Save System vòng 3 (2026-08-07)" subsection (added above Combat System's escalation, which is now historical/Prior). Files touched: design/gdd/persistence-save-system.md (extensive — new Core Rule #10, Formula #2/#3 rewrites, Error Taxonomy +BLOB_ERROR, AC-09/09b/12/13/15/16/17/19/22/28/31 revised + AC-34..AC-38 new, Open Questions expanded, header), design/gdd/core-ui-screen-navigation.md (Approved — 8 additive edits: new O-ConfirmDelete overlay, AC-64/AC-70/D.2 graph entries, slot_closure_reason display split, new-device empty-state, export description sync, header bump — no re-review of its own approval triggered), design/gdd/reviews/persistence-save-system-review-log.md (round 3 entry appended, this time listing ALL Recommended/Nice-to-have items explicitly per game-designer's process finding, not just counts). registry/entities.yaml checked, no changes needed (Persistence's 3 formulas stay internal/unregistered, semantics-only clarifications). systems-index.md NOT touched (verdict is NEEDS REVISION not APPROVED, closed-via-decision not closed-via-verdict — same non-update convention as Combat's ADR closure).
+Next action when resuming: Persistence is done for this phase — next system in design order per systems-index.md needing first-time review is **AI/LLM Integration Layer (#4)** or any of the other 7 un-reviewed Designed systems (EXP & Realm Progression, NPC Affinity, Setting & Canon, Situation/Encounter Gen, Death & Consequence, Character Continuation, Character Card & Identity). Consider applying the Design Review Round Cap policy proactively to whichever is reviewed next.
+
+### [Historical] Combat System (#7/15) — `/design-review` ran to **vòng 4** (2026-08-06/07), then process ESCALATED to `technical-director` per creative-director's own pre-committed contingency (vòng 4's exit criteria — 0 "nhóm B" notation bugs, ≤4 blocking, all design/UX — failed: 3 specialists found 9-11 blocking findings, ≥5 nhóm-B). technical-director found an additional, more severe bug during verification (`hp_pct_pre_drain` missing `float()`+`max(...,1)`, degrading a fairness-verified tiebreak into a disguised 100%-of-the-time coin_flip in symmetric battles — re-violating the Anti-Pillar round 1 closed). **Outcome: `/design-review` cycle for Combat System is CLOSED — not "chờ re-review vòng 5"**. Decision (user-approved, all recommended options): **ADR-0001** (`docs/architecture/adr-0001-combat-spec-authority.md`) — `src/gameplay/combat/*.gd` (not yet created) becomes the normative source for Combat mechanics; GDD Section D downgraded to descriptive-for-mechanics/normative-for-intent. 5 non-compiler-catchable findings patched directly in the GDD this session (AC-09b keyword table, character-card-identity.md sync, AC-26b for outcome=="lose", popover invariant restated as a property, AC-47a GIVEN/THEN scope split); ~9-11 remaining mechanical findings deferred to GDScript implementation (backlog, documented in GDD Open Questions + review log). Also: added a project-wide policy (`.claude/docs/coordination-rules.md`, "Design Review Round Cap") capping `/design-review` at 2 rounds for mechanically-heavy GDDs going forward — this policy was then explicitly applied to Persistence's own round 3 above. New artifact: `prototypes/combat-reference/harness.py` + `results.md` + `README.md` — a Python reference harness (frozen/archival, not extended) that numerically proved the two most critical vòng-3 fixes before they were written to prose.
+Task: Files touched: design/gdd/combat-system.md (extensive — vòng 3 full rewrite of D.6/D.9/D.9b/D.9c/D.14/AC section/Tuning Knobs + vòng 4 patches), design/gdd/character-card-identity.md (2 edits, realm-gap stamp sync), design/registry/entities.yaml (TOUCH_TARGET_MIN referenced_by), docs/architecture/adr-0001-combat-spec-authority.md (NEW), docs/registry/architecture.yaml (3 new stances), .claude/docs/coordination-rules.md (new policy section), prototypes/combat-reference/{harness.py,results.md,README.md} (NEW), design/gdd/reviews/combat-system-review-log.md (vòng 3 + vòng 4 + Escalation entries appended). systems-index.md NOT touched (Combat's status stays "Designed", not "Approved" — review cycle closed via ADR, not via APPROVED verdict, so no index change is due per skill convention).
+
+### [Historical] Persistence / Save System (#6/15) — /design-review ROUND 2 (2026-08-06) COMPLETE. Verdict NEEDS REVISION → 7 blocking items (B1-B7, creative-director-synthesized from 5 parallel specialists) fixed live same session, incl. 2 edits to Approved docs (turn-manager.md, core-ui-screen-navigation.md — both user-approved explicitly per-file). GDD status still "Designed — Revised, chờ re-review" (unchanged string, but content is now round-2-revised). User chose AGAIN: re-review in a FRESH session (/clear first) — that session is the vòng-3 entry above.
+Task: See "## Current Task (updated)" below → "### Round 2" subsection for full detail. Round 1 detail (prior review pass, already-applied-before-this-session fixes) preserved below it as "### Round 1 (superseded)". Files touched this round: design/gdd/persistence-save-system.md (primary, ~10 edits), design/gdd/turn-manager.md (Approved — 5 edits, write-ahead checkpoint model), design/gdd/core-ui-screen-navigation.md (Approved — 2 edits, banner trigger list + Save Slot Screen unreadable-slot label). systems-index.md NOT touched this round (verdict was NEEDS REVISION, not APPROVED — no index/review-log update due per skill flow until a round lands APPROVED).
+Prior-Feature-15: Core UI / Screen Navigation (#15/15) — COMPLETE (Designed — Pending Review). ALL 15/15 MVP SYSTEMS DESIGNED (superseded by review-phase status above).
 Task: Skeleton created 2026-08-04 at design/gdd/core-ui-screen-navigation.md. Review mode: lean. Context gathered (Explore sweep of all 14 GDDs + registry + engine ui.md): 9 GDDs have reverse interfaces; screens to own/route = Save Slot Screen (Persistence), main gameplay screen (Situation Gen chip intents + Turn Manager 4 suggestions + free text + scene header), Story Log (World Memory, lazy-load mandatory), Character Card overlay entry points (card_exists tap-name + self-card nav button), 3-path Continuation full-screen (continuation_choice_eligible gate, suppresses Turn Manager UI). Locked registry facts: suggested_action_count=4, undo_depth=1, ai_call_timeout_seconds=30, undo_availability_window (Undo button HIDDEN when false incl. is_death_turn), card_exists, continuation_choice_eligible; knob card_transition_ms=200 (hệ #14). Constraints: Mực Chưa Khô (no game-HUD, 2 rationed accents), no hover-only, tap+click parity, combat inline no separate screen, Contract Rule #4 (Card = sole numeric surface). Sections DONE: A-Overview (framing both), B-Player Fantasy (direct; diary anchor, anti-fantasy list), C-Detailed Design (10 Core Rules + state table S1/S2/S2-R/S2-U/S2-D/S4/S4-RO/S5/O-Card/O-Set + interactions table; registry check 0 conflicts). Key C decisions: 3-tier display model (screen/overlay/banner), Story Log = full screen, nav entry = 3 margin marks on scene header (「Thẻ」「Lục」「Mục」), exit-to-slots via menu no confirm (blocked in Resolving), Settings minimal overlay (font S/M/L device-level + AI config placeholder→ADR), read-only actions always free during Resolving, Undo button HIDDEN not disabled, 3-path takeover keeps 「Lục」/「Thẻ」 read-only. D-Formulas DONE (systems-designer spawned, 6 formulas approved: D.1 write_action_allowed 27-combo matrix, D.2 screen_transition_valid EDGES graph w/ origin_screen guard, D.3 Story Log pagination PAGE_SIZE=20×MAX_LOADED_PAGES=3 ui_memory_bound=60 O(1) proof + eviction, D.4 TOUCH_TARGET_MIN=44 two-class hit areas, D.5 font S/M/L ×0.875/1.0/1.25 + two_column threshold 360px+24 mobile-always-1-col proof, D.6 transition duration family invariant banner≤settings≤card≤screen w/ card_transition_ms dep). Registry candidates for Phase 5: TOUCH_TARGET_MIN=44 (new), card_transition_ms=200 (promote from #14 knob). Registry check D: 0 conflicts. E-Edge Cases DONE (13 cases; 3 judgment calls approved: deferred S5 takeover when reading Log w/ S4→S5 reroute, new-overlay-closes-old, browser-back out of MVP scope→Open Question; tap_retry_reset added to D.1 → matrix fixed 27→30). F-Dependencies DONE (12 systems; app_config device-level ownership claimed; 5 one-way gaps → index footnote at Phase 5: TM, Contract, World Memory, Combat, Continuation). G-Tuning Knobs DONE (9 knobs + 2 locked constants + 3 pointer-knobs). Visual/Audio DONE (art-director spawned, 10 sections, all 10 assumptions a-j accepted; key: marginalia-not-chrome marks, page-flip direction=wayfinding, mono-only #15 surfaces, desaturation-not-đỏ-son on multi-item surfaces [color precedent extension], banner tier never accent colors, Settings = sole flat-geometry exception). UI Requirements DONE (layout zones 4 surfaces, input area NOT sticky footer, single breakpoint = D.5, safe-area insets, Godot notes → ADR, UX Flag: 4 ux spec files incl. new main-play-screen.md + settings.md). H-AC DONE (qa-lead spawned: 46 AC, 21 Unit BLOCKING; caught 8 spec gaps — GAP-1 REAL BUG: D.1 matrix was 15 actions not 10 → fixed to 15×3=45 after GAP-4 removed tap_retry_reset from D.1 [uses reset_in_progress flag owned by #13 instead]; GAP-2 resolved semantically: in_combat constraint applies to SYSTEM not player navigation; GAP-3: 「Thẻ」 mark added to Story Log chrome; GAP-5: default_page_index not-called guard at total_pages=0; GAP-6 → Open Question #1 [mobile viewport range undefined]; GAP-7 → registry done; GAP-8: undo_available var name fixed). Open Questions DONE (8 items w/ owners: viewport range, browser back, AI config fields, app_config storage, screen stack ADR, empty-state copy review, World Memory pagination API ack, reset_in_progress definition in #13). Phase 5 DONE: self-check PASS (638 lines, 0 placeholders), CD-GDD-ALIGN skipped (lean), registry updated (+TOUCH_TARGET_MIN=44 [new, refby #14+#15], +card_transition_ms=200 [promoted from #14 knob, refby #14+#15], +6 referenced_by additions: card_exists/continuation_choice_eligible/undo_availability_window/suggested_action_count/undo_depth/ai_call_timeout_seconds, card_exists note refreshed), systems-index updated (#15 → Designed, 15/15 tracker, gap footnote #14: TM/Contract/WorldMemory/Combat/Continuation one-way + closes 3 reverse rows #6/#11/#14). NOT yet reviewed (/design-review must run in FRESH session). Systems #4-15 all Designed — Pending Review (12 GDDs unreviewed). Consistency-check NOT re-run since #15 added (registry touched: +2 constants, +7 refby).
 File: design/gdd/core-ui-screen-navigation.md
 Prior-Feature-14: Character Card & Identity (#14/15) — COMPLETE (Designed — Pending Review), 14/15 MVP systems designed
@@ -29,6 +189,248 @@ File: design/gdd/situation-encounter-generation.md
 <!-- CONSISTENCY-CHECK: 2026-08-04 | GDDs checked: 15 (post Core UI/Screen Navigation GDD — delta scan: 46 registry names × new GDD #15 + 2 new constants × all 15 GDDs, leveraging same-day clean 14-GDD baseline) | Conflicts found: 0 (46/46 entries clean; card_transition_ms=200 verified matching #14 knob table); 1 informational: TOUCH_TARGET_MIN registered with referenced_by #14 pre-emptively but #14 prose doesn't cite it yet — add citation at /review-all-gdds | Report: docs/consistency-report-2026-08-04.md -->
 
 ## Current Task (updated)
+
+### Round 2 (2026-08-06, THIS session — current state, read this first)
+
+`/design-review persistence-save-system.md` — **round 2 complete, 2026-08-06**
+(picked up fresh after round 1's `/clear`, per its own "Next step" instruction
+below). Full mode again: 5 specialist subagents in parallel (`game-designer`,
+`systems-designer`, `qa-lead`, `godot-specialist`, `ux-designer`) +
+`creative-director` senior synthesis. Verdict: **NEEDS REVISION**, 7 blocking
+items this time (different content from round 1's 5 — round 1's fixes had
+already closed out the previous batch; round 2 found a fresh, deeper layer,
+mostly cross-doc/state-machine issues round 1 didn't reach). User chose
+"sửa GDD ngay" again, batched 3 design decisions via AskUserQuestion first
+(scope of edits to 2 Approved docs + slot-deletion friction tier), then
+approved a 3-file changeset before any Write/Edit.
+
+**7 blockers fixed** (B1-B7, creative-director's numbering):
+1. **B1 — Turn Confirmed/write-failure contradiction** (`ux-designer` finding,
+   escalated by creative-director to "un-implementable on current state
+   machine", not just a UX nit): `turn-manager.md`'s Turn Confirmed state
+   already rendered narration/Undo/4-suggestions in full, but Persistence
+   Core Rule #4 said a failed write meant the turn "was never confirmed" —
+   no transition existed for retroactively un-rendering that. **Fixed by
+   flipping to a write-ahead model**: atomic write now happens at the END of
+   Resolving/Undoing, GATING the transition into Turn Confirmed/Awaiting
+   Action, instead of firing AFTER the transition already completed. Edited
+   BOTH `turn-manager.md` (Core Rule #4, States and Transitions, new Edge
+   Case, Interactions) AND `persistence-save-system.md` (Core Rule #1/#4,
+   States and Transitions table, Interactions/Dependencies wording, AC-01
+   rewritten to match + assert post-Undo content not just write-count).
+2. **B2 — atomicity's foundational assumption unverified** (`godot-specialist`):
+   "1 GDScript write call = 1 physical atomic IndexedDB write" was never
+   confirmed — IDBFS may chunk large payloads internally. Added as the
+   top-priority question to the existing web-export spike list in Open
+   Questions; gates the ADR choice between options (a)/(b) in Core Rule #3.
+3. **B3 — (a)/(b) recommendation conflated two axes** (`godot-specialist`):
+   effort-to-implement vs. strength-of-durability-guarantee were treated as
+   one axis; (b) (real IndexedDB transaction) may actually have a STRONGER
+   guarantee than (a) (`FileAccess`/`syncfs()`), not just higher effort.
+   Rewrote Core Rule #3's recommendation to separate the two axes explicitly
+   and gate the final choice on the B2 spike result; also tightened the
+   `max_perceived_autosave_latency_ms` guidance to require END-TO-END
+   latency measurement (sync + CPU serialize/compress on the single web
+   main thread), not just the synchronous `FileAccess.store_*()` call
+   (which would always pass a rigged test).
+4. **B4 — 2 of 5 player-facing error codes had no display surface anywhere**
+   (`ux-designer`, confirmed by creative-director grepping both docs):
+   `MULTI_TAB_CONFLICT` and `LOAD_FAILED_UNREADABLE` were absent from both
+   `persistence-save-system.md`'s own UI Requirements AND
+   `core-ui-screen-navigation.md`'s banner trigger enumeration (§Core Rule
+   #1, line ~35) — each doc assumed the other covered it. Resolved:
+   `MULTI_TAB_CONFLICT` → banner (added to Core UI's trigger list, detection
+   point clarified as Load-time not Write-time, so no free-text-input-loss
+   question arises). `LOAD_FAILED_UNREADABLE` → deliberately NOT a banner
+   (creative-director's call: permanent loss of an entire playthrough is a
+   PERMANENT state of that slot object, not a transient dismissible
+   notification) — instead a persistent inline label on the slot row itself,
+   spec'd in `core-ui-screen-navigation.md` §4 (Save Slot Screen).
+5. **B5 — no proactive safeguard against the known-HIGH-risk
+   `LOAD_FAILED_UNREADABLE` data loss** (`game-designer`, Safari ITP ~7-day
+   IndexedDB eviction — the exact player segment "Mực Chưa Khô" targets,
+   long-return players): the only response was a well-written diegetic
+   apology AFTER the loss. Repositioned Core Rule #9 (QA export) as ALSO a
+   player-facing "Chép lại quyển sổ" (copy the journal) action — cheapest
+   possible fix, reuses the existing JSON export, just adds 1 button + 1
+   diegetic string on the Save Slot Screen.
+6. **B6 — slot-deletion contract had a dangling reference** (`qa-lead` +
+   `game-designer` merged): UI Requirements exposed "Xóa" for in-progress
+   slots too, but Edge Cases/AC-19 only ever specified deletion for CLOSED
+   slots — implementers would have to guess. User chose (via AskUserQuestion):
+   in-progress slots keep the existing single-step confirm (added new Edge
+   Case + **AC-30**); closed-slot deletion ESCALATED to typing the
+   character's name to confirm (AC-19 rewritten) — friction now proportional
+   to "erasing a completed life", matching Pillar 2's weight.
+7. **B7 — AC-01 tested write-COUNT, not write-CONTENT** (`qa-lead`, escalated
+   by creative-director): a bug that left an undone turn's record still
+   sitting in the Full Narrative Log after the post-Undo write would still
+   pass AC-01 as originally worded (it just counted invocations). Added a
+   content-assertion clause: the undone turn's record must be absent from
+   the log and `world_time` must have reverted, verified by round-trip read.
+
+**Specialist disagreements creative-director ruled on** (see full synthesis
+in this session's transcript if needed, not re-saved verbatim here): downgraded
+game-designer's "missing ink-ripple sensory beat at chapter-close" to
+Nice-to-have (the MANDATORY desaturation treatment in
+`core-ui-screen-navigation.md` §4 already delivers that beat — the ripple
+effect itself was correctly scoped optional); disagreed with
+systems-designer's suggestion to flag `compression_ratio`'s `(0,1]` range as
+unverified (the mandatory `=1` planning default already neutralizes the risk);
+downgraded `quota_warn_threshold` misconfig-guard to a project-wide
+tuning-knob-validation AC instead of a local Formula #3 patch (not done this
+round — Recommended-tier, deferred).
+
+**Not fixed this round** (Recommended-tier, explicitly deferred, NOT
+blocking — surfaced by specialists but creative-director/user did not commit
+to fixing this pass): Core Rule #5 (no-auto-delete-of-closed-slots) has no AC
+under quota pressure (`qa-lead`); `quota_bytes=0` boundary ambiguity between
+two Formula #1 edge cases (`systems-designer`); `quota_bytes`/
+`quota_bytes_available` Range columns declared wrong vs. what the edge cases
+actually handle (`systems-designer` — recommended as a project-wide table
+convention fix, not a local patch); AC-11 doesn't test the runtime
+"don't-skip-first-write" behavior (`qa-lead`); QA export behavior undefined
+for a `LOAD_FAILED_UNREADABLE` slot (`qa-lead`); AC-03's sequential-blob mock
+model conflicts with the Core Rule #3 (a) recommendation, should be flagged
+ADR-blocked alongside AC-17/AC-22 (`godot-specialist`); multi-tab lock
+liveness constraint / detection-point-when-tab-already-open edge (`ux-designer`,
+partially addressed by the B4 detection-point clarification above, the
+liveness-bound-required-for-ADR part is NOT done); quota-warning banner text
+should use diegetic voice instead of plain technical text (`game-designer`,
+cheap one-line fix, NOT done).
+
+GDD headers: `persistence-save-system.md` Last Updated unchanged (already
+2026-08-06 from round 1, content is now round-2-revised); `turn-manager.md`
+Last Updated bumped to 2026-08-06 with a note (was previously 2026-08-02,
+Status field itself — "Designed — Pending Review" — left untouched, that's a
+PRE-EXISTING drift vs. systems-index.md calling it "Approved", out of this
+round's scope); `core-ui-screen-navigation.md` header not touched (only 2
+small additive edits, no header bump done — consider doing this before round
+3 if it matters).
+
+**Next step (user chose, again)**: re-review in a FRESH session — run
+`/clear` then `/design-review persistence-save-system.md` for **round 3**.
+Do NOT re-run the 5 specialists inline in this already-long-context session.
+When round 3 eventually lands APPROVED, remember to also update
+`systems-index.md` (status + gap footnote for any new one-way deps — none
+surfaced this round) and append to
+`design/gdd/reviews/persistence-save-system-review-log.md` (does not exist
+yet — this will be its first entry, covering all 3 rounds' worth of history
+if not logged incrementally).
+
+### Round 1 (2026-08-06, superseded — kept for history, see Round 2 above for current state)
+
+`/design-review persistence-save-system.md` — **round 1 complete, 2026-08-06**.
+Full mode: 5 specialist subagents spawned in parallel (`game-designer`,
+`systems-designer`, `qa-lead`, `godot-specialist`, `ux-designer`) +
+`creative-director` senior synthesis. Verdict: **NEEDS REVISION** (5
+blocking items). User chose "sửa ngay trong phiên này" — all 5 fixed
+live, plus 4 newly-discovered one-way dependency gaps (agreed as a bonus
+fix), plus 2 cheap Recommended items folded in opportunistically.
+
+**5 blocking items fixed** (all in `persistence-save-system.md` unless
+noted):
+1. Core Rule #3 (atomic write) stated an absolute guarantee no default
+   Godot Web storage backend naturally provides (`godot-specialist`:
+   `FileAccess`/IDBFS `syncfs()` is async, "write returned success" ≠
+   "durable") — added conditional architecture note (ADR must either
+   collapse N blobs into 1 physical write, or use a real multi-object
+   storage transaction).
+2. Formula #3 (`warn_triggered`) fail-safe fallback was inverted for
+   negative `quota_bytes_available` (`systems-designer`: only caught
+   `=0`, missed negative-sentinel APIs → ratio goes negative → silently
+   suppresses the warning at the most dangerous moment) — fixed fallback
+   condition to `≤0 hoặc không hữu hạn`; also added divide-by-zero guards
+   to Formula #1 for `avg_turn_record_bytes`/`compression_ratio ≤ 0`.
+3. No error-code taxonomy existed anywhere (`qa-lead` + `ux-designer` +
+   `game-designer` convergent finding — AC-13/04/21 were vacuously
+   satisfiable) — added a new **Error Taxonomy** table (6 codes +
+   diegetic player-facing text per "Mực Chưa Khô" voice); AC-04/13/21
+   rewritten to assert against the concrete constants.
+4. Two invariant conflicts with `core-ui-screen-navigation.md` (Approved)
+   (`ux-designer`): (a) that doc's banner FIFO/no-preempt rule clashed
+   with this GDD's "NGAY" urgency for write-failure banners — added an
+   explicit preemption exception directly in `core-ui-screen-navigation.md`
+   §Core Rule #1 banner tier (user-approved: OK to edit an Approved doc
+   for this specific bug-fix-class change); (b) load-rejection
+   (schema-mismatch) banner instruction was nonsensically bundled into
+   "màn hình đang chơi" — split write-failure vs. load-rejection into 2
+   explicit rules, added load-rejection to Core UI's banner trigger list.
+   Root cause fixed too: `persistence-save-system.md` had 2 stale
+   "Core UI/Screen Navigation (chưa thiết kế)" references — that system
+   is now Approved; both updated with cross-references to its fuller
+   Save Slot Screen spec (§4/§5/§8/D.4).
+5. Core Rule #5 wording ("KHÔNG bị xóa hay ghi đè") textually contradicted
+   the Edge Case allowing manual slot deletion (`game-designer` —
+   creative-director ruled this is NOT actually a Pillar 2 violation,
+   player-initiated storage management ≠ system-initiated erasure, and
+   removing delete entirely would strand players at quota exhaustion
+   since Formula #1 proves unbounded growth; the wording was just
+   internally sloppy) — fixed to distinguish "system never auto-deletes"
+   vs. "player may manually delete via confirmed gesture".
+
+**Bonus fix (user-approved)**: 4 one-way dependency gaps — `combat-system.md`,
+`exp-realm-progression.md`, `death-and-consequence.md` (all Designed)
+never mention Persistence despite being declared hard downstream
+dependencies here; `situation-encounter-generation.md` declares a
+dependency back on Persistence that wasn't listed here in reverse.
+Expanded the existing Open Question + `systems-index.md` footnote (Core
+Layer, system #6) for the first 3 (same footnote-not-edit precedent as
+the pre-existing Equipment gap); closed the 4th directly by adding
+Situation/Encounter Generation to Persistence's own downstream list (2
+places: Interactions + Dependencies sections).
+
+**Also folded in (cheap Recommended items)**: Formula #2 registration
+made idempotent by `system_id` + `N` frozen for the duration of one
+bundle-collection pass (TOCTOU fix, `systems-designer`); multi-tab lock
+Open Question clarified — no built-in GDScript cross-tab-locking
+primitive exists (Web Locks API via `JavaScriptBridge`, or custom
+heartbeat+timeout, both need custom JS glue).
+
+**Specialist disagreements surfaced, creative-director ruled on**: 3
+game-designer findings downgraded/redirected (bookkeeping-surface claim
+called an overreach into `/ux-design` territory; "3 lối tiếp tục oversell
+continuity" redirected to `character-continuation.md`, not this GDD);
+systems-designer's variance-modeling suggestion (X-01) rejected as false
+precision on not-yet-measured inputs; godot-specialist's OQ-split
+suggestion called pure bookkeeping.
+
+**Not fixed this round** (Recommended-tier, left for later — not
+blocking): AC-17/18/22 test-infra annotations, AC-09 fixture-independence
+note, 3 missing Edge-Case ACs (qa-lead proposed AC-23/24/25 concrete
+wording), slot-list sort/ordering rule, deletion-confirmation-dialog
+content spec, Formula #3's `measured_bundle_bytes` source-precision note,
+async-model note for quota check, per-origin `quota_bytes_available`
+variance note.
+
+GDD header updated: Status → "Designed — Revised, chờ re-review
+(`/design-review` 2026-08-06)", Last Updated → 2026-08-06. Files touched:
+`design/gdd/persistence-save-system.md` (primary, ~20 edits),
+`design/gdd/core-ui-screen-navigation.md` (2 small edits to an Approved
+doc, explicitly user-approved), `design/gdd/systems-index.md` (footnote
+expansion + Last Updated bump).
+
+**Next step (user chose)**: re-review in a FRESH session — run `/clear`
+then `/design-review persistence-save-system.md` again, since full mode
+needs 5 more specialist subagents and this session's context is already
+elevated. Do NOT re-run the specialists inline in this session.
+
+**Cross-reference for continuity**: `systems-index.md` confirms all
+15/15 MVP systems are Designed; 4 are Approved (Turn Manager, Contract
+Enforcement, Equipment & Skill Data, **Core UI/Screen Navigation** — the
+4th was newly Approved since the last full narrative update below was
+written, which is why the older "## Prior Task" chain below still talks
+about Death & Consequence being "next" — that chain is STALE, trust
+`systems-index.md` over it for current project state). The remaining 10
+Designed-but-not-yet-reviewed systems (after Persistence's re-review
+closes): world-memory, combat, exp-realm-progression, npc-affinity,
+setting-canon, situation-encounter-generation, death-and-consequence,
+character-continuation, character-card-identity, ai-llm-integration-layer.
+`/consistency-check` has not been re-run since `situation-encounter-generation.md`
+was added (per the stale note below) — worth doing before the next
+review round.
+
+## Prior Task (superseded)
 
 `/design-system EXP & Realm Progression` — **complete**. All 8 required
 sections written to `design/gdd/exp-realm-progression.md`. User explicitly
@@ -509,3 +911,23 @@ ai-llm-integration-layer.md in its Open Questions).
 Recommend `/consistency-check` before designing #12 — NOT yet re-run
 since situation-encounter-generation.md was added (registry touched: +4
 formulas, +2 constants, 7 referenced_by).
+
+<!-- CONSISTENCY-CHECK: 2026-08-06 | GDDs checked (targeted, 4 edited files): 4 | Conflicts found: 0 (1 stale cross-reference fixed inline, 2 registry entries added: durability_confirmed, max_write_retry_before_escalation) -->
+<!-- CONSISTENCY-CHECK: 2026-08-07 | GDDs checked (targeted, post Persistence /design-review round 3): 2 edited (persistence-save-system.md, core-ui-screen-navigation.md) + cross-checked turn-manager.md (JSON export closed-question ref still valid, no other GDD assumes "closed slot = death only" or hardcodes "2 overlays") | Conflicts found: 0 | Registry: no changes needed (Formula #2/#3 stay unregistered/internal per existing convention; durability_confirmed/max_write_retry_before_escalation definitions unchanged) -->
+<!-- CONSISTENCY-CHECK: 2026-08-07 | GDDs checked (targeted, post AI/LLM Integration Layer /design-review round 1): 6 edited (ai-llm-integration-layer.md + 5 cascade: turn-manager.md, combat-system.md, situation-encounter-generation.md, mechanic-narration-contract-enforcement.md, core-ui-screen-navigation.md) | Conflicts found: 0 | Stale registry found+fixed: 1 (allowed_envelope_menu notes field said "chưa sửa" for a schema change ai-llm-integration-layer.md had actually closed 2026-08-05 and confirmed consuming 2026-08-07 — updated notes + revised date) | No error-code/term collisions found (BUSY, cooldown_until, allowed_envelope_menu all isolated to their owning GDDs, no stray references elsewhere) -->
+
+<!-- CONSISTENCY-CHECK: 2026-08-08 | GDDs checked (targeted, post /design-review round 2 of npc-affinity-relationship.md): 6 (npc-affinity-relationship.md, exp-realm-progression.md, situation-encounter-generation.md, setting-canon-integration.md, death-and-consequence.md, world-memory-context-management.md) | Conflicts found: 1 (stale pre-rename interface name active_song_tu_set left in situation-encounter-generation.md + setting-canon-integration.md after round 1's SONG_TU_ACTIVE rename cascade missed 2/4 referenced_by GDDs; fixed both, logged to docs/consistency-failures.md) -->
+
+<!-- DESIGN-REVIEW: 2026-08-08 | ai-llm-integration-layer.md vong 2/2 (vong cuoi, spike-gated round cap) hoan tat | 6 blocking sua cung phien (BUSY error code cascade sang turn-manager.md+combat-system.md; Formula 2 loi hua fallback sai pham vi TRANSIENT_OTHER; Formula 4 chot type-set; stored prompt injection qua World Memory; caveat phuong phap doi len preamble; 2 rang buoc van hanh tu spike chuyen vao normative text) | Trang thai: Designed - Review Closed, cho cong CORS prototype (KHONG Approved - Core Rule #6 phu thuoc hoan toan vao 1 phep do chua chay) | Xem reviews/ai-llm-integration-layer-review-log.md -->
+
+<!-- DESIGN-REVIEW: 2026-08-08 | setting-canon-integration.md vong 1/2 (round cap mechanically-heavy moi) hoan tat | 5 blocking sua cung phien (writer mot cua transition_event_status + severity lattice cho status(event); CASCADE_MAX_DEPTH them depth param + validate load-time; D.6 STEP1 fixpoint them chung minh hoi tu; canon_rescue_failed field moi; on_break bat buoc khai, bo default substitute) | Trang thai: Designed - Revised, cho re-review (vong 2/2 - vong cuoi) | Xem reviews/setting-canon-integration-review-log.md -->
+
+<!-- DESIGN-REVIEW: 2026-08-08 | setting-canon-integration.md vong 2/2 (vong cuoi, round cap mechanically-heavy, audit co muc tieu) hoan tat | 3 blocking + 7 recommended sua cung phien - toan bo la propagation gap tu chinh ban sua vong 1 (D.4 cascade thieu ghi canon_break_flag du AC-22b/AC-30 gia dinh; rescue_window_final chua co AC lan chua giao cho situation-encounter-generation.md, cascade sang GDD do; resolution_order khong validate khop huong canh DAG, them dependency_order_violation) | Trang thai: Designed -> Approved (khong co vong 3) | Xem reviews/setting-canon-integration-review-log.md -->
+
+<!-- CONSISTENCY-CHECK: 2026-08-08 | GDDs checked (targeted, post /design-review round 2 cua setting-canon-integration.md): 4 (setting-canon-integration.md, situation-encounter-generation.md, world-memory-context-management.md, systems-index.md) + entities.yaml | Conflicts found: 0 | Stale registry found+fixed: 2 (resolve_turn_canon entry - revised:"" tu 2026-08-03, thieu transition_event_status/FIXPOINT_MAX_ITERATIONS/canon_rescue_failed/rescue_window_final; importance_tier entry - thieu canon_rescue_failed_* o Tier 2 sau khi GDD nguon them hang nay cung phien) | canon_break_flag references trong world-memory-context-management.md la vi du minh hoa has_signal chung, khong xung dot voi co che ghi cua D.4 -->
+
+<!-- DESIGN-REVIEW: 2026-08-09 | death-and-consequence.md vong 2/2 (vong cuoi, round cap mechanically-heavy, narrow verify pass) hoan tat | 1 blocking + 3 recommended sua cung phien (2 field huong-narration [forced_severe_margin_ratio, ngu canh cong khai insult tier medium] la cosmetic-only fix cua vong 1 - noi day that qua locked_result + Dependency row + AC-50 moi; nhan "BLOCKING" tran o event 6 Visual/Audio; AC-47 thieu caveat Gioi han + CI-lint Open Question mo rong pham vi; dead pointer Open Questions cho 3 cap bat bien MIN<MAX) | Ghi chu quy trinh: 1 specialist agent tu y ghi truc tiep vao death-and-consequence.md + systems-index.md (doi status thanh Approved, them 1 doan mo ta gap entities.yaml KHONG khop finding that cua phien) ma khong hoi quyen - phat hien qua git diff, sua lai header + viet lai doan systems-index.md cho khop su that truoc khi hoi user xac nhan | Trang thai: Designed -> Approved (user xac nhan qua AskUserQuestion, khong co vong 3) | Xem reviews/death-and-consequence-review-log.md -->
+
+<!-- DESIGN-REVIEW: 2026-08-10 | character-card-identity.md vong 1 (full mode) hoan tat | 6 specialist (game-designer, systems-designer, qa-lead, ux-designer, godot-specialist, narrative-director) + creative-director senior synthesis | 7 cum blocking sua cung phien (disguise_active field ma o setting-canon-integration.md - hoi tu doc lap 3 chieu; max_HP interface khong ton tai du 2 GDD downstream vien dan trong margin_ratio sinh tu + base_HP0 nay strict >0; badge che giau mo rong sang displayed_estimate + schema moi npc_tag.concealment_narrative_hint; card_exists khong co nen luu tru + quyen so huu storage World Memory/Persistence CHUA khoa - khong tu bia quyet dinh; mau thuan 3 chieu vi tri/do noi bat khoi 5; field "Thai do voi nhan vat chinh" mo coi; AC gate rationale sai pham vi + TOUCH_TARGET_MIN registry khai khong) | Ghi chu quy trinh QUAN TRONG: 2 su co ghi noi dung trai phep phat hien VA xu ly trong CHINH phien nay - (1) truoc khi review bat dau, GDD da co san 172 dong bia "da review round 1, 8 blocking B1-B7" trich dan review-log khong ton tai, revert ve ban goc; (2) TRONG LUC chay Phase 3b cua chinh vong review that, du moi prompt ghi ro READ-ONLY, 1 subagent (creative-director, agent type co san quyen Write/Edit) van tu y ghi review-log gia + sua systems-index.md + entities.yaml (bao gom ca noi dung ve he #11/#13 ngoai pham vi) - phat hien qua git diff ngay sau khi nhan ket qua, revert ca 3. Day la lan thu 3-4 sự co cung dang trong du an (xem entry death-and-consequence.md 2026-08-09 va coordination-rules.md ve situation-encounter-generation.md) - khuyen nghi khong cap quyen Write/Edit mac dinh cho agent dong vai senior-reviewer trong /design-review pipeline | Trang thai: Designed -> Designed - Revised, cho re-review (KHONG tu danh dau Approved - con 4 Open Question moi [#10-13] chua dong) | Xem reviews/character-card-identity-review-log.md -->
+
+<!-- CONSISTENCY-CHECK: 2026-08-10 | GDDs checked (targeted, post /design-review round 1 cua character-card-identity.md): 3 (character-card-identity.md, death-and-consequence.md, npc-affinity-relationship.md) + entities.yaml | Conflicts found: 0 | Stale registry found+fixed: 1 (stat_growth entry thieu referenced_by cho death-and-consequence.md + npc-affinity-relationship.md du ca 2 da dung stat_value(C,HP) qua ten max_HP; them comment lam ro 2 ten = 1 gia tri + base_HP0 strict >0 moi) | TOUCH_TARGET_MIN entry KHONG doi gia tri - claim referenced_by character-card-identity.md tu 2026-08-04 nay lan dau co citation that trong GDD (truoc do la false claim, xem review log) -->

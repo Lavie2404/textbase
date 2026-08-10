@@ -39,7 +39,7 @@ verdict PROCEED).
 | 10 | Setting & Canon Integration | Narrative | MVP | Designed | [setting-canon-integration.md](setting-canon-integration.md) | World Memory |
 | 11 | Situation/Encounter Generation (inferred) | Narrative | MVP | Designed | [situation-encounter-generation.md](situation-encounter-generation.md) | AI Integration Layer, Turn Manager, World Memory |
 | 12 | Death & Consequence | Gameplay | MVP | Designed | [death-and-consequence.md](death-and-consequence.md) | Combat System, NPC Affinity |
-| 13 | Character Continuation (inferred) | Gameplay | MVP | Designed | [character-continuation.md](character-continuation.md) | Death & Consequence |
+| 13 | Character Continuation (inferred) | Gameplay | MVP | Approved | [character-continuation.md](character-continuation.md) | Death & Consequence |
 | 14 | Character Card & Identity | UI | MVP | Designed | [character-card-identity.md](character-card-identity.md) | Equipment & Skill Data, NPC Affinity, Setting & Canon Integration |
 | 15 | Core UI/Screen Navigation (inferred) | UI | MVP | Designed | [core-ui-screen-navigation.md](core-ui-screen-navigation.md) | Combat System, Character Card, Situation Generation |
 

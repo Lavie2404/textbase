@@ -1,2 +1,5 @@
 - [Vô Danh Lục progression risks](project_vo_danh_luc_progression_risks.md) — draft EXP/bậc/áp chế formulas + unresolved dominant-strategy/world-outpaces-player/gear-penalty risks found 2026-08-01
+- [EXP-realm-progression GDD review](project_exp-realm-progression-gdd-review.md) — finalized GDD (2026-08-08): confirmed passive/Song-Tu stacks per combat exchange (up to 90%+ threshold/battle), loss>win exploit at tier_diff≤-3, threshold knobs pacing-inert
 - [User profile](user_profile.md) — solo dev, personal non-commercial xianxia IF-RPG, wants numeric adversarial review not vague warnings
+- [NPC-affinity round 2 review](project_npc-affinity-round2-review.md) — round-robin Song Tu cleared (per-instance rate unchanged, global turn budget caps it); pacing claim lệch ~2-3x confirmed, backlog not blocking
+- [Death & Consequence review](project_death-and-consequence-review.md) — recomputed 81% recovery-by-turn-90 claim is best-case-only (turn30 anchor; turn80→32%, turn85→23%); tự_tu priority-order claim not incentive-supported (zero opp. cost, dominant by default)

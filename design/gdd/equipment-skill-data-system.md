@@ -1,6 +1,6 @@
 # Equipment & Skill Data System
 
-> **Status**: In Design
+> **Status**: **Approved** (`/design-review` 2026-08-02 — 1 blocking + 1 recommended sửa cùng phiên, không cần re-review; xem `reviews/equipment-skill-data-system-review-log.md`). Header trước đó ghi nhầm "In Design" dù review đã đóng từ 2026-08-02 — sửa lại cho khớp review-log, 2026-08-10.
 > **Author**: user + agents
 > **Last Updated**: 2026-08-02
 > **Implements Pillar**: Pillar 3 (Sức Mạnh Có Logic), Pillar 4 (Tường Thuật Sống Động)
@@ -80,11 +80,28 @@ chuyện (Pillar 4), không phải một dòng log số liệu.
 6. **Sở hữu ở cấp Character**: mỗi nhân vật (chính hoặc NPC) có đúng 1 vũ
    khí đang trang bị (`equipped_weapon_id`) + danh sách kỹ năng đã học
    (`known_skill_ids`, có thể rỗng). KHÔNG có inventory đầy đủ (kho đồ,
-   mang nhiều vũ khí) ở MVP — ngoài phạm vi hệ này.
+   mang nhiều vũ khí) ở MVP — ngoài phạm vi hệ này. **Làm rõ 2026-08-10**
+   (`/design-review character-continuation.md` round 2): mỗi bản ghi sở
+   hữu này khóa theo `char_id` (cùng định danh Character Card & Identity
+   dùng) — không phải 1 slot dữ liệu "nhân vật chính" toàn cục duy nhất;
+   khi Character Continuation phát `char_id` MỚI (playthrough "Chơi
+   lại"), hệ này khởi tạo bản ghi độc lập, không ghi đè bản ghi của
+   `char_id` CŨ (xem AC-18).
 7. **Dữ liệu là template tĩnh, không phải trạng thái runtime**: HP/EXP
    hiện tại của nhân vật KHÔNG lưu ở đây (thuộc Character Card/EXP
    system). Hệ này chỉ trả lời "vũ khí/kỹ năng/thức NÀY có thuộc tính
    gì" — không trả lời "nhân vật NÀO đang có bao nhiêu HP".
+
+8. **Vật phẩm hồi phục (recovery item)** — bổ sung 2026-08-05, đóng gap
+   cụm D `/design-review` gộp 11 GDD: một danh mục dữ liệu TÁCH BIỆT với
+   Vũ khí/Kỹ năng/Thức (không đi qua 3 tầng phân cấp ở Rule #1) — chỉ
+   phục vụ nhánh "tiên thảo dị bảo" của `death-and-consequence.md`
+   Formula D.3. Schema tối thiểu: `{item_id, efficacy}`.
+   `efficacy: float`, range `[0,1]` — hệ số hiệu lực hồi phục, BẮT BUỘC
+   do tác giả item tự khai khi authoring, KHÔNG có giá trị default của
+   engine (item không khai `efficacy` không hợp lệ để dùng ở nhánh này).
+   Mô hình tiêu thụ (single-use hay có "charge") CHƯA quyết — xem Open
+   Questions của `death-and-consequence.md`.
 
 ### States and Transitions
 
@@ -116,6 +133,10 @@ Ràng buộc toàn vẹn: không được tồn tại 1 Thức không có Kỹ n
   qua wrapper — KHÔNG phải `locked_result` cơ học, nên nằm NGOÀI phạm vi
   leak-detection (Formula 1 của hệ đó chỉ áp dụng cho số liệu cơ học đã
   khóa, không áp dụng cho text mô tả phong cách).
+- **Death & Consequence** (Feature, đã Designed) — bổ sung 2026-08-05:
+  đọc field `efficacy` trên schema "Vật phẩm hồi phục" (Rule #8) cho
+  `recovery_attempt` Formula D.3 nhánh tiên thảo dị bảo — phụ thuộc mềm,
+  KHÔNG đi qua 3 tầng Vũ khí/Kỹ năng/Thức.
 - **EXP & Realm Progression** (Feature, đã Designed): ý nghĩa đầy đủ
   của trường `tier` (bậc) — hệ này chỉ lưu số nguyên, không định nghĩa ý
   nghĩa/công thức. Không phải phụ thuộc bắt buộc (hệ này hoạt động độc
@@ -306,6 +327,25 @@ một chiều, cần sửa.)*
 **Edge Case — trạng thái CHẶN CỨNG**
 - **AC-17** (= AC-12): GIVEN vi phạm Formula 2, WHEN chạy CI/authoring
   lint, THEN dữ liệu bị chặn, không được merge.
+
+**Cross-system: Character Continuation lazy-init contract**
+- **AC-18** (Rule #6 mở rộng — lazy-init theo `char_id` cho nhân vật
+  chính khi "Chơi lại"; đóng Open Question BLOCKING của
+  `character-continuation.md` D.1, thêm 2026-08-10, `/design-review
+  character-continuation.md` round 2, narrow verify pass — Lớp A, kỹ
+  thuật "dirty old slot first", mirror `death-and-consequence.md`
+  AC-13/AC-36): GIVEN `char_id` CŨ đã bị làm bẩn (mock trả
+  `equipped_weapon_id="thiet_kiem_hoen_ri",
+  known_skill_ids=["luu_van_kiem_phap_tam"]` — khác loadout khởi điểm
+  mẫu chuẩn MVP), WHEN Character Continuation phát `char_id` MỚI cho
+  nhân vật chính (mock, chưa từng xuất hiện) và hệ này được truy vấn
+  `equipped_weapon_id`/`known_skill_ids` của `char_id` đó lần đầu, THEN
+  trả về ĐÚNG loadout khởi điểm mẫu chuẩn MVP — KHÔNG PHẢI giá trị đã
+  làm bẩn ở `char_id` CŨ (chứng minh dữ liệu sở hữu ở Rule #6 lưu
+  keyed-by-`char_id`, không phải 1 record "nhân vật chính" toàn cục duy
+  nhất bị ghi đè tại chỗ). GIVEN cùng fixture, WHEN đọc lại `char_id` CŨ
+  sau đó, THEN vẫn trả giá trị đã làm bẩn — không bị ảnh hưởng bởi việc
+  tạo `char_id` MỚI. *(unit, provisional-interface)*
 
 ## Open Questions
 

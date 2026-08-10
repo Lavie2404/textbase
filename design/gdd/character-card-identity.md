@@ -1,8 +1,8 @@
 # Character Card & Identity
 
-> **Status**: Designed — Pending Review
+> **Status**: Designed — Revised, chờ re-review
 > **Author**: duchx + Claude Code agents (ux-designer, game-designer routing)
-> **Last Updated**: 2026-08-04
+> **Last Updated**: 2026-08-10 — `/design-review` round 1 full mode (6 specialist + creative-director) hoàn tất, 7 cụm blocking sửa live cùng phiên; xem `reviews/character-card-identity-review-log.md`
 > **Implements Pillar**: Pillar 4 (Tường Thuật Sống Động — bề mặt số liệu duy nhất), Pillar 1 (Thế Giới Khách Quan — đặc quyền xuyên không chỉ là thông tin)
 
 ## Overview
@@ -49,7 +49,11 @@ Ba khoảnh khắc neo (anchor moments):
    thật bên dưới lớp cải trang. Cảm giác thông đồng với định mệnh: *mình biết
    một bí mật cả thế giới không biết* — nhưng chỉ là biết, thế giới không vì
    thế mà nể mình (Pillar 1). Ngược lại, gặp NPC thường "đang che giấu" mà
-   thẻ không nói gì thêm — cảm giác tò mò, muốn điều tra.
+   thẻ không nói gì thêm — cảm giác tò mò, chờ thời cơ thử sức (sửa
+   2026-08-10 — bản cũ hứa "muốn điều tra", nhưng MVP không có cơ chế điều
+   tra hoàn thành nào cho concealment [xem Rule #9 + Open Question #1];
+   counterplay duy nhất ở MVP là giao chiến, tự lộ thực lực thật qua HP —
+   xem Edge Cases. Lời hứa cũ không có gì đỡ, sửa để khớp phạm vi thật).
 3. **Cuốn hộ chiếu của đời tu luyện** — thẻ của chính mình dày lên theo thời
    gian: cấp tăng, chỉ số nhích từng dòng, kỹ năng mới xuất hiện, Hảo cảm
    từng NPC đổi dải. Và khi đời tu luyện sang trang xấu: dấu triện đỏ son
@@ -80,7 +84,14 @@ trực tiếp Bartle Achievers (theo dõi tiến độ tối ưu Lực chiến) 
    tác chưa gặp KHÔNG có thẻ (đặc quyền xuyên không là kiến thức meta của
    người chơi, không phải danh bạ tra cứu trong game).
 3. **Cấu trúc khối cố định** (thứ tự trên thẻ): ① Hồ sơ (Tên, Giới tính,
-   Thân phận, Thái độ với nhân vật chính — chỉ thẻ NPC, Tính cách, Ngoại
+   Thân phận, Thái độ với nhân vật chính — chỉ thẻ NPC, tóm tắt dạng text
+   ngắn (VD "Thù địch", "Thân thiết") lấy từ CÙNG NGUỒN dải thái độ 7 mức
+   của khối④ (NPC Affinity) — KHÔNG phải field riêng, không thuộc
+   `CONCEALABLE_FIELDS` (giống Hảo cảm số/dải thái độ ở D.2), chỉ hiển thị
+   2 lần ở 2 độ chi tiết khác nhau: tóm tắt ở ①, đầy đủ (số + thanh + chấm)
+   ở ④ (làm rõ 2026-08-10 — bản cũ để field này không rơi vào bất kỳ tập
+   field/nguồn dữ liệu nào, rủi ro 2 chỗ hiển thị "thái độ" mâu thuẫn nhau
+   trên cùng 1 thẻ, vi phạm Core Rule #4), Tính cách, Ngoại
    hình, Tiểu sử, Vị trí hiện tại); ② Chỉ số chiến đấu (Cấp độ-Bậc + 12 chỉ
    số: HP, ATK, DEF, SPD, ACC, Né tránh, Crit Rate, Crit Damage, Khuếch đại
    sát thương, Chống chịu, Lifesteal, HP Regen + Lực chiến ước tính; riêng
@@ -107,8 +118,22 @@ trực tiếp Bartle Achievers (theo dõi tiến độ tối ưu Lực chiến) 
    sẵn, không phải giá trị tính) kèm badge "đang che giấu" trên từng field
    bị che; field không có giá trị bề ngoài hiện "???". Lực chiến ước tính
    khi đó tính trên bộ giá trị bề ngoài (rủi ro đánh giá sai đối thủ là chủ
-   đích thiết kế). **Combat luôn dùng giá trị THẬT** khi trận đấu thực sự
-   diễn ra — thẻ có thể "bị lừa", công thức thì không.
+   đích thiết kế) — **con số `displayed_estimate` khi đó LUÔN mang chính
+   badge "đang che giấu"**, không chỉ 12 field con (sửa 2026-08-10 — bản cũ
+   chỉ badge từng field, con dấu Lực chiến — số lớn nhất, nổi bật nhất thẻ,
+   đúng con số anchor moment 1 bảo người chơi đọc để quyết đánh/lùi —
+   không có tín hiệu gì báo nó có thể là giả; xem D.4 + Visual/Audio mục 2):
+   "con số trên thẻ không bao giờ nói dối" (Player Fantasy) nghĩa là badge —
+   dấu hiệu "giá trị này có thể không phải sự thật" — không bao giờ bị giấu,
+   dù bản thân con số có thể sai. **Combat luôn dùng giá trị THẬT** khi
+   trận đấu thực sự diễn ra — thẻ có thể "bị lừa", công thức thì không.
+   **Ràng buộc kích hoạt (mới, 2026-08-10)**: `concealment.active` chỉ được
+   set `true` khi content/AI đã điền đủ `concealment.displayed_value` cho
+   TOÀN BỘ 12 chỉ số chiến đấu (tất-cả-hoặc-không-gì, cùng triết lý fail-fast
+   D.5) — không cho phép bật che giấu với dữ liệu bề ngoài thiếu sót, vì
+   khi đó D.4 lan truyền `"???"` ngay lập tức và biến ca kịch tính "bị lừa
+   bởi bộ số giả hợp lý" thành "biết ngay mình không biết gì", làm mất tác
+   dụng thiết kế của Rule này.
 7. **Đường ghi duy nhất qua nút**: Thẻ chỉ thay đổi world-state gián tiếp
    qua các phần tử tương tác, và mọi nút đều gửi **hành động qua Turn
    Manager** như một action bình thường (tốn lượt, khóa input khi Resolving,
@@ -119,11 +144,21 @@ trực tiếp Bartle Achievers (theo dõi tiến độ tối ưu Lực chiến) 
    chuẩn).
 8. **Sở hữu dữ liệu**: Hệ này sở hữu (a) **schema Hồ sơ nhân vật** (định
    nghĩa field, không sở hữu storage — instance lưu trong entity record của
-   World Memory/blob Persistence), (b) **bộ chỉ số khởi điểm `base_X0`** cho
+   World Memory/blob Persistence; **quyền sở hữu storage giữa 2 hệ này CHƯA
+   khóa** — xem Open Question mới về ADR storage, bổ sung 2026-08-10), (b)
+   **bộ chỉ số khởi điểm `base_X0`** cho
    12 chỉ số mỗi nhân vật (hạt giống của `stat_growth` — EXP đã bàn giao
    tường minh), (c) **schema NPC tag** nội dung (gồm
    `npc_tag.medium_override` cho Death & Consequence, nullable, thiếu →
-   default "sỉ nhục"), (d) **schema `concealment`** (Rule 6). Giá trị
+   default "sỉ nhục"; và **`npc_tag.concealment_narrative_hint`** — text
+   ngắn content/AI-authored hướng dẫn AI narration mô tả NPC này thế nào
+   khi `concealment.active=true` [VD "hành xử/dáng vẻ như đệ tử yếu, giấu
+   khí tức"], nullable, mới bổ sung 2026-08-10 để đóng gap: không field
+   nào trong dự án trước đây mang loại dữ liệu này, và không có nó thì AI
+   narration có thể vô tình mô tả đúng thực lực thật qua văn xuôi dù số
+   liệu đã bị làm giả — xem Dependencies downstream [Mechanic/Narration
+   Contract Enforcement, AI/LLM Integration Layer] và Open Question mới),
+   (d) **schema `concealment`** (Rule 6). Giá trị
    instance do content author (NPC seed MVP) hoặc AI tạo khi sinh nhân vật.
 9. **Điều tra nằm ngoài hệ này**: Hành động điều tra để lộ giá trị thật của
    NPC che giấu là action trong lượt thuộc Situation/Encounter Generation
@@ -144,8 +179,8 @@ trực tiếp Bartle Achievers (theo dõi tiến độ tối ưu Lực chiến) 
 
 | Trạng thái | Điều kiện | Khác biệt |
 |---|---|---|
-| Xem thường | `in_combat=false` | 4 khối cơ bản + badge; Lực chiến ước tính độ nổi bật THẤP NHẤT |
-| Xem giao đấu | `in_combat=true` | Thêm khối Trạng thái giao đấu; ưu tiên thị giác theo Combat: khung triện kết trận > thanh HP > chi tiết pha > ước tính |
+| Xem thường | `in_combat=false` | 4 khối cơ bản + badge; khung "con dấu" Lực chiến ước tính độ nổi bật CAO (hạng 2 toàn thẻ, seal lớn nhất — khớp Visual/Audio §1, nguồn sự thật DUY NHẤT cho độ nổi bật; sửa 2026-08-10, bản cũ ghi nhầm "THẤP NHẤT", mâu thuẫn trực tiếp Visual/Audio §1 — đây là con số quyết định hành động của anchor moment 1, phải nổi bật) |
+| Xem giao đấu | `in_combat=true` | Thêm khối Trạng thái giao đấu (khối ⑤, vị trí CỐ ĐỊNH theo Core Rule #3 — KHÔNG dời lên đầu thẻ; accordion khối ⑤ tự mở, KHÔNG cho user thu gọn trong khi `in_combat=true`, khác hành vi ③⑥ — sửa 2026-08-10, xem UI Requirements); ưu tiên thị giác theo Combat: khung triện kết trận > thanh HP > chi tiết pha > ước tính |
 | Danh tính kép | major canon + cải trang | Hồ sơ 2 danh tính |
 | Che giấu | `concealment.active=true` (NPC thường) | Giá trị bề ngoài + badge/??? |
 | Overlay 3 lối | `continuation_choice_eligible=true` | Toàn màn hình, tái dùng khung thẻ (Character Continuation sở hữu nội dung) |
@@ -244,8 +279,20 @@ field:
 The `displayed_field` formula is defined as:
 ```
 displayed_field(C, field):
-  if field ∈ IDENTITY_FIELDS AND is_major_canon(C) AND disguise_active(C):
-      return dual_identity(true_value(C, field), disguise_value(C, field))
+  if field ∈ IDENTITY_FIELDS AND is_major_canon(C):
+      // GUARD ưu tiên tuyệt đối (sửa 2026-08-10) — với field danh tính của
+      // 1 nhân vật major-canon, KHÔNG BAO GIỜ rơi xuống nhánh concealment
+      // bên dưới, kể cả khi concealment.active(C)=true — đặc quyền xuyên
+      // không (Rule #5) áp cho DANH TÍNH vô điều kiện, tách biệt hoàn toàn
+      // khỏi cơ chế concealment (Rule #6) mà GDD này sở hữu riêng
+      if disguise_active(C):
+          dv = disguise_value(C, field)
+          return dual_identity(true_value(C, field), dv) if dv is not null else true_value(C, field)
+          // null-guard (sửa 2026-08-10): nếu Setting & Canon chưa author
+          // bí danh cho field này, KHÔNG trả dual_identity(x, undefined)
+          // (ngoài 4 loại output đã khai) — fallback về true_value đơn
+      else:
+          return true_value(C, field)
   elif field ∈ CONCEALABLE_FIELDS AND concealment.active(C):
       v = concealment.displayed_value(C, field)
       return v if v is not null else "???"
@@ -260,7 +307,7 @@ displayed_field(C, field):
 | Nhân vật | `C` | character | entity hợp lệ (`card_exists(C)=true`) | Nhân vật đang xem thẻ |
 | Field đang xét | `field` | enum | mọi field schema Hồ sơ trên thẻ | Field cụ thể cần chọn giá trị hiển thị |
 | Cờ nhân vật nguyên tác lớn | `is_major_canon(C)` | bool | {0,1} | Nguồn: Setting & Canon |
-| Cờ đang cải trang bằng bí danh | `disguise_active(C)` | bool | {0,1} | Nguồn: Setting & Canon (đang dùng bí danh thay `true_identity`) |
+| Cờ đang cải trang bằng bí danh | `disguise_active(C)` | bool | {0,1} | **Card tự suy ra** (sửa 2026-08-10, đóng gap: `setting-canon-integration.md` KHÔNG export field runtime này — hệ đó chỉ có `true_identity` + "danh sách bí danh/cải trang" dạng tồn kho, không có cờ "đang dùng bí danh NGAY LÚC NÀY") — định nghĩa: `disguise_active(C) := len(alias_list(C)) > 0`, tức nhân vật major-canon còn ≥1 bí danh active trong danh sách do Setting & Canon sở hữu. Hệ quả/rủi ro: nếu 1 nhân vật NGỪNG cải trang giữa truyện, Setting & Canon phải chủ động XÓA alias khỏi danh sách để cờ này chuyển `false` — không có cơ chế toggle độc lập nào khác. Đây là 1 giả định MVP đơn giản hóa, chưa xác nhận với Setting & Canon owner — xem Open Question mới |
 | Giá trị thật đã khóa | `true_value(C, field)` | any | miền của `field` | Giá trị thật, khóa bởi hệ sở hữu field đó |
 | Giá trị bí danh (đặc quyền xuyên không) | `disguise_value(C, field)` | any | miền của `field` | Chỉ tồn tại khi `field ∈ IDENTITY_FIELDS`, nguồn Setting & Canon |
 | Cờ đang che giấu | `concealment.active(C)` | bool | {0,1} | Schema sở hữu bởi hệ này (Rule #8d) |
@@ -379,6 +426,14 @@ là KHÔNG GIAN SENTINEL RIÊNG của Card, tách biệt với `"N/A"`/`"+∞"` 
 tương tác khi Card ghép `displayed_estimate(player)` và
 `displayed_estimate(target)` thành 1 tỉ lệ so sánh.
 
+**Badge che giấu (bổ sung 2026-08-10)**: khi `concealment.active(C)=true`
+VÀ `displayed_estimate(C)` trả về 1 SỐ (không phải `"???"`), con số đó
+LUÔN mang badge "đang che giấu" — cùng ký hiệu/vị trí như badge field D.2
+case 2 (Visual/Audio mục 2), đặt ngay cạnh seal Lực chiến. Đây là badge
+DUY NHẤT áp cho 1 giá trị DẪN XUẤT (không phải field D.2 gốc) — ngoại lệ
+tường minh mở rộng phạm vi "per field" ban đầu của Visual/Audio mục 2
+(xem Core Rule #6).
+
 **Example (bình thường, không che giấu):** `concealment.active=false` →
 dùng 12 `true_value` → `Điểm_Chỉ_Số=310`, `Điểm_Kỹ_Năng=Điểm_Trang_Bị=0`
 → `displayed_estimate(C) = 310`.
@@ -408,15 +463,32 @@ entity record được tạo (cùng lượt nhân vật lần đầu xuất hi�
 chạy lại mỗi lần mở thẻ.
 
 The `base_stat_completeness_check` formula is defined as:
-`base_stat_completeness(char_id) = AND over X in 12 chỉ số of [ defined(base_X0(char_id, X)) AND numeric(base_X0(char_id, X)) AND base_X0(char_id, X) ≥ 0 ]`
+```
+base_stat_completeness(char_id) =
+    ( defined(base_HP0(char_id)) AND numeric(base_HP0(char_id)) AND base_HP0(char_id) > 0 )   // HP: strict >0, xem rationale dưới
+    AND
+    AND over X in {11 chỉ số còn lại} of [ defined(base_X0(char_id, X)) AND numeric(base_X0(char_id, X)) AND base_X0(char_id, X) ≥ 0 ]
+```
+
+**Ràng buộc riêng cho HP (sửa 2026-08-10)**: HP là chỉ số DUY NHẤT trong
+12 chỉ số được dùng làm MẪU SỐ ở hệ downstream (`hp_pct = hp/max_HP` —
+`combat-system.md`; `margin_ratio` — `npc-affinity-relationship.md`,
+`death-and-consequence.md`). `base_HP0=0` hợp lệ theo ràng buộc `≥0`
+chung sẽ lan truyền thành `stat_growth(C,HP)=0` vĩnh viễn
+(`exp-realm-progression.md`), làm sai lệch ÂM THẦM (không crash,
+`max(max_HP,1)` chặn mọi chia-cho-0, nhưng 3 hệ downstream đều coi
+`max_HP=0` là điều kiện LỖI, không phải trạng thái hợp lệ) mọi phép tính
+downstream đó. 11 chỉ số còn lại chỉ dùng làm tử số/hệ số nhân nên `=0`
+chỉ gây yếu, không gây trạng thái vô nghĩa — giữ nguyên `≥0`.
 
 **Variables:**
 
 | Variable | Symbol | Type | Range | Description |
 |---|---|---|---|---|
 | Mã nhân vật | `char_id` | string | ID hợp lệ | Nhân vật đang được tạo (content author hoặc AI sinh) |
-| Chỉ số khởi điểm | `base_X0(char_id, X)` | float \| undefined | `[0, ∞)` khi có | 1 trong 12 hằng khởi điểm, sở hữu bởi hệ này (Core Rule #8b) |
-| Kết quả | `base_stat_completeness(char_id)` | bool | {0,1} | `1` = đủ 12/12, cho phép tạo entity record; `0` = fail-fast |
+| Chỉ số khởi điểm HP | `base_HP0(char_id)` | float \| undefined | `(0, ∞)` khi có — **strict, khác 11 chỉ số kia** | Hạt giống `max_HP` — dùng làm mẫu số ở 3 GDD downstream, xem rationale trên |
+| Chỉ số khởi điểm (11 chỉ số còn lại) | `base_X0(char_id, X)` | float \| undefined | `[0, ∞)` khi có | 1 trong 11 hằng khởi điểm còn lại, sở hữu bởi hệ này (Core Rule #8b) |
+| Kết quả | `base_stat_completeness(char_id)` | bool | {0,1} | `1` = đủ 12/12 (kể cả HP > 0), cho phép tạo entity record; `0` = fail-fast |
 
 **Output Range:** Boolean `{0,1}`, không có giá trị trung gian — đúng
 tinh thần "tất-cả-hoặc-không-gì" (cùng dạng với
@@ -431,6 +503,23 @@ tinh thần "tất-cả-hoặc-không-gì" (cùng dạng với
 tạo nhân vật này, log `"content gap: base_X0 thiếu Lifesteal cho char_id=bach_tuyet_nghi"`,
 KHÔNG tạo entity record một nửa (tránh trạng thái `stat_growth` tính ra
 `NaN`/thiếu ở các cấp sau).
+
+**Example (fail-fast, HP=0 chính xác, bổ sung 2026-08-10):** NPC seed đủ
+12/12 field NHƯNG `base_HP0=0` chính xác (không âm, không phi số) →
+`base_stat_completeness=0` (fail) — ràng buộc HP là `>0` STRICT, khác
+biệt với 11 chỉ số kia (`≥0`); log `"content gap: base_HP0 phải >0 (nhận 0)
+cho char_id=..."`.
+
+**Ghi chú interface downstream (bổ sung 2026-08-10)**: `max_HP(C)` mà
+`combat-system.md`/`death-and-consequence.md`/`npc-affinity-relationship.md`
+dùng làm mẫu số cho `hp_pct`/`margin_ratio` chính là field `HP` ở đây
+(`true_value(C, HP)`, sau khi `stat_growth` áp lên `base_HP0`) — KHÔNG
+đi qua D.2/`displayed_field`, bất kể `concealment.active(C)`. Giữ tên
+`HP` ở GDD này để nhất quán nội bộ; 3 GDD downstream dùng `max_HP` theo
+quy ước riêng — 2 tên cùng 1 giá trị. Xem Dependencies (downstream) để
+có dòng khai tường minh — trước 2026-08-10, GDD này không có dòng
+Dependencies nào cho interface này dù 3 hệ downstream đã dùng trực tiếp
+trong phép tính sinh tử (`margin_ratio` → death roll).
 
 ## Edge Cases
 
@@ -510,7 +599,7 @@ Core Mechanics #7) nếu thiếu; Soft = suy giảm tiện ích nhưng thẻ v�
 | Equipment & Skill Data | **Hard** | `equipped_weapon_id`, `known_skill_ids` + bảng tên hiển thị | ✅ |
 | Death & Consequence | **Hard** | `alive`, `death_and_consequence_blocked`, `pending_fate`, `efficacy`, `recovery_self_attempt_allowed` | ✅ |
 | Turn Manager | **Hard** | Nhận action từ nút (Song Tu/Hồi phục) qua đường action chuẩn; đọc trạng thái khóa input + undo (D.1) | Turn Manager giữ "Depends On: —" theo quy ước Foundation — ghi nhận gap tại systems-index như 12 gap trước |
-| World Memory | **Hard** | Entity record (nguồn `card_exists` D.1, storage instance hồ sơ) | Chưa liệt kê chiều ngược — cần footnote systems-index |
+| World Memory | **Hard** | Entity record (nguồn `card_exists` D.1, storage instance hồ sơ) | Chưa liệt kê chiều ngược — cần footnote systems-index. **Quyền sở hữu storage với Persistence CHƯA khóa** (xem Open Question mới) |
 | Situation/Encounter Generation | Soft | `location` hiện tại; (tương lai) kết quả điều tra lật `concealment` | ✅ |
 | Character Continuation | **Hard** (chiều ngược) | Trigger `continuation_choice_eligible` + nội dung màn hình 3 lối (thẻ là khung render) | ✅ |
 | Mechanic/Narration Contract Enforcement | **Hard** | Core Rule #4 của thẻ ("bề mặt số liệu duy nhất") là mặt ngược Core Rule #4 bên đó; cơ chế thực thi runtime (`numeric_leak_detection`) thuộc hệ đó, thẻ chỉ là bề mặt hiển thị hợp lệ | Bổ sung theo phát hiện qa-lead 2026-08-04 (GDD này viện dẫn nhưng chưa liệt kê) |
@@ -519,10 +608,14 @@ Core Mechanics #7) nếu thiếu; Soft = suy giảm tiện ích nhưng thẻ v�
 
 | Hệ | Hard/Soft | Interface |
 |---|---|---|
-| EXP & Realm Progression | **Hard** | `base_X0` (12 hằng khởi điểm/nhân vật — hạt giống `stat_growth`) |
+| EXP & Realm Progression | **Hard** | `base_X0` (12 hằng khởi điểm/nhân vật — hạt giống `stat_growth`; `base_HP0` nay ràng buộc `>0` strict, xem D.5) |
 | Death & Consequence | Soft | Schema `npc_tag.medium_override` (nullable, thiếu → "sỉ nhục") |
-| Combat System | **Hard** | `base_X(C)` đọc từ thẻ làm input D.1 của Combat (giá trị THẬT, không qua D.2) |
-| Core UI/Screen Navigation (#15, chưa thiết kế) | **Hard** (provisional) | Điểm vào mở thẻ từ mọi màn hình; thẻ là 1 trong các screen chính |
+| Death & Consequence | **Hard** (bổ sung 2026-08-10) | `max_HP(C)` ≡ field `HP` của thẻ (D.5, xem "Ghi chú interface downstream") — dùng làm mẫu số `margin_ratio`, PHẢI `>0`, nay ĐẢM BẢO bởi D.5 `base_HP0>0` strict. Trước 2026-08-10 GDD đó viện dẫn interface này mà GDD này chưa từng khai — đóng gap |
+| Combat System | **Hard** | `base_X(C)` đọc từ thẻ làm input D.1 của Combat (giá trị THẬT, không qua D.2); `max_HP(C)` (≡ field `HP`) PHẢI `>0` (precondition chia HP), nay ĐẢM BẢO bởi D.5 `base_HP0>0` strict |
+| NPC Affinity & Relationship | **Hard** (bổ sung 2026-08-10) | `max_HP(C)` ≡ field `HP` của thẻ — dùng làm mẫu số `margin_ratio`. Cùng gap/cùng fix như dòng Death & Consequence trên |
+| Mechanic/Narration Contract Enforcement | **Hard** (provisional, bổ sung 2026-08-10) | Schema `npc_tag.concealment_narrative_hint` — AI/Narration NÊN đọc field này khi dựng văn cho NPC có `concealment.active=true`, tránh mâu thuẫn thẻ-vs-văn; cơ chế enforcement thật (chặn leak dạng mô tả/tính cách khớp thực lực thật, khác `Numeric Leak Detection` hiện có chỉ bắt số) CHƯA tồn tại — hệ đó chưa cam kết tiêu thụ field mới này, xem Open Question mới |
+| AI/LLM Integration Layer | **Hard** (provisional, bổ sung 2026-08-10) | Nguồn tiêu thụ trực tiếp `npc_tag.concealment_narrative_hint` khi build prompt narration cho NPC che giấu — chưa cam kết tường minh, xem Open Question mới |
+| Core UI/Screen Navigation (#15) | **Hard** | Điểm vào mở thẻ từ mọi màn hình; thẻ là 1 trong các screen chính (sửa 2026-08-10 — hệ #15 nay đã **Approved**, không còn "chưa thiết kế") |
 | Persistence | Hai chiều | Instance `base_X0`/`npc_tag`/`concealment`/hồ sơ nằm trong blob opaque |
 
 **Trạng thái 2 chiều**: 9/9 GDD upstream đã liệt kê hệ này trong
@@ -535,7 +628,7 @@ Manager và World Memory không ghi chiều Card→họ.
 
 | Knob | Giá trị mặc định | Phạm vi an toàn | Ảnh hưởng | Quá cao → | Quá thấp → |
 |---|---|---|---|---|---|
-| `base_X0` (bộ 12 giá trị/nhân vật, data file) | Theo seed nhân vật (MVP: 4 nhân vật authored) | Mỗi chỉ số ≥ 0; % stats ≤ `PERCENT_STAT_CAP` (EXP) | Điểm xuất phát toàn bộ đường tăng trưởng `stat_growth` + cân bằng sớm | NPC seed quá mạnh → phá dynamic "mây tầng nào gió tầng nấy" sớm | Nhân vật chính quá yếu → mọi trận đầu game thành tự sát |
+| `base_X0` (bộ 12 giá trị/nhân vật, data file) | Theo seed nhân vật (MVP: 4 nhân vật authored) | HP `> 0` strict (sửa 2026-08-10, xem D.5 rationale — khác 11 chỉ số kia); 11 chỉ số còn lại `≥ 0`; % stats ≤ `PERCENT_STAT_CAP` (EXP) | Điểm xuất phát toàn bộ đường tăng trưởng `stat_growth` + cân bằng sớm | NPC seed quá mạnh → phá dynamic "mây tầng nào gió tầng nấy" sớm | Nhân vật chính quá yếu → mọi trận đầu game thành tự sát; HP=0 bị D.5 chặn cứng lúc tạo |
 | `profile_text_max_length` | 280 ký tự/field | 120–600 | Độ dài tối đa Tính cách/Ngoại hình/Tiểu sử trên thẻ (mobile) | Thẻ thành trang văn, chìm khối chỉ số | Hồ sơ cụt, mất chất tiểu thuyết |
 | `card_transition_ms` | 200 | 0–400 | Thời gian hiệu ứng mực loang khi mở thẻ | Cảm giác ì trên mobile | Mất cảm giác "Mực Chưa Khô", thẻ bật như popup HUD |
 | `stat_display_precision` | 0 (số nguyên); % stats: 1 lẻ | 0–2 | Số chữ số thập phân trên khối chỉ số | Nhiễu thị giác, vỡ khung con dấu | % stats tròn 0 lẻ gây hiểu lầm ngưỡng (5.4% ≠ 5%) |
@@ -602,7 +695,7 @@ nguyên như đã khóa; overlay 3 lối tiếp tục giữ nguyên như
 | Element | Visual treatment | Rationale/pillar |
 |---|---|---|
 | **Danh tính kép** (`dual_identity`, D.2 case 1) | Tên thật hiển thị TRƯỚC, trong seal đậm nhất family số (đặc quyền = "biết ngay sự thật"). Tên cải trang hiển thị NGAY DƯỚI, trong khung mực loang nhỏ (không seal — đây là "vỏ bọc", không phải sự thật cơ học), nối bằng 1 dấu gạch mực đơn giản, không icon/màu riêng. | Weight-based hierarchy (đậm=thật, thường=vỏ) tách 2 tầng chỉ bằng 1 liếc mắt, không cần màu — đúng anchor moment 2 Player Fantasy, tuân khẩu phần hóa (KHÔNG dùng màu phân biệt 2 danh tính). |
-| **Badge "đang che giấu"** (per field, D.2 case 2) | Thẻ ngoặc kép kiểu thư pháp 「che giấu」 đặt sát field bị che (không phải icon vẽ riêng — dùng ký tự Unicode có sẵn, cùng family Hồ sơ, weight nhẹ hơn). Dùng ĐỒNG NHẤT cho mọi loại field (danh tính/stat/hồ sơ), không đổi hình theo loại. | Giải pháp thuần typography, không phát sinh asset mới — khớp Art Pipeline Complexity "Thấp" (`game-concept.md`); nhất quán 1 mẫu duy nhất giúp quét nhanh nhiều thẻ. |
+| **Badge "đang che giấu"** (per field D.2 case 2, VÀ trên `displayed_estimate` D.4 khi là số — mở rộng 2026-08-10) | Thẻ ngoặc kép kiểu thư pháp 「che giấu」 đặt sát field bị che (không phải icon vẽ riêng — dùng ký tự Unicode có sẵn, cùng family Hồ sơ, weight nhẹ hơn). Dùng ĐỒNG NHẤT cho mọi loại field (danh tính/stat/hồ sơ) VÀ cho seal Lực chiến ước tính khi nó là số dưới `concealment.active=true`, không đổi hình theo loại. | Giải pháp thuần typography, không phát sinh asset mới — khớp Art Pipeline Complexity "Thấp" (`game-concept.md`); nhất quán 1 mẫu duy nhất giúp quét nhanh nhiều thẻ; đóng vòng lặp "con số không bao giờ nói dối" ngay cả khi số đó do che giấu tạo ra. |
 | **Sentinel "???"** (D.2 case 3) | Field trong seal (stat/Lực chiến): chuỗi `"???"` render trong khung seal, cùng weight số thường. Field trong khung mực loang (hồ sơ/danh tính): thay bằng 1 vệt mực loang nhỏ phủ lên vị trí văn bản — tái dùng CHÍNH kỹ thuật/asset tạo viền mực loang của khung thẻ, chỉ ở quy mô nhỏ hơn (không phải asset mới). | Vệt mực "blot" kể chuyện "thông tin chưa được viết ra" bằng chính motif lõi của game, củng cố mood "nhật ký sống" thay vì text placeholder khô khan; không tăng chi phí asset vì tái dùng kỹ thuật đã cần cho khung thẻ. |
 | **"chờ đột phá"** trên thanh EXP (D.3) — QUYẾT ĐỊNH MÀU | **GIỮ ĐƠN SẮC, KHÔNG dùng xanh ngọc.** Thanh EXP chuyển từ fill mực đặc sang hoạ văn gạch chéo lấp đầy toàn thanh; nhãn `"chờ đột phá"` đặt trong seal riêng thay vị trí số (như mọi sentinel số khác). Xanh ngọc CHỈ hợp lệ ở khoảnh khắc đột phá THẬT xảy ra (`breakthrough_requirement_met` chuyển true) — phạm vi đó thuộc `exp-realm-progression.md` (Visual/Audio hiện "[To be designed]"), KHÔNG thuộc mục này. | Quyết định có chủ đích, không phải bỏ sót: trạng thái Chờ Đột Phá có thể LẶP LẠI N lượt liên tiếp (EXP kẹp trần, không đổi) — nếu tô xanh ngọc cho 1 trạng thái lặp lại nhiều lượt/nhiều lần mở thẻ, màu sẽ mất tính hiếm, phá vỡ đúng cơ chế "thấy màu = biết ngay thế giới vừa đổi thật" (`game-concept.md`) và vi phạm nguyên tắc "độ bền tín hiệu phản ánh độ bền trạng thái" đã lập ở `death-and-consequence.md` (trạng thái LẶP/CHỜ không nên mang 1 tín hiệu "sự kiện 1 lần"). |
 | **Dải thái độ** (7 mức — không thêm màu) | Tên dải hiển thị bằng TEXT (7 tên tiếng Việt — Thù địch sâu sắc/Thù địch/Lạnh nhạt/Trung lập/Thiện cảm/Thân thiết/Tri kỷ — đã tự thân phân biệt hướng, không cần mã màu/icon). Bổ sung PHỤ: 1 thanh ngang mực mảnh lưỡng cực (tâm = Trung lập) + 1 chấm đánh dấu vị trí dải hiện tại, chỉ đổi VỊ TRÍ trái/phải và ĐỘ ĐẬM (tăng theo khoảng cách tới tâm) — không đổi hình chấm, không đổi màu. Hảo cảm số trong seal riêng cạnh thanh. | Ưu tiên typography (đã đủ rõ) thay vì phát minh bộ icon hướng mới — khớp Art Pipeline "Thấp"; thanh+chấm chỉ củng cố phụ, có thể bỏ mà không mất thông tin (graceful degradation nếu asset chưa kịp làm). |
@@ -681,7 +774,7 @@ Xanh ngọc: KHÔNG xuất hiện ở bất kỳ đâu trên Character Card theo
 | Thông tin | Vị trí | Tần suất cập nhật | Điều kiện |
 |---|---|---|---|
 | Toàn bộ khối ①–④ (qua D.2) | Thẻ overlay toàn nội dung, cuộn dọc | Mỗi lần mở thẻ (snapshot tại thời điểm mở) | `card_exists=true` |
-| Khối ⑤ Trạng thái giao đấu | Đầu thẻ khi giao đấu | Mỗi exchange (theo Combat) | `in_combat=true` |
+| Khối ⑤ Trạng thái giao đấu | Vị trí CỐ ĐỊNH theo thứ tự ①-⑥ (Core Rule #3, KHÔNG dời khối — sửa 2026-08-10, bản cũ "Đầu thẻ khi giao đấu" mâu thuẫn trực tiếp Core Rule #3 + Visual/Audio §1); khi mở thẻ lúc `in_combat=true`, tự động cuộn (auto-scroll) neo vào khối ⑤; accordion khối ⑤ mặc định MỞ và KHÔNG thể user-collapse trong khi `in_combat=true` (khác hành vi accordion ③⑥) | Mỗi exchange (theo Combat) | `in_combat=true` |
 | Badge chết/phế + nút Hồi phục | Theo bảng UI của Death & Consequence | Mỗi lần mở thẻ | `alive=false` / `blocked=true` |
 | Nút Song Tu | Khối ④ thẻ NPC | Mỗi lần mở thẻ + sau mỗi lượt confirm | Trạng thái Available/Active |
 | Thanh EXP + `exp_to_next`/"chờ đột phá" | Khối ② thẻ nhân vật chính | Mỗi lượt confirm | Chỉ thẻ nhân vật chính |
@@ -705,6 +798,12 @@ Xanh ngọc: KHÔNG xuất hiện ở bất kỳ đâu trên Character Card theo
   không thay đổi thứ tự đọc.
 - Danh sách 12 chỉ số dạng lưới seal 2–3 cột tùy bề rộng; không bảng
   ngang tràn màn hình.
+- **Vùng chạm tối thiểu (bổ sung 2026-08-10)**: 4 phần tử tương tác độc
+  lập trên thẻ — nút Song Tu, nút Hồi phục, nút X đóng thẻ, badge "đang
+  che giấu" (nếu về sau có tương tác) — đều phải đạt `TOUCH_TARGET_MIN=44px`
+  (registry, hằng khóa theo WCAG 2.5.5/Apple HIG/Material, đã dùng ở
+  `core-ui-screen-navigation.md`), kể cả khi Visual/Audio mô tả chúng là
+  "con dấu" nhỏ đặt sát nhãn text.
 
 **Scope**: Không tạo màn hình mới ngoài chính thẻ này — overlay 3 lối
 (Character Continuation) và khối giao đấu (Combat) lồng vào khung thẻ như
@@ -722,11 +821,21 @@ Xanh ngọc: KHÔNG xuất hiện ở bất kỳ đâu trên Character Card theo
 *(Đề xuất bởi `qa-lead` 2026-08-04, duyệt kèm 5 hướng xử lý spec gap —
 gap #1 đã sửa ở Dependencies, gap #3 đã sửa ở Edge Cases + AC-37, gap #2
 cross-ref tại AC-11, gap #4/#5 ghi Open Questions. Hệ này là hệ
-**Presentation/UI đọc-only** — phần render/layout/interaction feel nhận
+**Presentation/UI đọc-only** — phần render/layout/interaction FEEL (thị
+giác/cảm giác, không thể assert bằng spy/equality) nhận
 **ADVISORY** gate (bằng chứng: walkthrough thủ công tại
-`production/qa/evidence/character-card-identity/`). NGOẠI LỆ BLOCKING: 5
-công thức D.1–D.5 là hàm chọn lọc/dẫn xuất **tất định thuần túy** — mọi AC
-gắn nhãn **[Unit]** là **BLOCKING** gate, bắt buộc file test tự động tại
+`production/qa/evidence/character-card-identity/`). NGOẠI LỆ BLOCKING
+(làm rõ 2026-08-10 — bản cũ chỉ nêu điều kiện (a) khiến các AC test
+interaction WIRING ở mục 7-8 có vẻ mâu thuẫn với câu "interaction feel =
+ADVISORY" ngay phía trên) áp dụng cho AC thỏa MỘT trong 2 điều kiện, cả
+hai đều test được bằng mock/spy thuần logic, không cần render thật: (a) 5
+công thức D.1–D.5 là hàm chọn lọc/dẫn xuất **tất định thuần túy** cùng
+logic lựa chọn khối/field dẫn xuất từ chúng (mục 1-6); (b) hành vi
+**wiring** tương tác — nút gửi đúng action/đúng số lượng, tính khả dụng
+nút theo boolean input (mục 7, Edge Cases mục 8) — phân biệt với **feel**
+tương tác (alpha, timing, focus thị giác thật) luôn là `[Manual/UI]`/
+ADVISORY (mục 9). Mọi AC gắn nhãn **[Unit]** thỏa (a) hoặc (b) là
+**BLOCKING** gate, bắt buộc file test tự động tại
 `tests/unit/character-card-identity/` (naming:
 `character_card_[feature]_test.gd`, hàm `test_[scenario]_[expected]`)
 trước khi story tương ứng được đánh dấu Complete. AC gắn nhãn
@@ -818,6 +927,11 @@ tử trả về LUÔN ①②③④⑤⑥ cố định bất kể tổ hợp cờ
 `char_id` là NPC, WHEN dựng khối ②, THEN không có phần tử "còn X EXP tới
 cấp kế" trong output; GIVEN `char_id` là nhân vật chính, THEN CÓ phần tử
 đó. **[Unit]**
+
+**AC-48** (Rule #3 — khối ④ Hảo cảm & Song Tu chỉ ở thẻ NPC, bổ sung
+2026-08-10, đối xứng AC-10): GIVEN `char_id` là nhân vật chính, WHEN dựng
+thẻ, THEN khối ④ (Hảo cảm số, dải thái độ, nút Song Tu) KHÔNG xuất hiện
+trong output; GIVEN `char_id` là NPC, THEN khối ④ CÓ xuất hiện. **[Unit]**
 
 **AC-11** (Rule #4 — số cơ học không bị trích dẫn nguyên văn vào văn
 tường thuật, phạm vi kiểm chứng của hệ này): GIVEN danh sách field thuộc
@@ -944,6 +1058,22 @@ log "content gap" phát đúng nội dung tham chiếu `char_id` + field thiếu
 là chuỗi phi số, WHEN `base_stat_completeness_check` chạy, THEN trả `0`
 cho cả 2 test con (a) giá trị âm, (b) giá trị phi số — `defined` chưa
 đủ, còn cần `numeric` VÀ `≥0`. **[Unit]** *(boundary)*
+
+**AC-46** (D.5 boundary MỚI — `base_HP0=0` chính xác, bổ sung 2026-08-10):
+GIVEN `base_X0(char_id)` đủ 12/12 field NHƯNG `base_HP0(char_id)=0` chính
+xác (không âm, không phi số — khác case AC-28), WHEN
+`base_stat_completeness_check` chạy, THEN trả `0` (fail) — ràng buộc HP là
+`>0` STRICT, KHÔNG chấp nhận `=0` dù 11 chỉ số khác chấp nhận `≥0`; log
+`"content gap: base_HP0 phải >0 (nhận 0) cho char_id=..."`. Test đối
+chứng: cùng tổ hợp nhưng `base_HP0=0.01` (dương rất nhỏ) → trả `1` (pass).
+**[Unit]** *(boundary)*
+
+**AC-47** (interface Combat-facing bỏ qua concealment, bổ sung 2026-08-10):
+GIVEN `concealment.active(C)=true`, đủ 12 `displayed_value` khác
+`true_value`, WHEN Combat (mock) gọi `base_X(C, stat)`/`max_HP(C)` (KHÔNG
+phải `displayed_field`), THEN trả đúng `true_value` cho mọi stat — spy
+xác nhận hàm không gọi qua D.2/`displayed_field`, kể cả khi
+`concealment.active=true`. **[Unit]** *(spy)*
 
 ### 7. Tương tác qua nút & khóa input (Rule #7)
 
@@ -1082,6 +1212,10 @@ cho chuột/cảm ứng vs bàn phím, cả 2 đạt kết quả tương đươn
 | 4 | Bất biến `in_combat` × `alive=false` có loại trừ lẫn nhau ở tầng sở hữu không? (AC-35 chỉ test phòng thủ phía Card) | Combat System + Death & Consequence (xác nhận hợp đồng) | `/consistency-check` kế tiếp hoặc `/review-all-gdds` |
 | 5 | EXP GDD có nên lộ field boolean "Chờ Đột Phá" tường minh thay vì để Card tự suy `is_awaiting_breakthrough` từ 2 điều kiện biên (D.3)? | EXP & Realm Progression | Khi retrofit/revise EXP GDD |
 | 6 | Ai populate instance `concealment.displayed_*` + hồ sơ cho **NPC do AI sinh**? (Đề xuất: lời gọi sinh NPC schema-constrained của AI Layer/Situation Gen; MVP không cần — 3 NPC seed đều content-authored) | Situation Gen + AI/LLM Integration Layer | Khi thiết kế flow sinh NPC động, hậu MVP |
-| 7 | Kỹ thuật điểm vào tap-tên (`RichTextLabel` meta tag 4.4+) + xử lý dual-focus 4.6 cho phần tử tương tác trên thẻ | technical-director / ADR | `/create-architecture` |
-| 8 | Danh sách field đầy đủ của **schema `npc_tag`** — hiện mới có `medium_override`; các hệ khác có thể "đặt hàng" thêm tag | Hệ này (mở rộng theo yêu cầu) | Mở, bổ sung khi có yêu cầu mới |
+| 7 | Kỹ thuật điểm vào tap-tên (`RichTextLabel` meta tag 4.4+) + cơ chế map tên-trong-văn-bản → `char_id` (chưa có chủ sở hữu, kể cả ở mức khai báo — cắt ngang AI/LLM Integration Layer + Contract Enforcement, bổ sung phạm vi 2026-08-10) + xử lý dual-focus 4.6 cho phần tử tương tác trên thẻ | technical-director / ADR | `/create-architecture` |
+| 8 | Danh sách field đầy đủ của **schema `npc_tag`** — hiện có `medium_override` + `concealment_narrative_hint` (mới 2026-08-10); các hệ khác có thể "đặt hàng" thêm tag | Hệ này (mở rộng theo yêu cầu) | Mở, bổ sung khi có yêu cầu mới |
 | 9 | Visual khoảnh khắc **đột phá thật** (nơi hợp lệ duy nhất của xanh ngọc) — art-director đã vẽ ranh giới ở GDD này, nội dung chi tiết chưa tồn tại vì EXP GDD bỏ qua Visual/Audio | EXP & Realm Progression (retrofit Visual/Audio, spawn art-director) | Trước `/art-bible` hoặc cùng đợt |
+| 10 | **Quyền sở hữu storage** cho entity record — "World Memory/blob Persistence" (Core Rule #8a) vẫn là either/or, CHƯA khóa ở bất kỳ tài liệu đáng tin cậy nào (bổ sung 2026-08-10, sau khi xác minh cả 2 GDD nguồn). Chặn hiện thực thật của D.1/D.5 (không rõ ghi/đọc entity record vào đâu) | technical-director / ADR | `/create-architecture` |
+| 11 | **`disguise_active(C) := len(alias_list(C))>0`** (D.2, bổ sung 2026-08-10) là suy diễn MVP đơn giản hóa từ dữ liệu tồn kho của Setting & Canon, chưa xác nhận với owner hệ đó — rủi ro: nếu 1 nhân vật ngừng cải trang giữa truyện mà Setting & Canon không chủ động xóa alias khỏi danh sách, thẻ tiếp tục hiện `dual_identity` sai. Cần xác nhận Setting & Canon cam kết giữ danh sách bí danh "sống" (xóa khi hết dùng), không chỉ tồn kho tĩnh | Setting & Canon Integration | Trước khi implement D.2 |
+| 12 | Cam kết tiêu thụ **`npc_tag.concealment_narrative_hint`** (mới, Rule #8c) khi build prompt narration cho NPC che giấu — chưa hệ nào (Mechanic/Narration Contract Enforcement, AI/LLM Integration Layer) cam kết tường minh; không có nó, AI narration có thể vô tình mô tả đúng thực lực thật qua văn xuôi dù số liệu đã bị làm giả (bổ sung 2026-08-10) | Mechanic/Narration Contract Enforcement + AI/LLM Integration Layer | Trước Vertical Slice |
+| 13 | Tiền đề anchor moment 1 ("thẻ luôn tồn tại trước khi trận bắt đầu", Rule #2 + Overview) chưa được chứng minh cross-system — `situation-encounter-generation.md` D.7 hỗ trợ chạm trán ambient không có state theo dõi trước (mai phục); 0 AC ở bất kỳ GDD nào kiểm tra tiền đề này (bổ sung 2026-08-10) | Combat System + Situation/Encounter Generation | `/consistency-check` hoặc `/review-all-gdds` kế tiếp |

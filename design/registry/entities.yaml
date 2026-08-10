@@ -37,7 +37,13 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 
 version: 1
-last_updated: "2026-08-03"
+last_updated: "2026-08-10"
+# 2026-08-10 (character-card-identity.md /design-review round 1): stat_growth
+# +2 referenced_by (death-and-consequence.md, npc-affinity-relationship.md)
+# + comment clarifying max_HP naming equivalence + base_HP0 strict >0.
+# TOUCH_TARGET_MIN: no value change — character-card-identity.md's
+# referenced_by claim (added 2026-08-04) is now backed by a real citation
+# in the GDD text (previously false — see review log).
 # 2026-08-03: +2 formulas, +4 constants from npc-affinity-relationship.md;
 # referenced_by updated on fact_extraction_count
 # 2026-08-03 (later): +3 formulas from setting-canon-integration.md;
@@ -583,6 +589,8 @@ formulas:
       - design/gdd/exp-realm-progression.md
       - design/gdd/combat-system.md
       - design/gdd/character-card-identity.md
+      - design/gdd/death-and-consequence.md
+      - design/gdd/npc-affinity-relationship.md
     variables:
       - base_X0
       - level
@@ -592,6 +600,14 @@ formulas:
       - PERCENT_STAT_CAP
     output_range: "[base_X0, ∞) cho chỉ số thô; [0, PERCENT_STAT_CAP] cho chỉ số dạng %"
     expression: "stat_value(C, X) = base_X0 + LEVEL_GROWTH_X * (level(C) - 1) + BREAKTHROUGH_BONUS_X * (tier(C) - 1); chỉ số % thêm clamp(., 0, PERCENT_STAT_CAP)"
+    # 2026-08-10 (character-card-identity.md /design-review round 1):
+    # stat_value(C, HP) là giá trị mà death-and-consequence.md và
+    # npc-affinity-relationship.md gọi là max_HP (dùng làm mẫu số
+    # margin_ratio) — 2 tên, cùng 1 giá trị, đọc trực tiếp true_value(C,HP)
+    # qua character-card-identity.md D.5, KHÔNG qua concealment. base_HP0
+    # (input của stat_value khi X=HP) nay ràng buộc strict >0 (khác 11 chỉ
+    # số còn lại, ≥0) ở character-card-identity.md D.5, đảm bảo max_HP
+    # không bao giờ =0 xuống 2 hệ downstream trên. +2 referenced_by.
     notes: "Tăng đều mỗi cấp + nhảy vọt riêng mỗi lần đột phá (tier tăng).
       Là nguồn THẬT cho base_ATK/base_HP/... mà Combat System Formula D.1
       dùng làm input trước khi áp áp chế cảnh giới (combat-system.md hiện

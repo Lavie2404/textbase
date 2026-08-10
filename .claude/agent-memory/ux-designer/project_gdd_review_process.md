@@ -17,5 +17,6 @@ Dự án `ai-story-game` chạy `/design-review [path]` theo nhiều vòng đố
 2. Tìm gap THẬT SỰ MỚI hoặc gap sâu hơn (khác bản chất) so với các vòng trước — không re-litigate kiến trúc đã đứng vững ≥2 vòng liên tiếp.
 3. Ghi rõ mức độ nghiêm trọng (BLOCKING/RECOMMENDED/GHI NHẬN) VÀ đề xuất giải pháp cụ thể cho mỗi finding quan trọng — không chỉ nêu vấn đề (đúng vai trò "chuyên gia tư vấn" trong Collaboration Protocol).
 4. Không tự ghi vào review log hay sửa GDD — trả finding về cho agent điều phối (`/design-review` orchestrator hoặc creative-director), việc ghi log/sửa file cần approval của người dùng.
+5. **Khi 1 vòng review trước "đề xuất chuyển phạm vi" 1 gap sang GDD KHÁC thay vì sửa ngay tại chỗ** (VD log ghi "đề xuất chuyển phạm vi sang X.md") — vòng sau PHẢI xác minh gap đó THỰC SỰ xuất hiện ở GDD đích bằng cách đọc/grep file đó, không được giả định việc chuyển đã xảy ra. Case đã xác nhận: `combat-system.md` review vòng 2 (2026-08-06) đề xuất chuyển "touch target/contrast/AI-wait indicator" sang `turn-manager.md`, nhưng khi kiểm tra ở vòng 3, `turn-manager.md` KHÔNG hề chứa các từ khóa này — gap rơi vào khoảng trống giữa 2 tài liệu, không ai nhận sở hữu. Coi "đề xuất chuyển phạm vi" trong review log là CHƯA ĐÓNG cho tới khi xác minh được bằng chứng ở file đích, không phải khi log ghi "đề xuất".
 
-Liên quan: [[project-game-identity-context]]
+Liên quan: [[project-game-identity-context]], [[project-combat-ux-open-items]]

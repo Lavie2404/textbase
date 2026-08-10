@@ -30,7 +30,7 @@
 #   Superseded entries:     Grep pattern="status: superseded"
 
 version: 1
-last_updated: ""
+last_updated: "2026-08-07"
 
 # ─── STATE OWNERSHIP ─────────────────────────────────────────────────────────
 # Who is the authoritative owner of each piece of shared game state.
@@ -131,7 +131,17 @@ performance_budgets: []
 # Register an API decision when the choice is non-obvious and other ADRs might
 # make a different choice for the same purpose without knowing this was decided.
 
-api_decisions: []
+api_decisions:
+  - purpose: gameplay_rng
+    status: active
+    api: "RandomNumberGenerator instance, injected as the last parameter of every mechanics function that consumes randomness"
+    not: "global/autoload RNG singleton; per-call ad-hoc RandomNumberGenerator.new()"
+    adr: docs/architecture/adr-0001-combat-spec-authority.md
+    reason: "Determinism for testing (GUT tests can mock a single injected stream) and dependency injection per coding-standards.md ('dependency injection over singletons'). Verified feasible by prototypes/combat-reference/harness.py experiment Q5 (same seed threaded through full call chain -> identical results across independent runs)."
+    referenced_by:
+      - docs/architecture/adr-0001-combat-spec-authority.md
+    added: 2026-08-07
+    revised: ""
 
 # Example:
 #
@@ -157,7 +167,20 @@ api_decisions: []
 # Register a pattern when an ADR explicitly bans it AND other ADRs might
 # unknowingly use it (i.e., it's a tempting but wrong approach for this project).
 
-forbidden_patterns: []
+forbidden_patterns:
+  - pattern: static_function_hidden_state_for_testable_mechanics
+    status: active
+    description: "Gameplay mechanics functions requiring test verification (e.g. combat resolution, formula evaluation) must not be written as bare static/global functions relying on ambient/hidden state. Use pure functions (all needed state, including RNG, passed as explicit parameters) or instance methods with constructor-injected dependencies."
+    why: "Static functions with hidden state cannot be spied/mocked cleanly by GUT (which wraps instances), and pseudocode written in this style repeatedly hid real bugs across 4 rounds of design review for Combat System (undefined symbols, missing parameters, unclear RNG provenance) that a compiler would have caught immediately had the code been written as executable pure functions from the start."
+    adr: docs/architecture/adr-0001-combat-spec-authority.md
+    added: 2026-08-07
+
+  - pattern: bare_int_division_in_gameplay_formulas
+    status: active
+    description: "Never write `a / b` where both operands are statically `int`-typed in gameplay formula code. Always cast explicitly: `float(a) / b` (or an equivalent float-cast helper)."
+    why: "GDScript's `int/int` truncates toward zero by default (opposite of Python's default true division) — an omitted float() cast silently produces wrong results rather than an error. This exact bug class caused Combat System's exhaustion-convergence formula to fail 0/108 Safe Range combinations under real GDScript semantics despite a prior numeric harness (written in Python, wrong default) claiming 72/72 convergence, and separately caused a tiebreak formula to degenerate into a disguised coin-flip 100% of the time in symmetric battles. See docs/architecture/adr-0001-combat-spec-authority.md Context for the full incident history."
+    adr: docs/architecture/adr-0001-combat-spec-authority.md
+    added: 2026-08-07
 
 # Example:
 #

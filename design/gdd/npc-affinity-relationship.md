@@ -1,8 +1,27 @@
 # NPC Affinity & Relationship
 
-> **Status**: Designed — Pending Review
+> **Status**: **Approved**
 > **Author**: user + agents
-> **Last Updated**: 2026-08-03
+> **Last Updated**: 2026-08-08 — `/design-review` vòng 2/2 (vòng cuối, round
+> cap mechanically-heavy) hoàn tất: 4 specialist (`game-designer`,
+> `systems-designer`, `economy-designer`, `qa-lead`) + `creative-director`
+> tổng hợp, audit có mục tiêu theo đúng scope review log vòng 1. 4 blocking
+> tìm thấy — tất cả là gap đồng bộ tài liệu phát sinh từ 1 thay đổi hằng số
+> ở vòng 1 (`FATIGUE_WINDOW_TURNS` 3→5), không phải design defect mới —
+> đã sửa live cùng phiên (Player Fantasy khớp lại saturation gate D.5/D.6
+> B2; registry `entities.yaml` đồng bộ; AC-16 fixture + AC-16a/AC-16b mới;
+> preamble echo). Kèm 4 recommended (AC-08 mốc lượt, AC-19b dời đúng mục,
+> pacing ước tính lại). Vòng 1: verdict NEEDS REVISION, 8 blocking đã sửa
+> (Song Tu gate + giữ D.3 fatigue với `FATIGUE_WINDOW_TURNS` nâng 3→5;
+> chặn khai thác lan truyền bằng gắn B2 vào hiệu lực trực tiếp còn sống).
+> Xem `design/gdd/reviews/npc-affinity-relationship-review-log.md`.
+> **Post-approval fix (2026-08-09)**: D.1 `margin_ratio` sub-formula sửa
+> field-shape — `hp_after` viết nhầm như field cấp ngoài của hand-off
+> Combat (thực ra lồng trong `per_actor[actor_id].hp_after`); `max_HP`
+> làm rõ nguồn = Character Card & Identity, không phải hand-off Combat.
+> Cascade từ `/design-review` round 1 của `death-and-consequence.md`
+> (finding D-CRITICAL). Không đổi hành vi số học (int-truncation fix
+> 2026-08-08 vẫn đúng), chỉ sửa đường đọc field — không cần re-review.
 > **Implements Pillar**: Pillar 1 (Thế Giới Khách Quan), Pillar 2 (Hệ Quả Thực Sự); phục vụ trực tiếp aesthetic Fellowship & nhu cầu Relatedness
 
 ## Overview
@@ -56,7 +75,19 @@ Mặt tối cùng sức nặng: **thù hận là chuyện nghiêm túc**. Gây t
 phải một thanh đo tụt xuống rồi thôi — thù địch sâu sắc (-100 đến -80)
 nghĩa là NPC đó thật sự muốn người chơi chết, và một trận thua trước họ có
 thể là kết thúc vĩnh viễn. Thù hận còn lan: hại một người là mang tiếng
-với cả vòng quan hệ của họ — không có "free kill" nào sạch sẽ.
+với cả vòng quan hệ của họ **nếu có ai chứng kiến hoặc nạn nhân còn sống
+kể lại** — sửa 2026-08-08 (`/design-review` vòng 1, câu cũ "không có
+free kill nào sạch sẽ" mâu thuẫn trực tiếp với Core Rule #4/Edge Cases:
+giết không nhân chứng KHÔNG lan truyền, đây là quyết định thiết kế đã
+chốt 2026-08-03, xem Open Questions "Free-kill không nhân chứng"). Với
+mọi xung đột KHÔNG phải giết người — và với chính vụ giết nếu có ai
+chứng kiến — không có cách nào gây hại sạch sẽ hoàn toàn — **trừ khi nạn
+nhân đã kịch trần thù hận (-100): khi đó hành vi thù địch tiếp theo
+không còn ý nghĩa cơ học nào (không delta, không lan truyền), không
+phải vì thế giới tha thứ, mà vì với người này bạn đã không còn gì để
+mất thêm** (sửa 2026-08-08 `/design-review` vòng 2 — câu tuyệt đối cũ bị
+chính saturation gate D.5/D.6 B2 của vòng 1 phủ định, cùng lớp lỗi với
+"free kill" đã sửa ở trên; xem D.5, D.6 B2, AC-19b).
 
 Cuối cùng, quan hệ là **khoản đầu tư dài hạn**: Hảo cảm tích lũy qua nhiều
 phiên chơi, không thể cày nhanh, mất đi không dễ lấy lại (Pillar 2: Hệ Quả
@@ -110,30 +141,58 @@ chỉ giữ được sức nặng chừng nào con số không bao giờ nói d�
    sâu sắc" ⇔ `affinity ≤ -80` (BAO GỒM -80; đóng câu hỏi tính bao
    gồm/loại trừ từ review log của game-concept). Đây là cờ mà Death &
    Consequence đọc để quyết định nguy cơ chết thật khi thua trận.
-6. **Song Tu — hành động lặp lại được (đa NPC)**: nút Song Tu hiển thị
+6. **Song Tu — hành động lặp lại được (đa NPC), có cooldown riêng (sửa
+   2026-08-08, `/design-review` vòng 1 cụm A1)**: nút Song Tu hiển thị
    trên Character Card của NPC khi `affinity ≥ +60` (`SONG_TU_THRESHOLD`,
-   BAO GỒM +60) và bấm được **bất cứ lúc nào** còn đủ điều kiện — mỗi
-   lần bấm là MỘT hành động Song Tu, tốn 1 lượt qua Turn Manager như mọi
-   hành động khác. Hiệu ứng mỗi lần: Hảo cảm NPC đó **+ngẫu nhiên 1–10
-   điểm** (số nguyên, phân phối đều, clamp +100; là RNG source nên undo
-   rồi làm lại có thể ra kết quả khác — đúng tiền lệ Turn Manager
-   AC-12). Delta Song Tu được **miễn trừ** diminishing
+   BAO GỒM +60). Bấm được khi ĐỒNG THỜI (a) đủ điều kiện affinity như
+   trên VÀ (b) đã qua ít nhất `SONG_TU_COOLDOWN_TURNS` lượt kể từ lần
+   Song Tu GẦN NHẤT với ĐÚNG NPC đó (hoặc chưa từng Song Tu với NPC đó —
+   không có tiền lệ thì luôn qua điều kiện (b)). Hệ giữ 1 tracker
+   `last_song_tu_turn(npc_id)` riêng cho mục đích này (không dùng chung
+   streak tracker của D.3 — Song Tu vẫn miễn trừ D.2–D.4 như trước, đây
+   là 1 cơ chế cooldown ĐỘC LẬP, không phải fatigue). Nếu bấm khi chưa
+   đủ điều kiện (b): hành động bị từ chối ở tầng input — KHÔNG tạo
+   `classified_event`, KHÔNG tốn lượt, không gọi vào
+   `resolve_turn_affinity` (cùng nguyên tắc lọc trước-khi-vào-menu mà
+   Situation/Encounter Generation áp dụng cho các envelope khác). Lý do
+   thêm cooldown: nếu không, Song Tu — vốn đã miễn trừ D.2–D.4 — trở
+   thành strictly dominant strategy so với mọi hành động xã hội khác
+   (được cả `game-designer`, `economy-designer`, `systems-designer` độc
+   lập xác nhận ở review vòng 1); cooldown khôi phục "chi phí thời gian"
+   tương đương các đường khác mà không cần đánh đổi biên độ +1-10/lần.
+   Mỗi lần bấm hợp lệ là MỘT hành động Song Tu, tốn 1 lượt qua Turn
+   Manager như mọi hành động khác. Hiệu ứng mỗi lần: Hảo cảm NPC đó
+   **+ngẫu nhiên 1–10 điểm** (số nguyên, phân phối đều, clamp +100; là
+   RNG source nên undo rồi làm lại có thể ra kết quả khác — đúng tiền lệ
+   Turn Manager AC-12). Delta Song Tu được **miễn trừ** diminishing
    returns/repetition fatigue/cap lượt (D.2–D.4) vì đã có chi phí cố
-   định 1 lượt + điều kiện ngưỡng cao. Lần Song Tu ĐẦU TIÊN với một NPC
-   thiết lập **"quan hệ Song Tu active"** (trạng thái bền — nguồn EXP #4
-   của `exp-realm-progression.md`); quan hệ tự hủy khi Hảo cảm NPC đó
-   tụt dưới +40 (`SONG_TU_BREAK_THRESHOLD`); tái lập bằng cách thực hiện
-   Song Tu lần nữa (đòi hỏi leo lại ≥ +60). **Nhiều NPC có thể có quan
-   hệ Song Tu active đồng thời.**
-7. **EXP bonus Song Tu KHÔNG cộng dồn theo số NPC**: `SONG_TU_ACTIVE`
-   (mà EXP & Realm Progression D.4 tiêu thụ) = 1 khi **tập quan hệ
-   active khác rỗng**, bất kể 1 hay nhiều NPC. Lý do: (a) giữ nguyên
-   công thức D.4 của `exp-realm-progression.md` (đã Designed) — boolean
-   derived, không phải sửa GDD; (b) chặn dominant strategy "cày harem để
-   nhân EXP" — nhiều quan hệ Song Tu là lựa chọn tường thuật/mạch
-   truyện, không phải máy nhân EXP. Interface trả về **danh sách NPC ID
-   active** (không phải boolean trần) — EXP đọc "khác rỗng", các hệ
-   tường thuật đọc danh sách cụ thể.
+   định 1 lượt + `SONG_TU_COOLDOWN_TURNS` + điều kiện ngưỡng cao. Lần
+   Song Tu ĐẦU TIÊN với một NPC thiết lập **"quan hệ Song Tu active"**
+   (trạng thái bền — nguồn EXP #4 của `exp-realm-progression.md`); quan
+   hệ tự hủy khi Hảo cảm NPC đó tụt dưới +40 (`SONG_TU_BREAK_THRESHOLD`);
+   tái lập bằng cách thực hiện Song Tu lần nữa (đòi hỏi leo lại ≥ +60,
+   VẪN chịu cooldown như bình thường — Broken→Available không reset
+   `last_song_tu_turn`). **Nhiều NPC có thể có quan hệ Song Tu active
+   đồng thời** — mỗi NPC có cooldown riêng, độc lập.
+7. **EXP bonus Song Tu KHÔNG cộng dồn theo số NPC — sửa tên interface
+   2026-08-08 (`/design-review` vòng 1 cụm A4, đóng lệch nghĩa với
+   `exp-realm-progression.md` D.4)**: hệ này sở hữu và xuất ra
+   `song_tu_relationship_active_npc_ids` — **danh sách NPC ID** đang có
+   quan hệ Song Tu active (rỗng nếu không NPC nào). Hệ này KHÔNG sở hữu
+   và KHÔNG định nghĩa tên `SONG_TU_ACTIVE` — cờ đó là biến NỘI BỘ của
+   `exp-realm-progression.md` D.4, công thức
+   `SONG_TU_ACTIVE(self) = 1 if (Tâm Pháp hiện tại có type=song-tu AND
+   song_tu_relationship_active_npc_ids ≠ ∅) else 0` — một phép AND giữa
+   dữ liệu Tâm Pháp (Equipment & Skill Data System) và dữ liệu quan hệ
+   (hệ này). Hệ này chỉ chịu trách nhiệm đúng vế thứ hai của AND đó:
+   "khác rỗng, bất kể 1 hay nhiều NPC" — không cộng dồn theo số NPC. Lý
+   do không cộng dồn: chặn dominant strategy "cày harem để nhân EXP" —
+   nhiều quan hệ Song Tu là lựa chọn tường thuật/mạch truyện, không phải
+   máy nhân EXP. *(Trước 2026-08-08, Core Rule này và Dependencies dùng
+   nhầm tên `SONG_TU_ACTIVE` cho danh sách/set của chính hệ này, đọc như
+   thể hệ này định nghĩa đầy đủ cờ mà EXP tiêu thụ — gây hiểu lầm rằng
+   điều kiện Tâm Pháp không tồn tại. Sửa bằng đổi tên, không đổi hành
+   vi.)*
 8. **Tuân thủ vòng đời lượt**: mọi delta (kể cả lan truyền) được tính và
    khóa trong Resolving, ghi vào `locked_result` dưới dạng field
    `affinity_delta_[npc_id]` (số nguyên, đúng quy ước đặt tên entity_id
@@ -175,8 +234,8 @@ instance):
 | State | Điều kiện | Nút Song Tu | Chuyển sang |
 |---|---|---|---|
 | Locked | `affinity < +60`, chưa có quan hệ active | Ẩn | → Available (khi `affinity ≥ +60`) |
-| Available | `affinity ≥ +60`, chưa từng/không còn quan hệ active | Hiện, bấm được | → Active (khi thực hiện Song Tu lần đầu — lượt xác nhận) HOẶC → Locked (nếu tụt `< +60`) |
-| Active | Đã có quan hệ Song Tu (nguồn EXP #4 nếu Tâm Pháp phù hợp); vẫn song tu tiếp được khi `affinity ≥ +60` | Hiện khi `affinity ≥ +60`, ẩn khi +40 ≤ affinity < +60 | → Broken (khi `affinity < +40`) HOẶC → Ended (NPC chết) |
+| Available | `affinity ≥ +60`, chưa từng/không còn quan hệ active | Hiện; bấm ĐƯỢC nếu đã qua `SONG_TU_COOLDOWN_TURNS` kể từ lần Song Tu gần nhất với NPC này (hoặc chưa từng — luôn bấm được), ngược lại hiện dạng đếm ngược (xem UI Requirements) | → Active (khi thực hiện Song Tu lần đầu — lượt xác nhận) HOẶC → Locked (nếu tụt `< +60`) |
+| Active | Đã có quan hệ Song Tu (nguồn EXP #4 nếu Tâm Pháp phù hợp); vẫn song tu tiếp được khi `affinity ≥ +60` | Hiện khi `affinity ≥ +60` (cùng quy tắc cooldown/đếm ngược như Available), ẩn khi +40 ≤ affinity < +60 | → Broken (khi `affinity < +40`) HOẶC → Ended (NPC chết) |
 | Broken | Từng Active, Hảo cảm tụt dưới +40 | Ẩn cho đến khi `affinity ≥ +60` | → Available (khi leo lại `≥ +60`) |
 | Ended | NPC đã chết (Death & Consequence) | Ẩn | (terminal) |
 
@@ -195,9 +254,10 @@ instance):
   định nguy cơ chết thật; PHÁT sự kiện "NPC bị giết bởi nhân vật chính"
   (kèm cờ có nhân chứng) để hệ này xử lý lan truyền.
 - **EXP & Realm Progression** (downstream, Designed): đọc
-  `SONG_TU_ACTIVE` = (tập Song Tu active ≠ rỗng) — đóng Open Question
-  của GDD đó: interface là **danh sách NPC ID**, EXP tiêu thụ dạng
-  boolean derived, bonus không cộng dồn theo số NPC.
+  `song_tu_relationship_active_npc_ids` (**danh sách NPC ID**, sửa tên
+  2026-08-08 — hệ này không sở hữu tên `SONG_TU_ACTIVE`, đó là biến nội
+  bộ D.4 của EXP kết hợp AND với điều kiện Tâm Pháp); bonus không cộng
+  dồn theo số NPC.
 - **World Memory** (upstream, hard): schema field
   `affinity_delta_[npc_id]` khớp quy ước entity_id; hệ này truy vấn
   fact theo `entity_id` khi cần lịch sử tương tác của 1 NPC.
@@ -217,7 +277,8 @@ instance):
 *(Đề xuất bởi `systems-designer`, thẩm định kinh tế bởi `economy-designer`;
 người dùng chốt các điểm bất đồng 2026-08-03: `LOSS_VS_NPC_DELTA=-3` — sửa
 lỗi ngược chiều "tâm phục khẩu phục" của đề xuất gốc +3; `PROPAGATION_RATE
-=0.5` dung hòa; fatigue cửa sổ trượt 3 lượt; giữ cơ chế thắng-áp-đảo. Mọi
+=0.5` dung hòa; fatigue cửa sổ trượt 5 lượt (nâng từ 3 ngày 2026-08-08,
+`/design-review` vòng 1); giữ cơ chế thắng-áp-đảo. Mọi
 field số trong `locked_result` là SỐ NGUYÊN sau round — đúng Numeric Leak
 Detection của Contract Enforcement.)*
 
@@ -246,7 +307,7 @@ adjustment nếu event_type = combat_win_vs_npc]`
 | `save_life` (cứu mạng) | Situation Gen / Combat | `+SAVE_LIFE_DELTA` = +15 | 0 | Có |
 | `combat_win_vs_npc` (thắng trận trước NPC theo dõi) | Combat hand-off (`outcome=win`) | `-(COMBAT_WIN_BASE + COMBAT_WIN_MARGIN_SCALE × margin_ratio)` = -5 → -15 | 2; nâng lên 3 nếu `margin_ratio ≥ SEVERE_WIN_MARGIN_THRESHOLD` (thắng áp đảo = làm nhục công khai) | Không (âm) |
 | `combat_loss_vs_npc` (thua trận trước NPC theo dõi) | Combat hand-off (`outcome=lose`) | `LOSS_VS_NPC_DELTA` = **-3** (NPC thắng nảy sinh khinh thường/xem nhẹ kẻ thua — chiều NPC→người chơi; trope "tâm phục khẩu phục" là chiều ngược lại, không áp dụng) | 1 | Không (âm) |
-| `insult` (xúc phạm) | Situation Gen | `-INSULT_DELTA` = -8 | 2 | Không |
+| `insult` (xúc phạm) | Situation Gen; hoặc Death & Consequence (Nhánh B "Tha mạng", tier=medium — bổ sung 2026-08-09, tái dùng event type có sẵn, không đổi delta/severity) | `-INSULT_DELTA` = -8 | 2 | Không |
 | `threaten` (đe dọa) | Situation Gen | `-THREATEN_DELTA` = -12 | 3 | Không |
 | `betray` (phản bội) | Situation Gen | `-BETRAY_DELTA` = -30 | 4 | Không |
 | `kill_witnessed` (giết NPC — delta áp cho TỪNG nhân chứng còn sống trong `entities_in_scope`; nạn nhân đã chết, không còn affinity để chỉnh) | Death & Consequence hand-off | `-KILL_WITNESS_DELTA` = -25/nhân chứng | 5 | Không |
@@ -254,7 +315,18 @@ adjustment nếu event_type = combat_win_vs_npc]`
 
 **Combat win margin sub-formula:**
 ```
-margin_ratio = hp_remaining_pct(người thắng) tại battle_active=false   // nguồn: combat-system.md hand-off
+margin_ratio = float(per_actor[winner_id].hp_after) / max(max_HP(winner_id), 1)   // ÉP KIỂU float() TƯỜNG MINH TRƯỚC KHI CHIA — bắt buộc
+                                                                              // (sửa 2026-08-08, cụm B2: cùng lớp lỗi int/int truncation
+                                                                              // combat-system.md D.9b/D.9c từng mắc và tự sửa; nguồn:
+                                                                              // combat-system.md hand-off tại battle_active=false, cả 2 field
+                                                                              // đều khai int trong schema hand-off — không ép kiểu, phép chia
+                                                                              // nguyên sẽ gần như LUÔN đọc 0 trừ khi hp_after == max_HP)
+                                                                              // (sửa field-shape 2026-08-09, cascade từ /design-review round 1
+                                                                              // của death-and-consequence.md, finding D-CRITICAL: hp_after
+                                                                              // KHÔNG phải field cấp ngoài của hand-off — lồng trong
+                                                                              // per_actor[actor_id].hp_after theo combat-system.md Core Rule
+                                                                              // #11; max_HP KHÔNG có trong locked_result — đến từ Character
+                                                                              // Card & Identity, không phải hand-off Combat)
 combat_win_vs_npc_delta = -(COMBAT_WIN_BASE + COMBAT_WIN_MARGIN_SCALE × margin_ratio)
 severity = 3 nếu margin_ratio ≥ SEVERE_WIN_MARGIN_THRESHOLD, ngược lại 2
 ```
@@ -264,7 +336,7 @@ severity = 3 nếu margin_ratio ≥ SEVERE_WIN_MARGIN_THRESHOLD, ngược lại 
 | Variable | Symbol | Type | Range | Description |
 |---|---|---|---|---|
 | Loại sự kiện | `event_type` | enum | bảng trên | Từ Combat/Death & Consequence (hard) hoặc Situation Gen (social, provisional) |
-| Tỷ lệ HP còn lại người thắng | `margin_ratio` | float | [0,1] | `hp_after`/`max_HP` từ `locked_result` hand-off của Combat |
+| Tỷ lệ HP còn lại người thắng | `margin_ratio` | float | [0,1] | `float(per_actor[winner_id].hp_after)/max(max_HP(winner_id),1)` — `hp_after` từ `locked_result` hand-off của Combat (lồng trong `per_actor`), `max_HP` từ Character Card & Identity — PHẢI ép kiểu float() trước chia (sửa 2026-08-08; field-shape sửa 2026-08-09, xem sub-formula) |
 | Delta nền thắng trận | `COMBAT_WIN_BASE` | float (knob) | 2–10 | Delta âm tối thiểu khi thắng sát nút |
 | Hệ số margin | `COMBAT_WIN_MARGIN_SCALE` | float (knob) | 0–15 | Delta âm thêm khi thắng áp đảo |
 | Ngưỡng thắng "làm nhục" | `SEVERE_WIN_MARGIN_THRESHOLD` | float (knob) | 0.6–0.85 | Từ đây severity nâng lên 3, đủ điều kiện D.5 |
@@ -274,12 +346,20 @@ severity = 3 nếu margin_ratio ≥ SEVERE_WIN_MARGIN_THRESHOLD, ngược lại 
 luôn "rẻ" hơn lấy lòng (Core Rule #3, Player Fantasy "mất đi không dễ lấy
 lại").
 
-**Pacing đã kiểm chứng** (economy-designer): 0 → +60 cần ~8–12 hành động
-tích cực ĐA DẠNG ≈ 2.5–3 phiên chơi tập trung (một phiên điển hình dồn 1
-NPC: `help+help+gift+save_life+help ≈ +28 thô`); 0 → -80 chỉ cần 2–3 hành
-vi nghiêm trọng (VD 2× `betray` ≈ -70... cộng lan truyền) — bất đối xứng
-có chủ đích, và một hành vi cực đoan có nhân chứng CÓ THỂ đẩy trung lập
-xuống -80 trong 1 lượt (hợp lệ theo thể loại, không phải bug).
+**Pacing (ước tính lại 2026-08-08, `/design-review` vòng 2 —
+economy-designer)**: số cũ "~8–12 hành động ≈ 2.5–3 phiên" tính TRƯỚC
+khi `FATIGUE_WINDOW_TURNS` nâng 3→5 ở vòng 1 và KHÔNG còn đúng: D.3 nay
+áp fatigue cho cả nhịp chơi hợp lệ qua menu chuẩn (Example B, AC-16a),
+không chỉ spam liên tiếp không nghỉ. Resimulation thô: 0 → +60 cần
+~**25–30** hành động tích cực (chỉ 3 loại khả dụng ở MVP —
+`gift`/`small_help`/`save_life`, và `save_life` là tình huống, không
+tạo theo ý muốn) ≈ **6–8 phiên chơi tập trung**, không phải 2.5–3. Con
+số này vẫn là ước lượng lại theo công thức, CHƯA phải giá trị đã đo
+bằng harness/playtest thật — cần xác nhận trước Production. 0 → -80 chỉ
+cần 2–3 hành vi nghiêm trọng (VD 2× `betray` ≈ -70... cộng lan truyền)
+— bất đối xứng có chủ đích, và một hành vi cực đoan có nhân chứng CÓ THỂ
+đẩy trung lập xuống -80 trong 1 lượt (hợp lệ theo thể loại, không phải
+bug).
 
 **Scope-cut MVP**: chưa phân biệt "đấu thân thiện" vs "đấu địch ý" — cờ
 `spar_friendly` để dành Situation/Encounter Generation (xem Open
@@ -327,6 +407,21 @@ lượt `T`:
   không bị phạt. Không áp cho delta lan truyền (D.5) và `song_tu_action`
   (miễn trừ đã khóa).
 
+**Bất biến liên-GDD bắt buộc (thêm 2026-08-08, `/design-review` vòng 1
+cụm A1/A3)**: `FATIGUE_WINDOW_TURNS ≥ POSITIVE_SOCIAL_COOLDOWN_TURNS`
+(hằng số của `situation-encounter-generation.md` D.1, mặc định 4). Lý
+do: `gift`/`small_help` chỉ vào lại menu sau khi
+`cooldown_elapsed` (cách nhau `≥ POSITIVE_SOCIAL_COOLDOWN_TURNS` lượt) —
+nếu `FATIGUE_WINDOW_TURNS` NHỎ HƠN cooldown đó, mọi lần lặp hợp lệ qua
+đường menu chuẩn đều rơi ngoài cửa sổ, `streak_before` luôn reset về 0,
+và D.3 trở thành dead code cho toàn bộ đường chơi hợp lệ (chỉ còn bắt
+được spam qua văn tự do vượt menu — economy-designer phát hiện đúng lỗ
+hổng này ở mặc định cũ `WINDOW=3 < COOLDOWN=4`). Mặc định của hệ này đã
+nâng lên `FATIGUE_WINDOW_TURNS=5` (xem Tuning Knobs) để giữ bất biến này
+đúng với mặc định của `situation-encounter-generation.md`; nếu 1 trong 2
+hằng số bị tinh chỉnh sau này, PHẢI kiểm tra lại bất biến — ghi chú
+tương tự cũng đặt ở Tuning Knobs của GDD kia.
+
 **Variables:**
 
 | Variable | Symbol | Type | Range | Description |
@@ -334,13 +429,22 @@ lượt `T`:
 | Số lần lặp trước lần này | `streak_before` | int | [0, ∞) | 0 = lần đầu/mới reset, không fatigue |
 | Tốc độ suy giảm | `FATIGUE_RATE` | float (knob) | 0.05–0.3 | Hiệu lực giảm bấy nhiêu mỗi lần lặp thêm |
 | Sàn hiệu lực | `FATIGUE_FLOOR` | float (knob) | 0.1–0.5 | Hiệu lực tối thiểu dù lặp bao nhiêu |
-| Cửa sổ trượt | `FATIGUE_WINDOW_TURNS` | int (knob) | 2–5 | Khoảng cách lượt tối đa để vẫn tính là "lặp" |
+| Cửa sổ trượt | `FATIGUE_WINDOW_TURNS` | int (knob) | 3–8 | Khoảng cách lượt tối đa để vẫn tính là "lặp"; PHẢI `≥ POSITIVE_SOCIAL_COOLDOWN_TURNS` (xem bất biến liên-GDD trên) |
 | Kết quả | `effective_delta'` | float | `(0, effective_delta]` | Delta sau cả D.2 + D.3 |
 
-**Example** (`FATIGUE_RATE=0.15, FATIGUE_FLOOR=0.25, WINDOW=3`):
-`small_help` NPC X các lượt 10,11,12,13,14 → +3, +2.55, +2.10, +1.65,
-+1.20; lượt 15 tiếp → chạm dần sàn 0.25 (+0.75). Nếu nghỉ tới lượt 18
-(cách 4 > 3) mới help lại → reset, +3 đầy đủ.
+**Example A — spam liên tiếp** (`FATIGUE_RATE=0.15, FATIGUE_FLOOR=0.25,
+WINDOW=5` — mặc định mới, sửa 2026-08-08): `small_help` NPC X các lượt
+10,11,12,13,14 → +3, +2.55, +2.10, +1.65, +1.20; lượt 15 tiếp → chạm dần
+sàn 0.25 (+0.75). Nếu nghỉ tới lượt 21 (cách 6 > 5) mới help lại → reset,
++3 đầy đủ.
+
+**Example B — cadence qua menu chuẩn** (minh họa bất biến liên-GDD hoạt
+động đúng): `small_help` NPC X mỗi 4 lượt (đúng nhịp
+`POSITIVE_SOCIAL_COOLDOWN_TURNS=4` của `situation-encounter-generation.md`
+— lượt 10, 14, 18, 22) → `T − last_event_turn = 4 ≤ WINDOW(5)` mỗi lần,
+streak KHÔNG reset → +3, +2.55, +2.10, +1.65 — D.3 thật sự kích hoạt cho
+đường chơi hợp lệ qua menu (khác với hành vi dead-code ở mặc định cũ
+`WINDOW=3 < COOLDOWN=4`, nơi mọi lần lặp qua menu đều bị coi là lần đầu).
 
 ### D.4 — Per-turn positive cap
 
@@ -365,7 +469,12 @@ lượt cùng NPC → `min(21, 20) = 20`.
 ### D.5 — Propagation (one-hop, điều kiện nhân chứng)
 
 ```
-IF severity(event) ≥ PROPAGATION_SEVERITY_MIN AND perpetrator_known(event):
+IF severity(event) ≥ PROPAGATION_SEVERITY_MIN AND perpetrator_known(event)
+   AND (event.type == kill_witnessed OR A_before(victim) > -100):
+     // điều kiện cuối THÊM 2026-08-08 (cụm B6) — xem D.6 B2 cho lý do đầy
+     // đủ: nạn nhân còn sống và đã bão hòa ở -100 (delta trực tiếp = 0)
+     // thì KHÔNG lan truyền nữa, chặn khai thác "chi phí bị giới hạn,
+     // thu nhập lan truyền không giới hạn"
   FOR npc IN linked_npcs(victim) \ witnesses \ {victim}:
     raw_prop = base_delta(event) × PROPAGATION_RATE × link_strength(victim, npc)
     prop_effective = raw_prop × (diminish_factor(A_before(npc)) nếu raw_prop > 0, ngược lại 1)
@@ -424,14 +533,35 @@ resolve_turn_affinity(turn):
   // --- B1: delta trực tiếp (D.1) ---
   IF event.type == kill_witnessed:
     IF |witnesses(scene)| == 0: RETURN {}  // Core Rule #4 — không nhân chứng, không gì cả
-    FOR w IN witnesses(scene): contributions[w] += base_delta(event)   // âm, không D.2/D.3
+    FOR w IN witnesses(scene): contributions[w] += base_delta(event) + CRUELTY_REP_DELTA
+      // âm, không D.2/D.3; + CRUELTY_REP_DELTA THÊM cho nhân chứng — sửa
+      // 2026-08-08 (cụm B2): bản trước THIẾU thành phần này, mâu thuẫn
+      // trực tiếp D.5 prose ("mọi NPC biết tin", trong đó nhân chứng LÀ
+      // NPC biết tin trực tiếp nhất) và chính regression fixture AC-18/
+      // AC-20 (kỳ vọng nhân chứng A = -25 + (-2) = -27, KHÔNG phải -25)
+  ELSE IF event.type == song_tu_action:
+    contributions[target] += base_delta(event)   // MIỄN TRỪ TOÀN BỘ D.2/D.3 —
+      // guard tường minh, KHÔNG rơi vào nhánh chung dưới đây (sửa
+      // 2026-08-08, cụm B1: bản trước thiếu guard này, khiến pseudocode
+      // literal nhân nhầm diminish_factor × fatigue_factor vào delta
+      // Song Tu — mâu thuẫn trực tiếp Core Rule #6 và chính AC-07)
   ELSE:
     raw = base_delta(event, context)
     IF raw > 0: raw ×= diminish_factor(A_before(target)) × fatigue_factor(streak_before(target, event.type))
     contributions[target] += raw
 
   // --- B2: lan truyền (D.5) ---
-  IF base_delta(event) < 0 AND severity ≥ PROPAGATION_SEVERITY_MIN AND perpetrator_known:
+  IF base_delta(event) < 0 AND severity ≥ PROPAGATION_SEVERITY_MIN AND perpetrator_known
+     AND (event.type == kill_witnessed OR A_before(target) > -100):
+      // điều kiện cuối THÊM 2026-08-08 (cụm B6, chặn khai thác kinh tế
+      // economy-designer phát hiện): nếu nạn nhân CÒN SỐNG và đã bão hòa
+      // ở -100 (delta trực tiếp lượt này chắc chắn cho locked_delta=0),
+      // lan truyền KHÔNG kích hoạt nữa — gắn chi phí trực tiếp (giới hạn
+      // ở -100) với thu nhập lan truyền (trước đây không giới hạn) vào
+      // CÙNG một biên, đóng lỗ hổng "đe dọa nạn nhân đã bão hòa để farm
+      // Hảo cảm dương miễn phí qua NPC ghét nạn nhân đó, vĩnh viễn, không
+      // fatigue". `kill_witnessed` không cần điều kiện này vì 1 NPC chỉ
+      // chết được đúng 1 lần — không có đường lặp lại để khai thác.
     victim = (event.type == kill_witnessed) ? event.victim_id : target
     FOR npc IN linked_npcs(victim) \ witnesses(scene) \ {victim}:
       contributions[npc] += D5_total(event, victim, npc)   // đã gồm cruelty component
@@ -484,8 +614,24 @@ affinity_delta_D: +5}` → `A_after`: A=-17, C=29, D=25 — 3 field trong
 - **Nếu lượt có delta Hảo cảm (kể cả lan truyền) bị Undo**: TOÀN BỘ delta
   hoàn tác, VÀ trạng thái phụ cũng hoàn tác theo — streak tracker của D.3
   quay về giá trị trước lượt, quan hệ Song Tu vừa thiết lập trong lượt đó
-  coi như chưa từng thiết lập (Turn Manager Core Rule #8 áp cho MỌI trạng
-  thái của hệ này, không chỉ giá trị Hảo cảm).
+  coi như chưa từng thiết lập, VÀ `last_song_tu_turn(npc_id)` (cooldown
+  Core Rule #6, thêm 2026-08-08) cũng quay về giá trị trước lượt — nếu
+  lượt bị undo LÀ lượt Song Tu vừa bấm, tracker trở lại giá trị TRƯỚC đó
+  (coi như chưa bấm, cooldown không bị "tốn" oan) (Turn Manager Core Rule
+  #8 áp cho MỌI trạng thái của hệ này, không chỉ giá trị Hảo cảm).
+- **Nếu bấm Song Tu khi đang trong `SONG_TU_COOLDOWN_TURNS`** (thêm
+  2026-08-08, cụm A1): hành động bị từ chối trước khi vào Turn Manager —
+  không tạo lượt, không tốn Resolving, không RNG nào được gọi. Đây là
+  hành vi lọc-trước-khi-gửi giống các envelope khác của Situation Gen,
+  không phải 1 lượt "lãng phí".
+- **Nếu nạn nhân còn sống đã bão hòa ở -100 khi 1 sự kiện đủ điều kiện
+  lan truyền xảy ra** (thêm 2026-08-08, cụm B6): không delta trực tiếp
+  nào ghi (đã = 0 theo quy tắc `has_signal`), VÀ không lan truyền nào
+  kích hoạt cho lượt đó — kể cả khi `severity`/`perpetrator_known` đủ
+  điều kiện. Người chơi có thể tiếp tục nhắm sự kiện âm vào nạn nhân đã
+  bão hòa (không lỗi, không bị chặn ở tầng input) nhưng lượt đó hoàn
+  toàn vô tác dụng cơ học — không có cách "farm" lan truyền dương qua 1
+  nạn nhân đã kịch trần âm.
 - **Nếu giết NPC không có nhân chứng**: không field `affinity_delta` nào
   được ghi cho bất kỳ NPC nào — không lan truyền, không tiếng tăm. Sự
   kiện "NPC chết" vẫn vào World Memory qua các field khác (của Death &
@@ -495,7 +641,8 @@ affinity_delta_D: +5}` → `A_after`: A=-17, C=29, D=25 — 3 field trong
   địa điểm không nhân chứng là chiến lược hợp lệ), không phải lỗ hổng.
 - **Nếu NPC chết khi đang có quan hệ Song Tu active**: state → Ended
   (terminal); tập active co lại; nếu là NPC cuối cùng trong tập,
-  `SONG_TU_ACTIVE` = 0 từ lượt kế tiếp — nguồn EXP #4 tắt.
+  `song_tu_relationship_active_npc_ids` rỗng từ lượt kế tiếp — nguồn
+  EXP #4 tắt.
 - **Nếu NPC trong `linked_npcs(victim)` đã chết trước đó**: bỏ qua — NPC
   chết không nhận delta (fact lịch sử của họ vẫn giữ nguyên trong World
   Memory, theo edge case "NPC đã chết" của GDD đó).
@@ -506,8 +653,9 @@ affinity_delta_D: +5}` → `A_after`: A=-17, C=29, D=25 — 3 field trong
   nhỏ hơn giá trị random đã đổ (VD ở 97, đổ được 8 → `locked_delta = +3`).
   RNG vẫn được gọi lại đầy đủ khi undo-rồi-làm-lại (Turn Manager AC-12).
 - **Nếu lượt Song Tu ĐẦU TIÊN thiết lập quan hệ — EXP bonus tính từ khi
-  nào**: nguồn EXP #4 đánh giá `SONG_TU_ACTIVE` theo trạng thái ĐẦU LƯỢT
-  → bonus bắt đầu từ lượt KẾ TIẾP, không phải chính lượt thiết lập.
+  nào**: nguồn EXP #4 đánh giá `song_tu_relationship_active_npc_ids`
+  theo trạng thái ĐẦU LƯỢT → bonus bắt đầu từ lượt KẾ TIẾP, không phải
+  chính lượt thiết lập.
   Tránh phụ thuộc thứ tự resolve giữa 2 hệ trong cùng lượt — không có
   "vừa song tu vừa nhận bonus của chính hành động đó".
 - **Nếu 1 lượt vừa qua ngưỡng break** (VD từ +65 nhận delta âm lớn xuống
@@ -544,11 +692,12 @@ affinity_delta_D: +5}` → `A_after`: A=-17, C=29, D=25 — 3 field trong
 | Mechanic/Narration Contract Enforcement | Hệ này phụ thuộc | Khóa `affinity_delta_[npc_id]` trước narration_call; AI nhận dải thái độ + hướng thay đổi, không nhận số thô | Hard |
 | World Memory & Context Management | Hệ này phụ thuộc | Schema field `affinity_delta_[npc_id]` khớp quy ước entity_id (đóng Open Question "quy ước đặt tên entity_id" của GDD đó cho hệ này); truy vấn fact theo `entity_id` | Hard |
 | Combat System | Hệ này phụ thuộc Combat | Nhận hand-off (`outcome`, `hp_after`/`max_HP` cho `margin_ratio`) khi `battle_active=false` → sự kiện `combat_win/loss_vs_npc` | Hard |
-| Death & Consequence (đã Designed) | 2 chiều | ĐỌC cờ thù địch sâu sắc (`affinity ≤ -80`); PHÁT sự kiện `kill_witnessed` kèm danh sách nhân chứng | Hard (chiều đọc cờ) / Soft (chiều phát kill — thiếu thì mất 1 loại sự kiện) |
-| EXP & Realm Progression | EXP phụ thuộc hệ này | `SONG_TU_ACTIVE` = (tập quan hệ active ≠ rỗng); interface trả danh sách NPC ID — đóng Open Question của GDD đó; bonus không cộng dồn; đánh giá theo trạng thái đầu lượt | Soft (chiều ngược — thiếu thì EXP mất nguồn #4, đã khai sẵn bên đó) |
-| Situation/Encounter Generation (đã Designed) | Hệ này phụ thuộc | (a) Phân loại sự kiện xã hội từ hành động tự do; (b) `entities_in_scope` làm danh sách nhân chứng. **Ràng buộc bắt buộc từ thẩm định kinh tế (economy-designer 2026-08-03)**: hệ đó KHÔNG được cung cấp lựa chọn sự kiện tích cực (tặng quà/giúp đỡ) on-demand mọi lượt, và hành động Song Tu nên gate qua bối cảnh tường thuật (địa điểm riêng tư, NPC sẵn lòng) — nếu không, ratchet Hảo cảm chắc chắn xảy ra bất kể fatigue/cap | Soft (MVP chạy được bằng sự kiện cơ học cứng) |
-| Character Card & Identity (đã Designed) | Character Card phụ thuộc hệ này | Đọc Hảo cảm (số), dải thái độ, trạng thái nút Song Tu (5 state) | Hard (chiều ngược) |
-| Persistence/Save System | Persistence phụ thuộc hệ này | Serialize: bảng affinity per NPC, tập quan hệ Song Tu active, streak trackers (D.3), `link_strength` graph — nằm trong `turn_snapshot` theo Core Rule #8 của Turn Manager | Hard (chiều ngược) |
+| Death & Consequence (đã Designed) | 2 chiều | ĐỌC cờ thù địch sâu sắc (`affinity ≤ -80`); PHÁT sự kiện `kill_witnessed` kèm danh sách nhân chứng; PHÁT thêm `insult` khi Nhánh B "Tha mạng" tier=medium (bổ sung 2026-08-09, tái dùng event type có sẵn) | Hard (chiều đọc cờ) / Soft (chiều phát kill/insult — thiếu thì mất 1-2 loại sự kiện) |
+| EXP & Realm Progression | EXP phụ thuộc hệ này | Hệ này xuất `song_tu_relationship_active_npc_ids` (danh sách NPC ID, sửa tên 2026-08-08 — hệ này KHÔNG sở hữu tên `SONG_TU_ACTIVE`, đó là biến nội bộ D.4 của EXP, kết hợp AND với điều kiện Tâm Pháp); bonus không cộng dồn theo số NPC; đánh giá theo trạng thái đầu lượt | Soft (chiều ngược — thiếu thì EXP mất nguồn #4, đã khai sẵn bên đó) |
+| Situation/Encounter Generation (đã Designed) | Hệ này phụ thuộc | (a) Phân loại sự kiện xã hội từ hành động tự do; (b) `entities_in_scope` làm danh sách nhân chứng; (c) gate riêng của `song_tu_action` (bối cảnh `private` + NPC sẵn lòng, D.1 hệ đó) tiếp tục là điều kiện HIỂN THỊ menu, ĐỘC LẬP và bổ sung cho `SONG_TU_COOLDOWN_TURNS` mà hệ này tự sở hữu (Core Rule #6, sửa 2026-08-08) — 2 cơ chế chồng nhau có chủ đích: 1 gate bối cảnh (Situation Gen) + 1 gate thời gian (hệ này). **Ràng buộc bắt buộc từ thẩm định kinh tế (economy-designer 2026-08-03, thu hẹp phạm vi 2026-08-08)**: hệ đó KHÔNG được cung cấp lựa chọn sự kiện tích cực (tặng quà/giúp đỡ) on-demand mọi lượt. **Bất biến liên-GDD bắt buộc** (thêm 2026-08-08, cụm A1/A3): `FATIGUE_WINDOW_TURNS` (hệ này, D.3) PHẢI `≥ POSITIVE_SOCIAL_COOLDOWN_TURNS` (hệ đó, D.1) — nếu không, D.3 trở thành dead code cho toàn bộ đường chơi hợp lệ qua menu (xem D.3 Formulas) | Soft (MVP chạy được bằng sự kiện cơ học cứng) |
+| Character Card & Identity (đã Designed) | Character Card phụ thuộc hệ này | Đọc Hảo cảm (số), dải thái độ, trạng thái nút Song Tu (5 state + đếm ngược cooldown, thêm 2026-08-08) | Hard (chiều ngược) |
+| Character Card & Identity (đã Designed, bổ sung 2026-08-10 — chiều ngược của dòng trên, tường minh hóa ghi chú đã có ở header/D.1 từ 2026-08-09) | Hệ này phụ thuộc Character Card (mềm) | Đọc `max_HP(C)` ≡ field `HP` của thẻ (D.5 GDD đó) — field KHÔNG có trong hand-off Combat (`locked_result` không phát field này), input trực tiếp `margin_ratio` (D.1); PHẢI `>0`, nay đảm bảo bởi `base_HP0>0` strict phía Card | Soft |
+| Persistence/Save System | Persistence phụ thuộc hệ này | Serialize: bảng affinity per NPC, tập quan hệ Song Tu active, `last_song_tu_turn` per NPC (cooldown Core Rule #6, thêm 2026-08-08), streak trackers (D.3), `link_strength` graph — nằm trong `turn_snapshot` theo Core Rule #8 của Turn Manager | Hard (chiều ngược) |
 
 *(Ghi chú đối chiếu ngược: `systems-index.md` hiện ghi "Depends On: Turn
 Manager, World Memory" cho hệ #9 — bảng trên bổ sung Combat, Contract
@@ -573,11 +722,12 @@ update index.)*
 | `DIMINISH_FLOOR` | 0.1 | 0.05–0.3 | **Không được = 0** (mất bất biến "luôn còn cửa tiến bộ"). Tăng: dư địa tiến bộ ở +99 nhiều hơn |
 | `FATIGUE_RATE` | 0.15 | 0.05–0.3 | Tăng: spam cùng loại bị phạt nhanh hơn |
 | `FATIGUE_FLOOR` | 0.25 | 0.1–0.5 | Giảm: spam kéo dài gần như vô nghĩa |
-| `FATIGUE_WINDOW_TURNS` | 3 | 2–5 | Tăng: khó "rải cách lượt" né fatigue hơn. Giảm về 1 = quay lại định nghĩa lượt-liền-kề |
+| `FATIGUE_WINDOW_TURNS` | **5** (sửa 2026-08-08, cũ 3) | 3–8 | Tăng: khó "rải cách lượt" né fatigue hơn. **PHẢI `≥ POSITIVE_SOCIAL_COOLDOWN_TURNS`** (`situation-encounter-generation.md` D.1, mặc định 4) — nếu không, D.3 hết kích hoạt qua đường chơi hợp lệ (dead code, xem D.3 Formulas) |
 | `CAP_POSITIVE_PER_TURN` | 20 | 15–25 | Giảm < 15: bắt đầu cắt cả sự kiện `save_life` đơn lẻ — không khuyến nghị |
 | `PROPAGATION_RATE` | 0.5 | 0.3–0.7 | Trần 0.7 để lan truyền luôn < trải nghiệm trực tiếp. Tăng: mạng quan hệ đáng sợ hơn |
 | `CRUELTY_REP_DELTA` | -2 | -5…-1 | Tăng độ âm: danh tiếng tàn nhẫn lan rộng mạnh dù không quen nạn nhân |
 | `PROPAGATION_SEVERITY_MIN` | 3 | 2–4 | Giảm xuống 2: `insult` cũng lan — có thể quá nhạy |
+| `SONG_TU_COOLDOWN_TURNS` (mới 2026-08-08, cụm A1) | 5 | 3–8 | Số lượt tối thiểu giữa 2 lần Song Tu VỚI CÙNG 1 NPC. Giảm: Song Tu tiến gần lại dominant strategy (miễn trừ D.2-D.4, chỉ còn cooldown thấp cản). Tăng: Song Tu hiếm hơn, gần với nhịp `gift`/`save_life` khác — không được để 0 (quay lại lỗ hổng dominant strategy đã đóng ở review vòng 1) |
 
 *(KHÔNG phải tuning knob: `SONG_TU_THRESHOLD=60`,
 `SONG_TU_BREAK_THRESHOLD=40`, ngưỡng thù địch sâu sắc `-80`, thang
@@ -605,7 +755,11 @@ Character Card & Identity (đã Designed) BẮT BUỘC tôn trọng:
    ở Section C (Locked/Available/Active/Broken/Ended — cột "Nút Song
    Tu"). Bấm nút = gửi một hành động Song Tu qua Turn Manager (đi vào
    Resolving như mọi hành động, khóa input khi đang Resolving, tốn 1
-   lượt, có thể Undo như lượt thường).
+   lượt, có thể Undo như lượt thường). **Khi NPC đủ điều kiện affinity
+   nhưng đang trong `SONG_TU_COOLDOWN_TURNS`** (thêm 2026-08-08, cụm
+   A1): nút vẫn hiện nhưng ở trạng thái đếm ngược (không bấm được) —
+   người chơi thấy còn bao nhiêu lượt nữa mới Song Tu lại được, tránh
+   nhầm với trạng thái Locked/Broken hoàn toàn ẩn nút.
 2. **Mục "Thái độ với nhân vật chính"** trên thẻ NPC: hiển thị theo 7
    dải thái độ (Section C Tầng 1), kèm giá trị Hảo cảm số.
 3. **Số Hảo cảm và delta không bao giờ xuất hiện trong văn tường thuật**
@@ -690,20 +844,38 @@ hoặc 11 không bao giờ xảy ra với RNG thật (assert biên trong code).
 statistical test riêng (10.000 mẫu, chi-square) — chạy non-blocking vì
 mang tính thống kê, không đưa vào gate.* *(unit, injected RNG)*
 
-**AC-08** (Rule #6 + Section C — state machine Song Tu đủ 5 state):
-GIVEN 1 NPC đi qua chuỗi: affinity 55 (Locked) → 62 (Available, nút
-hiện) → thực hiện Song Tu lần đầu, lượt xác nhận (Active) → affinity
-tụt 45 (Active, nút ẨN vì 40≤A<60 nhưng quan hệ CÒN) → tụt 39 (Broken)
-→ leo lại 61 (Available) → Song Tu lần nữa (Active — tái lập), WHEN
-kiểm tra state + visibility nút sau mỗi bước, THEN đúng như chuỗi trên;
-VÀ GIVEN 2 NPC cùng đạt Active đồng thời, THEN cả 2 quan hệ cùng tồn
-tại độc lập (đa NPC hợp lệ). *(unit)*
+**AC-07b** (Rule #6, thêm 2026-08-08 cụm A1 — cooldown Song Tu): GIVEN
+NPC `affinity=+70`, chưa từng Song Tu (`last_song_tu_turn=null`),
+`SONG_TU_COOLDOWN_TURNS=5`, WHEN thực hiện Song Tu tại lượt 10, THEN
+hành động được CHẤP NHẬN (tốn 1 lượt, RNG được gọi), `last_song_tu_turn=10`;
+WHEN thử bấm lại tại lượt 13 (cách 3 < 5), THEN hành động bị TỪ CHỐI
+trước khi vào Turn Manager — không tạo lượt, RNG spy đếm 0 lệnh gọi
+thêm, `last_song_tu_turn` KHÔNG đổi; WHEN thử bấm lại tại lượt 15 (cách
+5 ≥ 5), THEN hành động được CHẤP NHẬN, `last_song_tu_turn=15`. GIVEN 2
+NPC khác nhau, THEN cooldown độc lập theo từng NPC (Song Tu NPC_A không
+ảnh hưởng cooldown của NPC_B). *(unit, injected RNG + mock Turn Manager)*
 
-**AC-09** (Rule #7 — SONG_TU_ACTIVE không cộng dồn, interface danh
-sách): GIVEN tập quan hệ active lần lượt = `{}`, `{npc_A}`, `{npc_A,
-npc_B, npc_C}`, WHEN đọc interface, THEN interface trả về DANH SÁCH NPC
-ID đúng nội dung tập; và boolean derived `SONG_TU_ACTIVE` lần lượt =
-`0, 1, 1` — 3 NPC không cho giá trị nào khác 1 NPC. *(unit)*
+**AC-08** (Rule #6 + Section C — state machine Song Tu đủ 5 state; bổ
+sung mốc lượt 2026-08-08 vòng 2 — bản trước không nêu số lượt, khiến 1
+implementation ĐÚNG cooldown Core Rule #6 không pass được vì thiếu ≥5
+lượt giữa 2 lần Song Tu): GIVEN 1 NPC đi qua chuỗi: affinity 55 (Locked)
+→ 62 (Available, nút hiện) → thực hiện Song Tu lần đầu tại lượt 10,
+lượt xác nhận (Active, `last_song_tu_turn=10`) → affinity tụt 45
+(Active, nút ẨN vì 40≤A<60 nhưng quan hệ CÒN) → tụt 39 (Broken) → leo
+lại 61 tại lượt ≥ 15 (Available — đã qua `SONG_TU_COOLDOWN_TURNS=5` kể
+từ lượt 10) → Song Tu lần nữa tại lượt đó (Active — tái lập), WHEN kiểm
+tra state + visibility nút sau mỗi bước, THEN đúng như chuỗi trên; VÀ
+GIVEN 2 NPC cùng đạt Active đồng thời, THEN cả 2 quan hệ cùng tồn tại
+độc lập (đa NPC hợp lệ). *(unit)*
+
+**AC-09** (Rule #7 — không cộng dồn theo số NPC, interface danh sách;
+sửa tên 2026-08-08): GIVEN tập quan hệ active lần lượt = `{}`, `{npc_A}`,
+`{npc_A, npc_B, npc_C}`, WHEN đọc `song_tu_relationship_active_npc_ids`,
+THEN interface trả về ĐÚNG DANH SÁCH NPC ID theo nội dung tập (KHÔNG
+phải boolean) — hệ này không tự tính hay export bất kỳ giá trị nào tên
+`SONG_TU_ACTIVE`; VÀ boolean derived `(tập ≠ ∅)` mà EXP dùng làm 1 vế
+của phép AND trong D.4 lần lượt = `0, 1, 1` — 3 NPC không cho giá trị
+nào khác 1 NPC ở vế này. *(unit)*
 
 **AC-10** (Rule #8 — mọi delta khóa trong `locked_result`, nhiều
 field/1 sự kiện): GIVEN sự kiện lan truyền chạm 3 NPC trong 1 lượt,
@@ -711,13 +883,22 @@ WHEN Resolving hoàn tất, THEN cả 3 field `affinity_delta_[npc_id]` nằm
 trong CÙNG 1 `locked_result` của đúng lượt đó (không tách nhiều lượt,
 không ghi ngoài `locked_result`), mỗi field là số nguyên. *(unit)*
 
-**AC-11** (Rule #9 — clamp trước khóa, bất biến toàn cục): GIVEN bộ
-sinh ngẫu nhiên seeded tạo 1.000 tổ hợp (A_before ∈ [-100,100], chuỗi
-sự kiện + lan truyền bất kỳ), WHEN chạy `resolve_turn_affinity` cho
-từng tổ hợp, THEN với MỌI NPC: `A_before + locked_delta ∈ [-100, +100]`
-— không tồn tại `locked_result` nào hàm chứa giá trị đẩy affinity ra
-ngoài thang (property-based test, đóng rủi ro clamp của systems-index
-High-Risk). *(unit, property-based seeded)*
+**AC-11** (Rule #9 — clamp trước khóa, bất biến toàn cục; đặc tả lại
+2026-08-08 — cụm B1/qa, bản trước không đủ chi tiết để implement không
+đoán): GIVEN bộ sinh ngẫu nhiên seeded tạo 1.000 tổ hợp, MỖI tổ hợp = 1
+lệnh gọi `resolve_turn_affinity` với: `A_before` cho mọi NPC tham gia
+rút uniform int trong [-100,100]; ĐÚNG 1 `event` rút uniform từ toàn bộ
+9 giá trị `event_type` của D.1 (kèm tham số hợp lệ theo loại — VD
+`margin_ratio` uniform float [0,1] cho sự kiện combat); `linked_npcs(victim)`
+kích thước uniform int [0,6], mỗi NPC có `link_strength` uniform float
+[-1.0,1.0]; `witnesses(scene)` là tập con ngẫu nhiên của
+`linked_npcs(victim)` kích thước uniform int [0, |linked_npcs|];
+`perpetrator_known` suy ra ĐÚNG theo công thức Quy ước chung (không rút
+ngẫu nhiên độc lập), WHEN `resolve_turn_affinity` chạy, THEN với MỌI
+NPC bị chạm: `A_before + locked_delta ∈ [-100, +100]` — không tồn tại
+`locked_result` nào hàm chứa giá trị đẩy affinity ra ngoài thang
+(property-based test, đóng rủi ro clamp của systems-index High-Risk).
+*(unit, property-based seeded)*
 
 ### Formulas
 
@@ -734,6 +915,16 @@ inject với `margin_ratio` lần lượt = 0, 0.3, 0.69, 0.7, 1.0, WHEN tính
 -11.9, -12, -15; VÀ `severity` = 2, 2, 2, **3**, **3** — ranh giới nâng
 severity tại ĐÚNG `margin_ratio ≥ 0.7` (0.69 chưa nâng), tức chỉ từ 0.7
 trở lên thắng mới đủ điều kiện lan truyền D.5. *(unit)*
+
+**AC-13b** (D.1 sub-formula margin — ép kiểu float() thật, không dùng
+mock đã-là-float; thêm 2026-08-08 cụm B3/systems): GIVEN Combat hand-off
+inject với `hp_after=50` (kiểu int) và `max_HP=100` (kiểu int) — KHÔNG
+truyền `margin_ratio` đã tính sẵn như AC-13, THEN implementation PHẢI
+tính `margin_ratio = float(hp_after)/max(max_HP,1) = 0.5` — test này
+FAIL nếu bất kỳ bước trung gian nào thực hiện `hp_after/max_HP` bằng
+phép chia số nguyên (sẽ cho `0.5` bị cắt cụt về `0`, kéo `combat_win_vs_npc`
+về `-5` sai và `severity` sai luôn về 2). Đây là test regression cho
+đúng lớp lỗi `combat-system.md` D.9b từng mắc. *(unit)*
 
 **AC-14** (Quy ước chung — sub-formula `perpetrator_known`): GIVEN 3
 kịch bản: (a) `betray` nhắm NPC còn sống, `entities_in_scope={target}`
@@ -752,22 +943,55 @@ small_help, THEN kết quả lần lượt = +5.0 (factor 1); +12.09 (15×0.806)
 VÀ property: `diminish_factor(A) ≥ 0.1 > 0` với MỌI A kể cả +100 (floor
 không bao giờ = 0 — luôn còn cửa tiến bộ). *(unit, regression neo số)*
 
-**AC-16** (D.3 — repetition fatigue cửa sổ trượt, khớp ví dụ GDD):
-GIVEN `FATIGUE_RATE=0.15, FATIGUE_FLOOR=0.25, WINDOW=3`, diminish mock
-=1, chuỗi `small_help` NPC X tại các lượt 10,11,12,13,14,15, WHEN tính
-`effective_delta'` mỗi lần, THEN = +3, +2.55, +2.10, +1.65, +1.20,
-+0.75 (chạm sàn 0.25); GIVEN sau lượt 14 nghỉ tới lượt 18 (cách 4 > 3)
-mới help lại, THEN reset hoàn toàn → +3 đầy đủ; GIVEN xen kẽ `gift` NPC
-X hoặc `small_help` NPC Y, THEN mỗi cặp `(npc_id, event_type)` khác
-nhau có streak ĐỘC LẬP, `streak_before=0` cho cặp mới — đa dạng hóa
-không bị phạt. *(unit, regression neo số)*
+**AC-16** (D.3 — repetition fatigue cửa sổ trượt, khớp ví dụ GDD; sửa
+2026-08-08 `/design-review` vòng 2 — fixture cũ `WINDOW=3` VI PHẠM bất
+biến liên-GDD `FATIGUE_WINDOW_TURNS ≥ POSITIVE_SOCIAL_COOLDOWN_TURNS` và
+assertion "reset ở gap 4" mâu thuẫn trực tiếp D.3 Example A/B đã sửa ở
+vòng 1 — AC này ở gate BLOCKING, fixture cũ mã hóa chính dead-code bug
+đã đóng thành 1 test PASS): GIVEN `FATIGUE_RATE=0.15, FATIGUE_FLOOR=0.25,
+WINDOW=5` (mặc định thật), diminish mock =1, chuỗi `small_help` NPC X
+tại các lượt 10,11,12,13,14,15, WHEN tính `effective_delta'` mỗi lần,
+THEN = +3, +2.55, +2.10, +1.65, +1.20, +0.75 (chạm sàn 0.25); GIVEN sau
+lượt 14 nghỉ tới lượt 21 (cách 6 > 5) mới help lại, THEN reset hoàn
+toàn → +3 đầy đủ; GIVEN xen kẽ `gift` NPC X hoặc `small_help` NPC Y,
+THEN mỗi cặp `(npc_id, event_type)` khác nhau có streak ĐỘC LẬP,
+`streak_before=0` cho cặp mới — đa dạng hóa không bị phạt. *(unit,
+regression neo số)*
 
-**AC-17** (D.4 — per-turn positive cap, chỉ cap dương): GIVEN cùng lượt
-cùng NPC nhận save_life đã diminish còn +12 VÀ propagation dương +9
-(tổng thô 21), WHEN áp D.4, THEN tổng dương = `min(21, 20) = 20`; GIVEN
-cùng lượt 1 NPC nhận tổng ÂM -27 (witness -25 + cruelty -2), THEN KHÔNG
-bị cap — tổng âm giữ nguyên -27 (không có sàn an toàn cho hành vi tàn
-ác). *(unit)*
+**AC-16a** (D.3 — cadence qua menu chuẩn KHÔNG reset; mới 2026-08-08
+vòng 2, minh họa bất biến liên-GDD hoạt động đúng — khác hành vi
+dead-code ở fixture cũ `WINDOW=3`): GIVEN cùng cấu hình trên, chuỗi
+`small_help` NPC X mỗi 4 lượt (đúng nhịp `POSITIVE_SOCIAL_COOLDOWN_TURNS
+=4` của `situation-encounter-generation.md` — lượt 10, 14, 18, 22), WHEN
+tính `effective_delta'`, THEN `T − last_event_turn = 4 ≤ WINDOW(5)` mỗi
+lần → streak KHÔNG reset → +3, +2.55, +2.10, +1.65 — D.3 thật sự kích
+hoạt cho đường chơi hợp lệ qua menu chuẩn, không chỉ spam liên tiếp
+không nghỉ. *(unit, regression neo số)*
+
+**AC-16b** (bất biến liên-GDD `FATIGUE_WINDOW_TURNS ≥
+POSITIVE_SOCIAL_COOLDOWN_TURNS` — test tĩnh cấp BLOCKING; mới 2026-08-08
+vòng 2, cùng dạng AC-67 của `core-ui-screen-navigation.md` cho cặp hằng
+số `LIVE_WINDOW_TURNS`/`CONTENT_EXCHANGE_ESTIMATE`): GIVEN giá trị cấu
+hình hiện hành của cả 2 GDD (`FATIGUE_WINDOW_TURNS=5`,
+`POSITIVE_SOCIAL_COOLDOWN_TURNS=4`), WHEN chạy assertion tĩnh (không cần
+mock/RNG), THEN `FATIGUE_WINDOW_TURNS ≥ POSITIVE_SOCIAL_COOLDOWN_TURNS`
+PHẢI đúng — test này FAIL nếu 1 trong 2 hằng số bị tinh chỉnh sau này mà
+không xét lại vế kia, bắt sớm chính lớp lỗi đã gây dead-code D.3 ở
+review vòng 1 (`WINDOW=3 < COOLDOWN=4`). *(unit, config assertion)*
+
+**AC-17** (D.4 — per-turn positive cap, chỉ cap dương; chú thích
+2026-08-05 — ca dương là unit test CÔ LẬP của hàm cap D.4, KHÔNG phải
+kịch bản khả thi qua `resolve_turn_affinity` D.6 đầy đủ: theo D.5, lan
+truyền dương chỉ xảy ra khi `base_delta(event) < 0` — 1 NPC không bao
+giờ nhận CẢ delta trực tiếp dương LẪN propagation dương trong cùng 1
+lượt qua pipeline thật; test này chỉ kiểm hàm cap nhận input tổng hợp
+giả lập, tách biệt khỏi D.6): GIVEN input tổng hợp (mock, không qua D.6)
+mô phỏng 1 NPC nhận tổng dương thô 21 (VD từ 2 nguồn giả định: +12 và
++9), WHEN áp D.4, THEN tổng dương = `min(21, 20) = 20`; GIVEN cùng test
+1 NPC nhận tổng ÂM -27 (witness -25 + cruelty -2 — kịch bản NÀY khả thi
+qua D.6 thật), THEN KHÔNG bị cap — tổng âm giữ nguyên -27 (không có sàn
+an toàn cho hành vi tàn ác). *(unit — ca dương là isolated helper test,
+ca âm là integration-reachable)*
 
 **AC-18** (D.5 — propagation, khớp ví dụ GDD + đảo dấu link âm): GIVEN
 giết NPC_B với nhân chứng A; C là bạn thân B (`link=+0.7`, vắng mặt,
@@ -787,6 +1011,25 @@ nhánh witness (bị loại khỏi vòng `linked \ witnesses` — không cộng 
 lần); NPC_F nhận 0 delta (không lan bậc 2 từ E); VÀ mỗi NPC clamp theo
 `A_before` của CHÍNH họ — không NPC nào đọc kết quả đã clamp của NPC
 khác trong cùng lượt. *(unit)*
+
+**AC-19b** (D.5/D.6 B2 — chặn khai thác lan truyền qua nạn nhân đã bão
+hòa; thêm 2026-08-08 cụm B6/economy; **di chuyển vào đúng mục Acceptance
+Criteria 2026-08-08 vòng 2** — bản trước nằm lạc trong mục `## Formulas`
+D.5, ngoài dãy AC-01→AC-38 mà 1 QA tester/CI liệt kê tuần tự khi build
+`tests/unit/npc-affinity-relationship/`, rủi ro bỏ sót hoàn toàn regression
+cho 1 exploit kinh tế đã đóng): GIVEN nạn nhân V còn sống ở
+`affinity(V)=-100` (đã bão hòa), NPC F có `link_strength(V,F)=-0.6`
+(ghét V), `PROPAGATION_RATE=0.5, CRUELTY_REP_DELTA=-2`, WHEN người chơi
+lặp lại `threaten` nhắm V ở NHIỀU lượt liên tiếp, THEN MỖI lượt:
+`affinity_delta_V` KHÔNG được ghi (locked_delta=0, đã ở biên), VÀ
+`affinity_delta_F` CŨNG KHÔNG được ghi (lan truyền không kích hoạt vì
+`A_before(V) = -100`, không `> -100`) — khác với hành vi TRƯỚC khi vá
+(lỗ hổng: F từng tiếp tục nhận `+((-12)×0.5×(-0.6)) - 2 = +1.6 → +2`
+MỖI LƯỢT vô thời hạn, miễn trừ hoàn toàn D.3, dù V đã không còn "mất"
+gì thêm). GIVEN sự kiện `kill_witnessed` (nạn nhân chỉ chết được 1 lần,
+không có đường lặp lại), THEN lan truyền VẪN kích hoạt bình thường
+(điều kiện bão hòa không áp cho nhánh giết). *(unit, regression cho khai
+thác kinh tế đã đóng)*
 
 **AC-20** (D.6 — regression test tổng hợp CỐ ĐỊNH, khớp ví dụ GDD):
 GIVEN kịch bản AC-18 với `A_before`: A=10, C=40, D=20, WHEN
@@ -834,12 +1077,19 @@ nhân đã chết; không lan truyền; không cruelty rep). Tội ác hoàn h�
 thiết kế có chủ đích, test xác nhận 0 field, không xác nhận "lỗi".
 *(unit, provisional-interface)*
 
-**AC-25** (NPC chết khi Song Tu active): GIVEN npc_A và npc_B đều
-Active, WHEN Death & Consequence phát sự kiện npc_A chết (mock), THEN
-state npc_A → **Ended** (terminal — leo affinity lại cũng không bao giờ
-rời Ended), tập active co lại `{npc_B}`, `SONG_TU_ACTIVE` vẫn = 1; WHEN
-npc_B chết tiếp, THEN tập rỗng và `SONG_TU_ACTIVE=0` **từ lượt kế
-tiếp** (đánh giá đầu lượt) — nguồn EXP #4 tắt. *(unit + mock D&C)*
+**AC-25** (NPC chết khi Song Tu active; bổ sung bước verify 2026-08-08 —
+cụm B2/qa, bản trước chỉ khẳng định "terminal" bằng lời văn, không có
+bước nào thử vi phạm claim đó): GIVEN npc_A và npc_B đều Active, WHEN
+Death & Consequence phát sự kiện npc_A chết (mock), THEN state npc_A →
+**Ended**, tập active co lại `{npc_B}`, danh sách
+`song_tu_relationship_active_npc_ids` vẫn có 1 phần tử (`npc_B`); WHEN
+`affinity(npc_A)` SAU ĐÓ nhận đủ delta dương để đạt lại `≥ +60` (VD 1
+`save_life` mock), THEN state npc_A VẪN LÀ Ended — KHÔNG chuyển sang
+Available/Active, nút Song Tu vẫn ẩn (verify tường minh claim "terminal,
+leo affinity lại cũng không rời Ended" thay vì chỉ khẳng định trong lời
+văn); WHEN npc_B chết tiếp, THEN tập rỗng — nguồn EXP #4 (qua
+`song_tu_relationship_active_npc_ids ≠ ∅`) tắt **từ lượt kế tiếp** (đánh
+giá đầu lượt). *(unit + mock D&C)*
 
 **AC-26** (ngưỡng đúng biên 60/40/-80 + thứ tự resolve trong lượt):
 GIVEN các cặp giá trị biên, WHEN kiểm tra, THEN: `affinity=+60` → nút
@@ -864,16 +1114,28 @@ Manager AC-12), không cache/replay roll cũ. *(unit + spy trên RNG
 inject)*
 
 **AC-29** (EXP bonus tính từ lượt KẾ TIẾP): GIVEN lượt N là Song Tu đầu
-tiên thiết lập quan hệ, WHEN đọc `SONG_TU_ACTIVE` theo trạng thái ĐẦU
-LƯỢT cho lượt N và lượt N+1, THEN lượt N = `0` (không có "vừa song tu
-vừa nhận bonus của chính hành động đó"), lượt N+1 = `1` — loại bỏ phụ
-thuộc thứ tự resolve giữa 2 hệ trong cùng lượt. *(unit)*
+tiên thiết lập quan hệ, WHEN đọc `song_tu_relationship_active_npc_ids`
+theo trạng thái ĐẦU LƯỢT cho lượt N và lượt N+1, THEN lượt N = `∅`
+(không có "vừa song tu vừa nhận bonus của chính hành động đó"), lượt
+N+1 = `{npc_id đó}` — loại bỏ phụ thuộc thứ tự resolve giữa 2 hệ trong
+cùng lượt. *(unit)*
 
-**AC-30** (NPC mới — khởi tạo mặc định 0): GIVEN sự kiện `gift` nhắm
-NPC chưa từng được theo dõi và data NPC KHÔNG có giá trị khởi đầu, WHEN
-resolve, THEN NPC được khởi tạo `affinity=0` (trung lập) TRƯỚC, rồi áp
-delta bình thường → `A_after=+5`, không throw lỗi — "chưa có lịch sử"
-là trạng thái hợp lệ (nhất quán World Memory AC-13). *(unit)*
+**AC-30** (NPC mới — khởi tạo mặc định 0 CHỈ KHI không có preset
+authored; **làm rõ 2026-08-09**, `/design-review character-continuation.md`
+round 1 — đóng nghi vấn mâu thuẫn với Core Rule #6 của GDD đó): GIVEN sự
+kiện `gift` nhắm NPC chưa từng được theo dõi VÀ data NPC KHÔNG có giá
+trị khởi đầu (fixture của AC này — KHÔNG có preset nào được authoring
+gán cho NPC đó trong setting pack), WHEN resolve, THEN NPC được khởi
+tạo `affinity=0` (trung lập) TRƯỚC, rồi áp delta bình thường →
+`A_after=+5`, không throw lỗi — "chưa có lịch sử" là trạng thái hợp lệ
+(nhất quán World Memory AC-13). **Phân biệt tường minh với reset "Chơi
+lại"** (`character-continuation.md` Core Rule #6): khi playthrough mới
+khởi tạo, mỗi NPC reset về ĐÚNG giá trị preset mặc định của setting pack
+NẾU preset đó tồn tại (VD 1 NPC có dev-seed affinity ≥+60 cho Song Tu
+MVP reachability, `exp-realm-progression.md` Core Rule mở rộng) — fixture
+AC-30 (`affinity=0`) chỉ mô tả trường hợp KHÔNG có preset, không phải
+giá trị sàn áp cho MỌI NPC bất kể setting pack khai gì; 2 quy tắc không
+mâu thuẫn, chỉ khác điều kiện áp dụng. *(unit)*
 
 **AC-31** (đối thủ combat không phải NPC theo dõi): GIVEN Combat
 hand-off (`outcome=win`, `margin_ratio=0.9`) với đối thủ là quái vật
@@ -948,6 +1210,26 @@ narration, 2 lượt đánh giá độc lập chấm consistent/inconsistent, đ
 khi ≥ 90% consistent), evidence lưu `production/qa/evidence/`. *(manual
 — ADVISORY)*
 
+**AC-39** (Character Continuation — container slot-scoped, đóng Open
+Question BLOCKING của `character-continuation.md` D.1; thêm 2026-08-10,
+`/design-review character-continuation.md` round 2, narrow verify pass —
+Lớp B: `npc_id` là ID CỐ ĐỊNH setting-pack-authored, không đổi giữa các
+playthrough, khác Lớp A/`char_id` — kỹ thuật "chưa từng thấy ID" không
+áp dụng được, thay bằng "container rebind sang blob slot mới", KHÔNG
+đổi schema/key của Core Rule #1): GIVEN NPC `npc_A` có `affinity=+42`
+(khác 0, "làm bẩn" trước) ở slot A đang active, WHEN Character
+Continuation hoàn tất "Chơi lại" (Persistence "Tạo slot mới" → slot B,
+blob rỗng — mock), THEN hệ này ĐỌC blob active hiện hành (slot B) khi
+truy vấn `affinity(npc_A)` — trả về default (`0` nếu không có preset,
+hoặc giá trị preset setting pack — xem AC-30) — KHÔNG PHẢI `+42` còn sót
+từ slot A (chứng minh hệ này KHÔNG giữ 1 bản sao in-memory không rebind
+theo slot đang active của Persistence). GIVEN sau đó đọc lại
+`affinity(npc_A)` khi slot A được mở lại qua "Xem lại slot đã khép"
+(read-only, `persistence-save-system.md`), THEN vẫn trả `+42` — dữ liệu
+2 slot độc lập, không bị ghi đè chéo. *(unit + integration, container
+rebind — KHÔNG đổi schema `affinity`/Core Rule #1, chỉ xác nhận điều
+kiện ĐỌC đúng blob active)*
+
 ## Open Questions
 
 - **Taxonomy sự kiện xã hội chính thức** (`gift`/`small_help`/`insult`...
@@ -955,10 +1237,18 @@ khi ≥ 90% consistent), evidence lưu `production/qa/evidence/`. *(manual
   đấu thân thiện/địch ý — cần Situation/Encounter Generation chuẩn hóa
   khi thiết kế. *(Owner: narrative-director + systems-designer, target:
   `/design-system situation-encounter-generation`)*
-- **Ràng buộc content-gating chống ratchet** (không positive event
-  on-demand mọi lượt; Song Tu gate qua bối cảnh) đã ghi ở Dependencies —
-  cần kiểm chứng được tôn trọng khi GDD Situation Gen viết xong.
-  *(Owner: economy-designer review, target: `/design-review` của GDD đó)*
+- **Ràng buộc content-gating chống ratchet — thu hẹp phạm vi 2026-08-08
+  (`/design-review` vòng 1)**: phần "Song Tu gate qua bối cảnh" đã ĐÓNG
+  — hệ này giờ tự sở hữu gate thời gian (`SONG_TU_COOLDOWN_TURNS`, Core
+  Rule #6), không còn phụ thuộc hoàn toàn vào việc Situation Gen tự
+  nguyện tuân thủ. Phần "không positive event on-demand mọi lượt" của
+  Situation Gen VẪN CÒN mở — cần kiểm chứng được tôn trọng (đã xác nhận
+  đang tuân thủ tại thời điểm review vòng 1, xem review log). Phần MỚI
+  phát sinh: khai thác lan truyền qua NPC bị ghét (delta dương miễn trừ
+  hoàn toàn D.3) đã ĐÓNG bằng saturation gate (D.5/D.6 B2, AC-19b) —
+  không còn phụ thuộc Situation Gen ở nhánh này. *(Owner: economy-designer
+  review, target: round 2 của chính GDD này — xem round cap ở
+  `coordination-rules.md`)*
 - **Quy ước làm tròn `round-half-away-from-zero`** — quyết định kỹ thuật
   chưa có tiền lệ registry/coding-standards; cần chuẩn hóa toàn dự án
   (EXP hiện cũng round). *(Owner: technical-director, target: trước

@@ -1,6 +1,6 @@
 # Mechanic/Narration Contract Enforcement
 
-> **Status**: In Design
+> **Status**: **Approved** (`/design-review` 2026-08-02 — 1 blocking + 2 recommended sửa cùng phiên, không cần re-review; xem `reviews/mechanic-narration-contract-enforcement-review-log.md`). Header trước đó ghi nhầm "In Design" dù review đã đóng từ 2026-08-02 — sửa lại cho khớp review-log, 2026-08-10.
 > **Author**: user + agents
 > **Last Updated**: 2026-08-02
 > **Implements Pillar**: Pillar 3 (Sức Mạnh Có Logic), Pillar 4 (Tường Thuật Sống Động), Pillar 1 (Thế Giới Khách Quan)
@@ -168,11 +168,26 @@ narration = "Kiếm khí xé toạc lớp phòng ngự, để lại vết thươ
 `extract_numerals = {"47"}` → `leak_matches = {damage}` →
 `leak_count=1, leak_flag=1` (vi phạm Core Rule #4).
 **Edge case đã kiểm biên**: `locked_result` không có field số nào (VD:
-lượt hội thoại thuần) → `leak_matches` luôn rỗng bất kể narration nói gì
-→ phải LOG kèm `n=0` để QA không nhầm "0 leak" ở đây với "0 leak vì hệ
-thống hoạt động đúng". Field có giá trị 0 (VD: `damage=0` khi trượt đòn)
-bị loại trừ khỏi kiểm tra có chủ đích — tránh false-positive vì chữ số
-"0" trùng với các token không phải số trong văn Việt.
+lượt hội thoại thuần/`rp_only`) → `leak_matches` (Formula 1 gốc) luôn
+rỗng bất kể narration nói gì → phải LOG kèm `n=0` để QA không nhầm "0
+leak" ở đây với "0 leak vì hệ thống hoạt động đúng". Field có giá trị 0
+(VD: `damage=0` khi trượt đòn) bị loại trừ khỏi kiểm tra có chủ đích —
+tránh false-positive vì chữ số "0" trùng với các token không phải số
+trong văn Việt.
+
+**Backstop generic cho trường hợp `n=0`** (bổ sung 2026-08-05, đóng gap
+`/design-review` gộp 11 GDD — Formula 1 gốc là no-op khi `n=0`, vi phạm
+nguyên tắc "không dựa vào prompt engineering" cho loại lượt phổ biến
+nhất `rp_only`): khi `fields(locked_result) = ∅`, chạy thêm
+`generic_stat_leak(turn) = extract_numerals(narration_text) ≠ ∅ AND
+matches_stat_pattern(narration_text)`, trong đó `matches_stat_pattern`
+là regex TỐI THIỂU khớp các mẫu số-liền-đơn-vị-thống-kê phổ biến (VD
+`\d+\s?(HP|EXP|điểm|%)`, `[+-]\d+`) — KHÔNG chính xác 100% (không thay
+thế Formula 1 khi có `locked_result` thật, chỉ là lưới an toàn cho
+`n=0`), nhưng là enforcement THẬT thay vì chỉ dựa prompt.
+`generic_stat_leak=true` → cùng hành vi log/flag như `leak_flag=1`
+(không tự động chặn hiển thị, chỉ log cho QA — giữ đúng tinh thần MVP
+hypothesis, không auto-reject narration).
 
 **2. Session Violation Count** (gate cho MVP hypothesis của
 `game-concept.md`)
@@ -357,19 +372,32 @@ rất hẹp, đúng như kỳ vọng.)*
   `AI/LLM Integration Layer` khi được viết, không chốt ở đây. *(Owner:
   godot-specialist + systems-designer, target: `/design-system AI/LLM
   Integration Layer`)*
-- **Formula 1 chỉ bắt số viết bằng chữ số** (regex `\d+`), không bắt số
-  viết bằng chữ (VD: "hai mươi ba") — nếu AI trộn định dạng, sẽ lọt qua
-  detection. Cần quyết định: có đáng để mở rộng detection, hay đủ để cấm
-  luôn việc AI viết số bằng chữ trong prompt instruction (đơn giản hơn).
-  *(Owner: systems-designer, target: khi viết prompt template thật cho
-  AI/LLM Integration Layer)*
+- ~~Formula 1 chỉ bắt số viết bằng chữ số (regex `\d+`), không bắt số viết
+  bằng chữ~~ — **ĐÃ ĐÓNG 2026-08-07** (`/design-review ai-llm-integration-layer.md`
+  vòng 1): chọn phương án đơn giản hơn — Core Rule #2 của GDD đó nay cấm
+  thẳng việc AI viết số bằng chữ ngay trong chỉ thị prompt của
+  `narration_call`, thay vì mở rộng detection hậu-kiểm. *(Owner:
+  systems-designer — Đã đóng)*
 - **Vi phạm ngữ nghĩa (semantic-mismatch) hiện chỉ dựa vào QA thủ công**
   (xem Edge Cases, AC-14) — có đáng đầu tư một cơ chế kiểm tra bán tự
   động NGOÀI vòng lặp lượt chơi (VD: batch review sau khi phiên kết
   thúc, dùng 1 lệnh gọi AI "giám khảo" riêng, không tính vào
   `calls_per_turn` vì chạy off-hot-path) hay chấp nhận thủ công hoàn
-  toàn ở MVP? *(Owner: qa-lead + technical-director, target: sau khi MVP
-  hypothesis chạy thử ≥1 phiên thật)*
+  toàn ở MVP? **Cập nhật 2026-08-07** (`/design-review ai-llm-integration-layer.md`
+  vòng 1, `security-engineer` + `creative-director`): LỚP RỦI RO của giới
+  hạn này đã ĐỔI, không chỉ là 1 instance khác — prompt injection qua ô
+  nhập tự do của người chơi (xác nhận tồn tại ở
+  `situation-encounter-generation.md` Core Rule #4) biến "AI thỉnh thoảng
+  tự trôi ngẫu nhiên" (giới hạn đã chấp nhận, QA đối chiếu ≥1 lượt/phiên
+  đủ dùng) thành "người chơi có thể tái lập/điều khiển được theo ý muốn"
+  — một exploit LẶP LẠI được, không phải drift ngẫu nhiên. `ai-llm-integration-layer.md`
+  Core Rule #2 đã bổ sung cơ chế phân tách delimiter (giảm thiểu tần suất
+  injection thành công) nhưng KHÔNG loại bỏ hoàn toàn khả năng model bỏ
+  qua chỉ thị — QA đối chiếu thủ công ≥1 lượt/phiên (AC-14) có thể KHÔNG
+  còn đủ nếu injection trở thành vector lặp lại phổ biến; câu hỏi "có đáng
+  đầu tư cơ chế bán tự động" giờ cấp thiết hơn trước. *(Owner: qa-lead +
+  technical-director, target: sau khi MVP hypothesis chạy thử ≥1 phiên
+  thật — VẪN CHƯA GIẢI QUYẾT, chỉ nâng mức độ ưu tiên)*
 - **`leak_detection_enabled` nên là code flag hay có debug UI riêng?**
   Liên quan đến Open Question tương tự về debug panel đã nêu ở
   `turn-manager.md`. *(Owner: technical-director, target: trước

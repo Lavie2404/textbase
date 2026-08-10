@@ -214,10 +214,15 @@ khi thua phụ thuộc vào Hảo cảm của đối thủ đối với nhân v�
   đến hậu quả nghiêm trọng nhưng không gây chết — trọng thương, bị ép uống
   thuốc độc, sỉ nhục trước đám đông, phế bỏ đan điền/võ công... Loại hậu quả
   cụ thể do hệ thống xác định trước (dựa trên bối cảnh/mức chênh lệch Lực
-  chiến), AI chỉ tường thuật lại, không tự chọn. Phế bỏ đan điền/võ công
-  không phải hậu quả vĩnh viễn — có thể khôi phục qua đại cơ duyên, tiên
+  chiến — **hoặc, ở đúng ngưỡng thù địch sâu sắc, việc VỪA THOÁT CHẾT tự nó
+  cũng là một "bối cảnh" ép mức hậu quả nặng nhất, bất kể mức chênh lệch Lực
+  chiến của trận đó — sửa 2026-08-09, khớp `death-and-consequence.md` Core
+  Rule 3c/3d**), AI chỉ tường thuật lại, không tự chọn. Phế bỏ đan điền/võ
+  công không phải hậu quả vĩnh viễn — có thể khôi phục qua đại cơ duyên, tiên
   thảo dị bảo, hoặc sự kiện cốt truyện đặc biệt do AI mô phỏng, nhưng không
-  dễ dàng và không đảm bảo.
+  dễ dàng và không đảm bảo. **Phế bỏ đan điền/võ công đi kèm 1 penalty Lực
+  chiến thật (nhỏ, có chủ đích — xem `death-and-consequence.md` Core Rule
+  #6), không chỉ chặn tích lũy EXP** (sửa 2026-08-09).
 
 Khi kết quả "phải chết" thực sự xảy ra (chỉ có thể ở ngưỡng thù địch sâu
 sắc), nhân vật chính THẬT SỰ chết — không có cơ chế cứu mạng nào can thiệp,
@@ -389,7 +394,7 @@ thuật ngữ và trope: cảnh giới, tâm pháp, bế quan, song tu, áp ch�
 
 - Chưa chốt dịch vụ AI/LLM backend hỗ trợ nội dung người lớn — quyết định kiến trúc quan trọng, cần một ADR riêng ở `/create-architecture`.
 - Godot 4.6 vượt quá thời điểm huấn luyện của model — cần tra cứu `docs/engine-reference/godot/` liên tục thay vì đoán API.
-- Persistence HTML5 (Emscripten IDBFS cần sync JS tường minh; Safari ITP xóa dữ liệu sau ~7 ngày không tương tác; private mode không lưu; quota mobile thấp hơn desktop; nhật ký thế giới tăng vô hạn theo thiết kế chưa có chiến lược nén/rotate) cần một ADR riêng ở `/create-architecture`.
+- Persistence HTML5 (Emscripten IDBFS cần sync JS tường minh; Safari ITP xóa dữ liệu sau ~7 ngày không tương tác; private mode không lưu; quota mobile thấp hơn desktop; nhật ký thế giới tăng vô hạn theo thiết kế chưa có chiến lược nén/rotate; **bổ sung 2026-08-06, `/design-review persistence-save-system.md` — `godot-specialist`**: toàn bộ chiến lược JS-glue [`JavaScriptBridge.eval()`, cần cho Web Locks API/`StorageManager.estimate()`/IndexedDB transaction thật] phụ thuộc header CSP `unsafe-eval` của host — chưa xác minh; nếu export Web bật Threaded/SharedArrayBuffer [cần header COOP/COEP], bước đồng bộ bền vững có thể THỰC SỰ CHẶN main thread thay vì non-blocking như giả định) cần một ADR riêng ở `/create-architecture`.
 - API key AI/LLM sẽ lộ ở client-side do không có backend server — chấp nhận có chủ đích cho dự án cá nhân phi thương mại, cần ghi nhận tường minh trong ADR đó.
 
 ### Market Risks
@@ -421,12 +426,20 @@ thuật ngữ và trope: cảnh giới, tâm pháp, bế quan, song tu, áp ch�
 thay đổi kết quả cơ học, không có ngoại lệ — và mọi kết quả chiến đấu khớp
 100% với Lực chiến đã tính.
 
-Phạm vi kiểm chứng MVP tách làm 2 tầng AC riêng biệt: (a) Khế Ước Cơ Học/
-Tường Thuật — kiểm chứng bằng hypothesis trên, dùng được ngay ở MVP; (b) tốc
-độ/cảm giác tăng trưởng Hảo cảm tự nhiên (từ 0 đến ngưỡng Song Tu) — KHÔNG
-được validate ở MVP vì NPC hảo cảm khởi đầu đã preset sẵn (xem mục Required
-for MVP #3); hoãn sang Vertical Slice với ít nhất 1 NPC bắt đầu từ Hảo cảm =
-0.
+Phạm vi kiểm chứng MVP tách làm 3 tầng AC riêng biệt (mục thứ 3 thêm
+2026-08-08, `/design-review` vòng 2 của `exp-realm-progression.md`, cụm
+A2-3/A2-6): (a) Khế Ước Cơ Học/Tường Thuật — kiểm chứng bằng hypothesis
+trên, dùng được ngay ở MVP; (b) tốc độ/cảm giác tăng trưởng Hảo cảm tự
+nhiên (từ 0 đến ngưỡng Song Tu) — KHÔNG được validate ở MVP vì NPC hảo cảm
+khởi đầu đã preset sẵn (xem mục Required for MVP #3); hoãn sang Vertical
+Slice với ít nhất 1 NPC bắt đầu từ Hảo cảm = 0; (c) tốc độ/cảm giác đột
+phá cảnh giới thật (từ level 1 tăng dần) — KHÔNG được validate ở MVP vì
+nhân vật chính khởi đầu đã dev-seed sẵn ở level 9 (xem mục Required for
+MVP #1) — theo tính toán tại review đó, đường tới lần đột phá ĐẦU TIÊN từ
+level 1 (900-3.000 lượt qua đường combat thuần, hoặc ~300 lượt qua đường
+tu luyện thụ động tối ưu) đều vượt xa cửa sổ kiểm chứng MVP (≥90 lượt/3
+phiên) dù chơi theo chiến lược nào; hoãn validate tốc độ đột phá THẬT
+sang Vertical Slice với nhân vật bắt đầu từ level 1.
 
 **Tiêu chí FAIL**: Hypothesis thất bại nếu (1) **[BLOCKING — kiểm chứng bằng
 log trạng thái cơ học, xem mục Required for MVP #6]** phát hiện ≥ 1 lần AI
@@ -437,10 +450,19 @@ sánh chủ quan: bản mới có ít lần "cảm thấy được ưu ái phi l
 không?
 
 **Required for MVP**:
-1. 1 nhân vật chính đầy đủ chỉ số/kỹ năng/trang bị.
+1. 1 nhân vật chính đầy đủ chỉ số/kỹ năng/trang bị. **Sửa 2026-08-08**
+   (`/design-review` vòng 2 của `exp-realm-progression.md`, cụm A2-3 —
+   cùng dạng dev-seed đã áp cho Hảo cảm ở mục #3 và Tâm Pháp ở mục #4):
+   nhân vật chính khởi đầu ở **level 9** (dev-seed), KHÔNG phải level 1 —
+   đây là dev-seed để đảm bảo người chơi chạm được mốc Chờ Đột Phá VÀ ít
+   nhất 1 lần đột phá thật trong phạm vi cửa sổ kiểm chứng MVP (≥90
+   lượt/3 phiên, xem MVP Definition), KHÔNG dùng để validate tốc độ/cảm
+   giác đột phá tự nhiên từ level 1 (việc đó hoãn sang Vertical Slice,
+   cần nhân vật bắt đầu từ level 1 — xem MVP Definition, tầng kiểm chứng
+   (c)).
 2. 1 vùng bối cảnh nhỏ trong 1 danh tác cụ thể (ví dụ: Đấu La Đại Lục) với AI tạo tình huống động, nhân vật chính là người hoàn toàn mới.
 3. 3 NPC (1 thù địch, 1 hảo cảm, 1 trung lập) với hệ thống Hảo cảm hoạt động đầy đủ. NPC hảo cảm khởi đầu đã đạt ngưỡng Hảo cảm đủ điều kiện Song Tu — đây là dev seed để kiểm thử code path Song Tu trong phạm vi phiên chơi ngắn, KHÔNG dùng để validate tốc độ/cảm giác tăng trưởng Hảo cảm tự nhiên (việc đó hoãn sang Vertical Slice, cần NPC bắt đầu từ Hảo cảm = 0).
-4. Hệ thống Chiến đấu (Lực chiến, áp chế cảnh giới) + EXP + Song Tu hoạt động đầy đủ. Cơ chế Cái Chết (ngưỡng thù địch sâu sắc, 3 lối tiếp tục: Quỷ tu/Chuyển sinh/Chơi lại) hoạt động đầy đủ.
+4. Hệ thống Chiến đấu (Lực chiến, áp chế cảnh giới) + EXP + Song Tu hoạt động đầy đủ. Cơ chế Cái Chết (ngưỡng thù địch sâu sắc) hoạt động đầy đủ — trong 3 lối tiếp tục (Quỷ tu/Chuyển sinh/Chơi lại), CHỈ Chơi lại cần hoạt động đầy đủ ở MVP (Quỷ tu/Chuyển sinh hoãn sang Vertical Slice — quyết định `/gate-check` 2026-08-01, sửa 2026-08-05 khớp `systems-index.md` Priority Tiers). **Sửa 2026-08-08** (`/design-review` vòng 1 của `exp-realm-progression.md`, cụm A6 — đóng mâu thuẫn với Scope Tiers bên dưới): "Song Tu hoạt động đầy đủ" ở MVP BAO GỒM 1 Tâm Pháp dev-seed tối giản (`type=song-tu`, `exp_multiplier=1.0`, mirror tiền lệ dev-seed Hảo cảm ở mục #3) gán sẵn cho nhân vật chính — nếu không, nguồn EXP Song Tu (`exp-realm-progression.md` D.4) là dead code ở MVP thật vì cần Tâm Pháp `type=song-tu` mà "Tâm pháp cơ bản" (đa dạng/lựa chọn) chỉ xuất hiện ở Vertical Slice (xem Scope Tiers). Dev-seed này CHỈ để exercise code path D.4 trong phạm vi phiên chơi ngắn, KHÔNG dùng để validate cảm giác "chọn Tâm Pháp" thật (việc đó hoãn sang Vertical Slice cùng hệ Tâm Pháp đầy đủ).
 5. Trạng thái thế giới (Hảo cảm, EXP, lịch sử) được lưu (persist) qua việc đóng/mở lại trình duyệt — điều kiện tiên quyết để kiểm chứng "chơi được nhiều phiên liên tục".
 6. Log trạng thái cơ học trước/sau mỗi lượt (HP, EXP, Lực chiến, Hảo cảm) — cần để kiểm chứng khách quan Core hypothesis (zero instances AI tự sửa kết quả cơ học) qua ≥90 lượt/3 phiên; không thể dò bằng mắt đáng tin cậy ở quy mô này. Tận dụng cùng cơ chế snapshot mà yêu cầu persist trạng thái (mục 5) đã cần có.
 
@@ -453,8 +475,8 @@ không?
 
 | Tier | Content | Features | Timeline |
 | ---- | ---- | ---- | ---- |
-| **MVP** | 1 bối cảnh danh tác (VD: Đấu La Đại Lục), 3 NPC | Chiến đấu + EXP + Hảo cảm + Song Tu đầy đủ | Vài ngày – vài tuần |
-| **Vertical Slice** | MVP hoàn thiện hơn | + Tâm pháp cơ bản | Vài tuần |
+| **MVP** | 1 bối cảnh danh tác (VD: Đấu La Đại Lục), 3 NPC | Chiến đấu + EXP + Hảo cảm + Song Tu đầy đủ (1 Tâm Pháp dev-seed tối giản, KHÔNG phải hệ thống Tâm Pháp đầy đủ — sửa 2026-08-08, xem Required for MVP #4) | Vài ngày – vài tuần |
+| **Vertical Slice** | MVP hoàn thiện hơn | + Tâm pháp cơ bản (hệ thống ĐẦY ĐỦ — nhiều Tâm Pháp, lựa chọn thật, không chỉ 1 dev-seed) | Vài tuần |
 | **Alpha** | Vài bối cảnh danh tác, nhiều NPC hơn | Tất cả hệ thống, còn thô | 1–2 tháng |
 | **Full Vision** | Nhiều bối cảnh danh tác để chọn, mở rộng liên tục | Tất cả hệ thống hoàn thiện | Không giới hạn — cập nhật khi cần (dự án cá nhân) |
 
