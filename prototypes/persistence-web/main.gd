@@ -74,6 +74,8 @@ func _ready() -> void:
 	if phase == 1:
 		results["exp2_idb"] = await _exp2()
 		_log("exp2_done", results["exp2_idb"])
+		results["exp2b_bridge_mechanics"] = await _exp2b()
+		_log("exp2b_done", results["exp2b_bridge_mechanics"])
 		results["exp3_locks"] = await _exp3()
 		_log("exp3_done", results["exp3_locks"])
 		results["exp5_phase1"] = await _exp5_phase1()
@@ -199,7 +201,10 @@ var _db: JavaScriptObject = null
 
 func _on_idb_upgrade(args: Array) -> void:
 	var db = args[0].target.result
-	db.createObjectStore("saves")
+	for name in ["saves", "bytes_direct_test", "bytes_b64_test", "turn_records_test",
+			"snapshot_store", "turn_records_abort_test", "snapshot_abort_store"]:
+		if not db.objectStoreNames.contains(name):
+			db.createObjectStore(name)
 
 
 func _exp2() -> Dictionary:
@@ -210,7 +215,7 @@ func _exp2() -> Dictionary:
 		return out
 
 	var w := Waiter.new()
-	var req = idb.open("persistence_proto_db", 1)
+	var req = idb.open("persistence_proto_db", 2)
 	var up_cb := JavaScriptBridge.create_callback(_on_idb_upgrade)
 	var ok_cb := JavaScriptBridge.create_callback(
 			func(args: Array) -> void: w.settle({"ok": true, "ev": args[0]}))
@@ -325,6 +330,419 @@ func _summarize(samples: Array) -> Dictionary:
 		"submit_to_complete_ms_p50": sub[n / 2],
 		"ordering_put_success_before_oncomplete_all": order_ok,
 	}
+
+
+# ---------------------------------------- exp2b: bridge marshalling mechanics
+#
+# Follow-up validation requested after engine-specialist ADR review: three
+# load-bearing bridge mechanisms the original exp2 never actually exercised.
+#   1. PackedByteArray across the bridge into IndexedDB (raw pass vs base64).
+#   2. Compound-key [slot_id, world_time] cursor range scan — requires a
+#      MULTI-FIRE create_callback (cursor "success" fires once per record).
+#   3. One readwrite transaction spanning two object stores (put + deletes),
+#      single oncomplete, and an abort variant proving rollback.
+
+func _hash_bytes(b: PackedByteArray) -> String:
+	var ctx := HashingContext.new()
+	ctx.start(HashingContext.HASH_SHA256)
+	ctx.update(b)
+	return ctx.finish().hex_encode()
+
+
+func _make_deterministic_bytes(size: int) -> PackedByteArray:
+	var b := PackedByteArray()
+	b.resize(size)
+	for i in size:
+		b[i] = i % 256  # sweeps through 0x00 and 0xFF every 256 bytes
+	return b
+
+
+## Function.prototype.apply avoids the `.call()` / GDScript Object.call()
+## name collision landmine (see exp3's _invoke_js_function comment) while
+## still letting us set an explicit `this` for a bare function reference.
+func _apply_this(fn: JavaScriptObject, this_arg: Variant) -> Variant:
+	return fn.apply(this_arg)
+
+
+## Builds a real JS Array by constructing it via create_object and assigning
+## elements with GDScript's `[]` operator. Confirmed empirically (and via the
+## shipped runtime's GodotJSWrapper.variant2js) that a *raw* GDScript Array/
+## Dictionary/PackedByteArray passed as a bridge argument is NOT supported by
+## the generic exchange path (only nil/bool/int/float/string/object-proxy are)
+## and arrives as JS `undefined`. `[]`-assignment on a JavaScriptObject routes
+## through object_setvar, which takes a full Variant key AND value (both still
+## limited to the same primitive set) — so building the array element-by-element
+## with primitive leaves, then passing the resulting PROXY, works because a
+## proxy is an "object" (type 24) which the exchange path handles natively.
+func _make_js_array(values: Array) -> JavaScriptObject:
+	var arr: JavaScriptObject = JavaScriptBridge.create_object("Array")
+	for i in values.size():
+		arr[i] = values[i]
+	return arr
+
+
+func _idb_get_value(store_name: String, key: Variant) -> Dictionary:
+	var tx = _db.transaction(store_name, "readonly")
+	var store = tx.objectStore(store_name)
+	var req = store.get(key)
+	var w := Waiter.new()
+	var ok_cb := JavaScriptBridge.create_callback(
+			func(args: Array) -> void: w.settle({"ok": true, "value": args[0].target.result}))
+	var err_cb := JavaScriptBridge.create_callback(
+			func(_a: Array) -> void: w.settle({"ok": false, "error": "get error"}))
+	_keep.append(ok_cb)
+	_keep.append(err_cb)
+	req.addEventListener("success", ok_cb)
+	req.addEventListener("error", err_cb)
+	var r = await w.wait(10.0, get_tree())
+	if _is_timeout(r):
+		return {"ok": false, "error": "timeout"}
+	return r
+
+
+## Same shape as _idb_write_timed but skips JSON-serialising a Dictionary —
+## the caller already has a ready-to-store string (e.g. base64). Lets #2b
+## measure base64-string latency with the identical methodology as exp2.
+func _idb_write_timed_value(store_name: String, key: String, value_str: String) -> Dictionary:
+	var w := Waiter.new()
+	var ord := {"n": 0, "put": -1, "complete": -1}
+	var t0 := Time.get_ticks_usec()
+	var tx = _db.transaction(store_name, "readwrite")
+	var store = tx.objectStore(store_name)
+	var put_req = store.put(value_str, key)
+	var t_submit := Time.get_ticks_usec()
+	var put_cb := JavaScriptBridge.create_callback(func(_args: Array) -> void:
+		ord["n"] += 1
+		ord["put"] = ord["n"])
+	var done_cb := JavaScriptBridge.create_callback(func(_args: Array) -> void:
+		ord["n"] += 1
+		ord["complete"] = ord["n"]
+		w.settle({"ok": true}))
+	var fail_cb := JavaScriptBridge.create_callback(
+			func(_args: Array) -> void: w.settle({"ok": false}))
+	_keep.append(put_cb)
+	_keep.append(done_cb)
+	_keep.append(fail_cb)
+	put_req.addEventListener("success", put_cb)
+	tx.addEventListener("complete", done_cb)
+	tx.addEventListener("error", fail_cb)
+	tx.addEventListener("abort", fail_cb)
+	var r = await w.wait(20.0, get_tree())
+	var t1 := Time.get_ticks_usec()
+	if _is_timeout(r) or not r.get("ok", false):
+		return {"error": "transaction failed for " + key}
+	return {
+		"bytes": value_str.length(),
+		"submit_to_complete_ms": float(t1 - t_submit) / 1000.0,
+		"e2e_ms": float(t1 - t0) / 1000.0,
+		"put_success_before_oncomplete": ord["put"] > 0 and ord["complete"] > ord["put"],
+	}
+
+
+func _exp2b() -> Dictionary:
+	var out := {"name": "exp2b_bridge_mechanics"}
+	out["bytearray_bridge"] = await _exp2b_bytearray_bridge()
+	out["compound_key_cursor"] = await _exp2b_compound_key_cursor()
+	out["multi_store_tx"] = await _exp2b_multi_store_tx()
+	return out
+
+
+# --- 2b.1: PackedByteArray across the bridge --------------------------------
+
+func _idb_put_get_raw(store_name: String, key: String, value: Variant) -> Dictionary:
+	var out := {}
+	var tx = _db.transaction(store_name, "readwrite")
+	var store = tx.objectStore(store_name)
+	var w := Waiter.new()
+	var put_req = store.put(value, key)
+	var ok_cb := JavaScriptBridge.create_callback(func(_a: Array) -> void: w.settle({"ok": true}))
+	var err_cb := JavaScriptBridge.create_callback(func(_a: Array) -> void: w.settle({"ok": false}))
+	_keep.append(ok_cb)
+	_keep.append(err_cb)
+	put_req.addEventListener("success", ok_cb)
+	put_req.addEventListener("error", err_cb)
+	var r = await w.wait(10.0, get_tree())
+	if _is_timeout(r):
+		out["put"] = {"ok": false, "error": "timeout"}
+		return out
+	out["put"] = r
+	if not r.get("ok", false):
+		return out
+	var read := await _idb_get_value(store_name, key)
+	out["read"] = read
+	if read.get("ok", false):
+		var val = read["value"]
+		var to_string_fn = JavaScriptBridge.get_interface("Object").prototype.toString
+		out["stored_value_tostring_tag"] = str(_apply_this(to_string_fn, val))
+		out["stored_value_gdscript_type"] = str(typeof(val))
+	return out
+
+
+func _exp2b_bytearray_bridge() -> Dictionary:
+	var out := {"name": "packed_byte_array_bridge"}
+	var size := 102400  # ~100KB, matches exp2's 100KB JSON-string case
+	var bytes := _make_deterministic_bytes(size)
+	var expected_hash := _hash_bytes(bytes)
+	out["payload_bytes"] = size
+	out["expected_hash"] = expected_hash
+
+	# (a) Inspect what JS type a directly-passed PackedByteArray arrives as,
+	# via two independent checks (neither uses eval):
+	#   - constructor-arg path: new Uint8Array(bytes) -> read .length back.
+	#   - Object.prototype.toString.apply(bytes) -> read the type tag string.
+	var uint8_ctor_check: JavaScriptObject = JavaScriptBridge.create_object("Uint8Array", bytes)
+	out["direct_pass_uint8array_ctor_length"] = int(uint8_ctor_check.length)
+	var to_string_fn = JavaScriptBridge.get_interface("Object").prototype.toString
+	out["direct_pass_object_tostring_tag"] = str(_apply_this(to_string_fn, bytes))
+
+	# (b) Does IndexedDB put() succeed as-is with the raw PackedByteArray value?
+	out["direct_put_result"] = await _idb_put_get_raw("bytes_direct_test", "k1", bytes)
+
+	# (c)/(d) Cheapest working encoding: base64 string via native GDScript
+	# Marshalls (no per-byte bridge calls at all), then measured the same way
+	# exp2 measures JSON-string writes.
+	var t_enc0 := Time.get_ticks_usec()
+	var b64 := Marshalls.raw_to_base64(bytes)
+	var t_enc1 := Time.get_ticks_usec()
+	out["base64_encode_ms"] = float(t_enc1 - t_enc0) / 1000.0
+	out["base64_length"] = b64.length()
+	out["base64_overhead_ratio"] = float(b64.length()) / float(size)
+
+	var samples: Array = []
+	for i in N_ITER:
+		var m := await _idb_write_timed_value("bytes_b64_test", "k_%d" % i, b64)
+		if not m.has("error"):
+			samples.append(m)
+	if samples.size() > 0:
+		out["base64_latency"] = _summarize(samples)
+
+	var readback := await _idb_get_value("bytes_b64_test", "k_0")
+	if readback.get("ok", false) and readback.get("value") != null:
+		var decoded: PackedByteArray = Marshalls.base64_to_raw(str(readback["value"]))
+		out["roundtrip_hash_match"] = _hash_bytes(decoded) == expected_hash
+		out["roundtrip_size_match"] = decoded.size() == size
+	else:
+		out["roundtrip_hash_match"] = false
+		out["roundtrip_error"] = readback.get("error", "value missing")
+
+	return out
+
+
+# --- 2b.2: compound key [slot_id, world_time] + multi-fire cursor scan ------
+
+func _is_sorted_ascending(arr: Array) -> bool:
+	for i in range(1, arr.size()):
+		if arr[i] < arr[i - 1]:
+			return false
+	return true
+
+
+## Proves create_callback CAN fire more than once: registered ONCE on the
+## cursor request's "success" event, invoked once per record plus a final
+## time with cursor==null marking end-of-range. `cursor.continue()` cannot be
+## written in GDScript at all — `continue` is a reserved statement keyword,
+## a parse error after `.` — so this uses the spec-equivalent `advance(1)`.
+func _cursor_scan(store_name: String, lower: JavaScriptObject, upper: JavaScriptObject) -> Dictionary:
+	var records: Array = []
+	var fire_count := {"n": 0}
+	var tx = _db.transaction(store_name, "readonly")
+	var store = tx.objectStore(store_name)
+	var range_iface: JavaScriptObject = JavaScriptBridge.get_interface("IDBKeyRange")
+	var key_range = range_iface.bound(lower, upper)
+	var cursor_req = store.openCursor(key_range)
+	var w := Waiter.new()
+	var cb := JavaScriptBridge.create_callback(func(args: Array) -> void:
+		fire_count["n"] += 1
+		var event = args[0]
+		var cursor = event.target.result
+		if cursor == null:
+			w.settle(true)
+			return
+		records.append(JSON.parse_string(str(cursor.value)))
+		cursor.advance(1))
+	var err_cb := JavaScriptBridge.create_callback(func(_a: Array) -> void: w.settle(false))
+	_keep.append(cb)
+	_keep.append(err_cb)
+	cursor_req.addEventListener("success", cb)
+	cursor_req.addEventListener("error", err_cb)
+	var r = await w.wait(15.0, get_tree())
+	return {
+		"records": records,
+		"fire_count": fire_count["n"],
+		"completed": not _is_timeout(r) and r == true,
+	}
+
+
+func _exp2b_compound_key_cursor() -> Dictionary:
+	var out := {"name": "compound_key_cursor_scan"}
+
+	# Self-test the array-building bridge trick before relying on it for keys.
+	var probe := _make_js_array([7, 42])
+	out["array_build_length_ok"] = int(probe.length) == 2
+	out["array_build_values_ok"] = int(probe[0]) == 7 and int(probe[1]) == 42
+
+	# 10 records across 2 slot_ids, interleaved insert order (not sorted).
+	var seed_order := [
+		[2, 300], [1, 100], [1, 300], [2, 100], [1, 200],
+		[2, 200], [1, 500], [2, 500], [1, 400], [2, 400],
+	]
+	var tx = _db.transaction("turn_records_test", "readwrite")
+	var store = tx.objectStore("turn_records_test")
+	var w := Waiter.new()
+	var done_cb := JavaScriptBridge.create_callback(func(_a: Array) -> void: w.settle(true))
+	var fail_cb := JavaScriptBridge.create_callback(func(_a: Array) -> void: w.settle(false))
+	_keep.append(done_cb)
+	_keep.append(fail_cb)
+	tx.addEventListener("complete", done_cb)
+	tx.addEventListener("error", fail_cb)
+	tx.addEventListener("abort", fail_cb)
+	for pair in seed_order:
+		var key := _make_js_array(pair)
+		var value := JSON.stringify({"slot_id": pair[0], "world_time": pair[1]})
+		store.put(value, key)
+	var seed_r = await w.wait(10.0, get_tree())
+	out["seed_ok"] = not _is_timeout(seed_r) and seed_r == true
+	if not out["seed_ok"]:
+		return out
+
+	var lower := _make_js_array([1, 0])
+	var upper := _make_js_array([1, 10000])
+	var scan := await _cursor_scan("turn_records_test", lower, upper)
+	out["fire_count"] = scan["fire_count"]
+	out["completed"] = scan["completed"]
+
+	var world_times: Array = []
+	var all_slot1 := true
+	for rec in scan["records"]:
+		world_times.append(int(rec.get("world_time", -1)))
+		if int(rec.get("slot_id", -1)) != 1:
+			all_slot1 = false
+	out["world_times_in_order"] = world_times
+	out["record_count"] = world_times.size()
+	out["ordered_ascending"] = _is_sorted_ascending(world_times)
+	out["all_records_slot1"] = all_slot1
+	# fire_count = N matching records + 1 final null-cursor call.
+	out["fire_count_matches_record_count_plus_one"] = scan["fire_count"] == world_times.size() + 1
+
+	out["pass"] = out["completed"] and out["record_count"] == 5 \
+			and out["ordered_ascending"] and out["all_records_slot1"] \
+			and out["fire_count_matches_record_count_plus_one"] \
+			and out["array_build_length_ok"] and out["array_build_values_ok"]
+	return out
+
+
+# --- 2b.3: multi-store transaction (put + deletes, commit and abort) -------
+
+func _seed_records(store_name: String, keys: Array) -> bool:
+	var tx = _db.transaction(store_name, "readwrite")
+	var store = tx.objectStore(store_name)
+	var w := Waiter.new()
+	var done_cb := JavaScriptBridge.create_callback(func(_a: Array) -> void: w.settle(true))
+	var fail_cb := JavaScriptBridge.create_callback(func(_a: Array) -> void: w.settle(false))
+	_keep.append(done_cb)
+	_keep.append(fail_cb)
+	tx.addEventListener("complete", done_cb)
+	tx.addEventListener("error", fail_cb)
+	tx.addEventListener("abort", fail_cb)
+	for pair in keys:
+		store.put(JSON.stringify({"slot_id": pair[0], "world_time": pair[1]}), _make_js_array(pair))
+	var r = await w.wait(10.0, get_tree())
+	return not _is_timeout(r) and r == true
+
+
+func _multi_store_commit(del_keys: Array) -> Dictionary:
+	var out := {}
+	var store_names := _make_js_array(["snapshot_store", "turn_records_test"])
+	var tx = _db.transaction(store_names, "readwrite")
+	var snap_store = tx.objectStore("snapshot_store")
+	var turn_store = tx.objectStore("turn_records_test")
+
+	var fire_count := {"n": 0}
+	var w := Waiter.new()
+	var complete_cb := JavaScriptBridge.create_callback(func(_a: Array) -> void:
+		fire_count["n"] += 1
+		w.settle(true))
+	var error_cb := JavaScriptBridge.create_callback(func(_a: Array) -> void: w.settle(false))
+	_keep.append(complete_cb)
+	_keep.append(error_cb)
+	tx.addEventListener("complete", complete_cb)
+	tx.addEventListener("error", error_cb)
+	tx.addEventListener("abort", error_cb)
+
+	snap_store.put(JSON.stringify({"snapshot": "commit_variant", "world_time": 999}), "snap_commit")
+	for pair in del_keys:
+		turn_store.delete(_make_js_array(pair))
+
+	var r = await w.wait(10.0, get_tree())
+	out["oncomplete_fire_count"] = fire_count["n"]
+	out["settled_ok"] = not _is_timeout(r) and r == true
+
+	var snap_read := await _idb_get_value("snapshot_store", "snap_commit")
+	out["snapshot_persisted"] = snap_read.get("ok", false) and snap_read.get("value") != null
+
+	var still_present := 0
+	for pair in del_keys:
+		var rr := await _idb_get_value("turn_records_test", _make_js_array(pair))
+		if rr.get("ok", false) and rr.get("value") != null:
+			still_present += 1
+	out["deleted_records_remaining"] = still_present
+
+	out["pass"] = out["settled_ok"] and out["oncomplete_fire_count"] == 1 \
+			and out["snapshot_persisted"] and still_present == 0
+	return out
+
+
+func _multi_store_abort(del_keys: Array) -> Dictionary:
+	var out := {}
+	var store_names := _make_js_array(["snapshot_abort_store", "turn_records_abort_test"])
+	var tx = _db.transaction(store_names, "readwrite")
+	var snap_store = tx.objectStore("snapshot_abort_store")
+	var turn_store = tx.objectStore("turn_records_abort_test")
+
+	var w := Waiter.new()
+	var abort_cb := JavaScriptBridge.create_callback(func(_a: Array) -> void: w.settle("aborted"))
+	var complete_cb := JavaScriptBridge.create_callback(func(_a: Array) -> void: w.settle("completed"))
+	_keep.append(abort_cb)
+	_keep.append(complete_cb)
+	tx.addEventListener("abort", abort_cb)
+	tx.addEventListener("complete", complete_cb)
+
+	snap_store.put(JSON.stringify({"snapshot": "abort_variant", "world_time": 998}), "snap_abort")
+	for pair in del_keys:
+		turn_store.delete(_make_js_array(pair))
+	tx.abort()  # "abort" is not a GDScript keyword — plain dot-call is fine here.
+
+	var r = await w.wait(10.0, get_tree())
+	out["settle_reason"] = str(r) if not _is_timeout(r) else "timeout"
+
+	var snap_read := await _idb_get_value("snapshot_abort_store", "snap_abort")
+	out["snapshot_rolled_back"] = snap_read.get("ok", false) and snap_read.get("value") == null
+
+	var still_present := 0
+	for pair in del_keys:
+		var rr := await _idb_get_value("turn_records_abort_test", _make_js_array(pair))
+		if rr.get("ok", false) and rr.get("value") != null:
+			still_present += 1
+	out["deletes_rolled_back"] = still_present == del_keys.size()
+
+	out["pass"] = out["settle_reason"] == "aborted" and out["snapshot_rolled_back"] \
+			and out["deletes_rolled_back"]
+	return out
+
+
+func _exp2b_multi_store_tx() -> Dictionary:
+	var out := {"name": "multi_store_transaction"}
+
+	var del_keys := [[9, 111], [9, 222], [9, 333]]
+	out["seed_delete_targets_ok"] = await _seed_records("turn_records_test", del_keys)
+	out["commit_variant"] = await _multi_store_commit(del_keys)
+
+	var del_keys_abort := [[9, 611], [9, 622], [9, 633]]
+	await _seed_records("turn_records_abort_test", del_keys_abort)
+	out["abort_variant"] = await _multi_store_abort(del_keys_abort)
+
+	out["pass"] = out["commit_variant"].get("pass", false) and out["abort_variant"].get("pass", false)
+	return out
 
 
 # ------------------------------------------- exp3: Web Locks pending Promise
