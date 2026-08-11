@@ -441,9 +441,15 @@ func _idb_write_timed_value(store_name: String, key: String, value_str: String) 
 
 func _exp2b() -> Dictionary:
 	var out := {"name": "exp2b_bridge_mechanics"}
+	_log("exp2b_step_start", {"step": "bytearray_bridge"})
 	out["bytearray_bridge"] = await _exp2b_bytearray_bridge()
+	_log("exp2b_step_done", {"step": "bytearray_bridge"})
+	_log("exp2b_step_start", {"step": "compound_key_cursor"})
 	out["compound_key_cursor"] = await _exp2b_compound_key_cursor()
+	_log("exp2b_step_done", {"step": "compound_key_cursor"})
+	_log("exp2b_step_start", {"step": "multi_store_tx"})
 	out["multi_store_tx"] = await _exp2b_multi_store_tx()
+	_log("exp2b_step_done", {"step": "multi_store_tx"})
 	return out
 
 
@@ -494,9 +500,12 @@ func _exp2b_bytearray_bridge() -> Dictionary:
 	out["direct_pass_uint8array_ctor_length"] = int(uint8_ctor_check.length)
 	var to_string_fn = JavaScriptBridge.get_interface("Object").prototype.toString
 	out["direct_pass_object_tostring_tag"] = str(_apply_this(to_string_fn, bytes))
+	_log("exp2b_bytearray_a_done", {"ctor_len": out["direct_pass_uint8array_ctor_length"],
+			"tag": out["direct_pass_object_tostring_tag"]})
 
 	# (b) Does IndexedDB put() succeed as-is with the raw PackedByteArray value?
 	out["direct_put_result"] = await _idb_put_get_raw("bytes_direct_test", "k1", bytes)
+	_log("exp2b_bytearray_b_done", out["direct_put_result"])
 
 	# (c)/(d) Cheapest working encoding: base64 string via native GDScript
 	# Marshalls (no per-byte bridge calls at all), then measured the same way
@@ -511,12 +520,14 @@ func _exp2b_bytearray_bridge() -> Dictionary:
 	var samples: Array = []
 	for i in N_ITER:
 		var m := await _idb_write_timed_value("bytes_b64_test", "k_%d" % i, b64)
+		_log("exp2b_bytearray_b64_iter", {"i": i, "m": m})
 		if not m.has("error"):
 			samples.append(m)
 	if samples.size() > 0:
 		out["base64_latency"] = _summarize(samples)
 
 	var readback := await _idb_get_value("bytes_b64_test", "k_0")
+	_log("exp2b_bytearray_roundtrip_read", readback)
 	if readback.get("ok", false) and readback.get("value") != null:
 		var decoded: PackedByteArray = Marshalls.base64_to_raw(str(readback["value"]))
 		out["roundtrip_hash_match"] = _hash_bytes(decoded) == expected_hash
@@ -580,6 +591,8 @@ func _exp2b_compound_key_cursor() -> Dictionary:
 	var probe := _make_js_array([7, 42])
 	out["array_build_length_ok"] = int(probe.length) == 2
 	out["array_build_values_ok"] = int(probe[0]) == 7 and int(probe[1]) == 42
+	_log("exp2b_cursor_probe_done", {"len_ok": out["array_build_length_ok"],
+			"vals_ok": out["array_build_values_ok"]})
 
 	# 10 records across 2 slot_ids, interleaved insert order (not sorted).
 	var seed_order := [
@@ -602,12 +615,14 @@ func _exp2b_compound_key_cursor() -> Dictionary:
 		store.put(value, key)
 	var seed_r = await w.wait(10.0, get_tree())
 	out["seed_ok"] = not _is_timeout(seed_r) and seed_r == true
+	_log("exp2b_cursor_seed_done", {"seed_ok": out["seed_ok"]})
 	if not out["seed_ok"]:
 		return out
 
 	var lower := _make_js_array([1, 0])
 	var upper := _make_js_array([1, 10000])
 	var scan := await _cursor_scan("turn_records_test", lower, upper)
+	_log("exp2b_cursor_scan_done", scan)
 	out["fire_count"] = scan["fire_count"]
 	out["completed"] = scan["completed"]
 
@@ -735,11 +750,14 @@ func _exp2b_multi_store_tx() -> Dictionary:
 
 	var del_keys := [[9, 111], [9, 222], [9, 333]]
 	out["seed_delete_targets_ok"] = await _seed_records("turn_records_test", del_keys)
+	_log("exp2b_tx_seed_done", {"ok": out["seed_delete_targets_ok"]})
 	out["commit_variant"] = await _multi_store_commit(del_keys)
+	_log("exp2b_tx_commit_done", out["commit_variant"])
 
 	var del_keys_abort := [[9, 611], [9, 622], [9, 633]]
 	await _seed_records("turn_records_abort_test", del_keys_abort)
 	out["abort_variant"] = await _multi_store_abort(del_keys_abort)
+	_log("exp2b_tx_abort_done", out["abort_variant"])
 
 	out["pass"] = out["commit_variant"].get("pass", false) and out["abort_variant"].get("pass", false)
 	return out
