@@ -1,8 +1,8 @@
 # Persistence / Save System
 
-> **Status**: Designed — Revised (vòng 3, `/design-review` full mode 2026-08-07) — chu trình `/design-review` VĂN BẢN CHÍNH THỨC ĐÓNG tại vòng 3 (quyết định user + `creative-director`, cùng tiền lệ Combat System). Spike kỹ thuật **ĐÃ HOÀN TẤT 2026-08-08** (`docs/engine-reference/godot/modules/web-export.md` §Group B) — Core Rule #3 CHỐT phương án (b) (IndexedDB transaction thật qua JavaScriptBridge, thắng vì controllability chứ không phải atomicity) + phát hiện và sửa 1 lỗ hổng chi phí thật (append-only phải là 1-file/turn-record, không phải 1 file lớn dần). Còn 6 hạng mục prototype thật (xem Open Questions) trước khi `/architecture-decision` chốt — spike KHÔNG thay thế prototype, chỉ thu hẹp phạm vi cần prototype.
+> **Status**: Designed — Prototype hoàn tất, ADR-0002 đã soạn (Proposed, chờ user accept). Chu trình `/design-review` văn bản đã đóng tại vòng 3 (2026-08-07). Spike kỹ thuật hoàn tất 2026-08-08. **Prototype thật HOÀN TẤT 2026-08-11** (`prototypes/persistence-web/`, chạy trên Godot 4.6 Web export thật + Chrome headless): #2 PASS (`transaction.oncomplete` reach GDScript thật, latency e2e p50 0,6–14,2ms cho 1KB–1MB — dư ~7–25 lần so `max_perceived_autosave_latency_ms=150`), #3 PASS (Web Locks giữ cả session qua pattern `Promise.resolve.bind` — pattern "callback trả Promise" thất bại đúng như spike dự đoán), #5 an toàn theo số đo (mtime IDBFS độ phân giải MILI GIÂY, 8/8 trial không mất dữ liệu). Hạng mục #4 (ma trận thiết bị thật) còn mở — harness sẵn tại `prototypes/persistence-web/DEVICE-TEST.md`, là điều kiện xác minh trước deploy, không chặn implementation. Toàn bộ quyết định còn treo đã chốt tại `docs/architecture/adr-0002-persistence-storage-backend.md` (đã qua engine-specialist validation; Experiment 2b bổ sung đang đóng nốt 2 cơ chế marshalling/cursor).
 > **Author**: user + agents
-> **Last Updated**: 2026-08-08
+> **Last Updated**: 2026-08-11
 > **Implements Pillar**: Pillar 2 (Hệ Quả Thực Sự)
 > **Creative Director Review (CD-GDD-ALIGN)**: Đã review làm senior synthesis 3 lần — 2026-08-06 (vòng 1+2, verdict gốc NEEDS REVISION, 12 mục Required, Scope Signal XL, sửa toàn bộ cùng phiên) và 2026-08-07 (vòng 3, 5 specialist: `game-designer`, `systems-designer`, `godot-specialist`, `qa-lead`, `ux-designer` + `creative-director` — verdict NEEDS REVISION, 9 cụm nhóm-A + 8 mục batch nhóm-B, Scope Signal M cho khối lượng sửa/XL cho implementation tổng thể — sửa toàn bộ cùng phiên, creative-director khuyến nghị KHÔNG chạy vòng 4). Không phải CD-GDD-ALIGN PHASE-GATE chính thức. Xem `design/gdd/reviews/persistence-save-system-review-log.md` cho lịch sử đầy đủ.
 
@@ -1682,6 +1682,47 @@ mới + Formula #2/#3 đã sửa, chưa có AC tương ứng)
   Nhật ký đầy đủ chứa đúng 1 turn record.
 
 ## Open Questions
+
+> **Addendum 2026-08-11 — trạng thái sau prototype + ADR-0002**: các mục
+> dưới đây được viết trước khi prototype chạy; trạng thái hiện tại như
+> sau, chi tiết tại `docs/architecture/adr-0002-persistence-storage-backend.md`
+> (Proposed) + `prototypes/persistence-web/README.md`:
+> - **Điều kiện giải phóng khóa đa-tab** → CHỐT tại ADR-0002 D3: Web Locks
+>   `{ifAvailable:true}` (từ chối tức thời đúng AC-18), giữ cả session qua
+>   pattern `Promise.resolve.bind` (prototype #3 PASS — pattern ngây thơ
+>   "callback trả Promise" thất bại thật như dự đoán), tự giải phóng khi
+>   tab đóng/crash (AC-33); fallback heartbeat CHỈ nếu thiết bị trong ma
+>   trận #4 thiếu `navigator.locks`. Câu hỏi CSP `unsafe-eval` đã đóng từ
+>   spike (không dùng eval); threaded/`Atomics.wait` không áp dụng (chốt
+>   nothreads export).
+> - **Timeout gom blob + TOCTOU** → CHỐT tại ADR-0002 D2:
+>   `blob_gather_timeout_ms=100` (assertion hậu kiểm trên `stage()` đồng
+>   bộ), mỗi hệ expose MỘT lời gọi nguyên tử `get_blob() → {status, bytes}`.
+> - **AC-17/AC-22/AC-29/AC-33 chờ ADR** → viết được từ bây giờ: giao thức
+>   mock 2 pha `stage()`/`commit()` đặc tả ở ADR-0002 D2; AC-29 tầng đo
+>   thật đã có số đo prototype (#2, `results.json`); AC-33 theo D3.
+> - **Hạng mục prototype #2 (oncomplete + latency)** → ĐÓNG, PASS
+>   (24/24 iteration, thứ tự đúng; bảng latency ở ADR-0002 Performance
+>   Implications).
+> - **Ma trận WebView #4 + `persist()`** → CÒN MỞ (cần thiết bị thật) —
+>   harness sẵn (`DEVICE-TEST.md`, cần https tunnel vì secure-context;
+>   `persist()` bị DENY ngay cả trên desktop Chrome headless — ITP iOS
+>   vẫn là câu hỏi thật). Là điều kiện xác minh TRƯỚC deploy công khai
+>   (ADR-0002 Risks), không chặn implementation.
+> - **Thuật toán nén** → CHỐT tại ADR-0002 D5: MVP KHÔNG nén
+>   (`compression_ratio=1`); nếu sau này nén, đơn vị là (b) chỉ tại
+>   full-flush snapshot — loại trừ tường minh nén per-turn-record.
+> - **Rủi ro `schema_version` hậu-launch** → posture CHỐT tại ADR-0002 D6
+>   (tiền-1.0 chấp nhận save-breaking; bắt buộc chiến lược migrate trước
+>   người chơi ngoài đầu tiên — ADR tương lai supersede riêng mục đó).
+> - **Quota đa-slot** → CHỐT tại ADR-0002 D4 (kế toán byte per-slot tự
+>   quản trong store `slots`; `estimate()` chỉ đo tổng origin, biên an
+>   toàn `quota_warn_threshold=0.85` hấp thụ fuzzing).
+> - **Q5 mtime-collision (IDBFS)** → đo được: timestamp lưu độ phân giải
+>   MILI GIÂY, 8/8 trial cùng-giây không mất dữ liệu — nỗi lo "cùng giây"
+>   hạ cấp thành measured-safe (chỉ còn lý thuyết cùng-mili-giây, không
+>   đạt được qua đường FileAccess→sync-frame-kế); dù sao đường (a) không
+>   dùng làm gate (Core Rule #3 đã chốt (b)).
 
 - ~~`quota_exhaustion_turn` chưa định nghĩa hành vi khi
   `quota_bytes ≤ fixed_blob_bytes`~~ — **đã chốt 2026-08-05**

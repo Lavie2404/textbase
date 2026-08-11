@@ -1,8 +1,8 @@
 # Combat System
 
-> **Status**: Designed — chờ implementation (chu trình `/design-review` văn bản đã kết thúc sau vòng 4; xem `docs/architecture/adr-0001-combat-spec-authority.md`)
+> **Status**: Implemented — GUT green (ADR-0001 executed, 2026-08-11): `src/gameplay/combat/*.gd` là nguồn sự thật cơ học; toàn bộ suite GUT xanh (14 script, 91 test, 829 assert — phủ mọi AC BLOCKING ở tầng cơ học/formula; các AC nhãn Integration chạm Turn Manager/narration/Undo chờ hệ tương ứng được implement); sweep hội tụ AC-47a tái lập đúng 96/108 tổ hợp Safe Range (khớp harness đóng băng `prototypes/combat-reference/results.md`); Tiêu chí xác nhận ADR-0001: compiler/static-typing + lint bắt ≥5 mục backlog vòng 4, KHÔNG phát hiện lỗi kiến trúc nào (không kích hoạt điều kiện đảo ngược)
 > **Author**: user + agents
-> **Last Updated**: 2026-08-07
+> **Last Updated**: 2026-08-11
 > **Implements Pillar**: Pillar 3 (Sức Mạnh Có Logic), Pillar 4 (Tường Thuật Sống Động)
 > **Creative Director Review (CD-GDD-ALIGN)**: Full mode `/design-review` 2026-08-06 (vòng 3, 7 specialist) → vòng 4 hẹp (3 specialist, 2026-08-06/07) KHÔNG đạt tiêu chí thoát → leo thang `technical-director` → **ADR-0001**: `src/gameplay/combat/*.gd` (GDScript + GUT) là nguồn sự thật cho cơ học Combat kể từ đây; Section D của GDD này hạ xuống vai trò MÔ TẢ cho chi tiết cơ học (chữ ký/kiểu/thứ tự thực thi/ngữ nghĩa chia), vẫn NORMATIVE cho ý định thiết kế/tuning knob/hợp đồng liên hệ hệ. Xem `design/gdd/reviews/combat-system-review-log.md` cho lịch sử đầy đủ 4 vòng + quyết định leo thang.
 
@@ -357,16 +357,53 @@ sách thức đã dùng theo Core Rule #5.)*
 ## Formulas
 
 > 📌 **Thẩm quyền spec (kể từ `docs/architecture/adr-0001-combat-spec-authority.md`,
-> 2026-08-07)**: Section D này (D.1–D.14) giờ là MÔ TẢ cho chi tiết cơ học
-> (chữ ký hàm, kiểu dữ liệu, thứ tự thực thi, ngữ nghĩa chia số, biên
-> mảng) — **nguồn sự thật thật sự là `src/gameplay/combat/*.gd`** (chưa
-> tồn tại tại thời điểm viết dòng này — xem Migration Plan của ADR-0001).
-> Nếu văn xuôi ở đây và code `.gd` mâu thuẫn nhau, `.gd` ĐÚNG cho tới khi
-> có 1 lần sửa tường minh cả hai cùng lúc — KHÔNG sửa cơ học ở đây trước
-> rồi chép sang `.gd` sau (nguyên tắc 1 chiều: code → prose). Section D
-> vẫn NORMATIVE đầy đủ cho: ý định thiết kế, tên/giá trị mặc định/dải an
-> toàn/lý do của mọi Tuning Knob, và hợp đồng liên hệ chéo hệ (field nào
-> hệ khác đọc, điều kiện nào).
+> 2026-08-07; THI HÀNH XONG 2026-08-11)**: cơ học Combat giờ được định
+> nghĩa NORMATIVE bởi **`src/gameplay/combat/*.gd`** (static-typed GDScript,
+> test bằng GUT tại `tests/unit/combat/`, sweep hội tụ tại
+> `tools/combat/convergence_sweep.gd`, lint tại `tools/lint/combat_lint.py`).
+> Section D này (D.1–D.14) là MÔ TẢ cho chi tiết cơ học (chữ ký hàm, kiểu
+> dữ liệu, thứ tự thực thi, ngữ nghĩa chia số, biên mảng). Nếu văn xuôi ở
+> đây và code `.gd` mâu thuẫn nhau, `.gd` ĐÚNG cho tới khi có 1 lần sửa
+> tường minh cả hai cùng lúc — KHÔNG sửa cơ học ở đây trước rồi chép sang
+> `.gd` sau (nguyên tắc 1 chiều: code → prose). Section D vẫn NORMATIVE
+> đầy đủ cho: ý định thiết kế, tên/giá trị mặc định/dải an toàn/lý do của
+> mọi Tuning Knob, và hợp đồng liên hệ chéo hệ (field nào hệ khác đọc,
+> điều kiện nào).
+>
+> **Các khác biệt cơ học cụ thể nơi code (normative) khác văn xuôi bên
+> dưới** (chốt 1 lần khi viết `.gd`, đúng Migration Plan bước 4 — backlog
+> vòng 4 + leo thang):
+> - **Chữ ký `resolve_exchange` đầy đủ** (`combat_resolver.gd`): bổ sung
+>   các tham số văn xuôi thiếu — `hp` (dict HP hiện tại), `exchange_id`,
+>   `thuc_tier_of` (nguồn tier cho `skill_tier_used`, D.1),
+>   `is_spar_friendly`, `spar_parity_eligible` (cache 1 lần/trận, D.9b),
+>   `tuning` — cùng `action_type_of`/`thuc_id_of`/`player_id`/`rng` đã có.
+> - **`hp_pct_pre_drain` (D.9)**: tính qua hàm chung
+>   `CombatFormulas.hp_pct` = `float(hp) / maxi(max_HP, 1)` — có ĐỦ cả
+>   `float()` lẫn guard mẫu số (đóng phát hiện leo thang round-4: thiếu 2
+>   biện pháp này, tiebreak suy biến thành coin_flip ẩn 100% ở kịch bản
+>   đối xứng). Cùng hàm dùng cho D.9b/D.9c/Tầng 1 NPC.
+> - **Mọi phép chia** đều ép `float()` tường minh + guard mẫu số:
+>   `exhaustion_progress` (D.4b) thêm `maxi(CAP - ONSET, 1)`; D.12 ép
+>   float trước `ceili()`; `parity_diff` (D.9b) floor mẫu tại 1 — được
+>   lint `tools/lint/combat_lint.py` cấm `int/int` trần toàn thư mục.
+> - **D.7 lifesteal**: heal được ÁP DỤNG vào HP người đánh ngay khi đòn
+>   resolve xong (clamp `max_HP`) — pseudocode D.9 bên dưới chỉ GHI NHẬN
+>   `heal` vào `per_actor` mà không bao giờ cộng vào `hp`; code làm đúng
+>   công thức `hp'(attacker)` của D.7.
+> - **D.14**: `chosen_index` có clamp `min(..., |pool|-1)` thực thi +
+>   pool sort tất định theo `thuc_id`; roll LUÔN được rút kể cả pool 1
+>   phần tử (đúng công thức, giữ ổn định stream RNG).
+> - **"Đánh thường"**: `skill_tier_used = 0` (bậc riêng, không bao giờ
+>   tạo phạt gear-gap vì `tier(C) ≥ 1`) — văn xuôi chưa từng chốt số này.
+> - **AC-09b**: bảng từ khóa outcome giờ là DATA thực thi
+>   (`combat_narration.gd`), không còn chỉ là bảng văn xuôi.
+> - **Ô 2 khi hết sạch thức** (UI Requirements): code trả slot rỗng
+>   (`empty`) vì Ô 1 đã là "Đánh thường" — văn xuôi không định nghĩa
+>   trường hợp này.
+> - Sàn `max(1, ...)` của D.6 và thứ tự drain đối xứng + tiebreak của D.9
+>   giữ ĐÚNG như văn xuôi vòng 3 — nay được compiler + GUT + sweep xác
+>   nhận (96/108 tổ hợp Safe Range hội tụ, khớp harness đóng băng).
 
 *(Quy ước ký hiệu dùng xuyên suốt: `clamp(v, lo, hi) = max(lo, min(hi, v))`;
 `round()` làm tròn thông thường, 0.5 làm tròn lên; `roll_uniform[0,1)` là

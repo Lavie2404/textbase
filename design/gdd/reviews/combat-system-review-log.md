@@ -128,3 +128,44 @@ Theo đúng cam kết cuối vòng 3, leo thang lên `technical-director` với 
 | 5 | AC-47a: tách GIVEN (quét 108) và THEN (96 phải hội tụ, 12 phải flag vi phạm ràng buộc, không bỏ qua im lặng) | AC-47a |
 
 Trạng thái sau quyết định: **Designed — chờ implementation** (không còn "chờ re-review vòng N"). `combat-system.md` Section D chính thức chuyển vai trò descriptive-cho-cơ-học kể từ `docs/architecture/adr-0001-combat-spec-authority.md`. Chu trình review văn bản cho Combat System **kết thúc tại đây** — bước tiếp theo là implementation GDScript + GUT test, theo Migration Plan của ADR-0001, không phải `/design-review` vòng 5.
+
+---
+
+## 2026-08-11 — Implementation gate ĐÓNG: ADR-0001 thi hành xong, GUT xanh toàn bộ
+
+Đây KHÔNG phải vòng `/design-review` (chu trình văn bản đã kết thúc ở vòng
+4 + escalation). Đây là biên bản đóng cổng implementation theo đúng
+Migration Plan của `docs/architecture/adr-0001-combat-spec-authority.md`
+(nay đã **Accepted** kèm phụ lục Validation Results).
+
+**Kết quả**: `src/gameplay/combat/` (7 file GDScript static-typed, pure
+function, RNG inject — nguồn chuẩn NORMATIVE cho cơ chế Combat từ nay) +
+`tests/unit/combat/` (13 file test + factory) — **GUT: 14 scripts, 91
+tests, 91 pass, 829 asserts**. Sweep hội tụ AC-47a/47b đã migrate sang
+`tools/combat/convergence_sweep.gd`: AC-47a 96/108 hội tụ — KHỚP CHÍNH
+XÁC số liệu harness.py đóng băng (12 combo không hội tụ đều là vi phạm
+cross-constraint #2 được flag tường minh); Q3b fairness 155/300–145/300
+(51,7%/48,3%), nhất quán với 52,3%/47,7% của harness. Lint D2
+(`tools/lint/combat_lint.py`): 0 finding trên code thật, bắt được cả 2
+lớp defect trên file mồi.
+
+**3 tiêu chí validation của ADR-0001 — ĐẠT CẢ 3**: (1) 9 hạng mục backlog
+vòng 4 bị compiler/typing/lint bắt (mục tiêu ≥5), gồm đúng con bug
+`hp_pct_pre_drain` coin-flip trá hình đã kích hoạt ADR; (2) KHÔNG có
+defect kiến trúc — cấu trúc exchange-loop / lock-before-narrate /
+D.9-D.9b-D.9c dịch sang GDScript nguyên vẹn, trigger đảo ngược ADR không
+kích hoạt; (3) ~35 phút từ file source đầu tiên tới GUT xanh toàn bộ —
+nhanh hơn hẳn 1 vòng review.
+
+**1 bug prose mới ngoài backlog đã biết** (lớp cục bộ/cơ học, không phải
+kiến trúc): D.9 pseudocode ghi nhận `heal` (D.7 lifesteal) vào `per_actor`
+nhưng KHÔNG BAO GIỜ cộng vào HP người đánh — code áp dụng đúng công thức
+D.7 tại thời điểm resolve strike. Đã ghi vào banner Section D của GDD
+cùng các judgment call (basic attack `skill_tier_used=0`, mutual-drain
+bypass D.9b theo nhánh pseudocode tường minh, slot 2 empty khi hết thức,
+AC-49 tier=0 mâu thuẫn dải tier 1–∞ — test cả 2).
+
+**Trạng thái**: `combat-system.md` header → `Implemented — GUT green
+(ADR-0001 executed, 2026-08-11)`; Section D mang banner "THI HÀNH XONG"
++ danh sách delta code↔prose; quyền chuẩn cơ chế từ nay là một chiều
+code → prose theo đúng ADR-0001.

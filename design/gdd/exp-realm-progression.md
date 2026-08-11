@@ -143,7 +143,9 @@ Formulas/Acceptance Criteria bắt buộc spawn specialist ở lean mode.)*
    boolean `breakthrough_requirement_met(tier)`, không sở hữu nội dung điều
    kiện (tương tự cách `persistence-save-system.md` coi `turn_snapshot` là
    opaque blob). Nguồn cụ thể: Setting & Canon Integration — **đã
-   Designed, interface provisional**. **Ràng buộc thiết kế mới (thêm
+   Designed** (đã hình thức hóa — gỡ nhãn provisional 2026-08-11,
+   `/consistency-check`: interface nay đặc tả đầy đủ tại
+   `setting-canon-integration.md`). **Ràng buộc thiết kế mới (thêm
    2026-08-08, `/design-review` vòng 2, cụm A2-1 Option C)**: GDD này KHÔNG
    sở hữu NỘI DUNG `breakthrough_requirement_met`, nhưng ĐẶT RA 1 ràng buộc
    bắt buộc cho hệ sở hữu nó (Setting & Canon Integration) — điều kiện đột
@@ -225,11 +227,17 @@ Formulas/Acceptance Criteria bắt buộc spawn specialist ở lean mode.)*
 - **Turn Manager** (upstream, hard) — mọi thay đổi EXP/level/tier chỉ
   "final" khi lượt xác nhận và không undo (Core Rule #8); passive EXP
   trigger mỗi lượt xác nhận.
-- **NPC Affinity & Relationship** (đã Designed, soft/provisional) — cung
+- **NPC Affinity & Relationship** (đã Designed, soft; đã hình thức hóa —
+  gỡ nhãn provisional 2026-08-11, `/consistency-check`: interface nay đặc
+  tả đầy đủ tại `npc-affinity-relationship.md`) — cung
   cấp trạng thái "quan hệ Song Tu active" cho nguồn EXP #4.
-- **Death & Consequence** (đã Designed, soft/provisional) — cung cấp cờ
+- **Death & Consequence** (đã Designed, soft; đã hình thức hóa — gỡ nhãn
+  provisional 2026-08-11, `/consistency-check`: interface nay đặc tả đầy
+  đủ tại `death-and-consequence.md`) — cung cấp cờ
   "phế đan điền/võ công" chặn tích lũy EXP.
-- **Setting & Canon Integration** (đã Designed, soft/provisional) — cung
+- **Setting & Canon Integration** (đã Designed, soft; đã hình thức hóa —
+  gỡ nhãn provisional 2026-08-11, `/consistency-check`: interface nay đặc
+  tả đầy đủ tại `setting-canon-integration.md`) — cung
   cấp dữ liệu `breakthrough_requirement` cụ thể theo bối cảnh.
 - **Character Card & Identity** (đã Designed, downstream) — đọc `level`,
   `tier` để hiển thị mục "Cấp độ - Bậc".
@@ -238,10 +246,10 @@ Formulas/Acceptance Criteria bắt buộc spawn specialist ở lean mode.)*
   `hostile_initiative_allowed`/`HOSTILE_INITIATIVE_LEVEL_GAP_MAX=20`) và
   để sinh `level` đối thủ ambient trong khoảng `encounter_level_range`.
 
-*(Nhiều interaction ở trên là provisional vì hệ phụ thuộc lúc viết chưa
-thiết kế — nay các hệ đó đã Designed —
-cùng pattern các GDD trước đã dùng, sẽ đối chiếu lại khi các hệ đó được
-thiết kế.)*
+*(Nhiều interaction ở trên từng gắn nhãn provisional vì hệ phụ thuộc lúc
+viết chưa thiết kế — nay các hệ đó đã Designed/Approved và đã được đối
+chiếu 2026-08-11 (`/consistency-check`): interface nay đặc tả đầy đủ tại
+hệ sở hữu, các nhãn provisional tương ứng đã gỡ.)*
 
 ## Formulas
 
@@ -466,7 +474,7 @@ không có NPC↔NPC nên không cần model quan hệ mới.)*
 
 | Variable | Symbol | Type | Range | Description |
 |---|---|---|---|---|
-| Cờ điều kiện Song Tu | `SONG_TU_ACTIVE(self)` | bool (0/1) | {0,1} | Cả 2 điều kiện Rule 2 (Tâm Pháp song-tu của `self` + `self` thuộc quan hệ Song Tu active với player, nguồn: NPC Affinity — provisional; self-relative hóa 2026-08-08 vòng 2, cụm A2-5) |
+| Cờ điều kiện Song Tu | `SONG_TU_ACTIVE(self)` | bool (0/1) | {0,1} | Cả 2 điều kiện Rule 2 (Tâm Pháp song-tu của `self` + `self` thuộc quan hệ Song Tu active với player, nguồn: NPC Affinity — đã hình thức hóa, gỡ nhãn provisional 2026-08-11, `/consistency-check`: interface nay đặc tả đầy đủ tại `npc-affinity-relationship.md`; self-relative hóa 2026-08-08 vòng 2, cụm A2-5) |
 | Tỷ lệ Song Tu | `SONG_TU_EXP_RATE` | float (knob) | 0–1 | % của `exp_threshold(level)` mỗi lượt khi điều kiện đủ |
 | Kết quả | `song_tu_exp_bonus` | float | `{0} ∪ [SONG_TU_EXP_RATE * exp_threshold, SONG_TU_EXP_RATE * exp_threshold]` | 0 nếu không active; giá trị cố định (theo level) nếu active |
 

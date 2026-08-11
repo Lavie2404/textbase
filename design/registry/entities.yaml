@@ -37,7 +37,7 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 
 version: 1
-last_updated: "2026-08-10"
+last_updated: "2026-08-11"
 # 2026-08-10 (character-card-identity.md /design-review round 1): stat_growth
 # +2 referenced_by (death-and-consequence.md, npc-affinity-relationship.md)
 # + comment clarifying max_HP naming equivalence + base_HP0 strict >0.
@@ -70,7 +70,23 @@ last_updated: "2026-08-10"
 # Attribute fields: any key stats that could appear in another GDD
 #   (health, damage, drops, faction, etc.)
 
-entities: []
+entities:
+  - name: npc_tag
+    status: active
+    source: design/gdd/character-card-identity.md
+    referenced_by:
+      - design/gdd/character-card-identity.md
+      - design/gdd/death-and-consequence.md
+      - design/gdd/ai-llm-integration-layer.md
+      - design/gdd/mechanic-narration-contract-enforcement.md
+    attributes:
+      medium_override: "string | null — Death & Consequence tiêu thụ; thiếu -> default 'sỉ nhục'"
+      concealment_narrative_hint: "string | null — text ngắn content/AI-authored; AI/LLM wrapper PHẢI chèn vào narration_call khi concealment.active=true, kèm chỉ thị 'không mô tả thực lực thật' (cam kết 2026-08-11, đóng OQ#12 của GDD nguồn)"
+    # schema mở (Card OQ#8) — hệ khác có thể "đặt hàng" thêm tag; đăng ký
+    # 2026-08-11 (/consistency-check): schema đã cross 4 hệ, đúng tiêu chí
+    # "register khi cross system boundary" mà trước đây chưa làm
+    added: 2026-08-11
+    revised: ""
 
 # Example (remove when first real entry is added):
 #
@@ -443,11 +459,17 @@ formulas:
       - design/gdd/setting-canon-integration.md
       - design/gdd/situation-encounter-generation.md
     variables:
-      - active_song_tu_set
+      - song_tu_relationship_active_npc_ids
       - SONG_TU_ACTIVE
     output_range: [0, 1]
-    expression: "SONG_TU_ACTIVE = 1 if |active_song_tu_set| >= 1 else 0;
-      interface trả DANH SÁCH NPC ID đang có quan hệ Song Tu active"
+    expression: "SONG_TU_ACTIVE = 1 if |song_tu_relationship_active_npc_ids|
+      >= 1 else 0; interface trả DANH SÁCH NPC ID đang có quan hệ Song Tu
+      active"
+    # renamed 2026-08-11 (registry catch-up): biến `active_song_tu_set` đổi
+    # tên thành `song_tu_relationship_active_npc_ids` tại chủ sở hữu
+    # (npc-affinity-relationship.md) từ 2026-08-08; GDD situation-encounter-
+    # generation đã theo tên mới từ round 1 2026-08-10, registry cập nhật trễ
+    # (deferred do phiên song song — xem review log situation-gen round 1)
     notes: "Đóng Open Question của exp-realm-progression.md (boolean đơn
       hay NPC ID): interface là danh sách NPC ID, EXP tiêu thụ boolean
       derived 'khác rỗng'. EXP bonus KHÔNG cộng dồn theo số NPC (chặn
@@ -637,12 +659,17 @@ formulas:
       exp-realm-progression.md Rule #10/AC-17 chờ (EXP chỉ cung cấp level
       thô). MỘT CHIỀU, không phải trị tuyệt đối — NPC yếu hơn tấn công
       lên hợp pháp. Thù địch sâu sắc (affinity ≤ -80) KHÔNG bypass gap;
-      chỉ provoked_flag (D.3, severity ≥ PROVOKE_SEVERITY_MIN=3, không
-      decay — tiêu thụ hoặc hòa giải affinity ≥ -10) mới bypass.
+      chỉ provoked_flag mới bypass. LƯU Ý schema (cập nhật 2026-08-11,
+      registry catch-up với fix B-2 round 1 2026-08-10 của GDD nguồn):
+      provoked_flag KHÔNG còn là state gốc — nó là tiện ích suy ra
+      provoked_flag(npc) = (provoked(npc) != null); state thật là
+      provoked(npc) = {set_turn, source_event_ref} | null (D.3, severity
+      ≥ PROVOKE_SEVERITY_MIN=3, không decay — CLEAR theo ĐỊNH DANH event
+      đã tiêu thụ [provoked_consumed_ref] hoặc hòa giải affinity ≥ -10).
       provoked mở QUYỀN, không mở ĐỘNG CƠ — D.4 vẫn đòi affinity ≤ -40
       mới thành hostile candidate."
     added: 2026-08-03
-    revised: ""
+    revised: "2026-08-11"
 
   - name: encounter_level_range
     status: active
@@ -662,10 +689,12 @@ formulas:
     notes: "CHỈ cho đối thủ ambient vô danh sinh thủ tục — NPC/canon có
       char_id dùng level data cố định. Trần cứng 20 là hệ quả logic bắt
       buộc từ hostile_initiative_allowed (đối thủ vừa sinh không thể có
-      provoked_flag). Combat (provisional) dùng level sinh ra + stat_growth
-      (EXP) để dựng chỉ số đối thủ — xem Open Questions của GDD nguồn."
+      provoked_flag). Writer thật: D.4b (3c) ambient_hostile_hook (từ
+      2026-08-10 — trước đó formula mồ côi). Combat dùng level sinh ra +
+      stat_growth (EXP) để dựng chỉ số đối thủ — thuật toán map level →
+      chỉ số vẫn là Open Question ở cả 2 GDD."
     added: 2026-08-03
-    revised: ""
+    revised: "2026-08-11"
 
   - name: entities_in_scope
     status: active
@@ -718,11 +747,12 @@ formulas:
       phân loại DUY NHẤT qua intent chip người chơi khai. Gating chống
       ratchet (economy-designer 2026-08-03): gift/small_help cooldown per
       (loại, NPC) + cấm cảnh dangerous; save_life hook-gated hoàn toàn;
-      song_tu cần private + willing. CẦN sửa schema suggestion_call của
-      ai-llm-integration-layer.md: array[4] string → array[4]
-      {text, envelope} (Open Question, chưa sửa)."
+      song_tu cần private + willing. Schema suggestion_call của
+      ai-llm-integration-layer.md: array[4] {text, envelope} — ĐÃ ĐÓNG
+      từ 2026-08-05 (AC-03 bên đó; note cũ 'chưa sửa' là stale, dọn
+      2026-08-11 registry catch-up)."
     added: 2026-08-03
-    revised: ""
+    revised: "2026-08-11"
 
   - name: alive
     status: active
@@ -963,12 +993,17 @@ constants:
     source: design/gdd/world-memory-context-management.md
     referenced_by:
       - design/gdd/world-memory-context-management.md
-    value: 5
+      - design/gdd/situation-encounter-generation.md
+    value: 8
+    # value 5 -> 8: nâng tại /design-review world-memory-context-management.md
+    # vòng 1 (2026-08-06); registry cập nhật trễ 2026-08-11 (registry catch-up
+    # cùng đợt situation-gen round 2). situation-gen tham chiếu (không sao
+    # chép) cho payload provoking_event_ref (D.3)
     unit: turns
     # absolute floor = 1 (Core Rule #5) — the sole undo-eligible turn must
     # always stay in the recency window in full form
     added: 2026-08-02
-    revised: ""
+    revised: "2026-08-11"
 
   - name: max_facts_per_entity
     status: active
@@ -1040,6 +1075,7 @@ constants:
     referenced_by:
       - design/gdd/core-ui-screen-navigation.md
       - design/gdd/character-card-identity.md
+      - design/gdd/situation-encounter-generation.md
     value: 44
     unit: px (CSS-equivalent)
     # hằng KHÓA theo chuẩn accessibility ngoài (WCAG 2.5.5 / Apple HIG /
@@ -1048,7 +1084,59 @@ constants:
     # >= 44px; tap-name nhúng trong prose = best-effort có trần. Đăng ký
     # vì character-card-identity.md có phần tử tương tác riêng (nút Song
     # Tu, Hồi phục, đóng overlay) phải tuân cùng chuẩn.
+    # referenced_by += situation-encounter-generation.md (2026-08-11,
+    # registry catch-up): chip intent ~15-25 chip/lượt của hệ đó phải
+    # tuân cùng chuẩn 44px (UI Requirements bên đó, ghi từ 2026-08-10).
     added: 2026-08-04
+    revised: "2026-08-11"
+
+  - name: POSITIVE_SOCIAL_COOLDOWN_TURNS
+    status: active
+    source: design/gdd/situation-encounter-generation.md
+    referenced_by:
+      - design/gdd/situation-encounter-generation.md
+      - design/gdd/npc-affinity-relationship.md
+    value: 4
+    unit: turns (cooldown per (envelope_type, npc) cho gift/small_help — D.1)
+    # knob, safe range 2-8. Đăng ký 2026-08-11 (/consistency-check): trước
+    # đây được nhắc trong 2 entry khác (allowed_envelope_menu variables,
+    # RESCUE_COOLDOWN_TURNS invariant) nhưng chưa có entry riêng dù cross
+    # 2 GDD. Bất biến liên khóa BINDING theo tổ hợp:
+    # RESCUE_COOLDOWN_TURNS >= 2 x POSITIVE_SOCIAL_COOLDOWN_TURNS —
+    # enforce bằng assert khi load config (xem entry RESCUE_COOLDOWN_TURNS).
+    added: 2026-08-11
+    revised: ""
+
+  - name: AMBIENT_ENCOUNTER_CHANCE
+    status: active
+    source: design/gdd/situation-encounter-generation.md
+    referenced_by:
+      - design/gdd/situation-encounter-generation.md
+    value: 0.25
+    unit: xác suất/lượt (world roll "nguy hiểm", D.4b nhánh 3a/3c)
+    # knob, safe range 0.2-0.5. DERIVE (economy-derivation-gated amendment,
+    # round 1 2026-08-10, SỬA derivation round 2 2026-08-11): =
+    # NPC_INITIATED_WINDOW_CAP / (NPC_INITIATED_WINDOW_TURNS + 1) = 1/4 —
+    # chu kỳ thật của window trượt [turn-3, turn) là 4 lượt (AC-26); bản
+    # round 1 ghi nhầm CAP/WINDOW_TURNS = 1/3, cao hơn trần thật +32%.
+    # Mục tiêu: tầng World/Ambient KHÔNG cộng thêm hoạt động thế giới ròng.
+    added: 2026-08-11
+    revised: ""
+
+  - name: RESCUE_COOLDOWN_TURNS
+    status: active
+    source: design/gdd/situation-encounter-generation.md
+    referenced_by:
+      - design/gdd/situation-encounter-generation.md
+    value: 8
+    unit: turns (cooldown per-NPC, valence rescue — D.4b/D.5)
+    # knob, safe range 8-16 (trần 15->16 sửa round 2 2026-08-11). Bất biến
+    # liên khóa BINDING theo tổ hợp (economy-derivation-gated amendment):
+    # RESCUE_COOLDOWN_TURNS >= 2 x POSITIVE_SOCIAL_COOLDOWN_TURNS — safe
+    # range từng dòng KHÔNG đủ, phải enforce khi load config (assert).
+    # Lý do: save_life là delta Hảo cảm cao nhất game (+15), phải hiếm
+    # hơn hẳn nhịp gift/small_help, chặn ratchet lớn nhất game.
+    added: 2026-08-11
     revised: ""
 
   - name: card_transition_ms

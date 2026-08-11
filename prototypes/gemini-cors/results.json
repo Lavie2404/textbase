@@ -1,0 +1,114 @@
+{
+  "preflight": [
+    {
+      "origin": "http://localhost:8765",
+      "request_headers": "content-type,x-goog-api-key",
+      "status": 200,
+      "access_control_headers": {
+        "access-control-allow-origin": "http://localhost:8765",
+        "access-control-allow-methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+        "access-control-allow-headers": "content-type,x-goog-api-key",
+        "access-control-max-age": "3600"
+      }
+    },
+    {
+      "origin": "http://localhost:8765",
+      "request_headers": "content-type",
+      "status": 200,
+      "access_control_headers": {
+        "access-control-allow-origin": "http://localhost:8765",
+        "access-control-allow-methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+        "access-control-allow-headers": "content-type",
+        "access-control-max-age": "3600"
+      }
+    },
+    {
+      "origin": "https://html-classic.itch.zone",
+      "request_headers": "content-type,x-goog-api-key",
+      "status": 200,
+      "access_control_headers": {
+        "access-control-allow-origin": "https://html-classic.itch.zone",
+        "access-control-allow-methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+        "access-control-allow-headers": "content-type,x-goog-api-key",
+        "access-control-max-age": "3600"
+      }
+    },
+    {
+      "origin": "https://html-classic.itch.zone",
+      "request_headers": "content-type",
+      "status": 200,
+      "access_control_headers": {
+        "access-control-allow-origin": "https://html-classic.itch.zone",
+        "access-control-allow-methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+        "access-control-allow-headers": "content-type",
+        "access-control-max-age": "3600"
+      }
+    },
+    {
+      "origin": "https://duchx.github.io",
+      "request_headers": "content-type,x-goog-api-key",
+      "status": 200,
+      "access_control_headers": {
+        "access-control-allow-origin": "https://duchx.github.io",
+        "access-control-allow-methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+        "access-control-allow-headers": "content-type,x-goog-api-key",
+        "access-control-max-age": "3600"
+      }
+    },
+    {
+      "origin": "https://duchx.github.io",
+      "request_headers": "content-type",
+      "status": 200,
+      "access_control_headers": {
+        "access-control-allow-origin": "https://duchx.github.io",
+        "access-control-allow-methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+        "access-control-allow-headers": "content-type",
+        "access-control-max-age": "3600"
+      }
+    },
+    {
+      "origin": "https://game.example.com",
+      "request_headers": "content-type,x-goog-api-key",
+      "status": 200,
+      "access_control_headers": {
+        "access-control-allow-origin": "https://game.example.com",
+        "access-control-allow-methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+        "access-control-allow-headers": "content-type,x-goog-api-key",
+        "access-control-max-age": "3600"
+      }
+    },
+    {
+      "origin": "https://game.example.com",
+      "request_headers": "content-type",
+      "status": 200,
+      "access_control_headers": {
+        "access-control-allow-origin": "https://game.example.com",
+        "access-control-allow-methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+        "access-control-allow-headers": "content-type",
+        "access-control-max-age": "3600"
+      }
+    }
+  ],
+  "browser": {
+    "control_network_ok": true,
+    "probes": [
+      {
+        "label": "header-key",
+        "ok": true,
+        "status": 400,
+        "bodyReadable": true,
+        "bodySnippet": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n        \""
+      },
+      {
+        "label": "query-key",
+        "ok": true,
+        "status": 400,
+        "bodyReadable": true,
+        "bodySnippet": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n        \""
+      }
+    ]
+  },
+  "meta": {
+    "endpoint": "generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+  }
+}

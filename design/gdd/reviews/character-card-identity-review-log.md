@@ -192,3 +192,65 @@ chứng minh tiền đề cross-system với Combat + Situation Gen), không ph�
 thủ tục hình thức — cần đóng ở phía các hệ đó trước khi hệ này an toàn
 để Approve. Không cần vòng 3 trừ khi 1 trong 4 Open Question đó, khi
 đóng, phát sinh mâu thuẫn ngược lại với GDD này.
+
+## Review — 2026-08-11 — Verdict: APPROVED (đóng 4 Open Question #10-13 qua cascade, không vòng review mới)
+Scope signal: M (cascade 4 tài liệu, 3 quyết định thiết kế user, không
+đổi kiến trúc hệ này ngoài 1 lần hạ phạm vi Rule #2)
+Specialists: 1 Explore agent (khảo sát read-only 10 mục facts trên 7
+GDD liên quan, trích nguyên văn + số dòng); quyết định qua
+`AskUserQuestion` (3 tab); áp cascade ở phiên chính.
+Blocking items: 0 mới | Recommended: 0 mới
+Prior verdict resolved: Có — điều kiện duy nhất round 2 đặt ra (4 OQ
+liên-hệ-thống phải đóng từ phía các hệ kia, không phát sinh mâu thuẫn
+ngược) đã thỏa.
+
+**Summary từng OQ:**
+- **#10 (storage entity record)**: khảo sát phát hiện tiền đề của OQ
+  ("chưa khóa ở tài liệu nào") LỖI THỜI — quyền sở hữu đã khóa từ
+  2026-08-05 (cụm E): `persistence-save-system.md` nhận sở hữu blob
+  Entity Record tường minh (2 chỗ), `world-memory-context-management.md`
+  từ chối sở hữu tường minh (dòng 41-48). Đóng bằng đối chiếu + sửa văn
+  bản hệ này (Rule #8a, D.1, bảng Interactions) — KHÔNG cần ADR mới.
+  Phần dư thật tách thành **OQ #14 mới** (durability timing của entity
+  record tạo mới ở lượt N — Entity Record thuộc lớp full-bundle flush
+  định kỳ, chưa rõ bền vững ngay tại lượt N; owner: Persistence + hệ
+  này, gộp vào đợt 6 hạng mục prototype Persistence).
+- **#11 (alias sống)**: khảo sát xác nhận alias là tồn kho tĩnh 100%
+  bên Setting & Canon ("setting pack là data tĩnh không cần lưu") — cam
+  kết "danh sách sống" sẽ tự mâu thuẫn với chính doc đó. User chốt:
+  **chấp nhận tĩnh ở MVP** — Setting & Canon Core Rule #2 thêm cam kết
+  hợp đồng (alias TĨNH per setting pack, ràng buộc content: không nhân
+  vật nào ngừng cải trang giữa truyện trong MVP) + Open Question có
+  owner cho cơ chế Alpha. D.2 hệ này cập nhật ghi chú "đã xác nhận với
+  owner".
+- **#12 (concealment_narrative_hint)**: khảo sát xác nhận 0 dòng nhắc
+  hint ở cả 2 hệ downstream, VÀ chỉ ra đúng chỗ thiếu — AI/LLM Core
+  Rule #2 tự tuyên "mọi nghĩa vụ ủy quyền PHẢI liệt kê tường minh ở
+  đây" + đã có tiền lệ y hệt (`style_descriptor`). User chốt: **làm
+  luôn cả 2 doc** — AI/LLM thêm bullet context-data cam kết chèn hint +
+  chỉ thị "không mô tả thực lực thật NPC che giấu"; Contract Enforcement
+  Core Rule #4 ghi nhận nghĩa vụ ủy quyền + giới hạn tự khai (leak-check
+  số học không bắt được leak văn xuôi — cùng lớp ủy quyền "cấm viết số
+  bằng chữ").
+- **#13 (thẻ trước trận)**: khảo sát xác nhận MÂU THUẪN THẬT —
+  `combat-system.md` Dependencies ghi rõ đối thủ ambient vô danh KHÔNG
+  có `char_id`, chỉ số Combat tự dựng từ `level + stat_growth`, không
+  qua thẻ; trong khi Rule #2 hệ này tuyên "mọi bên tham chiến có thẻ".
+  User chốt: **hạ phạm vi Rule #2** — thẻ chỉ cho nhân vật có `char_id`;
+  anchor moment 1 bảo toàn cho lớp vô danh ở tầng thiết kế (D.7 cap
+  level ≤ player+15, trần cứng +20 → "nguy hiểm đọc được" không cần
+  thẻ). D.1 ghi rõ đối thủ vô danh ngoài miền hàm `card_exists`.
+
+**GDD status → Approved** (user xác nhận qua `AskUserQuestion`
+2026-08-11 — đúng tiêu chí round 2: các OQ đóng không phát sinh mâu
+thuẫn ngược, không cần vòng 3).
+
+Files touched: `design/gdd/character-card-identity.md` (header, Rule #2,
+Rule #8a, D.1 + bảng biến, D.2 bảng biến, bảng Interactions, OQ #10-13
+đóng + OQ #14 mới), `design/gdd/setting-canon-integration.md` (Core Rule
+#2 cam kết alias tĩnh + 1 Open Question mới — cascade thứ 2 trong ngày
+sau đợt gỡ nhãn provisional), `design/gdd/ai-llm-integration-layer.md`
+(Core Rule #2 khu Dependencies: bullet context-data mới),
+`design/gdd/mechanic-narration-contract-enforcement.md` (Core Rule #4:
+ghi nhận ủy quyền), `design/gdd/systems-index.md` (#14 → Approved), file
+log này.

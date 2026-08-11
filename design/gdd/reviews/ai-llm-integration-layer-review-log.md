@@ -222,3 +222,51 @@ pending CORS prototype gate`.** Round cap CHỐT — không có round 3, dù
 tìm thấy gì thêm. Cổng Approved DUY NHẤT còn lại = prototype CORS PASS
 (không cần thêm vòng `/design-review`); nếu FAIL, route sang
 `/design-system` để soạn lại Core Rule #6, không phải `/design-review`.
+
+---
+
+## 2026-08-11 — Cổng CORS prototype: PASS → Approved (không phải vòng review)
+
+Đây KHÔNG phải một vòng `/design-review` (round cap đã chốt tại vòng 2/2)
+— đây là biên bản đóng cổng Approved duy nhất còn lại theo đúng quyết
+định của `creative-director` tại vòng 2 (2026-08-08): "khi prototype này
+PASS, `systems-index.md` chuyển thẳng Approved".
+
+**Prototype**: `prototypes/gemini-cors/` (cors_probe.py, README.md,
+results.json). Hai tầng đo độc lập:
+
+1. **Preflight thô** (`OPTIONS` trực tiếp tới
+   `generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`):
+   status 200, `access-control-allow-origin` ECHO nguyên văn Origin gửi
+   lên cho cả 4 origin thử (`http://localhost:8765`,
+   `https://html-classic.itch.zone`, `https://duchx.github.io`,
+   `https://game.example.com` — domain lạ chưa từng đăng ký đâu cả);
+   `POST` nằm trong allow-methods; cả 2 bộ header
+   (`content-type,x-goog-api-key` và `content-type`) được chấp nhận
+   nguyên văn; `access-control-max-age: 3600`.
+2. **Browser thật** (Chrome headless, page phục vụ từ origin
+   `http://localhost:8765`, control same-origin `/ping` xác nhận mạng
+   sống): `fetch()` POST với dummy key nhận **HTTP 400 "API key not
+   valid" với body JSON đọc được** ở cả 2 biến thể auth
+   (`x-goog-api-key` header và `?key=` query param) — nghĩa là trình
+   duyệt cho phép ĐỌC response cross-origin end-to-end; tầng chặn duy
+   nhất là auth (chủ đích — prototype không cần key thật, CORS verdict
+   độc lập với auth).
+
+**VERDICT: PASS.** Core Rule #6 (gọi thẳng client, không backend proxy)
+xác nhận khả thi trên đường đi thật mà Godot Web export sẽ dùng
+(`fetch mode: "cors"`).
+
+**Hệ quả đã cascade**:
+- Header GDD → **Approved** (2026-08-11); Open Question #1 CORS đóng.
+- `systems-index.md`: hàng #4 → Approved; Progress Tracker approved → 13
+  (đồng thời đồng bộ 6 ô Status lỗi thời của các hệ đã Approved từ các
+  phiên trước — nợ backlog "provisional/lỗi thời" đã ghi 2026-08-11).
+- **Finding bảo mật xác nhận** (dự đoán vòng 2 của `security-engineer`
+  nay là dữ kiện đo được): CORS của Gemini KHÔNG giới hạn origin →
+  HTTP referrer restriction ở Google Cloud Console là cơ chế phòng thủ
+  DUY NHẤT cho key mặc định chống đốt quota từ origin lạ. Đã nâng từ
+  "deferred non-blocking" thành **ràng buộc bắt buộc của ADR backend
+  AI** (ghi tại Open Questions GDD + README prototype Finding 3).
+- Hạng mục #6 (đo billing request zombie) — vẫn mở, không thuộc cổng
+  Approved, mang sang ADR backend AI (cần key thật + billing console).

@@ -192,3 +192,69 @@ panel đầy đủ mới), đặc biệt xác nhận `AMBIENT_ENCOUNTER_CHANCE`/
 `RESCUE_COOLDOWN_TURNS` không tạo dominant/degenerate strategy mới và
 D.4b không phá bất kỳ AC nào của các hệ downstream (Combat's
 `encounter_level_range` consumer, NPC Affinity's witness list).
+
+## Review — 2026-08-11 — Verdict: NEEDS REVISION → sửa cùng phiên → APPROVED (round 2/2, narrow verify pass, VÒNG CUỐI)
+Scope signal: M (narrow verify — không đổi kiến trúc; 3 blocking sửa là
+số học/câu chữ + 1 gate mới theo quyết định user)
+Specialists: 3 agent thật spawn song song qua `Agent` (systems-designer
+lens — số học kinh tế D.4b/D.5; qa-lead lens — xác minh 9 cụm + toàn bộ
+AC; cross-system lens — 7 hợp đồng liên hệ + registry). Tổng hợp: phiên
+chính (narrow pass, cùng tiền lệ Death & Consequence round 2).
+Blocking items: 3 mới | Recommended: 5 | Prior verdict resolved: **Có —
+8/9 cụm round 1 xác nhận ĐÓNG THẬT khi đối chiếu văn bản + hệ khác**
+(B-2 truy vết tay ví dụ E20/E23 khớp 100%; B-5/B-7 đóng trong tài liệu
+nhưng còn nợ lan truyền — đã đóng nốt trong phiên này).
+
+**Summary**: Đúng như amendment dự đoán, giá trị của vòng này nằm ở xác
+minh 2 hằng số liên khóa mới — và cả 2 đều có lỗi thật: (1)
+`AMBIENT_ENCOUNTER_CHANCE` derive sai mẫu số `CAP/WINDOW_TURNS=1/3` —
+chu kỳ thật của window trượt `[turn−3, turn)` là 4 lượt (chính AC-26
+chứng minh bằng số), trần đúng là `CAP/(WINDOW_TURNS+1)=1/4=0.25`; giữ
+0.33 làm world "nóng" hơn mục tiêu đã tuyên bố +32%. User chốt: đổi về
+0.25. (2) Safe-range 2 knob vô nghiệm ở biên: POSITIVE 2–8 × invariant
+2× đòi RESCUE ≥16 > trần 15 — cả qa-lead lẫn systems-designer lens tìm
+ra ĐỘC LẬP. User chốt: trần RESCUE 15→16 + ghi chú ⊕ ràng buộc chéo
+BINDING tại cả 2 dòng bảng, enforce bằng assert khi load config. (3)
+Trích dẫn "Turn Manager Core Rule #9(c) xác nhận riêng" là SAI — rule
+không tồn tại, TM Core Rule #3 nói ngược lại; viết lại thành cơ chế UI
+mới do hệ này sở hữu, chạy TRƯỚC khi envelope "gửi" (không mâu thuẫn TM
+#3). Ngoài ra, theo quyết định user: thêm **affinity gate dải trung lập
+(−40,+40)** vào `is_rescue_candidate` — NPC thân thiết không chồng +15
+lên vòng lặp dương, cao thủ hostile bị D.2 chặn giữ nguyên Anchor 2
+(đóng luôn finding R3/R7 của systems-designer lens).
+
+**Recommended đã sửa cùng phiên**: Core Rule #6 diễn đạt lại (3a/3b
+chia sẻ window, 3c tự giới hạn bằng xác suất — bảo vệ never-null AC-25);
+2 ghi chú chủ đích (`present` thuần cho rescue; cooldown rescue tiêu tại
+thời điểm chọn hook); AC-10b thêm affinity fixture; Open Question mới
+(target % `ambient_lull` ≈56% ở default — đo playtest vertical slice).
+
+**PASS-xác nhận đáng ghi**: không dominant/degenerate strategy mới
+(rescue trần ~8.3% số lượt trước gate, thấp hơn nữa sau gate; không
+farm được bằng đứng chờ; partition affinity kín); 5/7 hợp đồng
+liên-hệ-thống khớp nguyên văn (Combat `spar_friendly` + `encounter_level_range`,
+NPC Affinity bảng severity + witness list, Death & Consequence
+`alive`/presence, EXP `level` thô/AC-17, Setting & Canon chức năng);
+47 AC đều testable, đủ 8/8 section.
+
+**Nợ lan truyền đóng trong phiên**: `entities.yaml` (rename
+`song_tu_relationship_active_npc_ids`; đăng ký `AMBIENT_ENCOUNTER_CHANCE=0.25`
++ `RESCUE_COOLDOWN_TURNS=8` [range 8–16, invariant BINDING];
+`TOUCH_TARGET_MIN.referenced_by` += hệ này; `recency_window_turns` 5→8
+[trễ từ 2026-08-06]; dọn 2 note stale `allowed_envelope_menu`/
+`encounter_level_range`); `setting-canon-integration.md` (Approved —
+cascade có ghi ngày: gỡ 5 nhãn "provisional" lỗi thời cho interface
+phía hệ này, giữ vết lịch sử); `systems-index.md` #11 Designed →
+Approved.
+
+**Round-cap**: round 2/2 theo economy-derivation-gated amendment — vòng
+này chính là vòng xác minh bất biến mới, các finding còn dư toàn
+nhóm-B/wording → KHÔNG mở vòng 3, đúng quy ước. **GDD status →
+Approved** (user xác nhận qua `AskUserQuestion` 2026-08-11).
+
+Files touched: `design/gdd/situation-encounter-generation.md` (Core Rule
+#3/#6, D.4b `is_rescue_candidate` + diễn giải, 2 bảng knob + ghi chú ⊕,
+example/fixture 0.33→0.25, AC-10b, Visual §1, Open Questions +1, header),
+`design/registry/entities.yaml` (6 mục + 2 entry mới),
+`design/gdd/setting-canon-integration.md` (5 chỗ cascade),
+`design/gdd/systems-index.md` (#11 → Approved), file log này.

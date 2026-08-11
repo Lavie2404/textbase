@@ -162,3 +162,56 @@ vòng 3; (4) ngân sách MVP dự án. Bước tiếp theo: chạy spike kỹ th
 `technical-director` + `creative-director` (không panel đầy đủ) kiểm
 đúng 1 câu hỏi — kết quả spike có làm mất hiệu lực posture Core Rule #3/
 khung A1 không — trước khi vào `/architecture-decision`.
+
+---
+
+## 2026-08-11 — Prototype hoàn tất + ADR-0002 soạn xong (không phải vòng review)
+
+Biên bản đóng giai đoạn prototype (không phải vòng `/design-review` —
+chu trình văn bản đã đóng tại vòng 3). Prototype thật chạy trên **Godot
+4.6 Web export thật** (nothreads, không COOP/COEP) + Chrome headless,
+toàn bộ tại `prototypes/persistence-web/` (results.json = số liệu thô):
+
+- **#2 IndexedDB-qua-JavaScriptBridge — PASS**: `transaction.oncomplete`
+  reach GDScript thật qua `create_callback()` (gắn bằng
+  `addEventListener`), thứ tự đúng 24/24 iteration. Latency end-to-end
+  (gồm serialize trên main thread): p50 0,6ms (1KB) / 2,0ms (100KB) /
+  14,2ms (1MB), max 20,9ms — so ngân sách
+  `max_perceived_autosave_latency_ms=150`: dư ~7 lần ở worst case 1MB,
+  ~16–25 lần ở payload thông thường.
+- **#3 Web Locks giữ cả session — PASS với twist đúng dự đoán**: pattern
+  ngây thơ (callback bridged TRẢ VỀ pending Promise) THẤT BẠI thật —
+  giá trị trả về của Callable không băng qua bridge (JS nhận
+  `undefined`, khóa nhả ngay). Pattern eval-free hoạt động: dựng Promise
+  từ GDScript, truyền `Promise.resolve.bind(Promise, pendingPromise)`
+  làm lock callback — xác minh đủ 3 tiêu chí (giữ khóa theo
+  `locks.query()`, probe `{ifAvailable:true}` bị từ chối khi đang giữ,
+  giải phóng sạch khi GDScript resolve). Fallback heartbeat KHÔNG cần
+  trên phương diện API.
+- **#5 mtime-collision IDBFS — measured-safe**: 8/8 trial ghi 2 lần
+  cùng-giây (gap ~250ms và ~70ms) sống sót qua reload, đọc trực tiếp
+  backing store xác nhận timestamp lưu độ phân giải MILI GIÂY — nỗi lo
+  "cùng wall-clock second" của spike hạ cấp thành measured-safe.
+- **`persist()` bị DENY ngay trên desktop Chrome headless** (quota vẫn
+  ~10,7GB) — củng cố: câu hỏi ITP ~7 ngày của iOS PHẢI trả lời trên
+  thiết bị thật (hạng mục #4, harness sẵn ở `DEVICE-TEST.md`, cần https
+  tunnel vì secure-context-only).
+
+**ADR-0002** (`docs/architecture/adr-0002-persistence-storage-backend.md`,
+Proposed) chốt toàn bộ hạng mục "quyết định ADR" còn treo: schema 3
+store (slots / turn_records / snapshots), `durability_confirmed` :=
+`oncomplete` của đúng 1 transaction readwrite mỗi lượt, seam
+`stage()`/`commit()` + giao thức mock cho AC-03/17/22, khóa slot Web
+Locks theo D3, quota D4, KHÔNG nén MVP (đơn vị (b) nếu sau này nén —
+Core Rule #7 yêu cầu chốt tường minh), posture `schema_version` D6.
+
+**Engine-specialist validation (godot-specialist)**: APPROVE-WITH-NOTES
+— 10 finding, trong đó 2 blocking-cho-implementation xác đáng
+(PackedByteArray qua bridge CHƯA test — prototype mới chứng minh
+String/JSON; compound-key cursor scan + transaction đa-store CHƯA test,
+utility await hiện tại là single-settle không phục vụ được cursor).
+Xử lý: 8 minor đã sửa thẳng vào ADR; 2 blocking → **Experiment 2b**
+(đang chạy, cùng prototype dir) làm Migration Plan step 0 — cổng
+pre-implementation, có fallback định danh sẵn trong D1a nếu fail.
+
+GDD: header + Open Questions addendum cập nhật tương ứng cùng ngày.

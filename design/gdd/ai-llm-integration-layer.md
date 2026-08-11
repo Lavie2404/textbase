@@ -1,8 +1,8 @@
 # AI/LLM Integration Layer
 
-> **Status**: **Designed — Review Closed (vòng 2/2, round cuối theo spike-gated Round Cap) — chờ cổng CORS prototype**. Văn bản thiết kế coi như hoàn chỉnh, không còn vòng `/design-review` nào nữa cho hệ này; Approved chỉ mở khi prototype CORS (Open Questions, ưu tiên #1) PASS — Core Rule #6 (gọi thẳng client) sụp hoàn toàn nếu CORS thất bại, kéo theo Core Rule #1/AC-01/AC-09/AC-28 phải viết lại quanh 1 backend proxy. Nếu CORS FAIL: route sang `/design-system` (soạn lại Core Rule #6), không phải `/design-review`.
+> **Status**: **Approved** (2026-08-11 — cổng CORS prototype **PASS**, xem `prototypes/gemini-cors/`: preflight echo mọi Origin + browser thật đọc được response cross-origin từ `generativelanguage.googleapis.com`, cả 2 biến thể auth `x-goog-api-key`/`?key=`. Kiến trúc gọi-thẳng-client Core Rule #6 đứng vững; theo quyết định vòng 2 2026-08-08, PASS → chuyển thẳng Approved, không cần thêm vòng `/design-review`. Hệ quả bảo mật kèm theo: CORS KHÔNG giới hạn origin → HTTP referrer restriction ở Google Cloud Console là phòng thủ duy nhất cho key mặc định — bắt buộc vào cùng ADR backend AI.)
 > **Author**: user + agents
-> **Last Updated**: 2026-08-08 — vòng 2 hoàn tất: 5 specialist (`game-designer`, `systems-designer`, `godot-specialist`, `security-engineer`, `qa-lead`) + `creative-director` tổng hợp. 6 blocking đã sửa cùng phiên (BUSY chưa cascade; Formula 2 lời hứa fallback sai phạm vi trên nhánh TRANSIENT_OTHER; Formula 4 mâu thuẫn multiset/type-set; stored prompt injection qua World Memory; caveat phương pháp lạc chỗ; 2 ràng buộc vận hành từ spike [`use_threads`/`process_mode`] chỉ nằm trong Open Questions đã đóng). Xem `design/gdd/reviews/ai-llm-integration-layer-review-log.md`.
+> **Last Updated**: 2026-08-11 — Approved qua cổng CORS prototype. Bản văn thiết kế không đổi từ 2026-08-08 — vòng 2 hoàn tất: 5 specialist (`game-designer`, `systems-designer`, `godot-specialist`, `security-engineer`, `qa-lead`) + `creative-director` tổng hợp. 6 blocking đã sửa cùng phiên (BUSY chưa cascade; Formula 2 lời hứa fallback sai phạm vi trên nhánh TRANSIENT_OTHER; Formula 4 mâu thuẫn multiset/type-set; stored prompt injection qua World Memory; caveat phương pháp lạc chỗ; 2 ràng buộc vận hành từ spike [`use_threads`/`process_mode`] chỉ nằm trong Open Questions đã đóng). Xem `design/gdd/reviews/ai-llm-integration-layer-review-log.md`.
 > **Implements Pillar**: Pillar 3 (Sức Mạnh Có Logic), Pillar 4 (Tường Thuật Sống Động)
 > **Creative Director Review (CD-GDD-ALIGN)**: Đã review làm senior synthesis trong `/design-review` full mode 2026-08-07 (vòng 1, 5 specialist: `game-designer`, `systems-designer`, `godot-specialist`, `qa-lead`, `security-engineer` + `creative-director`) — verdict NEEDS REVISION (10 cụm Required gộp từ 22 finding thô, Scope Signal L), đã sửa toàn bộ cùng phiên + cascade sang 5 GDD khác (`turn-manager.md`, `combat-system.md`, `situation-encounter-generation.md`, `mechanic-narration-contract-enforcement.md`, `core-ui-screen-navigation.md`). Vòng 2 (2026-08-08, sau spike) là senior synthesis thứ hai, cũng của `creative-director`. Không phải CD-GDD-ALIGN PHASE-GATE chính thức. Xem `design/gdd/reviews/ai-llm-integration-layer-review-log.md`.
 
@@ -278,6 +278,19 @@ riêng) — mỗi lệnh gọi có một vòng đời độc lập:
   phong cách thi triển thức) được tầng này chèn vào prompt của
   `narration_call` khi trận đấu liên quan — đây là context data, không
   phải `locked_result`, không chịu Checkpoint 1.
+- **Character Card & Identity** *(thêm 2026-08-11, cascade đóng Open
+  Question #12 bên đó — cùng khuôn context-data với `style_descriptor`
+  ngay trên)*: `npc_tag.concealment_narrative_hint` (text ngắn
+  content-authored, VD "hành xử/dáng vẻ như đệ tử yếu, giấu khí tức")
+  PHẢI được tầng này chèn vào prompt của `narration_call` khi cảnh chứa
+  NPC có `concealment.active=true`, KÈM chỉ thị cố định: **"không mô tả
+  thực lực/cảnh giới thật của NPC đang che giấu qua văn xuôi — mô tả
+  theo hint"**. Đây là context data, không phải `locked_result`, không
+  chịu Checkpoint 1. Lý do (nghĩa vụ ủy quyền từ Card Rule #8c): số
+  liệu hiển thị đã bị làm giả bởi tầng concealment của Card, nhưng
+  leak-check của Contract Enforcement thuần số học — không có chỉ thị
+  này, AI có thể vô tình tả đúng thực lực thật bằng văn xuôi mà không
+  hệ nào bắt được.
 - **Combat System, Situation/Encounter Generation** (đã Designed): sẽ
   gọi qua cùng wrapper này khi được thiết kế — hợp đồng giao diện (2 loại
   call_type, format input/output) đã cố định ở GDD này, các hệ đó chỉ cần
@@ -1047,18 +1060,23 @@ specialist + `creative-director` phát hiện: Core Rule/Formula dưới đây
   hiểu đúng: ngân sách `ai_call_budget_per_turn=3` giới hạn **lệnh gọi
   logic**, không giới hạn **hóa đơn thật** phía nhà cung cấp AI.
 
-  **Hạng mục prototype thật còn treo** (không answerable từ tài liệu,
-  xem xếp hạng đầy đủ ở cuối `web-export.md`): #1 (ưu tiên cao nhất) —
-  CORS policy thật của endpoint AI đã chọn (Gemini hay khác) từ origin
-  của game, chặn toàn bộ kiến trúc gọi-thẳng-từ-client (Core Rule #6)
-  nếu thất bại; #6 — đo tác động thật của chi phí request bị bỏ dở
-  (zombie) lên hóa đơn API trong kịch bản fallback xấu nhất. *(Owner:
-  technical-director, target: trước `/create-architecture`)* **Đây là
-  cổng Approved duy nhất còn lại của GDD này (thêm 2026-08-08
-  `/design-review` vòng 2, `creative-director`)** — không cần thêm vòng
-  `/design-review` nào; khi prototype này PASS, `systems-index.md`
-  chuyển thẳng Approved. Nếu FAIL, route sang `/design-system` (soạn lại
-  Core Rule #6), không phải `/design-review`. **Liên quan trực tiếp**
+  ~~**Hạng mục prototype thật còn treo**~~ — **#1 CORS ĐÃ ĐÓNG, PASS
+  (2026-08-11)**, kết quả đầy đủ tại `prototypes/gemini-cors/`
+  (README.md + results.json): (a) preflight `OPTIONS` trả 200 với
+  `access-control-allow-origin` ECHO đúng Origin gửi lên cho cả 4
+  origin thử (localhost, itch.zone, github.io, domain lạ) — hiệu lực
+  tương đương `*`; (b) test browser thật (Chrome headless, origin
+  `http://localhost:8765`): `fetch()` POST `generateContent` nhận HTTP
+  400 "API key not valid" với body ĐỌC ĐƯỢC ở cả 2 biến thể auth
+  (`x-goog-api-key` header và `?key=` query) — CORS mở hoàn toàn, thất
+  bại duy nhất là tầng auth (chủ đích, dùng dummy key). Kiến trúc
+  gọi-thẳng-từ-client (Core Rule #6) XÁC NHẬN khả thi. #6 (đo tác động
+  thật của chi phí request zombie lên hóa đơn) — VẪN MỞ, cần key thật +
+  billing console, KHÔNG thuộc cổng Approved (theo quyết định vòng 2);
+  mang sang ADR backend AI như hạng mục đo không-blocking. *(Owner:
+  technical-director, target: trước `/create-architecture`)* Cổng
+  Approved đã mở theo đúng quyết định 2026-08-08 (`creative-director`):
+  PASS → `systems-index.md` chuyển thẳng Approved. **Liên quan trực tiếp**
   (thêm 2026-08-08 vòng 2, đóng gap `security-engineer`): xác nhận CORS
   và rò rỉ `userKey` là 2 cơ chế trình duyệt độc lập (CORS không cấp
   quyền đọc `localStorage`/IndexedDB của origin khác — không tạo lỗ hổng
@@ -1067,6 +1085,11 @@ specialist + `creative-director` phát hiện: Core Rule/Formula dưới đây
   Cloud Console cho key mặc định" (đã deferred non-blocking từ vòng 1)
   trở thành cơ chế PHÒNG THỦ DUY NHẤT chặn key mặc định bị đốt quota từ
   origin lạ — 2 khoản này nên vào cùng 1 ADR, không tách rời.
+  **Prototype 2026-08-11 XÁC NHẬN nhánh này xảy ra thật** (CORS echo
+  mọi origin, xem `prototypes/gemini-cors/README.md` Finding 3): điều
+  kiện giả định "NẾU không giới hạn origin" nay là dữ kiện đo được —
+  referrer restriction chính thức là ràng buộc BẮT BUỘC của ADR backend
+  AI, không còn là deferred item.
 - **`systems-index.md` chưa liệt kê cạnh phụ thuộc Turn Manager → AI/LLM
   Integration Layer** trong Dependency Map (xem Section Dependencies ở
   trên) — cùng dạng phụ thuộc một chiều đã gặp 2 lần trước. *(Owner:

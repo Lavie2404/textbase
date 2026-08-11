@@ -79,7 +79,16 @@ game càng "vô hình" ở khoản này càng đúng chức năng.
    EXP...) trong văn xuôi — số liệu chỉ hiển thị qua UI riêng (Character
    Card, theo Visual Identity Anchor của `game-concept.md`). Loại bỏ khả
    năng AI vô tình "nói khác" con số thật, vì con số thật không bao giờ
-   xuất hiện trong câu chữ để mâu thuẫn.
+   xuất hiện trong câu chữ để mâu thuẫn. *(Ghi nhận nghĩa vụ ủy quyền,
+   thêm 2026-08-11 — cascade đóng Open Question #12 của
+   `character-card-identity.md`: với NPC đang che giấu thực lực
+   [`concealment.active=true`], wrapper của AI/LLM Integration Layer
+   PHẢI chèn `npc_tag.concealment_narrative_hint` + chỉ thị "không mô tả
+   thực lực thật qua văn xuôi" vào `narration_call` — xem Core Rule #2
+   bên đó. Giới hạn tự khai: hậu kiểm leak của hệ NÀY thuần số học
+   [`extract_numerals`] nên KHÔNG bắt được leak dạng văn xuôi mô tả thực
+   lực — enforcement cho lớp leak này nằm ở chỉ thị prompt do wrapper
+   chèn, cùng lớp với ủy quyền "cấm viết số bằng chữ" đã có.)*
 5. **Enforcement qua kiến trúc, không qua prompt engineering đơn thuần**:
    Nguyên tắc này không được coi là "đã đủ" chỉ vì đã viết rõ trong system
    prompt — prompt là gợi ý, AI vẫn có thể lệch. Enforcement thật sự nằm ở

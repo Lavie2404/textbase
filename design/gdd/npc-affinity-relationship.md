@@ -112,7 +112,9 @@ chỉ giữ được sức nặng chừng nào con số không bao giờ nói d�
    qua Death & Consequence, hành động Song Tu); (b) **sự kiện xã hội đã
    phân loại** (tặng quà, giúp đỡ, cứu mạng, xúc phạm, phản bội, đe
    dọa...) do Situation/Encounter Generation phân loại từ hành động
-   người chơi (**interface provisional** — hệ đó nay đã Designed). Hệ này
+   người chơi (đã hình thức hóa — gỡ nhãn provisional 2026-08-11,
+   `/consistency-check`: interface nay đặc tả đầy đủ tại
+   `situation-encounter-generation.md`). Hệ này
    chỉ sở hữu bảng ánh xạ **loại sự kiện → delta cơ bản** (Formulas D.1)
    — không tốn AI call, không vi phạm Khế Ước.
 3. **Hiệu suất giảm dần, không decay**: delta dương giảm hiệu lực khi
@@ -136,7 +138,9 @@ chỉ giữ được sức nặng chừng nào con số không bao giờ nói d�
    PHẠM, tường thuật có thể nhắc đến cái chết bí ẩn), thủ phạm ẩn danh
    là một chiến lược hợp lệ của thế giới khách quan. Danh sách nhân
    chứng = các NPC trong `entities_in_scope` của cảnh (nguồn: Situation
-   Gen, provisional).
+   Gen — đã hình thức hóa, gỡ nhãn provisional 2026-08-11,
+   `/consistency-check`: interface nay đặc tả đầy đủ tại
+   `situation-encounter-generation.md`).
 5. **Ngưỡng thù địch sâu sắc — bao gồm cận biên**: trạng thái "thù địch
    sâu sắc" ⇔ `affinity ≤ -80` (BAO GỒM -80; đóng câu hỏi tính bao
    gồm/loại trừ từ review log của game-concept). Đây là cờ mà Death &
@@ -249,8 +253,10 @@ instance):
   sự kiện Hảo cảm (thua/thắng trước NPC, mức độ theo margin). Combat
   không đọc/ghi Hảo cảm (ranh giới đã vẽ ở `combat-system.md` Section D
   đầu mục).
-- **Death & Consequence** (downstream+upstream, đã Designed,
-  provisional): ĐỌC cờ thù địch sâu sắc (`affinity ≤ -80`) để quyết
+- **Death & Consequence** (downstream+upstream, đã Approved 2026-08-09;
+  đã hình thức hóa — gỡ nhãn provisional 2026-08-11, `/consistency-check`:
+  interface nay đặc tả đầy đủ tại `death-and-consequence.md`): ĐỌC cờ
+  thù địch sâu sắc (`affinity ≤ -80`) để quyết
   định nguy cơ chết thật; PHÁT sự kiện "NPC bị giết bởi nhân vật chính"
   (kèm cờ có nhân chứng) để hệ này xử lý lan truyền.
 - **EXP & Realm Progression** (downstream, Designed): đọc
@@ -261,11 +267,14 @@ instance):
 - **World Memory** (upstream, hard): schema field
   `affinity_delta_[npc_id]` khớp quy ước entity_id; hệ này truy vấn
   fact theo `entity_id` khi cần lịch sử tương tác của 1 NPC.
-- **Situation/Encounter Generation** (upstream, đã Designed,
-  **provisional**): cung cấp (a) phân loại sự kiện xã hội từ hành động
-  người chơi, (b) danh sách NPC trong cảnh (`entities_in_scope`) làm
-  danh sách nhân chứng. Cho đến khi hệ đó được thiết kế, MVP có thể
-  chạy bằng bảng sự kiện cơ học cứng (nguồn a của Core Rule #2).
+- **Situation/Encounter Generation** (upstream, đã Approved; đã hình
+  thức hóa — gỡ nhãn provisional 2026-08-11, `/consistency-check`:
+  interface nay đặc tả đầy đủ tại
+  `situation-encounter-generation.md`): cung cấp (a) phân loại sự kiện
+  xã hội từ hành động người chơi, (b) danh sách NPC trong cảnh
+  (`entities_in_scope`) làm danh sách nhân chứng. (Trước khi hệ đó được
+  thiết kế, MVP giai đoạn đầu có thể chạy bằng bảng sự kiện cơ học cứng
+  — nguồn a của Core Rule #2.)
 - **Character Card & Identity** (downstream, đã Designed): đọc Hảo
   cảm (số), dải thái độ, trạng thái nút Song Tu.
 - **Mechanic/Narration Contract Enforcement** (upstream, hard): mọi
@@ -302,7 +311,7 @@ adjustment nếu event_type = combat_win_vs_npc]`
 
 | event_type | Nguồn | `base_delta` | `severity` | Chịu D.2/D.3/D.4? |
 |---|---|---|---|---|
-| `gift` (tặng quà) | Situation Gen (provisional) | `+GIFT_DELTA` = +5 | 0 | Có (dương) |
+| `gift` (tặng quà) | Situation Gen (đã hình thức hóa — gỡ nhãn provisional 2026-08-11, `/consistency-check`: interface nay đặc tả đầy đủ tại `situation-encounter-generation.md`) | `+GIFT_DELTA` = +5 | 0 | Có (dương) |
 | `small_help` (giúp đỡ nhỏ) | Situation Gen | `+SMALL_HELP_DELTA` = +3 | 0 | Có |
 | `save_life` (cứu mạng) | Situation Gen / Combat | `+SAVE_LIFE_DELTA` = +15 | 0 | Có |
 | `combat_win_vs_npc` (thắng trận trước NPC theo dõi) | Combat hand-off (`outcome=win`) | `-(COMBAT_WIN_BASE + COMBAT_WIN_MARGIN_SCALE × margin_ratio)` = -5 → -15 | 2; nâng lên 3 nếu `margin_ratio ≥ SEVERE_WIN_MARGIN_THRESHOLD` (thắng áp đảo = làm nhục công khai) | Không (âm) |
@@ -335,7 +344,7 @@ severity = 3 nếu margin_ratio ≥ SEVERE_WIN_MARGIN_THRESHOLD, ngược lại 
 
 | Variable | Symbol | Type | Range | Description |
 |---|---|---|---|---|
-| Loại sự kiện | `event_type` | enum | bảng trên | Từ Combat/Death & Consequence (hard) hoặc Situation Gen (social, provisional) |
+| Loại sự kiện | `event_type` | enum | bảng trên | Từ Combat/Death & Consequence (hard) hoặc Situation Gen (social; đã hình thức hóa — gỡ nhãn provisional 2026-08-11, `/consistency-check`: interface nay đặc tả đầy đủ tại `situation-encounter-generation.md`) |
 | Tỷ lệ HP còn lại người thắng | `margin_ratio` | float | [0,1] | `float(per_actor[winner_id].hp_after)/max(max_HP(winner_id),1)` — `hp_after` từ `locked_result` hand-off của Combat (lồng trong `per_actor`), `max_HP` từ Character Card & Identity — PHẢI ép kiểu float() trước chia (sửa 2026-08-08; field-shape sửa 2026-08-09, xem sub-formula) |
 | Delta nền thắng trận | `COMBAT_WIN_BASE` | float (knob) | 2–10 | Delta âm tối thiểu khi thắng sát nút |
 | Hệ số margin | `COMBAT_WIN_MARGIN_SCALE` | float (knob) | 0–15 | Delta âm thêm khi thắng áp đảo |
@@ -678,7 +687,9 @@ affinity_delta_D: +5}` → `A_after`: A=-17, C=29, D=25 — 3 field trong
 - **Nếu Situation Gen chưa tồn tại** (MVP giai đoạn đầu): chỉ nguồn sự
   kiện cơ học cứng hoạt động (combat/giết/Song Tu) — hệ vẫn chạy đầy đủ
   với tập sự kiện hẹp; sự kiện xã hội bật lên khi Situation Gen được
-  thiết kế (đã khai provisional ở Section C).
+  thiết kế — điều kiện nay đã thỏa (đã hình thức hóa — gỡ nhãn
+  provisional 2026-08-11, `/consistency-check`: interface nay đặc tả đầy
+  đủ tại `situation-encounter-generation.md`).
 - **Nếu cùng lượt có nhiều đóng góp cho cùng NPC** (VD witness delta +
   cruelty rep): cộng dồn trong `contributions[npc_id]` trước
   cap/round/clamp — 1 field duy nhất/NPC/lượt, không bao giờ ghi 2 field

@@ -126,7 +126,16 @@ phải trả giá (AC-33: mỗi lần cứu-lại đòi 1 sinh mạng thật).
    La Đại Lục), 1 vùng, data tối thiểu đủ cho 3 NPC + 2–3 sự kiện canon.
 2. **Hồ sơ nhân vật nguyên tác**: `{char_id, true_identity, danh sách bí
    danh/cải trang, is_major_canon, hồ sơ level/tier, vai trong các sự
-   kiện}`. **Đặc quyền xuyên không**: với `is_major_canon=true`,
+   kiện}`. **Cam kết hợp đồng — alias list là TĨNH per setting pack ở
+   MVP** *(thêm 2026-08-11, cascade đóng Open Question #11 của
+   `character-card-identity.md`, quyết định user)*: `danh sách bí
+   danh/cải trang` là data tồn kho của setting pack (nhất quán
+   Dependencies "setting pack là data tĩnh không cần lưu"), KHÔNG có
+   writer runtime — hệ quả ràng buộc content: **không nhân vật nào trong
+   content MVP được "ngừng cải trang giữa truyện"**, để suy diễn
+   `disguise_active(C) := len(alias_list(C)) > 0` của Character Card D.2
+   luôn đúng. Nếu Alpha cần cơ chế ngừng-cải-trang, hệ NÀY phải sở hữu 1
+   cờ runtime + serialize (xem Open Questions). **Đặc quyền xuyên không**: với `is_major_canon=true`,
    Character Card của người chơi LUÔN hiển thị danh tính thật kể cả khi
    đang cải trang; NPC thường thì chỉ hiển thị "đang che giấu/dịch
    dung". Đặc quyền là THÔNG TIN người chơi — không đổi world-state:
@@ -252,7 +261,9 @@ phải trả giá (AC-33: mỗi lần cứu-lại đòi 1 sinh mạng thật).
    earliest_world_time` → hệ này phán quyết trạng thái cuối (Canon
    nguyên bản / Substituted / Vanished / Branched) trong cùng lượt,
    khóa kết quả, phát cho Situation/Encounter Generation dựng tình
-   huống tương ứng (provisional — hệ đó nay đã Designed).
+   huống tương ứng (interface đã hình thức hóa — hệ đó Designed +
+   `/design-review` round 1 đóng cơ chế 2026-08-10; gỡ nhãn provisional
+   2026-08-11, cascade từ round 2 bên đó).
 8. **`breakthrough_requirement` data**: mỗi setting định nghĩa predicate
    cơ học theo tier (VD Đấu La: đã hấp thụ Hồn Hoàn phù hợp cho tier
    kế). Hệ này cung cấp evaluation `breakthrough_requirement_met(tier)`
@@ -304,13 +315,17 @@ xem D.4).
 - **NPC Affinity & Relationship** (upstream, Designed): đọc `affinity`,
   `song_tu_active`, cờ thù địch sâu sắc làm predicate premise (VD tiền
   đề "Tiểu Vũ chưa thuộc về ai" phá bằng quan hệ Song Tu).
-- **Death & Consequence** (upstream, đã Designed, provisional): nguồn
+- **Death & Consequence** (upstream, đã Approved 2026-08-09; đã hình
+  thức hóa — gỡ nhãn provisional 2026-08-11, `/consistency-check`:
+  interface nay đặc tả đầy đủ tại `death-and-consequence.md`): nguồn
   premise-break "chết" quan trọng nhất — sự kiện NPC chết kích hoạt
   kiểm tra eager mọi premise `alive(X)`.
-- **Situation/Encounter Generation** (downstream, đã Designed,
-  provisional): tiêu thụ trạng thái sự kiện Due/Resolved để dựng tình
-  huống đúng dòng canon; nhận `canon_outcome` narrative summary làm
-  nguyên liệu.
+- **Situation/Encounter Generation** (downstream, đã Designed — gỡ nhãn
+  provisional 2026-08-11, cascade từ `/design-review` round 1-2 bên đó:
+  cơ chế tiêu thụ Due/Resolved + `canon_role_rescue` + `location(X)` đã
+  đặc tả đầy đủ trong GDD đó): tiêu thụ trạng thái sự kiện Due/Resolved
+  để dựng tình huống đúng dòng canon; nhận `canon_outcome` narrative
+  summary làm nguyên liệu.
 - **Character Card & Identity** (downstream, đã Designed): đọc hồ sơ
   nhân vật nguyên tác — danh tính thật (major canon), trạng thái cải
   trang, hồ sơ tier.
@@ -336,7 +351,7 @@ sở hữu dữ liệu — đúng vai "trọng tài", không phải "chủ đấ
 | `alive(X)` | Death & Consequence (đã Designed) | cờ boolean per-char |
 | `affinity(X) so ngưỡng` | NPC Affinity & Relationship | `A_after` sau `resolve_turn_affinity` |
 | `possesses(X, item)` | Equipment/Inventory | cờ sở hữu + cờ `destroyed` |
-| `location(X)` | Situation Gen (provisional) | vị trí hiện tại |
+| `location(X)` | Situation Gen (Core Rule #7 bên đó — đặc tả đầy đủ, gỡ provisional 2026-08-11) | vị trí hiện tại |
 | `world_time` | Turn Manager | `world_time_advancement` (registry) |
 | `event_completed(E)` | **Chính hệ này** | `status(E)` — xem D.1 |
 | `song_tu_active(X, npc)` | NPC Affinity | tập active (registry `song_tu_active`) |
@@ -725,7 +740,9 @@ resolve_turn_canon(turn):
         on_break=substitute → transition_event_status(event, Dormant-Modified, "eager_break")
 
   // STEP 1b — Người chơi cứu sự kiện (Core Rule #4b):
-  IF classified_event(turn) == canon_role_rescue(event_E, char_C)            // nguồn: Situation Gen, provisional
+  IF classified_event(turn) == canon_role_rescue(event_E, char_C)            // nguồn: Situation Gen (char_C resolve qua
+                                                                             // deterministic string-match, Core Rule #4 bên
+                                                                             // đó — gỡ provisional 2026-08-11)
      AND status(E) == Suspended AND eligible(C, E.vacant_core_role):         // D.3, cơ học
     transition_event_status(E, Dormant-Modified, "rescue_success")           // hợp lệ theo bảng States (Suspended
                                                                                // → Dormant-Modified CHỈ qua nhánh này)
@@ -1556,11 +1573,21 @@ có, chỉ xác nhận điều kiện ĐỌC đúng blob active)*
   khi Death & Consequence/EXP/Combat chốt schema `locked_result` thật
   của họ. *(Owner: systems-designer, target: `/design-system
   death-and-consequence` + `/consistency-check`)*
-- **Phân loại `canon_role_rescue` từ hành động tự do** — thuộc
-  Situation/Encounter Generation (provisional), cùng nhóm với taxonomy
-  sự kiện xã hội của NPC Affinity. *(Owner: narrative-director +
-  systems-designer, target: `/design-system
-  situation-encounter-generation`)*
+- **Phân loại `canon_role_rescue` từ hành động tự do** — **ĐÃ ĐÓNG
+  2026-08-10/11** (ghi nhận cascade 2026-08-11): Situation/Encounter
+  Generation Core Rule #4 đặc tả deterministic string-match (0 AI call),
+  khớp 0/≥2 tên hạ `rp_only` có kiểm soát — xem GDD đó + AC-40b bên đó.
+  Giữ bullet làm vết lịch sử.
+- **Cơ chế "ngừng cải trang giữa truyện" cho Alpha** (mới 2026-08-11,
+  cascade từ Open Question #11 của `character-card-identity.md`): MVP
+  cam kết alias list TĨNH per setting pack (Core Rule #2 — không content
+  MVP nào có nhân vật ngừng cải trang). Nếu Alpha cần diễn biến này, hệ
+  NÀY phải sở hữu 1 cờ/trạng thái runtime (per char, per alias) + writer
+  tường minh + serialize vào blob của hệ này (phá giả định "setting pack
+  là data tĩnh không cần lưu" ở Dependencies — cần sửa đồng thời), và
+  Character Card D.2 đổi nguồn `disguise_active` từ suy diễn alias-list
+  sang đọc cờ này. *(Owner: hệ này + Character Card, target: khi
+  authoring content Alpha đầu tiên có nhân vật ngừng cải trang)*
 - **Cờ `destroyed` cho vật phẩm** — premise `possesses` cần nhưng
   `equipment-skill-data-system.md` (**Approved**) chưa có. **Nâng mức
   2026-08-08** (`/design-review` vòng 1, `creative-director`): vì hệ sở

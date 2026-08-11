@@ -1,10 +1,13 @@
 # ADR-0001: Combat mechanics are specified by executable GDScript, not prose pseudocode
 
 ## Status
-Proposed
+Accepted (2026-08-11 — the Migration Plan was executed in full under the user's
+standing directive to close Combat per this ADR, and all three Validation
+Criteria were met empirically; see "Validation Results" appendix at the end of
+this document)
 
 ## Date
-2026-08-06
+2026-08-06 (Proposed) / 2026-08-11 (Accepted)
 
 ## Engine Compatibility
 
@@ -176,3 +179,43 @@ If criterion 2 fails, that is the sole signal that should reverse this decision.
 - `design/gdd/reviews/combat-system-review-log.md` — full 4-round review history this ADR is a direct response to.
 - `prototypes/combat-reference/harness.py` + `results.md` — frozen evidence base (see Decision).
 - Future ADRs for EXP & Realm Progression / NPC Affinity & Relationship may cite this one if those systems' review cycles show the same defect-density pattern.
+
+---
+
+## Validation Results (2026-08-11 — appended at Acceptance)
+
+The Migration Plan was executed 2026-08-11: `project.godot` bootstrapped,
+GUT 9.7.1 installed, `src/gameplay/combat/*.gd` implemented (7 source files:
+tuning config, combatant snapshot, formulas D.1–D.7/D.10–D.13, resolver
+D.8/D.9/D.9b/D.9c, NPC D.14 + Core Rule #2, action slots, narration keyword
+table), `tests/unit/combat/` written (13 test files + shared factory), the
+AC-47a/47b sweeps migrated to `tools/combat/convergence_sweep.gd`, and the D2
+lint delivered as `tools/lint/combat_lint.py` (verified to catch both defect
+classes on a seeded bad file; runs clean on the real code).
+
+**Final GUT run: Scripts 14 | Tests 91 | Passing 91 | Asserts 829 — all
+green** (independently re-run and confirmed by the orchestrating session).
+
+Against the three Validation Criteria:
+
+1. **≥5 round-4 backlog items caught by compiler/typing/lint — MET (9)**:
+   missing `hp`/`exchange_id` params; `hp_pct_pre_drain` missing
+   `float()`+`max(max_HP,1)` (the disguised-coin-flip defect this ADR was
+   written over — now a dedicated regression test); undeclared `self`/`other`
+   in D.9b/D.9c; `outcome` unassigned on the common branch; `thuc_id`/`rng`
+   never threaded; D.14 bounds clamp; D.14 `P(thức_i)` property→executable
+   pick; AC-09b keyword list→executable data; D.12 int-division-before-ceil.
+2. **No architectural defect — MET**: the exchange-loop /
+   lock-before-narrate / D.9-D.9b-D.9c structure translated to typed GDScript
+   unchanged. The reversal trigger was NOT activated. One additional *local*
+   prose bug was found and fixed in code (D.7 lifesteal recorded but never
+   applied to HP) — mechanical class, logged in the GDD Section D banner.
+3. **Faster than one review round — MET**: ~35 minutes from first source file
+   to full-suite green; the 91-test suite passed its first complete run.
+
+Convergence evidence vs the frozen harness: AC-47a deterministic sweep
+96/108 converging (EXACT match with frozen Q1-FIXED; all 12 non-converging
+combos are flagged cross-constraint-#2 violations, none silent); Q3b
+SPD-fairness 155/300 vs 145/300 (51.7%/48.3%, consistent with frozen
+52.3%/47.7%, vs 0/300 pre-fix); AC-47b Monte Carlo advisory sweep consistent.
+`harness.py` remains frozen/archival as decided.

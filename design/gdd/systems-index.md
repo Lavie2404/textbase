@@ -30,18 +30,18 @@ verdict PROCEED).
 | 1 | Turn Manager / Core Game Loop (inferred) | Core | MVP | Approved | [turn-manager.md](turn-manager.md) | — |
 | 2 | Mechanic/Narration Contract Enforcement (inferred) | Core | MVP | Approved | [mechanic-narration-contract-enforcement.md](mechanic-narration-contract-enforcement.md) | — |
 | 3 | Equipment & Skill Data System (inferred) | Gameplay | MVP | Approved | [equipment-skill-data-system.md](equipment-skill-data-system.md) | — |
-| 4 | AI/LLM Integration Layer | Core | MVP | Designed | [ai-llm-integration-layer.md](ai-llm-integration-layer.md) | Mechanic/Narration Contract Enforcement |
-| 5 | World Memory & Context Management (inferred) | Core | MVP | Designed | [world-memory-context-management.md](world-memory-context-management.md) | Turn Manager |
-| 6 | Persistence / Save System | Persistence | MVP | Designed | [persistence-save-system.md](persistence-save-system.md) | Turn Manager |
-| 7 | Combat System | Gameplay | MVP | Designed | [combat-system.md](combat-system.md) | Equipment & Skill Data, AI Integration Layer, Turn Manager, Contract Enforcement |
-| 8 | EXP & Realm Progression | Progression | MVP | Designed | [exp-realm-progression.md](exp-realm-progression.md) | Combat System, Turn Manager |
-| 9 | NPC Affinity & Relationship | Progression | MVP | Designed | [npc-affinity-relationship.md](npc-affinity-relationship.md) | Turn Manager, World Memory |
-| 10 | Setting & Canon Integration | Narrative | MVP | Designed | [setting-canon-integration.md](setting-canon-integration.md) | World Memory |
-| 11 | Situation/Encounter Generation (inferred) | Narrative | MVP | Designed | [situation-encounter-generation.md](situation-encounter-generation.md) | AI Integration Layer, Turn Manager, World Memory |
-| 12 | Death & Consequence | Gameplay | MVP | Designed | [death-and-consequence.md](death-and-consequence.md) | Combat System, NPC Affinity |
+| 4 | AI/LLM Integration Layer | Core | MVP | Approved | [ai-llm-integration-layer.md](ai-llm-integration-layer.md) | Mechanic/Narration Contract Enforcement |
+| 5 | World Memory & Context Management (inferred) | Core | MVP | Approved | [world-memory-context-management.md](world-memory-context-management.md) | Turn Manager |
+| 6 | Persistence / Save System | Persistence | MVP | Designed — prototype PASS, ADR-0002 Proposed (2026-08-11) | [persistence-save-system.md](persistence-save-system.md) | Turn Manager |
+| 7 | Combat System | Gameplay | MVP | Implemented (GUT green, ADR-0001 Accepted 2026-08-11) | [combat-system.md](combat-system.md) | Equipment & Skill Data, AI Integration Layer, Turn Manager, Contract Enforcement |
+| 8 | EXP & Realm Progression | Progression | MVP | Approved | [exp-realm-progression.md](exp-realm-progression.md) | Combat System, Turn Manager |
+| 9 | NPC Affinity & Relationship | Progression | MVP | Approved | [npc-affinity-relationship.md](npc-affinity-relationship.md) | Turn Manager, World Memory |
+| 10 | Setting & Canon Integration | Narrative | MVP | Approved | [setting-canon-integration.md](setting-canon-integration.md) | World Memory |
+| 11 | Situation/Encounter Generation (inferred) | Narrative | MVP | Approved | [situation-encounter-generation.md](situation-encounter-generation.md) | AI Integration Layer, Turn Manager, World Memory |
+| 12 | Death & Consequence | Gameplay | MVP | Approved | [death-and-consequence.md](death-and-consequence.md) | Combat System, NPC Affinity |
 | 13 | Character Continuation (inferred) | Gameplay | MVP | Approved | [character-continuation.md](character-continuation.md) | Death & Consequence |
-| 14 | Character Card & Identity | UI | MVP | Designed | [character-card-identity.md](character-card-identity.md) | Equipment & Skill Data, NPC Affinity, Setting & Canon Integration |
-| 15 | Core UI/Screen Navigation (inferred) | UI | MVP | Designed | [core-ui-screen-navigation.md](core-ui-screen-navigation.md) | Combat System, Character Card, Situation Generation |
+| 14 | Character Card & Identity | UI | MVP | Approved | [character-card-identity.md](character-card-identity.md) | Equipment & Skill Data, NPC Affinity, Setting & Canon Integration |
+| 15 | Core UI/Screen Navigation (inferred) | UI | MVP | Approved | [core-ui-screen-navigation.md](core-ui-screen-navigation.md) | Combat System, Character Card, Situation Generation |
 
 ---
 
@@ -359,8 +359,8 @@ tục review-thuần-văn-bản — xem chi tiết
 |--------|-------|
 | Total systems identified | 15 |
 | Design docs started | 15 |
-| Design docs reviewed | 3 |
-| Design docs approved | 3 |
+| Design docs reviewed | 15 |
+| Design docs approved | 13 (2026-08-11: +AI/LLM Integration Layer qua cổng CORS prototype PASS; còn lại: Persistence [prototype PASS + ADR-0002 Proposed — chờ user accept ADR], Combat [ĐÃ implement, GUT 91/91 xanh, ADR-0001 Accepted]) |
 | MVP systems designed | 15/15 |
 | Vertical Slice systems designed | 0/0 |
 

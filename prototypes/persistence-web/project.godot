@@ -1,0 +1,13 @@
+; Prototype project — persistence-web. Throwaway per .claude/rules/prototype-code.md.
+config_version=5
+
+[application]
+
+config/name="persistence-web-proto"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.6", "GL Compatibility")
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

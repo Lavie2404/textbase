@@ -1,8 +1,8 @@
 # Character Card & Identity
 
-> **Status**: Designed — Revised, chờ re-review
+> **Status**: **Approved** (2026-08-11 — 4 Open Question liên-hệ-thống #10-13 [điều kiện Approve duy nhất còn lại sau round 2/2] đã đóng qua cascade 4 tài liệu + 3 quyết định user; không phát sinh mâu thuẫn ngược, đúng tiêu chí "không cần vòng 3" của round 2; user xác nhận Approved qua `AskUserQuestion` — xem `reviews/character-card-identity-review-log.md`)
 > **Author**: duchx + Claude Code agents (ux-designer, game-designer routing)
-> **Last Updated**: 2026-08-10 — `/design-review` round 1 full mode (6 specialist + creative-director) hoàn tất, 7 cụm blocking sửa live cùng phiên; xem `reviews/character-card-identity-review-log.md`
+> **Last Updated**: 2026-08-11 — đóng OQ #10-13 (storage chốt theo Persistence [đã khóa 2026-08-05, đối chiếu lại]; alias TĨNH MVP theo cam kết Setting & Canon; hint được AI/LLM + Contract Enforcement cam kết tiêu thụ; Rule #2 hạ phạm vi "chỉ nhân vật có char_id"); thêm OQ #14 (durability timing, hẹp)
 > **Implements Pillar**: Pillar 4 (Tường Thuật Sống Động — bề mặt số liệu duy nhất), Pillar 1 (Thế Giới Khách Quan — đặc quyền xuyên không chỉ là thông tin)
 
 ## Overview
@@ -78,11 +78,22 @@ trực tiếp Bartle Achievers (theo dõi tiến độ tối ưu Lực chiến) 
    thái của Turn Manager.
 2. **Luật tồn tại thẻ**: Thẻ được tạo tự động (một lần, không xóa) khi nhân
    vật lần đầu **xuất hiện trong một lượt đã confirm-và-không-undo** (tức có
-   entity record trong World Memory). Điều kiện này tự động bao phủ ràng
-   buộc của Combat (mọi bên tham chiến đều đã xuất hiện trong lượt → luôn có
-   thẻ đầy đủ `level`/`tier` trước khi trận đấu bắt đầu). Nhân vật nguyên
-   tác chưa gặp KHÔNG có thẻ (đặc quyền xuyên không là kiến thức meta của
-   người chơi, không phải danh bạ tra cứu trong game).
+   entity record — blob Entity Record, storage thuộc Persistence, xem Rule
+   #8a). **Phạm vi: chỉ nhân vật có `char_id`** *(hạ phạm vi 2026-08-11,
+   đóng Open Question #13, quyết định user: đối thủ ambient VÔ DANH sinh
+   thủ tục — Situation Gen D.7/D.4b, "một toán cướp", "yêu thú hoang" —
+   KHÔNG có `char_id`, KHÔNG có entity record, KHÔNG có thẻ; Combat tự
+   dựng chỉ số cho lớp này từ `level + stat_growth` [combat-system.md
+   Dependencies]. Anchor moment 1 "soát địch trước khi rút kiếm" vẫn bảo
+   toàn cho lớp này ở TẦNG THIẾT KẾ, không cần thẻ: D.7 cap level ambient
+   ≤ `player_level + AMBIENT_HOSTILE_LEVEL_CAP` [trần cứng ≤ +20] nên
+   "nguy hiểm đọc được" giữ nguyên — đối thủ vô danh không bao giờ là bẫy
+   vượt tầm)*. Với nhân vật CÓ `char_id`, điều kiện tồn tại thẻ tự động
+   bao phủ ràng buộc của Combat (mọi bên tham chiến có danh tính đều đã
+   xuất hiện trong lượt → luôn có thẻ đầy đủ `level`/`tier` trước khi
+   trận đấu bắt đầu). Nhân vật nguyên tác chưa gặp KHÔNG có thẻ (đặc
+   quyền xuyên không là kiến thức meta của người chơi, không phải danh bạ
+   tra cứu trong game).
 3. **Cấu trúc khối cố định** (thứ tự trên thẻ): ① Hồ sơ (Tên, Giới tính,
    Thân phận, Thái độ với nhân vật chính — chỉ thẻ NPC, tóm tắt dạng text
    ngắn (VD "Thù địch", "Thân thiết") lấy từ CÙNG NGUỒN dải thái độ 7 mức
@@ -143,9 +154,13 @@ trực tiếp Bartle Achievers (theo dõi tiến độ tối ưu Lực chiến) 
    Undoing). Kết liễu/Tha mạng KHÔNG nằm trên thẻ (thuộc danh sách 4 gợi ý
    chuẩn).
 8. **Sở hữu dữ liệu**: Hệ này sở hữu (a) **schema Hồ sơ nhân vật** (định
-   nghĩa field, không sở hữu storage — instance lưu trong entity record của
-   World Memory/blob Persistence; **quyền sở hữu storage giữa 2 hệ này CHƯA
-   khóa** — xem Open Question mới về ADR storage, bổ sung 2026-08-10), (b)
+   nghĩa field, không sở hữu storage — instance lưu trong blob **Entity
+   Record do Persistence sở hữu storage**, opaque với Persistence; *đã
+   khóa 2026-08-05 [cụm E `/design-review` gộp 11 GDD] tại CẢ 2 GDD
+   nguồn: `persistence-save-system.md` nhận sở hữu tường minh ở 2 chỗ,
+   `world-memory-context-management.md` từ chối sở hữu tường minh — bản
+   2026-08-10 của tài liệu này ghi "either/or chưa khóa" là LỖI THỜI so
+   với 2 file đó; đối chiếu và đóng Open Question #10 ngày 2026-08-11*), (b)
    **bộ chỉ số khởi điểm `base_X0`** cho
    12 chỉ số mỗi nhân vật (hạt giống của `stat_growth` — EXP đã bàn giao
    tường minh), (c) **schema NPC tag** nội dung (gồm
@@ -205,7 +220,7 @@ Phần tử con dùng máy trạng thái của hệ sở hữu, thẻ chỉ rend
 | Situation Gen | vào | `location` hiện tại; (tương lai) kết quả điều tra lật `concealment` | Situation Gen |
 | Character Continuation | vào | Trigger + nội dung màn hình 3 lối | Character Continuation |
 | Turn Manager | ra | Action từ nút Song Tu/Hồi phục (đi đường action chuẩn); đọc trạng thái khóa input | Turn Manager |
-| World Memory / Persistence | hai bên | Instance hồ sơ/`base_X0`/`npc_tag`/`concealment` lưu trong entity record + blob (opaque với Persistence) | World Memory / Persistence |
+| World Memory / Persistence | hai bên | Instance hồ sơ/`base_X0`/`npc_tag`/`concealment` lưu trong blob **Entity Record — storage do Persistence sở hữu** (opaque với Persistence; World Memory chỉ giữ turn record + fact-delta, KHÔNG giữ hồ sơ thường trực — chốt 2026-08-05, đối chiếu đóng OQ#10 2026-08-11) | Persistence (storage) / **Hệ này** (schema) |
 
 ## Formulas
 
@@ -222,7 +237,9 @@ NPC Affinity, Death & Consequence).
 
 Hình thức hóa Core Rule #2: thẻ được tạo đúng một lần, tự động, khi nhân
 vật lần đầu xuất hiện trong một lượt đã confirm-và-không-undo (có entity
-record trong World Memory). Vì undo chỉ khả dụng cho lượt xác nhận **gần
+record — blob Entity Record của Persistence, sửa 2026-08-11 khớp Rule
+#8a; phạm vi: chỉ nhân vật có `char_id`, đối thủ ambient vô danh nằm
+ngoài miền định nghĩa của hàm này — xem Rule #2). Vì undo chỉ khả dụng cho lượt xác nhận **gần
 nhất** (registry `undo_availability_window`), việc "undo đúng lượt tạo
 thẻ" chỉ có thể xảy ra khi đó vẫn là lượt cuối cùng — tức chưa có lượt nào
 sau đó cũng tham chiếu nhân vật này, nên công thức dưới đây không bao giờ
@@ -236,7 +253,7 @@ The `card_exists` formula is defined as:
 
 | Variable | Symbol | Type | Range | Description |
 |---|---|---|---|---|
-| Mã nhân vật | `char_id` | string | ID hợp lệ trong World Memory | Nhân vật cần tra thẻ |
+| Mã nhân vật | `char_id` | string | ID định danh hợp lệ (entity record tồn tại trong blob Entity Record) | Nhân vật cần tra thẻ — đối thủ ambient vô danh KHÔNG có `char_id`, ngoài miền hàm |
 | Tập nhân vật xuất hiện trong lượt | `entities_appearing(t)` | set\<string\> | ⊆ `entities_in_scope(t)` ∪ ID trong `locked_result(t)` | Ai xuất hiện trong lượt `t` |
 | Lượt đã xác nhận | `confirmed(t)` | bool | {0,1} | Lượt `t` đã qua Turn Manager xác nhận |
 | Lượt đã undo | `undone(t)` | bool | {0,1} | Lượt `t` đã bị undo |
@@ -307,7 +324,7 @@ displayed_field(C, field):
 | Nhân vật | `C` | character | entity hợp lệ (`card_exists(C)=true`) | Nhân vật đang xem thẻ |
 | Field đang xét | `field` | enum | mọi field schema Hồ sơ trên thẻ | Field cụ thể cần chọn giá trị hiển thị |
 | Cờ nhân vật nguyên tác lớn | `is_major_canon(C)` | bool | {0,1} | Nguồn: Setting & Canon |
-| Cờ đang cải trang bằng bí danh | `disguise_active(C)` | bool | {0,1} | **Card tự suy ra** (sửa 2026-08-10, đóng gap: `setting-canon-integration.md` KHÔNG export field runtime này — hệ đó chỉ có `true_identity` + "danh sách bí danh/cải trang" dạng tồn kho, không có cờ "đang dùng bí danh NGAY LÚC NÀY") — định nghĩa: `disguise_active(C) := len(alias_list(C)) > 0`, tức nhân vật major-canon còn ≥1 bí danh active trong danh sách do Setting & Canon sở hữu. Hệ quả/rủi ro: nếu 1 nhân vật NGỪNG cải trang giữa truyện, Setting & Canon phải chủ động XÓA alias khỏi danh sách để cờ này chuyển `false` — không có cơ chế toggle độc lập nào khác. Đây là 1 giả định MVP đơn giản hóa, chưa xác nhận với Setting & Canon owner — xem Open Question mới |
+| Cờ đang cải trang bằng bí danh | `disguise_active(C)` | bool | {0,1} | **Card tự suy ra** (sửa 2026-08-10, đóng gap: `setting-canon-integration.md` KHÔNG export field runtime này — hệ đó chỉ có `true_identity` + "danh sách bí danh/cải trang" dạng tồn kho, không có cờ "đang dùng bí danh NGAY LÚC NÀY") — định nghĩa: `disguise_active(C) := len(alias_list(C)) > 0`, tức nhân vật major-canon còn ≥1 bí danh active trong danh sách do Setting & Canon sở hữu. Hệ quả/rủi ro: nếu 1 nhân vật NGỪNG cải trang giữa truyện, Setting & Canon phải chủ động XÓA alias khỏi danh sách để cờ này chuyển `false` — không có cơ chế toggle độc lập nào khác. **Đã xác nhận với owner 2026-08-11** (đóng Open Question #11, quyết định user): `setting-canon-integration.md` cam kết tường minh alias list là TĨNH per setting pack ở MVP — không nhân vật nào "ngừng cải trang giữa truyện" trong content MVP, nên suy diễn này an toàn theo hợp đồng; cơ chế ngừng-cải-trang nếu Alpha cần (cờ runtime + serialize) là Open Question CÓ OWNER bên đó |
 | Giá trị thật đã khóa | `true_value(C, field)` | any | miền của `field` | Giá trị thật, khóa bởi hệ sở hữu field đó |
 | Giá trị bí danh (đặc quyền xuyên không) | `disguise_value(C, field)` | any | miền của `field` | Chỉ tồn tại khi `field ∈ IDENTITY_FIELDS`, nguồn Setting & Canon |
 | Cờ đang che giấu | `concealment.active(C)` | bool | {0,1} | Schema sở hữu bởi hệ này (Rule #8d) |
@@ -599,7 +616,7 @@ Core Mechanics #7) nếu thiếu; Soft = suy giảm tiện ích nhưng thẻ v�
 | Equipment & Skill Data | **Hard** | `equipped_weapon_id`, `known_skill_ids` + bảng tên hiển thị | ✅ |
 | Death & Consequence | **Hard** | `alive`, `death_and_consequence_blocked`, `pending_fate`, `efficacy`, `recovery_self_attempt_allowed` | ✅ |
 | Turn Manager | **Hard** | Nhận action từ nút (Song Tu/Hồi phục) qua đường action chuẩn; đọc trạng thái khóa input + undo (D.1) | Turn Manager giữ "Depends On: —" theo quy ước Foundation — ghi nhận gap tại systems-index như 12 gap trước |
-| World Memory | **Hard** | Entity record (nguồn `card_exists` D.1, storage instance hồ sơ) | Chưa liệt kê chiều ngược — cần footnote systems-index. **Quyền sở hữu storage với Persistence CHƯA khóa** (xem Open Question mới) |
+| World Memory | **Hard** | `entities_appearing(t)` từ turn record (input `card_exists` D.1); storage instance hồ sơ KHÔNG ở đây — thuộc blob Entity Record của Persistence (sửa 2026-08-11, khớp Rule #8a/OQ#10 đã đóng: quyền sở hữu storage ĐÃ khóa từ 2026-08-05, dòng này sót trong đợt cascade — bắt bởi `/consistency-check`) | Chưa liệt kê chiều ngược — cần footnote systems-index |
 | Situation/Encounter Generation | Soft | `location` hiện tại; (tương lai) kết quả điều tra lật `concealment` | ✅ |
 | Character Continuation | **Hard** (chiều ngược) | Trigger `continuation_choice_eligible` + nội dung màn hình 3 lối (thẻ là khung render) | ✅ |
 | Mechanic/Narration Contract Enforcement | **Hard** | Core Rule #4 của thẻ ("bề mặt số liệu duy nhất") là mặt ngược Core Rule #4 bên đó; cơ chế thực thi runtime (`numeric_leak_detection`) thuộc hệ đó, thẻ chỉ là bề mặt hiển thị hợp lệ | Bổ sung theo phát hiện qa-lead 2026-08-04 (GDD này viện dẫn nhưng chưa liệt kê) |
@@ -613,8 +630,8 @@ Core Mechanics #7) nếu thiếu; Soft = suy giảm tiện ích nhưng thẻ v�
 | Death & Consequence | **Hard** (bổ sung 2026-08-10) | `max_HP(C)` ≡ field `HP` của thẻ (D.5, xem "Ghi chú interface downstream") — dùng làm mẫu số `margin_ratio`, PHẢI `>0`, nay ĐẢM BẢO bởi D.5 `base_HP0>0` strict. Trước 2026-08-10 GDD đó viện dẫn interface này mà GDD này chưa từng khai — đóng gap |
 | Combat System | **Hard** | `base_X(C)` đọc từ thẻ làm input D.1 của Combat (giá trị THẬT, không qua D.2); `max_HP(C)` (≡ field `HP`) PHẢI `>0` (precondition chia HP), nay ĐẢM BẢO bởi D.5 `base_HP0>0` strict |
 | NPC Affinity & Relationship | **Hard** (bổ sung 2026-08-10) | `max_HP(C)` ≡ field `HP` của thẻ — dùng làm mẫu số `margin_ratio`. Cùng gap/cùng fix như dòng Death & Consequence trên |
-| Mechanic/Narration Contract Enforcement | **Hard** (provisional, bổ sung 2026-08-10) | Schema `npc_tag.concealment_narrative_hint` — AI/Narration NÊN đọc field này khi dựng văn cho NPC có `concealment.active=true`, tránh mâu thuẫn thẻ-vs-văn; cơ chế enforcement thật (chặn leak dạng mô tả/tính cách khớp thực lực thật, khác `Numeric Leak Detection` hiện có chỉ bắt số) CHƯA tồn tại — hệ đó chưa cam kết tiêu thụ field mới này, xem Open Question mới |
-| AI/LLM Integration Layer | **Hard** (provisional, bổ sung 2026-08-10) | Nguồn tiêu thụ trực tiếp `npc_tag.concealment_narrative_hint` khi build prompt narration cho NPC che giấu — chưa cam kết tường minh, xem Open Question mới |
+| Mechanic/Narration Contract Enforcement | **Hard** (cam kết 2026-08-11 — gỡ provisional, đóng OQ#12; dòng này sót trong đợt cascade, bắt bởi `/consistency-check`) | Schema `npc_tag.concealment_narrative_hint` — hệ đó ĐÃ ghi nhận nghĩa vụ ủy quyền tại Core Rule #4 (wrapper phải chèn hint + chỉ thị "không mô tả thực lực thật"), kèm giới hạn tự khai: leak-check số học không bắt được leak văn xuôi — enforcement cho lớp này nằm ở chỉ thị prompt, cùng lớp ủy quyền "cấm viết số bằng chữ" |
+| AI/LLM Integration Layer | **Hard** (cam kết 2026-08-11 — gỡ provisional, đóng OQ#12; dòng này sót trong đợt cascade, bắt bởi `/consistency-check`) | Nguồn tiêu thụ trực tiếp `npc_tag.concealment_narrative_hint`: Core Rule #2 bên đó ĐÃ có gạch đầu dòng context-data tường minh (cùng khuôn `style_descriptor`) — PHẢI chèn hint + chỉ thị cố định khi cảnh chứa NPC `concealment.active=true` |
 | Core UI/Screen Navigation (#15) | **Hard** | Điểm vào mở thẻ từ mọi màn hình; thẻ là 1 trong các screen chính (sửa 2026-08-10 — hệ #15 nay đã **Approved**, không còn "chưa thiết kế") |
 | Persistence | Hai chiều | Instance `base_X0`/`npc_tag`/`concealment`/hồ sơ nằm trong blob opaque |
 
@@ -1215,7 +1232,8 @@ cho chuột/cảm ứng vs bàn phím, cả 2 đạt kết quả tương đươn
 | 7 | Kỹ thuật điểm vào tap-tên (`RichTextLabel` meta tag 4.4+) + cơ chế map tên-trong-văn-bản → `char_id` (chưa có chủ sở hữu, kể cả ở mức khai báo — cắt ngang AI/LLM Integration Layer + Contract Enforcement, bổ sung phạm vi 2026-08-10) + xử lý dual-focus 4.6 cho phần tử tương tác trên thẻ | technical-director / ADR | `/create-architecture` |
 | 8 | Danh sách field đầy đủ của **schema `npc_tag`** — hiện có `medium_override` + `concealment_narrative_hint` (mới 2026-08-10); các hệ khác có thể "đặt hàng" thêm tag | Hệ này (mở rộng theo yêu cầu) | Mở, bổ sung khi có yêu cầu mới |
 | 9 | Visual khoảnh khắc **đột phá thật** (nơi hợp lệ duy nhất của xanh ngọc) — art-director đã vẽ ranh giới ở GDD này, nội dung chi tiết chưa tồn tại vì EXP GDD bỏ qua Visual/Audio | EXP & Realm Progression (retrofit Visual/Audio, spawn art-director) | Trước `/art-bible` hoặc cùng đợt |
-| 10 | **Quyền sở hữu storage** cho entity record — "World Memory/blob Persistence" (Core Rule #8a) vẫn là either/or, CHƯA khóa ở bất kỳ tài liệu đáng tin cậy nào (bổ sung 2026-08-10, sau khi xác minh cả 2 GDD nguồn). Chặn hiện thực thật của D.1/D.5 (không rõ ghi/đọc entity record vào đâu) | technical-director / ADR | `/create-architecture` |
-| 11 | **`disguise_active(C) := len(alias_list(C))>0`** (D.2, bổ sung 2026-08-10) là suy diễn MVP đơn giản hóa từ dữ liệu tồn kho của Setting & Canon, chưa xác nhận với owner hệ đó — rủi ro: nếu 1 nhân vật ngừng cải trang giữa truyện mà Setting & Canon không chủ động xóa alias khỏi danh sách, thẻ tiếp tục hiện `dual_identity` sai. Cần xác nhận Setting & Canon cam kết giữ danh sách bí danh "sống" (xóa khi hết dùng), không chỉ tồn kho tĩnh | Setting & Canon Integration | Trước khi implement D.2 |
-| 12 | Cam kết tiêu thụ **`npc_tag.concealment_narrative_hint`** (mới, Rule #8c) khi build prompt narration cho NPC che giấu — chưa hệ nào (Mechanic/Narration Contract Enforcement, AI/LLM Integration Layer) cam kết tường minh; không có nó, AI narration có thể vô tình mô tả đúng thực lực thật qua văn xuôi dù số liệu đã bị làm giả (bổ sung 2026-08-10) | Mechanic/Narration Contract Enforcement + AI/LLM Integration Layer | Trước Vertical Slice |
-| 13 | Tiền đề anchor moment 1 ("thẻ luôn tồn tại trước khi trận bắt đầu", Rule #2 + Overview) chưa được chứng minh cross-system — `situation-encounter-generation.md` D.7 hỗ trợ chạm trán ambient không có state theo dõi trước (mai phục); 0 AC ở bất kỳ GDD nào kiểm tra tiền đề này (bổ sung 2026-08-10) | Combat System + Situation/Encounter Generation | `/consistency-check` hoặc `/review-all-gdds` kế tiếp |
+| 10 | ~~**Quyền sở hữu storage** cho entity record~~ — **ĐÃ ĐÓNG 2026-08-11**: đối chiếu lại 2 GDD nguồn cho thấy quyền sở hữu ĐÃ khóa từ 2026-08-05 (cụm E): `persistence-save-system.md` nhận sở hữu blob Entity Record tường minh ở 2 chỗ; `world-memory-context-management.md` từ chối sở hữu tường minh. Tiền đề "chưa khóa" của OQ này (ghi 2026-08-10) là lỗi thời. Rule #8a/D.1/bảng Interactions đã sửa khớp. Phần dư THẬT còn lại → OQ #14 mới (durability timing) | ~~technical-director / ADR~~ — đã đóng | — |
+| 14 | **Durability timing của Entity Record mới tạo**: Entity Record thuộc lớp blob "trạng thái hiện tại" (`fixed_blob_bytes`) của Persistence — đi theo chu kỳ full-bundle flush ĐỊNH KỲ, được phép chạy ngoài critical path của lượt. Chưa có tài liệu nào nói rõ: entity record TẠO MỚI ở lượt N có được đảm bảo bền vững ngay tại lượt N không (D.1 `card_exists` phụ thuộc "lượt đã confirm" — nếu crash giữa 2 chu kỳ flush, thẻ có thể "đã tồn tại" trong session nhưng biến mất sau reload)? (bổ sung 2026-08-11, phần dư hẹp tách từ OQ #10) | Persistence + hệ này | `/create-architecture` (cùng đợt 6 hạng mục prototype Persistence) |
+| 11 | ~~**`disguise_active(C) := len(alias_list(C))>0`** chưa xác nhận với owner~~ — **ĐÃ ĐÓNG 2026-08-11** (quyết định user): Setting & Canon cam kết tường minh (ghi chú cascade bên đó) alias list là **TĨNH per setting pack ở MVP** — không content MVP nào có nhân vật ngừng cải trang giữa truyện, suy diễn của D.2 an toàn theo hợp đồng. Cơ chế ngừng-cải-trang cho Alpha (cờ runtime do Setting & Canon sở hữu + serialize) → Open Question CÓ OWNER tại `setting-canon-integration.md` | ~~Setting & Canon Integration~~ — đã đóng | — |
+| 12 | ~~Cam kết tiêu thụ **`npc_tag.concealment_narrative_hint`**~~ — **ĐÃ ĐÓNG 2026-08-11**: `ai-llm-integration-layer.md` bổ sung gạch đầu dòng context-data tường minh (cùng khuôn `style_descriptor` của Equipment — nơi Core Rule #2 bên đó tự tuyên "mọi nghĩa vụ ủy quyền PHẢI liệt kê ở đây") cam kết chèn hint + chỉ thị "không mô tả thực lực thật NPC che giấu" vào `narration_call`; `mechanic-narration-contract-enforcement.md` ghi nhận nghĩa vụ ủy quyền + giới hạn hậu kiểm (leak-check số học không bắt được leak văn xuôi — cùng lớp với ủy quyền "cấm viết số bằng chữ") | ~~2 hệ đó~~ — đã đóng | — |
+| 13 | ~~Tiền đề anchor moment 1 chưa chứng minh cross-system~~ — **ĐÃ ĐÓNG 2026-08-11** (quyết định user, hạ phạm vi): Rule #2 nay giới hạn tường minh "chỉ nhân vật có `char_id`" — đối thủ ambient vô danh (Situation Gen D.7/D.4b) KHÔNG có thẻ, khớp nguyên văn Combat Dependencies (tự dựng chỉ số từ `level + stat_growth`). Anchor moment 1 bảo toàn cho lớp vô danh ở tầng thiết kế: D.7 cap level ≤ player+15 (trần cứng +20) nên "nguy hiểm đọc được" không cần thẻ. Mâu thuẫn 3-GDD giải thể bằng văn bản, không cần cơ chế mới | ~~Combat + Situation Gen~~ — đã đóng | — |

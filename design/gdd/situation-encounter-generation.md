@@ -1,10 +1,14 @@
 # Situation/Encounter Generation
 
-> **Status**: Designed — Revised, chờ re-review (round 1/2 `/design-review`
-> full mode hoàn tất 2026-08-10 — verdict MAJOR REVISION NEEDED, 9 cụm
-> blocking sửa cùng phiên, xem `reviews/situation-encounter-generation-review-log.md`)
+> **Status**: **Approved** (round 2/2 `/design-review` narrow verify pass
+> hoàn tất 2026-08-11 — 8/9 cụm round 1 xác nhận đóng thật; 3 blocking mới
+> [derivation `AMBIENT_ENCOUNTER_CHANCE` 1/3→1/4, safe-range liên khóa
+> `RESCUE_COOLDOWN_TURNS` trần 15→16 + ràng buộc chéo BINDING, trích dẫn
+> sai TM #9(c)] + affinity gate cho `is_rescue_candidate` sửa cùng phiên;
+> user xác nhận Approved qua `AskUserQuestion` 2026-08-11 — xem
+> `reviews/situation-encounter-generation-review-log.md`)
 > **Author**: user + agents
-> **Last Updated**: 2026-08-10
+> **Last Updated**: 2026-08-11
 > **Implements Pillar**: Pillar 1 (Thế Giới Khách Quan — scheduler khách quan, ngưỡng 20 cấp), Pillar 2 (Hệ Quả Thực Sự — cảnh mọc từ lịch sử), Pillar 5 (Tự Do Nhập Vai — văn tự do + intent chip)
 > **Creative Director Review (CD-GDD-ALIGN)**: Hoàn tất qua `/design-review` round 1 full mode (senior synthesis), 2026-08-10
 
@@ -106,10 +110,14 @@ người chơi.
    chip mơ hồ đứng trước cơ chế duy nhất có thể gây chết thật): chip
    `combat_challenge[npc]` chạm LẦN 1 mở popup xác nhận 2 lựa chọn —
    "Đấu giao hữu" (`spar_friendly=true`) / "Khiêu chiến thật"
-   (`spar_friendly=false`) — bắt buộc chọn 1, không có default ngầm;
-   khớp đúng bước "xác nhận riêng" mà Turn Manager Core Rule #9(c) đã
-   yêu cầu cho `combat_challenge` (không phải cơ chế mới, tái dùng đúng
-   hạ tầng đó).
+   (`spar_friendly=false`) — bắt buộc chọn 1, không có default ngầm.
+   *(Sửa 2026-08-11, `/design-review` round 2: bản trước viện dẫn "Turn
+   Manager Core Rule #9(c) xác nhận riêng" — trích dẫn SAI, rule đó
+   không tồn tại [TM chỉ có 9 rule phẳng; #9 nói về Undo-khi-chết].
+   Popup này là cơ chế UI MỚI do hệ này SỞ HỮU, chạy TRƯỚC khi envelope
+   được gửi — vì vậy KHÔNG mâu thuẫn với TM Core Rule #3 "xác nhận NGAY
+   khi gửi, không có bước xác nhận lại riêng": envelope chỉ được coi là
+   "gửi" sau khi người chơi chọn xong trong popup.)*
 4. **Văn tự do phân loại DUY NHẤT bằng ý định người chơi khai báo.** Ô
    nhập tự do có bộ chip intent (chỉ hiện chip nằm trong menu lượt đó;
    mặc định `rp_only`). Không chip → `rp_only`: AI tường thuật nhưng
@@ -158,10 +166,18 @@ người chơi.
    ~75% số lượt theo chính toán học D.5 mà không ai định nghĩa nó chứa
    gì): xem D.4b — pipeline 3 nhánh con theo thứ tự **(3a) NPC gặp nguy
    (rescue)** → **(3b) NPC trung lập có mặt** → **(3c) Ambient thủ tục
-   thuần túy (D.7)**. Cả 3 nhánh con CHIA SẺ (không cộng thêm) ngân sách
-   nhịp độ toàn cục của D.5 — đây là cách tầng World/Ambient không phá
-   van thở chống "máy bán quest" mà D.5 đang bảo vệ. Mỗi lượt chỉ 1 hook
-   chính (bất biến giữ nguyên qua cả 3 tầng).
+   thuần túy (D.7)**. Tầng này KHÔNG cộng thêm hoạt động thế giới ròng,
+   qua 2 cơ chế KHÁC NHAU *(diễn đạt lại 2026-08-11, round 2 — bản cũ
+   viết "cả 3 nhánh con chia sẻ ngân sách D.5" dễ khiến implementer gate
+   luôn nhánh 3c, làm `world_tier_hook` hết nhánh return ở lượt window
+   đóng và phá bất biến never-null của AC-25)*: nhánh **(3a)/(3b)** chia
+   sẻ TRỰC TIẾP ngân sách D.5 qua `cooldown_ok` ⊃ `global_window_ready`;
+   nhánh **(3c)** KHÔNG bị window gate — nó tự giới hạn bằng
+   `AMBIENT_ENCOUNTER_CHANCE` derive từ đúng nhịp của D.5 (xem
+   D.4b/Tuning Knobs), và vì thế luôn return được (`ambient_hostile`
+   hoặc `ambient_lull`) ở mọi lượt. Đây là cách tầng World/Ambient không
+   phá van thở chống "máy bán quest" mà D.5 đang bảo vệ. Mỗi lượt chỉ 1
+   hook chính (bất biến giữ nguyên qua cả 3 tầng).
 7. **Di chuyển & vị trí.** Setting pack khai đồ thị location (danh sách
    + cạnh kề). `move_to` chỉ hợp lệ tới location kề. Hệ này sở hữu
    `location(X)` cho người chơi VÀ NPC (bảng presence data-driven,
@@ -552,7 +568,8 @@ friendly). `hostility_rank(NPC_Y)=1 > 0` → chọn NPC_Y →
 Đóng gap B-1/B-3 (`/design-review` round 1): trước bản sửa này,
 `ambient_hook()` là một token không thân hàm — không knob, không
 formula nào định nghĩa nó sinh ra gì. Theo đúng toán học D.5 (cooldown
-per-NPC=5 lượt × cửa sổ toàn cục 1/3 lượt), tầng NPC chủ động (ưu tiên
+per-NPC=5 lượt × cửa sổ toàn cục CAP=1/WINDOW=3 lượt → chu kỳ tối
+thiểu 4 lượt), tầng NPC chủ động (ưu tiên
 2) chỉ nổ ~1 lần/4 lượt và canon Due (ưu tiên 1) hiếm (MVP chỉ 2-3
 event) — nghĩa là **~75% số lượt game rơi vào tầng này**. Trong lỗ đó
 từng mất: `save_life` (dead code — gate của nó đòi
@@ -597,17 +614,36 @@ và D.5):
 ```
 is_rescue_candidate(npc, turn) = alive(npc)
                                 AND present(npc, scene)
+                                  // present THUẦN, KHÔNG present_or_adjacent — CHỦ ĐÍCH (ghi rõ
+                                  // 2026-08-11, round 2): NPC phải Ở TRONG cảnh mới gặp nguy
+                                  // TRONG cảnh đó; NPC adjacent không thể "gặp nguy trước mắt
+                                  // người chơi" ở một location khác
+                                AND affinity(npc) > HOSTILE_INITIATIVE_AFFINITY_MAX   // -40
+                                AND affinity(npc) < FRIENDLY_INITIATIVE_AFFINITY_MIN  // +40
+                                  // affinity gate (thêm 2026-08-11, round 2, quyết định user):
+                                  // rescue CHỈ mở cho dải trung lập — NPC thân thiết (≥+40) đã
+                                  // có kênh friendly riêng, không chồng thêm +15 lên vòng lặp
+                                  // dương; NPC hostile (≤-40, gồm cao thủ bị D.2 chặn) giữ
+                                  // nguyên Anchor 2 "không thèm để mắt" — không thể farm +15
+                                  // từ kẻ đang cố tình lờ người chơi
                                 AND deterministic_roll(turn, seed_stream="ambient") < AMBIENT_ENCOUNTER_CHANCE
                                   // TÁI DÙNG đúng roll của (3c) — "nguy hiểm" của rescue
                                   // và "nguy hiểm" của ambient hostile LÀ CÙNG MỘT sự kiện thế giới,
                                   // chỉ khác ở chỗ có NPC present hay không
                                 AND cooldown_ok(npc, rescue, turn)  // D.5, valence rescue — RESCUE_COOLDOWN_TURNS
 ```
-Diễn giải: khi world roll (3c) "nguy hiểm" xảy ra VÀ một NPC có tên đang
-present, NPC đó trở thành `at_risk_npc` thay vì đối thủ vô danh —
-`active_hook = {type: "npc_in_danger", at_risk_npc: npc}`, khớp đúng
-gate D.1 hiện có (không sửa D.1, chỉ cấp cho nó đường sinh). Không NPC
-present → roll đó là ambient hostile vô danh bình thường (3c).
+Diễn giải: khi world roll (3c) "nguy hiểm" xảy ra VÀ một NPC TRUNG LẬP
+có tên đang present, NPC đó trở thành `at_risk_npc` thay vì đối thủ vô
+danh — `active_hook = {type: "npc_in_danger", at_risk_npc: npc}`, khớp
+đúng gate D.1 hiện có (không sửa D.1, chỉ cấp cho nó đường sinh). Không
+NPC trung lập present → roll đó là ambient hostile vô danh bình thường
+(3c). **Cooldown tiêu tại thời điểm CHỌN HOOK, không phải khi player
+bấm `save_life`** (ghi rõ 2026-08-11, round 2): `npc_last_initiated[rescue]`
+cập nhật ngay khi `rescue_hook` được chọn ở Scene Pending Update — nếu
+player bỏ qua `save_life` lượt đó, cơ hội +15 vẫn mất và cooldown 8 lượt
+vẫn chạy. Chủ đích, nhất quán tiền lệ hostile/friendly-initiated: hook
+tự nó là sự kiện thế giới đã xảy ra, không phụ thuộc phản ứng người chơi
+— "thế giới không chờ tôi".
 
 **Định nghĩa `is_neutral_presence_candidate`**:
 ```
@@ -631,21 +667,21 @@ bị bỏ quên nhất — NPC trung lập).
 
 | Variable | Symbol | Type | Range | Description |
 |---|---|---|---|---|
-| Xác suất world roll "nguy hiểm" | `AMBIENT_ENCOUNTER_CHANCE` | float (knob) | 0.2–0.5 | Mặc định **1/3 ≈ 0.33** — DERIVE từ `NPC_INITIATED_WINDOW_CAP=1 / NPC_INITIATED_WINDOW_TURNS=3` (giữ tần suất "world nguy hiểm" cùng bậc độ lớn với tần suất NPC chủ động cực đoan đã có, không tạo thêm hoạt động thế giới ròng — economy-derivation-gated amendment, xem Tuning Knobs) |
-| Cooldown rescue per-NPC | `RESCUE_COOLDOWN_TURNS` | int (knob) | 8–15 | Mặc định **8**. Bất biến bắt buộc: `RESCUE_COOLDOWN_TURNS ≥ 2 × POSITIVE_SOCIAL_COOLDOWN_TURNS` (mặc định 4) — `save_life` là delta Hảo cảm cao nhất game (+15, npc-affinity-relationship.md D.1), phải hiếm hơn hẳn nhịp `gift`/`small_help` thường (economy-derivation-gated amendment — 2 hằng số liên khóa) |
+| Xác suất world roll "nguy hiểm" | `AMBIENT_ENCOUNTER_CHANCE` | float (knob) | 0.2–0.5 | Mặc định **1/4 = 0.25** — DERIVE từ `NPC_INITIATED_WINDOW_CAP=1 / (NPC_INITIATED_WINDOW_TURNS=3 + 1)` (giữ tần suất "world nguy hiểm" cùng bậc độ lớn với tần suất NPC chủ động cực đoan đã có, không tạo thêm hoạt động thế giới ròng — economy-derivation-gated amendment, xem Tuning Knobs). *(Sửa 2026-08-11, round 2: bản trước derive `CAP/WINDOW_TURNS = 1/3` — SAI mẫu số; chu kỳ thật của window trượt `[turn−3, turn)` là 4 lượt [chính AC-26 chứng minh: hook lượt 23 → ready lại lượt 27], nên trần tần suất đúng là `CAP/(WINDOW_TURNS+1) = 1/4`.)* |
+| Cooldown rescue per-NPC | `RESCUE_COOLDOWN_TURNS` | int (knob) | 8–16 *(trần 15→16, sửa 2026-08-11 round 2)* | Mặc định **8**. Bất biến bắt buộc BINDING theo tổ hợp: `RESCUE_COOLDOWN_TURNS ≥ 2 × POSITIVE_SOCIAL_COOLDOWN_TURNS` (mặc định 4) — `save_life` là delta Hảo cảm cao nhất game (+15, npc-affinity-relationship.md D.1), phải hiếm hơn hẳn nhịp `gift`/`small_help` thường (economy-derivation-gated amendment — 2 hằng số liên khóa; xem ghi chú ràng buộc chéo ở Tuning Knobs) |
 | Cooldown neutral-presence per-NPC | dùng chung `NPC_INITIATIVE_COOLDOWN_TURNS=5` | int (knob) | 3–10 | Không tạo knob mới — NPC trung lập trở thành "world-hook" theo đúng nhịp mà NPC cực đoan chủ động đã có |
 | Roll xác định | `deterministic_roll(turn, seed_stream)` | float ∈ [0,1) | — | RNG injectable (seeded stub cho test), 1 stream riêng `"ambient"` — tách biệt RNG stream của D.7's chọn level cụ thể trong khoảng |
 
 **Output Range:** đúng 1 trong 4 giá trị `{rescue_hook, neutral_presence_hook, ambient_hostile_hook, ambient_lull_hook}` — never null.
 
 **Example:** Lượt 40, không canon Due, không NPC cực đoan đủ điều kiện
-(ưu tiên 1/2 trống). `deterministic_roll(40,"ambient")=0.21 < 0.33` →
+(ưu tiên 1/2 trống). `deterministic_roll(40,"ambient")=0.21 < 0.25` →
 world roll "nguy hiểm". NPC_C (trung lập, affinity=5) đang present →
 `is_rescue_candidate(NPC_C, 40)=true` (giả sử cooldown rescue sẵn sàng)
 → `active_hook={type:"npc_in_danger", at_risk_npc:NPC_C}` →
 `save_life[NPC_C]` xuất hiện trong menu lượt 41 lần đầu tiên trong toàn
 bộ lịch sử formula của tài liệu này. Lượt 44 (rescue vừa dùng, cooldown
-8 lượt chưa hết): `deterministic_roll(44,"ambient")=0.51 ≥ 0.33` →
+8 lượt chưa hết): `deterministic_roll(44,"ambient")=0.51 ≥ 0.25` →
 không nguy hiểm → không NPC nào present → check neutral_presence: NPC_C
 present, trung lập, cooldown sẵn sàng → `neutral_presence_hook(NPC_C)`
 → `scene_tags += "npc_reason_NPC_C"`, NPC_C giữ trong `entities_in_scope`
@@ -693,7 +729,7 @@ thể không đổi.
 |---|---|---|---|---|
 | Lượt hook gần nhất (theo valence) | `npc_last_initiated[valence](npc)` | int \| null | [1, turn) | 4 tracker/NPC (`hostile`, `friendly`, `rescue`, `neutral_presence` — 2 valence mới 2026-08-10); cập nhật tracker ĐÚNG valence khi D.4/D.4b chọn npc này |
 | Cooldown cá nhân (hostile/friendly/neutral_presence) | `NPC_INITIATIVE_COOLDOWN_TURNS` | int (knob) | 3–10 | Mặc định **5** |
-| Cooldown cá nhân (rescue) | `RESCUE_COOLDOWN_TURNS` | int (knob) | 8–15 | Mặc định **8** (D.4b — knob riêng, ≥ 2×`POSITIVE_SOCIAL_COOLDOWN_TURNS`) |
+| Cooldown cá nhân (rescue) | `RESCUE_COOLDOWN_TURNS` | int (knob) | 8–16 | Mặc định **8** (D.4b — knob riêng, ràng buộc BINDING ≥ 2×`POSITIVE_SOCIAL_COOLDOWN_TURNS` theo tổ hợp — xem Tuning Knobs) |
 | Cửa sổ trượt toàn cục | `NPC_INITIATED_WINDOW_TURNS` | int (knob) | 2–6 | Mặc định **3** — nay đếm CHUNG cả 4 valence (2026-08-10) |
 | Trần trong cửa sổ | `NPC_INITIATED_WINDOW_CAP` | int (knob) | 1–2 | Mặc định **1** — tối đa 1 hook thuộc {hostile, friendly, rescue, neutral_presence} mỗi 3 lượt |
 | Kết quả | `cooldown_ok(npc, valence, turn)` | bool | {0,1} | Input cho `is_*_candidate` (D.4) và `is_rescue_candidate`/`is_neutral_presence_candidate` (D.4b) |
@@ -895,7 +931,7 @@ systems-index ở bước cập nhật cuối, không sửa bảng Enumeration.)
 
 | Knob | Default | Safe Range | Nguồn | Ảnh hưởng nếu chỉnh |
 |---|---|---|---|---|
-| `POSITIVE_SOCIAL_COOLDOWN_TURNS` | 4 | 2–8 | D.1 | Thấp → cơ hội tăng Hảo cảm dày lên, nguy cơ ratchet (economy-designer cảnh báo <2); cao → NPC "lạnh nhạt", nguồn tăng affinity khan hiếm |
+| `POSITIVE_SOCIAL_COOLDOWN_TURNS` | 4 | 2–8 **(ràng buộc chéo BINDING — xem ghi chú ⊕ dưới bảng)** | D.1 | Thấp → cơ hội tăng Hảo cảm dày lên, nguy cơ ratchet (economy-designer cảnh báo <2); cao → NPC "lạnh nhạt", nguồn tăng affinity khan hiếm |
 | `PROVOKE_SEVERITY_MIN` | 3 | 2–4 | D.3 | Thấp (2) → cả `insult` cũng chọc giận cao thủ — thế giới "nóng tính"; cao (4) → chỉ `betray`/giết mới chọc được |
 | `PROVOKE_RECONCILE_AFFINITY` | −10 | −20…0 | D.3 | Cao (0) → phải leo hẳn về trung lập mới xóa thù; thấp (−20) → hòa giải dễ hơn |
 | `HOSTILE_INITIATIVE_AFFINITY_MAX` | −40 | −60…−10 | D.4 | Cao (−10) → NPC hơi ghét đã có thể gây sự — thế giới hung hãn; thấp (−60) → chỉ kẻ thù thật sự mới chủ động |
@@ -905,8 +941,20 @@ systems-index ở bước cập nhật cuối, không sửa bảng Enumeration.)
 | `NPC_INITIATED_WINDOW_CAP` | 1 | 1–2 | D.5 | 2 → thế giới dồn dập hơn, ít khoảng lặng ambient |
 | `AMBIENT_LEVEL_BAND_DOWN` | 15 | 5–30 | D.7 | Rộng → gặp nhiều đối thủ "lót đường" dễ; hẹp → mọi encounter đều sát tầm |
 | `AMBIENT_HOSTILE_LEVEL_CAP` | 15 | 5–20 (**trần cứng 20**) | D.7 | Cao → ambient nguy hiểm hơn; KHÔNG BAO GIỜ vượt 20 — tự mâu thuẫn với D.2 |
-| `AMBIENT_ENCOUNTER_CHANCE` *(mới 2026-08-10)* | 1/3 ≈ 0.33 | 0.2–0.5 | D.4b | **Bất biến liên khóa** (economy-derivation-gated amendment): DERIVE từ `NPC_INITIATED_WINDOW_CAP/NPC_INITIATED_WINDOW_TURNS` (=1/3) — tầng World/Ambient (D.4b) chiếm ~75% số lượt theo cấu trúc, nên xác suất "nguy hiểm" của nó phải cùng bậc độ lớn với tần suất NPC chủ động cực đoan đã có, KHÔNG cộng thêm hoạt động thế giới ròng. Cao hơn nhiều → thế giới xáo động gấp đôi dự kiến, phá van thở D.5 |
-| `RESCUE_COOLDOWN_TURNS` *(mới 2026-08-10)* | 8 | 8–15 | D.4b/D.5 | **Bất biến liên khóa** (economy-derivation-gated amendment): BẮT BUỘC `≥ 2 × POSITIVE_SOCIAL_COOLDOWN_TURNS` (mặc định 4) — `save_life` là delta Hảo cảm cao nhất game (+15), phải hiếm hơn hẳn nhịp gift/small_help thường; thấp hơn ngưỡng này biến `save_life` thành ratchet lớn nhất trong game |
+| `AMBIENT_ENCOUNTER_CHANCE` *(mới 2026-08-10, sửa derivation 2026-08-11 round 2)* | 1/4 = 0.25 | 0.2–0.5 | D.4b | **Bất biến liên khóa** (economy-derivation-gated amendment): DERIVE từ `NPC_INITIATED_WINDOW_CAP/(NPC_INITIATED_WINDOW_TURNS+1)` (=1/4 — chu kỳ thật của window trượt là `WINDOW_TURNS+1` lượt, xem AC-26; bản 2026-08-10 ghi nhầm `CAP/WINDOW_TURNS=1/3`, cao hơn trần thật +32%) — tầng World/Ambient (D.4b) chiếm ~75% số lượt theo cấu trúc, nên xác suất "nguy hiểm" của nó phải cùng bậc độ lớn với tần suất NPC chủ động cực đoan đã có, KHÔNG cộng thêm hoạt động thế giới ròng. Cao hơn nhiều → thế giới xáo động gấp đôi dự kiến, phá van thở D.5. Hệ quả tại default: ~56% tổng số lượt là `ambient_lull` (0.75 × 0.75) — target % chính thức chưa chốt, đo qua playtest (xem Open Questions) |
+| `RESCUE_COOLDOWN_TURNS` *(mới 2026-08-10, trần 15→16 sửa 2026-08-11 round 2)* | 8 | 8–16 **(ràng buộc chéo BINDING — xem ghi chú ⊕ dưới bảng)** | D.4b/D.5 | **Bất biến liên khóa** (economy-derivation-gated amendment): BẮT BUỘC `≥ 2 × POSITIVE_SOCIAL_COOLDOWN_TURNS` (mặc định 4) — `save_life` là delta Hảo cảm cao nhất game (+15), phải hiếm hơn hẳn nhịp gift/small_help thường; thấp hơn ngưỡng này biến `save_life` thành ratchet lớn nhất trong game |
+
+**⊕ Ràng buộc chéo BINDING giữa 2 knob liên khóa** *(thêm 2026-08-11,
+`/design-review` round 2 — đóng blocking: bảng cũ ghi safe range 2 dòng
+độc lập [POSITIVE 2–8, RESCUE 8–15], nhưng tổ hợp POSITIVE=8 đòi RESCUE
+≥ 16 > trần 15, tức tồn tại tổ hợp hợp-lệ-theo-từng-dòng nhưng vô
+nghiệm theo bất biến)*: safe range của TỪNG dòng trên **không đủ** để
+một tổ hợp là hợp lệ — mọi tổ hợp tune PHẢI đồng thời thỏa
+`RESCUE_COOLDOWN_TURNS ≥ 2 × POSITIVE_SOCIAL_COOLDOWN_TURNS`. Trần
+RESCUE nâng lên 16 để mọi giá trị `POSITIVE ∈ [2,8]` đều có ít nhất 1
+nghiệm hợp lệ. Ràng buộc này phải được ENFORCE khi implement (assert
+lúc load config, không chỉ ghi bằng lời — cùng pattern
+tuning-knob-invariant `FLOOR_TOTAL` của Death & Consequence).
 
 **KHÔNG phải tuning knob** (hằng số khóa): `HOSTILE_INITIATIVE_LEVEL_GAP_MAX
 = 20` (từ game-concept.md — đổi cần re-review toàn game);
@@ -968,9 +1016,10 @@ nhóm theo NPC (theo `npc_id` cố định), trong mỗi nhóm theo thứ tự
 `envelope_type` cố định của `ENVELOPE_TYPES` (Core Rule #3). Một chip
 biến mất chỉ kéo các chip SAU nó (theo đúng thứ tự cố định này) lên gần
 hơn — không bao giờ hoán đổi vị trí hai chip cùng hiện diện ở 2 lượt
-liên tiếp. `combat_challenge`/`threaten`/`betray` (đã có xác nhận riêng
-qua Core Rule #3/Turn Manager Core Rule #9(c) hoặc severity cao) không
-cần thêm rào cản, nhưng thứ tự ổn định giảm phần lớn rủi ro chạm nhầm
+liên tiếp. `combat_challenge`/`threaten`/`betray` (`combat_challenge`
+đã có popup xác nhận riêng của Core Rule #3 hệ này — sửa trích dẫn
+2026-08-11, round 2; các envelope còn lại dựa vào severity cao tự thân)
+không cần thêm rào cản, nhưng thứ tự ổn định giảm phần lớn rủi ro chạm nhầm
 sang lượt liền kề mà không nhận ra vị trí đã đổi.
 
 ### 2. Chip intent trong ngôn ngữ Mực Chưa Khô
@@ -1091,7 +1140,7 @@ PROVOKE_RECONCILE_AFFINITY=−10, HOSTILE_INITIATIVE_AFFINITY_MAX=−40,
 FRIENDLY_INITIATIVE_AFFINITY_MIN=+40, NPC_INITIATIVE_COOLDOWN_TURNS=5,
 NPC_INITIATED_WINDOW_TURNS=3, NPC_INITIATED_WINDOW_CAP=1,
 AMBIENT_LEVEL_BAND_DOWN=15, AMBIENT_HOSTILE_LEVEL_CAP=15,
-AMBIENT_ENCOUNTER_CHANCE=1/3, RESCUE_COOLDOWN_TURNS=8` — 2 knob cuối
+AMBIENT_ENCOUNTER_CHANCE=1/4, RESCUE_COOLDOWN_TURNS=8` — 2 knob cuối
 mới 2026-08-10, D.4b) cùng hằng số khóa
 (`HOSTILE_INITIATIVE_LEVEL_GAP_MAX=20, MAX_NPC_PER_SCENE=3,
 song_tu_threshold=60`). RNG (D.7 + D.4b's `deterministic_roll`) phải
@@ -1184,10 +1233,12 @@ pipeline thật, mới 2026-08-10, đóng gap B-1 — AC-10 gốc chỉ inject
 trạng thái trực tiếp, KHÔNG kiểm chứng có đường sinh; systems-designer/
 narrative-director/game-designer độc lập xác nhận `active_hook.type ==
 "npc_in_danger"` không tồn tại trong miền enum thật của D.4 phiên bản
-cũ): GIVEN NPC_A present trong scene, `deterministic_roll(turn,"ambient")`
-seeded trả về giá trị < `AMBIENT_ENCOUNTER_CHANCE`, `cooldown_ok(NPC_A,
-rescue, turn)=true`, KHÔNG canon Due, KHÔNG candidate cực đoan (ưu tiên
-1/2 trống), WHEN `select_primary_hook(turn)` chạy (KHÔNG mock D.4b —
+cũ): GIVEN NPC_A present trong scene, `affinity(NPC_A)=5` (trung lập —
+thỏa affinity gate của `is_rescue_candidate`, thêm 2026-08-11 round 2),
+`deterministic_roll(turn,"ambient")` seeded trả về giá trị <
+`AMBIENT_ENCOUNTER_CHANCE`, `cooldown_ok(NPC_A, rescue, turn)=true`,
+KHÔNG canon Due, KHÔNG candidate cực đoan (ưu tiên 1/2 trống), WHEN
+`select_primary_hook(turn)` chạy (KHÔNG mock D.4b —
 chạy pipeline thật từ đầu), THEN trả về
 `{type:"npc_in_danger", at_risk_npc: NPC_A}` — chứng minh bằng thực thi,
 không phải inject; VÀ `save_life[NPC_A]` xuất hiện trong
@@ -1576,6 +1627,15 @@ level, trả fallback cố định định nghĩa sẵn trong code, không crash
   `witnesses` (mô phỏng, không trần) khỏi `entities_in_scope` (trình
   bày, có trần). *(Owner: systems-designer, target: trước Alpha — không
   ảnh hưởng MVP)*
+- **Target % cho `ambient_lull` chưa được xác nhận bằng playtest** (mới
+  2026-08-11, `/design-review` round 2, systems-designer): tại default
+  (`AMBIENT_ENCOUNTER_CHANCE=0.25`, chu kỳ window 4 lượt), ước tính
+  ~56% tổng số lượt là "khoảng lặng" thuần túy (0.75 tầng world × 0.75
+  không-nguy-hiểm). Khoảng lặng là CHỦ ĐÍCH (D.5 "cần khoảng lặng")
+  nhưng tài liệu chưa có target % chấp nhận được để phân biệt "đúng
+  liều" với "quá trống" — cần đo cảm nhận thật qua playtest, rồi chốt
+  target vào Tuning Knobs. *(Owner: game-designer + creative-director,
+  target: playtest vertical slice)*
 - **Cụm AC coverage còn lại của D.1 gate table** (mới 2026-08-10, đóng
   gap qa-lead #4, backlog nhóm-B không blocking): thiếu AC cho
   `combat_challenge`'s `alive(npc)=false` bị loại khỏi menu; thiếu

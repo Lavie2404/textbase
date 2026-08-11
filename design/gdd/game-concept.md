@@ -1,7 +1,11 @@
 # Game Concept: Vô Danh Lục
 
 *Created: 2026-08-01*
-*Status: Draft*
+*Status: Approved (re-review xác nhận 2026-08-11 — verdict treo "NEEDS
+REVISION nhẹ" 2026-08-01 đóng: cả 4 blocking + bỏ Cứu Mệnh xác minh có
+thật trong văn bản, drift check với 13 GDD Approved không phát hiện mâu
+thuẫn thiết kế nào; 5 sửa metadata áp cùng phiên — xem
+`reviews/game-concept-review-log.md`)*
 
 ---
 
@@ -255,6 +259,10 @@ Mọi lựa chọn để lại dấu vết lâu dài trong lịch sử thế gi�
 dung AI tạo ra sau này. Ngoại lệ duy nhất: người chơi có thể xóa/undo đúng
 lượt VỪA xác nhận (sửa lỗi thao tác) trước khi lượt kế tiếp diễn ra — một
 khi đã sang lượt mới, lượt trước đó khóa vĩnh viễn, không thể sửa nữa.
+**Trừ lượt dẫn đến chết thật — không thể undo** (bổ sung chữ nghĩa
+2026-08-11 cho khớp `turn-manager.md` Core Rule #9, vốn suy diễn hợp lệ
+từ chính Anti-Pillar "không cơ chế cứu chết" bên dưới: Undo không được
+phép trở thành cơ chế cứu mạng phi-diegetic).
 
 *Design test*: Phân vân giữa tính năng tiện lợi (undo/reset) và tính nhất
 quán lịch sử → giữ hệ quả, không có làm lại dễ dàng — ngoại lệ duy nhất:
@@ -319,7 +327,7 @@ tương lai. Nguyên tắc này cần được đặc tả đầy đủ thành A
 
 - **KHÔNG để NPC tâng bốc/nhượng bộ nhân vật chính vô lý**: phá vỡ pillar *Thế Giới Khách Quan* — NPC có thể yêu quý/khen ngợi như cảm xúc cá nhân, nhưng không phải lời phán xét của thế giới.
 - **KHÔNG làm chiến đấu real-time/hoạt ảnh phức tạp**: phá vỡ trọng tâm *Tường Thuật Sống Động* bằng văn bản, không phải phản xạ tay.
-- **KHÔNG cho phép quay lại/undo quá 1 lượt gần nhất**: người chơi chỉ có thể xóa lượt VỪA xác nhận (sửa lỗi bấm nhầm/mô tả nhầm), không thể quay ngược nhiều lượt hay viết lại lịch sử xa hơn — đây là ngoại lệ DUY NHẤT với pillar *Hệ Quả Thực Sự*.
+- **KHÔNG cho phép quay lại/undo quá 1 lượt gần nhất**: người chơi chỉ có thể xóa lượt VỪA xác nhận (sửa lỗi bấm nhầm/mô tả nhầm), không thể quay ngược nhiều lượt hay viết lại lịch sử xa hơn — đây là ngoại lệ DUY NHẤT với pillar *Hệ Quả Thực Sự*; và ngay cả ngoại lệ này cũng KHÔNG áp dụng cho lượt dẫn đến chết thật (xem Pillar 2 + `turn-manager.md` Core Rule #9 — bổ sung 2026-08-11).
 - **KHÔNG có hệ thống multiplayer/xã hội thật**: đây là game một người chơi, phát triển riêng cho cá nhân, không phải sản phẩm thương mại.
 - **KHÔNG có bất kỳ cơ chế nào để AI hoặc hệ thống "cứu" nhân vật chính khỏi cái chết đã được công thức Lực chiến xác định**: phải chết là chết thật, không ngoại lệ — đây từng là ngoại lệ phi-diegetic duy nhất trong thiết kế và đã bị loại bỏ để giữ đúng pillar *Sức Mạnh Có Logic*.
 
@@ -378,7 +386,7 @@ thuật ngữ và trope: cảnh giới, tâm pháp, bế quan, song tu, áp ch�
 | **Art Pipeline Complexity** | Thấp — chủ yếu UI, không cần asset 3D/hoạt ảnh phức tạp |
 | **Audio Needs** | Tối thiểu — có thể bổ sung nhạc nền/SFX nhẹ sau |
 | **Networking** | Không multiplayer — nhưng cần gọi API dịch vụ AI/LLM qua internet cho tường thuật |
-| **Content Volume** | MVP: 1 vùng bối cảnh, 3 NPC. Full vision: mở rộng liên tục, không giới hạn |
+| **Content Volume** | MVP: 1 vùng bối cảnh (~5–8 địa điểm — khớp `situation-encounter-generation.md`), 3 NPC, 2–3 sự kiện canon (khớp `setting-canon-integration.md` Rule #1; bổ sung 2026-08-11 — 2 hạng mục content này là điều kiện tối thiểu theo các GDD Approved, concept trước đây chưa liệt kê). Full vision: mở rộng liên tục, không giới hạn |
 | **Procedural Systems** | Có — nội dung tường thuật/tình huống do AI/LLM tạo động, không phải procedural generation truyền thống |
 
 ---
@@ -408,14 +416,18 @@ thuật ngữ và trope: cảnh giới, tâm pháp, bế quan, song tu, áp ch�
 
 ### Open Questions
 
+*(Cập nhật 2026-08-11, re-review xác nhận: các mục đánh dấu ✅ ĐÃ ĐÓNG
+bởi GDD Approved sở hữu câu trả lời — giữ nguyên văn làm vết lịch sử,
+con trỏ trỏ tới nơi chốt. Các mục không đánh dấu vẫn mở.)*
+
 - Dịch vụ AI/LLM nào sẽ dùng làm backend tường thuật? (quyết định ở `/create-architecture` qua ADR). Tiền lệ tham khảo: `reference.md` dùng Google Gemini API (key người dùng tự nhập hoặc key mặc định) và đã sinh được nội dung nhạy cảm thành công — điểm khởi đầu hợp lý để đánh giá cho ADR, cần xác minh lại điều khoản sử dụng (ToS) hiện hành trước khi chốt.
 - Công thức chính xác khi nhiều nguồn EXP trùng nhau trong cùng 1 lượt (ví dụ vừa chiến đấu vừa vượt cấp thắng) cần đặc tả đầy đủ ở `/design-system` cho hệ thống Tu luyện/Chiến đấu.
-- Bộ test case biên bắt buộc cho `/design-system` Chiến đấu: Lực chiến ở 0/0, floor khi chồng phạt vượt bậc + áp chế cảnh giới, cap khi EXP multi-source cùng lượt, tính bao gồm/loại trừ của ngưỡng 20 cấp và ngưỡng Song Tu, tính bao gồm/loại trừ của ngưỡng Hảo cảm -80 (thù địch sâu sắc), clamp Hảo cảm qua chuỗi lan truyền nhiều NPC.
-- Hình dạng đường cong EXP (linear/exponential/stepped) và tốc độ tăng/giảm/suy giảm Hảo cảm theo thời gian cần được xác định ở `/design-system`.
-- Cân nhắc đổi 4% EXP-khi-thua thành phần thưởng thông tin (lộ điểm yếu/kỹ năng đối thủ) thay vì EXP vô điều kiện — quyết định cuối để `/design-system`.
+- ✅ **ĐÃ ĐÓNG** — Bộ test case biên bắt buộc cho `/design-system` Chiến đấu: Lực chiến ở 0/0, floor khi chồng phạt vượt bậc + áp chế cảnh giới, cap khi EXP multi-source cùng lượt, tính bao gồm/loại trừ của ngưỡng 20 cấp và ngưỡng Song Tu, tính bao gồm/loại trừ của ngưỡng Hảo cảm -80 (thù địch sâu sắc), clamp Hảo cảm qua chuỗi lan truyền nhiều NPC. *(Chốt tại các GDD Approved: 20 cấp dùng `≤` — situation-gen D.2; -80 BAO GỒM biên — npc-affinity Rule 5 + death-and-consequence 3c; Song Tu =60 — npc-affinity; các test biên là AC chính thức của từng hệ.)*
+- ✅ **ĐÃ ĐÓNG** — Hình dạng đường cong EXP (linear/exponential/stepped) và tốc độ tăng/giảm/suy giảm Hảo cảm theo thời gian cần được xác định ở `/design-system`. *(Chốt: đường cong EXP — exp-realm-progression Formulas [Approved]; Hảo cảm KHÔNG suy giảm theo thời gian — npc-affinity Core Rule #3 "không decay", chính sách khóa.)*
+- ✅ **ĐÃ ĐÓNG** — Cân nhắc đổi 4% EXP-khi-thua thành phần thưởng thông tin (lộ điểm yếu/kỹ năng đối thủ) thay vì EXP vô điều kiện — quyết định cuối để `/design-system`. *(Chốt: GIỮ 4% — exp-realm-progression D.3 `LOSS_EXP_RATE=0.04` [Approved], formalize kèm invariant.)*
 - Điều kiện/tỷ lệ khôi phục đan điền/võ công sau khi bị phế (qua đại cơ duyên, tiên thảo dị bảo...) cần được đặc tả ở `/design-system` hệ thống Chiến đấu/Tu luyện.
 - Cần đặc tả rõ ở `/design-system`: giao diện/tường thuật thể hiện dấu hiệu "NPC đang che giấu/dịch dung" như thế nào, và cơ chế "tìm hiểu" để lộ dữ liệu thật (hành động điều tra, độ khó, rủi ro nếu bị phát hiện đang điều tra) hoạt động ra sao.
-- Danh sách chỉ số chiến đấu đầy đủ (ACC, Lifesteal, HP Regen, Crit Rate/Damage, Khuếch đại sát thương, Chống chịu, Né tránh) chi tiết hơn nhiều so với "Điểm Chỉ số" tóm gọn trong công thức Lực chiến ở Core Mechanics #2 — cần đối chiếu/thống nhất ở `/design-system` hệ thống Chiến đấu.
+- ✅ **ĐÃ ĐÓNG** — Danh sách chỉ số chiến đấu đầy đủ (ACC, Lifesteal, HP Regen, Crit Rate/Damage, Khuếch đại sát thương, Chống chịu, Né tránh) chi tiết hơn nhiều so với "Điểm Chỉ số" tóm gọn trong công thức Lực chiến ở Core Mechanics #2 — cần đối chiếu/thống nhất ở `/design-system` hệ thống Chiến đấu. *(Chốt: 12 chỉ số thống nhất toàn dự án — combat-system Formulas + character-card-identity D.5 `base_stat_completeness` 12/12 [cả 2 đã qua review].)*
 
 ---
 
@@ -460,7 +472,7 @@ không?
    giác đột phá tự nhiên từ level 1 (việc đó hoãn sang Vertical Slice,
    cần nhân vật bắt đầu từ level 1 — xem MVP Definition, tầng kiểm chứng
    (c)).
-2. 1 vùng bối cảnh nhỏ trong 1 danh tác cụ thể (ví dụ: Đấu La Đại Lục) với AI tạo tình huống động, nhân vật chính là người hoàn toàn mới.
+2. 1 vùng bối cảnh nhỏ trong 1 danh tác cụ thể (ví dụ: Đấu La Đại Lục) với AI tạo tình huống động, nhân vật chính là người hoàn toàn mới. Vùng MVP gồm **~5–8 địa điểm** (đồ thị location — `situation-encounter-generation.md`) và setting pack tối thiểu có **2–3 sự kiện canon** (`setting-canon-integration.md` Rule #1) — bổ sung 2026-08-11 cho khớp điều kiện tối thiểu của 2 GDD Approved.
 3. 3 NPC (1 thù địch, 1 hảo cảm, 1 trung lập) với hệ thống Hảo cảm hoạt động đầy đủ. NPC hảo cảm khởi đầu đã đạt ngưỡng Hảo cảm đủ điều kiện Song Tu — đây là dev seed để kiểm thử code path Song Tu trong phạm vi phiên chơi ngắn, KHÔNG dùng để validate tốc độ/cảm giác tăng trưởng Hảo cảm tự nhiên (việc đó hoãn sang Vertical Slice, cần NPC bắt đầu từ Hảo cảm = 0).
 4. Hệ thống Chiến đấu (Lực chiến, áp chế cảnh giới) + EXP + Song Tu hoạt động đầy đủ. Cơ chế Cái Chết (ngưỡng thù địch sâu sắc) hoạt động đầy đủ — trong 3 lối tiếp tục (Quỷ tu/Chuyển sinh/Chơi lại), CHỈ Chơi lại cần hoạt động đầy đủ ở MVP (Quỷ tu/Chuyển sinh hoãn sang Vertical Slice — quyết định `/gate-check` 2026-08-01, sửa 2026-08-05 khớp `systems-index.md` Priority Tiers). **Sửa 2026-08-08** (`/design-review` vòng 1 của `exp-realm-progression.md`, cụm A6 — đóng mâu thuẫn với Scope Tiers bên dưới): "Song Tu hoạt động đầy đủ" ở MVP BAO GỒM 1 Tâm Pháp dev-seed tối giản (`type=song-tu`, `exp_multiplier=1.0`, mirror tiền lệ dev-seed Hảo cảm ở mục #3) gán sẵn cho nhân vật chính — nếu không, nguồn EXP Song Tu (`exp-realm-progression.md` D.4) là dead code ở MVP thật vì cần Tâm Pháp `type=song-tu` mà "Tâm pháp cơ bản" (đa dạng/lựa chọn) chỉ xuất hiện ở Vertical Slice (xem Scope Tiers). Dev-seed này CHỈ để exercise code path D.4 trong phạm vi phiên chơi ngắn, KHÔNG dùng để validate cảm giác "chọn Tâm Pháp" thật (việc đó hoãn sang Vertical Slice cùng hệ Tâm Pháp đầy đủ).
 5. Trạng thái thế giới (Hảo cảm, EXP, lịch sử) được lưu (persist) qua việc đóng/mở lại trình duyệt — điều kiện tiên quyết để kiểm chứng "chơi được nhiều phiên liên tục".
@@ -486,10 +498,10 @@ không?
 
 - [x] Cấu hình engine (`/setup-engine`) — Godot 4.6, GDScript
 - [ ] Tạo Art Bible xác định bản sắc thị giác (`/art-bible`) — trước khi viết GDD chi tiết
-- [ ] Validate concept với `/design-review design/gdd/game-concept.md`
-- [ ] Prototype cơ chế cốt lõi trước khi viết GDD đầy đủ (`/prototype`) — đặc biệt kiểm chứng vòng lặp AI-tường thuật + công thức Lực chiến
-- [ ] Nếu prototype PROCEED: phân rã concept thành các hệ thống (`/map-systems`)
-- [ ] Viết GDD từng hệ thống (`/design-system [system-name]`) — đặc biệt hệ thống Chiến đấu/Tu luyện (công thức EXP, Lực chiến) và hệ thống Quan hệ NPC (Hảo cảm)
+- [x] Validate concept với `/design-review design/gdd/game-concept.md` — chạy 2026-08-01 (NEEDS REVISION nhẹ, sửa cùng phiên) + re-review xác nhận 2026-08-11 → Approved
+- [x] Prototype cơ chế cốt lõi trước khi viết GDD đầy đủ (`/prototype`) — `prototypes/khe-uoc-ai-concept/` (REPORT.md được `mechanic-narration-contract-enforcement.md` trích dẫn làm bằng chứng)
+- [x] Nếu prototype PROCEED: phân rã concept thành các hệ thống (`/map-systems`) — `systems-index.md`, 16 hệ
+- [x] Viết GDD từng hệ thống (`/design-system [system-name]`) — 16 GDD đã viết, 13 Approved tính đến 2026-08-11 (Combat/Persistence/AI-LLM chờ cổng implementation/prototype)
 - [ ] Xây vertical slice trước khi cam kết Production (`/vertical-slice`)
 - [ ] Kiểm chứng core loop bằng playtest cá nhân (`/playtest-report`)
 - [ ] Lên kế hoạch milestone đầu tiên (`/sprint-plan new`)
