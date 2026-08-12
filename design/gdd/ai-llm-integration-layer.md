@@ -610,6 +610,7 @@ bảng Systems Enumeration, giống tiền lệ trước.)*
 | `max_same_model_attempts_transient` | 2 | 1–3 | **TỔNG SỐ LẦN THỬ** (cùng ngữ nghĩa đã chốt ở trên) trên cùng 1 model cho lỗi mạng khác 503 (timeout, mất kết nối thoáng qua) — default=2 nghĩa là 2 lần thử (1 lần thử lại) trước khi chuyển model. Khớp `src/reference.md` (`maxRetries=2` mặc định — đặt tên khác nhưng cùng giá trị số). |
 | `model_cooldown_seconds` | 90 | 30–300 | Thời lượng 1 model bị đánh dấu quá tải, tạm bỏ qua khỏi danh sách ưu tiên (Formula 3). Quá ngắn → quay lại thử model vẫn còn quá tải; quá dài → bỏ lỡ cơ hội dùng lại model tốt nhất sớm hơn khi nó đã hồi phục. |
 | `request_timeout_default` | 15 | 10–20 | Trần thời gian tối đa cho MỘT HTTP request đơn lẻ (Formula 2 dùng `min(request_timeout_default, t_remaining(n))`). Đặt thấp hơn `ai_call_timeout_seconds` (30) có chủ đích. **Phạm vi lời hứa "còn ngân sách cho fallback" — thu hẹp 2026-08-08 (`/design-review` vòng 2, đóng gap `systems-designer`, bản trước tuyên bố quá rộng)**: đảm bảo còn ngân sách cho ≥1 lần fallback chỉ ĐÚNG trên nhánh `OVERLOADED` (503 là lỗi theo-model cụ thể, `max_same_model_attempts_overloaded=1` mặc định → model đổi gần như ngay). Trên nhánh `TRANSIENT_OTHER` với default (`max_same_model_attempts_transient=2`), 2 lần thử timeout đầy đủ trên CÙNG 1 model (`15+1+14=30s`, xem Formula 2 Example TRANSIENT) tiêu hết toàn bộ ngân sách TRƯỚC KHI model dự phòng được gọi lần nào — đây là CHỦ ĐÍCH, không phải bug: mọi model dự phòng Gemini dùng CHUNG 1 host, nên 1 lỗi kết nối/timeout gần như chắc chắn là lỗi tầng mạng/client (ảnh hưởng MỌI model như nhau), không phải lỗi riêng của model hiện tại — giá trị kỳ vọng của việc đổi model sớm trên nhánh này thấp, khác hẳn nhánh `OVERLOADED`. Đặt bằng hoặc cao hơn 30 sẽ vô hiệu hóa khả năng fallback hoàn toàn ở CẢ HAI nhánh. |
+| `ai_context_hard_token_budget` | 8000 | 4000–16000 | **Thêm 2026-08-12, ADR-0003** — đóng QQ-01 (`docs/architecture/architecture.md`): biến này được `world-memory-context-management.md` Formula #5 (Runtime Clamp) tiêu thụ và khai là "do tầng này cấp", nhưng trước ADR-0003 chưa từng thực sự được định nghĩa ở đây — biến phantom. KHÔNG suy ra từ context window của model trong `M` (cả 5 model hiện tại đều ~1.048.576 token, quá lớn để làm giới hạn có ý nghĩa) — ràng buộc thật là chi phí API + độ trễ mỗi lượt, không phải năng lực model. Xem ADR-0003 §Decision cho lý do chọn 8000 (≈2-3× kích thước kỳ vọng của Formula #4 ở `recency_window_turns=8` mặc định). |
 
 *(`ai_call_timeout_seconds=30` và `calls_per_turn_max=3` KHÔNG lặp lại ở
 đây — đã là hằng số khóa ở registry, nguồn `turn-manager.md`, xem
@@ -1094,14 +1095,17 @@ specialist + `creative-director` phát hiện: Core Rule/Formula dưới đây
   Integration Layer** trong Dependency Map (xem Section Dependencies ở
   trên) — cùng dạng phụ thuộc một chiều đã gặp 2 lần trước. *(Owner:
   producer/systems-designer, target: trước khi chạy `/consistency-check`)*
-- **Dịch vụ AI/LLM backend cụ thể chưa chốt** (đã flag từ
-  `game-concept.md`) — bao gồm xác minh ToS cho nội dung NSFW. GDD này giả
-  định Gemini API (theo `src/reference.md` + prototype) nhưng quyết định
-  chính thức + danh sách model dự phòng cụ thể là quyết định ADR. *(Owner:
-  technical-director, target: `/create-architecture`)*
-- **Giá trị cụ thể của danh sách model dự phòng** (tên/version model) cố
-  tình KHÔNG chốt trong GDD này (data-driven config, xem Core Rule #4) —
-  cần định nghĩa khi viết ADR/config thật.
+- ~~**Dịch vụ AI/LLM backend cụ thể chưa chốt**~~ — **ĐÃ ĐÓNG 2026-08-12,
+  ADR-0003**: Gemini API, gọi thẳng client (khớp giả định của GDD này +
+  `prototypes/gemini-cors/` đã PASS). *(ToS cho nội dung NSFW: chưa có
+  xác minh pháp lý riêng — không thuộc phạm vi kỹ thuật của ADR-0003, vẫn
+  là rủi ro chấp nhận đã ghi từ `game-concept.md`.)*
+- ~~**Giá trị cụ thể của danh sách model dự phòng**~~ — **ĐÃ ĐÓNG
+  2026-08-12, ADR-0003**: `M = ["gemini-3-flash-preview", "gemini-3.5-flash",
+  "gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-2.5-flash-lite"]`
+  (nguyên thứ tự `GEMINI_TEXT_MODEL_FALLBACKS` của `src/reference.md`),
+  cấu hình trong `AiLlmTuningConfig` (Resource, data-driven, xem ADR-0003
+  §Key Interfaces) — không hard-code trong code.
 - **Công cụ quan sát lý do Failed/reject** (nay **4** nhãn, không phải 3 —
   cập nhật 2026-08-08 vòng 2, thêm `BUSY` cạnh timeout/hết-model-dự-phòng/
   lỗi-cấu-hình, xem AC-32) cho QA thủ công — liên quan Open Question

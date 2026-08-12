@@ -374,10 +374,18 @@ func _apply_this(fn: JavaScriptObject, this_arg: Variant) -> Variant:
 ## limited to the same primitive set) — so building the array element-by-element
 ## with primitive leaves, then passing the resulting PROXY, works because a
 ## proxy is an "object" (type 24) which the exchange path handles natively.
+## NOTE (found on Godot 4.6-stable, new machine re-run 2026-08-11): the GDScript
+## static type-checker rejects an `int` index on `JavaScriptObject` at PARSE
+## time ("Only String or StringName can be used as index") — a load-time
+## failure, not a runtime one, so it silently breaks _ready() before any
+## experiment runs (this is what "harness treo" actually was, not a cursor
+## multi-fire issue). Fix: index with `str(i)` — JS treats numeric-string keys
+## on an Array identically to numeric ones, so the resulting object is still a
+## real JS Array (verified via the tostring-tag probe in #2b.1).
 func _make_js_array(values: Array) -> JavaScriptObject:
 	var arr: JavaScriptObject = JavaScriptBridge.create_object("Array")
 	for i in values.size():
-		arr[i] = values[i]
+		arr[str(i)] = values[i]
 	return arr
 
 
@@ -590,7 +598,7 @@ func _exp2b_compound_key_cursor() -> Dictionary:
 	# Self-test the array-building bridge trick before relying on it for keys.
 	var probe := _make_js_array([7, 42])
 	out["array_build_length_ok"] = int(probe.length) == 2
-	out["array_build_values_ok"] = int(probe[0]) == 7 and int(probe[1]) == 42
+	out["array_build_values_ok"] = int(probe[str(0)]) == 7 and int(probe[str(1)]) == 42
 	_log("exp2b_cursor_probe_done", {"len_ok": out["array_build_length_ok"],
 			"vals_ok": out["array_build_values_ok"]})
 

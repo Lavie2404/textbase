@@ -652,6 +652,18 @@ func _make_lock_options() -> JavaScriptObject:
 - **Testing only in desktop Chrome.** iOS WKWebView and the Zalo/Facebook/
   Messenger in-app browsers have different storage partitioning, eviction, and
   quota behaviour. The GDD names these as the real distribution channel.
+- **Indexing a `JavaScriptObject` with an `int`** (e.g. building a JS array
+  key-by-key: `arr[i] = value`). *(evidence: `prototypes/persistence-web`
+  Experiment 2b, empirical — hit while re-running the prototype on Godot
+  4.6-stable, not source-verified against an engine changelog entry.)* The
+  GDScript static type-checker rejects it at **parse** time —
+  `"Only String or StringName can be used as index for type
+  JavaScriptObject"` — which fails the whole script's load, not just the one
+  call. If this hits inside `_ready()`, the symptom looks exactly like a
+  hang: nothing ever runs, no error reaches your own logging, only Godot's
+  own stderr shows the `SCRIPT ERROR: Parse Error`. Fix: index with
+  `str(i)` — JS treats numeric-string keys on an `Array` identically to
+  numeric ones, so `arr[str(i)] = value` still builds a real JS `Array`.
 
 ---
 

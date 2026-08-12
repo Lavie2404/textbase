@@ -1302,9 +1302,22 @@ one-way, INVARIANT mirror — phát hiện bởi `qa-lead`/`systems-designer`)*
   không mất nội dung ở tầng logic; cơ chế nén/lưu trữ vật lý cụ thể là
   quyết định của Persistence/Save System. *(Owner: technical-director,
   target: `/design-system Persistence/Save System`, `/create-architecture`)*
-- **[REQUIRED ADR — chặn `/create-architecture`] RAM residency lúc runtime
-  + chữ ký sync/async của `get_turn_page`** *(nêu 2026-08-06 vòng 1,
-  `godot-specialist`; XÁC NHẬN CÒN TREO + làm rõ mức độ nghiêm trọng ở
+- ~~**[REQUIRED ADR — chặn `/create-architecture`] RAM residency lúc runtime
+  + chữ ký sync/async của `get_turn_page`**~~ — **ĐÃ ĐÓNG 2026-08-12,
+  ADR-0005** (`docs/architecture/adr-0005-world-memory-ram-residency.md`):
+  giả định MVP tạm thời bên dưới (RAM-resident toàn bộ, giữ đồng bộ, KHÔNG
+  đổi `#15`) đã được PHÊ DUYỆT CHÍNH THỨC, kèm trần số cụ thể
+  (`avg_turn_record_bytes≈800` × hệ số overhead GDScript String
+  UTF-32/Dictionary boxing ≈8-16× → ~12.8-25.6MB ở world_time=2.000, rất
+  an toàn so với MVP 3 NPC). Chữ ký `get_turn_page()`/`total_turns()`
+  chốt dạng `await`-shaped NGAY từ MVP (dù implementation đồng bộ thuần)
+  để Full Vision sau này chuyển sang IndexedDB async thật (tái dùng
+  cursor-scan đã validate ở ADR-0002 Experiment 2b) mà KHÔNG cần sửa call
+  site nào ở `core-ui-screen-navigation.md`. Xác minh thật (trần RAM WASM
+  heap thật trên thiết bị) dời sang `/soak-test` ở Polish phase, không
+  chặn ADR này. *(Lịch sử — giữ nguyên văn dưới đây để tham khảo, đã ĐÓNG
+  ở trên: nêu 2026-08-06 vòng 1,
+  `godot-specialist`; xác nhận nghiêm trọng ở
   vòng re-review 2, `godot-specialist` + `creative-director`)*: GDD này
   phân biệt rõ "lưu trữ vật lý" (Persistence, Core Rule #6) khỏi "dữ liệu
   cần cư trú RAM lúc đang chơi" (Nhật ký đầy đủ + kho fact, cả hai đều
@@ -1339,23 +1352,21 @@ one-way, INVARIANT mirror — phát hiện bởi `qa-lead`/`systems-designer`)*
   `get_turn_page`/`total_turns()` đồng bộ, không đổi #15), vì phạm vi MVP
   hiện tại (3 NPC, xem `systems-index.md`) chưa chắc chạm quy mô world_time
   đủ lớn để RAM là rủi ro thật — hoãn giải pháp RAM-bounded thật (IndexedDB
-  async) sang 1 ADR follow-up riêng khi lập kế hoạch Full Vision. *(Owner:
+  async) sang 1 ADR follow-up riêng khi lập kế hoạch Full Vision. ~~*(Owner:
   technical-director, target: `/create-architecture`, TRƯỚC khi bắt đầu
   code World Memory hoặc #15 — điều kiện tiên quyết đã tự đặt ra ở
-  `systems-index.md` risk register.)*
-- **`ai_context_hard_token_budget` — biến nền tảng của Formula #5 chưa
-  tồn tại ở nơi được tuyên bố sở hữu nó** *(mới, thêm 2026-08-06 vòng
-  re-review 2, `systems-designer`)*: World Memory GDD (Dependencies +
-  Formula #5) khẳng định biến này "registry, do `ai-llm-integration-
-  layer.md` cấp" — nhưng grep toàn bộ `ai-llm-integration-layer.md` VÀ
-  registry `entities.yaml`: **không có bất kỳ dòng nào định nghĩa nó**.
-  Đây là dependency đã khai từ vòng 1 (khi thêm Runtime Clamp) nhưng chưa
-  từng được lan truyền sang GDD sở hữu. GDD này CHỈ khai yêu cầu — việc
-  định nghĩa giá trị thật (phụ thuộc model AI đang dùng) thuộc phạm vi
-  `ai-llm-integration-layer.md`, cần xin phép riêng để sửa file đó. *(Owner:
-  người dùng quyết định thời điểm / `ai-llm-integration-layer.md` re-review,
-  target: trước khi Formula #5 (Runtime Hard Clamp) có thể vận hành thật —
-  hiện tại công thức vẫn ĐÚNG về mặt đặc tả, chỉ thiếu giá trị đầu vào.)*
+  `systems-index.md` risk register.)*~~ — đã hoàn tất, xem ADR-0005 ở đầu mục này.
+- ~~**`ai_context_hard_token_budget` — biến nền tảng của Formula #5 chưa
+  tồn tại ở nơi được tuyên bố sở hữu nó**~~ — **ĐÃ ĐÓNG 2026-08-12,
+  ADR-0003** (`docs/architecture/adr-0003-ai-llm-integration-layer.md`):
+  `ai-llm-integration-layer.md` nay định nghĩa `ai_context_hard_token_budget
+  = 8000` (tuning knob, safe range 4000–16000) trong bảng Tuning Knobs của
+  chính nó — hằng số cấu hình cố định, KHÔNG suy ra từ context window của
+  model đang dùng (ADR-0003 xác nhận: mọi model trong danh sách dự phòng
+  hiện tại đều ~1.048.576 token, quá lớn để làm giới hạn có ý nghĩa; ràng
+  buộc thật là chi phí API + độ trễ mỗi lượt). Formula #5 ở trên nay có đủ
+  giá trị đầu vào để vận hành thật, không còn là công thức "đúng đặc tả
+  nhưng thiếu input".
 - **Chủ sở hữu field cấu trúc cho "cam kết/lời hứa" định tính** *(mới,
   thêm 2026-08-06, `game-designer` + `creative-director`)*: World Memory
   CHỦ ĐÍCH không lưu nội dung định tính thuần túy (chỉ lưu delta cơ học

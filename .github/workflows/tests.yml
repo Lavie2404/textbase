@@ -1,0 +1,55 @@
+name: Automated Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# NOTE: this project uses GUT (Godot Unit Test), not GdUnit4 — see
+# tests/README.md. There is no widely maintained third-party GitHub Action
+# for GUT, so this workflow downloads a headless Godot build directly and
+# invokes GUT's own CLI entry point (addons/gut/gut_cmdln.gd).
+#
+# VERIFY BEFORE FIRST RUN: the exact release asset filename below targets
+# Godot 4.6-stable (see docs/engine-reference/godot/VERSION.md). Godot 4.6
+# is past this assistant's knowledge cutoff (~4.3) — confirm the asset name
+# against https://github.com/godotengine/godot/releases/tag/4.6-stable
+# before relying on this workflow; the historical naming pattern is
+# `Godot_v{VERSION}-stable_linux.x86_64.zip`.
+
+env:
+  GODOT_VERSION: "4.6-stable"
+  GODOT_ASSET: "Godot_v4.6-stable_linux.x86_64.zip"
+
+jobs:
+  test:
+    name: Run GUT Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Download headless Godot
+        run: |
+          curl -L -o godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/${GODOT_ASSET}"
+          unzip godot.zip
+          mv Godot_v4.6-stable_linux.x86_64 godot
+          chmod +x godot
+
+      - name: Run GUT test suite
+        run: |
+          ./godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests -gexit
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            **/*.log
+          if-no-files-found: ignore

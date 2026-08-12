@@ -42,6 +42,7 @@ verdict PROCEED).
 | 13 | Character Continuation (inferred) | Gameplay | MVP | Approved | [character-continuation.md](character-continuation.md) | Death & Consequence |
 | 14 | Character Card & Identity | UI | MVP | Approved | [character-card-identity.md](character-card-identity.md) | Equipment & Skill Data, NPC Affinity, Setting & Canon Integration |
 | 15 | Core UI/Screen Navigation (inferred) | UI | MVP | Approved | [core-ui-screen-navigation.md](core-ui-screen-navigation.md) | Combat System, Character Card, Situation Generation |
+| 16 | Character Customization Mode | Gameplay | MVP | Designed — chờ `/design-review` (lean mode, off-index feature phát sinh giữa phiên) | [character-customization-mode.md](character-customization-mode.md) | Core UI/Screen Navigation, Turn Manager, Combat System, EXP & Realm Progression, Character Card & Identity, Equipment & Skill Data System, Persistence / Save System |
 
 ---
 
@@ -50,7 +51,7 @@ verdict PROCEED).
 | Category | Description | Systems in this project |
 |----------|-------------|--------------------------|
 | **Core** | Foundation systems everything depends on | Turn Manager, Contract Enforcement, AI Integration Layer, World Memory |
-| **Gameplay** | The systems that make the game fun | Equipment & Skill Data, Combat, Death & Consequence, Character Continuation |
+| **Gameplay** | The systems that make the game fun | Equipment & Skill Data, Combat, Death & Consequence, Character Continuation, Character Customization Mode |
 | **Progression** | How the player grows over time | EXP & Realm Progression, NPC Affinity & Relationship |
 | **Persistence** | Save state and continuity | Persistence / Save System |
 | **UI** | Player-facing information displays | Character Card & Identity, Core UI/Screen Navigation |
@@ -327,8 +328,13 @@ tục review-thuần-văn-bản — xem chi tiết
 | 13 | Character Continuation | MVP | Feature | narrative-director, game-designer | S |
 | 14 | Character Card & Identity | MVP | Presentation | ux-designer, game-designer | M |
 | 15 | Core UI/Screen Navigation | MVP | Presentation | ux-designer, ui-programmer | M |
+| 16 | Character Customization Mode | MVP | Feature/Presentation | game-designer, ux-designer | S |
 
-*(S = 1 phiên thiết kế, M = 2-3 phiên, L = 4+ phiên.)*
+*(S = 1 phiên thiết kế, M = 2-3 phiên, L = 4+ phiên. Hệ #16 phát sinh
+giữa phiên 2026-08-12 [ngoài Recommended Design Order gốc từ
+`/map-systems`] — user yêu cầu tính năng "hack mode" giữa lúc chạy
+`/ux-design main-screen`, thiết kế qua `/design-system` cùng phiên,
+review mode `lean`.)*
 
 ---
 
@@ -357,11 +363,11 @@ tục review-thuần-văn-bản — xem chi tiết
 
 | Metric | Count |
 |--------|-------|
-| Total systems identified | 15 |
-| Design docs started | 15 |
-| Design docs reviewed | 15 |
+| Total systems identified | 16 (hệ #16 phát sinh giữa phiên 2026-08-12, off-index từ `/map-systems` gốc) |
+| Design docs started | 16 |
+| Design docs reviewed | 15 (hệ #16 chưa qua `/design-review`) |
 | Design docs approved | 13 (2026-08-11: +AI/LLM Integration Layer qua cổng CORS prototype PASS; còn lại: Persistence [prototype PASS + ADR-0002 Proposed — chờ user accept ADR], Combat [ĐÃ implement, GUT 91/91 xanh, ADR-0001 Accepted]) |
-| MVP systems designed | 15/15 |
+| MVP systems designed | 16/16 |
 | Vertical Slice systems designed | 0/0 |
 
 ---

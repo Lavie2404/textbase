@@ -30,7 +30,7 @@
 #   Superseded entries:     Grep pattern="status: superseded"
 
 version: 1
-last_updated: "2026-08-07"
+last_updated: "2026-08-12"
 
 # ─── STATE OWNERSHIP ─────────────────────────────────────────────────────────
 # Who is the authoritative owner of each piece of shared game state.
@@ -43,7 +43,17 @@ last_updated: "2026-08-07"
 # interface: how other systems access this state (read-only property, method call,
 #   signal, shared resource, etc.) — this is the contract other ADRs depend on.
 
-state_ownership: []
+state_ownership:
+  - state: save_bundle (per-slot turn_records + snapshots + slot metadata)
+    status: active
+    owner_system: persistence
+    adr: docs/architecture/adr-0002-persistence-storage-backend.md
+    interface: "StorageBackend.stage(blobs: Array[Dictionary]) / commit() (2-phase; durability signaled via committed(world_time: int) on the underlying IndexedDB transaction's oncomplete). Other systems never write storage directly -- they implement get_blob() -> {status, bytes: String} and persistence gathers + writes on their behalf."
+    write_access: persistence-only
+    referenced_by:
+      - docs/architecture/adr-0002-persistence-storage-backend.md
+    added: 2026-08-11
+    revised: ""
 
 # Example:
 #
@@ -71,7 +81,78 @@ state_ownership: []
 #
 # pattern options: signal | direct_call | event_bus | shared_resource | rpc | none
 
-interfaces: []
+interfaces:
+  - contract: persistence_stage_commit
+    status: active
+    pattern: direct_call
+    producer: persistence          # StorageBackend seam; emits committed()/failed()
+    consumers:
+      - turn-manager                # calls stage() then commit(), awaits the result to gate Turn Confirmed (Core Rule #1)
+    adr: docs/architecture/adr-0002-persistence-storage-backend.md
+    signal_signature: "stage(blobs: Array[Dictionary]) -> void [sync, no I/O] then commit() -> void [async]; result via committed(world_time: int) / failed(error_code: StringName) signals, never a return value"
+    referenced_by:
+      - docs/architecture/adr-0002-persistence-storage-backend.md
+    added: 2026-08-11
+    revised: ""
+
+  - contract: ai_request_call
+    status: active
+    pattern: direct_call
+    producer: ai-llm-integration-layer     # AiLlmRequestService, DI-injected Node (not Autoload)
+    consumers:
+      - turn-manager                        # calls request_ai() up to 3 times/turn (ai_call_budget_per_turn)
+    adr: docs/architecture/adr-0003-ai-llm-integration-layer.md
+    signal_signature: "request_ai(call_type: StringName, payload: Dictionary) -> Dictionary; returns {status: &\"success\"|&\"failed\", text/suggestions, error_code, error_reason} synchronously to the awaiting caller -- never raises for network/API failure"
+    referenced_by:
+      - docs/architecture/adr-0003-ai-llm-integration-layer.md
+    added: 2026-08-12
+    revised: ""
+
+  - contract: undo_capturable_contract
+    status: active
+    pattern: direct_call
+    producer: "each Feature system with a TR-*-Undo requirement (combat-system.md,
+      exp-realm-progression.md, npc-affinity-relationship.md,
+      death-and-consequence.md, character-card-identity.md) -- each implements
+      @abstract class_name UndoCapturable extends RefCounted for its own
+      Undo-covered state"
+    consumers:
+      - turn-manager                        # orchestrates capture (before Resolving) and
+                                             # restore (on Undo or write-failure), holds
+                                             # the single retained snapshot (undo_depth=1)
+    adr: docs/architecture/adr-0004-turn-manager-undo.md
+    signal_signature: "capture_snapshot() -> Dictionary [deep copy: .duplicate(true) for containers + .duplicate_deep() per Resource-typed field, Godot 4.5+]; restore_snapshot(snap: Dictionary) -> void [MUST mutate in-place, MUST re-emit the system's normal signals]"
+    referenced_by:
+      - docs/architecture/adr-0004-turn-manager-undo.md
+    added: 2026-08-12
+    revised: ""
+
+  - contract: world_memory_read_interface
+    status: active
+    pattern: direct_call
+    producer: world-memory
+    consumers:
+      - core-ui-screen-navigation   # D.3 Story Log pagination, D.3b S2 live window
+    adr: docs/architecture/adr-0005-world-memory-ram-residency.md
+    signal_signature: "get_turn_page(anchor_turn_id: int, count: int, direction: StringName) -> Dictionary; total_turns() -> int; get_turn(turn_id: int) -> Dictionary; get_processing_state(turn_id: int) -> Variant -- ALL await-shaped at every call site starting at MVP, even though the MVP implementation body is plain synchronous (no internal await/yield); callers must not call these directly from _process()/_physics_process()/_draw()/_input() (see forbidden_patterns)"
+    referenced_by:
+      - docs/architecture/adr-0005-world-memory-ram-residency.md
+    added: 2026-08-12
+    revised: ""
+
+  - contract: tap_name_resolution
+    status: active
+    pattern: direct_call
+    producer: character-card                # resolve_names_in_text(text) -> Array[Dictionary]
+    consumers:
+      - core-ui-screen-navigation            # build_tappable_bbcode() consumes match spans to
+                                              # construct RichTextLabel.bbcode_text at render time
+    adr: docs/architecture/adr-0006-tap-name-to-card-entry-point.md
+    signal_signature: "resolve_names_in_text(text: String) -> Array[Dictionary] [{start: int, end: int, char_id: String}, ...], pure/stateless, matches true_value(name) AND disguise_value(name)/concealment.displayed_value(name) to the same char_id, only for card_exists(char_id)=true, longest-match-first non-overlapping"
+    referenced_by:
+      - docs/architecture/adr-0006-tap-name-to-card-entry-point.md
+    added: 2026-08-12
+    revised: ""
 
 # Example:
 #
@@ -143,6 +224,166 @@ api_decisions:
     added: 2026-08-07
     revised: ""
 
+  - purpose: web_save_persistence
+    status: active
+    api: "IndexedDB driven directly via JavaScriptBridge (get_interface/create_object/create_callback), transaction.oncomplete as the durability boundary"
+    not: "FileAccess/user:// (Emscripten IDBFS) as the save path -- see forbidden_patterns below"
+    adr: docs/architecture/adr-0002-persistence-storage-backend.md
+    reason: "Core Rule #1 requires an observable durability event to gate Turn Confirmed transitions; IDBFS sync completion is not observable from GDScript (spike-verified). Empirically verified in prototypes/persistence-web/: Experiment #2 confirmed oncomplete reaches GDScript (24/24 iterations, correct put-before-complete ordering, 0.6-14.2ms p50 latency at 150ms budget); Experiment 2b confirmed the remaining mechanisms (PackedByteArray fails silently across the bridge -> String/base64 is the get_blob() contract; compound-key [slot_id, world_time] cursor scan via multi-fire callback; multi-store transaction commit+abort) all work as designed."
+    referenced_by:
+      - docs/architecture/adr-0002-persistence-storage-backend.md
+    added: 2026-08-11
+    revised: ""
+
+  - purpose: cross_tab_slot_locking
+    status: active
+    api: "navigator.locks.request(name, {ifAvailable: true}, cb) via JavaScriptBridge; held across the session by passing Promise.resolve.bind(Promise, pendingPromise) as the lock callback (pending Promise constructed from GDScript via create_object('Promise', executor_cb), resolve stashed and invoked on release)"
+    not: "returning the pending Promise directly from the create_callback() Callable -- Callable return values do not cross the bridge (verified: JS receives undefined, lock releases immediately)"
+    adr: docs/architecture/adr-0002-persistence-storage-backend.md
+    reason: "AC-18 requires instant multi-tab rejection ({ifAvailable:true}, no queue-wait); AC-33 requires crash-safe auto-release with zero heartbeat infrastructure. Verified empirically in prototypes/persistence-web/ Experiment #3 (bind_trick variant: held while pending, still held after 1s+, request promise settles + lock frees only after the stashed resolve() is invoked from GDScript)."
+    referenced_by:
+      - docs/architecture/adr-0002-persistence-storage-backend.md
+    added: 2026-08-11
+    revised: ""
+
+  - purpose: ai_llm_backend
+    status: active
+    api: "Gemini API (generativelanguage.googleapis.com), called directly from the Godot client via HTTPRequest; model fallback ladder M = [\"gemini-3-flash-preview\", \"gemini-3.5-flash\", \"gemini-3.1-flash-lite\", \"gemini-2.5-flash\", \"gemini-2.5-flash-lite\"] (GEMINI_TEXT_MODEL_FALLBACKS order from src/reference.md), config-driven via AiLlmTuningConfig Resource -- never hardcoded"
+    not: "backend proxy server for AI calls -- rejected, contradicts game-concept.md's client-side-key decision and adds infra cost/latency for no benefit at MVP scale"
+    adr: docs/architecture/adr-0003-ai-llm-integration-layer.md
+    reason: "Client-direct architecture verified feasible by prototypes/gemini-cors/ (CORS PASS, real browser fetch() reads cross-origin response). ai_context_hard_token_budget=8000 set as a fixed cost/latency-driven constant (not model-context-window-derived -- all 5 models verified ~1,048,576 input tokens, far too large to be a meaningful bound), closing QQ-01 from docs/architecture/architecture.md."
+    referenced_by:
+      - docs/architecture/adr-0003-ai-llm-integration-layer.md
+    added: 2026-08-12
+    revised: ""
+
+  - purpose: undo_rollback_mechanism
+    status: active
+    api: "Optimistic-apply + single-slot snapshot-restore: every Feature system applies
+      its locked_result to live state immediately (no staging/read-through anywhere);
+      Turn Manager retains exactly 1 pre-turn snapshot at a time (undo_capturable_contract
+      above), overwritten each new turn, matching undo_depth=1. The same restore call
+      serves both Undo and 'Persistence write failed after Resolving/Undoing'."
+    not: "deferred-commit staging (every Undo-covered read path across 5 systems would
+      need to become staging-aware -- rejected as materially more invasive for an
+      identical observable result); each system writing its own inverse operation
+      (forward/inverse drift risk -- see forbidden_patterns below)"
+    adr: docs/architecture/adr-0004-turn-manager-undo.md
+    reason: "undo_depth=1 (registry-locked, turn-manager.md) makes a full staging/stack
+      mechanism unnecessary weight -- exactly one retained snapshot suffices. Closes
+      QQ-03/Character Card OQ#14 as a byproduct: Entity Record creation deltas piggyback
+      the same per-turn stage()/commit() write already happening every confirmed turn
+      per ADR-0002, giving card existence the same durability boundary as world_time."
+    referenced_by:
+      - docs/architecture/adr-0004-turn-manager-undo.md
+    added: 2026-08-12
+    revised: ""
+
+  - purpose: world_memory_ram_residency
+    status: active
+    api: "World Memory's Full Narrative Log + extracted-fact store stay fully
+      RAM-resident (GDScript Array/Dictionary) for the whole session at MVP scope;
+      the public read interface (world_memory_read_interface above) is await-shaped
+      at every call site starting now, but the MVP implementation body is plain
+      synchronous -- no real suspension happens yet."
+    not: "building real async IndexedDB-backed bounded-RAM reads at MVP (Full Vision
+      concern, deferred -- see adr-0005 Alternative 1); a new warn_triggered-style
+      RAM runtime monitor at MVP (Alternative 3, rejected as over-engineering for an
+      unobserved risk)"
+    adr: docs/architecture/adr-0005-world-memory-ram-residency.md
+    reason: "Godot Web export's user:// (IDBFS/MEMFS) mirrors the entire file in RAM
+      regardless -- FileAccess-based pagination never actually bounds RAM, so the
+      only real RAM-bounded option is direct async IndexedDB queries (IndexedDB is
+      inherently async). Numeric grounding (persistence-save-system.md's
+      avg_turn_record_bytes=800, pessimistic 8x-16x GDScript String/Dictionary
+      overhead) shows MVP-scope playthroughs (3 seed NPCs) stay far below any
+      plausible mobile WASM heap ceiling. The await-shaped-now interface decision
+      lets Full Vision's eventual real-async swap require zero Core UI call-site
+      changes."
+    referenced_by:
+      - docs/architecture/adr-0005-world-memory-ram-residency.md
+    added: 2026-08-12
+    revised: ""
+
+  - purpose: input_lock_recursive_disable
+    status: active
+    api: "BOTH Control.mouse_behavior_recursive AND Control.focus_behavior_recursive
+      set together, always, via a single call site (_set_input_locked() or final
+      implementation name) -- confirmed as two fully independent 3-state enum
+      properties (Inherited/Disabled/Enabled) via direct ClassDB introspection +
+      runtime test against the pinned Godot 4.6.stable binary, 2026-08-12. Verify
+      the EFFECTIVE (post-override) state via get_mouse_filter_with_override() /
+      get_focus_mode_with_override() -- a descendant's raw mouse_filter/focus_mode
+      property does NOT change when an ancestor's recursive property is set."
+    not: "setting only one of the two properties (leaves the other input channel --
+      mouse/touch OR keyboard/gamepad -- completely unaffected by the lock, a real
+      double-submit risk via Tab+Enter during Resolving/Undoing); relying on the
+      older single mouse_filter property alone (does not cover focus at all)"
+    adr: docs/architecture/adr-0007-core-ui-input-lock-screen-stack-safe-area.md
+    reason: "This project's own curated docs/engine-reference/godot/modules/ui.md
+      was found stale/wrong on this exact point during ADR drafting (documented only
+      mouse_filter, never mentioned either *_behavior_recursive property existed) --
+      corrected as part of this ADR. TR-cusn-015 (core-ui-screen-navigation.md) had
+      self-flagged an internal contradiction between two of the project's own
+      documentation sources and explicitly refused to arbitrate without direct
+      engine verification."
+    referenced_by:
+      - docs/architecture/adr-0007-core-ui-input-lock-screen-stack-safe-area.md
+    added: 2026-08-12
+    revised: ""
+
+  - purpose: screen_stack_architecture
+    status: active
+    api: "Three separate Autoload-owned CanvasLayer nodes, one per tier (ScreenStack
+      layer=0, OverlayStack layer=1, BannerStack layer=2) -- CanvasLayer.layer
+      provides draw-order independent of scene-tree position. Screen-tier nodes (S1,
+      S2, S4, S4-RO, S5) and overlay-tier nodes (O-Card, O-Set) are instantiated once
+      at boot and cached for the session, toggled via visible=true/false. Content
+      nodes INSIDE S2/S4 (per-turn/per-page) are a separate, independent lifecycle
+      (D.3/D.3b eviction) -- unrelated to this screen-tier caching."
+    not: "SceneTree.change_scene_to_file()/change_scene_to_packed() for screen
+      transitions (frees the entire current scene tree, incompatible with overlays
+      rendering above the screen below + preserved scroll position); a single
+      Autoload/CanvasLayer with z_index-based tier ordering instead of 3 separate
+      CanvasLayers (reintroduces scene-tree-position-dependent ordering fragility)"
+    adr: docs/architecture/adr-0007-core-ui-input-lock-screen-stack-safe-area.md
+    reason: "core-ui-screen-navigation.md's TR-cusn-016 mandates both constraints
+      (no change_scene_to_file/packed(); screen-tier cached not freed) but left the
+      concrete scene/Autoload shape undecided. Godot's CanvasLayer.layer is the
+      idiomatic mechanism for exactly this kind of role-based draw-order guarantee.
+      Distinct from ai_llm_service_as_autoload's rejection of Autoload -- that
+      rejection was scoped to AC-29's per-test-isolation requirement, which does not
+      apply to screen-stack infrastructure (exactly one instance per running game,
+      by design, per the GDD's own OQ#5a)."
+    referenced_by:
+      - docs/architecture/adr-0007-core-ui-input-lock-screen-stack-safe-area.md
+    added: 2026-08-12
+    revised: ""
+
+  - purpose: safe_area_insets_web
+    status: active
+    api: "Custom HTML export shell (viewport-fit=cover meta tag) exposing
+      env(safe-area-inset-*) as CSS custom properties (--sat/--sar/--sab/--sal) on
+      :root, read via JavaScriptBridge.get_interface(\"window\") ->
+      getComputedStyle(documentElement).getPropertyValue(...) -- a method-call
+      chain, not a script-eval."
+    not: "JavaScriptBridge.eval() to read env() values (TR-cusn-014's original text
+      -- corrected by adr-0007; see javascript_bridge_eval_usage forbidden pattern
+      below); relying on DisplayServer.get_display_safe_area() (native-only, returns
+      nothing useful on Web export); trusting the stock Godot export template
+      (lacks viewport-fit=cover, causes env() to silently resolve to 0px)"
+    adr: docs/architecture/adr-0007-core-ui-input-lock-screen-stack-safe-area.md
+    reason: "web-export.md Q9 already established JavaScriptBridge.eval() is the
+      ONLY API in JavaScriptBridge requiring CSP unsafe-eval, and that every real
+      project need (including this one) is reachable via get_interface()/
+      create_object()/create_callback() instead -- getComputedStyle() is a plain
+      method call returning a primitive string, the same class of mechanism already
+      verified for navigator.locks/navigator.storage (Q6-Q8)."
+    referenced_by:
+      - docs/architecture/adr-0007-core-ui-input-lock-screen-stack-safe-area.md
+    added: 2026-08-12
+    revised: ""
+
 # Example:
 #
 # api_decisions:
@@ -181,6 +422,148 @@ forbidden_patterns:
     why: "GDScript's `int/int` truncates toward zero by default (opposite of Python's default true division) — an omitted float() cast silently produces wrong results rather than an error. This exact bug class caused Combat System's exhaustion-convergence formula to fail 0/108 Safe Range combinations under real GDScript semantics despite a prior numeric harness (written in Python, wrong default) claiming 72/72 convergence, and separately caused a tiebreak formula to degenerate into a disguised coin-flip 100% of the time in symmetric battles. See docs/architecture/adr-0001-combat-spec-authority.md Context for the full incident history."
     adr: docs/architecture/adr-0001-combat-spec-authority.md
     added: 2026-08-07
+
+  - pattern: fileaccess_userdir_as_durability_gate
+    status: active
+    description: "Never use FileAccess/user:// (Emscripten IDBFS) completion, or JavaScriptBridge.force_fs_sync(), as the signal that a save write is durable. Never gate Turn Confirmed/Undo transitions (Core Rule #1) on either."
+    why: "On Web export, FileAccess.store_*() returning true only means the write landed in the in-memory MEMFS layer; the actual IndexedDB sync happens on the next frame via an internal Emscripten callback that never reaches GDScript. force_fs_sync() only raises a dirty flag -- it reports completion to nobody. Treating either as durable makes Core Rule #1's write-ahead gate fiction. Confirmed by source-read spike (docs/engine-reference/godot/modules/web-export.md Q5/Q6) and is the deciding rejection reason for Alternative 1 (FileAccess/user:// over IDBFS) in adr-0002."
+    adr: docs/architecture/adr-0002-persistence-storage-backend.md
+    added: 2026-08-11
+
+  - pattern: ai_llm_service_as_autoload
+    status: active
+    description: "AiLlmRequestService (owns the HTTPRequest node + Formula 1-3 retry/fallback state machine of ai-llm-integration-layer.md) must never be registered as a project Autoload. It must be constructed as a plain Node, owned and dependency-injected by its caller (Turn Manager)."
+    why: "AC-29 of the already-Approved ai-llm-integration-layer.md GDD requires cooldown_until (the one variable that outlives a single logical call) to be injectable/isolable so GUT tests don't leak state between cases -- Autoloads are process-lifetime globals, exactly the pattern AC-29 exists to forbid. Also contradicts coding-standards.md's 'dependency injection over singletons' rule. Considered and rejected as Alternative 4 in adr-0003."
+    adr: docs/architecture/adr-0003-ai-llm-integration-layer.md
+    added: 2026-08-12
+
+  - pattern: per_system_inverse_undo_operations
+    status: active
+    description: "A Feature system must never implement its own independent 'inverse
+      operation' for Undo (e.g. a bespoke 'undo damage' that does HP += damage,
+      separate from the forward damage-dealing code). Use the undo_capturable_contract
+      (capture_snapshot()/restore_snapshot() via @abstract UndoCapturable) instead."
+    why: "An inverse operation is a second, independently-writable piece of logic per
+      mutation type that can silently drift from the forward operation as that forward
+      logic evolves (e.g. a formula change with its inverse forgotten) -- the same class
+      of risk the project's static_function_hidden_state_for_testable_mechanics and
+      bare_int_division_in_gameplay_formulas forbidden patterns exist to prevent
+      categorically. A generic capture/restore contract's correctness is independent of
+      what the forward logic does, so it cannot drift the same way. Considered and
+      rejected as Alternative 2 in adr-0004."
+    adr: docs/architecture/adr-0004-turn-manager-undo.md
+    added: 2026-08-12
+
+  - pattern: await_shaped_call_from_non_awaitable_callback
+    status: active
+    description: "Never call World Memory's Public Interface (get_turn_page,
+      total_turns, get_turn, get_processing_state -- world_memory_read_interface
+      above), or any function that wraps one of them, directly from an engine
+      callback that cannot itself await (_process(), _physics_process(), _draw(),
+      _input(), etc.)."
+    why: "Any GDScript function whose body contains `await` becomes a coroutine to
+      its OWN caller, whether or not it ever actually suspends. At MVP this is
+      harmless (the await-shaped Public Interface never really suspends yet), but
+      calling it from a non-awaitable engine callback would silently break the
+      moment Full Vision's implementation starts performing real async IndexedDB
+      reads -- exactly the kind of bug that is free to prevent now and expensive to
+      discover later. Identified by godot-specialist review during adr-0005
+      drafting, 2026-08-12."
+    adr: docs/architecture/adr-0005-world-memory-ram-residency.md
+    added: 2026-08-12
+
+  - pattern: ai_embedded_tap_target_markup
+    status: active
+    description: "Never prompt-instruct the AI to embed custom markup (e.g. {{char:id}}...{{/char}})
+      around character names inside narration_text for the purpose of building interactive
+      tap-targets. Use Character Card's resolve_names_in_text() (client-side, deterministic
+      string matching against known name/alias records) instead -- see tap_name_resolution
+      above."
+    why: "A missed wrap silently removes a tap-target with no error signal (unlike a compiler-
+      or test-catchable bug); a char_id marker containing digits sitting in the same string
+      Contract Enforcement's Formula 1 scans risks false-positive leak detection depending on
+      ordering; and it contradicts this project's established, repeatedly reaffirmed posture
+      (ai-llm-integration-layer.md Core Rule #2, mechanic-narration-contract-enforcement.md's
+      'no code path parses narration_text to extract world-state') of never trusting AI output
+      for anything beyond narrative content itself. Considered and rejected as Alternative 1 in
+      adr-0006."
+    adr: docs/architecture/adr-0006-tap-name-to-card-entry-point.md
+    added: 2026-08-12
+
+  - pattern: unescaped_ai_text_in_bbcode_render
+    status: active
+    description: "Never inject narration_text (or any AI-generated free text) into a
+      RichTextLabel's bbcode_text without first BBCode-escaping every segment outside an
+      intentionally-constructed tag ([ -> [lb], ] -> [rb])."
+    why: "AI-generated free text is not guaranteed bracket-free -- a literal '[' or ']' could
+      corrupt BBCode parsing, or, if shaped by a successful prompt-injection attempt, forge a
+      fake [url=]/[img=] tag pointing at attacker-chosen content. Structurally the same threat
+      class already defended against for direct/stored prompt injection (AC-26/AC-33 of
+      ai-llm-integration-layer.md), left open here for no reason if skipped. Considered and
+      rejected as Alternative 5 in adr-0006."
+    adr: docs/architecture/adr-0006-tap-name-to-card-entry-point.md
+    added: 2026-08-12
+
+  - pattern: wcag_aa_compliance_claim_with_open_gap
+    status: active
+    description: "Never state or imply 'WCAG 2.1 AA compliant' (store page, README, marketing,
+      or any player-facing/public document) while adr-0006's Part 2 accessibility scope
+      decision stands -- tap-name-to-card and the 3 marginalia bookmarks do not meet SC 4.1.2
+      (Name/Role/Value) or SC 1.3.1 (Info/Relationships), both Level A, at MVP."
+    why: "adr-0006 Part 2 accepts this gap on the record, with a documented keyboard-only
+      fallback (AC-56a via the 「Thẻ」 bookmark) -- but that acceptance is conditioned on the
+      gap never being silently misrepresented as full compliance. This is condition 3 of that
+      ADR's four binding conditions; registering it here lets /architecture-review and future
+      ADR/content authoring grep-check for the claim before it is ever made unknowingly."
+    adr: docs/architecture/adr-0006-tap-name-to-card-entry-point.md
+    added: 2026-08-12
+
+  - pattern: single_channel_recursive_input_lock
+    status: active
+    description: "Never assign Control.mouse_behavior_recursive or
+      Control.focus_behavior_recursive individually outside the project's single
+      designated input-lock call site (_set_input_locked() or its final
+      implementation name). Always set BOTH together, every time."
+    why: "The two properties are fully independent (confirmed by direct ClassDB
+      introspection + runtime test against the pinned Godot 4.6.stable binary,
+      adr-0007) -- setting only one leaves the other input channel (mouse/touch OR
+      keyboard/gamepad focus) completely unaffected by the lock. During Resolving/
+      Undoing (Core UI D.1), this is a real double-submit risk: Tab+Enter could
+      bypass a mouse-only lock entirely, or a tap could bypass a focus-only lock."
+    adr: docs/architecture/adr-0007-core-ui-input-lock-screen-stack-safe-area.md
+    added: 2026-08-12
+
+  - pattern: screen_tier_scene_free_or_swap
+    status: active
+    description: "Never call queue_free(), SceneTree.change_scene_to_file(), or
+      SceneTree.change_scene_to_packed() on any of Core UI's 5 screen-tier Control
+      nodes (S1, S2, S4, S4-RO, S5) or the ScreenStack/OverlayStack/BannerStack
+      Autoloads that own them. Toggle visible=true/false instead."
+    why: "change_scene_to_file()/packed() frees the ENTIRE current scene tree --
+      incompatible with overlays rendering above the screen below and preserved
+      scroll position, both requirements of core-ui-screen-navigation.md's TR-cusn-016.
+      This is distinct from content-tier eviction inside S2/S4 (D.3/D.3b), which DOES
+      require true freeing (remove_paragraph()) -- the two lifecycles must not be
+      confused with each other."
+    adr: docs/architecture/adr-0007-core-ui-input-lock-screen-stack-safe-area.md
+    added: 2026-08-12
+
+  - pattern: javascript_bridge_eval_usage
+    status: active
+    description: "Never use JavaScriptBridge.eval() anywhere in the codebase. Every
+      real project need (Web Locks, StorageManager.estimate(), IndexedDB
+      transactions, safe-area CSS env() reads via getComputedStyle(), etc.) is
+      reachable via get_interface()/create_object()/create_callback() instead."
+    why: "eval() is the single API in JavaScriptBridge that forces a CSP
+      unsafe-eval dependency (web-export.md Q9, source-verified) -- turning one
+      environment risk (a host's CSP might block it) into a statically-checkable
+      code-review rule instead. Already stated as project policy in
+      technical-preferences.md (added 2026-08-08 after the web-export.md technical
+      spike); registered here as a formal, grep-checkable entry after adr-0007
+      found core-ui-screen-navigation.md's own TR-cusn-014 had drifted from this
+      policy (its original text named eval() as the safe-area mechanism)."
+    adr: docs/architecture/adr-0007-core-ui-input-lock-screen-stack-safe-area.md
+    added: 2026-08-12
 
 # Example:
 #

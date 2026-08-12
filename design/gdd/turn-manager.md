@@ -498,18 +498,23 @@ tuning knob — đây là hard invariant kiến trúc (xem Formulas #2), không 
 
 ## Open Questions
 
-- **Cơ chế rollback/snapshot cho Undo trên các hệ downstream** (Combat, EXP,
-  Hảo cảm, Death & Consequence) chưa được chọn — cần một ADR xác định:
-  deferred-commit (kết quả khóa nằm ở staging, chỉ merge vào lưu trữ vĩnh
-  viễn khi hết cửa sổ undo — khuyến nghị từ `/design-review`) hay từng hệ tự
-  cung cấp inverse operation. Nguyên tắc bắt buộc (Core Rules #8) đã chốt —
-  chỉ còn cơ chế kỹ thuật cụ thể. *(Owner: technical-director +
-  systems-designer, target: trước khi bắt đầu `/design-system
-  combat-system`)*
-- **Schema `turn_snapshot` cho Persistence** (những field nào, ai sở hữu)
-  chưa được định nghĩa — cần cho AC-15. *(Owner: technical-director, target:
-  `/design-system persistence-save-system`, có thể gộp chung ADR với mục
-  trên)*
+- ~~**Cơ chế rollback/snapshot cho Undo trên các hệ downstream**~~ — **ĐÃ
+  ĐÓNG 2026-08-12, ADR-0004** (`docs/architecture/adr-0004-turn-manager-undo.md`):
+  chốt optimistic-apply + single-slot snapshot-restore — mỗi hệ Feature áp
+  dụng `locked_result` NGAY (không staging), Turn Manager giữ đúng 1
+  snapshot trước lượt (khớp `undo_depth=1`) qua contract `@abstract
+  capture_snapshot()`/`restore_snapshot()` mỗi hệ tự implement. KHÔNG chọn
+  deferred-commit staging (quá xâm lấn — mọi API đọc state của 5 hệ phải
+  thành staging-aware) lẫn inverse-ops mỗi hệ tự viết (rủi ro forward/
+  inverse lệch nhau theo thời gian).
+- ~~**Schema `turn_snapshot` cho Persistence**~~ — **ĐÃ ĐÓNG 2026-08-12,
+  ADR-0004**: sở hữu phân tán, `Array[Dictionary]` index-aligned với thứ tự
+  đăng ký hệ (không tập trung ở Turn Manager — mỗi hệ tự định nghĩa field
+  snapshot của mình theo đúng `TR-*-Undo` của GDD hệ đó). Turn record
+  schema (`{turn_id, action, locked_result, narration_text, world_time}`)
+  có thêm field mới `undone: bool` (mặc định `false`) — dùng cho cơ chế
+  tombstone (ghi đè, không xoá, cùng compound key qua `put()` sẵn có của
+  ADR-0002) khi 1 lượt bị undo.
 - **Transaction boundary giữa khóa kết quả downstream và ghi turn record**:
   nếu trình duyệt bị đóng/OS kill ngay sau khi 1 hệ downstream khóa kết quả
   nhưng trước khi Turn Manager ghi nhận lượt, có nguy cơ để lại trạng thái

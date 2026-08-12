@@ -2,17 +2,24 @@
 
 ## Status
 
-Proposed
+Accepted (2026-08-11 — the pre-implementation gate closed with Experiment 2b:
+all three previously-untested bridge mechanisms resolved [PackedByteArray
+marshalling FAILS → String/base64 contract; compound-key cursor scan PASS;
+multi-store transaction commit+abort PASS], no architectural change required,
+only the `get_blob()` payload type in Key Interfaces was finalized. See D1a
+"Resolved 2026-08-11" for the full evidence. Accepted per the user's standing
+directive to close the Persistence gate.)
 
 ## Date
 
-2026-08-11
+2026-08-11 (Proposed) / 2026-08-11 (Accepted)
 
 ## Last Verified
 
 2026-08-11 (all engine-behavior claims verified by source-read spike 2026-08-08
 `docs/engine-reference/godot/modules/web-export.md` + executed prototype
-2026-08-11 `prototypes/persistence-web/` on Godot 4.6-stable Web export)
+2026-08-11 `prototypes/persistence-web/` on Godot 4.6-stable Web export,
+including the Experiment 2b re-run the same day)
 
 ## Decision Makers
 
@@ -49,7 +56,7 @@ Experiment 2b (see D1a).
 | **Knowledge Risk** | HIGH — Web export internals are post-cutoff; every load-bearing claim here is verified by source-read spike (`web-export.md`, engine `4.6-stable` source) and/or the executed prototype, not training data |
 | **References Consulted** | `docs/engine-reference/godot/VERSION.md`, `docs/engine-reference/godot/modules/web-export.md` (Q5/Q6/Q7/Q8 + "Awaiting a JS Promise from GDScript without eval"), `prototypes/persistence-web/` (results.json, README.md) |
 | **Post-Cutoff APIs Used** | `JavaScriptBridge.get_interface()` / `create_object()` / `create_callback()` on 4.6 Web export (verified working in prototype); Web Platform APIs: IndexedDB, Web Locks (`navigator.locks`), `StorageManager.estimate()`/`persist()` |
-| **Verification Required** | (1) Prototype item **#4** (real-device matrix): IndexedDB/Web Locks/quota/`persist()` inside iOS Safari + WKWebView and Zalo/Facebook/Messenger in-app browsers, incl. Safari ITP ~7-day eviction AND a sandboxed-iframe (itch.io-style) case — run via `prototypes/persistence-web/DEVICE-TEST.md` (https tunnel required; secure-context-only APIs). Pre-release verification condition, not an implementation blocker (see Risks). (2) **Experiment 2b** (Migration step 0): PackedByteArray marshalling, compound-key cursor scans, multi-store transaction — pre-implementation gate, results recorded in the prototype README + summarized in D1a. |
+| **Verification Required** | Prototype item **#4** (real-device matrix): IndexedDB/Web Locks/quota/`persist()` inside iOS Safari + WKWebView and Zalo/Facebook/Messenger in-app browsers, incl. Safari ITP ~7-day eviction AND a sandboxed-iframe (itch.io-style) case — run via `prototypes/persistence-web/DEVICE-TEST.md` (https tunnel required; secure-context-only APIs). Pre-release verification condition, not an implementation blocker (see Risks). ~~Experiment 2b (Migration step 0)~~ — **DONE 2026-08-11**: PackedByteArray marshalling, compound-key cursor scans, multi-store transaction all resolved; see D1a. |
 
 ## ADR Dependencies
 
@@ -169,6 +176,43 @@ the affected D1 mechanism falls back as noted in-line (JSON-string payload
 contract; per-store sequential scans with per-record gets; two chained
 transactions with an idempotent-compaction journal record) without changing
 the ADR's core direction.
+
+**Resolved 2026-08-11 — Experiment 2b ran, results conclusive on all three
+sub-items** (full data: `prototypes/persistence-web/results.json` →
+`phase1.exp2b_bridge_mechanics`; narrative:
+`prototypes/persistence-web/README.md` §"#2b"):
+
+- **(i) `PackedByteArray` marshalling — FAILS, and fails silently.** A raw
+  `PackedByteArray` passed directly as a bridge call argument arrives in JS
+  as `undefined`; `IDBObjectStore.put()` reports success but the value reads
+  back as `null` — no error surfaces anywhere. **The `bytes: PackedByteArray`
+  contract is rejected; the JSON-string fallback is the real contract**, not
+  a fallback-of-last-resort. `Marshalls.raw_to_base64()` (native GDScript, no
+  bridge call, ~1.5ms/100KB) is the encoding when a system's blob is
+  genuinely binary; round-trip verified byte-identical (SHA-256 match), 1.333×
+  size overhead (matches theoretical base64 4/3), write latency p50 2.3ms /
+  p95 10.8ms for a ~133KB base64 string — still well inside the 150ms budget.
+  This finalizes `get_blob()`'s payload type in Key Interfaces below.
+- **(ii) compound-key `[slot_id, world_time]` cursor scan — PASS.** The
+  multi-fire `create_callback()` pattern works as designed: fires once per
+  matching record plus a final `cursor == null` call
+  (`fire_count == record_count + 1`, verified). Records returned in correct
+  ascending `world_time` order, correctly filtered to the target `slot_id`.
+- **(iii) multi-store transaction — PASS, commit and abort variants both
+  verified.** One `readwrite` transaction spanning `snapshot_store` +
+  `turn_records` fires `oncomplete` exactly once with both the snapshot
+  persisted and the old records deleted; calling `tx.abort()` rolls back
+  both stores together (snapshot absent, deletes reverted).
+
+No fallback is needed for (ii)/(iii) — D1/D2's compound-key load path and
+compaction transaction stand as designed. Only (i) changes a contract, and
+that change is captured in Key Interfaces.
+
+A load-time gotcha surfaced during the re-run, engine-version-specific to
+4.6: GDScript's static type-checker rejects an `int` index on
+`JavaScriptObject` at parse time (`str(i)` required instead) — see
+Implementation Guidelines below and
+`docs/engine-reference/godot/modules/web-export.md`.
 
 ### D2. The `stage()`/`commit()` seam maps onto the transaction boundary
 
@@ -312,9 +356,14 @@ signal failed(error_code: StringName)          # Error Taxonomy codes
 @abstract func abort() -> void
 
 ## 2) Per-system blob contract (TOCTOU rule: one atomic call per system)
-## Payload type ("bytes": PackedByteArray vs JSON String) is finalized by
-## Experiment 2b's marshalling verdict — see D1a.
-@abstract func get_blob() -> Dictionary        # { "status": StringName, "bytes": ... }
+## Payload type FINALIZED by Experiment 2b (D1a, 2026-08-11): "bytes" is a
+## String, never PackedByteArray — a raw PackedByteArray silently fails to
+## cross the JavaScriptBridge (arrives as JS undefined; IDB put "succeeds"
+## but reads back null, no error). Systems whose native blob is structured
+## data JSON.stringify() it directly (as #2's payloads do); systems whose
+## native blob is genuinely binary must Marshalls.raw_to_base64() it first
+## (~1.5ms/100KB, byte-identical round-trip verified).
+@abstract func get_blob() -> Dictionary        # { "status": StringName, "bytes": String }
 
 ## 3) Slot lock (Web Locks). NOTE: acquire is a COROUTINE — it awaits the
 ## navigator.locks.request() callback; call sites must `await` it (AC-18's
@@ -339,7 +388,12 @@ signal failed(error_code: StringName)          # Error Taxonomy codes
   explicit types; (b) attach JS event handlers via `addEventListener(...)`,
   never by setting `onX` properties through the bridge; (c) never invoke a
   stashed JS function via `.call()` (collides with GDScript `Object.call()`)
-  — park it as a property on a fresh JS object and invoke through that.
+  — park it as a property on a fresh JS object and invoke through that;
+  (d) indexing a `JavaScriptObject` with an `int` (e.g. building a JS array
+  key-by-key) is rejected by the GDScript 4.6 static type-checker at PARSE
+  time (`"Only String or StringName can be used as index"`) — a whole-script
+  load failure, not a runtime one. Use `arr[str(i)] = value`; JS treats
+  numeric-string keys on an `Array` identically to numeric ones.
 - Non-Web platforms (editor/desktop dev runs): provide a `FileAccess`-based
   `StorageBackend` implementation behind the same seam for development
   convenience only — it is NOT the durability reference and must not weaken
@@ -431,11 +485,12 @@ signal failed(error_code: StringName)          # Error Taxonomy codes
 
 ## Migration Plan
 
-0. **Experiment 2b** (pre-implementation gate, engine-specialist finding):
-   prove PackedByteArray↔bridge marshalling, compound-key `IDBKeyRange`
-   cursor scans via a multi-fire callback, and a multi-store `readwrite`
-   transaction — in `prototypes/persistence-web/`, same evidence discipline.
-   Finalizes the `get_blob()` payload type in Key Interfaces.
+0. **Experiment 2b — DONE (2026-08-11).** Proved PackedByteArray↔bridge
+   marshalling (fails; String/base64 is the contract), compound-key
+   `IDBKeyRange` cursor scans via a multi-fire callback (pass), and a
+   multi-store `readwrite` transaction (pass, commit + abort) — in
+   `prototypes/persistence-web/`. `get_blob()`'s payload type is finalized in
+   Key Interfaces above. Pre-implementation gate cleared; steps 1+ may begin.
 1. Implement `StorageBackend` seam + mock; write AC-03/17/22 tests against
    the mock (they were blocked on this ADR).
 2. Implement the IDB glue (reference: prototype `main.gd` patterns; rewrite,
