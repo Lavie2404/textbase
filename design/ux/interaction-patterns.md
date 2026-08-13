@@ -32,6 +32,17 @@ phát minh lại.
 | `nudge-line` | Feedback | main-screen (S2) |
 | `undo-button` | Input / Feedback | main-screen (S2) |
 | `breathing-continue-line` | Navigation / Modal (takeover) | main-screen (S2) |
+| `tool-panel-header` | Navigation | o-customize |
+| `tool-panel-close` | Navigation | o-customize |
+| `hack-undo-lock-warning` | Feedback | o-customize |
+| `tool-field-input` | Input | o-customize |
+| `tool-segmented-choice` | Input | o-customize, dự kiến: settings (O-Set, cỡ chữ S/M/L đã dùng trước đó — retro-fit khi viết spec settings) |
+| `tool-derived-readout` | Data Display | o-customize |
+| `tool-save-feedback` | Feedback | o-customize |
+| `tool-inline-error` | Feedback | o-customize |
+| `tool-repeatable-list` | Input | o-customize |
+| `tool-soft-warning` | Feedback | o-customize |
+| `tool-deletable-list-row` | Data Display / Input | o-customize |
 
 ---
 
@@ -256,6 +267,199 @@ phát minh lại.
 
 ---
 
+### tool-panel-header
+
+**Category**: Navigation
+**Used In**: o-customize, dự kiến: mọi overlay "công cụ" phi-diegetic tương lai
+
+**Description**: Tiêu đề tĩnh + nút đóng (X) đứng đầu 1 overlay thuộc trục hình học phi-diegetic (khác Card/marginalia) — đối lập trực tiếp `scene-header` (không icon-badge, không mực loang, chữ rõ ràng kiểu công cụ).
+
+**Specification**:
+- Text tĩnh, không animation entrance riêng (ăn theo chữ ký chuyển cảnh của overlay chứa nó)
+- Luôn kèm `tool-panel-close` cùng hàng
+
+**When to Use**: Đầu mỗi overlay thuộc nhóm "công cụ" (chủ động phá vỡ Visual Identity Anchor, VD panel cấu hình/debug).
+**When NOT to Use**: Không dùng cho overlay diegetic (Card, banner) — nơi đã có `scene-header`/ngôn ngữ marginalia riêng.
+**Reference**: `design/ux/o-customize.md` §Component Inventory
+
+---
+
+### tool-panel-close
+
+**Category**: Navigation
+**Used In**: o-customize
+
+**Description**: Nút đóng dạng chữ "X" (không icon asset, nhất quán nguyên tắc "chữ thay icon" toàn dự án) — đóng ngay lập tức, không qua luật 2-bậc (khác tap-ngoài/Esc).
+
+**Specification**:
+- Touch target ≥44px
+- Đóng NGAY khi bấm — hành động tường minh, bỏ mọi draft chưa Lưu không cảnh báo
+
+**When to Use**: Đường thoát tường minh, ưu tiên cao nhất, cho mọi overlay dạng form/panel.
+**When NOT to Use**: Không thay thế được luật tap-ngoài/Esc 2-bậc khi có field đang focus (2 cơ chế song song, không loại trừ nhau).
+**Reference**: `design/ux/o-customize.md` §Component Inventory, §Interaction Map
+
+---
+
+### hack-undo-lock-warning
+
+**Category**: Feedback
+**Used In**: o-customize
+
+**Description**: Banner cảnh báo cố định đầu panel, chỉ hiện khi 1 hành động sắp thực hiện trong panel sẽ khóa vĩnh viễn 1 cơ chế khác (ở đây: Undo của lượt gameplay trước) — xuất hiện TRƯỚC khi người chơi chạm bất kỳ điều khiển nào, không đợi tới lúc sắp bấm nút gây hệ quả.
+
+**Specification**:
+- 1 banner DUY NHẤT, không lặp lại cạnh từng nút gây hệ quả (dù có nhiều nút)
+- Live re-evaluate: biến mất ngay khi điều kiện gốc hết (VD sau khi hệ quả đã xảy ra), không cần đóng/mở lại overlay
+- Không dùng 2 màu accent đã khẩu phần hóa của thế giới thật
+
+**When to Use**: Khi 1 overlay có ≥1 hành động ghi-trạng-thái sẽ tạo hệ quả phụ không hiển nhiên (khóa 1 cơ chế khác) mà người chơi cần biết TRƯỚC khi bắt đầu thao tác.
+**When NOT to Use**: Không dùng cho cảnh báo lỗi kỹ thuật (đó là banner tầng `#1` chuẩn của `core-ui-screen-navigation.md`) — pattern này riêng cho cảnh báo hệ quả cơ học của chính overlay đang mở.
+**Reference**: `design/ux/o-customize.md` §Information Hierarchy, §States & Variants
+
+---
+
+### tool-field-input
+
+**Category**: Input
+**Used In**: o-customize
+
+**Description**: Field nhập liệu dạng input-box chuẩn (không khung con dấu, không mực loang) — đối lập trực tiếp ngôn ngữ "số phải minh họa bằng nét mực" của thế giới thật; biến thể số nguyên/float/text dùng chung 1 vỏ style, khác nhau ở validation.
+
+**Specification**:
+- Touch target ≥44px; chừa sẵn khoảng trống error-text cố định dưới field (tránh reflow khi validate bật)
+- Pre-fill giá trị hiện tại nếu có (không luôn bắt đầu rỗng)
+- Validate inline chỉ kích hoạt SAU first-interaction/blur, không khi vừa render
+
+**When to Use**: Mọi field nhập số/text trong overlay thuộc trục phi-diegetic.
+**When NOT to Use**: Không dùng để hiển thị số liệu chỉ-đọc thuộc thế giới thật (đó vẫn cần khung con dấu theo Visual Identity Anchor, ngoại lệ chỉ áp cho riêng O-Customize).
+**Reference**: `design/ux/o-customize.md` §Component Inventory, §Interaction Map
+
+---
+
+### tool-segmented-choice
+
+**Category**: Input
+**Used In**: o-customize, dự kiến: settings (O-Set, cỡ chữ S/M/L đã dùng trước đó theo cùng ngôn ngữ)
+
+**Description**: Nhóm 2-3 lựa chọn loại trừ lẫn nhau xếp ngang hàng, lựa chọn đang chọn đánh dấu bằng 1 chấm mực đặc nhỏ (không gạch chân — nghĩa đó đã bị hệ Death & Consequence chiếm).
+
+**Specification**:
+- Mỗi lựa chọn ≥44px touch target
+- 1 lựa chọn có thể mờ mực + lý do ngắn nếu điều kiện chưa thỏa (không ẩn hoàn toàn — người chơi cần biết lựa chọn đó tồn tại)
+- Tap = đổi lựa chọn NGAY, không cần bước xác nhận riêng
+
+**When to Use**: Chọn 1-trong-N (N nhỏ, 2-3) khi mọi lựa chọn nên luôn hiển thị đồng thời (không cần ẩn trong dropdown).
+**When NOT to Use**: Không dùng khi N lớn (>3-4) — khi đó cần dropdown chuẩn thay vì segmented.
+**Reference**: `design/ux/o-customize.md` §Component Inventory, §States & Variants
+
+---
+
+### tool-derived-readout
+
+**Category**: Data Display
+**Used In**: o-customize
+
+**Description**: Giá trị chỉ-đọc, tính lại real-time từ 1 field khác đang được chỉnh sửa (ở đây: `tier` derive từ `level`) — giúp người chơi thấy ngay hệ quả trước khi Lưu.
+
+**Specification**:
+- Cập nhật NGAY khi field nguồn đổi (không chờ submit)
+- Style rõ ràng "chỉ đọc" (khác field nhập được) — không cần border input-box
+
+**When to Use**: Khi 1 giá trị derive có ý nghĩa cần thấy trước khi commit, và công thức derive đã tồn tại sẵn ở hệ khác (tái dùng, không tính lại logic).
+**When NOT to Use**: Không dùng nếu giá trị derive không ảnh hưởng quyết định của người chơi trước khi Lưu.
+**Reference**: `design/ux/o-customize.md` §Component Inventory (Khu 1 — `tier`)
+
+---
+
+### tool-save-feedback
+
+**Category**: Feedback
+**Used In**: o-customize
+
+**Description**: Cặp nút Lưu + dòng phản hồi cục bộ ngay trong khu vực vừa thao tác — không toast/banner riêng, không tự động biến mất theo timer (chỉ biến mất khi field bị sửa tiếp).
+
+**Specification**:
+- In-flight: khóa TOÀN BỘ nút Lưu/Xóa/Undo liên quan (không chỉ nút vừa bấm) trong cửa sổ commit bất đồng bộ
+- Thành công: text "Đã ghi" (hoặc tương đương) NGAY trong khu đó
+- Thất bại: KHÔNG đổi state, báo lỗi trong khu đó, mở khóa lại
+
+**When to Use**: Form nhiều khu độc lập, mỗi khu tự chịu trách nhiệm 1 giao dịch nguyên tử riêng.
+**When NOT to Use**: Không dùng khi 1 nút submit duy nhất cho toàn form (khi đó feedback nên ở cấp form, không cấp khu).
+**Reference**: `design/ux/o-customize.md` §Component Inventory, §States & Variants, §Interaction Map
+
+---
+
+### tool-inline-error
+
+**Category**: Feedback
+**Used In**: o-customize
+
+**Description**: Text lỗi ngắn, xuất hiện NGAY dưới field gây lỗi, chỉ sau first-interaction/blur — không phải banner/toast, không chặn thao tác ở field khác.
+
+**Specification**:
+- Kèm viền đỏ trên field — nhưng LUÔN có text đi cùng (color-independence, không chỉ dựa vào màu)
+- Khoảng trống hiển thị lỗi được chừa sẵn cố định (tránh giật layout khi lỗi xuất hiện/biến mất)
+
+**When to Use**: Validate field-level trong form nhiều field.
+**When NOT to Use**: Không dùng cho cảnh báo không-chặn (đó là `tool-soft-warning`, khác pattern này ở chỗ không ngăn submit).
+**Reference**: `design/ux/o-customize.md` §Component Inventory, §Acceptance Criteria
+
+---
+
+### tool-repeatable-list
+
+**Category**: Input
+**Used In**: o-customize
+
+**Description**: Danh sách dòng field lặp lại, người chơi tự thêm/bớt qua nút tường minh (KHÔNG qua side-effect của phím Enter) — có invariant cardinality tối thiểu (≥1 dòng), nút xóa dòng cuối cùng bị mờ khi chạm ngưỡng đó.
+
+**Specification**:
+- Nút "+ Thêm [đơn vị]" thêm 1 dòng field trống, fade-in ≤150ms
+- Nút xóa từng dòng, fade-out ≤150ms trước khi gỡ khỏi layout; mờ mực khi chỉ còn đúng ngưỡng tối thiểu
+- Enter trong field của 1 dòng KHÔNG thêm dòng mới (tránh submit/thêm nhầm) — hành vi Enter theo đúng luật chung của form chứa nó (VD submit cả khu)
+
+**When to Use**: Nhập N≥1 mục con cùng loại trong 1 form lớn hơn, số lượng không cố định trước.
+**When NOT to Use**: Không dùng khi số lượng mục con CỐ ĐỊNH đã biết trước (khi đó dùng field tĩnh, không cần thêm/bớt).
+**Reference**: `design/ux/o-customize.md` §Component Inventory (Khu 3 — danh sách thức), §Open Questions #8
+
+---
+
+### tool-soft-warning
+
+**Category**: Feedback
+**Used In**: o-customize
+
+**Description**: Cảnh báo hiển thị khi 1 giá trị dưới ngưỡng khuyến nghị (không phải ngưỡng hợp lệ cứng) — KHÔNG chặn submit, khác hẳn `tool-inline-error`.
+
+**Specification**:
+- Text cảnh báo, không viền đỏ (để không lẫn với lỗi chặn)
+- Không ngăn nút Lưu — submit vẫn thành công bình thường
+
+**When to Use**: Khi có 2 tầng validate riêng biệt cho cùng 1 giá trị — 1 ngưỡng cứng (chặn) và 1 ngưỡng khuyến nghị (không chặn, chỉ nhắc).
+**When NOT to Use**: Không dùng nếu hệ thống chỉ có 1 tầng validate (khi đó chỉ cần `tool-inline-error`).
+**Reference**: `design/ux/o-customize.md` §Component Inventory (Khu 3 — dưới `min_thuc_per_skill`), §Acceptance Criteria
+
+---
+
+### tool-deletable-list-row
+
+**Category**: Data Display / Input
+**Used In**: o-customize
+
+**Description**: Danh sách read-only các entry đã tồn tại, mỗi dòng kèm nút xóa CÓ ĐIỀU KIỆN — mờ mực + lý do ngắn khi entry không đủ điều kiện xóa (đã tham chiếu ở nơi khác), thay vì ẩn nút hoàn toàn.
+
+**Specification**:
+- Empty state chuẩn khi danh sách rỗng (công thức chung toàn game — 1 dòng chữ nhạt, không icon/khung)
+- Nút xóa mỗi dòng: bấm được HOẶC mờ mực + lý do (không bao giờ ẩn — người chơi cần thấy TẠI SAO không xóa được)
+- Xóa thành công → dòng fade-out, ID/tên được giải phóng để dùng lại
+
+**When to Use**: Danh sách entry do người chơi tự tạo, có thể xóa NHƯNG điều kiện xóa phụ thuộc trạng thái tham chiếu ở hệ khác.
+**When NOT to Use**: Không dùng khi mọi entry LUÔN xóa được vô điều kiện (khi đó chỉ cần nút xóa chuẩn, không cần trạng thái mờ+lý do).
+**Reference**: `design/ux/o-customize.md` §Component Inventory (Khu 3 — danh sách entry custom), §States & Variants
+
+---
+
 ## Gaps & Patterns Needed
 
 Chỉ 1 UX spec (`main-screen.md`) đã viết — 5 màn hình + 3 overlay còn
@@ -277,8 +481,19 @@ pattern mới:
 
 1. **Thư viện mới có 1 nguồn duy nhất (S2)** — chưa được kiểm chứng
    chéo với spec khác để xem pattern có thật sự tái dùng được hay chỉ
-   đúng cho riêng S2. Cần review lại sau khi có spec thứ 2 (khuyến
-   nghị: S1 hoặc O-Card, theo đúng gợi ý tiếp theo của `/ux-design`).
+   đúng cho riêng S2. **Cập nhật sau spec thứ 2 (o-customize)**: 0/11
+   pattern gốc của S2 được tái dùng — O-Customize phát sinh 11 pattern
+   HOÀN TOÀN MỚI, không pattern nào chồng lấn. Đây KHÔNG phải dấu hiệu
+   thư viện thất bại — 2 spec thuộc 2 trục hình học đối lập có chủ
+   đích (S2 = diegetic "mực/marginalia", O-Customize = phi-diegetic
+   "công cụ", xem Visual/Audio Requirements `character-customization-mode.md`)
+   nên việc 0 pattern tái dùng là kết quả ĐÚNG dự kiến, không phải gap.
+   Câu hỏi gốc (tái dùng thật hay chỉ đúng cho 1 spec) vẫn cần 1 lần
+   kiểm chứng nữa trong CÙNG trục hình học — khuyến nghị spec kế tiếp
+   nên là 1 màn hình diegetic khác (S1/O-Card/S4) để test lại trục
+   "mực/marginalia", và/hoặc `settings.md` (O-Set) để test lại trục
+   "công cụ" — `tool-segmented-choice` đã dự đoán tái dùng được ở đó
+   (cỡ chữ S/M/L).
 2. **`is_touch_primary` 2-column rule** (Character Card, D.5 của
    `core-ui-screen-navigation.md`) chưa có pattern tương ứng trong
    thư viện — sẽ thêm khi viết spec Character Card.

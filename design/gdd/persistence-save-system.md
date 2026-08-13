@@ -61,14 +61,26 @@ thần "cuốn nhật ký sống" (Visual Identity Anchor "Mực Chưa Khô",
 
 ### Core Rules
 
-1. **Auto-save duy nhất tại 2 checkpoint mỗi lượt, ghi GATE việc chuyển
-   trạng thái (write-ahead), gate = `durability_confirmed` chứ không phải
-   "lời gọi ghi trả về"**: hệ thống tự động ghi atomic **NGAY TRƯỚC KHI**
+1. **Auto-save tại 3 checkpoint** *(sửa 2026-08-13 — bổ sung checkpoint thứ 3,
+   propagate từ `character-customization-mode.md` Rule #6a/ADR-0002 D1b; 2
+   checkpoint đầu vẫn GATE việc chuyển trạng thái theo write-ahead, checkpoint
+   thứ 3 độc lập với chu trình lượt)**, gate = `durability_confirmed` chứ không
+   phải "lời gọi ghi trả về": hệ thống tự động ghi atomic **NGAY TRƯỚC KHI**
    Turn Manager chuyển sang **Turn Confirmed** (sau khi AI tường thuật
    xong, còn đang ở Resolving) VÀ **NGAY TRƯỚC KHI** Undoing hoàn tất
    chuyển về **Awaiting Action** (còn đang ở Undoing). Điều kiện để
    transition đó xảy ra là `durability_confirmed = true` — thuật ngữ được
    ĐỊNH NGHĨA CHÍNH XÁC ở Core Rule #3 — không phải hệ quả xảy ra sau đó.
+   **Checkpoint thứ 3 — "hack-write commit"** (Character Customization Mode,
+   hệ #16, ngoài phạm vi Turn Manager hoàn toàn): mỗi lần ghi thành công qua
+   O-Customize (submit hoặc xóa) write-through atomic NGAY tại thời điểm commit,
+   không chờ/không gate bởi checkpoint lượt; ghi vào cùng store `turn_records`
+   nhưng khóa mở rộng `[slot_id, world_time, hack_seq]` (`hack_seq=0` cho 2
+   checkpoint đầu, `1,2,3...` cho hack-write cùng `world_time` — ADR-0002 D1b)
+   để không đè `locked_result`/`narration_text` của lượt vừa xác nhận. Không
+   gate bất kỳ transition nào của Turn Manager (hệ #16 bypass Turn Manager
+   hoàn toàn) — chỉ chia sẻ cùng `stage()`/`commit()` seam (D2) và cùng định
+   nghĩa `durability_confirmed` (Core Rule #3) với 2 checkpoint kia.
    **Sửa 2026-08-06** (`/design-review`, đóng mâu thuẫn: bản cũ để Turn
    Confirmed render đầy đủ (narration, nút Undo, 4 gợi ý mới —
    `turn-manager.md` States and Transitions) TRƯỚC KHI biết ghi có thành

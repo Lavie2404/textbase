@@ -295,6 +295,30 @@ Mục này đóng gap.)*
 - Chưa có turn record nào (`world_time=0`, slot vừa "Bắt đầu mới"): trả về
   `0`, KHÔNG throw (nhất quán AC-07a).
 
+**`referenced_in_world_memory(entry_id) → bool`** *(interface mới, thêm
+2026-08-13 — propagate từ `character-customization-mode.md` Rule #11/D.5,
+hệ #16; đã đăng ký song song vào ADR-0005 §Key Interfaces cùng ngày, mục
+này mirror interface đó vào prose GDD theo đúng yêu cầu Dependencies của
+hệ #16.)*
+- Kiểm tra xem 1 entity/item/skill/thức (định danh bởi `entry_id`) đã
+  TỪNG xuất hiện có cấu trúc trong tường thuật hay chưa — dùng làm gate
+  xóa entry custom của hệ #16 (D.5 bên đó: `NOT referenced_in_world_memory(entry)`
+  là 1 trong các điều kiện bắt buộc để xóa được).
+- **BẮT BUỘC là kiểm tra structural entity-reference** (tag entity-id gắn
+  tại thời điểm tường thuật, lấy từ `_extracted_facts`/cấu trúc entity-tag
+  nội bộ đã có sẵn), **KHÔNG BAO GIỜ** là text-match theo tên hiển thị
+  trong `narration_text` — nếu implement bằng text-match, false negative
+  (không nhận ra entry đã được nhắc tới) sẽ cho phép hệ #16 xóa một entry
+  ĐÃ vào truyện, đục lỗ lịch sử thế giới mà chính Pillar 2 cấm.
+- `entry_id` chưa từng xuất hiện: trả về `false`, KHÔNG throw — cùng
+  convention "không tồn tại = an toàn" như `get_facts_by_entity`.
+- Async-shaped theo đúng convention `await`-from-day-one của 4 interface
+  còn lại ở mục này (ADR-0005) — MVP resolve cùng-frame (không suspend
+  thật), implementer cần lưu ý "coroutine contagion": hàm gọi interface
+  này (VD hàm build danh sách nút xóa cho N entry trong panel hệ #16)
+  cũng phải tự async-shaped, không được gọi trực tiếp từ `_process()`/
+  `_physics_process()`/`_draw()`/`_input()`.
+
 ### Interactions with Other Systems
 
 - **Turn Manager**: nguồn ghi/xóa turn record duy nhất (Core Rule #2);

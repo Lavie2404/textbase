@@ -208,11 +208,20 @@ tường thuật) = 2. Lượt có gợi ý lỗi ở lần gọi đầu = 1 (si
 
 **3. Undo Availability Window** (điều kiện boolean)
 
-`undo_available = (turn_id == last_confirmed_turn_id) AND (no_newer_turn_confirmed) AND (has_confirmed_turn) AND (NOT is_death_turn)`
+`undo_available = (turn_id == last_confirmed_turn_id) AND (no_newer_turn_confirmed) AND (has_confirmed_turn) AND (NOT is_death_turn) AND (pending_snapshot_valid)`
+
+*(Thêm conjunct `pending_snapshot_valid` 2026-08-13 — propagate từ ADR-0004 +
+`character-customization-mode.md` Rule #6b. Trước bản sửa này, formula không
+có term nào phản ánh "snapshot đã bị hủy" — hack-write đầu tiên trong 1 cửa
+sổ Undo gọi `invalidate_pending_snapshot()` [ADR-0004, method mới], nhưng
+không conjunct nào ở đây trả về `false` sau khi điều đó xảy ra. Amend riêng
+ADR-0004 là không đủ vì `undo_available` là formula của GDD này, không phải
+của ADR.)*
 
 | Variable | Type | Description |
 |---|---|---|
 | turn_id | int | ID lượt đang xét |
+| pending_snapshot_valid | bool | `true` mặc định khi có snapshot đang treo (tương đương `has_confirmed_turn` cũ); chuyển `false` NGAY khi `invalidate_pending_snapshot()` (ADR-0004) được gọi — nguồn duy nhất gọi hàm này là hệ #16 (Character Customization Mode) tại lần hack-write/xóa ĐẦU TIÊN trong 1 cửa sổ Undo (Rule #6b của GDD đó). Không tự đổi lại `true` cho tới khi lượt kế tiếp confirm và `_capture_all()` tạo snapshot mới. |
 | last_confirmed_turn_id | int \| null | ID lượt gần nhất đã xác nhận; `null` nếu chưa có lượt nào (xem Output) |
 | no_newer_turn_confirmed | bool | true nếu chưa có lượt mới hơn được xác nhận |
 | has_confirmed_turn | bool | true nếu ít nhất 1 lượt đã từng được xác nhận trong phiên chơi |

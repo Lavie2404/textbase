@@ -259,6 +259,42 @@ different caller (hệ #16's O-Customize save handler) with a different key
 shape for its blob. `durability_confirmed` semantics (D1) are unchanged:
 `oncomplete` on that transaction is still the boundary.
 
+**Implementation guidance — 2 correctness hazards flagged by `godot-specialist`
+review (2026-08-13), both silent-data-loss classes, both required before
+coding the Load/write path against this section:**
+
+- **Range-scan bound width (BLOCKING).** Experiment 2b's already-verified
+  cursor-scan pattern built its `IDBKeyRange.bound(lower, upper)` with both
+  bounds the SAME length as the (then 2-segment) key. That pattern must NOT
+  be reused unmodified now that the key is 3 segments: IndexedDB's array-key
+  comparison rule says a shorter array always sorts BEFORE a longer array
+  sharing its prefix, so a naively-reused 2-segment upper bound at
+  `[slot_id, world_time_max]` would silently exclude every real hack-write
+  record at that same `world_time` — `[slot_id, world_time_max, 1]`,
+  `[slot_id, world_time_max, 2]`, etc. all sort AFTER that 2-segment bound,
+  not before it, and drop out of the scan with no error. **Every bound for a
+  `world_time`-scoped scan must be constructed as a full 3-segment array.**
+  The safe pattern for an inclusive-upper-bound-at-`world_time_max` scan:
+  use `world_time_max + 1` (not `world_time_max`) as the second segment of
+  the upper bound, with `hack_seq = 0` as the third — i.e. the upper bound
+  is the first key of the NEXT `world_time`, exclusive. This sidesteps the
+  array-length comparison hazard entirely and requires no knowledge of the
+  actual maximum `hack_seq` in use.
+- **`hack_seq` rehydration across a session boundary (BLOCKING).** This
+  section does not specify how the per-`world_time` `hack_seq` counter is
+  recovered after a slot re-opens with `world_time` unchanged (e.g. player
+  hack-writes twice, closes the tab with no new turn confirmed, reopens,
+  hack-writes again). If `hack_seq` is tracked as an in-memory counter reset
+  on load rather than derived from storage, the third hack-write's `put()`
+  can silently overwrite an earlier hack-write at the same key — the exact
+  "lost hack-write, no error" failure hệ #16's own Rule #7 treats as
+  unacceptable when caused by an engine bug rather than player intent.
+  **Required rule**: the next `hack_seq` to use for a given `[slot_id,
+  world_time]` is always `1 + max(hack_seq already present for that
+  [slot_id, world_time])`, computed via the same already-verified
+  compound-key cursor scan (Experiment 2b/D1a) — never an independent
+  in-memory counter that isn't reconciled against storage on slot-open.
+
 ### D2. The `stage()`/`commit()` seam maps onto the transaction boundary
 
 Core Rule #3's mandated internal 2-phase interface:
@@ -339,9 +375,13 @@ playtests.
 ### D6. `schema_version` posture
 
 Pre-1.0: save-breaking bumps are acceptable (solo project, player == 
-developer) — per the GDD's recorded creative-director recommendation. Both
-triggers bump it: N changes (system added/removed from the bundle) AND any
-registered system changing its internal blob format. A real migration
+developer) — per the GDD's recorded creative-director recommendation. Three
+triggers bump it: N changes (system added/removed from the bundle), any
+registered system changing its internal blob format, AND any change to the
+physical key shape of an existing object store (e.g. D1b's `turn_records`
+key widening from `[slot_id, world_time]` to `[slot_id, world_time,
+hack_seq]`, 2026-08-13 — the 3rd trigger, added when D1b's own text already
+assumed a bump without D6 explicitly naming this case). A real migration
 strategy becomes mandatory **before the first external player**; that future
 ADR supersedes this section only.
 
@@ -565,6 +605,14 @@ superseding ADR, keeping the seam so only the backend implementation swaps.
       #4 matrix browsers that have Web Locks.
 - [ ] Compaction: after `FLUSH_EVERY_N_TURNS` turns + flush, load-merge
       reproduces identical state to pre-flush (byte-identity per AC-07).
+- [ ] D1b (added 2026-08-13, `godot-specialist` review): a test proves a
+      3-segment upper-bound scan at `world_time_max` (constructed per the
+      "next `world_time`, exclusive" pattern above) still returns every
+      hack-write record at `world_time_max` — regression test for finding
+      1A.
+- [ ] D1b: a test proves reopening a slot and hack-writing again at an
+      unchanged `world_time` produces `hack_seq = 1 + previous max`, not a
+      reset-to-1 overwrite — regression test for finding 1B.
 
 ## GDD Requirements Addressed
 

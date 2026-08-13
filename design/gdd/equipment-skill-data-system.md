@@ -103,6 +103,29 @@ chuyện (Pillar 4), không phải một dòng log số liệu.
    Mô hình tiêu thụ (single-use hay có "charge") CHƯA quyết — xem Open
    Questions của `death-and-consequence.md`.
 
+9. **Marker per-entry cho gate xóa của Character Customization Mode** —
+   bổ sung 2026-08-13, propagate từ `character-customization-mode.md`
+   Rule #11/D.5 (hệ #16). Mỗi item/skill mang thêm 2 marker bền vững,
+   ghi ĐÚNG 1 LẦN, không bao giờ reset:
+   - **item**: `was_ever_equipped: bool` (mặc định `false`) — chuyển
+     `true` VĨNH VIỄN ngay khi item được trang bị lần đầu tiên (không
+     phải "đang trang bị" — thì quá-khứ-hoàn-thành, khác `equipped_weapon_id`
+     hiện tại). Chỉ item do hệ #16 tạo mới cần marker này để hệ #16 gate
+     xóa; nội dung gốc không có nút xóa nên marker vô hại nếu không đọc.
+   - **skill**: `was_ever_resolved_in_combat: bool` (mặc định `false`) —
+     chuyển `true` VĨNH VIỄN ngay khi 1 thức thuộc skill đó được Combat
+     System resolve lần đầu tiên trong bất kỳ trận nào (không phải "đã
+     học" — `known_skill_ids` đã có ngữ nghĩa đó).
+   - **Ngữ nghĩa gỡ `known_skill_ids` khi xóa skill custom**: khi hệ #16
+     xóa 1 skill hợp lệ (theo D.5 gate của hệ đó), ID skill đó PHẢI được
+     gỡ khỏi MỌI `known_skill_ids` còn tham chiếu nó trong CÙNG giao
+     dịch write-through — không để dangling reference (khớp Formula 2
+     `is_valid_dataset`'s tinh thần referential integrity, áp dụng cho
+     runtime thay vì chỉ authoring-time).
+   - 2 marker này KHÔNG phải tuning knob, KHÔNG phải cờ cơ học gameplay
+     đọc để phân nhánh (khác `hack_mode_used_this_slot` của hệ #16) —
+     chỉ phục vụ gate xóa D.5 bên đó.
+
 ### States and Transitions
 
 Hệ thống này không có state machine (dữ liệu tĩnh, không phải luồng xử

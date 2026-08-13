@@ -24,33 +24,2254 @@
 #
 # STATUS VALUES: active | deprecated | superseded-by: TR-[system]-NNN
 
-version: 1
-last_updated: ""
+version: 2
+last_updated: "2026-08-13"
 
-requirements: []
-
-# --- EXAMPLE ENTRIES (remove when first real entries are added) ---
-#
-# - id: TR-combat-001
-#   system: combat
-#   gdd: design/gdd/combat-system.md
-#   requirement: "Player takes damage from enemies based on attack power minus defence"
-#   created: 2026-03-10
-#   revised: ""
-#   status: active
-#
-# - id: TR-combat-002
-#   system: combat
-#   gdd: design/gdd/combat-system.md
-#   requirement: "Combo window timing is 0.4 seconds between hits"
-#   created: 2026-03-10
-#   revised: "2026-04-01"
-#   status: active
-#
-# - id: TR-combat-003
-#   system: combat
-#   gdd: design/gdd/combat-system.md
-#   requirement: "Old damage formula using raw stats"
-#   created: 2026-03-10
-#   revised: ""
-#   status: superseded-by: TR-combat-001
+requirements:
+- id: TR-turn-manager-001
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "State machine: `Awaiting Action`, `Resolving`, `Turn Confirmed(is_death_turn)`, `Undoing`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-002
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Turn record `{turn_id, action, locked_result, narration_text, world_time}` written to World Memory on confirm, deleted on undo"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-003
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "`world_time: int`, monotonic; `world_time' = world_time + confirmed×(1−undone)`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-004
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "`undo_available` = `(turn_id==last_confirmed_turn_id) AND no_newer_confirmed AND has_confirmed_turn AND NOT is_death_turn`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-005
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "`calls_per_turn` = 3 independent type-booleans, not an instance counter; hard invariant ≤3"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-006
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Transient `locked_result` pending cache during failed narration_call, released on retry-success/new-action/leave"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-007
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "`turn_snapshot` blob for Undo rollback — schema/ownership open (ADR owed)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-008
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Persistence reads/writes TM state: `state`, `last_confirmed_turn_id`, `undo_available`, `turn_snapshot`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-009
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Suggestion shape `{text, envelope}` × 4/turn"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-010
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Fixed fallback suggestion set (literal 3 entries) when AI retry fails"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-011
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Async call to `request_ai()`, per-call timeout `ai_call_timeout_seconds` (30, 10-60)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-012
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Input locked (reject 2nd submission) during Resolving/Undoing"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-013
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Persistence write is a GATE (not side-effect) on Resolving→Confirmed / Undoing→Awaiting, condition = `durability_confirmed=true`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-014
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Write-only retry path distinct from full Resolving re-run"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-015
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "RNG source injectable/mockable/seedable for deterministic tests"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-016
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Direct call TM → Feature systems to compute+lock result"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-017
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "TM → AI/LLM Layer via `request_ai()`, max 3 calls/turn"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-018
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "TM → World Memory: write on confirm, delete on undo, direct history read"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-019
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Death & Consequence: `pending_fate=true` overwrites 2/4 suggestion slots, bypasses AI, no `calls_per_turn` change"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-020
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Character Continuation handoff: `is_death_turn=true` hands off; `handoff_allowed=1` returns control at new `slot_id`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-021
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "`request_ai` `error_code=BUSY` handled as network failure for player, distinct log label"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-022
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Reload mid-Resolving → revert to Awaiting Action; reload during Confirmed → restore exact state"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-023
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Data-driven knobs: `suggested_action_count`(4,2-6), `undo_depth`(1,0-1), `ai_call_timeout_seconds`(30,10-60)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-024
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "`calls_per_turn≤3` is a hard invariant, NOT a tuning knob"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-025
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "`HTTPRequest` on Godot 4.6 Web export (COOP/COEP) unverified pre-spike"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-turn-manager-026
+  system: turn-manager
+  gdd: design/gdd/turn-manager.md
+  requirement: "Undeclared edges (real, not in Systems Enumeration table): TM→Contract Enforcement, TM→AI/LLM Layer, TM→World Memory, TM→Persistence"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-001
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "`locked_result: dict`, 0-n numeric fields"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-002
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "`narration_text: string` verbatim from AI"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-003
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "Single mandatory shared wrapper for EVERY `narration_call`/`suggestion_call` — no Feature system calls AI directly"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-004
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "Wrapper (not caller) owns prompt construction"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-005
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "5-stage checkpoint pipeline at every AI call site"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-006
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "Numeric Leak Detection: `leak_matches`/`leak_count`/`leak_flag` via regex `\\d+(\\.\\d+)?` vs `digits(abs(f.value))`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-007
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "Generic backstop regex for `n=0` case (`rp_only` turns)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-008
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "Session counters `V`/`T`, `violation_rate=V/T`, `N/A` at `T=0`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-009
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "Per-field diagnostic aggregation `leak_count_field(f)`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-010
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "All 3 formulas run post-hoc, zero extra AI calls"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-011
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "CI grep enforcing 100% AI-call-sites route through wrapper"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-012
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "Lint forbidding parsing `narration_text` outside whitelist"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-013
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "CI check: no enforcement-bypass flag anywhere, incl. dev builds"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-014
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "World Memory persists only `locked_result`+`narration_text` verbatim"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-015
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "`leak_flag` log retained incl. undone turns; excluded from `T`/`V` math"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-016
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "MVP gate: PASS iff `V=0` across `T≥90` turns / ≥3 sessions — absolute zero-tolerance"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-017
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "Multi-Feature-system-in-one-turn: all `locked_result` fields merge into ONE prompt/ONE call"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-mnce-018
+  system: mnce
+  gdd: design/gdd/mechanic-narration-contract-enforcement.md
+  requirement: "`leak_detection_enabled` toggles only Formula 1-3, not the pipeline itself"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-001
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "3-tier: Weapon(type)→N Skill→N Thức; each Thức belongs to 1 Skill; each Skill to 1 weapon_type; min 1 Thức/Skill"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-002
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "Optional cosmetic `family_id` grouping across weapon types, own `style_descriptor` each"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-003
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "`thuc_id` globally unique (not per-skill) — required by Combat's \"no repeat Thức/battle\" rule"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-004
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "`style_descriptor`: text fed to AI narration, NOT a `locked_result` numeric"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-005
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "`tier: int` on Weapon+Skill, reconciliation with 10-tier Cảnh giới scale open"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-006
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "Ownership keyed by `char_id`: 1 `equipped_weapon_id` + `known_skill_ids` list"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-007
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "No full inventory in MVP — 1 equipped weapon/character"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-008
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "Static template only, no runtime HP/EXP state"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-009
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "Recovery Item catalog `{item_id, efficacy:[0,1]}`, no engine default"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-010
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "Referential integrity: no orphan Thức, no invalid weapon_type"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-011
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "`is_pool_sufficient` — authoring-time warning, non-blocking"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-012
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "`is_valid_dataset` — CI hard gate, blocks commit"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-013
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "Implicit \"Đánh thường\" — 1 distinct entry PER weapon_type, auto-known, not in `known_skill_ids`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-014
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "Display names need not be globally unique (only `thuc_id`)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-015
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "Tier mismatch between weapon/skill is a VALID data-layer state (Combat penalizes)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-016
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "`char_id`-keyed storage supports lazy-init for a NEW char_id (Character Continuation)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-017
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "Persistence must serialize `equipped_weapon_id`+`known_skill_ids` — undeclared hard dep (this GDD doesn't list Persistence)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-018
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "Combat reads `weapon.tier`/`skill.tier`/`style_descriptor`/Thức list/`is_pool_sufficient`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-019
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "Character Card reads `equipped_weapon_id`+`known_skill_ids` for display"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-020
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "Knobs: `min_thuc_per_skill`(3,1-10), `max_known_skills_per_character`(6,3-12)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-021
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "No calc/balance logic owned here (Combat owns it)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-esds-022
+  system: esds
+  gdd: design/gdd/equipment-skill-data-system.md
+  requirement: "`max_known_skills_per_character` upper bound implies UI list-render + AI context-selection constraint"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-001
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "Single call-site invariant: only this layer invokes HTTPRequest to AI endpoint allowlist; CI static grep"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-002
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "One wrapper `request_ai(call_type, payload)` for narration+suggestion calls"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-003
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "`narration_call` validates `locked_result` present before ANY HTTP request"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-004
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "`suggestion_call` requires `response_mime_type:application/json` + schema for 4×`{text,envelope}`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-005
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "`HTTPRequest`/`Timer`: `use_threads=false`, `process_mode=PROCESS_MODE_ALWAYS`; CI check"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-006
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "`timeout` property set immediately before each `.request()`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-007
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "Network-retry state machine Idle→Requesting→{Success,Retrying-Network,Failed}; Retrying-Network invisible to caller, no extra `calls_per_turn`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-008
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "Backoff: OVERLOADED=`overload_retry_wait_seconds`; TRANSIENT_OTHER=`transient_retry_base_seconds×(attempt+1)`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-009
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "Global budget: `t_elapsed(n)≤ai_call_timeout_seconds`(30s); per-request timeout=`min(request_timeout_default,t_remaining(n))`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-010
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "Model fallback ladder `M` data-driven; `cooldown_until(m)` uses real wall-clock; `tried` set monotonic within one logical call"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-011
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "`cooldown_until` NOT persisted across reload; DI for test isolation"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-012
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "Error taxonomy: 503→retry+fallback; 429→fail immediate; 403→fail immediate config error; `M=[]`→fail immediate"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-013
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "`calls_per_turn` counts distinct call_types (max 3), NEVER `http_attempt_count`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-014
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "2nd `request_ai` while state≠Idle → immediate `BUSY`, no queueing"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-015
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "API key: `apiMode∈{default,userKey}`; `userKey` storage namespace separate from Persistence save bundle"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-016
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "`safetySettings=BLOCK_NONE` fixed system-wide, never per-turn toggle"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-017
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "Prompt injection defense: player input + World Memory context both delimiter-wrapped + disclaimed"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-018
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "`narration_call` prompt forbids spelled-out numerals (closes regex-leak-detector gap)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-019
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "Concealment context injection when NPC `concealment.active=true`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-020
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "CORS verified PASS via browser prototype; NOT yet verified via real Godot `HTTPRequest`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-021
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "`cancel_request()` on 4.6 Web export confirmed no-op — zombie requests billed but never wrongly resolve (IDs never reused)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-022
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "Test methodology: mocked HTTP + fake clock, except CI checks and manually-stepped mock for coroutine ordering"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-023
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "Resubmit-after-Failed: caller MUST resend exact same `locked_result`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-024
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "Consumes `ai_context_hard_token_budget` from World Memory Formula #5 — **owner declared here but value undefined anywhere (gap)**"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-aill-025
+  system: aill
+  gdd: design/gdd/ai-llm-integration-layer.md
+  requirement: "Undeclared edge: TM→AI/LLM Layer not in Systems Enumeration table"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-001
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "Two-tier: Full Narrative Log (unbounded) vs AI Context View (bounded, derived)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-002
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "Full Log never compressed for confirmed-not-undone turns; Undo hard-deletes"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-003
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "AI Context View = Recency Window(verbatim, default 8, floor 1) + Extracted Facts"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-004
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "Fact extraction 100% rule-based on `locked_result` fields, NEVER reads `narration_text` via AI; 0 `calls_per_turn`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-005
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "`recency_window_turns` floor=1 (undoable turn always verbatim)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-006
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "`in_window()` ONE-WAY trigger at confirm time, never re-queryable/resurrecting after Undo"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-007
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "`has_signal(f)` 5 typed branches + fail-safe default=true for unknown types"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-008
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "`selected_facts(entity)=top_K(...,key=(importance_tier DESC,world_time DESC,fact_id ASC),K)`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-009
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "`context_size≤C` — O(1)-in-world_time EXPECTED bound (not pointwise)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-010
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "Runtime Hard Clamp: measure REAL tokens, cut oldest-window-turn-first then lowest-tier-fact, return `{context,over_budget}`, never throw"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-011
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "`get_turn_page(anchor_turn_id,count,direction)→{records,has_more}`, never includes anchor, deleted anchor = virtual timestamp"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-012
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "`get_turn(id)`, `get_processing_state(id)`, `get_facts_by_entity(id)`, `total_turns()` O(1) counter"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-013
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "`total_turns()` MUST be O(1) maintained counter, not full-log rescan"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-014
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "Write+extract is ONE atomic op on TM confirm event"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-015
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "Persistence MUST serialize AI Context View as MANDATORY blob"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-016
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "Loading save with large `world_time` triggers ONE-TIME batch extraction pass"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-017
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "Tuning-knob changes mid-playthrough apply prospectively only"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-018
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "INVARIANT: `max_entities_per_prompt ≥ MAX_NPC_PER_SCENE+1` — must register jointly"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-019
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "Story Log UI must lazy-load/page, never load full log"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-020
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "**[Required New ADR]** RAM residency unresolved — IDBFS mirrors whole files into RAM; true IndexedDB access is async, conflicts with Core UI's sync-call assumption"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-021
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "Nearly all AC are pure unit tests, no network calls"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-wmcm-022
+  system: wmcm
+  gdd: design/gdd/world-memory-context-management.md
+  requirement: "Undeclared edge: TM reads AI Context View directly"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-001
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Write-ahead gate: `durability_confirmed=true` BEFORE Confirmed/Awaiting transition"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-002
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "`durability_confirmed` = full durable-commit chain — finalized: IndexedDB `transaction.oncomplete`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-003
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Save bundle = independently-owned blobs; Persistence opaque to content, enforces `blob_status∈{OK,MISSING,ERROR}`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-004
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Atomic all-or-nothing per turn; append-only, never re-serializes whole log"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-005
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "`stage()/commit()/abort()` seam — finalized: `StorageBackend` abstract class w/ `committed`/`failed` signals"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-006
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Full-flush snapshot+compaction off critical path, same atomic op as record deletion"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-007
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "`commit_allowed(bundle)=is_complete AND N≥1`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-008
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "`schema_version` refuse-to-load on ANY mismatch"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-009
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Bundle size O(world_time) growth (Formula #1) — unbounded by design"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-010
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Quota Utilization scoped at ORIGIN level (not per-slot)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-011
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Error taxonomy: player-facing (diegetic text) vs internal/log-only codes"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-012
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Multi-tab: first tab writes, second instantly rejected — finalized: Web Locks `{ifAvailable:true}`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-013
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Slot lifecycle: `slot_closure_reason∈{death,quota_exhausted}`, only `death` gates continuation"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-014
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Export: 9a QA JSON log, 9b readable text — never \"backup\", no import"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-015
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "After `max_write_retry_before_escalation`(3), offer non-destructive \"Khép quyển sổ\""
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-016
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "`max_perceived_autosave_latency_ms=150`(100-300) — append-only path only"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-017
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Compression: NONE MVP; if adopted, unit=(b) full-flush only, never per-record"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-018
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Entity Record blob (permanent char records) owned by Persistence, opaque"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-019
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "`commit()` result ONLY via signals, never sync return"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-020
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "TOCTOU: `get_blob()->{status,bytes}` ONE atomic call — `bytes` finalized as String"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-021
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "`blob_gather_timeout_ms=100` post-hoc assertion"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-022
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Pending-write-cache: persistent failure + resubmit retries ONLY write step, no re-AI-call"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-023
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Testing: unit+mock/spy mostly; multi-tab/mid-tx/quota need dedicated sim — AC-17/22/29/33 unblocked by ADR-0002"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-pss-024
+  system: pss
+  gdd: design/gdd/persistence-save-system.md
+  requirement: "Undeclared edges: Equipment/Combat/EXP/Death&Consequence don't list Persistence despite being hard dependents"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-001
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "Battle = multi-turn under TM; each TM turn during `in_combat` = one \"exchange\", `exchange_id` counter/battle"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-002
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "`resolve_exchange(A,B,action_type_of,thuc_id_of,player_id,rng)` single call-site"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-003
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "RNG injected as LAST param, never global singleton"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-004
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "All `int/int` division `float()`-cast explicitly (largest defect class, 4 review rounds)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-005
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "`locked_result` fixed 6 fields: `exchange_id,first_id,second_id,per_actor,battle_active,outcome`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-006
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "`per_actor[id]`: `thuc_id,action_type,executed,hit(3-state),crit,damage_dealt,heal,hp_after`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-007
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "`outcome={type,winner_id,loser_id}` — both null iff `type=\"no_outcome\"`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-008
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "`is_spar_friendly`(immutable/battle) + `external_abort_signal`(checked once/exchange)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-009
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "Sequential non-reentrant resolution: attacker fully resolves incl. HP=0 check before defender acts (\"no double-kill\")"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-010
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "Realm/gear suppression recomputed EVERY exchange, not cached"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-011
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "Skill-repeat exclusion scoped to whole battle, symmetric; \"Đánh thường\" exempt"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-012
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "Combat items cut from MVP; field reserved, never read"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-013
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "`battle_active=false` is the sole hand-off signal for EXP/Death&Consequence/Affinity"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-014
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "Exactly 1 narration_call/exchange, one-directional lock-then-narrate"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-015
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "`TECHNICAL_EXCHANGE_CAP`(200) pure safety valve, cross-constrained ≥120 vs `EXHAUSTION_ONSET_EXCHANGE`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-016
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "Undo rolls back HP/`in_combat`/used-skill-set; RNG genuinely re-rolls on redo"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-017
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "Exhaustion drain computed unconditionally both sides (avoids proven SPD-bias)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-018
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "GUT mandatory for every BLOCKING AC; convergence sweeps via headless script"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-019
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "Win/lose/no_outcome distinguishable by shape/glyph not color alone; text fallback"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-combat-020
+  system: combat
+  gdd: design/gdd/combat-system.md
+  requirement: "`Lực_chiến` estimate display-only, never decides outcome; sentinels `\"N/A\"`/`\"+∞\"`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-001
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "`tier(C)` DERIVED from `level` via `floor((level-1)/10)+1`, never stored independently"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-002
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "4 EXP sources gated by `turn.in_combat` vs `locked_result.battle_active=false` — mutually exclusive/turn"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-003
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "`turn.in_combat=true` across all 3 Combat states incl. concluding turn"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-004
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "`resolve_turn_exp` win/loss via SELF-RELATIVE comparison (`winner_id==self`), never `outcome.type`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-005
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "`exp_multiplier`(Tâm Pháp) applied ONCE to summed total, before cascade/cap"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-006
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "Level-up WHILE cascade, halts unconditionally at `level mod 10==0` → \"Chờ Đột Phá\", EXP capped at 100%, overflow discarded"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-007
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "`try_execute_breakthrough` MUST run before `resolve_turn_exp`; gated off when blocked/in_combat/death_turn"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-008
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "Full Rollback restores level/tier/EXP AND breakthrough-state atomically"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-009
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "`breakthrough_requirement_met(tier)` owned by Setting&Canon; may ONLY resolve true via combat branch"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-010
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "\"Awaiting Breakthrough\" qualitative signal Required-for-MVP, surfaced without leaking the answer"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-011
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "Fail-loud validation at load-time for 5+ invariants; `assert()` forbidden (stripped in release Web); structured `EXP_ERROR_*` codes"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-012
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "`resolve_turn_exp` applies to EVERY Card holder incl. NPCs"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-013
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "`is_death_turn=true` short-circuits ALL 4 sources to 0"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-014
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "Stat growth feeds Combat's `base_X(C)` — 12-stat/24-constant contract"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-015
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "Economic invariant must hold across FULL `CONTENT_EXCHANGE_ESTIMATE` Safe Range (15-50), not just default"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-016
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "Integration test required (not just mocks) to schema-check Combat's real field names"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-exp-017
+  system: exp
+  gdd: design/gdd/exp-realm-progression.md
+  requirement: "Fail-fast `EXP_ERROR_OPPONENT_TIER_UNDEFINED` if opponent lacks `tier`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-001
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "Single source of truth `affinity`/NPC, int `[-100,+100]`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-002
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "Delta ONLY from classified events (hard mechanical or pre-classified social) — zero AI calls in pipeline"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-003
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "No time-decay; only in-pipeline diminishing-returns + repetition-fatigue; negative deltas never diminished"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-004
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "Propagation ONE-HOP only, hard-capped, never chains; independent per-NPC clamp (closes chained-clamp High-Risk flag)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-005
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "`margin_ratio` MUST `float()`-cast `hp_after`/`max_HP` — same truncation class as Combat D.9b/D.9c"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-006
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "`SONG_TU_COOLDOWN_TURNS`(5) independent per-NPC tracker, rejected-at-input (no RNG roll if on cooldown)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-007
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "Exports `song_tu_relationship_active_npc_ids` (list) — NOT a boolean `SONG_TU_ACTIVE`; bonus doesn't scale w/ NPC count"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-008
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "All deltas incl. propagated computed/locked during Resolving, as `affinity_delta_[npc_id]` fields"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-009
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "Clamp `[-100,+100]` BEFORE lock, per-NPC independent, verified via 1000-combo property test"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-010
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "Deep-hostility flag `affinity≤-80`(inclusive) DERIVED, re-evaluated live"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-011
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "Song Tu 5-state machine (Locked/Available/Active/Broken/Ended), independent/NPC, `Ended` terminal"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-012
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "Rounding ONCE, per-NPC, after summing, before clamp, round-half-away-from-zero"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-013
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "Undo reverses deltas, D.3 streak trackers, cooldown tracker, Song Tu transitions"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-014
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "Persistence serializes affinity table, active Song Tu set, cooldowns, streaks, `link_strength` graph"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-015
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "Numbers never in `narration_text` — AI gets attitude band + direction only"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-npc-016
+  system: npc
+  gdd: design/gdd/npc-affinity-relationship.md
+  requirement: "INVARIANT: `FATIGUE_WINDOW_TURNS ≥ POSITIVE_SOCIAL_COOLDOWN_TURNS`(Situation Gen) — dedicated static-assertion AC"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-001
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "Setting-pack static data: char roles + event `{trigger_condition,earliest_world_time,location_id,roles,premises,canon_outcome,status}` + `breakthrough_requirement[tier]`; NOT serialized (static)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-002
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "8 premise types, each with fixed reversibility flag driving eager/lazy-break evaluation"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-003
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "Event state machine (8 states) via single-writer `transition_event_status(E,proposed,source)` — Guard 1 terminal write-once, Guard 2 severity lattice, GLOBAL invariant at every call site"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-004
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "Load-time DAG validation: `downstream_index` O(1), `longest_path` DFS, reject if `>CASCADE_MAX_DEPTH`, validate `resolution_order` vs DAG edges"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-005
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "`cascade_vanish_check` recursive: depth-cap cuts EAGER propagation only (not final judgment); live re-evaluation; visited-set is cycle-guard on SOURCE only (fan-out evaluated multiple times by design)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-006
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "STEP1 fixpoint bounded (≤3×|events|+1, proven); \"change\" = actual value mutation, required for proof"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-007
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "`resolve_turn_canon` pipeline: AFTER Combat/Death&Consequence/Affinity lock, BEFORE `resolve_turn_exp`; 5-step (fixpoint→rescue→Due-resolution→breakthrough→locked_result write→undo compliance)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-008
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "`substitute_selection` deterministic argmin, NO RNG, 1000-run determinism required"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-009
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "`canon_role_rescue` mechanical resolution: char_id from Situation Gen string-match (0 AI); on-failure locks structured reason code"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-010
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "`rescue_window_final(event_id)=is_due(event)` exported to Situation Gen as PROMPT DIRECTIVE only (no UI timer)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-011
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "`canon_due_payload`/`canon_role_npcs` exported to Situation Gen"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-012
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "`importance_score`/`importance_tier` supplies World Memory's fact-selection sort key"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-013
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "`world_state` = thin O(1) adapter — owns NO copy of any other system's state"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-014
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "0 AI calls in judgment; `calls_per_turn≤3` preserved"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-015
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "Event `status`(incl. Suspended) durable; `substitutes_used_this_turn` turn-scoped runtime only"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-016
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "TM Core Rule #8/#9 compliance: undo reverses status/cascades EXCEPT permanent lock on `is_death_turn`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-017
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "Load-time authoring validation rejects 5 error classes, returns STRUCTURED LIST of ALL errors (not fail-fast-on-first)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-018
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "Container-rebind requirement for slot-scoped replay (Layer B pattern) — reads ACTIVE slot blob every query, no stale copy"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-019
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "`turn_snapshot` includes event status(incl. Suspended)+rebound roles"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-sci-020
+  system: sci
+  gdd: design/gdd/setting-canon-integration.md
+  requirement: "Testing: BLOCKING, all external systems mocked"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-001
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "`scene={location_id,entities_in_scope,scene_tags,active_hook}` locked before any AI call; `entities_in_scope` capped `MAX_NPC_PER_SCENE=3`(LOCKED)+\"global\"≤4"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-002
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "Turn lifecycle state machine: Scene Pending Update→Locked→Awaiting Action→Classifying→Dispatched→(confirm/undo)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-003
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "Fixed 12-value `ENVELOPE_TYPES` taxonomy"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-004
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "`allowed_envelope_menu(turn)` computed ONCE at Scene Locked, never recomputed mid-turn; out-of-menu labels hard-downgrade to `rp_only`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-005
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "`spar_friendly` declared via UI popup on first `combat_challenge` tap, forced binary, no default"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-006
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "`canon_role_rescue` char_id: deterministic client-side STRING-MATCH, exactly 1 match required, 0/≥2→`rp_only` fallback, NO AI call"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-007
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "Anti-ratchet gating: `gift`/`small_help` need hook+cooldown; `song_tu_action` needs `private` tag+threshold — gates apply to AVAILABILITY not delta magnitude"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-008
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "`select_primary_hook` strict 3-tier priority: Canon Due→NPC-initiated→World/Ambient; exactly 1 hook/turn"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-009
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "`hostile_initiative_allowed(npc)=(level_gap≤20[LOCKED]) OR provoked_flag` — ONE-SIDED gap"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-010
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "`provoked(npc)` schema `{set_turn,source_event_ref}|null` — instance-identity SET/CLEAR (not turn-count), no decay"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-011
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "`cooldown_ok`=4 independent per-NPC valence trackers AND shared sliding-window global budget (World/Ambient tier SHARES this budget)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-012
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "`entities_in_scope`=`{\"global\"}∪top_K(candidates,key=(tier,-\\|affinity\\|,npc_id),K=3)`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-013
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "`encounter_level_range` hard-constrained `AMBIENT_HOSTILE_LEVEL_CAP≤HOSTILE_INITIATIVE_LEVEL_GAP_MAX=20`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-014
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "**`AMBIENT_ENCOUNTER_CHANCE`=0.25(derived=`CAP/(WINDOW_TURNS+1)`) ↔ `RESCUE_COOLDOWN_TURNS`=8(≥2×`POSITIVE_SOCIAL_COOLDOWN_TURNS`) — BINDING joint constraint**"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-015
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "`is_rescue_candidate` reuses ambient roll + neutral-band affinity gate; cooldown consumed at hook-selection time"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-016
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "`deterministic_roll(turn,seed_stream)` injectable/seeded, separate `\"ambient\"` stream from level-roll"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-017
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "`turn_snapshot` serializes scene/presence/cooldowns/`provoked`/4 trackers/hook-window history"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-018
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "0 AI calls; fixed resolve order Combat/Death→Affinity→Canon→EXP"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-019
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "Every chip `≥44px`(TOUCH_TARGET_MIN); stable relative-order (grouped by npc_id then fixed envelope order)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-seg-020
+  system: seg
+  gdd: design/gdd/situation-encounter-generation.md
+  requirement: "Testing: BLOCKING, all deps injected as mocks incl RNG"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-001
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "Activates ONLY when Combat hand-off has `battle_active=false` AND `outcome.type∈{win,lose}` AND `!is_spar_friendly` AND player involved"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-002
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "Pipeline order: immediately AFTER Combat, BEFORE NPC Affinity (kill_witnessed ready same turn) BEFORE Setting&Canon"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-003
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "Branch A (player loses): read `affinity(opponent)` at turn-START value; `≤-80`→D.1 death_roll→death locks `alive=false`+`is_death_turn=true`+**synchronous Persistence \"Khóa slot\" trigger BEFORE handoff**; survival→`forced_severe=true`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-004
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "`forced_severe_margin_ratio` = ORIGINAL pre-override ratio, narration-tone only, not mechanical input"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-005
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "D.1 death_roll formula w/ explicit `float()` cast + denom floor (same truncation class)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-006
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "D.2 `severity_tier`(mild/medium/severe), forced `severe` overrides; `severe`→`death_and_consequence_blocked=true`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-007
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "D.3 `recovery_attempt` 3 methods, cost ALWAYS deducted regardless of success; explicit REJECT for stale 4th enum value"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-008
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "Branch B (player wins): `pending_fate` open exactly 1 turn, ambiguous intent defaults to Tha mạng, resolves at TM confirm instant"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-009
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "Kết liễu: locks `alive=false`+`death_flag`, fires `kill_witnessed(victim,witnesses)`; NORMALLY UNDOABLE (unlike player death)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-010
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "Tha mạng@medium fires extra `classified_event(type=\"insult\")` reusing NPC Affinity's type"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-011
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "`alive(X)`/`death_flag` EXCLUSIVE single-writer for ALL characters; exactly 2 internal write paths"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-012
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "`death_and_consequence_blocked` blocks EXP AND applies `crippled_layer=CRIPPLED_PENALTY_MULT`(0.85) into Combat's penalty multiplier"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-013
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "Undo rolls back exactly 3 fields; resource refunds owned by OWNING system"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-014
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "Persistence \"Khóa slot\" trigger OWNED HERE (moved from Character Continuation, fires synchronously)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-015
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "3 MIN/MAX knob-pairs need load-time validation, NOT YET implemented — flagged for technical-director"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-016
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "`consequence_type`/`consequence_witnesses` exposed for EVERY tier for World Memory fact extraction"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-dc-017
+  system: dc
+  gdd: design/gdd/death-and-consequence.md
+  requirement: "Testing: Logic=BLOCKING, Visual/Feel=ADVISORY"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cc-001
+  system: cc
+  gdd: design/gdd/character-continuation.md
+  requirement: "`continuation_choice_eligible=is_death_turn AND death_confirmed` — PERMISSION only, not auto-trigger; needs explicit `tap_continue_to_fate`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cc-002
+  system: cc
+  gdd: design/gdd/character-continuation.md
+  requirement: "State machine Idle→Awaiting Choice→Processing Chơi Lại→New Playthrough\\|Reset Failed; only Chơi Lại functional MVP, other 2 \"silent\" stubs"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cc-003
+  system: cc
+  gdd: design/gdd/character-continuation.md
+  requirement: "D.1 `reset_completeness_check`: INTEGER-SUM gate `Σok(s)=N`(not float ratio==1, avoids IEEE-754 false-negative already fixed once in Persistence)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cc-004
+  system: cc
+  gdd: design/gdd/character-continuation.md
+  requirement: "`N` DERIVED 1:1 from Core Rule #6 bullet count, currently min 5"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cc-005
+  system: cc
+  gdd: design/gdd/character-continuation.md
+  requirement: "`ok(s)` 2-layer: Layer A(char_id-keyed, new/playthrough) vs Layer B(setting-pack fixed IDs, requires CONTAINER REBIND to new slot before read)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cc-006
+  system: cc
+  gdd: design/gdd/character-continuation.md
+  requirement: "`continuation_choice_eligible` = 2-layer defensive invariant between 2 independent systems"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cc-007
+  system: cc
+  gdd: design/gdd/character-continuation.md
+  requirement: "Persistence trigger: ONLY \"Tạo slot mới\", called once on first Processing entry; \"Khóa slot\" explicitly NOT owned here"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cc-008
+  system: cc
+  gdd: design/gdd/character-continuation.md
+  requirement: "Core Rule #6 full reset scope: EXP/level/alive/blocked-flag/affinity/canon-events/loadout all → defaults"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cc-009
+  system: cc
+  gdd: design/gdd/character-continuation.md
+  requirement: "Non-destructive escape-hatch after `max_write_retry_before_escalation` consecutive failures"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cc-010
+  system: cc
+  gdd: design/gdd/character-continuation.md
+  requirement: "Cross-system UI split: Core UI owns affordance/layout, this system owns content/copy"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cc-011
+  system: cc
+  gdd: design/gdd/character-continuation.md
+  requirement: "NO timeout/auto-select — player may remain in Awaiting Choice indefinitely (deliberate)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cc-012
+  system: cc
+  gdd: design/gdd/character-continuation.md
+  requirement: "Testing: BLOCKING, N=5 main fixture + N=0 boundary fixture, all 5 `ok(s)` mocked"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-001
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "6 fixed-order content blocks (Hồ sơ/Stats+EXP/Equipment/Affinity+SongTu/InCombat/PermanentBadges), order never reorders"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-002
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "`displayed_field(C,field)` total function, 4 mutually exclusive outputs (true/displayed/`\"???\"`/dual-identity) — pure, injectable"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-003
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "`displayed_estimate(C)` reuses Combat D.13 verbatim; propagates `\"???\"` all-or-nothing if any of 12 stats missing"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-004
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "`exp_to_next(C)` special-cases \"Chờ Đột Phá\"→sentinel string, not numeric 0"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-005
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "`base_stat_completeness_check` fail-fast at record-creation; `base_HP0` strictly >0(denominator elsewhere)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-006
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "Song Tu button renders only 2/5 states visible (Available/Active), others fully absent; Recovery=distinct square seal"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-007
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "Card open/close is FREE — never submits TM action, viewable in all 3 TM states"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-008
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "Song Tu/Recovery buttons submit via standard TM action path; also disabled by `in_combat` independently of TM lock"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-009
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "Cache invalidated when Undo reverts entity-record-creating turn (`card_exists` true→false)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-010
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "Knobs: `card_transition_ms`(200,0-400), `profile_text_max_length`(280,120-600), `stat_display_precision`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-011
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "Responsive: mobile=1-col+accordion (`FoldableContainer`, 4.5+) except block⑤ non-collapsible in-combat; desktop=2-col"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-012
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "Tap-name entry via `RichTextLabel` meta tag(4.4+); 4 interactive elements need `TOUCH_TARGET_MIN=44px`(shared w/ #15)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-013
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "Godot 4.6 dual-focus: every interactive element needs mouse+keyboard focus testing — flagged for an ADR"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-014
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "Owns 3 read-schemas: `base_X0`(seeds EXP), `npc_tag`(medium_override/concealment_hint), `concealment`; instance storage in Persistence's Entity Record"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-015
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "All 5 formulas deterministic, 0-AI-call, 0-world-write pure functions, unit-testable via mocks"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cci-016
+  system: cci
+  gdd: design/gdd/character-card-identity.md
+  requirement: "AC-01-47 Unit BLOCKING; AC-40-45 Manual/UI ADVISORY"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-001
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "3-tier UI model: screen(5 states)/overlay(max 1 concurrent)/banner(max 1, FIFO, one preempt exception)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-002
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "`write_action_allowed(action,tm_state,screen)` — 46 combinations, pure total function"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-003
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "`screen_transition_valid(from,to,ctx)` — closed/total over explicit 11-edge table"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-004
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "Story Log pagination: `PAGE_SIZE`(20,10-50), `MAX_LOADED_PAGES`(3,2-5), `PREFETCH_THRESHOLD`(5,`<PAGE_SIZE`); O(1) memory bound"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-005
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "`get_turn_page(anchor_turn_id,count,direction)→{records,has_more}` — the World Memory interface locked 2026-08-04"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-006
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "S2 live window: `LIVE_WINDOW_TURNS`(30) default; full state machine incl. real node eviction (`RichTextLabel.remove_paragraph()`)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-007
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "**`LIVE_WINDOW_TURNS`(#15)≥`CONTENT_EXCHANGE_ESTIMATE`(#7 Combat) — cross-GDD invariant, must jointly register at `/create-architecture`, same pattern as `card_transition_ms`**"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-008
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "Touch-target: inline(best-effort padding) vs standalone(`TOUCH_TARGET_MIN=44px` hard, `MIN_ADJACENT_GAP_PX=4`)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-009
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "Font-scale(`S:0.875,M:1.0,L:1.25`)/2-col layout ONLY when `is_touch_primary=false`; touch-primary forces 1-col always"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-010
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "Transition-duration family: `rank(banner)<settings<card<screen)` monotonic; `overlay_card` sourced from #14's `card_transition_ms`"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-011
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "Undo-button-disappear: dedicated alpha-fade signature, distinct from D.6's 4 tiers"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-012
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "`app_config`(font+onboarding flag) stored OUTSIDE Persistence slot bundle — new ownership scope"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-013
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "**Bidirectional fragility flagged in-GDD**: `card_transition_ms` tuned either direction can break #15's D.6 invariant — AC-27 CI check is the safety net"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-014
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "~~Safe-area insets need `JavaScriptBridge.eval()` reading CSS env() — requires custom HTML shell w/ `viewport-fit=cover`, stock template lacks it, fails SILENTLY~~ — **CORRECTED 2026-08-12, ADR-0007**: original text's `eval()` claim was wrong (conflicted with the project's own locked forbidden pattern). Real mechanism: custom HTML shell (still required) + `get_interface(\"window\")` → `getComputedStyle()` → `getPropertyValue(\"--sat\"...)`, zero `eval()`."
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-015
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "~~Input-lock via recursive node disable — CONTESTED/unverified API (2-property 4.5+ PR claim vs project's own single-property doc); GDD refuses to arbitrate, mandates Editor verification before ADR~~ — **CLOSED 2026-08-12, ADR-0007**: verified directly against the pinned 4.6.stable binary via `ClassDB` introspection + runtime test — the 2-property claim was CORRECT (`mouse_behavior_recursive` + `focus_behavior_recursive`, independent enums); this project's own `ui.md` was the stale source, now corrected."
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-016
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "Screen-stack: must NOT use `change_scene_to_file/packed()`; Autoload `CanvasLayer`s per tier, cached not freed — but content nodes inside S2/S4 must be truly freed on eviction"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-017
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "Dual-focus testing required per element (Pressed/Hover/Focus/Disabled 4-channel)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-018
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "Mobile virtual-keyboard avoidance mandatory for escalated delete-confirm"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-019
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "Outbound TM action catalogue: 8 actions incl 3 ungated-by-tm_state (GAP-4)"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-020
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "Testing: Unit BLOCKING for D.1-D.3b/D.6; Integration/Manual/Config ADVISORY"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-cusn-021
+  system: cusn
+  gdd: design/gdd/core-ui-screen-navigation.md
+  requirement: "Combat architecturally constrained to NEVER self-trigger screen transition"
+  created: 2026-08-12
+  revised: ""
+  status: active
+- id: TR-ccm-001
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Device-level toggle (O-Set, new \"Tùy chỉnh nhân vật\" group), OUTSIDE slot bundle, default OFF"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-002
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "`customize_panel_available` = D.1 5-way AND predicate (`toggle_enabled`, `screen=S2`, `tm_state=awaiting_action`, `NOT in_combat`, `NOT is_death_turn`); Rule #1b hidden-vs-dimmed mapping; live re-evaluate while O-Set open"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-003
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "O-Customize is the 3rd overlay (`{O-Card,O-Set,O-Customize}`), max 1 concurrent — ADR-0007 amendment"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-004
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Write `level` only, never `tier`; `tier` always derives via registry `tier_from_level`"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-005
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "12 `base_X0` all-12-or-nothing write, pre-filled via `get_base_X0`; finite, `≤STAT_WRITE_MAX`, `HP>0`, rest `≥0`; `undefined` never coerced to `0.0`"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-006
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Custom item/skill/thức share original content's ID namespace (no prefix); per-namespace runtime uniqueness check; N≥1 thức/skill cardinality gate"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-007
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Checkpoint #3: write-through atomic to Persistence at commit — ADR-0002 D1b amendment (`persistence-save-system.md` Core Rule #1: 2→3 checkpoints)"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-007b
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "`turn_records` key widened `[slot_id,world_time,hack_seq]` so checkpoint #3 never overwrites the current turn's `locked_result`/`narration_text`"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-008
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Async commit sequencing: lock 3 Save buttons + delete buttons + Undo during in-flight window; all effects (apply, invalidate, flag, log, feedback) fire only after `committed()`; `failed()` changes nothing"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-009
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "First hack-write in an open Undo window calls `invalidate_pending_snapshot()` — ADR-0004 new interface, permanently locks prior turn's Undo"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-010
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Every write (incl. delete) emits a mechanical-state-log entry labeled `hack_write`, outside the turn index"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-011
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Permanent — no dedicated undo/revert; standard 1-turn Undo cannot touch a hack-write once its window is invalidated (Rule #6b)"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-012
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "`hack_mode_used_this_slot` flag: set on first write, lives in slot bundle, never cleared/reset, OUTSIDE every system's `capture_snapshot()`/`restore_snapshot()`, persisted in the same write-through checkpoint as TR-ccm-007"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-013
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Hard lock when `in_combat=true` (read from Combat System)"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-014
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "D.2b atomic `(level,current_exp,state)` triple write; no-op gate on unchanged `level`; bidirectional invariant at tier-boundary levels; `state=\"Chờ Đột Phá\"` forbidden at non-boundary levels; absolute EXP ceiling at boundary levels"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-015
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Conditional delete (Rule #11): `entry.created_by_hack AND NOT referenced_in_world_memory(entry) AND` per-type condition (item: `NOT was_ever_equipped`; skill: `NOT was_ever_resolved_in_combat` + `known_skill_ids` removed same transaction; thức: `NOT has_parent_skill_alive`, cascade all-or-nothing)"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-016
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Panel operates only on the slot's active main-character `char_id` — no NPC-targeting UI"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-017
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "`SUBMIT_DEBOUNCE_MS` per-button (3 Save buttons + delete buttons independently), blocks double-tap races"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-018
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Downstream constraint: no system may infer \"valid progression\" from hack-written `tier`/`level`; hack-injected values are ground truth to all gameplay logic, no \"fake\" flag tracked mechanically"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-019
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Progress-gate bypass is intentional: hack level-write skips `breakthrough_requirement_met` and `death_and_consequence_blocked`"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-020
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Force-close discards draft with no warning — defensive-only path, not reachable via real gameplay (D.1 note)"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-021
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Keyboard/focus: full Tab traversal, Enter submits the focused zone, two-tier Esc/tap-outside dismissal when a field has focus"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-022
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "`TOUCH_TARGET_MIN=44px` (registry constant) for every field/button, no panel-specific exception"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-023
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "Knobs: `LEVEL_WRITE_MAX`(1,000,000; 1,000–10,000,000), `STAT_WRITE_MAX`(1e9; 1e6–1e12), `SUBMIT_DEBOUNCE_MS`(500ms; 200–1000ms), `hack_mode_toggle_default`(false, fixed)"
+  created: 2026-08-13
+  revised: ""
+  status: active
+- id: TR-ccm-024
+  system: ccm
+  gdd: design/gdd/character-customization-mode.md
+  requirement: "A slot with `hack_mode_used_this_slot=true` is excluded as a data source for MVP/Vertical Slice validation layers requiring a clean playthrough"
+  created: 2026-08-13
+  revised: ""
+  status: active

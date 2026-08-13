@@ -2,15 +2,25 @@
 
 ## Document Status
 
-- Version: 1.0 — **Phases 0–7b complete** (all 15 GDDs mapped, ownership/data-flow/API
-  boundaries drafted, ADR audit + Missing ADR List done, TD self-review complete).
-- Last Updated: 2026-08-12
+- Version: 1.1 — **Phases 0–7b complete for the original 15 GDDs** (ownership/data-flow/API
+  boundaries drafted, ADR audit + Missing ADR List done, TD self-review complete);
+  **hệ #16 (Character Customization Mode) folded in 2026-08-13** via `/architecture-review`
+  Phase 6 (this system was Approved 2026-08-13, one day after this doc's Phase 0-7b
+  session closed, and was missing from Phases 1/2/4/Baseline until this update — its
+  cross-system interface points were already correctly amended into ADR-0002/0004/
+  0005/0007 via `/propagate-design-change`, 2026-08-13; this update only closes the
+  gap in THIS document's own system map).
+- Last Updated: 2026-08-13
 - Engine: Godot 4.6 (Web/Mobile Web export, nothreads variant, GDScript)
-- GDDs Covered: 15 system GDDs + `game-concept.md`, all Approved (2 additionally Implemented: Combat / ADR-0001; Persistence has ADR-0002 Accepted)
-- ADRs Referenced: ADR-0001 (Combat, Accepted), ADR-0002 (Persistence, Accepted)
+- GDDs Covered: 16 system GDDs + `game-concept.md`, all Approved (2 additionally Implemented: Combat / ADR-0001; Persistence has ADR-0002 Accepted)
+- ADRs Referenced: all 7 (ADR-0001 through ADR-0007, all Accepted)
 - Technical Director Sign-Off: 2026-08-12 — **APPROVED WITH CONCERNS** (see Phase
   7b below: 4 blocking ADRs still unwritten, incl. one Foundation-layer gap; no
-  internal contradictions or unaddressed HIGH-risk domains found)
+  internal contradictions or unaddressed HIGH-risk domains found) — **status
+  unchanged by the 2026-08-13 hệ #16 addition**; see
+  `docs/architecture/architecture-review-2026-08-13.md` for that review's own
+  separate CONCERNS verdict (2 blocking engine-correctness findings in ADR-0002 D1b,
+  now patched).
 - Lead Programmer Feasibility: **SKIPPED — Lean mode** (not a PHASE-GATE in lean
   review mode per skill rule)
 - Review mode this session: **lean** (from `production/review-mode.txt`)
@@ -117,8 +127,9 @@ cutoff: ~May 2025 (~Godot 4.3)**. Post-cutoff versions in scope: **4.4 (MEDIUM)*
 
 ## Technical Requirements Baseline
 
-**Extracted from 15 system GDDs + game-concept.md | ~296 total requirements**
-(exact per-system counts below; ID format `TR-[gdd-slug]-[NNN]`)
+**Extracted from 16 system GDDs + game-concept.md | ~320 total requirements**
+(exact per-system counts below; ID format `TR-[gdd-slug]-[NNN]`; hệ #16's 24 TRs
+added 2026-08-13 via `/architecture-review`, `ccm` slug — see subsection 16 below)
 
 > Full requirement tables, module ownership summaries, key architectural decisions,
 > and open questions per system are preserved in this section — they feed Phase 1
@@ -634,6 +645,44 @@ cutoff: ~May 2025 (~Godot 4.3)**. Post-cutoff versions in scope: **4.4 (MEDIUM)*
 
 ---
 
+#### 16. Character Customization Mode (24 TRs) — Approved 2026-08-13, not yet implemented; **added to this baseline 2026-08-13 via `/architecture-review`** (was missing from the original 15-GDD Phase 0 pass — this system didn't exist yet)
+
+| Req ID | Requirement | Domain |
+|---|---|---|
+| TR-ccm-001 | Device-level toggle (O-Set, new "Tùy chỉnh nhân vật" group), OUTSIDE slot bundle, default OFF | Persistence |
+| TR-ccm-002 | `customize_panel_available` = D.1 5-way AND predicate (`toggle_enabled`, `screen=S2`, `tm_state=awaiting_action`, `NOT in_combat`, `NOT is_death_turn`); Rule #1b hidden-vs-dimmed mapping; live re-evaluate while O-Set open | Core |
+| TR-ccm-003 | O-Customize is the 3rd overlay (`{O-Card,O-Set,O-Customize}`), max 1 concurrent — ADR-0007 amendment | Core |
+| TR-ccm-004 | Write `level` only, never `tier`; `tier` always derives via registry `tier_from_level` | Data |
+| TR-ccm-005 | 12 `base_X0` all-12-or-nothing write, pre-filled via `get_base_X0`; finite, `≤STAT_WRITE_MAX`, `HP>0`, rest `≥0`; `undefined` never coerced to `0.0` | Data |
+| TR-ccm-006 | Custom item/skill/thức share original content's ID namespace (no prefix); per-namespace runtime uniqueness check; N≥1 thức/skill cardinality gate | Data |
+| TR-ccm-007 | Checkpoint #3: write-through atomic to Persistence at commit — ADR-0002 D1b amendment (`persistence-save-system.md` Core Rule #1: 2→3 checkpoints) | Persistence |
+| TR-ccm-007b | `turn_records` key widened `[slot_id,world_time,hack_seq]` so checkpoint #3 never overwrites the current turn's `locked_result`/`narration_text` | Persistence |
+| TR-ccm-008 | Async commit sequencing: lock 3 Save buttons + delete buttons + Undo during in-flight window; all effects (apply, invalidate, flag, log, feedback) fire only after `committed()`; `failed()` changes nothing | Timing |
+| TR-ccm-009 | First hack-write in an open Undo window calls `invalidate_pending_snapshot()` — ADR-0004 new interface, permanently locks prior turn's Undo | Cross-system |
+| TR-ccm-010 | Every write (incl. delete) emits a mechanical-state-log entry labeled `hack_write`, outside the turn index | Cross-system |
+| TR-ccm-011 | Permanent — no dedicated undo/revert; standard 1-turn Undo cannot touch a hack-write once its window is invalidated (Rule #6b) | Data |
+| TR-ccm-012 | `hack_mode_used_this_slot` flag: set on first write, lives in slot bundle, never cleared/reset, OUTSIDE every system's `capture_snapshot()`/`restore_snapshot()`, persisted in the same write-through checkpoint as TR-ccm-007 | Persistence |
+| TR-ccm-013 | Hard lock when `in_combat=true` (read from Combat System) | Cross-system |
+| TR-ccm-014 | D.2b atomic `(level,current_exp,state)` triple write; no-op gate on unchanged `level`; bidirectional invariant at tier-boundary levels; `state="Chờ Đột Phá"` forbidden at non-boundary levels; absolute EXP ceiling at boundary levels | Data |
+| TR-ccm-015 | Conditional delete (Rule #11): `entry.created_by_hack AND NOT referenced_in_world_memory(entry) AND` per-type condition (item: `NOT was_ever_equipped`; skill: `NOT was_ever_resolved_in_combat` + `known_skill_ids` removed same transaction; thức: `NOT has_parent_skill_alive`, cascade all-or-nothing) | Data |
+| TR-ccm-016 | Panel operates only on the slot's active main-character `char_id` — no NPC-targeting UI | Data |
+| TR-ccm-017 | `SUBMIT_DEBOUNCE_MS` per-button (3 Save buttons + delete buttons independently), blocks double-tap races | Timing |
+| TR-ccm-018 | Downstream constraint: no system may infer "valid progression" from hack-written `tier`/`level`; hack-injected values are ground truth to all gameplay logic, no "fake" flag tracked mechanically | Cross-system |
+| TR-ccm-019 | Progress-gate bypass is intentional: hack level-write skips `breakthrough_requirement_met` and `death_and_consequence_blocked` | Cross-system |
+| TR-ccm-020 | Force-close discards draft with no warning — defensive-only path, not reachable via real gameplay (D.1 note) | UI |
+| TR-ccm-021 | Keyboard/focus: full Tab traversal, Enter submits the focused zone, two-tier Esc/tap-outside dismissal when a field has focus | UI |
+| TR-ccm-022 | `TOUCH_TARGET_MIN=44px` (registry constant) for every field/button, no panel-specific exception | UI |
+| TR-ccm-023 | Knobs: `LEVEL_WRITE_MAX`(1,000,000; 1,000–10,000,000), `STAT_WRITE_MAX`(1e9; 1e6–1e12), `SUBMIT_DEBOUNCE_MS`(500ms; 200–1000ms), `hack_mode_toggle_default`(false, fixed) | Data |
+| TR-ccm-024 | A slot with `hack_mode_used_this_slot=true` is excluded as a data source for MVP/Vertical Slice validation layers requiring a clean playthrough | Data |
+
+**Ownership**: Owns a self-contained write lifecycle bypassing Turn Manager entirely (D.1/Rule #6), `hack_mode_used_this_slot`, `LEVEL_WRITE_MAX`/`STAT_WRITE_MAX`/`SUBMIT_DEBOUNCE_MS` knobs. Exposes no new read API of its own — writes land directly in EXP&Realm's/Character Card's/Equipment&Skill's own owned fields, gated by its own D.1-D.5 formulas. Consumes `tm_state`/`in_combat`/`is_death_turn` (TM/Combat, gate-only reads), `get_base_X0` (Character Card, pre-fill).
+
+**Key decisions**: A 3rd, fully independent write-lifecycle — not a Turn Manager action, not staged/deferred like every other write path in the game. Cross-system integration was folded into 4 EXISTING ADRs (0002/0004/0005/0007) rather than a new ADR of its own, since none of its 4 interface points introduce a genuinely new engine-risk domain — each rides a mechanism those ADRs had already engine-verified. `/architecture-review` (2026-08-13) found 2 BLOCKING correctness gaps in exactly one of those 4 points (ADR-0002 D1b's `hack_seq` key extension) — both patched into that ADR the same session.
+
+**Open**: 8-item GDD/registry prose-sync backlog (persistence-save-system.md Core Rule #1 text, turn-manager.md `undo_availability_window` conjunct, core-ui-screen-navigation.md AC-59a/59b, equipment-skill-data-system.md markers, world-memory-context-management.md interface mirror, entities.yaml `referenced_by` housekeeping, this GDD's own D.5 coroutine-contagion note, ADR-0002 D6 trigger-list wording) — tracked in `production/session-state/active.md`, not yet executed. `/ux-design` for O-Customize not yet run (Open Question #6 of the GDD).
+
+---
+
 ## Cross-Cutting Findings (consolidated across all 6 research passes)
 
 ### Undeclared dependency edges (real, but Systems Enumeration table intentionally left unedited per project precedent — do not re-open Approved GDDs, but the architecture's ownership map must reflect the true edges)
@@ -717,6 +766,7 @@ Godot 4.6 engine, Web/HTML5 export (nothreads variant), browser APIs accessed vi
 | Situation/Encounter Generation | `scene` struct, hook scheduler, envelope menu | `src/gameplay/situation_encounter/` | LOW |
 | Death & Consequence | `alive`/`death_flag` (single-writer, ALL characters), `pending_fate` | `src/gameplay/death_consequence/` | LOW |
 | Character Continuation | Continuation state machine, reset orchestration | `src/gameplay/character_continuation/` | LOW |
+| Character Customization Mode *(hệ #16, added 2026-08-13)* | `level`/12-`base_X0`/custom-item-skill-thức write path (bypasses Turn Manager entirely — a 3rd, self-contained write lifecycle, see D.1/Rule #6), `hack_mode_used_this_slot` flag | `src/gameplay/character_customization/` | LOW — no new engine-risk domain of its own; its 4 cross-system interface points (checkpoint #3, `invalidate_pending_snapshot()`, `referenced_in_world_memory()`, `OverlayStack` widening) already ride ADR-0002/0004/0005/0007's existing engine-verified mechanisms. 2 BLOCKING correctness findings surfaced against ADR-0002 D1b during `/architecture-review` 2026-08-13 (IndexedDB range-scan bound width, `hack_seq` rehydration) — both patched into that ADR the same session, see `architecture-review-2026-08-13.md`. |
 
 ### PRESENTATION LAYER
 
@@ -763,6 +813,7 @@ reserved/unused unless a future need arises.
 | Situation/Encounter Generation | `scene`+`active_hook`, `entities_in_scope`, `allowed_envelope_menu`, presence/cooldown trackers | `entities_in_scope`, classified events, `canon_role_rescue` resolved `char_id` | `canon_due_payload`(Setting&Canon), classified data(NPC Affinity), `alive(X)`(Death&Consequence) | `RandomNumberGenerator`(seeded `"ambient"` stream) |
 | Death & Consequence | `alive`/`death_flag`(ALL characters), `death_and_consequence_blocked`, `pending_fate` | `alive(X)`, `is_death_turn`, `kill_witnessed`, "Khóa slot" trigger | Combat hand-off, `max_HP(C)`(Character Card), `affinity(opponent)`(NPC Affinity) | `RandomNumberGenerator`(`death_roll`) |
 | Character Continuation | continuation state machine, reset orchestration | `continuation_choice_eligible`, `handoff_allowed` | `death_confirmed`(Death&Consequence), `is_death_turn`(TM), 5×`ok(s)` signals | Pure GDScript, calls Persistence "Tạo slot mới" |
+| Character Customization Mode *(hệ #16)* | `level`/12-`base_X0`/custom item-skill-thức write path (self-contained lifecycle, NOT orchestrated by Turn Manager), `hack_mode_used_this_slot` | writes into EXP&Realm/Character Card/Equipment&Skill's own owned fields directly (D.1-D.5 formulas gate the write, not a new exposed read API of its own) | `tm_state`/`in_combat`/`is_death_turn`(TM/Combat, gate only), `get_base_X0`(Character Card, pre-fill) | `invalidate_pending_snapshot()`(ADR-0004), `referenced_in_world_memory()`(ADR-0005), 3rd Persistence checkpoint via `[slot_id,world_time,hack_seq]`(ADR-0002 D1b), `OverlayStack`'s 3rd overlay slot(ADR-0007) — reuses 4 already-engine-verified mechanisms, introduces none of its own |
 
 ### PRESENTATION LAYER
 
@@ -1080,6 +1131,25 @@ class_name CharacterContinuation extends Node
 func is_continuation_eligible(turn: Dictionary) -> bool   # is_death_turn AND death_confirmed
 func start_new_playthrough() -> void   # only 1 functional path: "Chơi lại"
 func get_reset_completeness() -> Dictionary  # {ok_count, N, complete}
+```
+
+```gdscript
+## Character Customization Mode (hệ #16, added 2026-08-13) — NOT orchestrated by
+## Turn Manager; self-contained write lifecycle (D.1/Rule #6). Each func below is
+## one independent atomic transaction (one Persistence checkpoint-#3 write each).
+class_name CharacterCustomizationMode extends Control
+func is_panel_available(toggle_enabled: bool, screen: StringName, tm_state: StringName,
+        in_combat: bool, is_death_turn: bool) -> bool          # D.1, pure predicate
+func submit_progress(level: int, current_exp: float, state: StringName) -> void
+    # D.2b-gated atomic (level,current_exp,state) triple write
+func submit_base_stats(base_x0_map: Dictionary) -> void        # D.3-gated, all-12-or-nothing
+func submit_custom_entry(namespace: StringName, entry: Dictionary) -> void
+    # D.4-gated (uniqueness + cardinality); namespace ∈ {item, skill, thuc}
+func delete_custom_entry(entry_id: StringName) -> void         # D.5-gated
+# Every func above: on success, calls TurnManager.invalidate_pending_snapshot()
+# exactly once IF this is the first hack-write in an open Undo window (Rule #6b);
+# always sets hack_mode_used_this_slot=true in the same Persistence checkpoint on
+# first write ever (Rule #8); never touches world_time, never calls request_ai().
 ```
 
 ### PRESENTATION LAYER

@@ -195,14 +195,19 @@ Persistence write failed after Resolving  ────┘     for i in _register
                                                         _registered_systems[i].restore_snapshot(_pending_snapshot[i])
                                                      (Undo case ALSO re-stages a TOMBSTONE
                                                       record — same compound key
-                                                      [slot_id, world_time] as the
-                                                      just-undone turn, `undone: true` —
-                                                      via the EXISTING put()-overwrite
-                                                      semantics of stage()/commit(), no
-                                                      new delete primitive needed; Load's
-                                                      replay skips any record where
-                                                      undone=true instead of re-applying
-                                                      it — see Implementation Guidelines)
+                                                      [slot_id, world_time, 0] as the
+                                                      just-undone turn's own confirmed
+                                                      record (`hack_seq=0`, per ADR-0002
+                                                      D1b — corrected 2026-08-13; every
+                                                      ordinary turn-confirm write
+                                                      implicitly occupies segment 0),
+                                                      `undone: true` — via the EXISTING
+                                                      put()-overwrite semantics of
+                                                      stage()/commit(), no new delete
+                                                      primitive needed; Load's replay
+                                                      skips any record where undone=true
+                                                      instead of re-applying it — see
+                                                      Implementation Guidelines)
 ```
 
 ### Key Interfaces
@@ -347,7 +352,9 @@ func get_turn_delta_blob() -> Dictionary:
   Undo" trigger (already specified in `persistence-save-system.md`) re-stages a
   **tombstone** record — `{world_time: <the undone turn's>, undone: true}`, no
   `locked_result`/`narration_text` payload needed — to the **same** compound key
-  `[slot_id, world_time]` the undone turn already occupies, and `commit()`s it through
+  `[slot_id, world_time, 0]` the undone turn already occupies (`hack_seq=0` — corrected
+  2026-08-13 for ADR-0002 D1b's 3-segment key; every ordinary turn-confirm write
+  implicitly occupies this segment), and `commit()`s it through
   the unmodified `stage()`/`commit()` seam exactly like any normal write (corrected
   2026-08-12, `godot-specialist` review: ADR-0002's `stage()`/`commit()` interface has no
   delete primitive — only `put()`-style overwrite — so "delete the entry" as originally
@@ -361,6 +368,15 @@ func get_turn_delta_blob() -> Dictionary:
   (`OR over confirmed AND NOT undone turns`) already produces the correct answer once the
   tombstone's `undone=true` is visible to replay, independent of whether the delta's
   *content* is still physically present in that record.
+  **Tombstone-vs-hack-write mutual exclusion (added 2026-08-13, `godot-specialist`
+  review)**: a tombstone can only be written for a turn whose Undo is still available at
+  that moment — but per `character-customization-mode.md` Rule #6b, the FIRST hack-write
+  committed inside an open Undo window permanently invalidates that window immediately.
+  Consequently, a tombstone-write for `world_time=T` and the existence of any
+  `hack_seq≥1` record at `world_time=T` are structurally mutually exclusive: if a
+  hack-write had already occurred at T, T's Undo would already be gone and no tombstone
+  could ever be requested for it. No race/collision at that key is possible by
+  construction, not by accident of current scope.
 - `_registered_systems` order must be fixed and deterministic (e.g. registration order at
   session setup) — restore order across systems does not need to matter for correctness
   here (each system only touches its own state), but a fixed order makes test assertions
@@ -490,6 +506,7 @@ func get_turn_delta_blob() -> Dictionary:
 | `restore_snapshot()` implemented as a top-level variable reassignment instead of an in-place mutation, leaving stale references elsewhere in the codebase pointed at the pre-rollback container (`godot-specialist` finding, 2026-08-12) | Low | Medium | Key Interfaces now states the in-place-mutation requirement explicitly (`.clear()` + `.merge()`, or per-field assignment) with the rationale (aliasing risk) spelled out. |
 | A system's `restore_snapshot()` overwrites fields without re-emitting the signal(s) it normally fires on those fields, leaving UI stale until an unrelated redraw (`godot-specialist` finding, 2026-08-12) | Medium | Low | Key Interfaces now requires re-emitting the normal signal(s) as part of `restore_snapshot()`. |
 | `Resource.duplicate_deep()`'s exact parameters/edge-case behavior (e.g. against a Resource shared across multiple instances, such as content-authored NPC templates) not independently verified beyond the engine reference library's summary (`godot-specialist` could not WebSearch to confirm the full signature during review) | Low | Medium | Recommend a small GUT spike test against the real Godot 4.6 API before Combat's retrofit (Migration Plan step 2) confirming `duplicate_deep()` does not unintentionally deep-copy a Resource meant to stay shared (e.g. a content-authored template referenced by multiple instances) — not blocking this ADR's Acceptance, but should land before the first system relies on it. |
+| `invalidate_pending_snapshot()` (added 2026-08-13 for hệ #16) is called from a write path entirely outside the normal Resolving/Undo cycle — a reader might suspect a race against `_capture_all()`/`_restore_all()` | Low | Low | `godot-specialist` review, 2026-08-13: no race is possible. Godot's nothreads Web export means GDScript call stacks never interleave except at explicit `await` points, and none of `_capture_all()`/`_restore_all()`/`invalidate_pending_snapshot()` contain internal `await`. Beyond that, the two functions' call windows are structurally disjoint by `character-customization-mode.md` D.1's own gate: `invalidate_pending_snapshot()` is only reachable while `tm_state=awaiting_action` (panel open requires this), while `_capture_all()`/`_restore_all()` only run during `resolving`/`undoing` — verified reachability note, `systems-designer`+`qa-lead`, 2026-08-13. Not an accident of current scope; documented here so a future reader doesn't have to re-derive it. |
 
 ## Performance Implications
 

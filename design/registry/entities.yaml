@@ -259,6 +259,7 @@ formulas:
       - design/gdd/world-memory-context-management.md
       - design/gdd/death-and-consequence.md
       - design/gdd/core-ui-screen-navigation.md
+      - design/gdd/character-customization-mode.md
     variables:
       - turn_id
       - last_confirmed_turn_id
@@ -415,6 +416,7 @@ formulas:
       - design/gdd/exp-realm-progression.md
       - design/gdd/combat-system.md
       - design/gdd/character-card-identity.md
+      - design/gdd/character-customization-mode.md
     variables:
       - level
     output_range: [1, null]
@@ -432,6 +434,7 @@ formulas:
     referenced_by:
       - design/gdd/exp-realm-progression.md
       - design/gdd/character-card-identity.md
+      - design/gdd/character-customization-mode.md
     variables:
       - level
       - BASE_EXP_THRESHOLD
@@ -956,6 +959,7 @@ constants:
     referenced_by:
       - design/gdd/equipment-skill-data-system.md
       - design/gdd/combat-system.md
+      - design/gdd/character-customization-mode.md
     value: 3
     unit: thức (moves) per skill
     added: 2026-08-02
@@ -998,6 +1002,7 @@ constants:
     referenced_by:
       - design/gdd/equipment-skill-data-system.md
       - design/gdd/combat-system.md
+      - design/gdd/character-customization-mode.md
     value: 6
     unit: skills
     added: 2026-08-02
@@ -1196,6 +1201,7 @@ constants:
       - design/gdd/turn-manager.md
       - design/gdd/situation-encounter-generation.md
       - design/gdd/death-and-consequence.md
+      - design/gdd/character-customization-mode.md
     value: -80
     unit: điểm Hảo cảm (BAO GỒM -80 — thù địch sâu sắc khi affinity <= -80)
     # cờ mà Death & Consequence (chưa thiết kế) đọc để quyết định nguy cơ
@@ -1236,6 +1242,7 @@ constants:
       - design/gdd/situation-encounter-generation.md
       - design/gdd/game-concept.md
       - design/gdd/exp-realm-progression.md
+      - design/gdd/character-customization-mode.md
     value: 20
     unit: cấp (một chiều — level(npc) − level(player))
     # từ game-concept.md ("chênh lệch không quá 20 cấp mới có thể mang
