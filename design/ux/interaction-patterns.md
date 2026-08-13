@@ -122,6 +122,11 @@ phát minh lại.
 **Specification**:
 - Animation ngang, tốc độ cố định, không phụ thuộc elapsed time
 - Không có label số (không "đang tải... 45%")
+- **Leo thang diegetic nhẹ** (đóng OQ#14 `core-ui-screen-navigation.md`,
+  2026-08-13): sau `ai_writing_escalation_seconds` (provisional 15s,
+  knob 10–25s, PHẢI `< ai_call_timeout_seconds`), văn bản đổi sang
+  biến thể thứ hai ĐÚNG 1 lần (copy chốt với `narrative-director`) —
+  vẫn ink-sweep, vẫn không spinner/%/progress
 - Timeout tại `ai_call_timeout_seconds=30` → chuyển sang thông báo lỗi trong khung tường thuật
 
 **When to Use**: Mọi lúc chờ AI response trong game.
@@ -142,6 +147,9 @@ phát minh lại.
 - Biến thể **Pending Fate**: đậm mực hơn 1 bậc, KHÔNG có `intent-chip` đi kèm, chiếm 2/4 slot đúng 1 lượt
 - Khóa đệ quy khi `tm_state≠awaiting_action` (D.1), alpha 0.38
 - Touch target `≥44px`
+- **Bàn phím**: là Card tappable (KHÔNG phải Button bản chất) — phải
+  khai báo focus mode + xử lý Enter/Space tường minh khi implement;
+  Tab-reachable, Enter/Space kích hoạt = submit (cover AC-56a)
 
 **When to Use**: Danh sách gợi ý hành động do hệ thống sinh, số lượng cố định nhỏ (4).
 **When NOT to Use**: Danh sách dài/động số lượng — pattern này giả định đúng 4 slot cố định, không phải list cuộn.
@@ -212,7 +220,11 @@ phát minh lại.
 
 **Specification**:
 - Xuất hiện: fade-in khi `undo_available=true`
-- Biến mất: KHÔNG fade — tức thì, kể cả ngay sau `is_death_turn=true`
+- Biến mất: tween alpha 1.0→0 **≤150ms**, gỡ node khỏi layout SAU khi
+  tween hoàn tất (AC-59a/59b `core-ui-screen-navigation.md` — không
+  snap giữa 2 frame), kể cả ngay sau `is_death_turn=true`; mọi nguyên
+  nhân biến mất render CÙNG hiệu ứng *(sửa 2026-08-13 sau `/ux-review`
+  — bản trước ghi "KHÔNG fade, tức thì", mâu thuẫn AC-59a)*
 - Khóa đệ quy khi Resolving/Undoing (nhưng vẫn hiện, chỉ mờ trong lúc xử lý — khác với biến mất vĩnh viễn)
 
 **When to Use**: Hành động hoàn tác có giới hạn thời gian/điều kiện rõ ràng, nơi sự biến mất TỰ THÂN mang ý nghĩa.
@@ -233,6 +245,10 @@ phát minh lại.
 - Auto-scroll BẮT BUỘC tới dòng này ngay khi điều kiện set — ngoại lệ DUY NHẤT của luật "không auto-scroll" toàn game
 - KHÔNG có timeout tự động — chờ vô hạn cho tới khi người chơi tap
 - Tap → chuyển cảnh một chiều, không có đường quay lại trạng thái trước
+- **Bàn phím (BẮT BUỘC)**: Tab-reachable + Enter/Space-activatable,
+  TỰ NHẬN focus cùng nhịp auto-scroll — nếu đây là con đường duy nhất
+  đi tiếp (như S2→S5), thiếu route bàn phím = người dùng keyboard-only
+  kẹt vĩnh viễn (ngoài phạm vi exception ADR-0006)
 
 **When to Use**: Khoảnh khắc cao-stakes, không thể đảo ngược, cần trọng lượng thao tác chủ động (không phải side-effect tự động của hệ thống).
 **When NOT to Use**: Không dùng cho chuyển cảnh thông thường — đây là pattern hiếm, chỉ dành cho đúng 1 khoảnh khắc trong toàn game (death → 3-path).

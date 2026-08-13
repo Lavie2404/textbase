@@ -214,6 +214,51 @@ A load-time gotcha surfaced during the re-run, engine-version-specific to
 Implementation Guidelines below and
 `docs/engine-reference/godot/modules/web-export.md`.
 
+### D1b. Third checkpoint: hack-write commit (propagated from `character-customization-mode.md` Rule #6a, 2026-08-13)
+
+hệ #16 (Character Customization Mode, Approved 2026-08-13) introduces a write
+path that commits durably **outside** Turn Manager's Resolving→Confirmed
+cycle entirely — Core Rule #1's "Auto-save duy nhất tại 2 checkpoint" wording
+is now factually incomplete and must read **3**: (1) Turn Confirmed, (2)
+periodic full-flush, (3) hack-write/delete commit.
+
+**Schema decision**: extend `turn_records`' compound key from 2 segments to
+3 — `[slot_id, world_time, hack_seq]` — rather than opening a fourth object
+store or forcing an out-of-cadence full-snapshot flush (Rule #6a2's other
+named option). Rationale: a hack-write commit deliberately keeps `world_time`
+unchanged (hệ #16 Rule #6d — no turn is consumed), so it CANNOT reuse the
+existing 2-segment key without overwriting the just-confirmed turn's
+`locked_result`/`narration_text` and corrupting ADR-0004's undo-tombstone
+record at that same key. Widening the key is backward-compatible: every
+ordinary turn-confirm write (D1's original design) implicitly writes
+`hack_seq=0`; a hack-write/delete commit writes `hack_seq=1, 2, 3...`
+(incrementing per `world_time`, reset for the next `world_time`). This is a
+**generalization** of the already-validated compound-key cursor scan
+(Experiment 2b, D1a) — a 3-segment `IDBKeyRange` scan orders records exactly
+the same way a 2-segment one does, just with a finer tiebreaker — not a new
+mechanism requiring its own prototype pass.
+
+The out-of-cadence full-flush alternative was rejected: it would write the
+**entire** snapshot blob on every hack-write commit, directly undoing Core
+Rule #3's append-only-constant-cost design for a feature whose own GDD
+expects repeated experimentation (multiple "Lưu" clicks in one panel-open
+session, per hệ #16's 3-buttons-per-zone UI model) — the cost would scale
+with usage of the panel, not with turns, the opposite of what Core Rule #3
+exists to guarantee.
+
+**Load-time replay ordering**: Persistence's existing replay (latest
+snapshot + `turn_records` since it, in key order) now walks `(world_time,
+hack_seq)` ascending — `hack_seq=0` (the turn's own confirmed result) applies
+first for each `world_time`, then any hack-write records for that same
+`world_time` apply in sequence after it. This satisfies hệ #16 Rule #6a2's
+requirement verbatim: "hack-write sau lượt T, trước lượt T+1."
+
+**No new StorageBackend method required** — a hack-write commit calls the
+same `stage()`/`commit()` seam (D2) as any other write, just from a
+different caller (hệ #16's O-Customize save handler) with a different key
+shape for its blob. `durability_confirmed` semantics (D1) are unchanged:
+`oncomplete` on that transaction is still the boundary.
+
 ### D2. The `stage()`/`commit()` seam maps onto the transaction boundary
 
 Core Rule #3's mandated internal 2-phase interface:
@@ -535,6 +580,7 @@ superseding ADR, keeping the seam so only the backend implementation swaps.
 | `persistence-save-system.md` | Persistence | Formula #3: quota measurement API + margin rationale | D4: `estimate()` via bridge; fuzzing absorbed by `quota_warn_threshold=0.85` |
 | `turn-manager.md` | Turn Manager | Core Rule #4 / States: Turn Confirmed == durably saved | D1 gate wiring (Migration step 4) |
 | `world-memory-context-management.md` | World Memory | Full journal persisted losslessly (AC-07 cross-ref) | D5 lossless-or-none; load-merge byte-identity validation |
+| `character-customization-mode.md` | Character Customization Mode | Rule #6a (checkpoint thứ 3: hack-write commits durably outside the turn cycle) + Rule #6a2 (must not collide with the turn-record key) | D1b: `turn_records` key widened to `[slot_id, world_time, hack_seq]`, `hack_seq=0` for ordinary turns, `1,2,3...` for hack-writes at that `world_time` — propagated 2026-08-13, hệ #16 Approved vòng 4. |
 
 ## Related Decisions
 

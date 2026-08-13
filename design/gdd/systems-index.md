@@ -42,7 +42,7 @@ verdict PROCEED).
 | 13 | Character Continuation (inferred) | Gameplay | MVP | Approved | [character-continuation.md](character-continuation.md) | Death & Consequence |
 | 14 | Character Card & Identity | UI | MVP | Approved | [character-card-identity.md](character-card-identity.md) | Equipment & Skill Data, NPC Affinity, Setting & Canon Integration |
 | 15 | Core UI/Screen Navigation (inferred) | UI | MVP | Approved | [core-ui-screen-navigation.md](core-ui-screen-navigation.md) | Combat System, Character Card, Situation Generation |
-| 16 | Character Customization Mode | Gameplay | MVP | Designed — chờ `/design-review` (lean mode, off-index feature phát sinh giữa phiên) | [character-customization-mode.md](character-customization-mode.md) | Core UI/Screen Navigation, Turn Manager, Combat System, EXP & Realm Progression, Character Card & Identity, Equipment & Skill Data System, Persistence / Save System |
+| 16 | Character Customization Mode | Gameplay | MVP | Approved (2026-08-13, vòng 4 — verify hẹp qa-lead xác nhận sạch 2 blocking cuối của vòng 3; lịch sử: vòng 1 MAJOR REVISION NEEDED → 10/10 sửa, vòng 2 NEEDS REVISION → 12/12 cụm sửa, vòng 3 NEEDS REVISION hẹp → 2/2 sửa; xem review log. Chưa cascade: `/propagate-design-change` còn treo, 8 mục — xem Open Question #1 GDD) | [character-customization-mode.md](character-customization-mode.md) | Core UI/Screen Navigation, Turn Manager, Combat System, EXP & Realm Progression, Character Card & Identity, Equipment & Skill Data System, Persistence / Save System |
 
 ---
 
@@ -365,8 +365,8 @@ review mode `lean`.)*
 |--------|-------|
 | Total systems identified | 16 (hệ #16 phát sinh giữa phiên 2026-08-12, off-index từ `/map-systems` gốc) |
 | Design docs started | 16 |
-| Design docs reviewed | 15 (hệ #16 chưa qua `/design-review`) |
-| Design docs approved | 13 (2026-08-11: +AI/LLM Integration Layer qua cổng CORS prototype PASS; còn lại: Persistence [prototype PASS + ADR-0002 Proposed — chờ user accept ADR], Combat [ĐÃ implement, GUT 91/91 xanh, ADR-0001 Accepted]) |
+| Design docs reviewed | 16 (hệ #16: `/design-review` vòng 1 full 2026-08-13 → MAJOR REVISION NEEDED, đã sửa; vòng 2 → NEEDS REVISION 12 cụm, đã sửa; vòng 3 → NEEDS REVISION hẹp 2 blocking, đã sửa; vòng 4 verify hẹp qa-lead → APPROVED 2026-08-13) |
+| Design docs approved | 14 (2026-08-13: +Character Customization Mode qua vòng 4 verify hẹp, xem review log; 2026-08-11: +AI/LLM Integration Layer qua cổng CORS prototype PASS; còn lại: Persistence [prototype PASS + ADR-0002 Proposed — chờ user accept ADR], Combat [ĐÃ implement, GUT 91/91 xanh, ADR-0001 Accepted]) |
 | MVP systems designed | 16/16 |
 | Vertical Slice systems designed | 0/0 |
 

@@ -2,7 +2,7 @@
 
 > **Status**: In Design
 > **Author**: duchx + ux-designer
-> **Last Updated**: 2026-08-12
+> **Last Updated**: 2026-08-13
 > **Journey Phase(s)**: [To be designed — no player-journey.md yet]
 > **Template**: UX Spec
 
@@ -256,15 +256,16 @@ Mapping cho: Touch/Mouse hỗn hợp (không gamepad).
 | Chip intent | Tap/click | Chip chuyển trạng thái "đã chọn"; nội dung tương ứng điền vào ô tự do | Bật nội dung gợi ý vào ô tự do — KHÔNG tự submit, người chơi vẫn phải gửi |
 | Ô tự do | Gõ (tap để focus trên mobile) | Con trỏ nhấp nháy chuẩn | Text được giữ nguyên qua mọi lỗi/timeout |
 | Nút Gửi | Tap/click | Khóa ngay lập tức (chuyển sang Resolving) | `submit_action` với nội dung ô tự do |
-| Nút Undo | Tap/click | Biến mất ngay sau khi bấm (không phải mờ dần) | Hoàn tác lượt vừa confirm, khóa như Resolving trong lúc xử lý |
+| Nút Undo | Tap/click | Tween alpha 1.0→0 ≤150ms rồi gỡ hẳn khỏi layout (AC-59a — không snap, không disabled-ghost) | Hoàn tác lượt vừa confirm, khóa như Resolving trong lúc xử lý |
 | Tap-tên (`card_exists=true`) | Tap/click | Không hiệu ứng riêng biệt trước khi mở — mở O-Card ngay (200ms transition) | Mở overlay Thẻ Nhân Vật, luôn khả dụng kể cả Resolving (D.1 readonly) |
 | Tap-tên (`card_exists=false`) | Tap/click | Không có gì xảy ra — không styling, không phản hồi | Không hành động (đây là 1 điểm ⚠️ về mặt accessibility — xem Accessibility) |
 | Bút tích 「Thẻ」 | Tap/click | Mở O-Card cho nhân vật chính | Luôn khả dụng, kể cả Resolving |
 | Bút tích 「Lục」 | Tap/click | Page-flip transition (260ms) | Chuyển sang S4, luôn khả dụng kể cả Resolving |
 | Bút tích 「Mục」 | Tap/click | Mở O-Set | Luôn khả dụng kể cả Resolving |
 | Dòng "đọc tiếp về trước" | Tap/click | Page-flip transition | Chuyển sang S4 tại đúng lượt kế biên cửa sổ |
-| Dòng dẫn tap-to-continue | Tap/click (bất kỳ đâu trên dòng) | Nhịp thở alpha dừng lại, chuyển cảnh sang S5 | Kích hoạt takeover Character Continuation — **hành động 1 chiều duy nhất không auto-timeout của toàn S2** |
+| Dòng dẫn tap-to-continue | Tap/click (bất kỳ đâu trên dòng) / Enter hoặc Space khi đang focus (dòng dẫn TỰ NHẬN focus cùng nhịp auto-scroll) | Nhịp thở alpha dừng lại, chuyển cảnh sang S5 | Kích hoạt takeover Character Continuation — **hành động 1 chiều duy nhất không auto-timeout của toàn S2** |
 | Nudge heuristic line | Tap/click | Chip tương ứng được bật (1 chiều — tap để enable, không tự enable) | Không submit, chỉ hỗ trợ điền |
+| Khu nhập (bàn phím) | Tab/Shift+Tab di chuyển focus; Enter/Space kích hoạt phần tử đang focus (thẻ gợi ý/chip/nút Gửi/nút Undo) | Focus ring 2px chuẩn (mục 9 Visual/Audio GDD) | Outcome giống hệt tap/click tương ứng — cùng gate D.1 (`tm_state≠awaiting_action` → từ chối ở tầng UI) |
 
 ---
 
@@ -304,13 +305,27 @@ ràng buộc thứ tự `banner ≤ overlay_settings ≤ overlay_card ≤ screen
   (đệ quy cả cây node); chỉ báo "thế giới đang viết" fade-in cùng lúc,
   hiệu ứng ink-sweep (nét mực kéo dài ngang, KHÔNG map với thời gian
   thực đã trôi).
+- **Leo thang diegetic nhẹ khi AI call kéo dài** (đóng OQ#14
+  `core-ui-screen-navigation.md`): sau `ai_writing_escalation_seconds`
+  (provisional **15s**, tuning knob — dải an toàn 10–25s, PHẢI
+  `< ai_call_timeout_seconds=30`), văn bản chỉ báo đổi sang biến thể
+  thứ hai (VD "*thế giới vẫn đang viết…*" — copy chính thức chốt với
+  `narrative-director` khi implement, xem Open Questions), đổi ĐÚNG 1
+  LẦN, không leo thang tiếp; giữ nguyên hiệu ứng ink-sweep, KHÔNG
+  spinner/%/progress — không đổi ngôn ngữ thị giác đã khóa (Art
+  Bible).
 - **Turn Confirmed → 4 thẻ gợi ý mới**: fade-in nhẹ (thời lượng chưa
   có trong GDD nguồn — đề xuất provisional 150ms, cần xác nhận với
   `ui-programmer`/`art-director` khi implement).
 - **Nút Undo xuất hiện**: fade-in khi `undo_available` chuyển `true`.
-- **Nút Undo biến mất**: **KHÔNG fade** — biến mất tức thì (khớp Core
-  Rule #5 "biến mất hoàn toàn, không phải disabled") — sự đột ngột
-  này CHỦ ĐÍCH, củng cố cảm giác "mực đã khô".
+- **Nút Undo biến mất**: tween alpha 1.0→0 thời lượng **≤150ms**, node
+  chỉ bị gỡ khỏi layout SAU khi tween hoàn tất (AC-59a GDD) — mờ dần
+  mượt, không snap giữa 2 frame (AC-59b); mọi nguyên nhân biến mất
+  (lượt kế tiếp confirm / `is_death_turn=true` / vừa bấm Undo) đều
+  render CÙNG hiệu ứng. "Biến mất hoàn toàn" của Core Rule #5 nghĩa là
+  gỡ hẳn khỏi layout (không disabled-ghost), KHÔNG có nghĩa là snap
+  tức thì. *(Sửa 2026-08-13 sau `/ux-review` — bản trước ghi "KHÔNG
+  fade, tức thì", mâu thuẫn trực tiếp AC-59a/59b.)*
 - **Dòng dẫn tap-to-continue**: nhịp thở alpha liên tục `[0.85, 1.0]`,
   chu kỳ ~2s, không dừng cho tới khi được tap; auto-scroll BẮT BUỘC
   tới dòng này ngay khi `continuation_choice_eligible=true` — ngoại lệ
@@ -359,9 +374,21 @@ Questions.)*
 - **Keyboard-only navigation**: 3 bút tích 「Thẻ」「Lục」「Mục」 PHẢI
   Tab-reachable + Enter-activatable (ADR-0006 xác nhận đây là fallback
   bàn phím duy nhất được đảm bảo). 4 thẻ gợi ý, hàng chip, ô tự do,
-  nút Gửi, nút Undo — theo chuẩn web accessibility thông thường (Tab
-  order theo đúng thứ tự visual: header bookmarks → thẻ gợi ý → chip
-  → ô tự do → nút gửi → Undo → bookmarks đáy).
+  nút Gửi, nút Undo: Tab order theo đúng thứ tự visual (header
+  bookmarks → thẻ gợi ý → chip → ô tự do → nút gửi → Undo → bookmarks
+  đáy), Enter/Space kích hoạt phần tử đang focus. ⚠️ Lưu ý implement:
+  thẻ gợi ý/chip là **Card/Chip tappable, KHÔNG phải Button bản chất**
+  — phải khai báo focus mode + xử lý Enter/Space tường minh, không
+  mặc định có sẵn như Button (cover đúng bước "submit action" của
+  AC-56a GDD).
+- **Dòng dẫn tap-to-continue (bàn phím)**: khi
+  `continuation_choice_eligible=true`, dòng dẫn PHẢI Tab-reachable +
+  Enter/Space-activatable, và TỰ NHẬN focus cùng nhịp auto-scroll
+  (sau lượt chết khu nhập không còn render — Tab order lúc này chỉ
+  còn: bút tích header → dòng dẫn → bút tích đáy). Đây là con đường
+  DUY NHẤT sang S5 (Core Rule #6), KHÔNG thuộc phạm vi 2 ngoại lệ
+  ADR-0006 — thiếu route này, người dùng keyboard-only kẹt vĩnh viễn
+  tại S2 sau lượt chết.
 - **⚠️ Ngoại lệ đã ghi chép (ADR-0006 Part 2)**: tap-tên trong văn
   tường thuật **KHÔNG** Tab-reachable ở MVP (WCAG SC 4.1.2 & 1.3.1
   không đạt) — đây là exception có chủ đích, có ghi chép, không phải
@@ -407,17 +434,20 @@ tiếp bằng ngôn ngữ khác nếu cần dịch sau này).
 
 ## Acceptance Criteria
 
-- [ ] Màn hình S2 mở trong vòng 100ms từ lúc chọn "Tiếp tục"/"Bắt đầu mới" tại S1 (không loading screen — dữ liệu local, page-flip animation `transition_screen_ms=260ms` là toàn bộ độ trễ cảm nhận được)
+- [ ] Mở S2 từ S1 ("Tiếp tục"/"Bắt đầu mới"): dữ liệu hiển thị sẵn sàng trong <100ms (local, không network); độ trễ cảm nhận được của người chơi = trọn page-flip `transition_screen_ms=260ms`; **mốc pass/fail: khi animation lật trang kết thúc, S2 đã render hoàn chỉnh** — không loading screen, không frame trống/skeleton nào sau khi lật xong
 - [ ] Từ S2, tap 「Lục」 điều hướng đúng tới S4 (Story Log live) và giữ nguyên vị trí cuộn của S2 khi quay lại
 - [ ] Khi AI call vượt `ai_call_timeout_seconds=30`, S2 quay về Awaiting Action với thông báo lỗi TRONG khung tường thuật (không banner) và **nội dung ô tự do người chơi đã gõ được giữ nguyên nguyên vẹn**, không bị xóa/reset
 - [ ] Toàn bộ 3 bút tích 「Thẻ」「Lục」「Mục」 reachable và activatable bằng Tab + Enter thuần bàn phím, kể cả khi `tm_state=resolving`
 - [ ] Submit 1 hành động (thẻ gợi ý/chip/ô tự do) → `tm_state` chuyển `resolving` → khu nhập khóa đệ quy (alpha 0.38) → AI trả kết quả → narrative frame cập nhật đoạn văn mới → `tm_state` về `awaiting_action`, 4 thẻ gợi ý mới xuất hiện
 - [ ] Submit hành động thứ 2 trong lúc `tm_state=resolving` bị từ chối Ở TẦNG UI (không tới được Turn Manager) — verify bằng cả 2: (a) `write_action_allowed`-style formula trả `false`, (b) thao tác UI thật sự không phản hồi
-- [ ] Nút Undo hiện đúng khi `undo_available=true` và **biến mất hoàn toàn** (không phải mờ) ngay khi `undo_available=false`, kể cả ngay sau `is_death_turn=true`
+- [ ] Nút Undo hiện đúng khi `undo_available=true`; khi `undo_available=false` (kể cả ngay sau `is_death_turn=true`), tween alpha 1.0→0 chạy đúng thời lượng ≤150ms TRƯỚC khi node bị gỡ hẳn khỏi layout — không disabled-ghost, không snap giữa 2 frame (mirror AC-59a/59b GDD)
 - [ ] Khi có `pending_fate`, đúng 2/4 slot thẻ gợi ý hiển thị "Kết liễu"/"Tha mạng", render đậm mực hơn 1 bậc so với 3 thẻ còn lại, và KHÔNG có chip intent đi kèm 2 thẻ đó
-- [ ] Cửa sổ live giữ đúng trần bộ nhớ `ui_memory_bound = MAX_LOADED_PAGES × PAGE_SIZE` bất kể `total_turns` của slot — verify với 1 slot có `total_turns` rất lớn (VD 1000+) không làm tăng số node resident
+- [ ] Cửa sổ live giữ đúng trần D.3b: `s2_resident_turns(slot) = min(total_turns(slot), LIVE_WINDOW_TURNS)` với `LIVE_WINDOW_TURNS=30` — verify với 1 slot có `total_turns` rất lớn (VD 1000+): số lượt resident trong khung tường thuật không bao giờ vượt 30, số node không tăng theo `total_turns` (mirror AC-48/AC-66 GDD; KHÔNG dùng `ui_memory_bound = MAX_LOADED_PAGES × PAGE_SIZE` — đó là công thức D.3 của Story Log S4)
 - [ ] Khi `continuation_choice_eligible=true`, S2 auto-scroll tới dòng dẫn tap-to-continue NGAY khi cờ được set (không chờ người chơi tự cuộn) — verify đây là animation auto-scroll DUY NHẤT xảy ra trên toàn S2
 - [ ] Tap dòng dẫn tap-to-continue → chuyển sang S5, và slot hiện tại không còn đường quay lại S2 cũ (chỉ có thể vào S2 mới qua "Chơi lại" ở S5)
+- [ ] (Bàn phím) GIVEN `continuation_choice_eligible=true`, dòng dẫn tap-to-continue TỰ NHẬN focus cùng nhịp auto-scroll, Tab-reachable, và Enter/Space kích hoạt chuyển sang S5 — toàn bộ luồng sau-lượt-chết đi được bằng bàn phím thuần, không cần chuột/touch lần nào
+- [ ] (Bàn phím) Submit 1 hành động bằng bàn phím thuần: Tab tới 1 thẻ gợi ý → Enter/Space → `submit_action` được gọi với nội dung thẻ đó (cùng gate D.1 như tap) — cover đúng bước "submit action" của AC-56a (GDD)
+- [ ] Chỉ báo "thế giới đang viết" đổi văn bản sang biến thể thứ hai ĐÚNG 1 lần sau `ai_writing_escalation_seconds=15` (mock clock, không đo thời gian thực), KHÔNG đổi trước ngưỡng, và KHÔNG spinner/%/progress xuất hiện ở bất kỳ thời điểm nào của Resolving
 
 ---
 
@@ -447,3 +477,10 @@ tiếp bằng ngôn ngữ khác nếu cần dịch sau này).
    trên giả định về bối cảnh người chơi (Player Context on Arrival)
    thay vì hành trình đã map. Cân nhắc chạy phiên player-journey sau
    khi spec này được duyệt.
+7. **Copy chính thức cho biến thể leo thang của chỉ báo "đang viết"**
+   (owner: `narrative-director`, target: khi implement) — spec đã
+   chốt CƠ CHẾ (đổi văn bản đúng 1 lần sau
+   `ai_writing_escalation_seconds=15`, đóng OQ#14 GDD, xem
+   §Transitions & Animations); câu chữ cụ thể của biến thể thứ hai
+   (VD "*thế giới vẫn đang viết…*") còn provisional, cần
+   `narrative-director` duyệt.

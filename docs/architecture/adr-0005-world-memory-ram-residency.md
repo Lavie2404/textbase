@@ -243,6 +243,26 @@ func get_turn(turn_id: int) -> Dictionary:
 func get_processing_state(turn_id: int) -> Variant:
     ...
 
+# Added by propagation from character-customization-mode.md Rule #11/D.5
+# (2026-08-13): a STRUCTURAL entity-reference existence check, not a
+# turn-pagination read -- gates whether a hack-created custom item/skill/thức
+# is deletable ("chưa từng xuất hiện trong World Memory"). MUST be a
+# structural entity-ID lookup, never text-match against narration prose --
+# hệ #16's own GDD is explicit that a false negative here (text-match missing
+# a reference) would let a player delete an entry that already entered the
+# story, corrupting world history (Pillar 2). Does not change this ADR's
+# RAM-residency decision -- both _full_log and _extracted_facts are already
+# fully resident, so this is a query shape addition against existing
+# structures, not a new residency/async question.
+func referenced_in_world_memory(entry_id: StringName) -> bool:
+    # Implementation queries whichever RAM-resident structure actually tags
+    # entity IDs at narration time (_extracted_facts if entity references are
+    # captured there, else a scan of _full_log's structural entity tags) --
+    # left to World Memory's own implementation, not redecided by this ADR.
+    # Async-shaped per the same `await`-from-day-one convention as the other
+    # four Public Interface methods above, for the same Full Vision reason.
+    ...
+
 # Core UI #15 call sites (D.3 cold-start example) -- written `await`-shaped from MVP:
 
 func _cold_start_load_page() -> void:
@@ -446,6 +466,7 @@ this ADR's RAM-residency conclusion.
 | `world-memory-context-management.md` | World Memory & Context Management | Public Interface (`get_turn_page`, `total_turns`, `get_turn`, `get_processing_state`) | Interface shape locked as `await`-based starting at MVP (Key Interfaces), with the MVP implementation remaining synchronous internally. |
 | `core-ui-screen-navigation.md` | Core UI/Screen Navigation | D.3 (Story Log pagination), D.3b (S2 live window) — "Cứng" dependency on synchronous `get_turn_page`/`total_turns()` | No change required — this ADR's Decision explicitly preserves the synchronous-feel MVP behavior these ACs (including AC-50) depend on. |
 | `persistence-save-system.md` | Persistence/Save System | `avg_turn_record_bytes` byte-accounting Formula | Reused as the numeric basis for this ADR's RAM-ceiling estimate (Decision, Numeric grounding) — no change to that Formula. |
+| `character-customization-mode.md` | Character Customization Mode | Rule #11/D.5 (`referenced_in_world_memory(entry)` — structural entity-reference gate for deleting a custom entry) | Added as a fifth Public Interface method (Key Interfaces), `await`-shaped like the other four — propagated 2026-08-13, hệ #16 Approved vòng 4. Does not change this ADR's RAM-residency decision. |
 
 ## Related
 

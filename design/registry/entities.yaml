@@ -969,10 +969,28 @@ constants:
     value: 1000000
     unit: level
     added: 2026-08-12
+    revised: "2026-08-13"
+    # Trần vệ sinh kỹ thuật cho D.2 is_valid_level_write — chỉ chặn lớp lỗi
+    # kỹ thuật (typo, non-finite, giá trị phi thực tế) khi ghi `level` qua
+    # O-Customize. KHÔNG có cơ chế combat nào chặn hệ quả của level cực lớn
+    # (FLOOR_TOTAL là SÀN multiplier chống stat tụt về 0, không phải trần —
+    # claim cũ "đã tự an toàn nhờ FLOOR_TOTAL" bị /design-review vòng 1
+    # 2026-08-13 xác nhận SAI kỹ thuật, sửa tại đây vòng 2).
+
+  - name: STAT_WRITE_MAX
+    status: active
+    source: design/gdd/character-customization-mode.md
+    referenced_by:
+      - design/gdd/character-customization-mode.md
+    value: 1000000000
+    unit: stat point
+    added: 2026-08-13
     revised: ""
-    # Trần vệ sinh kỹ thuật cho D.2 is_valid_level_write — KHÔNG bảo vệ
-    # công thức Combat (đã tự an toàn nhờ FLOOR_TOTAL), chỉ chặn input
-    # lỗi đánh máy/giá trị phi thực tế khi ghi `level` qua O-Customize.
+    # Trần vệ sinh kỹ thuật cho D.3 is_valid_base_stat_set (mirror đúng vai
+    # trò LEVEL_WRITE_MAX): chặn non-finite/tràn/typo khi ghi 12 base_X0 qua
+    # O-Customize, giữ mọi phép nhân downstream (stat_growth, tổng Lực chiến)
+    # ở dải hữu hạn float64. KHÔNG phải knob cân bằng — hack stat lớn nhưng
+    # hữu hạn ≤ trần là chủ ý được phép. Safe range 1e6–1e12.
 
   - name: max_known_skills_per_character
     status: active

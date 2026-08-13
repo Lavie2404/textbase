@@ -296,6 +296,28 @@ func _restore_all() -> void:
     for i in _registered_systems.size():
         _registered_systems[i].restore_snapshot(_pending_snapshot[i])
 
+# Added by propagation from character-customization-mode.md Rule #6b (2026-08-13):
+# a caller OUTSIDE the normal Resolving/Undo cycle (hệ #16's write path, which
+# bypasses Turn Manager entirely) needs to permanently kill an in-flight Undo
+# window the moment its first hack-write/delete commits -- distinct from the
+# existing implicit invalidation (next turn's _capture_all() overwriting the
+# slot). No prior consumer needed an EXTERNAL invalidation entry point; all
+# five original consumers only ever read via restore_snapshot() or let the
+# next turn's capture overwrite the slot naturally.
+
+func invalidate_pending_snapshot() -> void:
+    # Idempotent: safe to call whether or not a snapshot is currently retained
+    # (character-customization-mode.md's AC-34 "no-snapshot-treo" branch --
+    # call-count is asserted, not the postcondition, when nothing was pending).
+    # Does NOT call restore_snapshot() on anyone -- this only prevents a FUTURE
+    # Undo/failed-write from using the retained snapshot; it does not roll
+    # anything back itself.
+    _pending_snapshot.clear()
+    # `turn-manager.md`'s undo_availability_window formula must read this same
+    # state (new conjunct `pending_snapshot_valid`, propagated separately into
+    # that GDD) so `undo_available` flips to false in the same instant this
+    # runs -- this method is the single source of truth that conjunct reads.
+
 # Character Card's per-turn Persistence contribution -- NOT the same method as
 # ADR-0002's already-locked get_blob() (that one keeps its existing name/shape
 # {status: StringName, bytes: String} unchanged, and keeps serving the periodic
@@ -543,6 +565,7 @@ with staging-overlay reads, a larger but isolated change (does not touch Persist
 | `character-card-identity.md` | Character Card & Identity | `TR-cci-009` (cache invalidated when Undo reverts entity-record-creating turn) | `restore_snapshot()` reverts Character Card's live entity table; `card_exists`'s own derivation formula then naturally recomputes to `false`. |
 | `character-card-identity.md` | Character Card & Identity | OQ#14 (Entity Record durability timing vs. flush cycle) | Closed — see Decision "QQ-03/OQ#14 closed". |
 | `docs/architecture/architecture.md` | Cross-system Open Questions | QQ-03 | Closed — see Decision. |
+| `character-customization-mode.md` | Character Customization Mode | Rule #6b (hack-write/delete commit must permanently invalidate an open Undo window, independent of the normal next-turn overwrite) | Added `invalidate_pending_snapshot()` to Turn Manager's public orchestration surface (Key Interfaces) — propagated 2026-08-13, hệ #16 Approved vòng 4. Does not change this ADR's core single-slot snapshot-restore decision. |
 
 ## Related
 

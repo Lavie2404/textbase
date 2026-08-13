@@ -178,9 +178,14 @@ of its mandatory warnings:
   (never `queue_free()`, never `change_scene_to_file()`/`change_scene_to_packed()`,
   per the GDD's mandatory warning (a)). This is the **screen tier**.
 - `OverlayStack` (Autoload) owns a second `CanvasLayer` (mid layer index)
-  holding at most one active overlay (`O-Card` or `O-Set`) at a time — same
-  cache-not-free pattern as the screen tier for the overlay scenes
-  themselves.
+  holding at most one active overlay (`O-Card`, `O-Set`, or `O-Customize` —
+  widened 2026-08-13 to include `O-Customize` per
+  `character-customization-mode.md` Rule #2, propagated after that GDD's
+  Approval) at a time — same cache-not-free pattern as the screen tier for
+  the overlay scenes themselves. The single-active-overlay rule generalizes
+  to a third member with no structural change: `show_overlay()` already
+  closes whatever is currently active before opening the requested one,
+  regardless of which two (or three) IDs are named.
 - `BannerStack` (Autoload) owns a third `CanvasLayer` (highest layer index)
   holding at most one active banner, FIFO-queued, with the one documented
   preempt exception (TR-cusn-001).
@@ -268,7 +273,8 @@ Autoload boot order (screen-stack tier, independent of gameplay Autoloads):
 │   └─ S5 (3-lối screen)         [cached]                          │
 ├───────────────────────────────────────────────────────────────┤
 │ OverlayStack (Autoload)        CanvasLayer.layer = 1             │
-│   └─ at most 1 of {O-Card, O-Set} active, cached not freed       │
+│   └─ at most 1 of {O-Card, O-Set, O-Customize} active,           │
+│      cached not freed (O-Customize added 2026-08-13)             │
 ├───────────────────────────────────────────────────────────────┤
 │ BannerStack (Autoload)         CanvasLayer.layer = 2 (topmost)   │
 │   └─ at most 1 banner active, FIFO queue, 1 documented preempt   │
@@ -318,7 +324,11 @@ func show_screen(id: StringName) -> void:
 # OverlayStack / BannerStack — same cache-not-free shape, layer 1 / layer 2,
 # each with its own show_overlay()/close_overlay() / push_banner() API per
 # TR-cusn-001's max-1-concurrent / max-1-FIFO rules (already specified by
-# the GDD, not redecided by this ADR).
+# the GDD, not redecided by this ADR). OverlayStack's overlay set is
+# {O-Card, O-Set, O-Customize} (O-Customize added 2026-08-13, propagated
+# from character-customization-mode.md Rule #2) — show_overlay() closing
+# whatever is currently active before opening the requested one already
+# generalizes to any number of named overlay IDs.
 
 # Input-lock helper (used by S2's controller, not a new Autoload):
 func _set_input_locked(area: Control, locked: bool) -> void:
@@ -542,6 +552,7 @@ way.
 | `core-ui-screen-navigation.md` | Core UI/Screen Navigation | OQ#5 (a) and (b) | Closed — both mandatory warnings satisfied by Decision Part 2/3. |
 | `core-ui-screen-navigation.md` | Core UI/Screen Navigation | "Ràng buộc kiến trúc bắt buộc" (3 marginalia bookmarks must stay outside the locked subtree) | Explicit in Decision Part 1 and Implementation Guidelines. |
 | `docs/architecture/architecture.md` | Missing ADR List | "Core UI: input-lock API + screen-stack architecture + safe-area insets" | Closed — this ADR. |
+| `character-customization-mode.md` | Character Customization Mode | Rule #2 (O-Customize is a 3rd overlay in the existing max-1-concurrent overlay state machine) | `OverlayStack`'s overlay set widened to `{O-Card, O-Set, O-Customize}` (Decision Part 2, Architecture diagram, Key Interfaces) — propagated 2026-08-13, hệ #16 Approved vòng 4. Mechanically trivial: no change to `show_overlay()`'s single-active-overlay logic. |
 
 ## Related
 
