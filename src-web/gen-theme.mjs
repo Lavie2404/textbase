@@ -55,6 +55,17 @@ const COLOR_MAP = [
   // dưới đảo ngược lại thành màu giấy, nếu không sẽ bị mực-trên-mực.
   ['#233523', '#1A1512', [26, 21, 18], 'nền nút CTA "Phân Tích & Tiếp Tục" -> mực đen (nút đảo màu)'],
   ['#324a32', '#1A1512', [26, 21, 18], 'hover nền nút CTA "Phân Tích & Tiếp Tục" -> mực đen'],
+  // #fef3c7 (kem rất nhạt) chưa từng có trong COLOR_MAP — dùng làm text-color
+  // (không chỉ trong drop-shadow) ở 4 chỗ: 2 tiêu đề hover, hover của span tên
+  // riêng ĐÃ nhận diện, và base (không hover) của span tên riêng CHƯA nhận
+  // diện (App.tsx parseAndRenderText nhánh "CẤP 2"). Trước 2026-08-15, chỗ
+  // base đó đọc được là NHỜ drop-shadow-[...rgba(0,0,0,0.8)] đen bao quanh
+  // tạo viền tương phản giả — sau khi rule triệt tiêu filter (55dafaf) gỡ
+  // đúng cái viền giả đó, chữ kem nhạt lộ ra gần như chìm vào nền giấy sáng
+  // (kem trên kem) -> đúng cảm giác "nhòe" user báo cáo. Map như family
+  // e8d3a1/cda45e (chữ tiêu đề sáng -> mực) để tự đọc được không cần dựa
+  // vào shadow nữa.
+  ['#fef3c7', '#1A1512', [26, 21, 18], 'chữ tiêu đề kem rất nhạt (tên riêng chưa nhận diện, hover tiêu đề) -> mực'],
 ];
 
 const SIDE_BORDER_PROPS = {
