@@ -17,7 +17,7 @@
 // suffix (`/10`, `/40`, ...) actually used in the source as its own token,
 // since `bg-[#cda45e]` and `bg-[#cda45e]/10` are different complete tokens.
 
-const OPACITY_STEPS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95];
+const OPACITY_STEPS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 98, 99];
 
 // [old hex, target hex/rgb-triplet for opaque use, [r,g,b] for alpha-blended bg use, label]
 const COLOR_MAP = [
@@ -163,6 +163,24 @@ const NAMED_MAP = [
   ['gray-500', 'var(--paper-deep)', 'var(--ink-60)', 'xám nhạt -> giấy đậm / mực nhạt'],
 ];
 
+// ---- hover: variants (added 2026-08-15, following a confirmed bug: a
+// button's base bg-[#1b2a1b] gets reskinned to paper-deep, but its SEPARATE
+// hover:bg-[#1b2a1b] token was never targeted at all — Tailwind CDN's own
+// (non-!important) hover rule then shows through the ORIGINAL unskinned dark
+// color on actual mouse-hover, while text-[#e8d3a1]'s unconditional
+// (non-hover-gated) !important ink rule stays black regardless of hover
+// state — black text on unskinned dark green = unreadable. This was a
+// systemic gap, not one button: `hover:` is a COMPLETE separate class token
+// from the bare one (`hover:bg-[#1b2a1b]` vs `bg-[#1b2a1b]`), and every rule
+// above/below only ever targets the bare token.
+// Fix: emit a mirrored rule for the literal `hover:${tok}` token, gated by
+// an ACTUAL `:hover` pseudo-class in the selector — this is safe (only
+// overrides while truly hovering) and is NOT the substring-match bug the
+// file-top comment warns about (that was `[class*=]` matching `hover:bg-X`
+// as a SUBSTRING of `bg-X` and applying permanently; this is `[class~=]`
+// exact-matching the distinct `hover:bg-X` token, active only on `:hover`).
+function hoverSel(tok) { return `[class~="hover:${tok}"]:hover`; }
+
 for (const [name, bgVal, fgVal, label] of NAMED_MAP) {
   out += `/* Tailwind ${name} -> bg:${bgVal} text/border:${fgVal}  (${label}) */\n`;
   out += `[class~="bg-${name}"] { background-color: ${bgVal} !important; }\n`;
@@ -170,10 +188,14 @@ for (const [name, bgVal, fgVal, label] of NAMED_MAP) {
   out += `[class~="border-${name}"] { border-color: ${fgVal} !important; }\n`;
   out += `[class~="placeholder-${name}"]::placeholder { color: ${fgVal} !important; }\n`;
   out += `[class~="ring-${name}"] { --tw-ring-color: ${fgVal} !important; }\n`;
+  out += `${hoverSel(`bg-${name}`)} { background-color: ${bgVal} !important; }\n`;
+  out += `${hoverSel(`text-${name}`)} { color: ${fgVal} !important; }\n`;
+  out += `${hoverSel(`border-${name}`)} { border-color: ${fgVal} !important; }\n`;
 }
 out += `\n/* bg-black/NN, bg-white/NN -> paper-deep tint at the same alpha (scrim AND component-field use cases both need this — see NAMED_MAP comment) */\n`;
 for (const step of OPACITY_STEPS) {
   out += `[class~="bg-black/${step}"], [class~="bg-white/${step}"] { background-color: ${rgba([237, 229, 208], step)} !important; }\n`;
+  out += `${hoverSel(`bg-black/${step}`)}, ${hoverSel(`bg-white/${step}`)} { background-color: ${rgba([237, 229, 208], step)} !important; }\n`;
 }
 out += `\n`;
 
@@ -199,6 +221,20 @@ function emitTokenRules(tok, bgv, flatVal) {
   s += `[class~="decoration-${tok}"] { text-decoration-color: ${flatVal} !important; }\n`;
   s += `[class~="accent-${tok}"] { accent-color: ${flatVal} !important; }\n`;
   s += `[class~="placeholder-${tok}"]::placeholder { color: ${flatVal} !important; }\n`;
+  // hover: mirror — same properties/values, gated by a real :hover so it
+  // only overrides while actually hovering (see hoverSel() comment above).
+  s += `${hoverSel(`bg-${tok}`)} { background-color: ${bgv} !important; }\n`;
+  s += `${hoverSel(`text-${tok}`)} { color: ${flatVal} !important; }\n`;
+  s += `${hoverSel(`border-${tok}`)} { border-color: ${flatVal} !important; }\n`;
+  for (const [side, props] of Object.entries(SIDE_BORDER_PROPS)) {
+    s += `${hoverSel(`border-${side}-${tok}`)} { ${props.map(p => `${p}: ${flatVal} !important;`).join(' ')} }\n`;
+  }
+  s += `${hoverSel(`ring-${tok}`)} { --tw-ring-color: ${flatVal} !important; }\n`;
+  s += `${hoverSel(`from-${tok}`)} { --tw-gradient-from: ${flatVal} !important; }\n`;
+  s += `${hoverSel(`via-${tok}`)} { --tw-gradient-via: ${flatVal} !important; }\n`;
+  s += `${hoverSel(`to-${tok}`)} { --tw-gradient-to: ${flatVal} !important; }\n`;
+  s += `${hoverSel(`decoration-${tok}`)} { text-decoration-color: ${flatVal} !important; }\n`;
+  s += `${hoverSel(`accent-${tok}`)} { accent-color: ${flatVal} !important; }\n`;
   return s;
 }
 
@@ -219,6 +255,31 @@ for (const [oldHex, flatVal, rgbTriplet, label] of COLOR_MAP) {
     out += emitTokenRules(`${base}/${step}`, rgba(rgbTriplet, step), flatVal);
   }
   out += `\n`;
+}
+
+// ---- correction: hover:bg-[#233523] must NOT inherit #233523's own bare-
+// token mapping (ink/mực đen). #233523 has exactly 2 distinct roles in the
+// source (verified 2026-08-15 via grep): (1) the BARE token `bg-[#233523]`
+// — used ONLY once, as the base background of the "Phân Tích & Tiếp Tục"
+// combat CTA button, intentionally an inverted ink button (see the
+// combined-selector exception above that flips ITS border/text to paper);
+// (2) `hover:bg-[#233523]` — used ~8 OTHER places as the generic
+// hover-highlight of buttons whose base is `bg-[#1b2a1b]` (paper-deep) or
+// `bg-transparent`, i.e. it plays the exact same role as #1b2a1b's own
+// hover state everywhere else, NOT the CTA's role. Those buttons' text
+// stays ink (never flipped to paper), so if the automatic hover-mirror
+// above (which — correctly for role (1) — copies the bare token's ink
+// mapping onto the hover: token too) is left as the final word, all 8
+// generic buttons get an ink hover background under ink text on hover =
+// unreadable, same defect class as the original hover: gap this whole
+// hover-mirroring feature exists to fix. Since this block runs AFTER the
+// COLOR_MAP loop, same-specificity + !important ties resolve by source
+// order — this wins and correctly overrides ONLY the hover: token role
+// back to the paper-deep family (matching #1b2a1b's own hover treatment).
+out += `/* hover:bg-[#233523] correction — see comment above: hover role only, paper-deep family (like #1b2a1b), NOT the bare token's ink/CTA role */\n`;
+out += `[class~="hover:bg-[#233523]"]:hover { background-color: #EDE5D0 !important; }\n`;
+for (const step of OPACITY_STEPS) {
+  out += `[class~="hover:bg-[#233523]/${step}"]:hover { background-color: ${rgba([237, 229, 208], step)} !important; }\n`;
 }
 
 console.log(out);
