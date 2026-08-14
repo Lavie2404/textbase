@@ -8186,234 +8186,6 @@ const SettingsMenu = ({
     );
 };
 
-const CombatLogPanel = ({ logEntries }) => {
-    const logEndRef = useRef(null);
-
-    useEffect(() => {
-        logEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [logEntries]);
-
-    return (
-        <InfoPanel> {/* Giữ nguyên Component bọc ngoài của bạn */}
-            <h4 className="font-bold text-[#cda45e] flex items-center mb-3 flex-shrink-0 tracking-widest uppercase scale-text-sm border-b border-[#cda45e]/20 pb-2">
-                <ChartBarIcon className="w-5 h-5 mr-2 text-[#cda45e]"/> Chiến Ký Giao Tranh
-            </h4>
-            <div className="flex-grow overflow-y-auto pr-2 space-y-2 scale-text-xs scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-[#0a0f0a]">
-                {logEntries.map(entry => (
-                    <div key={entry.id} className="p-2 bg-[#101a10] border-l-2 border-[#cda45e]/50">
-                        <p className="text-[#a3b8a3] leading-relaxed">
-                            <span className="font-bold text-[#cda45e] mr-2">[H{entry.round}]</span>
-                            <span className="font-bold text-[#8ba888]">{entry.actor}</span>
-                            <span className="text-[#8ba888]/60 mx-1">xuất</span>
-                            <span className="font-bold text-[#e8d3a1] underline decoration-[#cda45e]/30 underline-offset-2">{entry.skill}</span>
-                            <span className="text-[#8ba888]/60 mx-1">công</span>
-                            <span className="font-bold text-[#8b1515]">{entry.target}</span>
-                            <span className="text-[#e8d3a1]">. {entry.message}</span>
-                        </p>
-                    </div>
-                ))}
-                <div ref={logEndRef} />
-            </div>
-        </InfoPanel>
-    );
-};
-
-const CombatStatsModal = ({ show, onClose, combatants, logEntries }) => {
-    if (!show) return null;
-
-    const [activeStatTab, setActiveStatTab] = useState('damage');
-
-    const groupedLog = useMemo(() => {
-        if (!logEntries || logEntries.length === 0) return {};
-        const logsByRound = logEntries.reduce((acc, log) => {
-            const roundKey = `Hiệp ${log.round}`;
-            if (!acc[roundKey]) { acc[roundKey] = []; }
-            acc[roundKey].push(log);
-            return acc;
-        }, {});
-
-        const finalGroupedResult = {};
-        for (const roundKey in logsByRound) {
-            const actionsInRound = logsByRound[roundKey];
-            const turnsInRound = [];
-            let currentTurn = null;
-            const actorsThisRound = new Set(); 
-
-            actionsInRound.forEach(log => {
-                if (!currentTurn || currentTurn.actorId !== log.actorId) {
-                    if (currentTurn) { turnsInRound.push(currentTurn); }
-                    const isExtraTurn = actorsThisRound.has(log.actorId);
-                    currentTurn = { turnId: crypto.randomUUID(), actorId: log.actorId, actorName: log.actor, isExtraTurn: isExtraTurn, actions: [] };
-                    actorsThisRound.add(log.actorId);
-                }
-                currentTurn.actions.push(log);
-            });
-            if (currentTurn) { turnsInRound.push(currentTurn); }
-            finalGroupedResult[roundKey] = turnsInRound;
-        }
-        return finalGroupedResult;
-    }, [logEntries]);
-    
-    const stats = useMemo(() => {
-        const charStats = {};
-        combatants.forEach(char => {
-            charStats[char.id] = { 
-                id: char.id, name: getDisplayName(char), isPlayerSide: char.isPlayer || char.isCompanion, 
-                damageDealt: { direct: 0, dot: 0, item: 0, summon: 0 }, damageMitigated: { reduction: 0, shield: 0, dodge: 0 }, 
-                healingDone: { skill: 0, item: 0 }, shieldGranted: 0, 
-            };
-        });
-
-        logEntries.forEach(log => {
-            if (log.actorId && charStats[log.actorId]) {
-                const actorStat = charStats[log.actorId];
-                actorStat.damageDealt.direct += log.damageDealt?.direct || 0;
-                actorStat.damageDealt.dot += log.damageDealt?.dot || 0;
-                actorStat.damageDealt.item += log.damageDealt?.item || 0;
-                actorStat.damageDealt.summon += log.damageDealt?.summon || 0;
-                if (log.healingDone) {
-                    if (typeof log.healingDone === 'object') {
-                        actorStat.healingDone.skill += log.healingDone.skill || 0;
-                        actorStat.healingDone.item += log.healingDone.item || 0;
-                    } else { actorStat.healingDone.skill += log.healingDone || 0; }
-                }
-                actorStat.shieldGranted += log.shieldGranted || 0;
-            }
-            if (log.targetId && charStats[log.targetId]) {
-                const targetStat = charStats[log.targetId];
-                targetStat.damageMitigated.reduction += log.damageMitigated?.reduction || 0;
-                targetStat.damageMitigated.shield += log.damageMitigated?.shield || 0;
-                targetStat.damageMitigated.dodge += log.damageMitigated?.dodge || 0;
-            }
-        });
-
-        Object.values(charStats).forEach(s => {
-            s.totalDamage = Object.values(s.damageDealt).reduce((a, b) => a + b, 0);
-            s.totalMitigated = Object.values(s.damageMitigated).reduce((a, b) => a + b, 0);
-            s.totalDamageTaken = (s.damageMitigated.reduction || 0) + (s.damageMitigated.shield || 0);
-            s.totalHealing = (s.healingDone.skill || 0) + (s.healingDone.item || 0);
-            s.totalUtility = s.totalHealing + (s.shieldGranted || 0);
-        });
-        return Object.values(charStats);
-    }, [logEntries, combatants]);
-
-    const sortAndFilterStats = (tab) => {
-        let sorted = [...stats];
-        if (tab === 'damage') sorted.sort((a, b) => b.totalDamage - a.totalDamage);
-        if (tab === 'tanking') sorted.sort((a, b) => b.totalDamageTaken - a.totalDamageTaken);
-        if (tab === 'utility') sorted.sort((a, b) => b.totalUtility - a.totalUtility);
-        return sorted;
-    };
-    const displayedStats = sortAndFilterStats(activeStatTab);
-    
-    const maxValues = useMemo(() => ({
-        damage: Math.max(1, ...stats.map(s => s.totalDamage)),
-        tanking: Math.max(1, ...stats.map(s => s.totalDamageTaken + s.damageMitigated.dodge)),
-        utility: Math.max(1, ...stats.map(s => s.totalUtility)),
-    }), [stats]);
-
-    const StackedProgressBar = ({ data, totalValue }) => ( 
-        <div className="w-full bg-[#0a0f0a] border border-[#cda45e]/20 h-2 flex overflow-hidden shadow-[inset_0_0_5px_rgba(0,0,0,0.8)]"> 
-            {totalValue > 0 ? data.map(({ value, colorClass, label }) => ( 
-                <div key={label} title={`${label}: ${value}`} className={`h-full ${colorClass} transition-all duration-300`} style={{ width: `${(value / totalValue) * 100}%` }}></div> 
-            )) : <div className="h-full w-full bg-transparent"></div>} 
-        </div> 
-    );
-    
-    const CharacterStatRow = ({ s, maxValue }) => { 
-        const totalDamageTaken = (s.damageMitigated.reduction || 0) + (s.damageMitigated.shield || 0); 
-        return ( 
-            <div className={`p-3 border border-transparent hover:border-[#cda45e]/30 transition-colors ${s.isPlayerSide ? 'bg-[#1b2a1b]/60' : 'bg-[#2a1b1b]/60'}`}> 
-                <div className="flex justify-between items-center mb-2"> 
-                    <h4 className={`font-bold tracking-wider ${s.isPlayerSide ? 'text-[#8ba888]' : 'text-[#8b1515]'}`} style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>{s.name}</h4> 
-                    {activeStatTab === 'damage' && <span className="font-mono font-bold text-[#cda45e]">{s.totalDamage}</span>} 
-                    {activeStatTab === 'tanking' && <span className="font-mono font-bold text-[#ff4d4d]">{totalDamageTaken}</span>} 
-                    {activeStatTab === 'utility' && <span className="font-mono font-bold text-[#a3b8a3]">{s.totalUtility}</span>} 
-                </div> 
-                {activeStatTab === 'damage' && <StackedProgressBar data={[{ value: s.damageDealt.direct, colorClass: 'bg-[#cda45e]', label: 'Trực tiếp' }, { value: s.damageDealt.dot, colorClass: 'bg-[#e8d3a1]', label: 'DoT' }, { value: s.damageDealt.item, colorClass: 'bg-[#8ba888]', label: 'Vật phẩm' }]} totalValue={maxValue} />} 
-                {activeStatTab === 'tanking' && <StackedProgressBar data={[{ value: totalDamageTaken, colorClass: 'bg-[#8b1515]', label: 'Đã nhận' }, { value: s.damageMitigated.dodge, colorClass: 'bg-[#4a5568]', label: 'Đã né' }]} totalValue={maxValue} />} 
-                {activeStatTab === 'utility' && <StackedProgressBar data={[{ value: s.healingDone.skill, colorClass: 'bg-[#8ba888]', label: 'Hồi phục (Kỹ năng)' }, { value: s.healingDone.item, colorClass: 'bg-[#a3b8a3]', label: 'Hồi phục (Vật phẩm)' }, { value: s.shieldGranted, colorClass: 'bg-[#cda45e]', label: 'Tạo khiên' }]} totalValue={maxValue} />} 
-            </div> 
-        ) 
-    };
-
-    const TabButton = ({ label, onClick, isActive }) => ( 
-        <button onClick={onClick} className={`flex-1 text-center py-3 transition-colors duration-200 text-sm font-bold tracking-widest uppercase ${ isActive ? 'bg-[#cda45e]/10 text-[#e8d3a1] border-b-2 border-[#cda45e]' : 'bg-transparent text-[#8ba888] hover:bg-[#101a10] hover:text-[#cda45e] border-b border-[#cda45e]/30' }`}> 
-            {label} 
-        </button> 
-    );
-
-    return (
-        <div className="fixed inset-0 bg-[#0a0f0a]/90 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
-            <div className="bg-[#162216] p-6 shadow-[0_0_40px_rgba(10,20,10,0.9)] w-full max-w-5xl max-h-[90vh] flex flex-col border border-[#cda45e]/50 relative">
-                
-                {/* Góc kim loại */}
-                <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[#cda45e] pointer-events-none"></div>
-                <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-[#cda45e] pointer-events-none"></div>
-                <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-[#cda45e] pointer-events-none"></div>
-                <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[#cda45e] pointer-events-none"></div>
-
-                <div className="flex justify-between items-center mb-6 flex-shrink-0 border-b border-[#cda45e]/20 pb-4">
-                    <h2 className="text-2xl font-bold text-[#cda45e] flex items-center tracking-widest" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}><ChartBarIcon className="w-6 h-6 mr-3 text-[#cda45e]"/> Thống Kê Giao Tranh</h2>
-                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-3xl font-semibold leading-none">×</button>
-                </div>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-grow min-h-0">
-                    
-                    {/* CỘT TRÁI: BẢNG XẾP HẠNG */}
-                    <div className="flex flex-col bg-[#0a0f0a]/60 border border-[#cda45e]/30 min-h-0 relative">
-                        <div className="flex flex-shrink-0">
-                            <TabButton label="Sát Thương" onClick={() => setActiveStatTab('damage')} isActive={activeStatTab === 'damage'}/>
-                            <TabButton label="Chống Chịu" onClick={() => setActiveStatTab('tanking')} isActive={activeStatTab === 'tanking'}/>
-                            <TabButton label="Đa Dụng" onClick={() => setActiveStatTab('utility')} isActive={activeStatTab === 'utility'}/>
-                        </div>
-                        <div className="flex-grow overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-transparent">
-                            <div className="space-y-3">
-                                {displayedStats.map(s => <CharacterStatRow key={s.id} s={s} maxValue={maxValues[activeStatTab]} />)}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* CỘT PHẢI: NHẬT KÝ CHI TIẾT */}
-                    <div className="flex flex-col bg-[#0a0f0a]/60 border border-[#cda45e]/30 min-h-0 relative">
-                         <div className="bg-[#101a10] border-b border-[#cda45e]/30 p-3 flex-shrink-0">
-                             <h3 className="text-sm font-bold text-[#cda45e] tracking-widest uppercase text-center">Chi Tiết Lượt Đấu</h3>
-                         </div>
-                         <div className="flex-grow overflow-y-auto p-4 space-y-5 text-sm scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-transparent">
-                            {Object.entries(groupedLog).map(([roundKey, turnsInRound]) => (
-                                <div key={roundKey} className="border border-[#cda45e]/20 bg-[#162216]/50">
-                                    <h4 className="font-bold text-[#cda45e] bg-[#101a10] border-b border-[#cda45e]/20 p-2 text-center tracking-widest sticky top-0">{roundKey}</h4>
-                                    <div className="space-y-4 p-4">
-                                        {turnsInRound.map((turn) => {
-                                            const turnLabel = turn.isExtraTurn ? `Lượt phụ: ${turn.actorName}` : `Lượt chính: ${turn.actorName}`;
-                                            return (
-                                                <div key={turn.turnId} className="pl-3 border-l-2 border-[#8ba888]/40">
-                                                     <p className="font-bold text-[#8ba888] mb-1.5" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>{turnLabel}</p>
-                                                     <ul className="list-none text-[#a3b8a3] text-xs space-y-2">
-                                                        {turn.actions.map(action => (
-                                                            <li key={action.id} className="leading-relaxed">
-                                                                <span className="font-bold text-[#e8d3a1] underline decoration-[#cda45e]/30">{action.skill}</span> 
-                                                                <span className="mx-1 opacity-60">nhắm vào</span> 
-                                                                <span className="font-bold text-[#8b1515]">{action.target}</span>: {action.message}
-                                                            </li>
-                                                        ))}
-                                                     </ul>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            ))}
-                         </div>
-                    </div>
-                </div>
-
-                 <button onClick={onClose} className="mt-6 w-full bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-3.5 tracking-widest uppercase text-sm shadow-[inset_0_0_15px_rgba(205,164,94,0.1)] transition-all flex-shrink-0">Khép Lại</button>
-            </div>
-        </div>
-    );
-};
-// HÀM MỚI: Modal Bảng Chức Năng cho Di động
 const MobileFunctionsModal = ({
     show,
     onClose,
@@ -8835,137 +8607,26 @@ const MobileInteractionPanel = ({
     gameMode,
     knowledge,
     playerCharacter,
-    activeCombatLoop,
     openCompanionInfoModal,
     handleTrackQuest,
     onShowTradeModal,
     activeTrade,
-    combatLog,
     getRealmInfoFromLevel,
     handleTogglePartyMember,
     handleLeaveParty,
     onStartSandbox,
-    onOpenHtabInfoModal,
-    handleForceExitStuckCombat
+    onOpenHtabInfoModal
 }) => {
-    const [activeCombatTab, setActiveCombatTab] = useState('danh-sach');
     const [activeExplorationTab, setActiveExplorationTab] = useState('doi-hinh');
 
     useEffect(() => {
         if (!show) {
-            setActiveCombatTab('danh-sach');
             setActiveExplorationTab('doi-hinh');
         }
     }, [show]);
 
     if (!show) return null;
     
-    const CombatStatsView = () => {
-        if (!activeCombatLoop) return null;
-
-        const stats = useMemo(() => {
-            const charStats = {};
-            activeCombatLoop.allCombatants.forEach(char => {
-                charStats[char.id] = { id: char.id, name: getDisplayName(char), isPlayerSide: char.isPlayer || char.isCompanion, damageDealt: { direct: 0, dot: 0, item: 0, summon: 0 }, damageMitigated: { reduction: 0, shield: 0, dodge: 0 }, healingDone: { skill: 0, item: 0 }, shieldGranted: 0, };
-            });
-            combatLog.forEach(log => {
-                if (log.actorId && charStats[log.actorId]) {
-                    const actorStat = charStats[log.actorId];
-                    actorStat.damageDealt.direct += log.damageDealt?.direct || 0;
-                    actorStat.damageDealt.dot += log.damageDealt?.dot || 0;
-                    actorStat.damageDealt.item += log.damageDealt?.item || 0;
-                    actorStat.damageDealt.summon += log.damageDealt?.summon || 0;
-                    if (log.healingDone) {
-                        if (typeof log.healingDone === 'object') {
-                            actorStat.healingDone.skill += log.healingDone.skill || 0;
-                            actorStat.healingDone.item += log.healingDone.item || 0;
-                        } else { actorStat.healingDone.skill += log.healingDone || 0; }
-                    }
-                    actorStat.shieldGranted += log.shieldGranted || 0;
-                }
-                if (log.targetId && charStats[log.targetId]) {
-                    const targetStat = charStats[log.targetId];
-                    targetStat.damageMitigated.reduction += log.damageMitigated?.reduction || 0;
-                    targetStat.damageMitigated.shield += log.damageMitigated?.shield || 0;
-                    targetStat.damageMitigated.dodge += log.damageMitigated?.dodge || 0;
-                }
-            });
-            Object.values(charStats).forEach(s => {
-                s.totalDamage = Object.values(s.damageDealt).reduce((a, b) => a + b, 0);
-                s.totalMitigated = Object.values(s.damageMitigated).reduce((a, b) => a + b, 0);
-                s.totalDamageTaken = (s.damageMitigated.reduction || 0) + (s.damageMitigated.shield || 0);
-                s.totalHealing = (s.healingDone.skill || 0) + (s.healingDone.item || 0);
-                s.totalUtility = s.totalHealing + (s.shieldGranted || 0);
-            });
-            return Object.values(charStats);
-        }, [combatLog, activeCombatLoop.allCombatants]);
-
-        const [activeStatCategory, setActiveStatCategory] = useState('damage');
-
-        const sortedStats = useMemo(() => {
-            let sorted = [...stats];
-            if (activeStatCategory === 'damage') sorted.sort((a, b) => b.totalDamage - a.totalDamage);
-            if (activeStatCategory === 'tanking') sorted.sort((a, b) => b.totalDamageTaken - a.totalDamageTaken);
-            if (activeStatCategory === 'utility') sorted.sort((a, b) => b.totalUtility - a.totalUtility);
-            return sorted;
-        }, [stats, activeStatCategory]);
-
-        const maxValue = useMemo(() => Math.max(1, ...sortedStats.map(s => {
-            if (activeStatCategory === 'damage') return s.totalDamage;
-            if (activeStatCategory === 'tanking') return s.totalDamageTaken + s.damageMitigated.dodge;
-            if (activeStatCategory === 'utility') return s.totalUtility;
-            return 1;
-        })), [sortedStats, activeStatCategory]);
-
-        const StatRow = ({ s }) => (
-            <div className={`p-3 border ${s.isPlayerSide ? 'bg-[#1b2a1b]/60 border-[#8ba888]/30' : 'bg-[#2a1b1b]/60 border-[#8b1515]/30'}`}>
-                <div className="flex justify-between items-center mb-2">
-                    <h4 className={`font-bold tracking-wider ${s.isPlayerSide ? 'text-[#8ba888]' : 'text-[#8b1515]'}`} style={{ fontFamily: "'Protest Revolution', sans-serif" }}>{s.name}</h4>
-                    <span className="font-mono font-bold text-[#cda45e]">{activeStatCategory === 'damage' ? s.totalDamage : (activeStatCategory === 'tanking' ? s.totalDamageTaken : s.totalUtility)}</span>
-                </div>
-                 <div className="w-full bg-[#0a0f0a] h-1.5 flex overflow-hidden border border-[#cda45e]/20">
-                    <div className="h-full bg-gradient-to-r from-[#cda45e]/50 to-[#e8d3a1] transition-all duration-300" style={{ width: `${((activeStatCategory === 'damage' ? s.totalDamage : (activeStatCategory === 'tanking' ? s.totalDamageTaken : s.totalUtility)) / maxValue) * 100}%` }}></div>
-                </div>
-            </div>
-        );
-
-        return (
-            <div className="flex flex-col h-full">
-                <div className="flex-shrink-0 flex border border-[#cda45e]/40 bg-[#0a0f0a] mb-4 space-x-px">
-                    <button onClick={() => setActiveStatCategory('damage')} className={`flex-1 py-2 text-xs font-bold tracking-widest uppercase ${activeStatCategory === 'damage' ? 'bg-[#cda45e]/20 text-[#e8d3a1]' : 'text-[#8ba888] hover:bg-[#162216]'}`} style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Sát Thương</button>
-                    <button onClick={() => setActiveStatCategory('tanking')} className={`flex-1 py-2 text-xs font-bold tracking-widest uppercase border-x border-[#cda45e]/20 ${activeStatCategory === 'tanking' ? 'bg-[#cda45e]/20 text-[#e8d3a1]' : 'text-[#8ba888] hover:bg-[#162216]'}`} style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Chống Chịu</button>
-                    <button onClick={() => setActiveStatCategory('utility')} className={`flex-1 py-2 text-xs font-bold tracking-widest uppercase ${activeStatCategory === 'utility' ? 'bg-[#cda45e]/20 text-[#e8d3a1]' : 'text-[#8ba888] hover:bg-[#162216]'}`} style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Đa Dụng</button>
-                </div>
-                <div className="flex-grow space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-[#0a0f0a] pr-2">
-                    {sortedStats.map(s => <StatRow key={s.id} s={s} />)}
-                </div>
-            </div>
-        );
-    };
-
-    const CombatLogView = () => {
-        if (!combatLog || combatLog.length === 0) {
-            return <p className="text-center text-[#a3b8a3] italic mt-10" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>Chưa có diễn biến nào trong trận chiến.</p>;
-        }
-        return (
-            <div className="space-y-2 text-sm overflow-y-auto h-full scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-[#0a0f0a] pr-2">
-                {combatLog.map(entry => (
-                    <div key={entry.id} className="p-2 bg-[#101a10] border-l-2 border-[#cda45e]/50 text-[#e8d3a1]">
-                        <p className="leading-relaxed">
-                            <span className="font-bold text-[#cda45e] mr-2">[H{entry.round}]</span>
-                            <span className="font-semibold text-[#8ba888]">{entry.actor}</span>
-                            <span className="text-[#a3b8a3]"> xuất </span>
-                            <span className="font-bold text-[#e8d3a1] underline decoration-[#cda45e]/30 underline-offset-2 mx-1">{entry.skill}</span>
-                            <span className="text-[#a3b8a3]"> công </span>
-                            <span className="font-semibold text-[#8b1515]">{entry.target}</span>
-                            <span className="text-[#e8d3a1]">. {entry.message}</span>
-                        </p>
-                    </div>
-                ))}
-            </div>
-        );
-    };
-
     const renderExplorationView = () => { 
         const trackedQuest = knowledge.trackedQuestId ? (knowledge.quests || []).find(q => q.id === knowledge.trackedQuestId) : null;
         
@@ -9165,86 +8826,6 @@ const MobileInteractionPanel = ({
         );
     };
 
-    const renderCombatView = () => {
-        if (!activeCombatLoop) return (
-            <div className="text-center py-6">
-                <p className="text-[#a3b8a3] mb-3">Đang tải trận chiến...</p>
-                <button
-                    onClick={handleForceExitStuckCombat}
-                    className="text-[10px] text-[#8ba888]/70 hover:text-[#e8d3a1] underline tracking-widest uppercase transition-colors"
-                    title="Dùng khi trận đấu bị treo/kẹt quá lâu"
-                >
-                    Bị kẹt trận? Quay lại Cốt Truyện
-                </button>
-            </div>
-        );
-
-        const CombatHeader = () => (
-            <div className="flex border-b border-[#cda45e]/40 mb-5 flex-shrink-0">
-                <button onClick={() => setActiveCombatTab('danh-sach')} className={`flex-1 text-center py-2.5 text-sm font-bold tracking-widest transition-colors ${activeCombatTab === 'danh-sach' ? 'border-b-2 border-[#cda45e] text-[#e8d3a1] bg-[#cda45e]/10' : 'text-[#8ba888] hover:text-[#cda45e]'}`} style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Danh Sách</button>
-                <button onClick={() => setActiveCombatTab('thong-ke')} className={`flex-1 text-center py-2.5 text-sm font-bold tracking-widest transition-colors ${activeCombatTab === 'thong-ke' ? 'border-b-2 border-[#cda45e] text-[#e8d3a1] bg-[#cda45e]/10' : 'text-[#8ba888] hover:text-[#cda45e]'}`} style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Thống Kê</button>
-                <button onClick={() => setActiveCombatTab('chien-ky')} className={`flex-1 text-center py-2.5 text-sm font-bold tracking-widest transition-colors ${activeCombatTab === 'chien-ky' ? 'border-b-2 border-[#cda45e] text-[#e8d3a1] bg-[#cda45e]/10' : 'text-[#8ba888] hover:text-[#cda45e]'}`} style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Chiến Ký</button>
-            </div>
-        );
-
-        const CombatantListView = () => {
-            const playerParty = activeCombatLoop.allCombatants.filter(c => (c.isPlayer || c.isCompanion));
-            const enemyParty = activeCombatLoop.allCombatants.filter(c => !c.isPlayer && !c.isCompanion);
-            
-            const CombatantCard = ({ character }) => {
-                const hpPercent = character.maxhp > 0 ? (character.hp / character.maxhp) * 100 : 0;
-                const isTurn = activeCombatLoop.currentTurnTaker?.id === character.id;
-                const isDead = character.hp <= 0;
-                const realmInfo = getRealmInfoFromLevel(character.level, knowledge.realmProgressionList);
-                const nameColor = character.isPlayer ? 'text-[#e8d3a1]' : (character.isCompanion ? 'text-[#8ba888]' : 'text-[#8b1515]');
-                const borderColor = isTurn ? 'border-[#cda45e] shadow-[0_0_10px_rgba(205,164,94,0.4)]' : 'border-[#cda45e]/20';
-                const uniqueNamesMap = getUniqueCombatantNames(activeCombatLoop.allCombatants);
-                const displayName = uniqueNamesMap[character.id];
-
-                return (
-                    <div className={`relative bg-[#101a10] border-2 ${borderColor} transition-all ${isDead ? 'opacity-40 grayscale' : ''}`}>
-                        <button onClick={() => openCompanionInfoModal(character)} className="w-full text-left p-2 hover:bg-[#162216]">
-                            <div className="flex items-center gap-3">
-                                <AvatarDisplay entity={character} className="w-12 h-12 flex-shrink-0" shapeClass="rounded-none border border-[#cda45e]/40" readOnly={true} />
-                                <div className="flex-grow overflow-hidden">
-                                    <p className={`font-bold tracking-wider text-sm truncate ${nameColor}`} style={{ fontFamily: "'Protest Revolution', sans-serif" }}>{displayName}</p>
-                                    <p className="text-[10px] text-[#cda45e] uppercase tracking-widest mt-0.5">{realmInfo.realmName} {realmInfo.realmTier}</p>
-                                </div>
-                            </div>
-                        </button>
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#0a0f0a] border-t border-[#cda45e]/10">
-                            <div className="bg-gradient-to-r from-[#8b1515] to-[#cda45e] h-full" style={{ width: `${hpPercent}%` }}></div>
-                        </div>
-                    </div>
-                );
-            };
-
-            return (
-                 <div className="flex flex-col h-full overflow-y-auto scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-[#0a0f0a] pr-2">
-                    <div className="grid grid-cols-2 gap-4 pb-2">
-                        <div className="space-y-3">
-                            {playerParty.map(char => <CombatantCard key={char.id} character={char} />)}
-                        </div>
-                        <div className="space-y-3">
-                            {enemyParty.map(char => <CombatantCard key={char.id} character={char} />)}
-                        </div>
-                    </div>
-                 </div>
-            );
-        };
-
-            return (
-            <div className="flex flex-col h-full min-h-0">
-                <CombatHeader />
-                <div className="flex-grow min-h-0">
-                    {activeCombatTab === 'danh-sach' && <CombatantListView />}
-                    {activeCombatTab === 'thong-ke' && <CombatStatsView />}
-                    {activeCombatTab === 'chien-ky' && <CombatLogView />}
-                </div>
-            </div>
-        );
-    };
-
     const renderTradeView = () => {
         return (
             <div className="flex flex-col items-center justify-center h-full text-center">
@@ -9265,14 +8846,17 @@ const MobileInteractionPanel = ({
         );
     };
 
+    // Combat System (design/gdd/combat-system.md): không còn tab riêng cho Combat (danh sách/thống kê/chiến ký) —
+    // trận đấu giờ không có UI riêng. Bảng "Tương Tác" trong lúc đang giao chiến tái dùng thẳng
+    // renderExplorationView() (đội hình/nhiệm vụ theo dõi) để người chơi vẫn xem được tình hình đội hình,
+    // thay vì hiện trống trơn.
     const getTitle = () => {
-        if (gameMode === 'COMBAT') return null; 
         if (gameMode === 'TRADE') return "Giao Dịch";
         return "Tương Tác";
     };
-    
+
     const title = getTitle();
-    
+
     return (
          <div className="fixed inset-0 bg-[#0a0f0a]/90 backdrop-blur-sm z-[60] flex flex-col p-4 sm:p-6 animate-fade-in-up">
             <div className={`flex justify-between items-center mb-6 flex-shrink-0 pb-4 border-b border-[#cda45e]/30 ${gameMode === 'TRADE' ? 'bg-[#101a10] border-x border-t p-4 shadow-[inset_0_0_20px_rgba(205,164,94,0.1)]' : ''}`}>
@@ -9280,8 +8864,7 @@ const MobileInteractionPanel = ({
                 <button onClick={onClose} className={`text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors ${title ? '' : 'ml-auto'}`}>×</button>
             </div>
             <div className="flex-grow min-h-0">
-                {gameMode === 'EXPLORATION' && renderExplorationView()}
-                {gameMode === 'COMBAT' && renderCombatView()}
+                {(gameMode === 'EXPLORATION' || gameMode === 'COMBAT') && renderExplorationView()}
                 {gameMode === 'TRADE' && renderTradeView()}
             </div>
         </div>
@@ -9571,1039 +9154,6 @@ const getUniqueCombatantNames = (combatants) => {
     return nameMap;
 };
 
-const VisualCombatArena = ({
-    combatants,
-    environmentImage,
-    activeAnimation,
-    onCharacterClick,
-    currentTurnTakerId,
-    defaultEnemyImages,
-    onAnimationVisualComplete
-}) => {
-
-    const stageRef = useRef(null);
-    const [dashState, setDashState] = useState({ id: null, type: '', left: null, bottom: null, color: null });
-    const [hurtTargets, setHurtTargets] = useState({});
-    
-    // --- STATE CHO CINEMATIC ---
-    const [cameraState, setCameraState] = useState({ scale: 1, originX: 50, originY: 50 });
-    const [focusState, setFocusState] = useState({ isActive: false, focusedIds:[] });
-    const [skillCutin, setSkillCutin] = useState({ isActive: false, name: '', isUltimate: false });
-
-    // --- STATE CHO VFX ---
-    const [slashes, setSlashes] = useState([]); 
-    const [waveSlashes, setWaveSlashes] = useState([]); 
-    const [explosions, setExplosions] = useState([]);
-    const [magicCircles, setMagicCircles] = useState([]); 
-    const [projectiles, setProjectiles] = useState([]);
-    const [curvedProjectiles, setCurvedProjectiles] = useState([]);
-    const [beams, setBeams] = useState([]); 
-    const [fallingObjects, setFallingObjects] = useState([]);
-    const [eruptions, setEruptions] = useState([]);
-    const [auras, setAuras] = useState([]);
-    const [rapidSlashes, setRapidSlashes] = useState([]);
-    const [rainArrows, setRainArrows] = useState([]);
-    const [lifeSteals, setLifeSteals] = useState([]);
-    const [sonicWaves, setSonicWaves] = useState([]);
-
-    const [floatingTexts, setFloatingTexts] = useState([]);
-    const [screenShake, setScreenShake] = useState(null);
-    const [screenFlash, setScreenFlash] = useState(null); 
-
-    // Vị trí đã căn chỉnh để khớp với đài đấu tròn ở trung tâm ảnh nền mặc định (2 phe đứng gọn trên mặt đài, không tràn ra cầu/núi 2 bên).
-    const BASE_POSITIONS = {
-        p1: { left: 42, bottom: 16 },
-        p3: { left: 34, bottom: 8  },
-        p2: { left: 36, bottom: 26 },
-        p4: { left: 26, bottom: 18 },
-
-        e1: { left: 58, bottom: 16 },
-        e3: { left: 66, bottom: 8  },
-        e2: { left: 64, bottom: 26 },
-        e4: { left: 74, bottom: 18 }
-    };
-
-    // Luôn tính độ căn giữa dựa trên ĐỦ 4 vị trí mỗi phe (p1-p4, e1-e4), BẤT KỂ số lượng chiến binh thực tế đang có mặt.
-    // Nhờ vậy độ lệch (offset) luôn là một hằng số cố định, không bao giờ đổi theo tỉ lệ quân số 2 bên (VD: 1 người chơi >< 4 kẻ thù).
-    const pLefts = [1, 2, 3, 4].map(i => BASE_POSITIONS[`p${i}`]?.left).filter(Boolean);
-    const eLefts = [1, 2, 3, 4].map(i => BASE_POSITIONS[`e${i}`]?.left).filter(Boolean);
-    const allLefts = [...pLefts, ...eLefts];
-    const battleCenter = allLefts.length > 0 ? (Math.min(...allLefts) + Math.max(...allLefts)) / 2 : 50;
-    const globalLayoutOffset = 50 - battleCenter;
-
-    const POSITIONS = {};
-    for (const key in BASE_POSITIONS) {
-        POSITIONS[key] = {
-            left: BASE_POSITIONS[key].left + globalLayoutOffset,
-            bottom: BASE_POSITIONS[key].bottom
-        };
-    }
-
-    const getPosPercent = (slot) => POSITIONS[slot] || { left: 50, bottom: 50 };
-
-    useEffect(() => {
-        if (!activeAnimation) return;
-
-        const playAnimation = async () => {
-            const { casterId, targetId, skill, changeset } = activeAnimation;
-            const primaryEffect = skill.effects?.find(e => e?.action?.type === 'damage') || skill.effects?.[0];
-            const vfx = primaryEffect?.action?.visual_effects || skill.visual_effects || { vfxType: 'slash', moveType: 'dash', color: '#e8d3a1', vfxCount: 1 };
-            
-            const customImg = vfx.customImageUrl || null;
-
-            // Làm chậm tốc độ di chuyển và bay đạn (từ 380ms lên 750ms)
-            const speed = 750; 
-            const vfxCount = vfx.vfxCount || primaryEffect?.action?.target?.hit_count || 1;
-            const isBuff = skill.effects?.[0]?.action?.type === 'heal' || skill.effects?.[0]?.action?.type === 'apply_status';
-            const isUltimate = skill.skillCategory === 'ultimate';
-            const isBasicAttack = skill.id === 'basic_attack';
-            
-            const caster = combatants.find(c => c.id === casterId);
-            const mainTarget = targetId ? combatants.find(c => c.id === targetId) : combatants.find(c => c.hp > 0 && c.isPlayer !== caster.isPlayer);
-            
-            if (!caster) return;
-
-            const damagedTargetIds = changeset.logs
-                .filter(log => log.damageDealt?.direct > 0 || log.damageDealt?.item > 0 || log.healingDone > 0)
-                .map(log => log.targetId);
-
-            // Chỉ những mục tiêu THỰC SỰ NHẬN SÁT THƯƠNG mới được flash trạng thái "hurt".
-            // Tách riêng khỏi damagedTargetIds vì list đó gộp cả log hồi máu (VD: hút máu/lifesteal cho caster),
-            // nếu không tách thì caster tự hồi máu cho mình sẽ bị coi là "hurt" và ảnh hiển thị rơi về idle/base
-            // thay vì giữ đúng ảnh kỹ năng đang tung ra.
-            const hurtOnlyTargetIds = changeset.logs
-                .filter(log => log.damageDealt?.direct > 0 || log.damageDealt?.item > 0)
-                .map(log => log.targetId);
-
-            let casterSlot = 'p1'; 
-            let targetSlot = 'e1';
-            
-            const playerParty = combatants.filter(c => c.isPlayer || c.isCompanion);
-            const enemyParty = combatants.filter(c => !c.isPlayer && !c.isCompanion);
-            
-            if (caster.isPlayer || caster.isCompanion) casterSlot = `p${Math.max(1, playerParty.findIndex(c => c.id === casterId) + 1)}`;
-            else casterSlot = `e${Math.max(1, enemyParty.findIndex(c => c.id === casterId) + 1)}`;
-            
-            if (mainTarget) {
-                if (mainTarget.isPlayer || mainTarget.isCompanion) targetSlot = `p${Math.max(1, playerParty.findIndex(c => c.id === mainTarget.id) + 1)}`;
-                else targetSlot = `e${Math.max(1, enemyParty.findIndex(c => c.id === mainTarget.id) + 1)}`;
-            }
-
-            const cPos = getPosPercent(casterSlot);
-            const tPos = getPosPercent(targetSlot);
-            const isCasterPlayerSide = caster.isPlayer || caster.isCompanion;
-
-            let targetPositions = [];
-            const targetsToScan = damagedTargetIds.length > 0 ? [...new Set(damagedTargetIds)] : (mainTarget ? [mainTarget.id] : []);
-            
-            let targetCoords = targetsToScan.map(id => {
-                const tObj = combatants.find(c => c.id === id);
-                if (!tObj) return null;
-                const isP = tObj.isPlayer || tObj.isCompanion;
-                const party = combatants.filter(c => (c.isPlayer || c.isCompanion) === isP);
-                const slot = `${isP ? 'p' : 'e'}${Math.max(1, party.findIndex(c => c.id === id) + 1)}`;
-                return POSITIONS[slot];
-            }).filter(Boolean);
-
-            if (targetCoords.length === 0) targetCoords.push(cPos);
-
-            const skillTargetType = primaryEffect?.action?.target?.type || skill.visual_effects?.targetType;
-            const isAoESkill = ['all_enemies', 'all_allies', 'random_enemy', 'splash'].includes(skillTargetType) || skill.skillCategory === 'ultimate';
-            const isAoE = targetCoords.length > 1 || isAoESkill;
-
-            const avgLeft = targetCoords.reduce((sum, p) => sum + p.left, 0) / targetCoords.length;
-            const avgBottom = targetCoords.reduce((sum, p) => sum + p.bottom, 0) / targetCoords.length;
-            const groupCenterX = avgLeft;
-            const groupCenterY = 100 - avgBottom - 10;
-
-            targetsToScan.forEach(id => {
-                const el = document.getElementById(`puppet-wrap-${id}`);
-                if (stageRef.current && el) {
-                    const sRect = stageRef.current.getBoundingClientRect();
-                    const tRect = el.getBoundingClientRect();
-                    const tObj = combatants.find(c => c.id === id);
-                    const tCY = tObj?.metadata?.visualCenterY || 40; 
-                    targetPositions.push({ 
-                        id, 
-                        x: ((tRect.left + tRect.width / 2 - sRect.left) / sRect.width) * 100,
-                        y: ((tRect.bottom - (tRect.height * (tCY / 100)) - sRect.top) / sRect.height) * 100
-                    });
-                }
-            });
-
-            if (targetPositions.length === 0) targetPositions.push({ id: casterId, x: cPos.left, y: 100 - cPos.bottom });
-
-            let wepXBase = cPos.left + (isCasterPlayerSide ? 5 : -5);
-            let wepYBase = 100 - cPos.bottom - 8;
-            const casterEl = document.getElementById(`puppet-wrap-${casterId}`);
-            if (stageRef.current && casterEl) {
-                const stageRect = stageRef.current.getBoundingClientRect();
-                const casterRect = casterEl.getBoundingClientRect();
-                const cCenterYPercent = caster?.metadata?.visualCenterY || 40;
-                wepXBase = ((casterRect.left + casterRect.width / 2 - stageRect.left) / stageRect.width) * 100;
-                const casterYPx = casterRect.bottom - (casterRect.height * (cCenterYPercent / 100));
-                wepYBase = ((casterYPx - stageRect.top) / stageRect.height) * 100;
-                wepXBase += isCasterPlayerSide ? 3 : -3;
-            }
-
-            const originY = 100 - cPos.bottom;
-            if (!isBasicAttack) {
-                // Chỉ hiện tên chiêu + zoom camera ở đây. KHÔNG đổi ảnh/tư thế lúc này -
-                // hoạt ảnh tấn công (đổi ảnh + di chuyển) chỉ được bắt đầu SAU KHI tên chiêu tắt hẳn (bên dưới).
-                if (isUltimate) {
-                    setCameraState({ scale: 1.5, originX: cPos.left, originY: originY });
-                    setFocusState({ isActive: true, focusedIds: [casterId] });
-                } else {
-                    const focused = [casterId];
-                    if (mainTarget) focused.push(mainTarget.id);
-                    setFocusState({ isActive: true, focusedIds: focused });
-                }
-
-                setSkillCutin({ isActive: true, name: skill.Name, isUltimate });
-                await sleep(1300);
-                setSkillCutin({ isActive: false, name: '', isUltimate: false });
-                setCameraState({ scale: 1, originX: 50, originY: 50 });
-                
-                if (isUltimate) { await sleep(500); setFocusState({ isActive: false, focusedIds:[] }); } 
-                else { setFocusState({ isActive: false, focusedIds:[] }); await sleep(100); }
-            }
-
-            let destLeft, destBottom;
-            let dynamicOffsetPct = isCasterPlayerSide ? -6 : 6; 
-            if (!isAoE && stageRef.current) {
-                const stageW = stageRef.current.clientWidth;
-                const casterEl = document.getElementById(`puppet-wrap-${casterId}`);
-                const targetElId = targetsToScan.length > 0 ? targetsToScan[0] : (mainTarget ? mainTarget.id : null);
-                const targetEl = document.getElementById(`puppet-wrap-${targetElId}`);
-
-                if (casterEl && targetEl && stageW > 0) {
-                    const casterObj = combatants.find(c => c.id === casterId);
-                    const targetObj = combatants.find(c => c.id === targetElId);
-                    const cRatio = casterObj?.metadata?.visualWidthRatio || 0.5; 
-                    const tRatio = targetObj?.metadata?.visualWidthRatio || 0.5;
-                    const trueCasterWidth = casterEl.getBoundingClientRect().width * cRatio;
-                    const trueTargetWidth = targetEl.getBoundingClientRect().width * tRatio;
-                    const distancePx = (trueCasterWidth / 2) + (trueTargetWidth / 2) + 1;
-                    
-                    dynamicOffsetPct = (distancePx / stageW) * 100;
-                    dynamicOffsetPct = isCasterPlayerSide ? -dynamicOffsetPct : dynamicOffsetPct;
-                }
-            }
-
-            if (isAoE) {
-                if (['explosion', 'magic_circle', 'ground_eruption', 'rapid_slashes', 'life_steal'].includes(vfx.vfxType)) {
-                    destLeft = avgLeft;
-                    destBottom = avgBottom;
-                } else {
-                    destLeft = isCasterPlayerSide ? 46 : 54;
-                    destBottom = 16; 
-                }
-            } else {
-                destLeft = targetCoords[0].left + dynamicOffsetPct;
-                destBottom = targetCoords[0].bottom;
-            }
-
-            if (vfx.moveType === 'teleport') {
-                setDashState({ id: casterId, type: 'teleport', left: destLeft, bottom: destBottom, color: vfx.color, skillId: skill.id });
-                await sleep(400); 
-                wepXBase = groupCenterX + (isCasterPlayerSide ? -4 : 4); wepYBase = groupCenterY;
-            } 
-            else if (vfx.moveType === 'teleport_behind') {
-                const behindLeft = targetCoords[0].left - dynamicOffsetPct; 
-                setDashState({ id: casterId, type: 'dash', left: behindLeft, bottom: destBottom, color: vfx.color, skillId: skill.id });
-                await sleep(300);
-                wepXBase = groupCenterX + (isCasterPlayerSide ? -4 : 4); wepYBase = groupCenterY;
-            }
-            else if (vfx.moveType === 'jump_strike') {
-                setDashState({ id: casterId, type: 'jump', left: (cPos.left + destLeft)/2, bottom: 80, color: vfx.color, skillId: skill.id });
-                await sleep(250);
-                setDashState({ id: casterId, type: 'dash', left: destLeft, bottom: destBottom, color: vfx.color, skillId: skill.id });
-                await sleep(200);
-                wepXBase = groupCenterX + (isCasterPlayerSide ? -4 : 4); wepYBase = groupCenterY;
-            }
-            else if (vfx.moveType === 'dash_through') {
-                // Lướt xuyên qua LẦN LƯỢT từng mục tiêu bị đánh trúng (sắp xếp theo hướng lướt tới),
-                // thay vì chỉ lướt tới mục tiêu đầu tiên rồi dừng. Tấn công toàn bộ -> lướt qua đủ cả 4;
-                // tấn công ngẫu nhiên 2 mục tiêu -> lướt qua đúng 2 mục tiêu ngẫu nhiên đó.
-                const sortedThroughTargets = [...targetCoords].sort((a, b) =>
-                    isCasterPlayerSide ? a.left - b.left : b.left - a.left
-                );
-
-                for (let ti = 0; ti < sortedThroughTargets.length; ti++) {
-                    const tCoord = sortedThroughTargets[ti];
-                    const passLeft = tCoord.left + dynamicOffsetPct;
-                    setDashState({ id: casterId, type: 'dash_through', left: passLeft, bottom: tCoord.bottom, color: vfx.color, skillId: skill.id });
-                    await sleep(ti === 0 ? 200 : 150);
-                }
-
-                const lastThroughCoord = sortedThroughTargets[sortedThroughTargets.length - 1];
-                const throughOffset = isCasterPlayerSide ? 10 : -10;
-                setDashState({ id: casterId, type: 'dash_through', left: lastThroughCoord.left - dynamicOffsetPct + throughOffset, bottom: lastThroughCoord.bottom, color: vfx.color, skillId: skill.id });
-                await sleep(250);
-                wepXBase = groupCenterX + (isCasterPlayerSide ? -4 : 4); wepYBase = groupCenterY;
-            }
-            else if (vfx.moveType === 'dash') {
-                setDashState({ id: casterId, type: 'dash', left: destLeft, bottom: destBottom, color: vfx.color, skillId: skill.id });
-                await sleep(350); 
-                wepXBase = groupCenterX + (isCasterPlayerSide ? -4 : 4); wepYBase = groupCenterY;
-            }
-            else if (vfx.moveType === 'stay') {
-                setDashState({ id: casterId, type: 'stay', left: cPos.left, bottom: cPos.bottom, color: vfx.color, skillId: skill.id });
-                await sleep(100);
-            }
-
-            if (vfx.vfxType === 'slash' && isAoE && vfx.moveType === 'stay') {
-                const overshootX = groupCenterX + (isCasterPlayerSide ? 30 : -30); 
-                const stageW = stageRef.current ? stageRef.current.clientWidth : 800;
-                const stageH = stageRef.current ? stageRef.current.clientHeight : 400;
-                
-                let angle = Math.atan2((groupCenterY - wepYBase)*stageH, (overshootX - wepXBase)*stageW) * 180 / Math.PI;
-                if (!isCasterPlayerSide) angle += 180; 
-
-                const waveId = Date.now();
-                setWaveSlashes(prev => [...prev, { id: waveId, start: {x: wepXBase, y: wepYBase}, end: {x: overshootX, y: groupCenterY}, color: vfx.color, angle: angle, img: customImg }]);
-                
-                setScreenShake('heavy'); 
-                setTimeout(() => setScreenShake(null), 350);
-                setTimeout(() => setScreenFlash('red'), 200);
-                setTimeout(() => setScreenFlash(null), 350);
-                
-                const currentHurts = {};
-                hurtOnlyTargetIds.forEach(id => currentHurts[id] = true);
-
-                // Giữ khung hình bị thương đỏ rực lâu hơn (500ms thay vì 150ms)
-                setTimeout(() => setHurtTargets(currentHurts), 150); 
-                setTimeout(() => setHurtTargets({}), 650);
-
-                // Giữ vết chém sóng năng lượng lâu hơn (1000ms thay vì 600ms)
-                setTimeout(() => setWaveSlashes(s => s.filter(x => x.id !== waveId)), 1000);
-                await sleep(1000); 
-                
-            } else {
-                
-                if (isAoE) {
-                     const centerFloorY = 100 - avgBottom;
-                     if (vfx.vfxType === 'ground_eruption') {
-                         const vfxId = Date.now() + 'center';
-                         setEruptions(prev =>[...prev, { id: vfxId, pos: {x: groupCenterX, y: centerFloorY}, color: vfx.color, scale: 3.5, speed: 600, img: customImg }]);
-                         setTimeout(() => setEruptions(b => b.filter(x => x.id !== vfxId)), 600);
-                     } else if (vfx.vfxType === 'magic_circle') {
-                         const vfxId = Date.now() + 'center';
-                         setMagicCircles(prev =>[...prev, { id: vfxId, pos: {x: groupCenterX, y: centerFloorY}, color: vfx.color, scale: 4, speed: 800, img: customImg }]);
-                         setTimeout(() => setMagicCircles(e => e.filter(x => x.id !== vfxId)), 800);
-                         setBeams(prev =>[...prev, { id: vfxId, start: {x: groupCenterX, y: 0}, length: 100, angle: 90, color: vfx.color, speed: 600, img: customImg }]);
-                         setTimeout(() => setBeams(e => e.filter(x => x.id !== vfxId)), 600);
-                     } else if (vfx.vfxType === 'explosion') {
-                         const vfxId = Date.now() + 'center';
-                         setExplosions(prev =>[...prev, { id: vfxId, pos: {x: groupCenterX, y: groupCenterY}, color: vfx.color, scale: 3.5, speed: 500, img: customImg }]);
-                         setTimeout(() => setExplosions(e => e.filter(x => x.id !== vfxId)), 500);
-                     }
-                }
-
-                for (let i = 0; i < vfxCount; i++) {
-                    if (i > 0 && vfx.moveType === 'dash') await sleep(speed / 2.5);
-                    
-                    if (isAoE && i === 0 && ['explosion', 'magic_circle', 'ground_eruption'].includes(vfx.vfxType)) {
-                         await sleep(150); 
-                    }
-                    
-                    if (!isBuff && hurtOnlyTargetIds.length > 0) {
-                        const currentHurts = {};
-                        hurtOnlyTargetIds.forEach(id => currentHurts[id] = true);
-                        setHurtTargets(currentHurts);
-                        // Giữ trạng thái giật đỏ của nhân vật lâu hơn
-                        setTimeout(() => setHurtTargets({}), 500);
-                    }
-
-                    targetPositions.forEach((targetPosData, index) => {
-                        const exactPoint = { x: targetPosData.x, y: targetPosData.y };
-                        const jitterPoint = { x: targetPosData.x + (Math.random()*6 - 3), y: targetPosData.y + (Math.random()*8 - 4) };
-                        
-                        const targetEl = document.getElementById(`puppet-wrap-${targetPosData.id}`);
-                        let tFloorY = 100 - (targetCoords[index]?.bottom || 16);
-                        if (stageRef.current && targetEl) {
-                            const sRect = stageRef.current.getBoundingClientRect();
-                            const tRect = targetEl.getBoundingClientRect();
-                            tFloorY = ((tRect.bottom - sRect.top) / sRect.height) * 100;
-                        }
-                        
-                        const currentWepPos = { x: wepXBase, y: wepYBase };
-                        const vfxId = Date.now() + i + index * 1000; 
-                        
-                        if (vfx.vfxType === 'slash') {
-                            setSlashes(prev =>[...prev, { id: vfxId, pos: jitterPoint, color: vfx.color, scale: isAoE ? 1.2 : 1.5, img: customImg }]);
-                            const displayDuration = customImg ? 2000 : speed;
-                            setTimeout(() => setSlashes(s => s.filter(x => x.id !== vfxId)), displayDuration);
-                        }
-                        else if (vfx.vfxType === 'projectile') {
-                            const stageW = stageRef.current ? stageRef.current.clientWidth : 800;
-                            const stageH = stageRef.current ? stageRef.current.clientHeight : 400;
-                            const startY = currentWepPos.y + (vfxCount > 1 ? (Math.random()*10 - 5) : 0);
-                            const angle = Math.atan2((jitterPoint.y - startY)*stageH, (jitterPoint.x - currentWepPos.x)*stageW) * 180 / Math.PI;
-                            setProjectiles(prev =>[...prev, { id: vfxId, start: {x: currentWepPos.x, y: startY}, end: jitterPoint, color: vfx.color, scale: vfx.scale || 1, angle: angle, speed, img: customImg }]);
-                            setTimeout(() => setProjectiles(p => p.filter(x => x.id !== vfxId)), speed);
-                        }
-                        else if (vfx.vfxType === 'curved_projectile') {
-                            setCurvedProjectiles(prev =>[...prev, { id: vfxId, start: currentWepPos, end: exactPoint, color: vfx.color, scale: 1.2, speed: speed + 200, direction: isCasterPlayerSide ? 1 : -1, img: customImg }]);
-                            setTimeout(() => { 
-                                setCurvedProjectiles(p => p.filter(x => x.id !== vfxId)); 
-                                setExplosions(prev =>[...prev, { id: vfxId+'e', pos: exactPoint, color: vfx.color, scale: 1, speed: 300, img: customImg }]);
-                                setTimeout(() => setExplosions(e => e.filter(x => x.id !== vfxId+'e')), 300);
-                            }, speed + 200);
-                        }
-                        else if (vfx.vfxType === 'beam') {
-                            const stageW = stageRef.current ? stageRef.current.clientWidth : 800;
-                            const stageH = stageRef.current ? stageRef.current.clientHeight : 400;
-                            const dx = ((exactPoint.x - currentWepPos.x) / 100) * stageW;
-                            const dy = ((exactPoint.y - currentWepPos.y) / 100) * stageH;
-                            const lengthPx = Math.sqrt(dx * dx + dy * dy);
-                            const lengthPercent = (lengthPx / stageW) * 100;
-                            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-                            
-                            setBeams(prev =>[...prev, { id: vfxId, start: currentWepPos, length: lengthPercent, angle: angle, color: vfx.color, speed, img: customImg }]);
-                            setExplosions(prev =>[...prev, { id: vfxId+'e', pos: exactPoint, color: vfx.color, scale: 1.5, speed, img: customImg }]);
-                            setTimeout(() => { setBeams(b => b.filter(x => x.id !== vfxId)); setExplosions(e => e.filter(x => x.id !== vfxId+'e')); }, speed + 150);
-                        } 
-                        else if (vfx.vfxType === 'aura_up' || vfx.vfxType === 'aura_down') {
-                            setAuras(prev =>[...prev, { id: vfxId, pos: { x: exactPoint.x, y: tFloorY }, color: vfx.color, isDown: vfx.vfxType === 'aura_down', speed: 600, img: customImg }]);
-                            setTimeout(() => setAuras(a => a.filter(x => x.id !== vfxId)), 600);
-                        }
-                        else if (vfx.vfxType === 'falling_object') {
-                            const scatterX = vfxCount > 3 ? (Math.random() * 24 - 12) : (Math.random() * 6 - 3);
-                            const dropPoint = { x: exactPoint.x + scatterX, y: exactPoint.y + (Math.random() * 8 - 4) };
-                            const startFallPos = { x: dropPoint.x + (isCasterPlayerSide ? -10 : 10), y: -30 };
-                            
-                            setFallingObjects(prev =>[...prev, { id: vfxId, start: startFallPos, end: dropPoint, color: vfx.color, scale: isAoE ? 1.5 : 2, speed: 400, img: customImg, flipX: !isCasterPlayerSide }]);
-                            setTimeout(() => {
-                                setFallingObjects(b => b.filter(x => x.id !== vfxId)); 
-                                setExplosions(prev =>[...prev, { id: vfxId+'e', pos: dropPoint, color: vfx.color, scale: isAoE ? 1.5 : 2, speed: 400, img: customImg }]); 
-                                setTimeout(() => setExplosions(e => e.filter(x => x.id !== vfxId+'e')), 400); 
-                            }, 400); 
-                        }
-                        else if (vfx.vfxType === 'rapid_slashes') {
-                            const slashCount = 4;
-                            for (let s = 0; s < slashCount; s++) {
-                                setTimeout(() => {
-                                    const rId = vfxId + 'r' + s;
-                                    const randPos = { x: exactPoint.x + (Math.random()*10 - 5), y: exactPoint.y + (Math.random()*10 - 5) };
-                                    setRapidSlashes(prev => [...prev, { id: rId, pos: randPos, color: vfx.color, angle: Math.random() * 360, img: customImg }]);
-                                    setTimeout(() => setRapidSlashes(arr => arr.filter(x => x.id !== rId)), 200);
-                                }, s * 120);
-                            }
-                        }
-                        else if (vfx.vfxType === 'rain_arrows') {
-                            const startX = exactPoint.x + (isCasterPlayerSide ? -20 : 20);
-                            setRainArrows(prev => [...prev, { id: vfxId, start: {x: startX, y: -20}, end: jitterPoint, color: vfx.color, speed: 400, isPlayerSide: isCasterPlayerSide, img: customImg }]);
-                            setTimeout(() => {
-                                setRainArrows(arr => arr.filter(x => x.id !== vfxId));
-                                setExplosions(prev =>[...prev, { id: vfxId+'e', pos: jitterPoint, color: vfx.color, scale: 0.8, speed: 200, img: customImg }]);
-                                setTimeout(() => setExplosions(e => e.filter(x => x.id !== vfxId+'e')), 200);
-                            }, 400);
-                        }
-                        else if (vfx.vfxType === 'life_steal') {
-                            const stageW = stageRef.current ? stageRef.current.clientWidth : 800;
-                            const stageH = stageRef.current ? stageRef.current.clientHeight : 400;
-                            const angle = Math.atan2((currentWepPos.y - exactPoint.y)*stageH, (currentWepPos.x - exactPoint.x)*stageW) * 180 / Math.PI;
-                            setLifeSteals(prev => [...prev, { id: vfxId, start: exactPoint, end: currentWepPos, color: vfx.color, angle: angle, speed: 500, img: customImg }]);
-                            setTimeout(() => setLifeSteals(arr => arr.filter(x => x.id !== vfxId)), 500);
-                        }
-                        else if (vfx.vfxType === 'sonic_wave') {
-                            setSonicWaves(prev => [...prev, { id: vfxId, pos: currentWepPos, color: vfx.color, speed: 600, img: customImg }]);
-                            setTimeout(() => setSonicWaves(arr => arr.filter(x => x.id !== vfxId)), 600);
-                        }
-                        else if (vfx.vfxType === 'magic_circle') {
-                            setMagicCircles(prev =>[...prev, { id: vfxId, pos: {x: exactPoint.x, y: tFloorY}, color: vfx.color, scale: isAoE ? 1.2 : 2, speed: 600, img: customImg }]);
-                            setTimeout(() => setMagicCircles(e => e.filter(x => x.id !== vfxId)), 600);
-                        }
-                        else if (vfx.vfxType === 'ground_eruption' || vfx.vfxType === 'explosion') {
-                            if (vfx.vfxType === 'ground_eruption') {
-                                setEruptions(prev =>[...prev, { id: vfxId, pos: {x: exactPoint.x, y: tFloorY}, color: vfx.color, scale: isAoE ? 1 : 1.5, speed: 500, img: customImg }]);
-                                setTimeout(() => setEruptions(b => b.filter(x => x.id !== vfxId)), 500);
-                            } else {
-                                setExplosions(prev =>[...prev, { id: vfxId, pos: exactPoint, color: vfx.color, scale: isAoE ? 1 : 1.5, speed: 400, img: customImg }]);
-                                setTimeout(() => setExplosions(e => e.filter(x => x.id !== vfxId)), 500);
-                            }
-                        }
-                    }); 
-
-                    if (skill.skillCategory === 'ultimate') { setScreenShake('heavy'); setTimeout(() => setScreenShake(null), 300); }
-                    else { setScreenShake('light'); setTimeout(() => setScreenShake(null), 200); }
-                    
-                    if (i === vfxCount - 1 && !isBuff) { setScreenFlash('red'); setTimeout(() => setScreenFlash(null), 150); }
-                    else if (i === vfxCount - 1 && isBuff) { setScreenFlash('blue'); setTimeout(() => setScreenFlash(null), 150); }
-
-                    // Kéo dài thời gian nghỉ (sleep) giữa mỗi hit đơn lẻ để dễ nhìn hơn
-                    if (['slash', 'strike', 'rapid_slashes', 'jump_strike'].includes(vfx.vfxType) && !isBuff) { await sleep(450); }
-                    else if (['projectile', 'curved_projectile'].includes(vfx.vfxType)) await sleep(450);
-                    else if (vfx.vfxType === 'beam') await sleep(550);
-                    else if (vfx.vfxType === 'falling_object') await sleep(400);
-                    else if (vfx.vfxType === 'ground_eruption') await sleep(450);
-                    else await sleep(speed / 1.2);
-                }
-            }
-
-            changeset.logs.forEach((log, i) => {
-                if (log.actorId !== casterId) return; 
-                let ftText = '';
-                let ftClass = 'vfx-dmg';
-
-                if (log.damageMitigated?.dodge > 0) {
-                    ftText = 'MISS'; ftClass = 'vfx-shield-text';
-                } else if (log.damageDealt?.direct > 0 || log.damageDealt?.item > 0) {
-                    const dmg = log.damageDealt.direct || log.damageDealt.item;
-                    ftText = `-${dmg}`;
-                    if (log.message?.includes('Chí mạng')) ftClass = 'vfx-dmg scale-150 text-orange-400';
-                } else if (log.healingDone > 0 || log.healingDone?.skill > 0) {
-                    const heal = log.healingDone.skill || log.healingDone;
-                    ftText = `+${heal}`; ftClass = 'vfx-heal';
-                } else if (log.shieldGranted > 0) {
-                    ftText = `🛡️+${log.shieldGranted}`; ftClass = 'vfx-shield-text';
-                }
-
-                if (ftText) {
-                    const ftId = Date.now() + i + 100;
-                    setFloatingTexts(prev =>[...prev, { id: ftId, targetId: log.targetId, text: ftText, className: ftClass }]);
-                    // Kéo dài sự tồn tại của chữ số bay lên từ 1200ms lên 2000ms
-                    setTimeout(() => setFloatingTexts(p => p.filter(x => x.id !== ftId)), 2000);
-                }
-            });
-
-            await sleep(200);
-            setDashState({ id: null, type: '', left: null, bottom: null, color: null });
-            onAnimationVisualComplete?.(activeAnimation);
-        };
-        playAnimation();
-    },[activeAnimation, combatants]);
-
-    const uniqueNamesMap = useMemo(() => getUniqueCombatantNames(combatants),[combatants]);
-
-    const mappedUnits = useMemo(() => {
-        let pCount = 1, eCount = 1;
-        return combatants.map(c => {
-            const isPlayerSide = c.isPlayer || c.isCompanion;
-            const slot = isPlayerSide ? `p${pCount++}` : `e${eCount++}`;
-            
-            let visualState = 'idle';
-            if (c.hp <= 0) visualState = 'dead';
-            else if (hurtTargets[c.id]) visualState = 'hurt'; 
-            else if (c.combatStatuses?.some(s => s.status_id === 'STUN' || s.status_id === 'SLEEP')) visualState = 'stun';
-            else if (dashState.id === c.id) {
-                // Dùng skillId lưu trực tiếp trong dashState thay vì activeAnimation.skill.id, vì activeAnimation
-                // bị một timer riêng (onAnimateAction) tắt về null theo công thức thời gian không khớp với thời lượng
-                // thực tế của animation (đặc biệt là tuyệt chiêu có đoạn cutin dài) -> nếu dựa vào activeAnimation thì
-                // ảnh chiêu sẽ bị rơi về idle giữa chừng dù animation (dashState) vẫn đang diễn ra.
-                const isBasic = dashState.skillId === 'basic_attack';
-                if (isBasic) {
-                    if (dashState.type === 'melee' || dashState.type === 'dash_through') {
-                        visualState = 'attack-melee';
-                    } else {
-                        visualState = 'attack-ranged';
-                    }
-                } else {
-                    if (dashState.type === 'melee' || dashState.type === 'dash_through' || dashState.type === 'teleport' || dashState.type === 'jump') {
-                        visualState = 'skill-melee';
-                    } else {
-                        visualState = 'skill-ranged';
-                    }
-                }
-            }
-
-            let currentImgSrc = genFallback(c.Name, isPlayerSide);
-            let currentImgType = 'base';
-
-            // Kẻ thù chưa được vẽ ảnh riêng (base/idle/attack) thì dùng dáng mặc định đã cấu hình trong Tùy Chỉnh, thay vì khối SVG placeholder.
-            const hasOwnImages = c.images && (c.images.base || c.images.idle || c.images.attack_normal);
-            const hasDefaultEnemyImages = defaultEnemyImages && (defaultEnemyImages.base || defaultEnemyImages.idle || defaultEnemyImages.attack_normal);
-            const effectiveImages = (!isPlayerSide && !hasOwnImages && hasDefaultEnemyImages)
-                ? { base: defaultEnemyImages.base || null, idle: defaultEnemyImages.idle || null, attack_normal: defaultEnemyImages.attack_normal || null, skills: {} }
-                : c.images;
-
-            if (effectiveImages) {
-                if (visualState === 'dead' && effectiveImages.base) {
-                    currentImgSrc = effectiveImages.base; currentImgType = 'base';
-                }
-                else if (visualState.includes('skill') && dashState.id === c.id && !hurtTargets[c.id] && visualState !== 'stun') {
-                    const skillId = dashState.skillId;
-                    if (effectiveImages.skills?.[skillId]) { currentImgSrc = effectiveImages.skills[skillId]; currentImgType = skillId; }
-                    else if (effectiveImages.attack_normal) { currentImgSrc = effectiveImages.attack_normal; currentImgType = 'attack_normal'; }
-                    else if (effectiveImages.idle) { currentImgSrc = effectiveImages.idle; currentImgType = 'idle'; }
-                    else { currentImgSrc = effectiveImages.base; currentImgType = 'base'; }
-                }
-                else if (visualState.includes('attack') && !hurtTargets[c.id] && visualState !== 'stun') {
-                    if (effectiveImages.attack_normal) { currentImgSrc = effectiveImages.attack_normal; currentImgType = 'attack_normal'; }
-                    else if (effectiveImages.idle) { currentImgSrc = effectiveImages.idle; currentImgType = 'idle'; }
-                    else { currentImgSrc = effectiveImages.base; currentImgType = 'base'; }
-                }
-                else {
-                    if (effectiveImages.idle) { currentImgSrc = effectiveImages.idle; currentImgType = 'idle'; }
-                    else { currentImgSrc = effectiveImages.base; currentImgType = 'base'; }
-                }
-            } else if (c.avatarBase64 || c.avatarUrl) {
-                currentImgSrc = c.avatarBase64 || c.avatarUrl;
-            }
-
-            const sizeCat = parseInt(c.sizeCategory || 2, 10);
-            let sizeStyle = {};
-            switch (sizeCat) {
-                case 1: sizeStyle = { width: 'clamp(60px, 10vw, 90px)', height: 'clamp(60px, 10vw, 90px)' }; break;   
-                case 2: sizeStyle = { width: 'clamp(80px, 13vw, 120px)', height: 'clamp(80px, 13vw, 120px)' }; break; 
-                case 3: sizeStyle = { width: 'clamp(100px, 16vw, 150px)', height: 'clamp(100px, 16vw, 150px)' }; break;
-                case 4: sizeStyle = { width: 'clamp(156px, 24vw, 228px)', height: 'clamp(156px, 24vw, 228px)' }; break;
-                case 5: sizeStyle = { width: 'clamp(192px, 30vw, 288px)', height: 'clamp(192px, 30vw, 288px)' }; break;
-                default: sizeStyle = { width: 'clamp(80px, 13vw, 120px)', height: 'clamp(80px, 13vw, 120px)' }; break;
-            }
-            const visualTopY = c.metadata?.visualTopY || 85; 
-            const visualCenterY = c.metadata?.visualCenterY || 40;
-            const manualZoom = c.metadata?.scaleOffsets?.[currentImgType] || 1; 
-            
-            let extraStyles = { ...sizeStyle, '--manual-zoom': manualZoom }; 
-
-            let isDashingClass = '';
-            if (dashState.id === c.id) {
-                if (dashState.type === 'dash' || dashState.type === 'dash_through') {
-                    isDashingClass = 'is-dashing-fast';
-                    extraStyles['--vfx-color'] = dashState.color || '#fff';
-                }
-            }
-
-           return {
-                ...c, posSlot: slot, isPlayerSide, visualState, extraStyles, isDashingClass,
-                displayImg: currentImgSrc,
-                displayName: uniqueNamesMap[c.id],
-                isTurn: c.id === currentTurnTakerId,
-                visualTopY: visualTopY,       
-                visualCenterY: visualCenterY  
-            };
-        });
-    },[combatants, dashState, activeAnimation, hurtTargets, uniqueNamesMap, currentTurnTakerId]);
-
-    const renderVfxContent = (vfxData, fallbackClassName) => {
-    if (vfxData.img) {
-         return <img src={vfxData.img} className="w-full h-full object-contain" alt="vfx" />;
-        }
-        if (fallbackClassName) {
-            return <div className={fallbackClassName}></div>;
-        }
-        return null;
-    };
-
-    return (
-        <div ref={stageRef} className={`camera-viewport ${screenShake === 'heavy' ? 'vfx-shake-heavy' : screenShake === 'light' ? 'vfx-shake-light' : ''}`}>           
-            <div 
-                className="absolute inset-0 bg-black z-[40] transition-opacity duration-300 pointer-events-none"
-                style={{ opacity: focusState.isActive ? 0.75 : 0 }}
-            ></div>
-
-            {screenFlash === 'red' && <div className="absolute inset-0 z-50 pointer-events-none bg-red-500/30 mix-blend-screen"></div>}
-            {screenFlash === 'blue' && <div className="absolute inset-0 z-50 pointer-events-none bg-blue-500/20 mix-blend-screen"></div>}
-
-            <div 
-                className={`absolute top-[15%] left-0 w-full z-[60] flex items-center justify-center overflow-hidden pointer-events-none transition-opacity duration-200 ${skillCutin.isActive ? 'opacity-100' : 'opacity-0'}`}
-            >
-                <div className={`cutin-text-container ${skillCutin.isActive ? 'is-active' : ''} ${skillCutin.isUltimate ? 'is-ultimate' : 'is-basic'}`}>
-                    <div className="cutin-bg"></div>
-                    <h2 className="cutin-text" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>{skillCutin.name}</h2>
-                </div>
-            </div>
-
-            <style dangerouslySetInnerHTML={{__html: `
-                .puppet-wrapper { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; transition: left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), bottom 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.25s ease, filter 0.3s ease; transform-origin: bottom center; }
-                .is-dashing-fast.player-side .puppet-img { transform: skewX(-15deg) scaleY(0.9) scaleX(1.1); filter: drop-shadow(-10px 0 0px var(--vfx-color)) drop-shadow(-25px 0 10px var(--vfx-color)) brightness(1.5) contrast(1.2); opacity: 0.85; mix-blend-mode: hard-light; }
-                .is-dashing-fast.enemy-side .puppet-img { transform: scaleX(-1) skewX(15deg) scaleY(0.9) scaleX(1.1); filter: drop-shadow(10px 0 0px var(--vfx-color)) drop-shadow(25px 0 10px var(--vfx-color)) brightness(1.5) contrast(1.2); opacity: 0.85; mix-blend-mode: hard-light; }
-                .is-focused { z-index: 1000 !important; filter: drop-shadow(0 0 25px rgba(255,255,255,0.6)) !important; }
-                .time-stopped .puppet-img, .time-stopped .shield-bubble { animation-play-state: paused !important; }
-                .time-stopped { filter: brightness(0.4) saturate(0.5); transition: filter 0.3s ease; }
-                .puppet-img { width: 100%; height: 100%; object-fit: contain; object-position: bottom center; transform-origin: bottom center; transition: transform 0.1s ease, filter 0.15s ease; }
-                .enemy-side .puppet-img { transform: scaleX(-1); }
-                @keyframes puppetBreath { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.02, 0.98); } }
-                @keyframes puppetBreathEnemy { 0%, 100% { transform: scale(-1, 1); } 50% { transform: scale(-1.02, 0.98); } }
-                .state-idle.player-side .puppet-img { animation: puppetBreath 2.2s infinite ease-in-out; }
-                .state-idle.enemy-side .puppet-img { animation: puppetBreathEnemy 2.2s infinite ease-in-out; }
-                .state-attack-melee .puppet-img { filter: brightness(1.2); transform: scale(1.1); }
-                .state-attack-melee.enemy-side .puppet-img { filter: brightness(1.2); transform: scaleX(-1) scale(1.1); }
-                .state-attack-ranged.player-side .puppet-img { filter: brightness(1.2); transform: scale(1.05); }
-                .state-attack-ranged.enemy-side .puppet-img { filter: brightness(1.2); transform: scaleX(-1) scale(1.05); }
-                .state-skill-melee .puppet-img { filter: brightness(1.5) drop-shadow(0 0 15px currentColor); transform: scale(1.25); }
-                .state-skill-melee.enemy-side .puppet-img { filter: brightness(1.5) drop-shadow(0 0 15px currentColor); transform: scaleX(-1) scale(1.25); }
-                .state-skill-ranged.player-side .puppet-img { filter: brightness(1.5) drop-shadow(0 0 15px currentColor); transform: scale(1.15); }
-                .state-skill-ranged.enemy-side .puppet-img { filter: brightness(1.5) drop-shadow(0 0 15px currentColor); transform: scaleX(-1) scale(1.15); }
-                
-                /* Tăng thời gian đứng yên chịu đau và hồi phục của nhân vật bị đánh trúng */
-                .state-hurt.player-side .puppet-img { filter: sepia(1) hue-rotate(-50deg) saturate(8) drop-shadow(0 0 20px red) brightness(1.5); transform: translateX(-20px) scale(0.9); transition: all 0.15s cubic-bezier(0.1, 0.9, 0.2, 1); }
-                .state-hurt.enemy-side .puppet-img { filter: sepia(1) hue-rotate(-50deg) saturate(8) drop-shadow(0 0 20px red) brightness(1.5); transform: scaleX(-1) translateX(-20px) scale(0.9); transition: all 0.15s cubic-bezier(0.1, 0.9, 0.2, 1); }
-                
-                @keyframes stunRattle { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.98) rotate(3deg); } }
-                @keyframes stunRattleEnemy { 0%, 100% { transform: scaleX(-1); } 50% { transform: scaleX(-1) scale(0.98) rotate(3deg); } }
-                .state-stun.player-side .puppet-img { animation: stunRattle 0.5s infinite ease-in-out; filter: grayscale(0.6) brightness(0.8) drop-shadow(0 0 10px yellow); }
-                .state-stun.enemy-side .puppet-img { animation: stunRattleEnemy 0.5s infinite ease-in-out; filter: grayscale(0.6) brightness(0.8) drop-shadow(0 0 10px yellow); }
-                .state-dead { pointer-events: none !important; }
-                .state-dead .unit-ui-layer { opacity: 0 !important; transition: opacity 0.5s ease !important; }
-                .state-dead .puppet-container { animation: containerDrift 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important; }
-                .state-dead .puppet-img { animation: smokeDissolve 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important; }
-                @keyframes containerDrift {
-                    0% { transform: scale(var(--manual-zoom, 1)) translateY(0); }
-                    15% { transform: scale(calc(var(--manual-zoom, 1) * 1.02)) translateY(-5px); }
-                    100% { transform: scale(calc(var(--manual-zoom, 1) * 1.1)) translateY(-50px) translateX(10px); }
-                }
-                @keyframes smokeDissolve {
-                    0% { filter: brightness(1) contrast(1) blur(0px); opacity: 1; }
-                    15% { filter: brightness(2.2) contrast(1.2) sepia(0.5) saturate(3) hue-rotate(-30deg) blur(2px) drop-shadow(0 0 15px #ff4d4d); opacity: 0.95; }
-                    50% { filter: brightness(1.6) contrast(0.9) sepia(1) saturate(5) hue-rotate(-50deg) blur(12px) drop-shadow(0 0 20px #990000); opacity: 0.5; }
-                    100% { filter: brightness(0.1) blur(35px) grayscale(1); opacity: 0; }
-                }
-
-                .vfx-aura { position: absolute; width: 100px; height: 180px; background: linear-gradient(to top, var(--vfx-color) 0%, transparent 100%); border-radius: 50% 50% 0 0; z-index: 120; transform-origin: bottom center; mix-blend-mode: screen; pointer-events: none; }
-                .vfx-aura::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, #ffffff 0%, transparent 60%); opacity: 0.6; mix-blend-mode: overlay; }
-                .vfx-aura-up { animation: auraUpAnim 0.7s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-                .vfx-aura-down { background: linear-gradient(to bottom, var(--vfx-color) 0%, transparent 100%); border-radius: 0 0 50% 50%; transform-origin: top center; animation: auraDownAnim 0.7s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-                @keyframes auraUpAnim { 0% { transform: translate(-50%, -100%) scaleY(0.2) scaleX(0.3); opacity: 0; filter: brightness(3); } 20% { opacity: 0.9; } 100% { transform: translate(-50%, -130%) scaleY(1.8) scaleX(1.5); opacity: 0; filter: blur(8px); } }
-                @keyframes auraDownAnim { 0% { transform: translate(-50%, -50%) scaleY(0.2) scaleX(0.3); opacity: 0; filter: brightness(3); } 20% { opacity: 0.9; } 100% { transform: translate(-50%, 10%) scaleY(1.8) scaleX(1.5); opacity: 0; filter: blur(8px); } }
-
-                .vfx-wave-slash { position: absolute; width: 250px; height: 250px; background: radial-gradient(circle at center, #fff 5%, var(--vfx-color) 15%, transparent 60%); clip-path: polygon(0 50%, 100% 0, 85% 50%, 100% 100%); z-index: 145; transform-origin: center; mix-blend-mode: screen; transition-property: left, top; transition-timing-function: ease-out; animation: waveSlashGrow 0.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-                @keyframes waveSlashGrow { 0% { transform: translate(-50%, -50%) scale(0.2) rotate(var(--angle)); opacity: 1; filter: brightness(3); } 60% { opacity: 0.9; } 100% { transform: translate(-50%, -50%) scale(3.5) rotate(var(--angle)); opacity: 0; filter: blur(6px); } }
-
-                .vfx-slash { position: absolute; width: 160px; height: 160px; background: radial-gradient(ellipse at center, #ffffff 5%, var(--vfx-color) 30%, transparent 70%); clip-path: polygon(0 50%, 100% 20%, 75% 50%, 100% 80%); opacity: 0; transform-origin: center; z-index: 150; mix-blend-mode: screen; animation: slashAnim 0.25s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-                @keyframes slashAnim { 0% { transform: translate(-50%, -50%) scale(0.3) rotate(-45deg); opacity: 1; filter: brightness(3); } 100% { transform: translate(-50%, -50%) scale(2.2) rotate(25deg); opacity: 0; filter: blur(4px); } }
-
-                .vfx-strike { position: absolute; width: 200px; height: 30px; background: linear-gradient(90deg, transparent, #fff 20%, #fff 80%, transparent); box-shadow: 0 0 20px var(--vfx-color), 0 0 40px var(--vfx-color); opacity: 0; transform-origin: center; z-index: 150; mix-blend-mode: color-dodge; animation: strikeAnim 0.2s cubic-bezier(0.0, 1.0, 0.2, 1) forwards; }
-                @keyframes strikeAnim { 0% { transform: translate(-50%, -50%) scaleX(0.1) scaleY(3); opacity: 1; filter: brightness(3); } 100% { transform: translate(-50%, -50%) scaleX(2) scaleY(0); opacity: 0; filter: blur(2px); } }
-
-                .vfx-explosion { position: absolute; width: 160px; height: 160px; background: radial-gradient(circle, #ffffff 10%, var(--vfx-color) 40%, transparent 75%); border-radius: 50%; opacity: 0; transform-origin: center; z-index: 140; mix-blend-mode: screen; animation: explodeAnim 0.4s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-                .vfx-explosion::before { content: ''; position: absolute; inset: 0; border: 8px solid var(--vfx-color); border-radius: 50%; animation: shockwaveAnim 0.4s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-                .vfx-explosion::after { content: ''; position: absolute; inset: 20%; background: #fff; border-radius: 50%; filter: blur(10px); }
-                @keyframes explodeAnim { 0% { transform: translate(-50%, -50%) scale(0.1); opacity: 1; filter: brightness(3); } 40% { opacity: 0.9; } 100% { transform: translate(-50%, -50%) scale(2); opacity: 0; filter: blur(8px); } }
-                @keyframes shockwaveAnim { 0% { transform: scale(0.5); opacity: 1; border-width: 15px; } 100% { transform: scale(2.5); opacity: 0; border-width: 1px; } }
-
-                .vfx-magic-circle { position: absolute; width: 180px; height: 180px; border: 4px solid var(--vfx-color); border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); box-shadow: 0 0 30px var(--vfx-color), inset 0 0 30px var(--vfx-color); z-index: 130; transform-origin: center; mix-blend-mode: screen; animation: spinCircle 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-                .vfx-magic-circle::before { content: ''; position: absolute; inset: -10px; border: 2px dashed var(--vfx-color); border-radius: 50%; animation: spinCircleReverse 1.2s linear forwards; }
-                .vfx-magic-circle::after { content: ''; position: absolute; inset: 20px; background: var(--vfx-color); border-radius: 50%; filter: blur(30px); opacity: 0.5; }
-                @keyframes spinCircle { 0% { transform: translate(-50%, -50%) rotateX(75deg) rotateZ(0deg) scale(0.1); opacity: 0; filter: brightness(3); } 20% { opacity: 1; transform: translate(-50%, -50%) rotateX(75deg) rotateZ(90deg) scale(1.2); filter: brightness(1.5); } 80% { opacity: 1; transform: translate(-50%, -50%) rotateX(75deg) rotateZ(270deg) scale(1); filter: brightness(1); } 100% { transform: translate(-50%, -50%) rotateX(75deg) rotateZ(360deg) scale(1.5); opacity: 0; filter: blur(5px); } }
-                @keyframes spinCircleReverse { 0% { transform: rotateZ(360deg); } 100% { transform: rotateZ(0deg); } }
-
-                .vfx-projectile { position: absolute; width: 60px; height: 12px; z-index: 130; transform-origin: left center; transition-property: left, top; transition-timing-function: cubic-bezier(0.4, 0, 1, 1); mix-blend-mode: screen; }
-                .vfx-projectile-core { width: 100%; height: 100%; border-radius: 10px; background: #fff; box-shadow: 0 0 15px var(--vfx-color), 0 0 30px var(--vfx-color); }
-                .vfx-projectile::after { content:''; position:absolute; right:90%; top:50%; transform:translateY(-50%); width:80px; height:6px; background:linear-gradient(to right, transparent, var(--vfx-color)); filter: blur(2px); }
-
-                .vfx-curved-proj { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: #fff; box-shadow: 0 0 20px var(--vfx-color), 0 0 40px var(--vfx-color); z-index: 130; mix-blend-mode: color-dodge; animation-timing-function: cubic-bezier(.3, -0.5, .7, 1.5); animation-fill-mode: forwards; }
-
-                @keyframes beamStrike { 0% { transform: translate(0, -50%) rotate(var(--beam-angle)) scaleX(0.1); opacity: 1; filter: brightness(4); box-shadow: 0 0 50px var(--beam-color); } 30% { transform: translate(0, -50%) rotate(var(--beam-angle)) scaleX(1); opacity: 1; filter: brightness(2); box-shadow: 0 0 30px var(--beam-color), 0 0 60px var(--beam-color); height: 20px; } 100% { transform: translate(0, -50%) rotate(var(--beam-angle)) scaleX(1); opacity: 0; filter: blur(4px); height: 2px; } }
-                .vfx-beam { position: absolute; height: 10px; background: #fff; pointer-events: none; z-index: 9998; transform-origin: left center; mix-blend-mode: screen; border-radius: 10px; animation: beamStrike 0.3s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-                
-                .vfx-falling-obj { position: absolute; width: 70px; height: 70px; background: radial-gradient(circle at 70% 70%, #fff 0%, var(--vfx-color) 50%, transparent 80%); filter: drop-shadow(0 -40px 20px var(--vfx-color)) brightness(1.5); border-radius: 50%; z-index: 145; mix-blend-mode: screen; transition-property: left, top; transition-timing-function: cubic-bezier(0.7, 0, 1, 1); }
-                
-                .vfx-eruption { position: absolute; width: 120px; height: 300px; background: linear-gradient(to top, var(--vfx-color) 10%, #fff 40%, transparent 100%); clip-path: polygon(20% 100%, 80% 100%, 100% 50%, 60% 0, 40% 0, 0 50%); box-shadow: 0 0 50px var(--vfx-color); transform-origin: bottom center; z-index: 135; opacity: 0; mix-blend-mode: screen; animation: eruptAnim 0.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-                @keyframes eruptAnim { 0% { transform: translate(-50%, -100%) scaleY(0.1) scaleX(0.5); opacity: 1; filter: brightness(4); } 40% { transform: translate(-50%, -100%) scaleY(1.2) scaleX(1); opacity: 1; filter: brightness(1.5); } 100% { transform: translate(-50%, -100%) scaleY(1) scaleX(1.8); opacity: 0; filter: blur(10px); } }
-
-                .vfx-rapid-slash { position: absolute; width: 100px; height: 10px; background: #fff; box-shadow: 0 0 10px var(--vfx-color), 0 0 20px var(--vfx-color); opacity: 0; transform-origin: center; z-index: 155; mix-blend-mode: screen; animation: rapidSlashAnim 0.15s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-                @keyframes rapidSlashAnim { 0% { transform: translate(-50%, -50%) scaleX(0.2) rotate(var(--angle)); opacity: 1; filter: brightness(3); } 100% { transform: translate(-50%, -50%) scaleX(2) scaleY(0.2) rotate(var(--angle)); opacity: 0; filter: blur(2px); } }
-
-                .vfx-rain-arrow { position: absolute; width: 40px; height: 3px; background: #fff; box-shadow: 0 0 10px var(--vfx-color), 0 0 20px var(--vfx-color); z-index: 140; transform: translate(-50%, -50%) rotate(calc(var(--dir) * 60deg)); mix-blend-mode: screen; transition-property: left, top; transition-timing-function: cubic-bezier(0.5, 0, 1, 1); border-radius: 5px; }
-                
-                .vfx-life-steal { position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%; box-shadow: 0 0 15px var(--vfx-color), 0 0 30px var(--vfx-color); z-index: 160; mix-blend-mode: screen; transition-property: left, top; transition-timing-function: cubic-bezier(0.2, 0.8, 0.4, 1); }
-                .vfx-life-steal::after { content: ''; position: absolute; top: 50%; left: 0; width: 80px; height: 6px; background: linear-gradient(90deg, transparent, var(--vfx-color)); transform: translateY(-50%); filter: blur(2px); }
-
-                .vfx-sonic-wave { position: absolute; width: 30px; height: 30px; border: 6px solid var(--vfx-color); border-radius: 50%; transform: translate(-50%, -50%); opacity: 0; z-index: 140; mix-blend-mode: screen; animation: sonicWaveAnim 0.5s ease-out forwards; box-shadow: inset 0 0 20px var(--vfx-color), 0 0 20px var(--vfx-color); }
-                @keyframes sonicWaveAnim { 0% { width: 30px; height: 30px; opacity: 1; border-width: 15px; filter: brightness(3); } 100% { width: 500px; height: 500px; opacity: 0; border-width: 1px; filter: blur(4px); } }
-
-                .is-teleporting { transition: none !important; animation: teleportPoof 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-                @keyframes teleportPoof { 0% { filter: brightness(3) blur(20px); opacity: 0; transform: scale(0.2) skewX(20deg); } 50% { filter: brightness(2) blur(5px); opacity: 0.9; transform: scale(1.3) skewX(-10deg); } 100% { filter: brightness(1) blur(0); opacity: 1; transform: scale(1) skewX(0); } }
-
-                /* Tăng thời gian hiển thị sát thương nhảy lên từ 1.2s lên 2.0s để quan sát */
-                @keyframes floatUpDmg { 0% { transform: translateY(0) scale(2); opacity: 0; filter: brightness(2); } 10% { transform: translateY(-10px) scale(1.2); opacity: 1; filter: brightness(1); } 80% { transform: translateY(-50px) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(0.9); opacity: 0; filter: blur(2px); } }
-                .vfx-dmg { color: #ff3333; text-shadow: 0 0 5px #000, 0 0 10px #000, 0 0 20px #8b0000; font-weight: 900; animation: floatUpDmg 2.0s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-                .vfx-heal { color: #33ff33; text-shadow: 0 0 5px #000, 0 0 10px #000, 0 0 20px #008b00; font-weight: 900; animation: floatUpDmg 2.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-                .vfx-shield-text { color: #60a5fa; text-shadow: 0 0 5px #000, 0 0 10px #000, 0 0 20px #1e3a8a; font-weight: 900; animation: floatUpDmg 2.0s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-
-                .shield-bubble { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 150%; height: 120%; border-radius: 50%; border: 3px solid rgba(0, 243, 255, 0.8); background: radial-gradient(circle, rgba(0, 243, 255, 0.1) 0%, rgba(0, 243, 255, 0.3) 100%); box-shadow: 0 0 20px rgba(0, 243, 255, 0.6), inset 0 0 15px rgba(0, 243, 255, 0.6); pointer-events: none; z-index: 20; mix-blend-mode: screen; animation: pulseShield 2s infinite ease-in-out; }
-                .enemy-side .shield-bubble { border-color: rgba(255, 0, 234, 0.8); background: radial-gradient(circle, rgba(255, 0, 234, 0.1) 0%, rgba(255, 0, 234, 0.3) 100%); box-shadow: 0 0 20px rgba(255, 0, 234, 0.6), inset 0 0 15px rgba(255, 0, 234, 0.6); }
-                @keyframes pulseShield { 0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.9; } 50% { transform: translateX(-50%) scale(1.08); opacity: 1; filter: brightness(1.2); } }
-
-                @keyframes floatIndicator { 0%, 100% { transform: translateY(-8px); filter: drop-shadow(0 0 8px currentColor) brightness(1); } 50% { transform: translateY(2px); filter: drop-shadow(0 0 15px currentColor) brightness(1.5); } }
-
-                .vfx-shake-light { animation: shakeLight 0.2s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
-                .vfx-shake-heavy { animation: shakeHeavy 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
-                @keyframes shakeLight { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-4px, 3px) rotate(-1deg); } 50% { transform: translate(4px, -3px) rotate(1deg); } 75% { transform: translate(-4px, -3px) rotate(-1deg); } }
-                @keyframes shakeHeavy { 0%, 100% { transform: translate(0,0); } 20% { transform: translate(-12px, 8px) rotate(-2deg); } 40% { transform: translate(12px, -8px) rotate(2deg); } 60% { transform: translate(-12px, -8px) rotate(-2deg); } 80% { transform: translate(12px, 8px) rotate(2deg); } }
-                
-                .camera-viewport { position: relative; width: 100%; height: 100%; min-height: 380px; overflow: hidden; z-index: 10; background-color: #0a0f0a; }
-                .battle-stage-wrapper { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
-                .stage-background { position: absolute; inset: 0; width: 100%; height: 100%; background-size: 100% 100%; background-position: center; background-repeat: no-repeat; z-index: 0; }
-
-                .cutin-text-container { position: relative; width: 100%; text-align: center; padding: 25px 0; }
-                .cutin-text-container.is-active { animation: cutinContainerAnim 1.3s ease-in-out forwards; }
-                .cutin-bg { position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(205,164,94,0.8), transparent); transform: skewX(-45deg); z-index: -1; }
-                .cutin-text-container.is-active .cutin-bg { animation: cutinBgAnim 1.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-                .cutin-text { font-size: 2rem; font-weight: 900; color: #fff; text-shadow: 0 0 10px #cda45e, 0 0 20px #cda45e, 0 0 40px #fff; letter-spacing: 0.2em; transform: scale(1.5); }
-                .cutin-text-container.is-active .cutin-text { animation: cutinTextScale 1.3s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-                .is-ultimate .cutin-bg { background: linear-gradient(90deg, transparent, rgba(139,21,21,1), transparent); }
-                .is-ultimate .cutin-text { font-size: 3rem; color: #ff4d4d; text-shadow: 0 0 15px #8b1515, 0 0 30px #8b1515, 0 0 50px #fff; }
-                
-                .has-custom-img { 
-                    background: transparent !important; 
-                    box-shadow: none !important; 
-                    border: none !important; 
-                    clip-path: none !important; 
-                    border-radius: 0 !important; 
-                    mix-blend-mode: screen !important; 
-                }
-                .has-custom-img::before,
-                .has-custom-img::after {
-                    display: none !important;
-                    content: none !important;
-                }
-
-                .vfx-projectile.has-custom-img { 
-                    width: 150px !important; 
-                    height: 150px !important; 
-                }
-                div.has-custom-img {
-                    filter: none !important;
-                }
-                .vfx-slash.has-custom-img {
-                    animation: customSlashAnim 2.0s ease-in-out forwards !important;
-                    width: 550px !important;
-                    height: 550px !important;
-                }
-                .vfx-wave-slash.has-custom-img {
-                    width: 550px !important;
-                    height: 350px !important;
-                    transition: none !important;
-                }
-
-                @keyframes customSlashAnim {
-                    0% { transform: translate(-80%, -50%) scale(0.6) rotate(0deg); opacity: 0; }
-                    15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(0deg); }
-                    85% { opacity: 1; transform: translate(-20%, -50%) scale(1.2) rotate(0deg); }
-                    100% { transform: translate(10%, -50%) scale(0.9) rotate(0deg); opacity: 0; }
-                }
-
-                @keyframes customWaveSlashAnim {
-                    0% { transform: translate(-50%, -50%) scale(0.4) rotate(var(--angle)); opacity: 0; }
-                    15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(var(--angle)); }
-                    85% { opacity: 1; transform: translate(-50%, -50%) scale(1.0) rotate(var(--angle)); }
-                    100% { transform: translate(-50%, -50%) scale(0.7) rotate(var(--angle)); opacity: 0; }
-                }
-            `}} />
-
-            <div 
-                className="battle-stage-wrapper"
-                style={{ 
-                    transformOrigin: `${cameraState.originX}% ${cameraState.originY}%`,
-                    transform: `scale(${cameraState.scale})` 
-                }}
-            >
-                {environmentImage ? (
-                    <div className="stage-background" style={{ backgroundImage: `url('${environmentImage}')` }}></div>
-                ) : (
-                    <>
-                        <div className="wall-layer" style={{ background: 'linear-gradient(to top, #1a1a2e, #0a0a12)', position: 'absolute', top: 0, left: 0, width: '100%', height: '65%', zIndex: 0 }}></div>
-                        <div className="wall-fade" style={{ background: 'linear-gradient(to bottom, transparent 0%, rgba(10,10,18,0.9) 50%, transparent 100%)', position: 'absolute', top: '45%', left: 0, width: '100%', height: '20%', zIndex: 2 }}></div>
-                        <div className="floor-layer" style={{ 
-                            backgroundColor: '#12121a', 
-                            backgroundImage: 'linear-gradient(rgba(205,164,94,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(205,164,94,0.15) 1px, transparent 1px)', 
-                            backgroundSize: '40px 40px',
-                            position: 'absolute', top: '40%', left: '-50%', width: '200%', height: '100%', transform: 'perspective(400px) rotateX(70deg)', transformOrigin: 'top center', zIndex: 1
-                        }}></div>
-                    </>
-                )}
-
-                {mappedUnits.map(unit => {
-                    const basePos = POSITIONS[unit.posSlot];
-                    const isDashing = dashState.id === unit.id;
-                    const currentLeft = isDashing ? dashState.left : basePos.left;
-                    const currentBottom = isDashing ? dashState.bottom : basePos.bottom;
-                    const isTeleporting = isDashing && dashState.type === 'teleport';
-
-                    const isFocused = focusState.focusedIds.includes(unit.id);
-                    const isTimeStopped = focusState.isActive && !isFocused;
-
-                    const ftList = floatingTexts.filter(f => f.targetId === unit.id);
-
-                    let calculatedZ = Math.round(100 - currentBottom) * 10;
-                    if (isFocused) calculatedZ += 10000;
-
-                    return (
-                        <div 
-                            key={unit.id} 
-                            id={`puppet-wrap-${unit.id}`}
-                            onClick={() => onCharacterClick(unit)}
-                            className={`puppet-wrapper cursor-pointer hover:brightness-125 ${unit.isPlayerSide ? 'player-side' : 'enemy-side'} state-${unit.visualState} ${unit.isDashingClass} ${isTeleporting ? 'is-teleporting' : ''} ${isFocused ? 'is-focused' : ''} ${isTimeStopped ? 'time-stopped' : ''}`}
-                            style={{ 
-                                left: `${currentLeft}%`,
-                                bottom: `calc(${currentBottom}% + 70px)`,
-                                zIndex: calculatedZ,
-                                transform: 'translateX(-50%)',
-                                '--vfx-color': dashState.color || '#ffffff',
-                                ...unit.extraStyles 
-                            }}
-                        >
-                            <div className="unit-ui-layer absolute text-center w-24 left-1/2 -translate-x-1/2 transition-opacity pointer-events-none" style={{ bottom: `calc(${unit.visualTopY}% + 8px)` }}>
-                                <div className="text-[10px] font-bold text-[#e8d3a1] bg-black/80 px-1 border border-[#cda45e]/50 truncate shadow-md">{unit.displayName}</div>
-                                <div className="w-full bg-gray-900 h-1.5 border border-black mt-0.5 relative overflow-hidden">
-                                    <div className={`h-full transition-all ${unit.isPlayerSide ? 'bg-cyan-400' : 'bg-red-500'}`} style={{ width: `${(unit.hp / unit.maxhp) * 100}%`, boxShadow: `0 0 5px ${unit.isPlayerSide ? '#22d3ee' : '#ef4444'}` }}></div>
-                                    {unit.shield > 0 && (
-                                        <div 
-                                            className="absolute top-0 h-full bg-yellow-400 transition-all shadow-[0_0_5px_#facc15]" 
-                                            style={{ 
-                                                left: `${(unit.hp / unit.maxhp) * 100}%`, 
-                                                width: `${(unit.shield / unit.maxhp) * 100}%` 
-                                            }}
-                                        ></div>
-                                    )}
-                                </div>
-                            </div>
-                            
-                            {ftList.map(f => (
-                                <div key={f.id} className={`absolute whitespace-nowrap z-[9999] pointer-events-none ${f.className}`} style={{ bottom: `calc(${unit.visualCenterY}% + 20px)` }}>{f.text}</div>
-                            ))}
-                            
-                            {unit.isTurn && (
-                                <div 
-                                    className={`absolute left-0 w-full flex justify-center z-[999] pointer-events-none mb-1 ${unit.isPlayerSide ? 'text-[#5eead4]' : 'text-[#ff4d4d]'}`} 
-                                    style={{ bottom: `calc(${unit.visualTopY}% + 38px)`, animation: 'floatIndicator 1.5s ease-in-out infinite' }}
-                                >
-                                    <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: `drop-shadow(0 0 8px currentColor) drop-shadow(0 0 15px currentColor)` }}>
-                                      <path d="M20 40L6 15H14V0H26V15H34L20 40Z" fill="currentColor" />
-                                      <path d="M20 34L11 17H17V3H23V17H29L20 34Z" fill="#ffffff" opacity="0.9"/>
-                                    </svg>
-                                </div>
-                            )}
-
-                            <div className="puppet-container h-full w-full relative pointer-events-none" style={{ transform: 'scale(var(--manual-zoom, 1))', transformOrigin: 'bottom center', transition: 'transform 0.3s' }}>
-                                {unit.shield > 0 && <div className="shield-bubble absolute inset-0"></div>}
-                                <img src={unit.displayImg} alt={unit.Name} className="puppet-img" crossOrigin="anonymous" />
-                            </div>
-                        </div>
-                    );
-                })}
-
-                {/* VẼ LỚP VFX NÂNG CẤP BẰNG HELPER FUNCTION */}
-                {waveSlashes.map(w => {
-                    const animName = `wave-movement-${w.id}`;
-                    return (
-                        <React.Fragment key={w.id}>
-                            {w.img && (
-                                <style dangerouslySetInnerHTML={{__html: `
-                                    @keyframes ${animName} {
-                                        0% { 
-                                            left: ${w.start.x}%; 
-                                            top: ${w.start.y}%; 
-                                            transform: translate(-50%, -50%) scale(0.3) rotate(${w.angle}deg); 
-                                            opacity: 0; 
-                                        }
-                                        15% { 
-                                            opacity: 1; 
-                                            transform: translate(-50%, -50%) scale(1.2) rotate(${w.angle}deg); 
-                                        }
-                                        85% { 
-                                            opacity: 1; 
-                                            transform: translate(-50%, -50%) scale(1.0) rotate(${w.angle}deg); 
-                                        }
-                                        100% { 
-                                            left: ${w.end.x}%; 
-                                            top: ${w.end.y}%; 
-                                            transform: translate(-50%, -50%) scale(0.6) rotate(${w.angle}deg); 
-                                            opacity: 0; 
-                                        }
-                                    }
-                                `}} />
-                            )}
-                            <div 
-                                className={`vfx-wave-slash flex items-center justify-center ${w.img ? 'has-custom-img' : ''}`}
-                                style={{ 
-                                    left: `${w.start.x}%`, 
-                                    top: `${w.start.y}%`, 
-                                    '--vfx-color': w.color, 
-                                    '--angle': `${w.angle}deg`, 
-                                    transitionDuration: w.img ? '0s' : '0.5s',
-                                    animationName: w.img ? animName : undefined,
-                                    animationDuration: w.img ? '1.5s' : undefined,
-                                    animationFillMode: w.img ? 'forwards' : undefined
-                                }}
-                                ref={el => { 
-                                    if(el && !w.img) { 
-                                        requestAnimationFrame(()=> { 
-                                            el.style.left=`${w.end.x}%`; 
-                                            el.style.top=`${w.end.y}%`; 
-                                        }); 
-                                    }
-                                }}
-                            >
-                                {renderVfxContent(w)}
-                            </div>
-                        </React.Fragment>
-                    );
-                })}
-                
-                {slashes.map(s => (<div key={s.id} className={`${s.isThrust ? "vfx-strike" : "vfx-slash"} flex items-center justify-center ${s.img ? 'has-custom-img' : ''}`} style={{ left: `${s.pos.x}%`, top: `${s.pos.y}%`, '--vfx-color': s.color, transform: `translate(-50%, -50%) scale(${s.scale})` }}>{renderVfxContent(s)}</div>))}
-                
-                {explosions.map(e => (<div key={e.id} className={`vfx-explosion flex items-center justify-center ${e.img ? 'has-custom-img' : ''}`} style={{ left: `${e.pos.x}%`, top: `${e.pos.y}%`, '--vfx-color': e.color, transform: `translate(-50%, -50%) scale(${e.scale})` }}>{renderVfxContent(e)}</div>))}
-                
-                {eruptions.map(e => (<div key={e.id} className={`vfx-eruption flex items-center justify-center ${e.img ? 'has-custom-img' : ''}`} style={{ left: `${e.pos.x}%`, top: `${e.pos.y}%`, '--vfx-color': e.color, transform: `translate(-50%, -100%) scale(${e.scale})` }}>{renderVfxContent(e)}</div>))}
-                
-                {magicCircles.map(m => (<div key={m.id} className={`vfx-magic-circle flex items-center justify-center ${m.img ? 'has-custom-img' : ''}`} style={{ left: `${m.pos.x}%`, top: `${m.pos.y}%`, '--vfx-color': m.color, transform: `translate(-50%, -50%) rotateX(75deg) scale(${m.scale})` }}>{renderVfxContent(m)}</div>))}
-                
-                {beams.map(b => ( 
-                    <div key={b.id} className={`vfx-beam flex items-center justify-center ${b.img ? 'has-custom-img' : ''}`} 
-                         style={{ left: `${b.start.x}%`, top: `${b.start.y}%`, width: `${b.length}%`, '--beam-color': b.color, '--beam-angle': `${b.angle}deg`, animationDuration: `${b.speed || 250}ms` }}>
-                         {renderVfxContent(b)}
-                    </div> 
-                ))}
-                
-                {auras.map(a => (<div key={a.id} className={`vfx-aura ${a.isDown ? 'vfx-aura-down' : 'vfx-aura-up'} flex items-center justify-center ${a.img ? 'has-custom-img' : ''}`} style={{ left: `${a.pos.x}%`, top: `${a.pos.y}%`, '--vfx-color': a.color, animationDuration: `${a.speed}ms` }}>{renderVfxContent(a)}</div>))}
-                
-                {projectiles.map(p => (<div key={p.id} className={`vfx-projectile flex items-center justify-center ${p.img ? 'has-custom-img' : ''}`} style={{ left: `${p.start.x}%`, top: `${p.start.y}%`, '--vfx-color': p.color, transform: `translate(-50%, -50%) rotate(${p.angle}deg) scale(${p.scale})`, transitionDuration: `${p.speed || 250}ms` }} ref={el => { if(el) { requestAnimationFrame(()=> { el.style.left=`${p.end.x}%`; el.style.top=`${p.end.y}%`; }); }}}>
-                    {renderVfxContent(p, "vfx-projectile-core")}
-                </div>))}
-                
-                {fallingObjects.map(p => (<div key={p.id} className={`vfx-falling-obj flex items-center justify-center ${p.img ? 'has-custom-img' : ''}`} style={{ left: `${p.start.x}%`, top: `${p.start.y}%`, '--vfx-color': p.color, transform: `translate(-50%, -50%) scale(${p.scale}) ${p.flipX ? 'scaleX(-1)' : ''}`, transitionDuration: `${p.speed || 400}ms` }} ref={el => { if(el) { requestAnimationFrame(()=> { el.style.left=`${p.end.x}%`; el.style.top=`${p.end.y}%`; }); }}}>
-                    {renderVfxContent(p)}
-                </div>))}
-                
-                {curvedProjectiles.map(p => {
-                    const animName = `curve-${p.id}`;
-                    const midX = (p.start.x + p.end.x) / 2;
-                    const midY = Math.min(p.start.y, p.end.y) - 40; 
-                    return (
-                        <React.Fragment key={p.id}>
-                            <style dangerouslySetInnerHTML={{__html: `
-                                @keyframes ${animName} {
-                                    0% { left: ${p.start.x}%; top: ${p.start.y}%; }
-                                    50% { left: ${midX}%; top: ${midY}%; }
-                                    100% { left: ${p.end.x}%; top: ${p.end.y}%; }
-                                }
-                            `}} />
-                            <div className={`vfx-curved-proj flex items-center justify-center ${p.img ? 'has-custom-img' : ''}`} style={{ '--vfx-color': p.color, transform: `translate(-50%, -50%) scale(${p.scale}) ${p.direction === -1 ? 'scaleX(-1)' : ''}`, animationName: animName, animationDuration: `${p.speed}ms` }}>
-                                {renderVfxContent(p)}
-                            </div>
-                        </React.Fragment>
-                    );
-                })}
-                
-                {rapidSlashes.map(s => (
-                    <div key={s.id} className={`vfx-rapid-slash flex items-center justify-center ${s.img ? 'has-custom-img' : ''}`} style={{ left: `${s.pos.x}%`, top: `${s.pos.y}%`, '--vfx-color': s.color, '--angle': `${s.angle}deg` }}>{renderVfxContent(s)}</div>
-                ))}
-                
-                {rainArrows.map(a => (
-                    <div key={a.id} className={`vfx-rain-arrow flex items-center justify-center ${a.img ? 'has-custom-img' : ''}`} style={{ '--vfx-color': a.color, '--dir': a.isPlayerSide ? '1' : '-1', transitionDuration: `${a.speed}ms` }} ref={el => { if(el) { el.style.left=`${a.start.x}%`; el.style.top=`${a.start.y}%`; requestAnimationFrame(()=> { el.style.left=`${a.end.x}%`; el.style.top=`${a.end.y}%`; }); }}}>
-                        {renderVfxContent(a)}
-                    </div>
-                ))}
-                
-                {lifeSteals.map(l => (
-                    <div key={l.id} className={`vfx-life-steal flex items-center justify-center ${l.img ? 'has-custom-img' : ''}`} style={{ left: `${l.start.x}%`, top: `${l.start.y}%`, '--vfx-color': l.color, transform: `translate(-50%, -50%) rotate(${l.angle}deg)`, transitionDuration: `${l.speed}ms` }} ref={el => { if(el) { requestAnimationFrame(()=> { el.style.left=`${l.end.x}%`; el.style.top=`${l.end.y}%`; }); }}}>
-                        {renderVfxContent(l)}
-                    </div>
-                ))}
-                
-                {sonicWaves.map(sw => (
-                    <div key={sw.id} className={`vfx-sonic-wave flex items-center justify-center ${sw.img ? 'has-custom-img' : ''}`} style={{ left: `${sw.pos.x}%`, top: `${sw.pos.y}%`, '--vfx-color': sw.color, animationDuration: `${sw.speed}ms` }}>{renderVfxContent(sw)}</div>
-                ))}
-
-            </div>
-        </div>
-    );
-};
 
 // COMPONENT 3: THAY THẾ TOÀN BỘ GAMEPLAYSCREEN
 const GameplayScreen = ({ 
@@ -10622,9 +9172,9 @@ const GameplayScreen = ({
     setCombatTargetingState,
     handleTargetSelection,
     handleForceExitStuckCombat,
-    openQuickLoreModal, combatLog, setShowCombatStatsModal,
+    openQuickLoreModal,
     fileInputRef, companionCommandInput, setCompanionCommandInput,
-    activeCombatLoop, combatEndSummary, setCombatEndSummary, finalizeCombatEnd, combatUIState, setCombatUIState,
+    activeCombatLoop, combatUIState, setCombatUIState,
     setModalMessage, processPlayerAction, setIsProcessingAction,
     setChoices, setShowHandbookModal,
     showFunctionsModal, setShowFunctionsModal, setShowCustomizationModal,
@@ -10633,9 +9183,9 @@ const GameplayScreen = ({
     handleTrackQuest,
     activeTrade, handleTogglePartyMember, handleLeaveParty,
     saveGameProgress, handleDeleteStoryItem,
-    currentGameId, combatEnvironmentImage,  onOpenPvP,
+    currentGameId, onOpenPvP,
     currentPlayStyle, onTogglePlayStyle, handleClearImageCache,
-    activeAnimation, onAnimationVisualComplete, pvpRoom, showFirebaseModal, setShowFirebaseModal, onStartSandbox,
+    pvpRoom, showFirebaseModal, setShowFirebaseModal, onStartSandbox,
     pvpTurnTimeLeft, setPvpTurnTimeLeft, onSetTheme, onOpenThemeEditor, onOpenCacheManager, handleAwakenHtab, isHtabChatActive, setIsHtabChatActive, currentHtabDialogue, handleHtabChat,
     htabExitPending, htabPendingResumeData, resumeWorldFromHtab,
     showHtabInfoModal, setShowHtabInfoModal,
@@ -10648,15 +9198,13 @@ const GameplayScreen = ({
     const [showVisualGallery, setShowVisualGallery] = useState(false); 
     const playerCharacter = knowledge.characters.find(c => c.isPlayer) || {}; 
     const gameplayScreenRef = useRef(null);
+    // Combat System (design/gdd/combat-system.md): #story-content-area giờ KHÔNG còn unmount/remount khi
+    // vào/thoát COMBAT nữa (trận đấu render ngay trong cùng khối cuộn cốt truyện) — hack khôi phục scrollTop
+    // qua preCombatScrollTopRef/callback-ref (từng cần vì DOM node cũ bị huỷ tạo lại) không còn cần thiết,
+    // dùng ref thường như bình thường.
     const storyContainerRef = useRef(null);
-    // Khối cuộn cốt truyện bị UNMOUNT hoàn toàn khi vào COMBAT (nhánh else của ternary gameMode === 'COMBAT')
-    // nên khi thoát trận nó được MOUNT LẠI TỪ ĐẦU và trình duyệt mặc định đặt scrollTop = 0 (kéo lên đầu),
-    // bất kể effect cuộn dựa theo storyHistory có làm gì hay không. Lưu vị trí cuộn liên tục vào ref này qua
-    // onScroll, rồi khôi phục lại đúng vị trí đó ngay khi khối cuộn được mount lại sau khi thoát trận.
-    const preCombatScrollTopRef = useRef(0);
     const [showScrollDownButton, setShowScrollDownButton] = useState(false);
     const [detailedChoice, setDetailedChoice] = useState(null);
-    const [showMobileLog, setShowMobileLog] = useState(false);
     const [showThemeEditor, setShowThemeEditor] = useState(false);
     const handleSaveToLocalClick = useCallback(() => {
         handleOpenGithubSaveModal();
@@ -10701,15 +9249,6 @@ const GameplayScreen = ({
         openCompanionInfoModal(playerCharacter?.id || 'player');
     }, [playerCharacter, setCharacterInfoInitialTab, openCompanionInfoModal, setShowInfoModal]);
 
-    const handleCombatantClick = (combatant) => {
-        openQuickLoreModal('auto-detect', combatant);
-    };
-
-    const handleShowCombatStats = useCallback(() => {
-        setShowInteractionPanel(false);
-        setShowCombatStatsModal(true);
-    }, [setShowInteractionPanel, setShowCombatStatsModal]);
-
     const returnToMainCombatActions = useCallback(() => {
         setIsProcessingAction(false); 
         setCombatTargetingState({ isActive: false, skill: null, casterId: null });
@@ -10729,7 +9268,6 @@ const GameplayScreen = ({
         const container = storyContainerRef.current;
         if (container) {
             const { scrollTop, scrollHeight, clientHeight } = container;
-            preCombatScrollTopRef.current = scrollTop;
             const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
             setShowScrollDownButton(!isNearBottom);
         }
@@ -10741,20 +9279,7 @@ const GameplayScreen = ({
             container.addEventListener('scroll', handleScroll);
             return () => container.removeEventListener('scroll', handleScroll);
         }
-        // Phụ thuộc thêm gameMode: khối cuộn cốt truyện bị unmount/mount lại mỗi khi vào/thoát COMBAT,
-        // nên phải gắn lại listener mỗi lần nó được mount lại, nếu không listener cũ sẽ bị bỏ rơi.
-    }, [handleScroll, gameMode]);
-
-    // Dùng CALLBACK REF thay vì useLayoutEffect([gameMode]): callback ref chạy CHÍNH XÁC ngay tại thời điểm
-    // phần tử được gắn vào DOM (kể cả khi mount lại sau khi thoát trận), đáng tin cậy hơn việc dựa vào
-    // effect chạy theo sau khi gameMode đổi giá trị — tránh trường hợp trình duyệt đã kịp đặt scrollTop = 0
-    // (kéo lên đầu) trước khi effect có cơ hội khôi phục lại.
-    const setStoryContainerRef = useCallback((node) => {
-        storyContainerRef.current = node;
-        if (node) {
-            node.scrollTop = preCombatScrollTopRef.current;
-        }
-    }, []);
+    }, [handleScroll]);
 
     const TopBar = () => {
         if (gameMode === 'COMBAT') return null;
@@ -11260,172 +9785,33 @@ const renderDefaultActions = () => {
             <div className="flex flex-col flex-1 min-h-0 overflow-hidden relative">
                 <TopBar />
 
-                {/* TRẠNG THÁI 1: CHẾ ĐỘ CHIẾN ĐẤU (COMBAT) */}
-                {gameMode === 'COMBAT' && activeCombatLoop ? (
-                    <div className="flex flex-col h-full min-h-0 bg-[#0a0f0a]/90 backdrop-blur-md relative">
-
-                        {/* MÀN HÌNH TỔNG KẾT — hiện ra khi trận đấu kết thúc, chặn thao tác cho tới khi bấm "Đóng" */}
-                        {combatEndSummary && (
-                            <div className="absolute inset-0 z-[100] bg-[#0a0f0a]/90 backdrop-blur-sm flex flex-col items-center justify-center gap-6 animate-fade-in p-6">
-                                <h2
-                                    className={`text-4xl sm:text-5xl font-bold tracking-widest uppercase drop-shadow-[0_0_15px_rgba(0,0,0,0.8)] ${
-                                        combatEndSummary.outcome === 'VICTORY' ? 'text-[#cda45e]' :
-                                        combatEndSummary.outcome === 'FLED' ? 'text-[#8ba888]' : 'text-[#ff4d4d]'
-                                    }`}
-                                    style={{ fontFamily: "'Protest Revolution', sans-serif" }}
-                                >
-                                    {combatEndSummary.outcome === 'VICTORY' ? 'Chiến Thắng' : combatEndSummary.outcome === 'FLED' ? 'Đã Tẩu Thoát' : 'Thất Bại'}
-                                </h2>
-                                <button
-                                    onClick={() => {
-                                        const { outcome, data, finalSharedCooldowns } = combatEndSummary;
-                                        setCombatEndSummary(null);
-                                        finalizeCombatEnd(outcome, data, finalSharedCooldowns);
-                                    }}
-                                    className="bg-transparent border-2 border-[#cda45e] hover:bg-[#cda45e]/10 text-[#e8d3a1] font-bold py-3 px-10 uppercase tracking-widest text-sm shadow-[inset_0_0_15px_rgba(205,164,94,0.15)] transition-all"
-                                    style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}
-                                >
-                                    Đóng
-                                </button>
-                            </div>
-                        )}
-
-                        {/* 1. SÀN ĐẤU  */}
-                        <div className="relative w-full flex-grow shadow-[0_5px_20px_rgba(0,0,0,0.8)] z-10 border-b-2 border-[#8b1515] overflow-hidden bg-black min-h-[280px] sm:min-h-[350px]">
-                            {activeCombatLoop?.currentTurnTaker && (
-                                <div className="absolute top-0 left-0 w-full z-[80] pointer-events-none animate-fade-in flex justify-center">
-                                    <div className="flex flex-col items-center">
-                                        <div className="bg-gradient-to-b from-[#162216]/95 to-[#0a0f0a]/95 border-x-2 border-b-2 border-[#cda45e] px-12 pt-2 pb-3 rounded-b-xl shadow-[0_5px_20px_rgba(0,0,0,0.9)] flex flex-col items-center justify-center min-w-[280px] relative overflow-hidden">
-                                            <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"></div>
-                                            <span className="text-[#8ba888] text-[10px] font-bold uppercase tracking-[0.3em] mb-1">
-                                                Hiệp {combatLog[combatLog.length - 1]?.round || 1}
-                                            </span>
-                                            <span className={`text-2xl font-bold tracking-widest uppercase ${activeCombatLoop.currentTurnTaker.isPlayer || activeCombatLoop.currentTurnTaker.isCompanion ? 'text-[#5eead4] drop-shadow-[0_0_8px_rgba(94,234,212,0.6)]' : 'text-[#ff4d4d] drop-shadow-[0_0_8px_rgba(255,77,77,0.6)]'}`} style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
-                                                {getDisplayName(activeCombatLoop.currentTurnTaker)}
-                                            </span>
-                                        </div>
-                                        <div className="w-16 h-3 bg-[#cda45e] opacity-80" style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }}></div>
-                                    </div>
-                                </div>
-                            )}
-
-                            <VisualCombatArena
-                                combatants={activeCombatLoop.allCombatants}
-                                environmentImage={combatEnvironmentImage}
-                                activeAnimation={activeAnimation}
-                                onCharacterClick={handleCombatantClick}
-                                currentTurnTakerId={activeCombatLoop?.currentTurnTaker?.id}
-                                defaultEnemyImages={gameSettings.defaultEnemyImages}
-                                onAnimationVisualComplete={onAnimationVisualComplete}
-                            />
+                {/* Combat System (design/gdd/combat-system.md): "chiến đấu theo lượt tường thuật bằng văn bản" —
+                    KHÔNG còn màn hình chiến đấu trực quan riêng. Trận đấu diễn ra NGAY TRONG luồng cốt truyện
+                    bình thường bên dưới (cùng #story-content-area, cùng khung lựa chọn hành động), chỉ có thêm
+                    một dải trạng thái văn bản tối giản (không hình ảnh/thanh máu đồ họa) để người chơi không mất
+                    dấu tình hình trận đấu trong lúc chờ tới lượt. */}
+                {gameMode === 'COMBAT' && activeCombatLoop && (() => {
+                    const playerSide = activeCombatLoop.allCombatants.filter(c => c.isPlayer || c.isCompanion);
+                    const enemySide = activeCombatLoop.allCombatants.filter(c => !c.isPlayer && !c.isCompanion);
+                    const sumHp = (list) => list.reduce((s, c) => s + Math.max(0, c.hp || 0), 0);
+                    const sumMaxHp = (list) => list.reduce((s, c) => s + Math.max(1, c.maxhp || 1), 0);
+                    const turnTakerName = activeCombatLoop.currentTurnTaker ? getDisplayName(activeCombatLoop.currentTurnTaker) : '';
+                    return (
+                        <div className="flex-shrink-0 z-30 bg-[#0a0f0a] border-b border-[#8b1515]/40 px-4 py-1.5 text-[11px] text-[#a3b8a3] flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5">
+                            <span className="font-bold text-[#ff4d4d] tracking-widest uppercase">
+                                ⚔ Đang giao chiến{turnTakerName ? ` — Lượt: ${turnTakerName}` : ''}
+                            </span>
+                            <span>Phe ta: {sumHp(playerSide)}/{sumMaxHp(playerSide)} HP ({playerSide.filter(c => c.hp > 0).length} còn chiến đấu)</span>
+                            <span>Phe địch: {sumHp(enemySide)}/{sumMaxHp(enemySide)} HP ({enemySide.filter(c => c.hp > 0).length} còn chiến đấu)</span>
                         </div>
-
-
-                        {/* 2. NHẬT KÝ THU GỌN  */}
-                        <div className="w-full flex-shrink-0 bg-[#101a10] border-b border-[#cda45e]/30 flex items-center px-4 h-16 shadow-[0_5px_15px_rgba(0,0,0,0.5)] z-20">
-                            <div className="flex-grow overflow-hidden flex flex-col justify-center h-full py-1.5 space-y-0.5">
-                                {combatLog.slice(-2).map(entry => (
-                                    <p key={entry.id} className="text-xs text-[#e8d3a1] truncate font-medium">
-                                        <span className="text-[#cda45e] font-bold">[{entry.actor}]</span> {entry.skill ? `dùng ${entry.skill} ` : ''}{entry.message}
-                                    </p>
-                                ))}
-                                {combatLog.length === 0 && <p className="text-xs text-[#8ba888] italic">Trận chiến sắp bắt đầu...</p>}
-                            </div>
-                            
-                            {/* Nút mở rộng Log ra toàn màn hình */}
-                            <button
-                                onClick={() => setShowMobileLog(true)}
-                                className="ml-4 flex-shrink-0 bg-[#162216] border border-[#cda45e]/50 hover:bg-[#cda45e]/20 text-[#cda45e] p-2 rounded transition-colors flex items-center justify-center shadow-md"
-                                title="Mở Toàn Bộ Nhật Ký"
-                            >
-                                <Bars3Icon className="w-6 h-6" />
-                            </button>
-                        </div>
-
-                        {/* 3. KHUNG HÀNH ĐỘNG CỦA NGƯỜI CHƠI  */}
-                        <div className="w-full flex-shrink-0 h-[220px] sm:h-[260px] bg-[#0a0f0a] overflow-y-auto scrollbar-thin scrollbar-thumb-[#cda45e] p-2 sm:p-4 z-30">
-                            {(isLoading || isProcessingAction) ? (
-                                <div className="text-center py-6 h-full flex flex-col items-center justify-center">
-                                    <div className="relative w-10 h-10 mx-auto mb-3">
-                                        <div className="absolute inset-0 border-2 border-[#8b1515]/30 rounded-full"></div>
-                                        <div className="absolute inset-0 border-2 border-[#ff4d4d] rounded-full border-t-transparent animate-[spin_1s_linear_infinite] shadow-[0_0_10px_rgba(255,77,77,0.3)]"></div>
-                                        <div className="absolute inset-2 bg-[#2a1b1b] border border-[#8b1515]/50 rounded-full flex items-center justify-center shadow-inner">
-                                            <div className="w-1.5 h-1.5 bg-[#ffb3b3] rounded-full animate-pulse shadow-[0_0_5px_#ffb3b3]"></div>
-                                        </div>
-                                    </div>
-                                    <p className="text-[#ff4d4d] tracking-widest text-xs font-bold animate-pulse">
-                                        {activeCombatLoop?.currentTurnTaker && (activeCombatLoop.currentTurnTaker.isPlayer || activeCombatLoop.currentTurnTaker.isCompanion)
-                                            ? 'Đang xử lý hành động...'
-                                            : 'Đang trong lượt của phe địch.'}
-                                    </p>
-                                    <button
-                                        onClick={handleForceExitStuckCombat}
-                                        className="mt-4 text-[10px] text-[#8ba888]/70 hover:text-[#e8d3a1] underline tracking-widest uppercase transition-colors"
-                                        title="Dùng khi trận đấu bị treo/kẹt quá lâu"
-                                    >
-                                        Bị kẹt trận? Quay lại Cốt Truyện
-                                    </button>
-                                </div>
-                            ) : (
-
-                                <div className="h-full w-full max-w-4xl mx-auto flex flex-col">
-                                    {(() => {
-                                        if (combatTargetingState.isActive) return renderTargetSelection();
-                                        if (combatUIState.view.startsWith('selecting_')) return renderSubMenu(combatUIState.view === 'selecting_potion' ? 'Túi Đan Dược' : 'Túi Pháp Bảo');
-                                        return renderDefaultActions();
-                                    })()}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* MODAL Full Nhật Ký  */}
-                        {showMobileLog && (
-                            <div className="fixed inset-0 z-[100] p-4 bg-black/90 backdrop-blur-sm flex items-center justify-center animate-fade-in" onClick={() => setShowMobileLog(false)}>
-                                <div className="w-full max-w-3xl h-[85vh] flex flex-col bg-[#162216] border border-[#cda45e]/50 shadow-[0_0_40px_rgba(205,164,94,0.15)] relative" onClick={e => e.stopPropagation()}>
-                                    
-                                    <button onClick={() => setShowMobileLog(false)} className="absolute top-3 right-3 text-[#a3b8a3] hover:text-white bg-[#8b1515]/80 hover:bg-[#8b1515] p-1.5 rounded z-10 transition-colors">
-                                        <XMarkIcon className="w-6 h-6"/>
-                                    </button>
-
-                                    <div className="p-4 border-b border-[#cda45e]/20 bg-[#101a10] flex-shrink-0">
-                                        <h3 className="text-[#cda45e] font-bold text-lg tracking-widest uppercase flex items-center" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
-                                            <ChartBarIcon className="w-6 h-6 mr-2" /> Toàn Cảnh Giao Tranh
-                                        </h3>
-                                    </div>
-                                    <div className="flex-grow overflow-y-auto p-5 space-y-4 scrollbar-thin scrollbar-thumb-[#8b1515] scrollbar-track-[#0a0f0a]">
-                                        {combatLog.length === 0 ? (
-                                            <p className="text-center text-[#8ba888] italic mt-10">Chưa có ai ra đòn.</p>
-                                        ) : (
-                                            combatLog.map(entry => (
-                                                <div key={entry.id} className="p-3 bg-[#0a0f0a]/80 border-l-4 border-[#8b1515] text-base animate-fade-in-up">
-                                                    <p className="leading-relaxed">
-                                                        {entry.round > 0 && <span className="font-bold text-[#cda45e] mr-2">[H{entry.round}]</span>}
-                                                        <span className="font-bold text-[#8ba888] text-lg">{entry.actor}</span>
-                                                        {entry.skill && <span className="text-[#a3b8a3] mx-1">xuất</span>}
-                                                        {entry.skill && <span className="font-bold text-[#e8d3a1] underline decoration-[#cda45e]/30 underline-offset-2">{entry.skill}</span>}
-                                                        {entry.target && <span className="text-[#a3b8a3] mx-1">công</span>}
-                                                        {entry.target && <span className="font-bold text-[#ff4d4d]">{entry.target}</span>}
-                                                        {entry.skill ? <span className="text-[#e8d3a1]">. {entry.message}</span> : <span className="text-[#e8d3a1] ml-2">{entry.message}</span>}
-                                                    </p>
-                                                </div>
-                                            ))
-                                        )}
-                                        <div ref={messagesEndRef} className="h-4" />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                ) : (
-                    /**/
-                    /* TRẠNG THÁI 2: CHẾ ĐỘ PHIÊU LƯU / KỂ CHUYỆN BÌNH THƯỜNG */
-                    /**/
-                    <>
+                    );
+                })()}
+                <>
                         <div
-                            ref={setStoryContainerRef}
+                            ref={storyContainerRef}
                             className={`bg-[#162216]/80 backdrop-blur-md p-4 sm:p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-transparent relative flex-grow shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] transition-all duration-500 ${
                                 knowledge.systemAssistant?.isActive ? 'brightness-[0.45] blur-[1px]' : ''
-                            }`} 
+                            }`}
                             id="story-content-area"
                         >
                             {/* Pattern nền chìm */}
@@ -11556,17 +9942,35 @@ const renderDefaultActions = () => {
                                             <div className="absolute inset-0 border-2 border-[#cda45e]/20 rounded-full"></div>
                                             <div className="absolute inset-0 border-2 border-[#cda45e] rounded-full border-t-transparent animate-[spin_1s_linear_infinite] shadow-[0_0_5px_rgba(205,164,94,0.3)]"></div>
                                         </div>
-                                        <p className="text-[#cda45e] tracking-widest text-xs font-bold animate-pulse">Đang suy nghĩ...</p>
+                                        <p className="text-[#cda45e] tracking-widest text-xs font-bold animate-pulse">
+                                            {gameMode === 'COMBAT' && activeCombatLoop
+                                                ? (activeCombatLoop.currentTurnTaker && (activeCombatLoop.currentTurnTaker.isPlayer || activeCombatLoop.currentTurnTaker.isCompanion)
+                                                    ? 'Đang xử lý hành động...'
+                                                    : 'Đang trong lượt của phe địch.')
+                                                : 'Đang suy nghĩ...'}
+                                        </p>
                                     </div>
+                                    {gameMode === 'COMBAT' && activeCombatLoop && (
+                                        <button
+                                            onClick={handleForceExitStuckCombat}
+                                            className="mt-3 text-[10px] text-[#8ba888]/70 hover:text-[#e8d3a1] underline tracking-widest uppercase transition-colors"
+                                            title="Dùng khi trận đấu bị treo/kẹt quá lâu"
+                                        >
+                                            Bị kẹt trận? Quay lại Cốt Truyện
+                                        </button>
+                                    )}
                                 </div>
                             ) : (
                                 <div className={knowledge.systemAssistant?.isActive ? "min-h-[60px]" : "min-h-[140px]"}>
-                                    {renderDefaultActions()}
+                                    {gameMode === 'COMBAT' && combatTargetingState.isActive
+                                        ? renderTargetSelection()
+                                        : gameMode === 'COMBAT' && combatUIState.view.startsWith('selecting_')
+                                        ? renderSubMenu(combatUIState.view === 'selecting_potion' ? 'Túi Đan Dược' : 'Túi Pháp Bảo')
+                                        : renderDefaultActions()}
                                 </div>
                             )}
                         </div>
                     </>
-                )}
 
                 <BottomNavBar gameMode={gameMode} />
                 
@@ -11600,18 +10004,15 @@ const renderDefaultActions = () => {
                     gameMode={gameMode}
                     knowledge={knowledge}
                     playerCharacter={playerCharacter}
-                    activeCombatLoop={activeCombatLoop}
                     openCompanionInfoModal={openCompanionInfoModal}
                     handleTrackQuest={handleTrackQuest}
                     onShowTradeModal={() => { setShowInteractionPanel(false); setShowTradeModal(true); }}
                     activeTrade={activeTrade}
-                    combatLog={combatLog}
                     getRealmInfoFromLevel={getRealmInfoFromLevel}
                     handleTogglePartyMember={handleTogglePartyMember}
                     handleLeaveParty={handleLeaveParty}
                     onStartSandbox={onStartSandbox}
                     onOpenHtabInfoModal={() => setShowHtabInfoModal(true)}
-                    handleForceExitStuckCombat={handleForceExitStuckCombat}
                 />
                 
                 <FirebaseConfigModal 
@@ -19827,6 +18228,22 @@ const handleCombatStateChange = (updatedCombatants, logs, changeset) => {
     }
 };
 
+// Combat System (design/gdd/combat-system.md): trận đấu giờ KHÔNG còn UI trực quan riêng — không hoạt ảnh,
+// không log cơ học hiển thị trực tiếp. Mỗi khi người chơi/đồng hành CHỌT XONG một hành động, đẩy một dòng
+// xác nhận NGẮN, KHÔNG gọi AI (đúng luật "đúng 1 lệnh gọi AI cho toàn trận", xem finalizeCombatEnd) vào
+// storyHistory theo đúng pattern 'type: system' đã dùng sẵn ở nơi khác trong file, để người chơi biết lựa
+// chọn đã được ghi nhận trong lúc chờ đến lượt tiếp theo/kết thúc trận.
+const pushCombatActionConfirmation = (actor, skillData, target) => {
+    if (!actor || !skillData) return;
+    const actorLabel = getDisplayName(actor);
+    const targetLabel = (target && target.id !== actor.id) ? ` nhắm vào ${getDisplayName(target)}` : '';
+    setStoryHistory(prev => [...prev, {
+        id: crypto.randomUUID(),
+        type: 'system',
+        content: `**[Chiến đấu]** ${actorLabel} thực hiện [${skillData.Name}]${targetLabel}.`
+    }]);
+};
+
 const handleActionRequest = async (turnTaker, isFirstTurn = false, options = {}, combatLoopInstance) => {
     // Xác định quyền sở hữu lượt đi
     let isMyTurn = false;
@@ -19869,6 +18286,7 @@ const handleActionRequest = async (turnTaker, isFirstTurn = false, options = {},
             if (options.skillToUse) {
                 setPvpTurnTimeLeft(null); // Tắt khi đã có lệnh đánh
                 const { skillToUse, target } = options;
+                pushCombatActionConfirmation(turnTaker, skillToUse, target);
 
                 try {
                     await combatLoopInstance.handleAction(skillToUse, target ? target.id : null);
@@ -19895,6 +18313,7 @@ const handleActionRequest = async (turnTaker, isFirstTurn = false, options = {},
     if (turnTaker.isPlayer || (turnTaker.isCompanion && !combatLoopInstance.isPlayerPresent)) {
         if (options.skillToUse) {
             const { skillToUse, target } = options;
+            pushCombatActionConfirmation(turnTaker, skillToUse, target);
             try {
                 await combatLoopInstance.handleAction(skillToUse, target ? target.id : null);
             } catch (error) {
@@ -19974,6 +18393,23 @@ const formatPartyInfo = (party, isWinner) => {
     }).join('\n    ');
 };
 
+// Combat System (design/gdd/combat-system.md, Core Identity — "chiến đấu theo lượt tường thuật bằng văn bản"):
+// Tuần tự hóa TOÀN BỘ diễn biến cơ học (mỗi pha giao đấu, từng thức cả hai bên đã dùng, trúng/né/chí mạng,
+// sát thương/hồi máu) đã tích lũy trong combatLog suốt trận thành một danh sách văn bản gọn, THEO ĐÚNG THỨ TỰ
+// đã xảy ra — đây là dữ liệu DUY NHẤT đưa vào lệnh gọi AI tường thuật MỘT LẦN DUY NHẤT cho toàn trận
+// (xem finalizeCombatEnd/buildXPrompt), để AI "gọi đúng tên thức" (Player Fantasy) của cả hai bên, đúng thứ tự.
+const formatCombatBlowByBlow = (combatLog) => {
+    const meaningfulEntries = (combatLog || []).filter(entry => entry && entry.actor && entry.round > 0);
+    if (meaningfulEntries.length === 0) {
+        return "(Trận đấu kết thúc ngay lập tức, không có pha giao đấu nào đáng chú ý.)";
+    }
+
+    return meaningfulEntries.map(entry => {
+        const skillPart = entry.skill ? `dùng [${entry.skill}]` : 'ra đòn';
+        const targetPart = entry.target ? ` nhắm vào ${entry.target}` : '';
+        return `[Hiệp ${entry.round}] ${entry.actor} ${skillPart}${targetPart}: ${entry.message}`;
+    }).join('\n    ');
+};
 
 const startCombat = async (playerParty_Objects, enemiesToFight_Objects, combatType = 'Lethal') => {
    if (!enemiesToFight_Objects || enemiesToFight_Objects.length === 0 || !playerParty_Objects || playerParty_Objects.length === 0) {
@@ -19984,8 +18420,6 @@ const startCombat = async (playerParty_Objects, enemiesToFight_Objects, combatTy
    
    // --- KHỐI BYPASS DÀNH CHO CHẾ ĐỘ ĐẤU TẬP (SANDBOX) ---
    if (combatType === 'Sandbox') {
-       setCombatEnvironmentImage(gameSettings.defaultCombatBackground || 'https://res.cloudinary.com/dptdcwltd/image/upload/v1779553767/S%C3%A2n_%C4%90%E1%BA%A5u_T%E1%BA%ADp_Th%C3%B4_S%C6%A1_S%C3%A0n_l%C3%B4i_%C4%91%C3%A0i__Arena_igqabu.jpg');
-       
        const refreshedPlayerParty = playerParty_Objects.map(p => calculateFinalStats(p));
        const refreshedEnemies = enemiesToFight_Objects.map(e => calculateFinalStats(e));
 
@@ -20001,14 +18435,11 @@ const startCombat = async (playerParty_Objects, enemiesToFight_Objects, combatTy
 
        setGameMode('COMBAT');
        setChoices([]);
-       
-       setCombatLog([{
+       setCombatLog([]);
+       setStoryHistory(prev => [...prev, {
            id: crypto.randomUUID(),
-           round: 0,
-           actor: "Hệ thống",
-           skill: "",
-           target: "",
-           message: "--- BẮT ĐẦU ĐẤU TẬP THỬ NGHIỆM --- \nHình nhân thế thân đã được thiết lập. Hãy thỏa sức thử nghiệm chiêu thức!"
+           type: 'system',
+           content: `**[Đấu tập]** Hình nhân thế thân đã được thiết lập. Hãy thỏa sức thử nghiệm chiêu thức!`
        }]);
        return;
    }
@@ -20058,202 +18489,26 @@ const startCombat = async (playerParty_Objects, enemiesToFight_Objects, combatTy
             }
         });
         
-        await Promise.all(skillPromises); 
+        await Promise.all(skillPromises);
 
-      
-        // GIAI ĐOẠN 2: LẤY VĂN BẢN MỞ MÀN & PROMPT NỀN
-      
-        let battleIntroText = "Trận chiến bắt đầu!";
-        let finalBgUrl = null;
-        let bgPrompt = null;
-        
-        const playerLoc = knowledge.locations.find(l => l.id === playerParty_Objects[0]?.current_location_id);
-        const locName = playerLoc ? playerLoc.Name : "Khu vực hoang vắng";
-        const locDesc = playerLoc ? playerLoc.description : "";
-        
-        if (gameSettings.defaultCombatBackground) {
-            // Người chơi đã cấu hình nền trận đấu cố định trong Tùy Chỉnh — dùng luôn, bỏ qua AI tự tạo nền.
-            finalBgUrl = gameSettings.defaultCombatBackground;
-        } else if (playerLoc && playerLoc.arenaBackgroundUrl) {
-            finalBgUrl = playerLoc.arenaBackgroundUrl;
-        }
+        // Combat System (design/gdd/combat-system.md): KHÔNG còn UI trực quan (không sàn đấu, không sprite),
+        // nên GIAI ĐOẠN 2/3/4 cũ (gọi AI viết văn mở màn + vẽ ảnh nền/base/dáng đánh/kỹ năng) đã bị CẮT hoàn
+        // toàn — đúng luật "đúng 1 lệnh gọi AI cho toàn trận" (xem finalizeCombatEnd/formatCombatBlowByBlow):
+        // AI tường thuật CHỈ được gọi MỘT LẦN, ở cuối trận, sau khi có đủ toàn bộ diễn biến cơ học. Mở màn giờ
+        // chỉ là một dòng xác nhận hệ thống NGẮN, không AI — cùng pattern với pushCombatActionConfirmation.
+        const enemyNamesForIntro = [...new Set(enemiesToFight_Objects.map(e => e.Name))].join(', ');
+        setStoryHistory(prev => [...prev, {
+            id: crypto.randomUUID(),
+            type: 'system',
+            content: `**[Chiến đấu]** Trận chiến bắt đầu! Đối mặt: ${enemyNamesForIntro}.`
+        }]);
 
-        const enemiesWithSkillsForIntro = enemiesToFight_Objects.map(enemy => ({
-            ...enemy,
-            skills: enemyMap.get(enemy.Name).skills || []
-        }));
-
-        try {
-            const introPrompt = `
-                A combat is starting in the game.
-                Location Name: ${locName}. Location Details: ${locDesc}. Weather: ${knowledge.weather}. Theme: ${gameSettings.theme}.
-                Player side: ${playerParty_Objects.map(p=>p.Name).join(', ')}.
-                Enemy side: ${enemiesWithSkillsForIntro.map(e=>e.Name).join(', ')}.
-                
-                Return a JSON object EXACTLY like this:
-                {
-                   "narrative": "Viết đoạn văn tiếng Việt mô tả khoảnh khắc chạm trán giữa hai bên tại địa điểm này.",
-                   "bgPrompt": ${finalBgUrl ? '""' : '"Detailed description of a 2D fighting game stage based on the location. CRITICAL INSTRUCTION: The bottom 40% to 50% of the image MUST be a solid, flat, walkable ground floor texture. The top 50% to 60% MUST be the background sky and scenery. Perfect horizontal horizon line. MUST specify \'2D flat hand-drawn style, game asset\'. DO NOT include text, borders, vignette, or characters."'}
-                }
-            `;
-            const schema = { type: "OBJECT", properties: { narrative: { type: "STRING" }, bgPrompt: { type: "STRING" } }, required:["narrative", "bgPrompt"] };
-            const payload = { contents:[{ role: "user", parts:[{ text: introPrompt }] }], generationConfig: { response_mime_type: "application/json", response_schema: schema } };
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
-            
-            const jsonText = await fetchWithRetries(apiUrl, payload);
-            const parsedIntro = JSON.parse(jsonText);
-            
-            // ÉP KIỂU STRING ĐỂ CHỐNG LỖI REACT CHILD OBJECT
-            battleIntroText = typeof parsedIntro.narrative === 'string' ? parsedIntro.narrative : JSON.stringify(parsedIntro.narrative);
-            bgPrompt = parsedIntro.bgPrompt;
-        } catch (err) {
-            console.warn("Lỗi tạo intro, dùng mặc định:", err);
-        }
-
-      
-        // GIAI ĐOẠN 3: VẼ ẢNH GỐC (BASE) VÀ ẢNH NỀN (NÉM TẤT CẢ VÀO HÀNG CHỜ CÙNG LÚC)
-        const essentialVisualPromises = [];
-
-        // Yêu cầu vẽ nền
-        if (!finalBgUrl && bgPrompt) {
-            essentialVisualPromises.push(
-                generateCombatEnvironment(bgPrompt, effectiveApiKey)
-                    .then(url => {
-                        if (url) {
-                            finalBgUrl = url; // Lưu vào biến cục bộ để gán sau khi đợi xong
-                            if (playerLoc) {
-                                setknowledge(prev => {
-                                    const newK = JSON.parse(JSON.stringify(prev));
-                                    const locIdx = newK.locations.findIndex(l => l.id === playerLoc.id);
-                                    if (locIdx > -1) newK.locations[locIdx].arenaBackgroundUrl = url;
-                                    return newK;
-                                });
-                            }
-                        }
-                    })
-                    .catch(e => console.error("Lỗi ngầm vẽ nền:", e))
-            );
-        }
-
-        // Yêu cầu vẽ ảnh Base của nhân vật
-        allTemplatesToProcess.forEach(char => {
-            if (!char.images) char.images = { base: null, idle: null, attack_normal: null, skills: {} };
-            
-            if (!char.images.base && !char.avatarError) {
-                const role = char.Role ? `Role/Profession: ${char.Role}. ` : "";
-                const desc = char.Appearance || char.description || "";
-                const baseCombatPrompt = `A single isolated full body character sprite of 1 individual, centered. Only one single character is allowed in the entire image. Theme: ${gameSettings.theme}. ${role}Appearance: ${desc.substring(0, 250)}. Pose: Default active combat stance, facing towards the right side of the screen (profile view facing right). 2D clean flat vector anime art style. Pure black #000000 outline border. Solid white #FFFFFF background. No second character, no duplication, no split screens.`;
-                
-                const charBasePromise = generateSingleImage(baseCombatPrompt, effectiveApiKey)
-                    .then(async (rawImageBase64) => {
-                        const processed = await processSprite(rawImageBase64, null);
-                        char.images.base = processed.url;
-                        if (!char.metadata) char.metadata = {};
-                        char.metadata.normalizedBaseMass = processed.normalizedMass;
-                        char.metadata.visualCenterY = processed.visualCenterY;
-                        char.metadata.visualTopY = processed.visualTopY;
-                        char.metadata.visualWidthRatio = processed.visualWidthRatio;
-
-                        if (char.isPlayer || char.isCompanion) {
-                            await storeAvatarInIndexedDB(char.id, processed.url);
-                            char.avatarStoredLocally = true;
-                        }
-                        if (!char.avatarBase64 && !char.avatarUrl) {
-                            char.avatarBase64 = processed.url; 
-                        }
-                    }).catch(imgError => {
-                        console.warn(`[CẢNH BÁO] Không thể vẽ ảnh Base cho "${char.Name}". Lỗi:`, imgError.message);
-                        char.avatarError = true;
-                    });
-
-                essentialVisualPromises.push(charBasePromise);
-            }
-        });
-
-        // ĐỢI TẤT CẢ BASE VÀ BACKGROUND XONG
-        if (essentialVisualPromises.length > 0) {
-            setModalMessage({ show: true, title: "Hãy sẵn sàng", content: `Trận chiến không thể tránh khỏi...`, type: "info" });
-            await Promise.all(essentialVisualPromises);
-        }
-        
-        if (finalBgUrl) {
-            setCombatEnvironmentImage(finalBgUrl);
-        }
-
-      
-        // GIAI ĐOẠN 4: VẼ CÁC DÁNG ĐÁNH VÀ KỸ NĂNG (CHẠY NGẦM HOÀN TOÀN)
-      
-        const updateBgImage = (charName, imgType, url, skillId = null) => {
-            if (!url) return;
-            setknowledge(prev => {
-                const newK = JSON.parse(JSON.stringify(prev));
-                newK.characters.forEach(c => {
-                    if (c.Name === charName) {
-                        if (!c.images) {
-                            c.images = { base: null, idle: null, attack_normal: null, skills: {} };
-                        }
-                        
-                        if (skillId) {
-                            if (!c.images.skills) c.images.skills = {};
-                            c.images.skills[skillId] = url;
-                        } else {
-                            c.images[imgType] = url;
-                        }
-                    }
-                });
-                return newK;
-            });
-        };
-
-        allTemplatesToProcess.forEach(char => {
-            // Phải đảm bảo char.images tồn tại và có ảnh base
-            if (char.images && char.images.base && !char.avatarError) {
-                const charDesc = `${char.Role || ''} ${char.Appearance || ''} ${char.description || ''}`.toLowerCase();
-                const isRanged = charDesc.match(/cung|nỏ|súng|pháp sư|phù thủy|ám khí|tiêu|ranged|bow|gun|magic|spell/);
-                const atkPoseType = isRanged ? "DYNAMIC: Aiming and shooting a ranged attack or casting a spell" : "DYNAMIC: Swinging weapon forward for a melee strike";
-
-                if (!char.images.idle) {
-                    generateSpecificPose("Resting/breathing combat pose", char.images.base, char.metadata?.normalizedBaseMass, effectiveApiKey)
-                        .then(url => updateBgImage(char.Name, 'idle', url))
-                        .catch(e => console.warn("Lỗi vẽ ngầm Idle:", e));
-                }
-                if (!char.images.attack_normal) {
-                    generateSpecificPose(atkPoseType, char.images.base, char.metadata?.normalizedBaseMass, effectiveApiKey)
-                        .then(url => updateBgImage(char.Name, 'attack_normal', url))
-                        .catch(e => console.warn("Lỗi vẽ ngầm Attack:", e));
-                }
-
-                const combatSkills = (char.isPlayer || char.isCompanion) 
-                    ? Object.values(char.equippedSkills || {}).filter(s => s && s.skillType === 'combat')
-                    : (char.skills ||[]);
-
-                for (const skill of combatSkills) {
-                    if (!char.images.skills || !char.images.skills[skill.id]) {
-                        const skillPrompt = `Action pose: Performing a move related to "${skill.Name}". Base concept: ${skill.description || 'Physical attack'}. CRITICAL INSTRUCTION: The character's body MUST remain EXACTLY the same size, scale, and proportions as the reference image. 2D flat art style. NO 3D. CLEAR DAYLIGHT LIGHTING. ABSOLUTELY NO VISUAL EFFECTS (VFX). DO NOT draw magic, fire, glowing auras, energy, or impact flashes. ONLY draw the pure physical character model (and their held weapons) in a dynamic physical stance.
-                            
-                            CRITICAL COLOR RULES (CHROMA KEY):
-                            1. The character MUST have a thick PURE #000000 BLACK outline/border around their entire body, hands, hair, and weapons.
-                            2. The ENTIRE background MUST be PURE #FFFFFF WHITE.
-                            3. DO NOT draw a desk, table, shadows on the floor, or any scenery. ONLY draw the character on a solid white background.`;                        
-                        generateSpecificPose(skillPrompt, char.images.base, char.metadata?.normalizedBaseMass, effectiveApiKey, true)
-                            .then(url => updateBgImage(char.Name, 'skills', url, skill.id))
-                            .catch(e => console.warn(`Lỗi vẽ ngầm Kỹ năng ${skill.Name}:`, e));
-                    }
-                }
-            }
-        });
-
-      
-        // GIAI ĐOẠN 5: ÁP DỤNG DATA VÀ VÀO GAME
-      
+        // GIAI ĐOẠN 2: ÁP DỤNG DATA VÀ VÀO GAME
         const enemiesWithSkills = enemiesToFight_Objects.map(enemy => {
             const template = enemyMap.get(enemy.Name);
             return {
                 ...enemy,
                 skills: template.skills ? JSON.parse(JSON.stringify(template.skills)) : [],
-                images: template.images, 
-                metadata: template.metadata,
-                avatarError: template.avatarError
             };
         });
 
@@ -20263,14 +18518,6 @@ const startCombat = async (playerParty_Objects, enemiesToFight_Objects, combatTy
                 const index = newKnowledge.characters.findIndex(c => c.id === updatedEnemy.id);
                 if (index > -1) {
                     newKnowledge.characters[index].skills = updatedEnemy.skills;
-                    newKnowledge.characters[index].images = updatedEnemy.images || { base: null, idle: null, attack_normal: null, skills: {} }; 
-                }
-            });
-            playerParty_Objects.forEach(playerChar => {
-                const index = newKnowledge.characters.findIndex(c => c.id === playerChar.id);
-                if (index > -1) {
-                    newKnowledge.characters[index].avatarStoredLocally = playerChar.avatarStoredLocally;
-                    if (playerChar.avatarBase64) newKnowledge.characters[index].avatarBase64 = playerChar.avatarBase64;
                 }
             });
             return newKnowledge;
@@ -20282,7 +18529,7 @@ const startCombat = async (playerParty_Objects, enemiesToFight_Objects, combatTy
         setModalMessage({ show: false, title: "", content: "", type: "info" });
         setIsLoading(false);
         setIsProcessingAction(false);
-        
+
         setCombatInitializationData({
             playerParty: refreshedPlayerParty,
             enemies: refreshedEnemies,
@@ -20291,15 +18538,7 @@ const startCombat = async (playerParty_Objects, enemiesToFight_Objects, combatTy
 
         setGameMode('COMBAT');
         setChoices([]);
-        
-        setCombatLog([{
-            id: crypto.randomUUID(),
-            round: 0,
-            actor: "Hệ thống",
-            skill: "",
-            target: "",
-            message: battleIntroText
-        }]);
+        setCombatLog([]);
 
    } catch (error) {
        console.error("Lỗi nghiêm trọng trong quá trình chuẩn bị combat:", error);
@@ -20751,21 +18990,6 @@ const [impromptuInput, setImpromptuInput] = useState('');
   const [showGameOverModal, setShowGameOverModal] = useState(false);
   const [activeEvent, setActiveEvent] = useState(null);
   const [activeCombatLoop, setActiveCombatLoop] = useState(null);
-  const [combatEndSummary, setCombatEndSummary] = useState(null);
-  const [combatEnvironmentImage, setCombatEnvironmentImage] = useState(null);
-  const [activeAnimation, setActiveAnimation] = useState(null);
-  // Resolver của Promise chờ VisualCombatArena báo hiệu hoạt ảnh thực sự đã chạy xong (không dựa vào ước lượng thời gian).
-  // currentAnimationDataRef dùng để đối chiếu danh tính, tránh tín hiệu trễ từ hoạt ảnh CŨ vô tình
-  // hoàn tất luôn hoạt ảnh MỚI đang chờ (2 async timer độc lập chạy nối tiếp nhau qua các lượt).
-  const animationVisualDoneResolverRef = useRef(null);
-  const currentAnimationDataRef = useRef(null);
-  const handleAnimationVisualComplete = useCallback((completedAnimationData) => {
-      if (completedAnimationData !== currentAnimationDataRef.current) return; // Tín hiệu trễ của hoạt ảnh cũ, bỏ qua
-      if (animationVisualDoneResolverRef.current) {
-          animationVisualDoneResolverRef.current();
-          animationVisualDoneResolverRef.current = null;
-      }
-  }, []);
   const [characterInfoInitialTab, setCharacterInfoInitialTab] = useState('character');
   const [apiKey, setApiKey] = useState('');
   const [apiMode, setApiMode] = useState('defaultGemini');
@@ -20790,46 +19014,6 @@ const [activeTrade, setActiveTrade] = useState({
     itemSpecificSellBonuses: {},
     itemSpecificBuyBonuses: {}, 
 });
-const generateCombatEnvironment = async (bgPrompt, effectiveApiKey) => {
-    if (!bgPrompt) return null;
-
-    console.log("Đang gọi API Gemini 3.1 Flash cho CẢNH NỀN với prompt:", bgPrompt);
-
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${effectiveApiKey}`;
-    const finalPrompt = `Generate an image: ${bgPrompt}. Masterpiece 2D flat game art, side-scrolling RPG arena. Zero perspective depth. CRITICAL: The bottom 40% to 50% of the image MUST be a solid, flat, walkable ground floor texture. The top part is the background scenery. Clear horizontal horizon. (NO text, NO words, NO watermarks, NO borders, NO vignette, NO white edges, NO UI, NO characters).`;
-    const payload = {
-        contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
-        generationConfig: { responseModalities: ["IMAGE"] } 
-    };
-    
-    // BỌC VÀO HÀNG CHỜ
-    const executeBgFetch = async () => {
-        const stageRes = await fetch(apiUrl, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify(payload) 
-        });
-
-        if (!stageRes.ok) throw new Error("Gemini API lỗi");
-        
-        const stageData = await stageRes.json();
-        const base64 = stageData.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-        
-        if (base64) {
-            console.log("Tạo Ảnh Nền THÀNH CÔNG!");
-            return `data:image/jpeg;base64,${base64}`;
-        }
-        return null;
-    };
-
-    try {
-        return await globalApiQueue.enqueue(executeBgFetch);
-    } catch (e) {
-        console.warn("Lỗi khi vẽ cảnh nền combat, sử dụng cảnh nền CSS mặc định:", e);
-        return null; 
-    }
-};
-
 
 const [selectedCharacterIdForModal, setSelectedCharacterIdForModal] = useState(null);
 const openCompanionInfoModal = (characterDataOrId) => {
@@ -21633,9 +19817,8 @@ const handleGenerateImpromptu = async () => {
               setPvpRoom(updatedState);
               pvpRoomRef.current = updatedState;
 
-              setShowPvPLobby(false); 
-              setCombatEnvironmentImage(gameSettings.defaultCombatBackground || 'https://res.cloudinary.com/dptdcwltd/image/upload/v1778224741/download_2_jfefpx.png');
-              setCombatInitializationData({ 
+              setShowPvPLobby(false);
+              setCombatInitializationData({
                   playerParty: pvpRoomRef.current.readyMyParty, 
                   enemies: pvpRoomRef.current.readyEnemyParty, 
                   combatType: 'PvP' 
@@ -21703,8 +19886,7 @@ const handleGenerateImpromptu = async () => {
   const [customActionInput, setCustomActionInput] = useState('');
   const [allowUnexpectedEvent, setAllowUnexpectedEvent] = useState(false);
   const [companionCommandInput, setCompanionCommandInput] = useState('');
-  const [combatLog, setCombatLog] = useState([]); 
-  const [showCombatStatsModal, setShowCombatStatsModal] = useState(false); 
+  const [combatLog, setCombatLog] = useState([]);
   const [combatTargetingState, setCombatTargetingState] = useState({
       isActive: false,
       skill: null,
@@ -22205,38 +20387,10 @@ useEffect(() => {
             handleCombatEnd,            // 4. onCombatEnd
             combatType,                 // 5. combatType
             knowledge.sharedCooldowns,  // 6. sharedCooldowns
-            async (animationData) => {  // 7. onAnimateAction
-                currentAnimationDataRef.current = animationData;
-                setActiveAnimation(animationData);
-
-                // Chờ TÍN HIỆU THẬT từ VisualCombatArena báo hoạt ảnh đã chạy xong hẳn, thay vì ước lượng
-                // thời gian (ước lượng cũ luôn ngắn hơn hoạt ảnh thực tế, đặc biệt là tuyệt chiêu có cutin dài,
-                // khiến lượt tiếp theo/màn tổng kết chiến thắng bị gọi ra giữa chừng lúc hoạt ảnh chưa xong).
-                // Vẫn giữ một mốc an toàn (fallback) để tránh kẹt trận nếu vì lý do gì đó không nhận được tín hiệu.
-                const skill = animationData.skill;
-                const vfx = skill.effects?.[0]?.action?.visual_effects || skill.visual_effects || {};
-                const vfxCount = vfx.vfxCount || skill.effects?.[0]?.action?.target?.hit_count || 1;
-                const fallbackTimeout = 5000 + (vfxCount * 500);
-
-                await new Promise(resolve => {
-                    let settled = false;
-                    const fallbackTimer = setTimeout(() => {
-                        if (settled) return;
-                        settled = true;
-                        animationVisualDoneResolverRef.current = null;
-                        resolve();
-                    }, fallbackTimeout);
-                    animationVisualDoneResolverRef.current = () => {
-                        if (settled) return;
-                        settled = true;
-                        clearTimeout(fallbackTimer);
-                        resolve();
-                    };
-                });
-
-                if (currentAnimationDataRef.current === animationData) currentAnimationDataRef.current = null;
-                setActiveAnimation(null);
-            },
+            // 7. onAnimateAction — Combat System (design/gdd/combat-system.md): không còn UI/animation trực quan
+            // nữa (không VisualCombatArena), nên đây chỉ là no-op resolve ngay lập tức để CombatLoop không bị
+            // chặn chờ một tín hiệu hoạt ảnh không còn tồn tại.
+            async () => {},
 
             // 8. onPvPActionGenerated
             async (pvpPayload) => {
@@ -22252,7 +20406,6 @@ useEffect(() => {
             callCombatAI 
         );
 
-        setCombatEndSummary(null);
         setActiveCombatLoop(loop);
         setTimeout(() => {
             loop.start();
@@ -29438,14 +27591,11 @@ const generateAndUploadNpcAvatar = useCallback(async (npc) => {
 }, [setknowledge, gameSettings.allowNsfw]); 
 
 // Được gọi ngay khi trận đấu vừa kết thúc (địch/ta gục ngã, bỏ chạy thành công...).
-// Chỉ lưu lại kết quả để hiển thị màn hình tổng kết — KHÔNG đóng cửa sổ chiến đấu ngay,
-// để người chơi kịp xem lại trận đấu. Cửa sổ chỉ thực sự đóng khi bấm nút "Đóng" (xem finalizeCombatEnd).
+// Combat System (design/gdd/combat-system.md): không còn UI/animation trực quan để "đợi xem cảnh kết liễu"
+// nữa, nên không cần màn hình tổng kết chặn thao tác — đi thẳng vào finalizeCombatEnd, nơi sẽ gọi lệnh AI
+// tường thuật DUY NHẤT cho toàn trận (đúng vai trò của một lượt tường thuật bình thường trong storyHistory).
 const handleCombatEnd = (outcome, data, finalSharedCooldowns) => {
-    // Lúc này hoạt ảnh của đòn kết liễu đã chạy xong hẳn (onAnimateAction chỉ resolve sau khi
-    // VisualCombatArena báo hoàn tất). Đợi thêm 2 giây cho người chơi kịp xem trọn cảnh rồi mới hiện tổng kết.
-    setTimeout(() => {
-        setCombatEndSummary({ outcome, data, finalSharedCooldowns });
-    }, 2000);
+    finalizeCombatEnd(outcome, data, finalSharedCooldowns);
 };
 
 const finalizeCombatEnd = async (outcome, data, finalSharedCooldowns) => {
@@ -29600,18 +27750,21 @@ const finalizeCombatEnd = async (outcome, data, finalSharedCooldowns) => {
     const enemyParty = isVictory ? data.losingSideInfo : data.winningSideInfo;
     const playerPartyFormatted = formatPartyInfo(playerParty, isVictory);
     const enemyPartyFormatted = formatPartyInfo(enemyParty, !isVictory);
+    // Toàn bộ diễn biến cơ học của trận (mọi pha giao đấu, mọi thức cả hai bên đã dùng) — nguồn dữ liệu
+    // DUY NHẤT cho lần gọi AI tường thuật DUY NHẤT của cả trận (xem formatCombatBlowByBlow).
+    const combatBlowByBlowFormatted = formatCombatBlowByBlow(combatLog);
 
     let prompt = '';
     if (outcome === 'FLED') {
-        prompt = buildFleePrompt(playerPartyFormatted, enemyPartyFormatted, gameSettings);
+        prompt = buildFleePrompt(playerPartyFormatted, enemyPartyFormatted, gameSettings, combatBlowByBlowFormatted);
     } else if (isVictory) {
         prompt = combatType === 'Sparring'
-            ? buildVictorySparringPrompt(playerPartyFormatted, enemyPartyFormatted, gameSettings)
-            : buildVictoryLethalPrompt(playerPartyFormatted, enemyPartyFormatted, gameSettings);
+            ? buildVictorySparringPrompt(playerPartyFormatted, enemyPartyFormatted, gameSettings, combatBlowByBlowFormatted)
+            : buildVictoryLethalPrompt(playerPartyFormatted, enemyPartyFormatted, gameSettings, combatBlowByBlowFormatted);
     } else {
         prompt = combatType === 'Sparring'
-            ? buildDefeatSparringPrompt(playerPartyFormatted, enemyPartyFormatted, gameSettings)
-            : buildDefeatLethalPrompt(playerPartyFormatted, enemyPartyFormatted, gameSettings);
+            ? buildDefeatSparringPrompt(playerPartyFormatted, enemyPartyFormatted, gameSettings, combatBlowByBlowFormatted)
+            : buildDefeatLethalPrompt(playerPartyFormatted, enemyPartyFormatted, gameSettings, combatBlowByBlowFormatted);
     }
 
     if (prompt) {
@@ -29619,7 +27772,7 @@ const finalizeCombatEnd = async (outcome, data, finalSharedCooldowns) => {
     }
 };
 
-const buildVictorySparringPrompt = (playerPartyFormatted, enemyPartyFormatted, gameSettings) => `
+const buildVictorySparringPrompt = (playerPartyFormatted, enemyPartyFormatted, gameSettings, combatBlowByBlowFormatted) => `
 //   PROMPT KẾT CỤC: THẮNG - GIAO HỮU (PHIÊN BẢN CÓ RỦI RO)
 
 // VAI TRÒ: Bạn là một Quản trò thông thái, chuyên sáng tác tiểu thuyết mạng bằng tiếng Việt theo góc nhìn thứ hai, thể loại "${gameSettings.theme}".
@@ -29632,6 +27785,8 @@ const buildVictorySparringPrompt = (playerPartyFormatted, enemyPartyFormatted, g
 //     ${playerPartyFormatted}
 // *   PHE ĐỐI ĐỊCH (Thua cuộc):
 //     ${enemyPartyFormatted}
+// *   DIỄN BIẾN CHI TIẾT TOÀN TRẬN (mọi pha giao đấu đã xảy ra, ĐÚNG THỨ TỰ — đây là NGUỒN SỰ THẬT DUY NHẤT về việc ai đã dùng thức gì, trúng/né/chí mạng ra sao; ngươi PHẢI tường thuật lại trọn vẹn diễn biến trận đấu này thành VĂN XUÔI liền mạch một lần duy nhất, gọi ĐÚNG TÊN từng thức cả hai bên đã dùng theo đúng thứ tự bên dưới, không bỏ sót pha nào có ý nghĩa, KHÔNG bịa thêm thức không có trong danh sách):
+//     ${combatBlowByBlowFormatted}
 
 // --- B. CHECKLIST NHIỆM VỤ CỦA BẠN (QUY TRÌNH RA QUYẾT ĐỊNH) ---
 // 1.  **BƯỚC 1: PHÂN TÍCH & QUYẾT ĐỊNH (QUAN TRỌNG NHẤT)**
@@ -29669,7 +27824,7 @@ Sau đòn đánh cuối cùng, *Lý Sư Huynh* lảo đảo rồi ngã xuống s
 ${postCombatRules}
 `;
 
-const buildVictoryLethalPrompt = (playerPartyFormatted, enemyPartyFormatted, gameSettings) => `
+const buildVictoryLethalPrompt = (playerPartyFormatted, enemyPartyFormatted, gameSettings, combatBlowByBlowFormatted) => `
 //   PROMPT KẾT CỤC: THẮNG - SINH TỬ
 
 // VAI TRÒ: Bạn là một Quản trò thông thái, chuyên sáng tác tiểu thuyết mạng bằng tiếng Việt theo góc nhìn thứ hai, thể loại "${gameSettings.theme}".
@@ -29682,6 +27837,8 @@ const buildVictoryLethalPrompt = (playerPartyFormatted, enemyPartyFormatted, gam
 //     ${playerPartyFormatted}
 // *   PHE ĐỐI ĐỊCH (Thua cuộc):
 //     ${enemyPartyFormatted}
+// *   DIỄN BIẾN CHI TIẾT TOÀN TRẬN (mọi pha giao đấu đã xảy ra, ĐÚNG THỨ TỰ — đây là NGUỒN SỰ THẬT DUY NHẤT về việc ai đã dùng thức gì, trúng/né/chí mạng ra sao; ngươi PHẢI tường thuật lại trọn vẹn diễn biến trận đấu này thành VĂN XUÔI liền mạch một lần duy nhất, gọi ĐÚNG TÊN từng thức cả hai bên đã dùng theo đúng thứ tự bên dưới, không bỏ sót pha nào có ý nghĩa, KHÔNG bịa thêm thức không có trong danh sách):
+//     ${combatBlowByBlowFormatted}
 
 // --- B. CHECKLIST NHIỆM VỤ CỦA BẠN (BẮT BUỘC THỰC HIỆN) ---
 // 1.  **PHÁN QUYẾT SỐ PHẬN (QUAN TRỌNG NHẤT):**
@@ -29717,7 +27874,7 @@ Trận chiến cuối cùng cũng kết thúc. Ngươi thở hổn hển, chốn
 ${postCombatRules}
 `;
 
-const buildDefeatSparringPrompt = (playerPartyFormatted, enemyPartyFormatted, gameSettings) => `
+const buildDefeatSparringPrompt = (playerPartyFormatted, enemyPartyFormatted, gameSettings, combatBlowByBlowFormatted) => `
 //   PROMPT KẾT CỤC: THUA - GIAO HỮU
 
 // VAI TRÒ: Bạn là một Quản trò thông thái, chuyên sáng tác tiểu thuyết mạng bằng tiếng Việt theo góc nhìn thứ hai, thể loại "${gameSettings.theme}".
@@ -29730,6 +27887,8 @@ const buildDefeatSparringPrompt = (playerPartyFormatted, enemyPartyFormatted, ga
 //     ${playerPartyFormatted}
 // *   PHE ĐỐI ĐỊCH (Thắng cuộc):
 //     ${enemyPartyFormatted}
+// *   DIỄN BIẾN CHI TIẾT TOÀN TRẬN (mọi pha giao đấu đã xảy ra, ĐÚNG THỨ TỰ — đây là NGUỒN SỰ THẬT DUY NHẤT về việc ai đã dùng thức gì, trúng/né/chí mạng ra sao; ngươi PHẢI tường thuật lại trọn vẹn diễn biến trận đấu này thành VĂN XUÔI liền mạch một lần duy nhất, gọi ĐÚNG TÊN từng thức cả hai bên đã dùng theo đúng thứ tự bên dưới, không bỏ sót pha nào có ý nghĩa, KHÔNG bịa thêm thức không có trong danh sách):
+//     ${combatBlowByBlowFormatted}
 
 // --- B. CHECKLIST NHIỆM VỤ CỦA BẠN (QUY TRÌNH RA QUYẾT ĐỊNH) ---
 // 1.  **BƯỚC 1: PHÂN TÍCH & QUYẾT ĐỊNH (QUAN TRỌNG NHẤT)**
@@ -29766,8 +27925,8 @@ Một cú đánh mạnh vào gáy khiến ngươi tối sầm mặt mũi và ng�
 \SurroundPostCombatRules
 `;
 
-const buildDefeatLethalPrompt = (playerPartyFormatted, enemyPartyFormatted, gameSettings) => `
-//   PROMPT KẾT CỤC: THUA - SINH TỬ 
+const buildDefeatLethalPrompt = (playerPartyFormatted, enemyPartyFormatted, gameSettings, combatBlowByBlowFormatted) => `
+//   PROMPT KẾT CỤC: THUA - SINH TỬ
 
 // VAI TRÒ: Bạn là một Đấng kể chuyện thông thái, chuyên sáng tác tiểu thuyết mạng bằng tiếng Việt theo góc nhìn thứ hai, thể loại "${gameSettings.theme}".
 // QUY TẮC VÀNG: Luôn gọi nhân vật chính là "ngươi" và mô tả mọi sự kiện từ góc nhìn của họ, hạn chế nhắc trực tiếp tên của nhân vật chính. Hạn chế nói về số liệu, chỉ số cụ thể như X HP...
@@ -29779,6 +27938,8 @@ const buildDefeatLethalPrompt = (playerPartyFormatted, enemyPartyFormatted, game
 //     ${playerPartyFormatted}
 // *   PHE PHẢN DIỆN (Thắng cuộc):
 //     ${enemyPartyFormatted}
+// *   DIỄN BIẾN CHI TIẾT TOÀN TRẬN (mọi pha giao đấu đã xảy ra, ĐÚNG THỨ TỰ — đây là NGUỒN SỰ THẬT DUY NHẤT về việc ai đã dùng thức gì, trúng/né/chí mạng ra sao; ngươi PHẢI tường thuật lại trọn vẹn diễn biến trận đấu này thành VĂN XUÔI liền mạch một lần duy nhất, gọi ĐÚNG TÊN từng thức cả hai bên đã dùng theo đúng thứ tự bên dưới, không bỏ sót pha nào có ý nghĩa, KHÔNG bịa thêm thức không có trong danh sách):
+//     ${combatBlowByBlowFormatted}
 
 // --- B. CHECKLIST NHIỆM VỤ CỦA BẠN ---
 // 1.  **PHÁN QUYẾT SỐ PHẬN (QUAN TRỌNG NHẤT):**
@@ -29791,7 +27952,7 @@ const buildDefeatLethalPrompt = (playerPartyFormatted, enemyPartyFormatted, game
 ${postCombatRules}
 `;
 
-const buildFleePrompt = (playerPartyFormatted, enemyPartyFormatted, gameSettings) => `
+const buildFleePrompt = (playerPartyFormatted, enemyPartyFormatted, gameSettings, combatBlowByBlowFormatted) => `
 //   PROMPT KẾT CỤC: BỎ CHẠY THÀNH CÔNG
 
 // VAI TRÒ: Bạn là một Quản trò thông thái, chuyên sáng tác tiểu thuyết mạng bằng tiếng Việt theo góc nhìn thứ hai, thể loại "${gameSettings.theme}".
@@ -29804,6 +27965,8 @@ const buildFleePrompt = (playerPartyFormatted, enemyPartyFormatted, gameSettings
 //     ${playerPartyFormatted}
 // *   PHE ĐỐI ĐỊCH (Bị bỏ lại):
 //     ${enemyPartyFormatted}
+// *   DIỄN BIẾN CHI TIẾT TRẬN ĐẤU TRƯỚC KHI TẨU THOÁT (mọi pha giao đấu đã xảy ra, ĐÚNG THỨ TỰ, trước khi kịp bỏ chạy — ngươi PHẢI lồng ghép NGẮN GỌN diễn biến này vào phần mở đầu tường thuật, gọi đúng tên các thức đã dùng nếu có, rồi mới chuyển sang cảnh tẩu thoát):
+//     ${combatBlowByBlowFormatted}
 
 // --- B. NHIỆM VỤ CỦA BẠN ---
 // 1.  **Tường thuật:** Viết một đoạn văn mô tả lại cảnh nhân vật chính và đồng đội tìm thấy cơ hội và thoát khỏi vòng vây.
@@ -34601,7 +32764,6 @@ const performStateCleanup = () => {
     setActiveCombatLoop(null);
     setCombatTargetingState({ isActive: false, skill: null, casterId: null });
     setCombatUIState({ view: 'main', items: [] });
-    setActiveAnimation(null);
     setRecentlyDefeatedIds([]);
     setIsHtabChatActive(false);
     setHtabExitPending(false);
@@ -34611,7 +32773,6 @@ const performStateCleanup = () => {
     setStorySummaries([]);
     setAdventureTurnCount(0);
     setIsSummarizing(false);
-    setCombatEnvironmentImage(null);
     setSuggestedActionsList([]);
     setShowSuggestedActionsModal(false);
     setQuestNotification({ show: false, quest: null });
@@ -35789,15 +33950,10 @@ const formatStoryText = useCallback((text) => {
                                 combatTargetingState={combatTargetingState}
                                 setCombatTargetingState={setCombatTargetingState}
                                 activeCombatLoop={activeCombatLoop}
-                                combatEndSummary={combatEndSummary}
-                                setCombatEndSummary={setCombatEndSummary}
-                                finalizeCombatEnd={finalizeCombatEnd}
                                 openQuickLoreModal={openQuickLoreModal}
                                 companionCommandInput={companionCommandInput}
                                 setCompanionCommandInput={setCompanionCommandInput}
-                                fileInputRef={fileInputRef} 
-                                combatLog={combatLog}
-                                setShowCombatStatsModal={setShowCombatStatsModal} 
+                                fileInputRef={fileInputRef}
                                 handleTargetSelection={handleTargetSelection}
                                 handleForceExitStuckCombat={handleForceExitStuckCombat}
                                 setModalMessage={setModalMessage}
@@ -35821,9 +33977,6 @@ const formatStoryText = useCallback((text) => {
                                 handleClearImageCache={handleClearImageCache}
                                 onTogglePlayStyle={handleTogglePlayStyle}
                                 handleDeleteStoryItem={handleDeleteStoryItem}
-                                combatEnvironmentImage={combatEnvironmentImage}
-                                activeAnimation={activeAnimation}
-                                onAnimationVisualComplete={handleAnimationVisualComplete}
                                 handleTogglePartyMember={handleTogglePartyMember}
                                 handleLeaveParty={handleLeaveParty}
                                 onOpenPvP={() => setShowPvPLobby(true)}
@@ -36093,14 +34246,6 @@ const formatStoryText = useCallback((text) => {
                 setModalMessage={setModalMessage} 
 
             />
-            {showCombatStatsModal && (
-                <CombatStatsModal
-                    show={showCombatStatsModal}
-                    onClose={() => setShowCombatStatsModal(false)}
-                    combatants={activeCombatLoop ? activeCombatLoop.allCombatants : []}
-                    logEntries={combatLog}
-                />
-            )}
     <LocalCacheManagerModal
         show={showLocalCacheManager}
         onClose={() => setShowLocalCacheManager(false)}
