@@ -216,7 +216,20 @@ function emitTokenRules(tok, bgv, flatVal) {
   }
   s += `[class~="ring-${tok}"] { --tw-ring-color: ${flatVal} !important; }\n`;
   s += `[class~="from-${tok}"] { --tw-gradient-from: ${flatVal} !important; }\n`;
-  s += `[class~="via-${tok}"] { --tw-gradient-via: ${flatVal} !important; }\n`;
+  // via- is special: Tailwind CDN's arbitrary-value JIT does NOT reference
+  // --tw-gradient-via when building the final --tw-gradient-stops list for
+  // a bracket via-[#hex]/NN token — it bakes the ORIGINAL resolved color in
+  // as a literal directly inside --tw-gradient-stops, bypassing the
+  // variable entirely. Confirmed via live computed-style inspection
+  // (2026-08-15): overriding --tw-gradient-via alone left the actual
+  // rendered gradient's middle stop showing the unskinned dark color even
+  // though --tw-gradient-via itself correctly read as the overridden paper
+  // tone — from-/to- don't have this problem (their var() references DO
+  // get used in --tw-gradient-stops). Fix: override --tw-gradient-stops
+  // directly, chaining through --tw-gradient-from/--tw-gradient-to (which
+  // ARE correctly override-able) so it still composes with whatever those
+  // resolve to.
+  s += `[class~="via-${tok}"] { --tw-gradient-via: ${flatVal} !important; --tw-gradient-stops: var(--tw-gradient-from, transparent), ${flatVal}, var(--tw-gradient-to, transparent) !important; }\n`;
   s += `[class~="to-${tok}"] { --tw-gradient-to: ${flatVal} !important; }\n`;
   s += `[class~="decoration-${tok}"] { text-decoration-color: ${flatVal} !important; }\n`;
   s += `[class~="accent-${tok}"] { accent-color: ${flatVal} !important; }\n`;
@@ -231,7 +244,7 @@ function emitTokenRules(tok, bgv, flatVal) {
   }
   s += `${hoverSel(`ring-${tok}`)} { --tw-ring-color: ${flatVal} !important; }\n`;
   s += `${hoverSel(`from-${tok}`)} { --tw-gradient-from: ${flatVal} !important; }\n`;
-  s += `${hoverSel(`via-${tok}`)} { --tw-gradient-via: ${flatVal} !important; }\n`;
+  s += `${hoverSel(`via-${tok}`)} { --tw-gradient-via: ${flatVal} !important; --tw-gradient-stops: var(--tw-gradient-from, transparent), ${flatVal}, var(--tw-gradient-to, transparent) !important; }\n`;
   s += `${hoverSel(`to-${tok}`)} { --tw-gradient-to: ${flatVal} !important; }\n`;
   s += `${hoverSel(`decoration-${tok}`)} { text-decoration-color: ${flatVal} !important; }\n`;
   s += `${hoverSel(`accent-${tok}`)} { accent-color: ${flatVal} !important; }\n`;
