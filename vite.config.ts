@@ -7,6 +7,9 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   root: '.',
+  // GitHub Pages project-page URL: https://<user>.github.io/textbase/ — every
+  // built asset path needs this prefix or the deployed page 404s on load.
+  base: '/textbase/',
   build: {
     outDir: 'dist',
   },
