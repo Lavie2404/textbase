@@ -5,22 +5,25 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 ## Technology Stack
 
-- **Engine**: Godot 4.6
-- **Language**: GDScript
+- **Platform**: Web app (browser), no game engine — pivoted 2026-08-14 from the
+  original Godot 4.6 plan. See `production/session-state/active.md` for the
+  decision record.
+- **Language**: TypeScript / JavaScript (React)
+- **Frontend**: React, built with Vite
+- **Backend**: Firebase (Auth, Firestore, Storage)
+- **AI**: Gemini API (client-side calls, user-supplied key)
+- **Save/Backup**: GitHub repo (via GitHub API)
 - **Version Control**: Git with trunk-based development
-- **Build System**: SCons (engine), Godot Export Templates
-- **Asset Pipeline**: Godot Import System + custom resource pipeline
+- **Build System**: Vite
 
-> **Note**: Engine-specialist agents exist for Godot, Unity, and Unreal with
-> dedicated sub-specialists. Use the set matching your engine.
+> **Note**: No dedicated web/React specialist agent exists in this roster yet.
+> Implementation routes to the generic programmer agents (`gameplay-programmer`,
+> `ui-programmer`, `lead-programmer`, `tools-programmer`) — see
+> `technical-preferences.md` § Engine Specialists for the routing table.
 
 ## Project Structure
 
 @.claude/docs/directory-structure.md
-
-## Engine Version Reference
-
-@docs/engine-reference/godot/VERSION.md
 
 ## Technical Preferences
 

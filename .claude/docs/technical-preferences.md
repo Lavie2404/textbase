@@ -5,10 +5,14 @@
 
 ## Engine & Language
 
-- **Engine**: Godot 4.6
-- **Language**: GDScript
-- **Rendering**: Godot 4 rendering (Forward+ / Mobile renderer — finalize per platform target during architecture)
-- **Physics**: Godot 4 default physics (Jolt)
+- **Platform**: Web app (browser) — React + Vite, no game engine (pivoted
+  2026-08-14 from the original Godot 4.6 plan)
+- **Language**: TypeScript / JavaScript
+- **UI Framework**: React (function components + hooks)
+- **Build Tool**: Vite
+- **Backend**: Firebase (Auth, Firestore, Storage)
+- **AI Integration**: Gemini API, called client-side with a user-supplied key
+- **Rendering**: Standard DOM/CSS — no canvas/WebGL rendering pipeline
 
 ## Input & Platform
 
@@ -24,42 +28,41 @@
 
 ## Naming Conventions
 
-- **Classes**: PascalCase (e.g., `PlayerController`)
-- **Variables**: snake_case (e.g., `move_speed`)
-- **Signals/Events**: snake_case, past tense (e.g., `health_changed`)
-- **Files**: snake_case matching class (e.g., `player_controller.gd`)
-- **Scenes/Prefabs**: PascalCase matching root node (e.g., `PlayerController.tscn`)
+- **Components**: PascalCase (e.g., `PlayerController`)
+- **Variables/functions**: camelCase (e.g., `moveSpeed`)
+- **Custom hooks**: camelCase, `use` prefix (e.g., `useCombatState`)
+- **Files**: match export — PascalCase for component files, camelCase for
+  utility/hook files (e.g., `PlayerController.tsx`, `combatFormulas.ts`)
 - **Constants**: UPPER_SNAKE_CASE (e.g., `MAX_HEALTH`)
 
 ## Performance Budgets
 
-- **Target Framerate**: 60 FPS
+- **Target Framerate**: 60 FPS for animated UI transitions
 - **Frame Budget**: 16.6 ms
-- **Draw Calls**: ~500–1000 (Godot 2D/UI-heavy web target)
+- **Bundle Size**: [TO BE CONFIGURED — set a target once first production build is measured]
 - **Memory Ceiling**: [TO BE CONFIGURED — set once target device profile for Mobile Web is known]
 
 ## Testing
 
-- **Framework**: GUT (Godot Unit Test)
+- **Framework**: [TO BE CONFIGURED — no JS/TS test runner set up yet; run `/test-setup` to scaffold one (e.g. Vitest)]
 - **Minimum Coverage**: [TO BE CONFIGURED]
-- **Required Tests**: Balance formulas, gameplay systems, networking (if applicable)
+- **Required Tests**: Balance formulas (damage, EXP, economy), state machines, save/load round-trip
 
 ## Forbidden Patterns
 
 <!-- Add patterns that should never appear in this project's codebase -->
-- **`JavaScriptBridge.eval()`** (bổ sung 2026-08-08, technical spike
-  `docs/engine-reference/godot/modules/web-export.md` §Q9): đây là API
-  DUY NHẤT trong `JavaScriptBridge` cần CSP `unsafe-eval` — mọi nhu cầu
-  thực tế của dự án (Web Locks, `StorageManager.estimate()`, IndexedDB
-  transaction cho Persistence) đều làm được qua `get_interface()`,
-  `create_object()`, `create_callback()` mà KHÔNG cần eval. Cấm dùng
-  `eval()` biến 1 rủi ro môi trường host (CSP có thể chặn) thành 1 quy
-  tắc code review kiểm tra được tĩnh.
+- **Hardcoding secrets** (Firebase config, Gemini API key, GitHub token) directly
+  in source: all must come from `import.meta.env.VITE_*` and live only in the
+  gitignored `.env` — never committed, never inlined as a literal.
+- **`eval()` / `new Function()`** on any AI- or user-supplied string: the app
+  renders Gemini output and player input directly; treat both as untrusted.
 
 ## Allowed Libraries / Addons
 
 <!-- Add approved third-party dependencies here -->
-- [None configured yet — add as dependencies are approved]
+- `react`, `react-dom` — UI framework
+- `firebase` — Auth, Firestore, Storage
+- `vite`, `@vitejs/plugin-react` — build tooling
 
 ## Architecture Decisions Log
 
@@ -72,12 +75,14 @@
 <!-- Read by /code-review, /architecture-decision, /architecture-review, and team skills -->
 <!-- to know which specialist to spawn for engine-specific validation. -->
 
-- **Primary**: godot-specialist
-- **Language/Code Specialist**: godot-gdscript-specialist (all .gd files)
-- **Shader Specialist**: godot-shader-specialist (.gdshader files, VisualShader resources)
-- **UI Specialist**: godot-specialist (no dedicated UI specialist — primary covers all UI)
-- **Additional Specialists**: godot-gdextension-specialist (GDExtension / native C++ bindings only)
-- **Routing Notes**: Invoke primary for architecture decisions, ADR validation, and cross-cutting code review. Invoke GDScript specialist for code quality, signal architecture, static typing enforcement, and GDScript idioms. Invoke shader specialist for material design and shader code. Invoke GDExtension specialist only when native extensions are involved.
+<!-- No dedicated React/web specialist agent exists in this roster (2026-08-14).
+     Routes to the generic programmer agents until/unless one is added. -->
+
+- **Primary**: lead-programmer
+- **Language/Code Specialist**: gameplay-programmer (game logic, state, formulas in `.ts`/`.tsx`)
+- **UI Specialist**: ui-programmer (screens, modals, layout components)
+- **Additional Specialists**: tools-programmer (Vite config, build tooling, dev scripts)
+- **Routing Notes**: Invoke `lead-programmer` for architecture decisions, ADR validation, and cross-cutting code review. Invoke `gameplay-programmer` for combat/economy/progression logic and state management. Invoke `ui-programmer` for component structure, screen composition, and interaction wiring. Invoke `tools-programmer` for build/tooling changes (`vite.config.ts`, `package.json`, CI).
 
 ### File Extension Routing
 
@@ -86,9 +91,8 @@
 
 | File Extension / Type | Specialist to Spawn |
 |-----------------------|---------------------|
-| Game code (.gd files) | godot-gdscript-specialist |
-| Shader / material files (.gdshader, VisualShader) | godot-shader-specialist |
-| UI / screen files (Control nodes, CanvasLayer) | godot-specialist |
-| Scene / prefab / level files (.tscn, .tres) | godot-specialist |
-| Native extension / plugin files (.gdextension, C++) | godot-gdextension-specialist |
-| General architecture review | godot-specialist |
+| Game/UI logic (`.tsx`, `.ts`) | gameplay-programmer or ui-programmer (by content) |
+| Styling (`.css`) | ui-programmer |
+| Build/tooling (`vite.config.ts`, `package.json`, `tsconfig.json`) | tools-programmer |
+| CI/workflow files | devops-engineer |
+| General architecture review | lead-programmer |

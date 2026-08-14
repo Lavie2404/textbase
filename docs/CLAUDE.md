@@ -27,7 +27,9 @@ ADR Dependencies, Engine Compatibility, GDD Requirements Addressed
 
 ## Engine Reference (`docs/engine-reference/`)
 
-Version-pinned engine API snapshots. **Always check here before using any
-engine API** — the LLM's training data predates the pinned engine version.
-
-Current engine: see `docs/engine-reference/godot/VERSION.md`
+**Not applicable** — the project pivoted to a web app (React + Vite, no game
+engine) on 2026-08-14; see `production/session-state/active.md`. This
+directory previously held version-pinned Godot/Unity/Unreal API snapshots
+and has been removed. If a post-training-cutoff library version becomes a
+concern (e.g. a React/Vite/Firebase major bump), recreate a scoped reference
+doc here rather than reintroducing the old three-engine structure.
