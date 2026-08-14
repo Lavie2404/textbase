@@ -33516,7 +33516,7 @@ const formatStoryText = useCallback((text) => {
         return text.map((segment, index) => {
             if (segment.type === 'narrative') {
                 return (
-                    <div key={`narrative-${index}`} className="mb-3 leading-relaxed whitespace-pre-line">
+                    <div key={`narrative-${index}`} className="mb-3 leading-relaxed whitespace-pre-line narrative-text">
                         {parseAndRenderText(segment.content)}
                     </div>
                 );
@@ -33544,7 +33544,7 @@ const formatStoryText = useCallback((text) => {
         return segments.map((segment, index) => {
              if (segment.type === 'narrative') {
                 return (
-                    <div key={`old-narrative-${index}`} className="mb-3 leading-relaxed whitespace-pre-line">
+                    <div key={`old-narrative-${index}`} className="mb-3 leading-relaxed whitespace-pre-line narrative-text">
                         {parseAndRenderText(segment.content)}
                     </div>
                 );
