@@ -1,0 +1,1331 @@
+{
+  "id": "cc69dec8-87f1-42ee-8f90-34729ab2be97",
+  "currentTurn": 7,
+  "saveVersion": "2.8",
+  "timestamp": "2026-08-14T21:31:43.080Z",
+  "gameSettings": {
+    "storyTitle": "Đấu La Đại Lục",
+    "theme": "Huyền Huyễn, Võ Hồn, Tu Luyện, Phiêu Lưu",
+    "setting": "Một thế giới rộng lớn nơi sức mạnh cá nhân được quyết định bởi Võ Hồn và Hồn Lực. Tại đây, các Hồn Sư phải săn bắt Hồn Thú để đạt được Hồn Hoàn, từ đó thăng cấp và gia tăng sức mạnh chiến đấu của bản thân.",
+    "playStyle": "STORY",
+    "uiTheme": "DARK_GOLD",
+    "textScale": 90,
+    "customThemeConfig": {
+      "bgMain": "#050505",
+      "bgPanel": "#1a1a24",
+      "accentMain": "#00f3ff",
+      "textMain": "#ffffff",
+      "textMuted": "#8888aa",
+      "bgImage": "",
+      "colorLocation": "#5eead4",
+      "colorItem": "#a5b4fc",
+      "colorUnknown": "#fef3c7",
+      "bubblePlayerFrom": "#162216",
+      "bubblePlayerTo": "#0a0f0a",
+      "bubbleNpcFrom": "#0a0f0a",
+      "bubbleNpcTo": "#101a10",
+      "bubblePlayerText": "#ffffff",
+      "bubbleNpcText": "#ffffff"
+    },
+    "bgmUrl": "",
+    "bgmVolume": 0,
+    "narratorPronoun": "Để AI quyết định",
+    "fanFicCharacterType": "Khởi Sinh",
+    "characterName": "Diệp Thần",
+    "characterPersonality": "Tùy chỉnh...",
+    "customCharacterPersonality": "Hài hước, thích chọc ghẹo và hưởng thụ bên cạnh mỹ nhân",
+    "characterGender": "Nam",
+    "characterBackstory": "Diệp Thần là một thiếu niên mồ côi sinh sống tại một ngôi làng nhỏ ven biên giới. Trong buổi lễ thức tỉnh, anh đã thức tỉnh một Võ Hồn biến dị mang hình dáng 1 chiếc mặt nạ cũ kỹ nhưng lại sở hữu Tiên Thiên Mãn Hồn Lực.",
+    "playerAvatarUrl": null,
+    "playerAvatarStoredLocally": false,
+    "difficulty": "Thường",
+    "difficultydescription": "",
+    "allowNsfw": true,
+    "customNsfwText": "",
+    "isNsfwMode": false,
+    "enableParasiticSystem": false,
+    "initialWorldElements": [
+      {
+        "name": "Thánh Hồn Thôn",
+        "type": "LOCATION",
+        "description": "Ngôi làng yên bình nơi Diệp Thần sinh ra và trải qua thời thơ ấu, cũng là nơi diễn ra nghi thức thức tỉnh Võ Hồn quan trọng.",
+        "id": "d0361afc-0ed5-4ddc-b724-799aa7b143fc"
+      },
+      {
+        "name": "Tố Vân",
+        "type": "NPC",
+        "description": "Một chấp sự của Võ Hồn Điện, người chịu trách nhiệm thức tỉnh Võ Hồn cho trẻ em trong làng và là người đầu tiên nhận sai tiềm năng của Diệp Thần.",
+        "id": "29022e01-a73d-4e58-9557-476db78764be"
+      },
+      {
+        "name": "Nặc Đinh Học Viện",
+        "type": "LOCATION",
+        "description": "Học viện Hồn Sư sơ cấp, nơi Diệp Thần bắt đầu con đường học tập bài bản về cách sử dụng Hồn Lực và gặp gỡ những đối thủ đầu tiên.",
+        "id": "06d75f44-c91d-48fd-b308-b60161e65672"
+      }
+    ],
+    "useCharacterGoal": false,
+    "characterGoal": "",
+    "allowCustomActionInput": true,
+    "currencyName": "Kim Hồn Tệ",
+    "isFanFictionMode": false,
+    "fanFicOriginalWork": "Đấu La Đại Lục",
+    "fanFicPlotSummary": "",
+    "fanFicCharacter": "Diệp Thần",
+    "fanFicEntryMethod": "Xuyên không",
+    "customFanFicEntryMethod": "",
+    "skipCrisis": true,
+    "initialMartialSouls": [
+      {
+        "id": "ee0e9951-9672-4d62-9018-877b2691b984",
+        "name": "Mặt nạ 12 cung hoàng đạo",
+        "rarity": "Thần Thoại",
+        "description": "Bao gồm 12 chiếc mặt nạ. Mỗi chiếc mang 1 năng lực riêng. Khởi đầu với 3 chiếc mặt nạ Bạch Dương, Kim Ngưu và Thiên Bình. 9 chiếc mặt nạ còn lại sẽ mở khóa khi hấp thu hồn hoàn"
+      }
+    ],
+    "initialTraits": [
+      {
+        "id": "9e64146b-4606-46d5-b6d7-78e257c834d9",
+        "name": "Mặt nạ Bạch Dương",
+        "description": "Mặt nạ Bạch Dương - 1 trong 12 mặt nạ hoàng đạo",
+        "category": "Vật phẩm",
+        "rarity": "Thần Thoại",
+        "stats": "ATK: 100000000\nDEF: 100000000\nSPD: 100000000\nCrit Rate: 100%\nCrit Dmg: 100%\nLifesteal: 100%",
+        "effects": "ATK tăng 100%. Sát thương kèm hiệu ứng thiêu đốt bằng 1% HP của kẻ địch",
+        "equipmentType": "Đầu",
+        "usageCondition": "Cấp độ: 1",
+        "skillCategoryChoice": "",
+        "cooldown": ""
+      },
+      {
+        "id": "9453b1ff-ad20-4a59-a011-d0f45c44f703",
+        "name": "Mặt nạ Kim Ngưu",
+        "description": "Mặt nạ Kim Ngưu - 1 trong 12 mặt nạ hoàng đạo",
+        "category": "Vật phẩm",
+        "rarity": "Thần Thoại",
+        "stats": "ATK: 100000000\nDEF: 100000000\nSPD: 100000000\nCrit Rate: 100%\nCrit Dmg: 100%\nLifesteal: 100%",
+        "effects": "DEF tăng 100%. Khi người chơi còn tiếp xúc với mặt đất được hồi máu liên tục bằng 1% HP",
+        "equipmentType": "Phụ kiện",
+        "usageCondition": "Cấp độ: 1",
+        "skillCategoryChoice": "",
+        "cooldown": ""
+      },
+      {
+        "id": "ef6e8ea7-11d0-464b-aced-0c001c450d02",
+        "name": "Mặt nạ Thiên Bình",
+        "description": "Mặt nạ Thiên Bình - 1 trong 12 mặt nạ hoàng đạo",
+        "category": "Vật phẩm",
+        "rarity": "Thần Thoại",
+        "stats": "ATK: 100000000\nDEF: 100000000\nSPD: 100000000\nCrit Rate: 100%\nCrit Dmg: 100%\nLifesteal: 100%",
+        "effects": "SPD tăng 100%. Tăng né 100%",
+        "equipmentType": "Phụ kiện",
+        "usageCondition": "Cấp độ: 1",
+        "skillCategoryChoice": "",
+        "cooldown": ""
+      }
+    ],
+    "defaultCombatBackground": "",
+    "defaultEnemyImages": {
+      "base": "",
+      "idle": "",
+      "attack_normal": ""
+    },
+    "characterRole": "Người xuyên không đến thế giới Đấu La 1 vạn năm trước khi Đường Tam xuất hiện",
+    "characterAppearance": "Diệp Thần sở hữu ngoại hình tuấn lãng với nụ cười phong lưu thường trực trên môi, khoác lên mình bộ trường bào tơ tằm nhẹ nhàng toát lên khí chất hào hoa và tự tại của một lãng tử đa tình."
+  },
+  "knowledge": {
+    "time": {
+      "year": 0,
+      "month": 1,
+      "day": 2,
+      "hour": 21
+    },
+    "weather": "Đêm trăng rằm, trời quang",
+    "narrativeCombatState": {
+      "isActive": false,
+      "combatants": []
+    },
+    "loreLocations": [
+      {
+        "id": "06d75f44-c91d-48fd-b308-b60161e65672",
+        "name": "Nặc Đinh Học Viện",
+        "description": "Học viện Hồn Sư sơ cấp, nơi Diệp Thần bắt đầu con đường học tập bài bản về cách sử dụng Hồn Lực và gặp gỡ những đối thủ đầu tiên.",
+        "type": "LOCATION"
+      }
+    ],
+    "loreNpcs": [],
+    "loreItems": [],
+    "locations": [
+      {
+        "id": "luc_dia_dau_la",
+        "description": "Một vùng đại lục rộng lớn, nơi linh hồn và sức mạnh hòa quyện làm một, nơi kẻ mạnh định đoạt tất cả bằng Võ Hồn.",
+        "category": "Quốc Gia",
+        "tier": 2,
+        "Name": "Lục Địa Đấu La"
+      },
+      {
+        "id": "loc_thanh_hon_thon",
+        "loreId": "d0361afc-0ed5-4ddc-b724-799aa7b143fc",
+        "description": "Ngôi làng nhỏ bình yên với những cánh đồng xanh ngát, tương truyền từng sản sinh ra một vị Hồn Thánh trong quá khứ.",
+        "category": "Thành Trì",
+        "tier": 3,
+        "parentLocationId": "luc_dia_dau_la",
+        "Name": "Thánh Hồn Thôn"
+      },
+      {
+        "id": "511fa2cb-e23e-4532-be3a-c2a5cbaaea42",
+        "Name": "Khu Rừng Thánh Hồn",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      }
+    ],
+    "items": [],
+    "worldItems": [],
+    "relationships": [
+      {
+        "id": "94242e19-984c-4c39-a3b5-fa020a2b2796",
+        "NPC": "Tố Vân",
+        "Standing": "Kính nể",
+        "Reason": "Kinh ngạc trước thiên phú Tiên Thiên Mãn Hồn Lực của ngươi.",
+        "AffinityChange": "+25"
+      },
+      {
+        "id": "5abd312a-dd87-4463-ac2e-86360a534090",
+        "NPC": "A Ngân",
+        "Standing": "Yêu thích",
+        "Reason": "Cảm phục và yêu quý tấm lòng lương thiện không màng hiểm nguy của ngươi.",
+        "AffinityChange": "+20"
+      }
+    ],
+    "quests": [],
+    "trackedQuestId": null,
+    "realmProgressionList": [
+      "Hồn Sĩ",
+      "Hồn Sư",
+      "Đại Hồn Sư",
+      "Hồn Tôn",
+      "Hồn Tông",
+      "Hồn Vương",
+      "Hồn Đế",
+      "Hồn Thánh",
+      "Hồn Đấu La",
+      "Phong Hào Đấu La",
+      "Thần Quan",
+      "Chân Thần",
+      "Siêu Cấp Thần",
+      "Thần Vương",
+      "Chí Cao Thần"
+    ],
+    "knownRecipes": [],
+    "eventHistory": [],
+    "unlearnedSkillScrolls": [],
+    "pendingItemsToCreate": [],
+    "pendingSkillCreations": [],
+    "characters": [
+      {
+        "id": "player",
+        "isPlayer": true,
+        "loreId": null,
+        "level": 4,
+        "exp": 116,
+        "ap": 5,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 15,
+          "atk": 0,
+          "def": 0,
+          "spd": 0
+        },
+        "current_location_id": "511fa2cb-e23e-4532-be3a-c2a5cbaaea42",
+        "baseHp": 2000,
+        "baseAtk": 200,
+        "baseDef": 100,
+        "baseSpd": 300,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 300005000,
+        "maxhp": 300005000,
+        "atk": 300000400,
+        "def": 300000200,
+        "spd": 300000600,
+        "cr": 100,
+        "cdmg": 607,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 100,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [
+          {
+            "Weight": 1.1,
+            "Name": "Chứng nhận Võ Hồn Điện",
+            "description": "Giấy chứng nhận hồn sư sơ cấp của Diệp Thần với Tiên Thiên Mãn Hồn Lực cấp 10.",
+            "Type": "Tín vật",
+            "Rarity": "Thường",
+            "Consumable": true,
+            "Equippable": false,
+            "id": "1d922eba-e919-410f-a086-a112c63b418c",
+            "quantity": 1,
+            "Value": 2999970
+          },
+          {
+            "Name": "Mặt nạ Bạch Dương",
+            "Type": "Đầu",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Bạch Dương - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:100000000,def:100000000,spd:100000000,cr:100,cdmg:100,atk_percent:100",
+            "Requirements": "level:1",
+            "Weight": 6.8,
+            "effects": [
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "LAST_DAMAGE_DEALT",
+                      "scale_number": 100,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_DEAL_DAMAGE"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "damage",
+                  "target": {
+                    "type": "single_enemy"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "MAX_HP",
+                      "scale_number": 0.01,
+                      "based_on": "target"
+                    }
+                  ],
+                  "special_properties": {
+                    "true_damage": true
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_DEAL_DAMAGE"
+                  }
+                ]
+              }
+            ],
+            "technicaldescription": "Tăng 100% Tấn công. Khi gây sát thương, hồi máu cho bản thân bằng 100% tổng sát thương vừa gây ra. Mỗi khi gây sát thương thành công, đòn đánh kèm theo hiệu ứng thiêu đốt gây thêm sát thương chuẩn bằng 1% Tối đa HP của mục tiêu.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "cf0c4a2f-febb-4d12-9096-56edfe2c282f",
+            "Value": 9999900000
+          },
+          {
+            "Name": "Mặt nạ Kim Ngưu",
+            "Type": "Phụ kiện",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Kim Ngưu - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:100000000,def:100000000,spd:100000000,cr:100,cdmg:100",
+            "Requirements": "level:1",
+            "Weight": 1.2,
+            "effects": [
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "LAST_DAMAGE_DEALT",
+                      "scale_number": 1,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_DEAL_DAMAGE"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_name": "Kim Ngưu Hộ Thể",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_COMBAT_START"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "MAX_HP",
+                      "scale_number": 0.01,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_TURN_START"
+                  }
+                ]
+              }
+            ],
+            "technicaldescription": "Hồi máu bằng 100% tổng sát thương gây ra mỗi khi tấn công. Khi bắt đầu chiến đấu, nhận hiệu ứng tăng 100% DEF. Mỗi khi bắt đầu lượt hành động và tiếp xúc mặt đất, tự động hồi phục 1% HP tối đa.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "af4875c7-4065-43fd-af1a-afb020152a3e",
+            "Value": 10999890000
+          },
+          {
+            "Name": "Mặt nạ Thiên Bình",
+            "Type": "Phụ kiện",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Thiên Bình - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:100000000,def:100000000,spd:100000000,cr:100,cdmg:100",
+            "Requirements": "level:1",
+            "Weight": 0.5,
+            "effects": [
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "LAST_DAMAGE_DEALT",
+                      "scale_number": 100,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_DEAL_DAMAGE"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_id": "LIBRA_BALANCE",
+                    "status_name": "Thiên Bình Vĩnh Cửu",
+                    "status_type": "buff"
+                  }
+                }
+              }
+            ],
+            "Consumable": false,
+            "Equippable": true,
+            "id": "d30cb488-1985-40f7-84a4-2ea88cd8de49",
+            "Value": 10999890000
+          }
+        ],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": {
+            "Name": "Mặt nạ Bạch Dương",
+            "Type": "Đầu",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Bạch Dương - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:100000000,hp:100000000,def:100000000,spd:100000000,cr:100,cdmg:100,atk_percent:100",
+            "Requirements": "level:1",
+            "Weight": 8.5,
+            "effects": [
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "LAST_DAMAGE_DEALT",
+                      "scale_number": 1,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_DEAL_DAMAGE"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_id": "aura_war_god",
+                    "status_name": "Hào Quang Chiến Thần",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_COMBAT_START"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_id": "golden_ram_armor",
+                    "status_name": "Giáp Cừu Vàng",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_HP_BELOW",
+                    "value": 0.3
+                  }
+                ]
+              }
+            ],
+            "technicaldescription": "Hồi máu bằng 100% tổng sát thương gây ra. Khi bắt đầu trận đấu, nhận hiệu ứng 'Hào Quang Chiến Thần' giúp tăng mạnh khả năng công kích. Khi lượng máu giảm xuống dưới 30%, nhận hiệu ứng 'Giáp Cừu Vàng' giúp giảm 30% sát thương nhận vào.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "71ccb178-1b00-4015-85b2-b194faca393a",
+            "quantity": 1,
+            "Value": 9999900000
+          },
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": {
+            "Name": "Mặt nạ Kim Ngưu",
+            "Type": "Phụ kiện",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Kim Ngưu - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:100000000,hp:100000000,def:100000000,spd:100000000,cr:100,cdmg:100,def_percent:100",
+            "Requirements": "level:1",
+            "Weight": 1.2,
+            "effects": [
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "MAX_HP",
+                      "scale_number": 0.01,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_TURN_START"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_id": "taurus_prot",
+                    "status_name": "Bảo Hộ Kim Ngưu",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_HP_BELOW",
+                    "value": 0.5
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "single_enemy"
+                  },
+                  "status_to_apply": {
+                    "status_id": "stun_target",
+                    "status_name": "Choáng",
+                    "status_type": "debuff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_DEAL_DAMAGE"
+                  }
+                ]
+              }
+            ],
+            "technicaldescription": "Hồi 1% HP tối đa mỗi khi bắt đầu lượt. Khi HP xuống dưới 50%, nhận trạng thái 'Bảo Hộ Kim Ngưu'. Khi gây sát thương, áp dụng trạng thái 'Choáng' lên mục tiêu trong 1 lượt.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "57f67d90-9710-40f6-9990-479246ed3e09",
+            "quantity": 1,
+            "Value": 10999890000
+          },
+          "Phụ kiện 2": {
+            "Name": "Mặt nạ Thiên Bình",
+            "Type": "Phụ kiện",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Thiên Bình - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:100000000,hp:100000000,def:100000000,spd:100000000,cr:100,cdmg:100,spd_percent:100,evasion:100",
+            "Requirements": "level:1",
+            "Weight": 0.5,
+            "effects": [
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_name": "Cân Bằng Thần Thánh",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_COMBAT_START"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "MISSING_HP",
+                      "scale_number": 0.15,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_TAKE_DAMAGE"
+                  },
+                  {
+                    "trigger": "ON_HP_BELOW",
+                    "value": 0.5
+                  }
+                ]
+              }
+            ],
+            "technicaldescription": "Tăng 100.000.000 Tấn Công, 100.000.000 Sinh Lực, 100.000.000 Phòng Thủ, 100.000.000 Tốc Độ, 100% Tỉ lệ chí mạng, 100% Sát thương chí mạng, 100% Tốc độ cơ bản và 100% Né tránh. Khi bắt đầu trận đấu, nhận hiệu ứng 'Cân Bằng Thần Thánh' tăng 25% Khuếch đại sát thương và 25% Giảm sát thương nhận vào. Khi bị tấn công lúc HP dưới 50%, hồi máu bằng 15% lượng máu đã mất.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "df4c3b52-6354-4c11-b904-19948aed13d7",
+            "quantity": 1,
+            "Value": 10999890000
+          },
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "Name": "Diệp Thần",
+        "Gender": "Nam",
+        "Role": "Người xuyên không đến thế giới Đấu La 1 vạn năm trước khi Đường Tam xuất hiện",
+        "Appearance": "Diệp Thần sở hữu ngoại hình tuấn lãng với nụ cười phong lưu thường trực trên môi, khoác lên mình bộ trường bào tơ tằm nhẹ nhàng toát lên khí chất hào hoa và tự tại của một lãng tử đa tình.",
+        "Backstory": "Diệp Thần là một thiếu niên mồ côi sinh sống tại một ngôi làng nhỏ ven biên giới. Trong buổi lễ thức tỉnh, anh đã thức tỉnh một Võ Hồn biến dị mang hình dáng 1 chiếc mặt nạ cũ kỹ nhưng lại sở hữu Tiên Thiên Mãn Hồn Lực.",
+        "MartialSouls": [
+          {
+            "name": "Mặt nạ 12 cung hoàng đạo",
+            "rarity": "Thần Thoại",
+            "description": "Bao gồm 12 chiếc mặt nạ. Mỗi chiếc mang 1 năng lực riêng. Khởi đầu với 3 chiếc mặt nạ Bạch Dương, Kim Ngưu và Thiên Bình. 9 chiếc mặt nạ còn lại sẽ mở khóa khi hấp thu hồn hoàn"
+          }
+        ],
+        "Personality": "Hài hước, thích chọc ghẹo và hưởng thụ bên cạnh mỹ nhân",
+        "isAppraised": true,
+        "description": "",
+        "isCompanion": false,
+        "realm": "Hồn Sĩ",
+        "incomingHealing": 1,
+        "maxExp": 800,
+        "skills": []
+      },
+      {
+        "id": "npc_to_van",
+        "isPlayer": false,
+        "loreId": "29022e01-a73d-4e58-9557-476db78764be",
+        "level": 26,
+        "exp": 0,
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 58,
+          "atk": 56,
+          "def": 56,
+          "spd": 56
+        },
+        "current_location_id": null,
+        "baseHp": 700,
+        "baseAtk": 70,
+        "baseDef": 35,
+        "baseSpd": 55,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 12300,
+        "maxhp": 12300,
+        "atk": 630,
+        "def": 595,
+        "spd": 615,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 35,
+        "description": "",
+        "stance": "Trung lập",
+        "personality": "Nghiêm túc",
+        "Gender": "Nam",
+        "sizeCategory": "2",
+        "Name": "Tố Vân",
+        "realm": "Đại Hồn Sư",
+        "incomingHealing": 1,
+        "maxExp": 42954,
+        "Role": "Chấp sự cấp thấp của Võ Hồn Điện, phụ trách nghi thức thức tỉnh Võ Hồn vùng biên viễn.",
+        "Appearance": "Dáng người cao ráo, khoác bộ áo choàng trắng đặc trưng của Võ Hồn Điện với viền bạc tinh tế. Gương mặt có phần sắc sảo, ánh mắt luôn lộ vẻ mệt mỏi xen lẫn kiêu ngạo, mái tóc xanh thẫm cột cao.",
+        "Backstory": "Là một hồn sư hệ mẫn công với Võ Hồn Độc Lang, Tố Vân đã dành cả thanh xuân để leo lên vị trí chấp sự. Dù luôn tỏ ra cao ngạo trước những người bình thường, anh ta thực chất đang lo lắng về việc thăng tiến bị trì trệ do tư chất bản thân đã chạm ngưỡng.",
+        "Personality": "Kiêu ngạo, cứng nhắc, coi trọng thứ bậc nhưng vẫn giữ được sự công tâm nhất định trong công việc.",
+        "Stance": "Nhìn nhận nhân vật chính như một kẻ tầm thường không có tương lai, tỏ thái độ thờ ơ và ban phát sự chỉ dẫn.",
+        "isAppraised": true,
+        "skills": []
+      },
+      {
+        "id": "npc_a_ngan_01",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 15,
+        "exp": 0,
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 94,
+          "atk": 92,
+          "def": 92,
+          "spd": 92
+        },
+        "current_location_id": "511fa2cb-e23e-4532-be3a-c2a5cbaaea42",
+        "baseHp": 480,
+        "baseAtk": 48,
+        "baseDef": 24,
+        "baseSpd": 44,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 19280,
+        "maxhp": 19280,
+        "atk": 968,
+        "def": 944,
+        "spd": 964,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 20,
+        "description": "",
+        "stance": "Thân thiện",
+        "Gender": "Nữ",
+        "Name": "A Ngân",
+        "realm": "Đại Hồn Sư",
+        "incomingHealing": 1,
+        "maxExp": 10457,
+        "skills": [],
+        "Role": "Thần Thú Hóa Hình - Lam Ngân Hoàng, Ẩn Sĩ Trị Liệu",
+        "Appearance": "Mái tóc dài màu xanh lam thướt tha như làn sóng nước, đôi mắt trong vắt như hồ thu phản chiếu bầu trời xanh. Nàng mặc bộ y phục giản dị màu xanh ngọc, tỏa ra khí chất thanh khiết, thoát tục và mùi hương thảo mộc dịu nhẹ của rừng già. Mỗi bước đi của nàng như khiến cỏ cây xung quanh bừng lên sức sống.",
+        "Backstory": "Vốn là hoàng đế của loài Lam Ngân Thảo - một Hồn Thú mười vạn năm tôn quý. Vì khao khát tìm hiểu nhân sinh và cảnh giới thần cấp, nàng quyết định từ bỏ tu vi mười vạn năm để hóa hình thành người, bắt đầu tu luyện lại từ đầu. Hiện nàng đang ẩn cư tại một thung lũng yên bình, che giấu thân phận thật sự khỏi sự truy lùng của các thế lực Hồn Sư hùng mạnh.",
+        "Personality": "Ôn nhu, nhân từ, yêu chuộng hòa bình và cực kỳ trân trọng mạng sống. Nàng luôn đối xử bao dung với vạn vật, sẵn lòng giúp đỡ những kẻ yếu thế mà không màng báo đáp.",
+        "Stance": "Cảm nhận được sự chân thành và linh hồn thuần khiết của nhân vật chính, nàng đối xử rất ôn hòa, sẵn sàng chỉ dẫn và bảo hộ khi gặp khó khăn.",
+        "isAppraised": true
+      }
+    ],
+    "sharedCooldowns": {
+      "tactical": 0,
+      "potion": 0
+    },
+    "adventureSkillCooldowns": {},
+    "requestNpcDesign": null,
+    "progression": {
+      "recentMeaningfulActions": [
+        {
+          "reason": "Hoàn thành nghi thức Thức tỉnh Võ hồn hiếm (Thập Nhị Hoàng Đạo Diện Cụ) và thể hiện tâm thế tự tin, nhập vai nhân vật sắc nét.",
+          "turn": 0
+        },
+        {
+          "reason": "Thức tỉnh Võ hồn dị biến và đạt Tiên Thiên Mãn Hồn Lực cấp 10, thể hiện phong thái bình tĩnh trước áp lực.",
+          "turn": 1
+        },
+        {
+          "reason": "Thức tỉnh Võ hồn với Tiên Thiên Mãn Hồn Lực cấp 10 và chính thức nhận chứng nhận từ Võ Hồn Điện",
+          "turn": 2
+        },
+        {
+          "reason": "Dàn dựng kịch bản 'khổ nhục kế' cứu linh thú để thao túng tâm lý và chiếm trọn lòng tin của Lam Ngân Hoàng.",
+          "turn": 6
+        }
+      ]
+    },
+    "loreQuests": [],
+    "pendingCreations": [],
+    "stateHistory": [
+      {
+        "time": {
+          "year": 0,
+          "month": 1,
+          "day": 2,
+          "hour": 7
+        },
+        "location_id": "511fa2cb-e23e-4532-be3a-c2a5cbaaea42",
+        "weather": "Trời trong",
+        "characters": [
+          {
+            "id": "player",
+            "Name": "Diệp Thần",
+            "level": 3,
+            "exp": 278,
+            "hp": 300005000,
+            "maxhp": 300005000,
+            "currency": 0,
+            "inventory": [
+              {
+                "Name": "Chứng nhận Võ Hồn Điện",
+                "quantity": 1
+              },
+              {
+                "Name": "Mặt nạ Bạch Dương",
+                "quantity": 1
+              },
+              {
+                "Name": "Mặt nạ Kim Ngưu",
+                "quantity": 1
+              },
+              {
+                "Name": "Mặt nạ Thiên Bình",
+                "quantity": 1
+              }
+            ],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_to_van",
+            "Name": "Tố Vân",
+            "level": 26,
+            "exp": 0,
+            "hp": 12300,
+            "maxhp": 12300,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          }
+        ],
+        "quests": []
+      },
+      {
+        "time": {
+          "year": 0,
+          "month": 1,
+          "day": 2,
+          "hour": 7
+        },
+        "location_id": "511fa2cb-e23e-4532-be3a-c2a5cbaaea42",
+        "weather": "Trời trong",
+        "characters": [
+          {
+            "id": "player",
+            "Name": "Diệp Thần",
+            "level": 3,
+            "exp": 278,
+            "hp": 299955000,
+            "maxhp": 300005000,
+            "currency": 0,
+            "inventory": [
+              {
+                "Name": "Chứng nhận Võ Hồn Điện",
+                "quantity": 1
+              },
+              {
+                "Name": "Mặt nạ Bạch Dương",
+                "quantity": 1
+              },
+              {
+                "Name": "Mặt nạ Kim Ngưu",
+                "quantity": 1
+              },
+              {
+                "Name": "Mặt nạ Thiên Bình",
+                "quantity": 1
+              }
+            ],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_to_van",
+            "Name": "Tố Vân",
+            "level": 26,
+            "exp": 0,
+            "hp": 12300,
+            "maxhp": 12300,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_a_ngan_01",
+            "Name": "A Ngân",
+            "level": 30,
+            "exp": 0,
+            "hp": 14580,
+            "maxhp": 14580,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          }
+        ],
+        "quests": []
+      }
+    ],
+    "systemAssistant": {
+      "isActive": false,
+      "dialogue": "",
+      "expression": "idle",
+      "images": {
+        "base": null,
+        "idle": null,
+        "smile": null,
+        "sad": null,
+        "angry": null,
+        "laugh": null
+      }
+    }
+  },
+  "storyHistory": [
+    {
+      "id": "814aee31-54d6-4597-ace0-195253eba6ac",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ánh nắng ban mai của buổi sớm tinh sương khẽ lách qua những kẽ hở trên mái ngói của gian nhà gỗ cũ kỹ tại trung tâm *Thánh Hồn Thôn*. Không khí bên trong tràn ngập sự căng thẳng và kỳ vọng của những đứa trẻ vừa tròn sáu tuổi. Ngươi, *Diệp Thần*, đang đứng ở cuối hàng với vẻ mặt chẳng mấy gì là nghiêm túc. Trong khi đám trẻ xung quanh run rẩy vì sợ hãi hoặc phấn khích, ngươi lại đang bận ngáp dài một cái, đôi mắt lờ đờ lướt qua mấy cô bé cùng làng, thầm nghĩ xem sau này ai sẽ trở thành một mỹ nhân rực rỡ nhất.\nPhía trên bục, một nam tử trẻ tuổi mặc y phục dài màu trắng, ngực áo có thêu chữ \"Hồn\" to tướng đang vung tay thi triển hồn lực. Đó chính là *Tố Vân*, vị chấp sự của *Võ Hồn Điện*."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Tiếp theo, Diệp Thần!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi lững thững bước lên phía trước, đứng vào giữa sáu viên hắc thạch đang tỏa ra ánh sáng nhàn nhạt. *Tố Vân* khẽ nhíu mày trước thái độ lông bông của ngươi, nhưng hắn vẫn đều đặn rót hồn lực vào trận pháp. Ngay lập tức, một luồng khí tức ấm áp bao phủ lấy cơ thể ngươi. Cảm giác như có một thứ gì đó đang ngủ sâu trong linh hồn ngươi bỗng chốc vươn vai thức dậy.\nMột tiếng \"Vút\" nhẹ vang lên, từ lòng bàn tay phải của ngươi, những luồng sáng vàng ròng cuộn trào, kết tinh lại thành những chiếc mặt nạ kỳ quái. Chúng lơ lửng xung quanh ngươi, tỏa ra một áp lực vô hình nhưng vô cùng cổ xưa. Chiếc mặt nạ hình đầu cừu trắng muốt (*Bạch Dương*), chiếc mặt nạ đầu bò bằng đồng vững chãi (*Kim Ngưu*) và chiếc mặt nạ mang hình cán cân công lý (*Thiên Bình*) là ba thứ rõ ràng nhất.\n*Tố Vân* nhìn chằm chằm vào những chiếc mặt nạ, đôi mắt lộ vẻ thất vọng thấy rõ. Hắn thở dài, lắc đầu ngao ngán."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Võ hồn là... mặt nạ sao? Lại còn là một bộ sưu tập mặt nạ? Haiz, võ hồn dạng vật dụng không có khả năng tấn công trực tiếp thường là phế võ hồn. Ngươi thật đen đủi, uổng công ta kỳ vọng vào khí chất của ngươi."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi nhìn ba chiếc mặt nạ đang xoay tròn, khóe môi khẽ nhếch lên một nụ cười đầy ẩn ý. Phế võ hồn? Tên chấp sự này mắt nhìn người thật sự có vấn đề. Ngươi cảm nhận được sức mạnh ẩn chứa trong chúng, một thứ quyền năng vượt xa những gì mà một kẻ như *Tố Vân* có thể hiểu được."
+        }
+      ]
+    },
+    {
+      "id": "2a4321ea-c560-4537-bea5-7ed4e05dd1aa",
+      "type": "system",
+      "content": "**[Hệ thống]** Chúc mừng **Diệp Thần** đã tăng **1** cấp! Cấp độ hiện tại: **2**.",
+      "transient": true
+    },
+    {
+      "id": "9fcc78b0-2a0f-454a-b485-7693c0a846fb",
+      "type": "user_choice",
+      "content": "Phớt lờ lời nói của Tố Vân và yêu cầu hắn tiến hành kiểm tra hồn lực ngay lập tức {Tỷ lệ thành công: 100%. Hậu quả/Phần thưởng: Xác định được tiềm năng tu luyện thực tế của bản thân.}"
+    },
+    {
+      "id": "581f614e-0f4c-443b-8ea4-3f0953e7576a",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Giữa gian nhà gỗ cũ kỹ của *Thánh Hồn Thôn*, nơi bụi bặm khẽ nhảy múa trong những vệt nắng vàng ươm xuyên qua khe cửa, bầu không khí bỗng chốc đông đặc lại. *Diệp Thần* đứng đó, đối diện với ánh mắt đầy vẻ thương hại và thất vọng của vị chấp sự *Võ Hồn Điện*. Ba chiếc mặt nạ kỳ quái — một trắng muốt như tuyết, một đồng thau vững chãi, một thanh thoát như pha lê — vẫn đang lững thững xoay tròn quanh thân thể hắn, tỏa ra một thứ khí tức u uẩn và cổ xưa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ngài nói đủ chưa? Nếu đã chê bai xong rồi thì phiền ngài đưa viên pha lê đó ra đây. Ta muốn kiểm tra hồn lực."
+        },
+        {
+          "type": "narrative",
+          "content": "Lời nói của *Diệp Thần* vang lên bình thản, thậm chí có chút lười biếng, hoàn toàn phớt lờ những lời nhận xét về \"phế võ hồn\" mà *Tố Vân* vừa thốt ra. Đám trẻ con đứng xung quanh bắt đầu xì xào, những đôi mắt ngây thơ lộ vẻ ngơ ngác trước sự bướng bỉnh của kẻ đang đứng trên bục. *Tố Vân* khựng lại, đôi mày thanh tú của hắn nhướng lên đầy vẻ kinh ngạc, rồi nhanh chóng chuyển sang một cái thở dài ngao ngán. Hắn lắc đầu, tay lần vào trong lớp y phục dài màu trắng, chậm rãi lấy ra một viên pha lê đo lường hồn lực xanh thẳm, trong vắt như nước hồ mùa thu."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Haiz, được rồi. Có lẽ cái tính khí này của ngươi là thứ duy nhất đáng giá lúc này đấy, Diệp Thần. Nhưng ta nói trước, võ hồn là định mệnh, đừng hy vọng quá nhiều để rồi chỉ nhận lại sự thất vọng cay đắng. Cầm lấy nó đi."
+        },
+        {
+          "type": "narrative",
+          "content": "Vị đại hồn sư cấp thấp này đưa viên pha lê ra với vẻ mặt vô cùng miễn cưỡng, cứ như thể hắn đang làm một việc vô ích nhất thế gian. Hắn tin chắc rằng một kẻ thức tỉnh ra \"vật dụng phế thải\" như mặt nạ thì lấy đâu ra dù chỉ một tia hồn lực? Có lẽ một phần mười cấp cũng đã là kỳ tích đối với cái thôn nghèo nàn này rồi.\n*Diệp Thần* nhếch môi cười nhạt, đôi mắt lướt qua vẻ kiêu ngạo chưa kịp tan biến trên khuôn mặt *Tố Vân*. Hắn không nói thêm lời nào, chậm rãi vươn bàn tay thon dài ra, đặt nhẹ lên bề mặt mát lạnh của viên pha lê.\nNgay khoảnh khắc da thịt chạm vào khối pha lê tinh khiết, một sự biến hóa kinh thiên động địa xảy ra.\nMột luồng kình khí vô hình đột ngột bộc phát từ tâm bàn tay của *Diệp Thần*, giống như một con cự long vừa thức tỉnh sau ngàn năm say ngủ, cuồng bạo lao thẳng vào trong viên pha lê. Viên pha lê vốn đang tĩnh lặng bỗng chốc rung chuyển dữ dội, một đốm sáng xanh le lói xuất hiện ở trung tâm, rồi trong nháy mắt, nó bành trướng ra như một vụ nổ ánh sáng.\nÁnh sáng rực rỡ đến mức chói mắt, xuyên qua mọi ngóc ngách của gian nhà gỗ, nuốt chửng lấy bóng tối ở các góc khuất và khiến cho đám trẻ xung quanh phải đưa tay che mắt, kêu lên những tiếng kinh hãi. Những chiếc mặt nạ đang lơ lửng quanh *Diệp Thần* bỗng dưng rung động bần bật, chúng dường như đang reo hò trước sự thức tỉnh của chủ nhân.\nĐôi mắt của *Tố Vân* vốn đang nheo lại vì chán nản, nay bỗng trợn trừng lên, đồng tử co rút lại như gặp phải thứ gì đó đáng sợ nhất cuộc đời mình. Hắn lắp bắp, đôi môi run rẩy không thốt nên lời. Viên pha lê trong tay hắn lúc này không còn là một vật dụng đo lường bình thường nữa, nó đang tỏa sáng rực rỡ như một mặt trời thu nhỏ, xanh thẳm đến mức đặc quánh, báo hiệu một sự thật mà bất kỳ ai trong *Võ Hồn Điện* cũng đều khao khát nhưng chưa bao giờ dám mơ tới ở một ngôi làng hẻo lánh như thế này."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Cái... cái gì thế này? Ánh sáng lấp đầy... không một kẽ hở... Trời ạ! Đây là... *Tiên Thiên Mãn Hồn Lực*!"
+        },
+        {
+          "type": "narrative",
+          "content": "Giọng nói của *Tố Vân* lạc hẳn đi, không còn chút bóng dáng nào của sự kiêu ngạo ban nãy. Hắn nhìn chằm chằm vào con số cấp 10 tròn trịa đang hiện hữu rõ mồn một qua độ đậm đặc của ánh sáng. Một sự mâu thuẫn khủng khiếp đang diễn ra ngay trước mắt hắn: Một \"phế võ hồn\" dạng mặt nạ lại đi kèm với thiên phú tu luyện cao nhất mà một người có thể đạt được khi thức tỉnh? Điều này hoàn toàn đi ngược lại với mọi lý thuyết mà hắn đã được học tại giáo phái.\nBên ngoài cửa sổ, một cơn gió nhẹ thổi qua, mang theo hương thơm của cỏ dại từ những cánh đồng xanh ngát của *Thánh Hồn Thôn*. Ánh nắng 9 giờ sáng dường như cũng trở nên nhạt nhòa trước hào quang đang tỏa ra từ cơ thể của *Diệp Thần*. *Tố Vân* cảm thấy tay mình run lên bần bật, suýt chút nữa đã đánh rơi cả viên pha lê quý giá. Hắn nhìn *Diệp Thần* bằng một ánh mắt hoàn toàn khác — không còn là nhìn một đứa trẻ nghèo khó, mà là nhìn một quái vật, một thiên tài vừa bước ra từ bóng tối."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Ngươi... Diệp Thần... ngươi rốt cuộc là ai? Võ hồn mặt nạ... cấp 10... chuyện này làm sao có thể xảy ra được?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* thu tay lại, ánh sáng từ viên pha lê vụt tắt, trả lại sự yên tĩnh cho căn phòng, nhưng sự chấn động trong lòng mọi người thì vẫn còn đó. Hắn nhìn ba chiếc mặt nạ đang dần biến mất vào lòng bàn tay, cảm nhận luồng hồn lực dồi dào đang luân chuyển trong kinh mạch như những dòng suối nhỏ cuộn trào. Một cảm giác sảng khoái và quyền lực mà hắn chưa từng biết tới đang lan tỏa khắp cơ thể.\nVẻ mặt của *Tố Vân* lúc này trông cực kỳ trớ trêu. Hắn vừa muốn thu hồi lại những lời nhạo báng ban nãy, lại vừa muốn lao đến ôm chầm lấy cái \"mầm non\" thiên tài này để báo công với điện chủ. Sự kiêu ngạo của một đại hồn sư cấp 26 giờ đây nát vụn dưới chân một đứa trẻ sáu tuổi chưa từng tu luyện.\nCảnh vật xung quanh *Thánh Hồn Thôn* vẫn bình yên như thế, những mái nhà tranh, những đống rơm khô lác đác, nhưng đối với *Diệp Thần*, thế giới này kể từ giây phút này đã hoàn toàn thay đổi. Hắn không còn là một cậu bé lười biếng hay mơ mộng nữa, mà đã chính thức bước chân vào con đường của kẻ mạnh."
+        }
+      ]
+    },
+    {
+      "id": "d85f9e00-cf8c-478a-8572-8117e9899f40",
+      "type": "system",
+      "content": "**[Hệ thống]** Chúc mừng **Diệp Thần** đã tăng **1** cấp! Cấp độ hiện tại: **3**.",
+      "transient": true
+    },
+    {
+      "id": "697c703e-cfc8-4fb2-befd-b5545fe70682",
+      "type": "user_custom_action",
+      "content": "Vậy là ta đã đủ điều kiện trở thành hồn sư rồi đúng không. Vậy ngài cấp chứng nhận cho ta trước được không. Ta muốn về ngủ rồi"
+    },
+    {
+      "id": "2618f346-c181-498d-bd78-8745ce2a0e77",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Trong gian nhà gỗ cũ kỹ của *Thánh Hồn Thôn*, dư âm của luồng ánh sáng xanh thẳm từ viên pha lê vẫn còn như nhảy múa trên những bức tường loang lổ vết thời gian. Bầu không khí vốn dĩ tràn ngập sự căng thẳng giờ đây lại trở nên tĩnh lặng đến mức đáng sợ, chỉ còn nghe thấy tiếng hơi thở dồn dập, run rẩy của vị chấp sự *Võ Hồn Điện*. *Tố Vân* đứng đó, đôi tay vẫn còn giữ lấy viên pha lê đo lường, nhưng cả cơ thể hắn dường như đã hóa đá. Ánh mắt hắn dán chặt vào *Diệp Thần* – đứa trẻ vừa tạo ra một kỳ tích mà cả đời hành nghề thức tỉnh của hắn chưa từng được chứng kiến.\nGiữa sự im lặng đặc quánh đó, *Diệp Thần* khẽ cử động. Hắn thu lại bàn tay vừa tạo nên cơn chấn động, vẻ mặt vẫn duy trì một sự điềm nhiên đến lạ lùng, thậm chí là có chút lười biếng như thể vừa làm xong một việc vặt chẳng đáng để tâm. Hắn nhìn lên vị chấp sự đang ngây người ra kia, khóe môi khẽ nhếch lên, phá vỡ bầu không khí bằng một tông giọng thản nhiên:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Vậy là ta đã đủ điều kiện trở thành hồn sư rồi đúng không? Vậy ngài cấp chứng nhận cho ta trước được không? Ta muốn về ngủ rồi."
+        },
+        {
+          "type": "narrative",
+          "content": "Câu hỏi của *Diệp Thần* như một gáo nước lạnh tạt thẳng vào mặt *Tố Vân*, khiến vị chấp sự này giật mình thoát khỏi cơn bàng hoàng. Hắn chớp mắt liên tục, nhìn đứa trẻ trước mặt bằng ánh mắt đầy phức tạp – đó là sự kinh ngạc, kính sợ, và cả một chút không cam lòng khi chứng kiến một thiên phú kinh người lại hiện diện trong một hình hài dửng dưng đến thế. *Tiên Thiên Mãn Hồn Lực*! Trong lịch sử của *Võ Hồn Điện*, bất kỳ ai sở hữu tư chất này đều là những tồn tại đứng trên đỉnh cao, là những thiên tài được các đại lão tranh giành. Vậy mà kẻ đang đứng trước mặt hắn lúc này lại chỉ muốn... về nhà đi ngủ?"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Ngươi... ngươi nói cái gì? Cấp chứng nhận? À... phải, đúng rồi. Ngươi sở hữu Tiên Thiên Mãn Hồn Lực, đương nhiên là đủ điều kiện, thậm chí là dư thừa..."
+        },
+        {
+          "type": "narrative",
+          "content": "*Tố Vân* lắp bắp, giọng nói không còn chút uy nghiêm nào của một chấp sự cấp 26. Hắn vội vàng đặt viên pha lê xuống một cách cẩn trọng, đôi tay vẫn còn run rẩy nhẹ nhàng lách vào trong tay áo, lấy ra một cuộn giấy da thô sơ nhưng mang theo huy hiệu của *Võ Hồn Điện*. Đây là thứ mà bao nhiêu đứa trẻ ở các thôn làng hẻo lánh hằng mơ ước, một tấm vé để bước ra khỏi cuộc đời bình phàm.\nHắn trải cuộn giấy da lên chiếc bàn gỗ lung lay, cầm lấy cây bút lông chim, nhúng vào lọ mực đen đậm đặc. Mỗi chuyển động của *Tố Vân* lúc này đều trở nên chậm chạp và thành kính một cách kỳ lạ. Hắn liếc nhìn *Diệp Thần*, rồi lại nhìn ba chiếc mặt nạ ảo ảnh vẫn đang mờ ảo hiện diện quanh thân thể cậu bé – *Bạch Dương*, *Kim Ngưu*, *Thiên Bình*. Dù trong tâm thức hắn vẫn cho rằng \"Mặt nạ\" là một dạng phế võ hồn, nhưng con số \"Cấp 10\" tròn trịa kia đã đánh nát mọi định kiến thông thường.\nTiếng ngòi bút sột soạt trên nền giấy da vang lên rõ mồn một trong gian nhà vắng. *Tố Vân* cẩn thận nắn nót từng chữ một: \"Tên: *Diệp Thần*. Võ hồn: *Mặt Nạ*. Hồn lực: *Tiên Thiên Mãn Hồn Lực cấp 10*.\" Khi viết đến dòng cuối cùng, hơi thở của hắn lại một lần nữa trở nên dồn dập. Hắn lấy ra con dấu bằng đồng, hít một hơi thật sâu rồi đóng mạnh xuống góc cuộn giấy. Một luồng hào quang nhạt từ con dấu tỏa ra, xác nhận tính pháp lý của tài liệu này trước toàn bộ hệ thống của *Võ Hồn Điện*.\nHắn cuộn tờ giấy lại, tiến về phía *Diệp Thần*, hơi cúi người xuống một cách vô thức như để thể hiện sự tôn trọng đối với một vị cường giả tương lai, dù kẻ đó mới chỉ là một đứa trẻ sáu tuổi."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Đây là *Chứng nhận Võ Hồn Điện* của ngươi. Với thứ này, ngươi có thể đến bất kỳ học viện hồn sư sơ cấp nào để đăng ký nhập học. *Diệp Thần*... ta phải nói rằng, ngươi là người đầu tiên khiến ta cảm thấy sự hiểu biết của mình về võ hồn là quá đỗi hạn hẹp. Chúc ngươi... thuận lợi trên con đường tu luyện."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi đưa tay nhận lấy cuộn giấy da, cảm nhận được độ nhám của nó và mùi mực mới vẫn còn hăng nồng. Chẳng buồn cảm ơn hay đáp lại những lời khách sáo, ngươi chỉ gật đầu một cái lấy lệ rồi xoay người bước đi. Bước chân của ngươi thong dong, tà áo thô sơ khẽ bay theo nhịp bước, hoàn toàn tương phản với vẻ nghiêm trang và kính cẩn của vị chấp sự phía sau.\nKhi ngươi đi ngang qua hàng dài những đứa trẻ vẫn còn đang đứng ngây ngốc, ánh mắt ngươi vô tình chạm phải một bóng dáng nhỏ bé đang đứng lặng lẽ ở góc khuất. Đó là *Đường Tam*. Hắn không giống như đám trẻ khác đang xì xào bàn tán về \"thiên tài\" hay \"mặt nạ\", đôi mắt của hắn sâu thẳm và tĩnh lặng như mặt hồ không đáy. Trong đôi mắt ấy, ngươi nhìn thấy một sự quan sát sắc lẹm, một sự đánh giá kín đáo mà không một đứa trẻ sáu tuổi bình thường nào có thể sở hữu. \n*Đường Tam* đứng đó, đôi bàn tay giấu trong ống áo dường như hơi siết lại. Hắn đã chứng kiến toàn bộ quá trình, từ lúc những chiếc mặt nạ cổ quái kia xuất hiện cho đến khi luồng hồn lực bùng nổ. Một cảm giác đồng điệu hay là sự cảnh giác giữa những kẻ mang trong mình bí mật? *Đường Tam* không nói gì, hắn chỉ lặng lẽ nhìn theo bóng lưng của ngươi khi ngươi bước ra khỏi bậc cửa, hướng về phía ánh nắng chan hòa của *Thánh Hồn Thôn*.\nNgươi bước ra khỏi gian nhà gỗ, làn gió mát của buổi sớm mai thổi nhẹ vào mặt, làm tan đi chút không khí ngột ngạt bên trong. Phía sau lưng, tiếng của *Tố Vân* dường như đang bắt đầu giải tán đám đông với một giọng điệu mệt mỏi và kiệt sức. Ánh nắng 9 giờ sáng chiếu rọi lên con đường mòn dẫn về căn nhà nhỏ của ngươi. Trong lòng ngươi, ba chiếc mặt nạ đã hoàn toàn biến mất, nhưng sự liên kết giữa linh hồn và nguồn năng lượng dồi dào kia thì vẫn còn đó, cuồn cuộn như sóng ngầm.\nNgươi vươn vai một cái thật dài, miệng lầm bầm về việc chiếc giường êm ái đang chờ đợi. Những xáo trộn vừa rồi chẳng qua chỉ là một bước đệm, mục tiêu của ngươi lúc này thực sự chỉ là một giấc ngủ bù sau một buổi sáng \"lao động\" mệt mỏi. Thế nhưng, ngươi biết rõ rằng, kể từ khoảnh khắc cuộn giấy da này nằm trong tay, cuộc sống yên bình tại ngôi làng nhỏ này có lẽ sẽ không còn kéo dài được bao lâu nữa. Những bí mật về bộ mặt nạ, về nguồn gốc của sức mạnh này, và cả những ánh mắt dõi theo như của *Đường Tam*, tất cả đang dệt nên một khởi đầu đầy sóng gió.\nNgươi đi qua những cánh đồng xanh ngắt, tiếng chim hót líu lo trên cành cây như đang chào đón một vị tân hồn sư. *Thánh Hồn Thôn* vẫn bình yên, nhưng trong đôi mắt lười biếng của ngươi, một thế giới rộng lớn và đầy rẫy những thách thức đã bắt đầu hé mở."
+        }
+      ]
+    },
+    {
+      "id": "968161ce-800c-4ea6-9a7b-15dbbf65323c",
+      "type": "user_custom_action",
+      "content": "Ngươi trở về nhà, thu xếp hành lý rồi rời khỏi thôn. Ngươi tính toán thời gian thì Đường Tam vẫn chưa xuất hiện tại thế giới này, Đường Hạo cũng chưa gặp A Ngân. Ngươi nảy ra 1 ý nghĩ: 'Ngươi sẽ cướp A Ngân khỏi Đường Hạo khiến Đường Tam không thể tới thế giới này'. Nghĩ vậy ngươi liền mang đồ đạc tiến vào khu rừng tìm thánh địa Lam Ngân Thảo"
+    },
+    {
+      "id": "c778fd0a-8397-4a9d-9016-b519e5271c67",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Quyết định rời khỏi *Thánh Hồn Thôn* sau khi thu xếp hành lý, ngươi ôm giữ dã tâm cướp đoạt *A Ngân* để bóp nghẹt sự tồn tại của *Đường Tam* từ trong trứng nước. Ngươi mang theo đồ đạc bước vào khu rừng sâu, cố gắng cảm nhận sự dao động của thảm thực vật xung quanh để tìm kiếm thánh địa *Lam Ngân Thảo*. Giữa những tán cây cổ thụ âm u, ngươi lờ mờ nhận ra một lối mòn tự nhiên được bao phủ bởi các dây leo xanh biếc, chỉ dẫn hướng đi sâu hơn vào lòng rừng.\nÁnh nắng của buổi chiều tà lúc ba giờ nhuộm vàng cả một góc trời, rọi những vệt sáng lốm đốm qua kẽ lá dày đặc của *Khu Rừng Thánh Hồn*. Không khí trong rừng mang theo mùi đất ẩm ướt, mùi lá mục và hương thơm thanh khiết của hoa cỏ hoang dại. Bản thân ngươi lúc này, với tư cách là một kẻ vừa thức tỉnh *Tiên Thiên Mãn Hồn Lực* cấp mười, cảm nhận được một luồng sinh cơ bừng bừng đang chuyển động trong từng mạch máu. Hồn lực dồi dào chảy xuôi theo kinh mạch, giống như một dòng sông nhỏ không ngừng gột rửa lục phủ ngũ tạng, mang lại cho ngươi một thể trạng khỏe khoắn và tràn đầy chân nguyên. Ngươi không hề cảm thấy mệt mỏi sau khi đi bộ một quãng đường dài, ngược lại, mỗi bước chân nện xuống thảm cỏ mềm đều mang theo một sự tự tin và dứt khoát đến đáng sợ.\nTrong đầu ngươi lúc này chỉ có một suy nghĩ duy nhất, một kế hoạch điên rồ nhưng đầy tính khả thi. Ngươi biết rõ dòng lịch sử của thế giới này. Tại một mốc thời gian dị biệt, khi *Đường Tam* bằng một cách nào đó vẫn chưa thực sự đặt dấu ấn tuyệt đối lên vận mệnh thế giới, và *Đường Hạo* vẫn chưa trải qua bi kịch mất đi thê tử, hoặc giả như mối liên kết giữa bọn họ đang ở một trạng thái lỏng lẻo nhất. *A Ngân* – hiện thân của *Lam Ngân Hoàng*, thánh mẫu của loài *Lam Ngân Thảo*, linh hồn tối cao của thảm thực vật đại lục – chính là chìa khóa then chốt. Nếu ngươi có thể tìm thấy thánh địa của nàng trước, cướp đoạt lấy nàng khi nàng chưa hóa hình hoặc khi nàng đang ở trạng thái yếu ớt nhất, ngươi sẽ trực tiếp bẻ gãy quỹ đạo định mệnh của cả đại lục này. Không có *A Ngân*, sẽ không có một *Đường Tam* với dòng máu song sinh võ hồn lam ngân hoàng và hạo thiên chùy đầy kiêu hãnh. Không có kẻ kế thừa tương lai đó, vận mệnh đại lục sẽ phải viết lại dưới bàn tay của ngươi.\nNghĩ đến đây, khóe môi ngươi khẽ cong lên thành một nụ cười lạnh lùng đầy dã tâm. Ngươi liếc nhìn về phía sau, nơi bóng dáng của *Thánh Hồn Thôn* đã hoàn toàn khuất sau những rặng đồi nhấp nhô. Ngôi làng nhỏ bé, bình yên đó giờ đây chỉ còn là một ký ức nhạt nhòa, một bệ phóng vô danh cho cuộc hành trình vĩ đại của ngươi. Ngươi siết chặt quai đeo của chiếc túi hành lý thô sơ trên vai, dứt khoát rẽ vào lối mòn ngập tràn dây leo xanh biếc kia.\nCàng đi sâu vào lòng rừng, ánh sáng mặt trời càng trở nên yếu ớt. Những cây cổ thụ cao vút hai ba người ôm không xuể vươn những cành lá sum suê che lấp cả bầu trời, tạo nên một không gian âm u và huyền bí. Dưới chân ngươi, thảm thực vật trở nên phong phú một cách kỳ lạ. Những bụi *Lam Ngân Thảo* bình thường vốn dĩ chỉ cao chưa đầy nửa gang tay, nay lại vươn dài, những chiếc lá mỏng manh màu xanh lục sẫm khẽ lay động theo từng bước chân của ngươi, như thể chúng đang thì thầm truyền tai nhau về sự xuất hiện của một vị khách không mời mà đến.\nNgươi nhắm mắt lại, cố gắng vận hành luồng hồn lực cấp mười trong cơ thể để hòa nhịp với hơi thở của thiên nhiên xung quanh. Dù chưa chính thức có được hồn hoàn đầu tiên, nhưng tư chất tuyệt đỉnh của *Tiên Thiên Mãn Hồn Lực* cho phép giác quan của ngươi nhạy bén hơn người thường gấp trăm lần. Ngươi có thể nghe thấy tiếng nước chảy róc rách từ một con suối nhỏ cách đó vài trăm mét, tiếng xào xạc của côn trùng dưới lớp lá mục, và đặc biệt là một luồng năng lượng sinh mệnh vô cùng nhu hòa, ẩn hiện nhưng cực kỳ bền bỉ đang lan tỏa từ sâu trong lòng rừng hoang dã. Luồng năng lượng đó mang hương vị thanh mát của sương sớm, nhẹ nhàng quấn quýt lấy hồn lực của ngươi như một sự dẫn lối vô hình."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Chính là hướng này. Tần số dao động của thảm thực vật ở đây rõ ràng là đậm đặc hơn rất nhiều so với bên ngoài. Thánh địa của loài cỏ khiêm nhường nhất thế giới... chắc chắn đang ẩn giấu ở phía trước."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi tự nhủ thầm, ánh mắt lấp lánh tia sáng sắc lạnh. Ngươi cúi người, lướt nhanh qua những bụi gai rậm rạp. Trên đường đi, ba chiếc mặt nạ võ hồn trong lòng bàn tay ngươi dường như cũng cảm nhận được dã tâm của chủ nhân, chúng khẽ dao động nhẹ, tỏa ra một tầng hào quang mờ ảo màu xám bạc để bảo vệ ngươi khỏi những độc trùng và chướng khí của rừng sâu. Chiếc mặt nạ *Bạch Dương* đại diện cho sự khởi đầu và sinh mệnh, chiếc mặt nạ *Kim Ngưu* đại diện cho phòng ngự và sức mạnh kiên cố, còn chiếc mặt nạ *Thiên Bình* lại giữ cho tinh thần của ngươi luôn ở trạng thái cân bằng và tỉnh táo nhất. Sự hiện diện của chúng giúp ngươi hoàn toàn miễn nhiễm với sự mệt mỏi và nỗi sợ hãi khi phải đối mặt với bóng tối đang dần nuốt chửng khu rừng.\nThời gian trôi qua một cách lặng lẽ. Ba giờ chiều... bốn giờ chiều... năm giờ chiều... rồi sáu giờ tối. Bốn tiếng đồng hồ thám hiểm liên tục trong khu rừng rậm rạp không làm bước chân ngươi chậm lại, nhưng cảnh vật xung quanh đã có sự thay đổi rõ rệt. Ánh hoàng hôn đỏ rực như máu cuối cùng cũng tắt lịm sau những rặng núi xa xăm, nhường chỗ cho bóng đêm huyền bí bao phủ toàn bộ *Khu Rừng Thánh Hồn*. Lúc này đã là bảy giờ tối. Không gian xung quanh tối đen như mực, chỉ có những đốm sáng lập lòe từ những loài nấm phát quang bám trên thân cây mục và đom đóm rừng bay lượn tạo nên một khung cảnh ma mị, đầy huyền ảo.\nChính lúc này, khi ngươi bước qua một rặng cây cổ thụ đổ rạp chắn ngang đường, một cảnh tượng kinh ngạc hiện ra trước mắt.\nTrước mặt ngươi là một thung lũng nhỏ ẩn mình giữa lòng núi đá. Nơi này hoàn toàn tách biệt với sự u tối của khu rừng rậm rạp ban nãy. Hàng vạn, hàng triệu đốm sáng màu xanh lam dịu nhẹ đang lơ lửng khắp nơi, tỏa ra từ những bụi *Lam Ngân Thảo* mọc dày đặc như một tấm thảm nhung khổng lồ. Ánh sáng màu lam dịu mát, thuần khiết dị thường, chiếu sáng cả thung lũng rộng lớn. Giữa trung tâm thung lũng, có một gốc cây cổ thụ khổng lồ đã khô héo từ lâu, nhưng quấn quanh thân cây ấy là một dây leo *Lam Ngân Thảo* lớn đến kinh ngạc, những chiếc lá của nó có những đường gân màu vàng kim lấp lánh như những sợi chỉ vàng quý giá. Đó không phải là một gốc cỏ bình thường, đó chính là một cây cỏ đang mang hơi thở hoàng gia, một sự tồn tại vượt trội đang say ngủ.\nHơi thở của loài thực vật tôn quý này tỏa ra một áp lực sinh mệnh cực kỳ nồng đậm, khiến cho hồn lực cấp mười của ngươi trong phút chốc phải rung động bần bật. Ngươi đứng ở lối vào thung lũng, cảm nhận được làn gió mang theo hương thơm dịu ngọt của cỏ xanh mơn mởn mơn man trên da thịt. Đây chắc chắn là nơi ẩn cư, hoặc là thánh địa nuôi dưỡng dòng máu hoàng tộc của loài cỏ này.\nNgươi chậm rãi tiến thêm một bước vào thung lũng, ánh mắt dán chặt vào gốc cỏ mang gân vàng kim kia. Dã tâm trong lòng ngươi như một ngọn lửa bùng cháy dữ dội. Đây chính là xuất phát điểm của mọi kế hoạch. Chỉ cần ngươi tiến tới và nắm giữ lấy thực thể này, định mệnh của đại lục sẽ lập tức rẽ sang một chương hoàn toàn mới do chính ngươi viết nên.\nThế nhưng, ngay khi chân ngươi vừa chạm vào rìa của thảm cỏ xanh phát sáng, thảm thực vật xung quanh bỗng nhiên có một sự xao động kỳ lạ. Những sợi dây leo *Lam Ngân Thảo* vốn dĩ mềm mại bỗng chốc dựng đứng lên như những con rắn nhỏ cảnh giác, chúng khẽ run rẩy, hướng những đầu lá nhọn hoắt về phía ngươi như một lời cảnh báo lạnh lùng đối với kẻ xâm nhập. Một luồng uy áp tinh thần vô hình, tuy không mang tính công kích bạo lực nhưng lại vô cùng kiên định, đột ngột phủ xuống từ phía gốc cây gân vàng kim kia, như muốn ngăn cản bước tiến của ngươi.\nNgươi đứng khựng lại, khóe mắt khẽ nheo lại đầy tính toán. Ngươi biết rõ rằng việc đối phó với một thánh vật mang tính linh thiêng như thế này không thể chỉ dùng bạo lực thô thiển, nhất là khi bản thân ngươi mới chỉ là một hồn sư cấp mười chưa có hồn hoàn. Ngươi cần phải đưa ra một quyết định chính xác để có thể chế ngự hoặc thu phục được nguồn sinh mệnh vĩ đại này mà không làm tổn hại đến bản thể của nó."
+        }
+      ]
+    },
+    {
+      "id": "7f6373aa-d999-48f6-ae4b-d6ce6e313a64",
+      "type": "user_custom_action",
+      "content": "Ngươi không tiến vào Thánh địa Lam Ngân Thảo. Ngươi dựng trại ở 1 khu vực gần đó và đợi. Đợi A Ngân hóa hình và rời khỏi Thánh Địa. Khi đó ngươi sẽ dàn dựng 1 trận chiến với hồn thú sau đó bị thương nặng để A Ngân cứu ngươi"
+    },
+    {
+      "id": "1eb3a7f7-5c71-488e-971c-79ba843c59dd",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Đối diện với thung lũng ngập tràn sắc lam huyền ảo của loài *Lam Ngân Thảo*, nơi mà hàng triệu đốm sáng dịu nhẹ đang lơ lửng như những linh hồn nhỏ bé canh giữ thánh địa, *Diệp Thần* đứng lặng người ở rìa đá. Làn gió đêm mang theo hương thơm thanh khiết của cỏ non mơn man trên gương mặt hắn, nhưng trong đôi mắt hắn không hề có sự say mê trước cảnh đẹp thoát tục này, mà chỉ có một sự tỉnh táo và tính toán đến lạnh lùng. Hắn khẽ rút bàn chân vừa mới chạm vào rìa thảm cỏ phát sáng lại. Hắn hiểu rằng, bước vào thánh địa lúc này là một hành động cực kỳ ngu xuẩn. Uy áp tinh thần vô hình nhưng kiên định từ gốc cỏ gân vàng kim kia chính là lời cảnh báo đanh thép nhất: bất kỳ sự xâm nhập thô bạo nào của một kẻ ngoại lai cũng sẽ đánh động đến ý chí của *Lam Ngân Hoàng*, khiến kế hoạch hoàn hảo của hắn tan thành mây khói trước khi kịp bắt đầu.\nHắn quyết định không tiến vào thánh địa mà lui lại dựng một trại nhỏ kín đáo ở vách đá khuất gió gần đó. Đêm đầu tiên trôi qua trong yên lặng, hắn bắt đầu chuỗi ngày kiên nhẫn chờ đợi, quan sát mọi động tĩnh từ vùng ánh sáng lam nhạt của thung lũng *Lam Ngân Thảo* để canh chừng thời khắc *A Ngân* xuất hiện."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Nôn nóng chính là kẻ thù lớn nhất của một kẻ đi săn. *Đường Hạo* chưa tới, *Đường Tam* lại càng chưa là gì cả. Vận mệnh của thế giới này, ta sẽ là người nắm giữ, nhưng trước hết, ta phải học cách làm bạn với bóng tối và sự cô độc của khu rừng này đã."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* tự nhủ thầm, giọng nói của hắn tan biến vào tiếng lá xạc xào của *Khu Rừng Thánh Hồn*. Hắn lùi lại khoảng ba trăm mét, men theo vách đá dựng đứng bao quanh thung lũng để tìm kiếm một điểm ẩn nấp lý tưởng. Cuối cùng, hắn dừng lại trước một khe đá hẹp, khuất sau một tán cây cổ thụ khổng lồ có bộ rễ chằng chịt bám chặt vào vách đá. Nơi này không chỉ khuất gió, mà tầm nhìn còn bao quát được toàn bộ lối ra vào duy nhất của thung lũng *Lam Ngân Thảo*. \nVới bàn tay khéo léo và thể trạng dẻo dai của một kẻ sở hữu *Tiên Thiên Mãn Hồn Lực* cấp mười, *Diệp Thần* nhanh chóng bắt tay vào việc dựng trại. Hắn dùng đoản đao thô sơ chặt những cành cây khô có kích thước vừa phải, khéo léo bện chúng lại bằng những sợi dây leo rừng dẻo dai để tạo thành một bộ khung lều vững chãi nép sát vào vách đá. Phía trên khung, hắn phủ lên một tấm bạt da thú thô ráp mà hắn đã mang theo từ *Thánh Hồn Thôn*, bên ngoài cùng được ngụy trang cẩn thận bằng một lớp lá khô, dương xỉ và rêu xanh. Từ khoảng cách chỉ mười mét, nếu không quan sát cực kỳ kỹ lưỡng, người ta sẽ chỉ nghĩ đó là một phần nhô ra tự nhiên của vách đá phủ đầy thực vật.\nĐể đảm bảo không để lại bất kỳ dấu vết sinh hoạt nào có thể đánh động đến những sinh vật nhạy cảm trong rừng hay những hồn sư hùng mạnh đi ngang qua, *Diệp Thần* tuyệt đối không nhóm lửa. Hắn dùng đá tảng lấp kín các khe hở của lều để ngăn mùi cơ thể thoát ra ngoài, đồng thời rải xung quanh một loại bột thảo dược có mùi đất ẩm để át đi hơi người. \nKhi bóng tối hoàn toàn nuốt chửng khu rừng, nhiệt độ giảm xuống nhanh chóng, mang theo cái lạnh thấu xương của sương muối phương Bắc. *Diệp Thần* ngồi xếp bằng trong không gian chật hẹp của chiếc lều ngụy trang, hai mắt khắm khít nhắm lại. Hắn không hề cảm thấy lạnh. Trong cơ thể hắn, luồng hồn lực cấp mười tinh thuần như dòng suối ấm áp không ngừng tuần hoàn qua các kinh mạch, gột rửa mệt mỏi và giữ cho thân nhiệt luôn ở mức hoàn hảo. Ba chiếc mặt nạ ảo ảnh trong lòng bàn tay hắn – *Bạch Dương*, *Kim Ngưu*, *Thiên Bình* – khẽ rung động nhẹ nhàng, tỏa ra một tầng hào quang mờ nhạt bao bọc lấy tâm trí hắn. \nChiếc mặt nạ *Bạch Dương* mang theo hơi thở của mùa xuân và sự sống, không ngừng bổ sung sinh khí cho cơ thể hắn, giúp hắn duy trì trạng thái đỉnh phong dù chỉ ăn những loại quả dại và lương khô đạm bạc. Chiếc mặt nạ *Kim Ngưu* củng cố sự kiên định của gân cốt, khiến việc ngồi bất động hàng giờ liền không gây ra bất kỳ sự tê mỏi nào. Trong khi đó, chiếc mặt nạ *Thiên Bình* giữ cho tinh thần hắn luôn ở một trạng thái cân bằng tuyệt đối, gạt bỏ mọi sự nôn nóng, lo âu hay sợ hãi trước bóng tối vô tận của rừng sâu. Hắn giống như một tảng đá lặng lẽ, một phần của vách núi, hòa mình hoàn toàn vào nhịp thở của thiên nhiên.\nChuỗi ngày chờ đợi kiên nhẫn bắt đầu. Một ngày, hai ngày, rồi một tuần lễ trôi qua trong sự tĩnh mịch đến đáng sợ của *Khu Rừng Thánh Hồn*. \nMỗi ngày, khi ánh sáng ban mai yếu ớt lách qua kẽ lá rọi xuống thung lũng, *Diệp Thần* lại hé mở một góc nhỏ của tấm bạt ngụy trang, lặng lẽ quan sát thung lũng *Lam Ngân Thảo*. Vùng ánh sáng lam nhạt kia dường như có một nhịp điệu sinh mệnh rất riêng. Cứ mỗi buổi trưa, khi mặt trời lên đến đỉnh đầu, ánh sáng lam nhạt ấy lại thu nhỏ lại, ẩn tàng vào sâu trong từng phiến lá của thảm cỏ khổng lồ. Và khi màn đêm buông xuống, nó lại bành trướng ra, tỏa sáng lấp lánh như một dải ngân hà rơi rụng nhân gian.\nTrong suốt thời gian này, *Diệp Thần* không hề lơi lỏng việc tu luyện và chuẩn bị. Hắn biết rõ rằng mình đang đi trên một sợi dây mảnh giữa vực sâu. Kế hoạch của hắn cực kỳ điên rồ: bẻ gãy vận mệnh của *Đường Tam* bằng cách cướp đi mẫu thân của hắn – *A Ngân*, trước khi mối nhân duyên giữa nàng và *Đường Hạo* kịp bắt đầu."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Để có được lòng tin của *Lam Ngân Hoàng* khi nàng vừa mới hóa hình, bạo lực hay sự cưỡng ép chỉ mang lại tác dụng ngược. Nàng là hiện thân của sự lương thiện, bao dung và tình yêu thương vạn vật. Cách duy nhất để đi vào trái tim của một sinh mệnh như thế, chính là lợi dụng lòng trắc ẩn của nàng. Một thiếu niên vô tội, vì bảo vệ nàng hoặc vô tình gặp nạn mà trọng thương cận kề cái chết... nàng tuyệt đối sẽ không khoanh tay đứng nhìn."
+        },
+        {
+          "type": "narrative",
+          "content": "Nghĩ đến đây, khóe môi *Diệp Thần* khẽ nhếch lên một nụ cười đầy mưu mô. Để vở kịch \"khổ nhục kế\" này diễn ra một cách hoàn mỹ không một vết xước, hắn đã dành nhiều ngày để khảo sát địa hình xung quanh thung lũng. Hắn tìm thấy một lối mòn nhỏ dẫn từ thung lũng ra một con suối nước ngọt phía Tây – đây chắc chắn sẽ là lộ trình đầu tiên mà *A Ngân* lựa chọn khi nàng hóa hình làm người và muốn khám phá thế giới xung quanh. \nCách lối mòn đó không xa, *Diệp Thần* đã âm thầm chuẩn bị một \"đạo cụ\" đặc biệt. Đó là một con *U Minh Lang* mười năm, một loài hồn thú hung hãn nhưng có tu vi thấp, vừa đủ để tạo ra những vết thương trông có vẻ kinh hoàng nhưng không thực sự đe dọa đến tính mạng của một kẻ sở hữu hồn lực cấp mười như hắn. Hắn đã dùng một loại thảo dược có mùi hương kích thích nhẹ để giam giữ con thú này trong một hang đá nhỏ gần đó, chỉ chờ thời khắc quyết định sẽ thả nó ra để hoàn thành màn kịch anh hùng cứu mỹ nhân đầy máu và nước mắt.\nMỗi đêm ngồi trong lều, *Diệp Thần* đều phân tích kỹ lưỡng về sự tồn tại của *Đường Hạo*. Gã khổng lồ của *Hạo Thiên Tông* lúc này có lẽ vẫn đang chìm đắm trong sự rèn luyện hoặc đang phiêu bạt giang hồ, chưa từng đặt chân đến góc nhỏ này của *Khu Rừng Thánh Hồn*. Khoảng thời gian trống này chính là món quà vĩ đại nhất mà số phận ban tặng cho hắn. Hắn phải hành động thật nhanh, thật chuẩn xác, dứt khoát không để lại bất kỳ kẽ hở nào cho sự can thiệp của định mệnh cũ.\nĐến đêm thứ mười hai, một sự biến hóa kỳ vĩ cuối cùng cũng xảy ra.\nĐó là một đêm trăng tròn tuyệt mỹ. Bầu trời không một gợn mây, ánh trăng bạc rọi xuống khu rừng già một tầng ánh sáng lạnh lẽo nhưng thuần khiết. Khoảng mười hai giờ đêm, *Diệp Thần* đang nhắm mắt dưỡng thần bỗng đột ngột mở mắt ra. Đồng tử của hắn co rút lại khi cảm nhận được một luồng năng lượng sinh mệnh khổng lồ, nồng đậm đến mức chưa từng có đang bùng phát từ hướng thung lũng *Lam Ngân Thảo*.\nHắn lập tức áp sát mặt vào khe hở của lều ngụy trang, nín thở quan sát.\nDưới ánh trăng sáng tỏ, toàn bộ thung lũng *Lam Ngân Thảo* đang rung động dữ dội. Hàng triệu bụi cỏ nhỏ bé đồng loạt dựng thẳng đứng, những chiếc lá màu xanh lục sẫm khẽ run rẩy, phát ra những tiếng rì rào trầm bổng như một bài thánh ca vĩ đại đang tôn vinh vị hoàng đế của chúng. Từ trung tâm thung lũng, nơi gốc cây cổ thụ khô héo, dây leo *Lam Ngân Thảo* khổng lồ mang những đường gân vàng kim rực sáng lên một cách chói lọi. Ánh sáng màu lam thẫm đặc quánh lại, cuộn trào như sóng triều, rồi nhanh chóng co cụm, quấn quýt lấy nhau tạo thành một kén ánh sáng khổng lồ cao hơn hai mét lơ lửng giữa không trung.\nMùi hương của sự sống, thanh khiết và ngọt ngào như sương sớm mùa xuân, đột ngột lan tỏa ra khắp không gian, khiến cho cả tinh thần của *Diệp Thần* cũng cảm thấy sảng khoái vô cùng.\n*Rắc... Rắc...*\nTiếng rạn nứt thanh thúy vang lên trong tĩnh mịch. Chiếc kén ánh sáng màu lam bắt đầu xuất hiện những vết nứt dài lấp lửng ánh vàng kim. Rồi trong một tiếng \"Oanh\" nhẹ nhàng như tiếng chuông gió ngân vang, chiếc kén vỡ tan thành vạn điểm sáng lung linh rơi rụng xuống thảm cỏ.\nTừ trong cơn mưa ánh sáng huyền ảo đó, một bóng dáng thanh mảnh, uyển chuyển của một thiếu nữ từ từ bước ra.\nNàng sở hữu một vẻ đẹp thoát tục, thanh lệ đến mức khiến cho cả ánh trăng đêm nay cũng trở nên nhạt nhòa. Mái tóc dài màu lam thẫm mềm mại như thác nước đổ dài qua hông, khẽ bay múa trong gió đêm. Làn da của nàng trắng ngần như ngọc thạch quý hiếm nhất, đôi mắt to tròn lấp lánh như chứa đựng cả một bầu trời sao lấp lánh, phản chiếu sự ngây thơ, tò mò và một chút bỡ ngỡ đối với thế giới mới mẻ xung quanh. Nàng khoác trên mình một bộ váy giản dị được kết từ những chiếc lá *Lam Ngân Thảo* mềm mại, để lộ bờ vai thon thả và đôi bàn chân trần nhỏ nhắn đang nhẹ nhàng đặt lên thảm cỏ xanh phát sáng.\nĐó chính là *A Ngân* – *Lam Ngân Hoàng* vừa mới hóa hình làm người!\nNàng khẽ vươn hai tay lên cao, hít một hơi thật sâu bầu không khí tự do của thế giới bên ngoài. Một nụ cười rạng rỡ, thuần khiết như đóa hoa chớm nở xuất hiện trên môi nàng. Nàng cúi xuống, dịu dàng vuốt ve những bụi cỏ nhỏ dưới chân, khẽ thì thầm những lời ngôn ngữ của loài thực vật mà người thường không thể hiểu được. Những bụi cỏ quanh nàng reo hò, đung đưa quấn quýt lấy chân nàng như muốn giữ chân vị hoàng đế của chúng, nhưng sự khao khát khám phá thế giới loài người trong đôi mắt của *A Ngân* là không thể ngăn cản.\nNàng đứng dậy, đôi mắt lấp lánh hướng về phía lối mòn dẫn ra con suối phía Tây – đúng như những gì *Diệp Thần* đã dự tính. Nàng bắt đầu bước những bước chân trần uyển chuyển, chậm rãi rời khỏi sự bảo hộ của thánh địa để bước vào khu rừng âm u bên ngoài.\nTrong bóng tối của vách đá, *Diệp Thần* khẽ liếm môi, dã tâm trong lòng bùng cháy dữ dội như lửa gặp dầu. Cơ thể hắn khẽ chuyển động, luồng hồn lực cấp mười vận hành đến cực hạn, sẵn sàng cho giây phút quyết định. Vở kịch vĩ đại nhất đời hắn, nhằm bóp nghẹt định mệnh của đứa con cưng của trời đất, chính thức bắt đầu từ giây phút này."
+        }
+      ]
+    },
+    {
+      "id": "b0192996-2966-434f-9cab-3f998e0e481a",
+      "type": "user_choice",
+      "content": "Khởi động kế hoạch khổ nhục kế ngay lập tức, giải phóng con *U Minh Lang* đã chuẩn bị sẵn để nó tấn công mình ngay trên lối mòn trước mắt *A Ngân*, giả vờ bảo vệ một con thú nhỏ vô tội để thu phục lòng trắc ẩn của nàng. {Tỷ lệ thành công: 85%. Hậu quả/Phần thưởng: Nhận được sự quan tâm và cứu trị trực tiếp từ *A Ngân*, bước đầu xây dựng lòng tin tuyệt đối; cơ thể chịu một số vết thương ngoài da thực tế.}"
+    },
+    {
+      "id": "6e4304b3-d978-4145-8610-a26d206ea8b2",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Gào! Một tiếng sói tru ghê rợn đột ngột xé toạc màn đêm tĩnh mịch của *Khu Rừng Thánh Hồn*, kéo theo một luồng gió tanh tưởi sộc thẳng vào thính giác. Ngươi lập tức giải phóng con *U Minh Lang* đã chuẩn bị sẵn để nó nhảy vào tấn công mình trên lối mòn ngay trước mắt *A Ngân*. Bóng sói xám khổng lồ bạt mạng lao ra từ lùm cây rậm rạp, nanh vuốt bén ngót phản chiếu ánh trăng rằm sắc lạnh. Dưới áp lực của loài thú dữ, ngươi không hề né tránh, mà trái lại, diễn tròn vai một đứa trẻ hoảng hốt nhưng đầy lòng trắc ẩn, vội vàng lao mình ra che chở cho một con thỏ rừng nhỏ bé đang run rẩy dưới gốc cây cổ thụ.\nXoạt! Móng vuốt sắc nhọn của con *U Minh Lang* sượt mạnh qua bả vai và cánh tay trái của ngươi. Vết cào rách nông trên cánh tay ngươi rỉ máu, từng giọt huyết dịch đỏ tươi nhanh chóng nhuộm đẫm lớp áo thô sơ khi ngươi ôm lấy con thú nhỏ vào lòng chịu trận. Cơn đau rát thực tế truyền thẳng vào đại não, nhưng khóe môi ngươi ẩn sau bóng tối lại khẽ nhếch lên một nụ cười đầy tính toán. Hành động dũng cảm và thuần khiết này khiến *A Ngân* vô cùng cảm động. Chứng kiến một sinh mệnh nhân loại nhỏ bé, yếu ớt lại sẵn sàng dùng tấm thân phàm tục để bảo vệ một loài động vật vô tội, trái tim lương thiện vốn tràn đầy tình yêu thương của nàng lập tức thắt lại."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Dừng tay!"
+        },
+        {
+          "type": "narrative",
+          "content": "Nàng lập tức dùng vạn dải *Lam Ngân Thảo* dưới mặt đất bộc phát hào quang xanh lam rực rỡ, kết tụ thành những dải lụa khổng lồ quấn chặt lấy thân hình con dã thú, dứt khoát hất văng con sói dữ ra xa hàng chục mét vào sâu trong bóng đêm của rừng già. Rồi nhanh chóng, với một động tác lướt nhẹ tựa như mây khói, nàng lướt đến bên cạnh ngươi, đôi bàn tay ngọc ngà áp nhẹ lên vết thương rỉ máu, truyền hồn lực chữa lành vết thương cho ngươi chỉ trong tích tắc, ánh mắt tràn đầy sự thiện cảm.\nLuồng hồn lực dịu nhẹ, mang theo hơi thở tinh khiết của thiên nhiên hoang dã từ lòng bàn tay của *A Ngân* cuồn cuộn chảy vào kinh mạch của ngươi. Cảm giác đau rát thấu xương ban nãy lập tức tan biến, thay vào đó là một luồng sinh khí ấm áp, thanh mát như dòng suối đầu nguồn mùa xuân. Vết rách trên da thịt ngươi bắt đầu khép lại với tốc độ mắt thường cũng có thể nhìn thấy, những tế bào tổn thương nhanh chóng được tái tạo, không để lại bất kỳ một vết sẹo nào. \nNgươi khẽ run rẩy, bờ vai hơi co rúm lại như vẫn chưa hoàn toàn thoát khỏi cơn kinh hoàng từ móng vuốt dã thú. Ngươi ngước mắt lên nhìn nàng, đôi mắt cố ý mở to, long lanh những tia sáng sợ hãi nhưng cũng đầy sự kinh ngạc trước dung nhan thoát tục của vị thiếu nữ trước mặt. Trong vòng tay ngươi, con thỏ rừng nhỏ bé vẫn đang run bần bật, nhưng cái ôm chặt ấm áp của ngươi dường như đã cho nó một chỗ dựa an toàn."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ngươi... ngươi là thần tiên ở đâu hạ phàm sao? Con thỏ này... nó có sao không?"
+        },
+        {
+          "type": "narrative",
+          "content": "Giọng nói của ngươi mang theo chút run rẩy của một đứa trẻ vừa trải qua ranh giới sinh tử, nhưng trong sâu thẳm tâm trí, ba chiếc mặt nạ võ hồn – *Bạch Dương*, *Kim Ngưu*, *Thiên Bình* – đang lặng lẽ vận chuyển trong thức hải. Sức mạnh tinh thần của ngươi cực kỳ tỉnh táo, đang không ngừng phân tích tần số hồn lực của nàng. Sức mạnh sinh mệnh của *Lam Ngân Hoàng* quả nhiên danh bất hư truyền, chỉ một hơi thở chữa trị ngắn ngủi cũng đủ khiến chân nguyên trong cơ thể ngươi dao động kịch liệt, cộng hưởng một cách kỳ diệu với chiếc mặt nạ *Bạch Dương* đại diện cho sinh mệnh lực.\n*A Ngân* nhìn thấy sự bướng bỉnh nhưng ngây thơ của ngươi, trong lòng dâng lên một niềm thương cảm vô bờ. Nàng vốn là một hồn thú hóa hình, mang theo cái nhìn hoài nghi và cảnh giác đối với loài người đầy rẫy mưu mô và tàn ác thông qua những lời cảnh báo từ tổ tiên. Thế nhưng, người đầu tiên nàng gặp lại là một thiếu niên trong sáng đến mức ngốc nghếch, sẵn sàng hy sinh thân mình để bảo vệ một sinh mệnh cỏn con không chút giá trị. Điều này hoàn toàn phá vỡ những định kiến bấy lâu của nàng, khiến tấm màng phòng bị trong lòng nàng đối với ngươi lập tức sụp đổ."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Ta không phải thần tiên, ta chỉ là một người đi ngang qua đây mà thôi. Đừng sợ, con dã thú kia đã bị ta đuổi đi xa rồi, con thỏ nhỏ trong lòng ngươi cũng hoàn toàn bình an vô sự. Ngươi thật là ngốc, tại sao lại dùng cơ thể của mình để che chở cho nó chứ? Nếu ta không đến kịp, ngươi có biết mình sẽ gặp nguy hiểm đến tính mạng không?"
+        },
+        {
+          "type": "narrative",
+          "content": "Nàng khẽ trách móc, nhưng giọng điệu dịu dàng như gió xuân lướt qua rặng liễu, tràn đầy sự quan tâm và lo lắng chân thành. Đôi mắt màu lam thẫm của nàng nhìn chăm chằm vào cánh tay đã được chữa lành của ngươi, khẽ thở phào nhẹ nhõm khi thấy da thịt đã khôi phục lại vẻ hồng hào khỏe mạnh. Nàng vươn những ngón tay thon dài, nhẹ nhàng vuốt ve cái đầu nhỏ của con thỏ rừng đang nằm trong lòng ngươi. Kỳ lạ thay, con thỏ hoang dã vốn rất nhút nhát kia khi chạm vào hơi ấm của nàng bỗng trở nên vô cùng ngoan ngoãn, khẽ cọ cọ bộ lông mềm mại vào lòng bàn tay nàng như một sự quyến luyến.\nNgươi khẽ cúi đầu, làm như ngượng ngùng trước lời trách mắng dịu dàng của nàng, nhưng thực chất là để che giấu tia sáng sắc lạnh đầy dã tâm đang lóe lên trong mắt. Mọi thứ đang diễn ra hoàn hảo không một vết xước, đúng như những gì ngươi đã vạch ra trong đầu. Lòng trắc ẩn và sự bao dung của *Lam Ngân Hoàng* chính là điểm yếu chí mạng mà ngươi có thể dễ dàng khai thác."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ta... ta không nghĩ nhiều như vậy. Lúc đó ta chỉ thấy con thỏ này quá tội nghiệp. Nó nhỏ bé như thế, nếu bị con sói kia vồ trúng thì chắc chắn sẽ chết mất. Ta tuy yếu ớt, nhưng ta không thể trơ mắt nhìn một sinh mệnh bị tàn sát ngay trước mắt mình mà không làm gì cả..."
+        },
+        {
+          "type": "narrative",
+          "content": "Lời nói của ngươi vừa dứt, những bụi *Lam Ngân Thảo* xung quanh dường như cũng cảm nhận được tần số tinh thần lương thiện giả tạo ấy, chúng đồng loạt lay động, tỏa ra những đốm sáng màu lam nhạt bao bọc lấy cả hai người. Ánh sáng dịu mát phản chiếu lên gương mặt thanh lệ của *A Ngân*, khiến nàng nhìn ngươi với ánh mắt càng thêm phần nhu hòa và cảm động. Một thiếu niên có tấm lòng thuần khiết như thế này, ở giữa thế giới nhân loại đầy rẫy tranh đoạt kia, quả thực là một viên ngọc quý hiếm có."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Ngươi tên là gì? Tại sao đêm hôm khuya khoắt thế này lại một mình đi sâu vào *Khu Rừng Thánh Hồn*? Nơi này có rất nhiều hồn thú hung dữ ẩn nấp, một người bình thường không có hồn lực bảo thân như ngươi rất dễ gặp nguy hiểm."
+        },
+        {
+          "type": "narrative",
+          "content": "Nàng nhẹ nhàng hỏi, bàn tay vẫn không rời khỏi vai ngươi, luồng hồn lực dịu mát vẫn duy trì một mức độ chuyển động nhỏ để bảo đảm cơ thể ngươi hoàn toàn hồi phục, không để lại bất kỳ di chứng nào từ cú sốc vừa rồi.\nNgươi giả vờ khẽ rùng mình một cái vì cái lạnh của sương đêm, ôm chặt lấy con thỏ vào lòng, ngước khuôn mặt ngây ngô lên nhìn nàng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ta tên là Diệp Thần, là người của ngôi làng nhỏ ở ngoài rìa khu rừng kia. Ta vừa mới thức tỉnh võ hồn hôm nay, nhưng ai cũng nói võ hồn của ta là một phế vật phế thải, không có tương lai. Ta buồn bã nên mới lang thang vào rừng hái ít thảo dược, không ngờ đi quá xa rồi lạc đường lúc nào không biết..."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi dừng lại một chút, khẽ thở dài, vẻ mặt lộ rõ sự cô đơn và tủi thân của một đứa trẻ bị cả thế giới quay lưng. Đây là một đòn tâm lý cực mạnh. *A Ngân* vốn là một sinh mệnh sinh ra từ loài cỏ dại bị coi là thấp kém nhất thế giới – *Lam Ngân Thảo*. Nàng hiểu rõ hơn ai hết cảm giác bị coi khinh, bị xem là phế vật vô dụng. Sự đồng cảm sâu sắc về số phận lập tức trỗi dậy mạnh mẽ trong tâm hồn nàng.\nNàng khẽ mỉm cười, nụ cười rạng rỡ đến mức khiến cho cả ánh trăng rằm trên cao cũng phải lu mờ. Nàng đưa tay xoa nhẹ mái tóc của ngươi, giọng nói tràn đầy sự khích lệ và an ủi."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Diệp Thần... cái tên thật đẹp. Ngươi không cần phải nghe những lời phán xét của người khác. Trên đời này không có võ hồn nào là phế vật thực sự, chỉ có kẻ không biết nỗ lực mà thôi. Loài cỏ *Lam Ngân Thảo* dưới chân chúng ta đây, tuy yếu ớt và bình thường nhất, nhưng chúng vẫn có thể bùng phát ra sức mạnh sinh mệnh vô tận để bảo vệ những gì chúng yêu thương. Ngươi sở hữu một tấm lòng lương thiện như thế, võ hồn của ngươi chắc chắn cũng sẽ mang một ý chí vĩ đại."
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe những lời đầy ý vị của nàng, trong lòng ngươi thầm cười lạnh. Hóa ra đây chính là cách mà nàng nhìn nhận thế giới – đầy rực rỡ và tràn ngập hy vọng hảo huyền. Nhưng chính sự ngây thơ này của nàng sẽ là bệ phóng hoàn hảo cho ngươi. Ngươi đã bước đầu chiếm trọn vẹn lòng tin và sự thiện cảm của nàng, bước đi tiếp theo sẽ quyết định liệu nàng có tự nguyện rời bỏ thánh địa để đi theo ngươi hay không. \nKhông gian xung quanh thung lũng một lần nữa chìm vào sự yên bình vốn có. Ánh trăng bạc dịu mát soi rọi bóng hình của hai người đang ngồi bên nhau giữa thảm cỏ phát sáng. Gió đêm lay động, mang theo hương thơm dịu ngọt của cỏ non và đất ẩm, vẽ nên một bức tranh đồng thoại tuyệt đẹp, nhưng bên dưới bức tranh ấy là một cạm bẫy định mệnh đang từ từ khép lại quanh vị hoàng hậu tương lai của loài cỏ dại."
+        }
+      ]
+    },
+    {
+      "id": "9339ba77-45dc-4878-b38a-30b994f1870b",
+      "type": "system",
+      "content": "**[Hệ thống]** Chúc mừng **Diệp Thần** đã tăng **1** cấp! Cấp độ hiện tại: **4**.",
+      "transient": true
+    }
+  ],
+  "choices": [
+    "Giả vờ choáng váng do mất máu để ngã vào lòng nàng nhằm gia tăng sự tiếp xúc thân mật và khơi dậy lòng trắc ẩn của nàng nhiều hơn. {Tỷ lệ thành công: 90%. Hậu quả/Phần thưởng: Nhận được sự che chở ấm áp từ Lam Ngân Hoàng, củng cố mối liên kết tình cảm bền chặt.}",
+    "Kết một chiếc vòng từ cỏ dại xung quanh dâng tặng nàng để tỏ lòng biết ơn chân thành, thể hiện tâm hồn thuần khiết của một thiếu niên. {Tỷ lệ thành công: 95%. Hậu quả/Phần thưởng: Khiến nàng vô cùng vui mừng và cảm động trước sự ngây thơ tinh tế, chỉ số hảo cảm tăng vọt.}",
+    "Tỏ ra lo lắng cho gia đình ở làng và ngỏ ý muốn tự mình rời đi, sử dụng kế lạt mềm buộc chặt để nàng chủ động đề nghị hộ tống bạn ra khỏi rừng sâu. {Tỷ lệ thành công: 85%. Hậu quả/Phần thưởng: Nàng sẽ không nỡ để một đứa trẻ thương tích đi một mình, quyết định đồng hành cùng bạn suốt chặng đường.}",
+    "Tò mò hỏi thăm gia thế của nàng với vẻ ngây thơ vô số tội, đồng thời chủ động chia sẻ phần lương khô ít ỏi trong túi hành lý cho nàng. {Tỷ lệ thành công: 88%. Hậu quả/Phần thưởng: Nàng mỉm cười đón nhận sự ấm áp giản dị, khoảng cách phòng bị giữa hai người hoàn toàn bị xóa nhòa.}"
+  ],
+  "gameMode": "EXPLORATION",
+  "activeTrade": {
+    "trader": null,
+    "playerOffer": [],
+    "npcOffer": null,
+    "offerType": "sell",
+    "sellMultiplier": 0,
+    "itemSpecificSellBonuses": {},
+    "itemSpecificBuyBonuses": {}
+  },
+  "storySummaries": [],
+  "adventureTurnCount": 6
+}
