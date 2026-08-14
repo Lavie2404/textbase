@@ -270,7 +270,7 @@ phát minh lại.
 ### tool-panel-header
 
 **Category**: Navigation
-**Used In**: o-customize, dự kiến: mọi overlay "công cụ" phi-diegetic tương lai
+**Used In**: o-customize, settings
 
 **Description**: Tiêu đề tĩnh + nút đóng (X) đứng đầu 1 overlay thuộc trục hình học phi-diegetic (khác Card/marginalia) — đối lập trực tiếp `scene-header` (không icon-badge, không mực loang, chữ rõ ràng kiểu công cụ).
 
@@ -287,7 +287,7 @@ phát minh lại.
 ### tool-panel-close
 
 **Category**: Navigation
-**Used In**: o-customize
+**Used In**: o-customize, settings
 
 **Description**: Nút đóng dạng chữ "X" (không icon asset, nhất quán nguyên tắc "chữ thay icon" toàn dự án) — đóng ngay lập tức, không qua luật 2-bậc (khác tap-ngoài/Esc).
 
@@ -322,7 +322,7 @@ phát minh lại.
 ### tool-field-input
 
 **Category**: Input
-**Used In**: o-customize
+**Used In**: o-customize, settings (biến thể mask — kèm `tool-field-mask-toggle`), save-slot-screen (ô gõ tên trong O-ConfirmDelete escalated)
 
 **Description**: Field nhập liệu dạng input-box chuẩn (không khung con dấu, không mực loang) — đối lập trực tiếp ngôn ngữ "số phải minh họa bằng nét mực" của thế giới thật; biến thể số nguyên/float/text dùng chung 1 vỏ style, khác nhau ở validation.
 
@@ -340,7 +340,7 @@ phát minh lại.
 ### tool-segmented-choice
 
 **Category**: Input
-**Used In**: o-customize, dự kiến: settings (O-Set, cỡ chữ S/M/L đã dùng trước đó theo cùng ngôn ngữ)
+**Used In**: o-customize, settings (cỡ chữ S/M/L; chế độ Mặc định/Của tôi), save-slot-screen (dòng mời cỡ chữ — biến thể bootstrapping: alpha 1.0 + glyph ≥ nấc M cố định, KHÔNG theo theme_scale)
 
 **Description**: Nhóm 2-3 lựa chọn loại trừ lẫn nhau xếp ngang hàng, lựa chọn đang chọn đánh dấu bằng 1 chấm mực đặc nhỏ (không gạch chân — nghĩa đó đã bị hệ Death & Consequence chiếm).
 
@@ -375,7 +375,7 @@ phát minh lại.
 ### tool-save-feedback
 
 **Category**: Feedback
-**Used In**: o-customize
+**Used In**: o-customize, settings
 
 **Description**: Cặp nút Lưu + dòng phản hồi cục bộ ngay trong khu vực vừa thao tác — không toast/banner riêng, không tự động biến mất theo timer (chỉ biến mất khi field bị sửa tiếp).
 
@@ -393,7 +393,7 @@ phát minh lại.
 ### tool-inline-error
 
 **Category**: Feedback
-**Used In**: o-customize
+**Used In**: o-customize, settings
 
 **Description**: Text lỗi ngắn, xuất hiện NGAY dưới field gây lỗi, chỉ sau first-interaction/blur — không phải banner/toast, không chặn thao tác ở field khác.
 
@@ -439,6 +439,82 @@ phát minh lại.
 **When to Use**: Khi có 2 tầng validate riêng biệt cho cùng 1 giá trị — 1 ngưỡng cứng (chặn) và 1 ngưỡng khuyến nghị (không chặn, chỉ nhắc).
 **When NOT to Use**: Không dùng nếu hệ thống chỉ có 1 tầng validate (khi đó chỉ cần `tool-inline-error`).
 **Reference**: `design/ux/o-customize.md` §Component Inventory (Khu 3 — dưới `min_thuc_per_skill`), §Acceptance Criteria
+
+---
+
+### paper-strip-banner
+
+**Category**: Feedback
+**Used In**: save-slot-screen (S1 — màn nhiều banner nhất); toàn cục mọi màn kể cả S5 (tầng banner, GDD §5)
+
+**Description**: Dải giấy mỏng ngang ở ĐỈNH màn hình cho thông báo không chặn — nền giấy kem đậm hơn nền chính 1 bậc, viền mực mảnh CHỈ cạnh dưới, chữ đen-xám thuần (không icon cảnh báo, không đỏ son/xanh ngọc — lỗi kỹ thuật ≠ hệ quả cơ học).
+
+**Specification**:
+- Tối đa 1 banner hiển thị; banner mới vào hàng chờ FIFO — NGOẠI LỆ duy nhất: banner lỗi ghi save (`WRITE_FAILED_*`) được preempt banner quota đang mở (GDD §5)
+- Vào: fade + rơi nhẹ 1 nấc từ đỉnh, `transition_banner_ms=120ms`; đẩy nội dung xuống, KHÔNG overlay che
+- Dismiss: tap X (readonly, luôn tự do) hoặc tự biến mất khi điều kiện gốc hết — KHÔNG auto-timeout
+- Không bao giờ che dòng dẫn tap-to-continue hay tap-target Họ B nào đang hiện
+
+**When to Use**: Lỗi/cảnh báo kỹ thuật tạm thời, không chặn (quota, ghi thất bại, version mismatch, đa-tab).
+**When NOT to Use**: Hệ quả cơ học của thế giới (không bao giờ dùng banner); trạng thái THƯỜNG TRỰC của 1 item (dùng nhãn cố định trên item — VD slot "phai mực"); lỗi AI timeout tại S2 (hiện trong khung tường thuật, GDD Core Rule #9).
+**Reference**: `design/ux/save-slot-screen.md` §States & Variants; `core-ui-screen-navigation.md` §5
+
+---
+
+### marginalia-menu
+
+**Category**: Navigation
+**Used In**: save-slot-screen (S1), main-screen (S2); dự kiến: S5
+
+**Description**: Popup nhỏ neo cạnh bút tích 「Mục」, danh sách mục chữ thuần — nội dung thay đổi theo màn hình (S1: chỉ "Cài đặt"; S2: "Về danh sách sổ" / "Cài đặt"; S5: chỉ "Về danh sách sổ"). Bút tích không đổi hình, chỉ nội dung menu đổi.
+
+**Specification**:
+- Mục không áp dụng VỀ CẤU TRÚC cho màn hiện tại → ẨN hoàn toàn, không ghost (luật Visual/Audio mục 1)
+- Mục bị khóa tạm theo `tm_state` → mờ mực + không bấm được (VD "Về danh sách sổ" khi Resolving — D.1 `tap_back_to_slots`)
+- Đóng: chọn 1 mục / tap ngoài / Esc; mỗi mục ≥44px touch target; chữ thuần, không icon
+- **Bàn phím**: khi menu mở, focus tự nhận vào mục đầu tiên; Tab/Shift+Tab (và mũi tên lên/xuống, tương đương) di chuyển giữa các mục; Enter/Space chọn; Esc đóng và trả focus về bút tích 「Mục」 — không keyboard trap
+
+**When to Use**: Điểm vào marginalia có nhiều hơn 1 đích, hoặc đích thay đổi theo màn hình.
+**When NOT to Use**: Hành động đơn cố định (dùng `marginalia-nav-link` trực tiếp — như 「Thẻ」「Lục」).
+**Reference**: `design/ux/save-slot-screen.md` §Navigation Position; `design/ux/settings.md` §Entry & Exit Points
+
+---
+
+### slot-spine-row
+
+**Category**: Data Display / Navigation
+**Used In**: save-slot-screen
+
+**Description**: Hàng danh sách hình "gáy sách" — thanh gáy đậm mực trái (~8-12px) + "bìa" giấy kem chứa metadata; hình học/thẳng nét CÓ CHỦ ĐÍCH (đối lập khung mực loang của Card — "geometric-spine = vật thể chứa"). Tap thân hàng = hành động chính theo trạng thái; hành động phụ = text links nhỏ trong hàng.
+
+**Specification**:
+- 4 biến thể: **trắng** (gáy nét đứt, "Bắt đầu mới"); **đang chơi** (dog-ear mép phải, tap = Tiếp tục); **đã khép** (khử bão hòa -40% giữ lightness toàn hàng + con dấu CHỮ phân biệt nguyên nhân, tap = Xem lại); **hỏng** (con dấu "?" mực nhòe + text thay metadata, tap = không hành động)
+- Hàng ≥44px (thực tế ~72-88px); links phụ vùng chạm 44px vô hình, cách nhau ≥`MIN_ADJACENT_GAP_PX`
+- Dòng nhắc điều kiện (VD nhắc chép lại ≥`EXPORT_NUDGE_DAYS`) là 1 dòng chữ nhạt TRONG hàng, tap được
+- Xóa thành công → fade-out ≤150ms rồi gỡ layout, danh sách khép mượt
+
+**When to Use**: Danh sách "vật thể chứa" trong ẩn dụ nhật ký (sổ/quyển) với 1 hành động chính + các hành động phụ.
+**When NOT to Use**: Danh sách entry dữ liệu thuần trong panel công cụ phi-diegetic (đó là `tool-deletable-list-row`).
+**Reference**: `design/ux/save-slot-screen.md` §Component Inventory, §ASCII Wireframe
+
+---
+
+### tool-field-mask-toggle
+
+**Category**: Input
+**Used In**: settings
+
+**Description**: Nút chữ nhỏ cạnh 1 `tool-field-input` chứa dữ liệu nhạy cảm (VD API key) — lật trạng thái hiển thị giữa che (`•••`) và hiện rõ, KHÔNG đổi giá trị field.
+
+**Specification**:
+- Touch target ≥44px dù là text button nhỏ
+- Trạng thái che là MẶC ĐỊNH khi field có nội dung pre-fill hoặc vừa gõ — không tự hiện rõ
+- Lật trạng thái là tạm thời, cục bộ phiên hiển thị — không persist qua lần mở overlay tiếp theo (luôn về che khi mở lại)
+- Không có hiệu ứng chuyển động riêng — đổi hiển thị tức thời
+
+**When to Use**: Field nhập/hiển thị dữ liệu nhạy cảm (credential, key) nơi người chơi cần tự kiểm tra đã gõ đúng chưa mà không lộ liên tục lên màn hình (rủi ro người khác liếc màn hình, đặc biệt Mobile Web nơi che khuất mà không xem lại được là bất tiện).
+**When NOT to Use**: Không dùng cho field không nhạy cảm (tên nhân vật, số liệu — đã có `tool-field-input` chuẩn không mask).
+**Reference**: `design/ux/settings.md` §Component Inventory, §Interaction Map
 
 ---
 

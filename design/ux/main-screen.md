@@ -261,7 +261,7 @@ Mapping cho: Touch/Mouse hỗn hợp (không gamepad).
 | Tap-tên (`card_exists=false`) | Tap/click | Không có gì xảy ra — không styling, không phản hồi | Không hành động (đây là 1 điểm ⚠️ về mặt accessibility — xem Accessibility) |
 | Bút tích 「Thẻ」 | Tap/click | Mở O-Card cho nhân vật chính | Luôn khả dụng, kể cả Resolving |
 | Bút tích 「Lục」 | Tap/click | Page-flip transition (260ms) | Chuyển sang S4, luôn khả dụng kể cả Resolving |
-| Bút tích 「Mục」 | Tap/click | Mở O-Set | Luôn khả dụng kể cả Resolving |
+| Bút tích 「Mục」 | Tap/click | Mở menu nhỏ 2 mục ("Về danh sách sổ" / "Cài đặt"), neo cạnh bút tích | Mở MENU luôn khả dụng kể cả Resolving (readonly); bên trong: "Cài đặt" → mở O-Set (luôn tự do, `open_settings`); "Về danh sách sổ" → `tap_back_to_slots`, mờ mực khi `tm_state≠awaiting_action` (D.1) — chi tiết cấu trúc menu ở `settings.md` §Entry & Exit Points *(bổ sung 2026-08-14 — dòng gốc chỉ mô tả nhánh Settings, thiếu nhánh "Về danh sách sổ" đã có sẵn trong Core Rule #10/D.2 nhưng chưa propagate tới Interaction Map này)* |
 | Dòng "đọc tiếp về trước" | Tap/click | Page-flip transition | Chuyển sang S4 tại đúng lượt kế biên cửa sổ |
 | Dòng dẫn tap-to-continue | Tap/click (bất kỳ đâu trên dòng) / Enter hoặc Space khi đang focus (dòng dẫn TỰ NHẬN focus cùng nhịp auto-scroll) | Nhịp thở alpha dừng lại, chuyển cảnh sang S5 | Kích hoạt takeover Character Continuation — **hành động 1 chiều duy nhất không auto-timeout của toàn S2** |
 | Nudge heuristic line | Tap/click | Chip tương ứng được bật (1 chiều — tap để enable, không tự enable) | Không submit, chỉ hỗ trợ điền |

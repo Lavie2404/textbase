@@ -1,0 +1,1617 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vô Danh Lục — UI Mockup (S1 · S2 · O-Set)</title>
+<!--
+  THROWAWAY PROTOTYPE — design review mockup only. Not shipping code.
+  Source specs (all Approved unless noted):
+    design/ux/save-slot-screen.md   (S1 + O-ConfirmDelete)
+    design/ux/main-screen.md        (S2)
+    design/ux/settings.md           (O-Set)
+    design/ux/interaction-patterns.md
+  AI operation ported from src/reference.md (user's previous React app) —
+  the full 2-API prompt pipeline, per user request 2026-08-14:
+    API 1 "EXPERT LOGIC ENGINE" (JSON schema): ≥6 scenarios with probability
+    + classification_tags → weighted dice roll picks one.
+    API 2 "NARRATIVE ENGINE": novelist prompt narrating the chosen scenario
+    AS IT HAPPENS, style/length driven by tags ('dai' = 3000+ words),
+    <dialogue speaker="…"> tags rendered as distinct dialogue blocks,
+    exactly 4 numbered choices with {Tỷ lệ thành công/Hậu quả} annotations.
+    Plus: model fallback ladder + sticky preferred model, 503 circuit-breaker
+    cooldown, error translation, [NC] placeholder, choice parser (verbatim).
+  Real API from the demo build (user directive): no canned offline mode.
+  "Mặc định" apiMode = project key in the DEFAULT_API_KEY constant below;
+  "Của tôi" = player key saved via O-Set. No key at all → loud error.
+  Placeholders: S4/S4-RO (no spec yet), O-Card (no spec yet), stamp copy
+  (art-director/writer pending), nudge copy (writer pending).
+-->
+<style>
+  :root{
+    --paper:#F5EFE0; --paper-deep:#EDE5D0; --ink:#2B2620;
+    --ink-60:rgba(43,38,32,.60); --ink-38:rgba(43,38,32,.38);
+    --ink-15:rgba(43,38,32,.15);
+    --t-banner:120ms; --t-overlay:150ms; --t-screen:260ms;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html{font-size:100%;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    /* Vietnamese-safe serif stack — Georgia lacks precomposed Vietnamese glyphs */
+    font-family:"Palatino Linotype","Noto Serif","Times New Roman",serif;
+    line-height:1.65; min-height:100vh;
+  }
+  button{font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer;}
+  button:focus-visible, [tabindex]:focus-visible, input:focus-visible{
+    outline:2px solid var(--ink); outline-offset:2px;
+  }
+  #app{max-width:72ch; margin:0 auto; padding:0 1.1rem calc(2rem + env(safe-area-inset-bottom));}
+
+  /* ===== page-flip stand-in (real build: Godot page-flip 260ms) ===== */
+  #screen-root.flip-fwd{animation:flipFwd var(--t-screen) ease-out;}
+  #screen-root.flip-back{animation:flipBack var(--t-screen) ease-out;}
+  @keyframes flipFwd{from{opacity:0; transform:translateX(38px);}to{opacity:1; transform:none;}}
+  @keyframes flipBack{from{opacity:0; transform:translateX(-38px);}to{opacity:1; transform:none;}}
+
+  /* ===== paper-strip-banner ===== */
+  .banner{
+    background:var(--paper-deep); border-bottom:1px solid var(--ink);
+    margin:0 -1.1rem; padding:.55rem 1.1rem;
+    display:flex; gap:.8rem; align-items:baseline;
+    animation:bannerIn var(--t-banner) ease-out;
+  }
+  @keyframes bannerIn{from{opacity:0; transform:translateY(-6px);}to{opacity:1; transform:none;}}
+  .banner p{margin:0; flex:1; font-size:.93rem;}
+  .banner .x{min-width:44px; min-height:44px; margin:-.55rem -0.4rem; font-size:1rem;}
+
+  /* ===== marginalia (Họ A) ===== */
+  .chrome{display:flex; justify-content:flex-end; gap:1.4rem; padding:.7rem 0 .2rem; position:relative;}
+  .marginalia{font-weight:300; letter-spacing:.05em; min-height:44px; min-width:44px; color:var(--ink);}
+  .marginalia-menu{
+    position:absolute; top:calc(100% - .2rem); right:0; z-index:30;
+    background:var(--paper); border:1px solid var(--ink); box-shadow:2px 3px 0 var(--ink-15);
+    min-width:12rem; padding:.25rem 0;
+  }
+  .marginalia-menu button{display:block; width:100%; text-align:left; padding:.7rem 1rem; min-height:44px;}
+  .marginalia-menu button[aria-disabled="true"]{color:var(--ink-38); cursor:default;}
+
+  /* ===== S1 ===== */
+  .invite{
+    padding:.9rem 0 .6rem; border-bottom:1px solid var(--ink-15);
+    font-size:17px; /* bootstrapping rule: fixed ≥ nấc M, alpha 1.0, ignores theme scale */
+  }
+  .invite .opts{display:flex; gap:.9rem; margin-top:.5rem;}
+  .invite .opts button{
+    border:1px solid var(--ink); min-width:64px; min-height:44px; padding:.3rem .9rem;
+    font-size:17px; background:var(--paper);
+  }
+  .invite.gone{animation:fadeOut 150ms forwards;}
+  @keyframes fadeOut{to{opacity:0;}}
+
+  .slot-list{padding:.4rem 0;}
+  .spine-row{
+    display:flex; width:100%; text-align:left; margin:.65rem 0; position:relative;
+    background:var(--paper); align-items:stretch;
+  }
+  .spine-row .spine{width:10px; background:var(--ink); flex:none;}
+  .spine-row.blank .spine{background:none; border-left:3px dashed var(--ink-38); width:7px;}
+  .spine-row .cover{
+    flex:1; border:1px solid var(--ink-15); border-left:0; padding:.7rem .9rem; position:relative;
+    background:var(--paper);
+  }
+  .spine-row.blank .cover{border-style:dashed; color:var(--ink-60);}
+  .spine-row.active-slot .cover::after{ /* dog-ear */
+    content:""; position:absolute; top:0; right:0; width:0; height:0;
+    border-top:16px solid var(--ink-60); border-left:16px solid transparent;
+  }
+  .spine-row.closed-slot .cover, .spine-row.closed-slot .spine{filter:saturate(.6); opacity:.78;}
+  .spine-row .name{font-weight:600; display:block;}
+  .spine-row .meta{font-size:.9rem; color:var(--ink-60); margin-top:.15rem; display:block;}
+  .spine-row .stamp{
+    position:absolute; top:.55rem; right:.7rem; border:1.5px solid var(--ink);
+    padding:.05rem .45rem; font-size:.85rem; transform:rotate(6deg); background:var(--paper);
+  }
+  .spine-row.corrupt .stamp{border-style:dotted; color:var(--ink-60); transform:rotate(-5deg);}
+  .row-links{margin-top:.45rem; font-size:.9rem; display:flex; gap:1.2rem; flex-wrap:wrap;}
+  .row-links button{min-height:44px; margin:-.7rem 0; padding:.7rem 0; text-decoration:underline; text-underline-offset:3px; color:var(--ink-60);}
+  .nudge{font-size:.88rem; color:var(--ink-60); font-style:italic; margin-top:.35rem;}
+  .nudge button{font:inherit; color:inherit; text-decoration:underline; text-underline-offset:3px; min-height:44px; margin:-.6rem 0; padding:.6rem 0;}
+  .row-confirm{font-size:.88rem; color:var(--ink-60); margin-top:.3rem; font-style:italic;}
+  .spine-row.deleting{animation:fadeOut 150ms forwards;}
+  .empty-state{text-align:center; padding:2.5rem 0; color:var(--ink);}
+  .empty-state .sub{color:var(--ink-60); font-size:.92rem; margin-top:.4rem;}
+
+  /* ===== S2 ===== */
+  .scene-header{padding:.6rem 0 .3rem; font-size:1.06rem; letter-spacing:.03em;}
+  .scene-header .seal{
+    display:inline-block; border:1.5px solid var(--ink); padding:0 .4rem; margin-left:.6rem;
+    font-size:.8rem; transform:rotate(4deg);
+  }
+  .narrative{border-top:1px solid var(--ink-15); padding:.8rem 0;}
+  .narrative p{margin:0 0 1rem; text-align:justify;}
+  .narrative .err{color:var(--ink-60); font-style:italic;}
+  /* dialogue chat-bubbles — ported layout from the old app's DialogueBubble:
+     player speech right-aligned w/ strong border, NPC left w/ soft border,
+     avatar circle (first letter), speaker name above, one sharp corner */
+  .dlg-wrap{display:flex; flex-direction:column; margin:0 0 1rem;}
+  .dlg-wrap.player{align-items:flex-end;}
+  .dlg-wrap.npc{align-items:flex-start;}
+  .dlg-row{display:flex; gap:.6rem; align-items:flex-start; max-width:92%;}
+  .dlg-wrap.player .dlg-row{flex-direction:row-reverse;}
+  .dlg-avatar{
+    width:34px; height:34px; border-radius:50%; border:1.5px solid var(--ink-60);
+    display:flex; align-items:center; justify-content:center; font-weight:600;
+    flex:none; background:var(--paper); font-size:.95rem; margin-top:1.1rem;
+  }
+  .dlg-wrap.player .dlg-avatar{border-color:var(--ink);}
+  .dlg-name{font-size:.8rem; color:var(--ink-60); margin-bottom:.15rem; letter-spacing:.03em;}
+  .dlg-wrap.player .dlg-name{text-align:right;}
+  .dlg-bubble{
+    border:1px solid var(--ink-38); background:var(--paper);
+    padding:.55rem .85rem; border-radius:14px 14px 14px 3px; text-align:left;
+  }
+  .dlg-wrap.player .dlg-bubble{
+    border-color:var(--ink); background:var(--paper-deep);
+    border-radius:14px 14px 3px 14px;
+  }
+  .tap-name{font-weight:600; cursor:pointer;}
+  .writing{font-style:italic; color:var(--ink-60); display:flex; align-items:center; gap:.6rem; margin:.4rem 0 1rem;}
+  .ink-sweep{display:inline-block; width:72px; height:2px; background:
+    linear-gradient(90deg, var(--ink) 0 40%, transparent 40% 100%);
+    background-size:250% 100%; animation:sweep 1.6s linear infinite;}
+  @keyframes sweep{from{background-position:120% 0;}to{background-position:-30% 0;}}
+
+  .input-zone{border-top:1px solid var(--ink-15); padding-top:.8rem; transition:opacity 150ms;}
+  .input-zone.locked{opacity:.38; pointer-events:none;}
+  @keyframes cardIn{from{opacity:0;}to{opacity:1;}}
+  /* "✦ Gợi ý hành động" panel at the end of the story frame — ported layout
+     from the old app (numbered 01.-04., bold action, italic annotation with
+     a thin left rule) */
+  .sug-panel{border:1px solid var(--ink-38); padding:.9rem 1rem; margin:.3rem 0 1rem; animation:cardIn 150ms ease-out;}
+  .sug-title{font-size:.78rem; letter-spacing:.2em; color:var(--ink-60); font-weight:600;
+    border-bottom:1px solid var(--ink-15); padding-bottom:.5rem; margin-bottom:.6rem;}
+  .sug-item{display:flex; gap:.7rem; padding:.55rem 0; border-bottom:1px solid var(--ink-15); text-align:left;}
+  .sug-item:last-child{border-bottom:0; padding-bottom:.1rem;}
+  .sug-num{font-weight:600; color:var(--ink-60); font-variant-numeric:tabular-nums; flex:none;}
+  .sug-label{font-weight:600; display:block; line-height:1.45;}
+  .sug-item.fate .sug-label{text-decoration:underline; text-underline-offset:4px;}
+  .sug-note{display:block; font-size:.86rem; font-style:italic; color:var(--ink-60);
+    margin-top:.35rem; padding-left:.7rem; border-left:1px solid var(--ink-38);}
+  /* compact action buttons + ⓘ detail (ported: "Hành Động N" + info button) */
+  .act-grid{display:grid; grid-template-columns:1fr 1fr; gap:.5rem;}
+  @media (min-width:560px){.act-grid{grid-template-columns:repeat(4,1fr);}}
+  .act-wrap{display:flex; align-items:stretch; animation:cardIn 150ms ease-out;}
+  .act-btn{flex:1; border:1px solid var(--ink-38); border-right:0; background:var(--paper);
+    min-height:48px; font-weight:600; padding:.4rem .4rem; font-size:.92rem;}
+  .act-btn:active{background:var(--paper-deep);}
+  .act-wrap.fate .act-btn{border-width:2px; border-color:var(--ink); border-right:0;}
+  .act-info{border:1px solid var(--ink-38); min-width:44px; background:var(--paper); color:var(--ink-60); font-size:1rem;}
+  .act-wrap.fate .act-info{border-width:2px; border-color:var(--ink);}
+  .chips{display:flex; flex-wrap:wrap; gap:.5rem; margin:.8rem 0 0;}
+  .chips button{
+    border:1px solid var(--ink-15); border-radius:2px; padding:.35rem .7rem; font-size:.88rem;
+    color:var(--ink-60); min-height:44px;
+  }
+  .chips button.on{border-color:var(--ink); color:var(--ink);}
+  .chips .grp{font-size:.8rem; color:var(--ink-38); align-self:center;}
+  .free-row{display:flex; gap:.6rem; margin-top:.8rem; align-items:flex-start;}
+  .free-row textarea{
+    flex:1; font:inherit; background:var(--paper); border:1px solid var(--ink-38);
+    padding:.55rem .7rem; color:var(--ink); min-height:60px; resize:vertical;
+  }
+  .free-row button{border:1px solid var(--ink); padding:.6rem 1.1rem; min-height:44px; background:var(--paper); font-weight:600; letter-spacing:.05em;}
+  .unexpected{display:flex; gap:.5rem; align-items:center; font-size:.82rem; color:var(--ink-60); margin-top:.6rem; cursor:pointer; min-height:44px;}
+  .unexpected input{width:16px; height:16px; accent-color:var(--ink); flex:none;}
+  .undo-wrap{margin-top:.9rem;}
+  .undo-btn{
+    border:1px solid var(--ink-38); padding:.4rem .9rem; min-height:44px; color:var(--ink-60);
+    animation:cardIn 150ms ease-out;
+  }
+  .undo-btn.vanish{animation:fadeOut 150ms forwards;}
+  .chrome.bottom{justify-content:flex-end; padding-top:1.2rem;}
+  .chrome.bottom .grp{display:flex; gap:1.4rem;}
+
+  /* ===== overlays ===== */
+  .backdrop{
+    position:fixed; inset:0; background:rgba(43,38,32,.25); z-index:40;
+    display:flex; align-items:flex-start; justify-content:center;
+  }
+  .panel{
+    background:var(--paper); border:1px solid var(--ink); width:min(30rem, calc(100vw - 2rem));
+    margin-top:8vh; box-shadow:3px 4px 0 var(--ink-15);
+    animation:panelIn var(--t-overlay) ease-out;
+    max-height:84vh; overflow:auto;
+  }
+  @keyframes panelIn{from{opacity:0; transform:translateY(-14px);}to{opacity:1; transform:none;}}
+  .panel-h{display:flex; align-items:center; justify-content:space-between; padding:.8rem 1rem; border-bottom:1px solid var(--ink-15);}
+  .panel-h h2{margin:0; font-size:1.05rem; font-weight:600;}
+  .panel-h .x{min-width:44px; min-height:44px; text-align:right; font-size:1.05rem;}
+  .panel-b{padding:1rem;}
+  .grp-label{font-size:.85rem; color:var(--ink-60); margin:0 0 .5rem; letter-spacing:.04em;}
+  .hint{font-size:.85rem; color:var(--ink-60); font-style:italic; margin:.2rem 0 1rem;}
+  .seg{display:flex; gap:.8rem; margin-bottom:1.3rem;}
+  .seg button{
+    border:1px solid var(--ink-38); min-width:64px; min-height:44px; padding:.35rem .8rem;
+    position:relative; background:var(--paper);
+  }
+  .seg button.sel{border-color:var(--ink);}
+  .seg button.sel::after{content:"●"; font-size:.5rem; position:absolute; bottom:2px; left:50%; transform:translateX(-50%);}
+  .seg .gs{font-size:.8rem;} .seg .gm{font-size:1rem;} .seg .gl{font-size:1.25rem;}
+  .field-row{display:flex; gap:.6rem; align-items:center;}
+  .field-row input{
+    flex:1; font:inherit; border:1px solid var(--ink-38); background:var(--paper);
+    padding:.55rem .7rem; min-height:44px; color:var(--ink);
+  }
+  .mask-toggle{min-height:44px; padding:0 .5rem; text-decoration:underline; text-underline-offset:3px; color:var(--ink-60);}
+  .err-slot{min-height:1.4rem; font-size:.88rem; color:#8a3324; margin:.25rem 0 0;}
+  .save-row{display:flex; justify-content:flex-end; align-items:center; gap:.9rem; margin-top:.4rem;}
+  .save-row .fb{font-size:.9rem; color:var(--ink-60); animation:cardIn 150ms;}
+  .save-row button{border:1px solid var(--ink); min-height:44px; padding:.35rem 1.2rem; background:var(--paper);}
+  .save-row button:disabled{border-color:var(--ink-38); color:var(--ink-38); cursor:default;}
+  .panel .danger-name{font-weight:600;}
+  .panel .actions{display:flex; justify-content:flex-end; gap:1rem; margin-top:1.1rem;}
+  .panel .actions button{border:1px solid var(--ink); min-height:44px; padding:.35rem 1.1rem; background:var(--paper);}
+  .panel .actions button:disabled{border-color:var(--ink-38); color:var(--ink-38); cursor:default;}
+
+  /* ===== character setup form (GameSetupScreen-style, tool axis) ===== */
+  .setup{padding:.5rem 0 2rem;}
+  .setup h1{font-size:1.15rem; font-weight:600; margin:.6rem 0 1rem;}
+  .setup .back-link{text-decoration:underline; text-underline-offset:3px; color:var(--ink-60); min-height:44px; display:inline-block;}
+  .setup .fld{margin-bottom:1rem;}
+  .setup .fld > label{display:block; font-size:.85rem; color:var(--ink-60); margin-bottom:.3rem; letter-spacing:.04em;}
+  .setup input[type=text], .setup textarea, .setup select{
+    width:100%; font:inherit; background:var(--paper); border:1px solid var(--ink-38);
+    padding:.5rem .7rem; color:var(--ink); min-height:44px;
+  }
+  .setup textarea{resize:vertical;}
+  .setup .with-suggest{display:flex; gap:.5rem; align-items:flex-start;}
+  .setup .with-suggest > :first-child{flex:1;}
+  .suggest-btn{border:1px solid var(--ink-38); min-height:44px; min-width:44px; padding:0 .6rem; background:var(--paper); flex:none;}
+  .suggest-btn:disabled{color:var(--ink-38); cursor:default;}
+  .setup .grp-title{font-weight:600; margin:1.5rem 0 .5rem; border-top:1px solid var(--ink-15); padding-top:1rem;}
+  .setup .grp-note{font-size:.83rem; color:var(--ink-60); font-style:italic; margin:0 0 .6rem;}
+  .setup .row{border:1px solid var(--ink-15); padding:.6rem; margin-bottom:.6rem;}
+  .setup .row .rr{display:flex; gap:.5rem; margin-bottom:.5rem; flex-wrap:wrap;}
+  .setup .row .rr > *{flex:1; min-width:9rem;}
+  .setup .row .rm{color:var(--ink-60); text-decoration:underline; text-underline-offset:3px; min-height:44px; font-size:.85rem;}
+  .setup .add-row{border:1px dashed var(--ink-38); width:100%; min-height:44px; color:var(--ink-60); margin-bottom:.8rem;}
+  .idea-box{background:var(--paper-deep); border:1px solid var(--ink-15); padding:.8rem; margin-bottom:1.4rem;}
+  .idea-box .msg{font-size:.85rem; color:var(--ink-60); font-style:italic; margin:.4rem 0 0; min-height:1.2rem;}
+  .start-btn{display:block; width:100%; border:2px solid var(--ink); padding:.75rem; font-weight:600; margin-top:1.6rem; background:var(--paper); letter-spacing:.03em;}
+  .start-btn:disabled{border-color:var(--ink-38); color:var(--ink-38);}
+
+  /* ===== placeholder screens ===== */
+  .placeholder{padding:3rem 0; text-align:center; color:var(--ink-60);}
+  .placeholder .back{text-decoration:underline; text-underline-offset:3px; min-height:44px; display:inline-block; margin-top:1rem; color:var(--ink);}
+
+  /* ===== demo drawer (non-diegetic, review tool only) ===== */
+  #demo-toggle{
+    position:fixed; right:.8rem; bottom:.8rem; z-index:60; width:44px; height:44px;
+    border:1px solid var(--ink-38); border-radius:50%; background:var(--paper); font-size:1.1rem;
+  }
+  #demo-panel{
+    position:fixed; right:0; bottom:0; z-index:59; background:#fff; color:#222;
+    font-family:system-ui,sans-serif; font-size:.82rem; line-height:1.5;
+    border:1px solid #bbb; border-radius:8px 0 0 0; padding:.9rem 1rem 3.4rem; width:min(21rem, 90vw);
+    display:none; max-height:70vh; overflow:auto;
+  }
+  #demo-panel.open{display:block;}
+  #demo-panel h3{margin:.2rem 0 .5rem; font-size:.9rem;}
+  #demo-panel button{border:1px solid #999; border-radius:4px; padding:.25rem .6rem; margin:.15rem .2rem .15rem 0; background:#f4f4f4;}
+  #demo-panel label{display:block; margin:.3rem 0;}
+  #demo-panel .note{color:#777; margin-top:.6rem;}
+  #demo-panel .ai-status{margin-top:.4rem; padding:.3rem .5rem; background:#f0f4f0; border-radius:4px;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="banner-slot"></div>
+  <main id="screen-root"></main>
+</div>
+<div id="overlay-root"></div>
+
+<button id="demo-toggle" title="Bảng demo (không thuộc thiết kế)" aria-label="Bảng demo">⚙</button>
+<aside id="demo-panel" aria-label="Bảng demo">
+  <h3>Bảng demo — kích trạng thái điều kiện</h3>
+  <div class="ai-status" id="ai-status">AI: (đang kiểm tra…)</div>
+  <div>
+    Banner (S1):
+    <button onclick="Demo.banner('quota')">Quota</button>
+    <button onclick="Demo.banner('version')">Version</button>
+    <button onclick="Demo.banner('multitab')">Đa-tab</button>
+  </div>
+  <label><input type="checkbox" id="d-fate" onchange="Demo.set('pendingFate',this.checked)"> Pending Fate ở lượt kế tiếp (đè 4 thẻ AI trả về — để duyệt UI)</label>
+  <label><input type="checkbox" id="d-esc" onchange="Demo.escalation(this.checked)"> Cờ escalation ghi-thất-bại (slot Lâm Phong)</label>
+  <div>
+    <button onclick="Demo.resetFont()">Hiện lại dòng mời cỡ chữ</button>
+    <button onclick="Demo.resetAll()">Reset toàn bộ</button>
+  </div>
+  <p class="note"><b>AI thật</b>: mở 「Mục」→ Cài đặt → Cấu hình AI → "Của tôi" →
+  nhập API key Gemini → Lưu. Vận hành theo đúng pipeline 2 tầng của
+  <i>src/reference.md</i>: API 1 (cỗ máy logic) sinh 6 kịch bản có xác suất +
+  tags văn phong → gieo xúc xắc → API 2 (tiểu thuyết gia) viết văn dài theo
+  tags ('dai' = 3000+ từ) với thẻ &lt;dialogue&gt; hiển thị riêng cho lời thoại,
+  kết thúc 4 lựa chọn kèm {Tỷ lệ thành công…}. Lượt AI có thể mất 30–90 giây —
+  đó là chủ đích (văn dài). <b>API thật chạy ngay từ demo</b> — không còn chế độ
+  văn bản mẫu; "Mặc định" = key dự án (hằng DEFAULT_API_KEY đầu file),
+  "Của tôi" = key nhập trong Cài đặt.<br><br>
+  <b>"Bắt đầu mới"</b> mở form NGƯỜI CHƠI TỰ NẶN nhân vật (kiểu GameSetupScreen
+  app cũ): tên, giới tính, tính cách, ngoại hình, xuất thân, mục tiêu, bối cảnh,
+  võ hồn, thiên phú, quan hệ cơ bản. Nút ✨ = AI gợi ý từng ô; "✨ Nặn toàn bộ"
+  = Đấng nặn người điền hộ cả form từ 1 ý tưởng (đúng vai trò của nó trong app
+  cũ); ô bỏ trống → AI tự quyết. "Bắt Đầu Cuộc Phiêu Lưu" → "Đấng kể chuyện"
+  thiết lập [REALM_LIST] + địa điểm + giờ rồi viết phân cảnh mở đầu.
+  Xem hồ sơ bằng bút tích 「Thẻ」.<br><br>
+  Placeholder có chủ đích: S4/S4-RO &amp; O-Card (chưa có UX spec); chữ con dấu
+  「Vong」「Mãn」 và copy dòng nhắc (chờ writer/art-director); page-flip thật
+  thuộc Godot — ở đây chỉ mô phỏng 260ms.</p>
+</aside>
+
+<script>
+'use strict';
+/* ================= state ================= */
+const FONT_SCALE = {S:'87.5%', M:'100%', L:'125%'};
+const EXPORT_NUDGE_DAYS = 5;
+const AI_ESCALATION_S = 15, AI_TIMEOUT_S = 30;
+const LS = {font:'vdl.font', apiMode:'vdl.apiMode', userKey:'vdl.userKey'};
+
+/* Character/world profile — field set ported from the old app:
+   handleGenerateImpromptuCharacter ("Đấng nặn người") schema: name, gender,
+   personality (PLAYER_PERSONALITIES enum), role, appearance, backstory, goal,
+   initialMartialSouls[], initialTraits[] — extended with `setting` and
+   `initialRelationships` (user request: vài quan hệ cơ bản; models the old
+   RELATIONSHIP system's NPC/Standing fields). Runtime fields realms /
+   startingLocation / startingHour come from the initialPrompt checklist tags
+   ([REALM_LIST], [WORLD_LOCATION], [SET_STARTING_LOCATION], [SET_STARTING_TIME]). */
+const DEFAULT_PROFILE = {
+  setting:'Đại lục Huyền Thương — nơi phàm nhân và tu sĩ sống lẫn vào nhau; linh khí thịnh ở núi cao rừng sâu, còn các trấn nhỏ ven sơn mạch chỉ thi thoảng thấy bóng tu sĩ qua lại. Trấn Thanh Hà nằm nép dưới chân sơn mạch Hắc Vụ, sống bằng nghề rèn và trà thô.',
+  name:'Lâm Phong', gender:'Nam', personality:'Kiên Định, Không Dễ Bỏ Cuộc',
+  role:'Con trai thợ rèn học lỏm tu tiên',
+  appearance:'Thân hình rắn rỏi của con nhà lao động, da ngăm vì lửa lò, đôi mắt sáng và bàn tay đầy vết chai của búa rèn.',
+  backstory:'Con trai độc nhất của thợ rèn trấn Thanh Hà; ba năm trước tình cờ nhặt được nửa quyển công pháp cháy dở trong đống sắt vụn thu mua, từ đó lén cha tự tu luyện.',
+  goal:'Tìm ra lai lịch nửa quyển công pháp và đường hoàng bước chân vào giới tu sĩ.',
+  initialMartialSouls:[
+    {name:'Lô Hỏa Chi Tâm', description:'Linh hồn mang hơi thở lò rèn — trầm ổn, chịu nung giỏi, càng tôi càng bền.'}
+  ],
+  initialTraits:[
+    {category:'Kỹ năng', name:'Thối Thể Quyền', description:'Quyền pháp rèn thân căn bản, học lỏm từ nhịp búa của cha.'},
+    {category:'Vật phẩm', name:'Tàn Quyển Vô Danh', description:'Nửa quyển công pháp cháy dở, chữ được chữ mất, lai lịch không rõ.'}
+  ],
+  initialRelationships:[
+    {name:'Đường Vũ Đồng', relationship:'Bạn đồng hành', standing:'Tin cậy', description:'Nữ tu sĩ Trúc Cơ kỳ trầm tĩnh, thông thạo địa hình quanh sơn mạch.'},
+    {name:'Lâm Đại Sơn', relationship:'Cha', standing:'Yêu thương nhưng nghiêm khắc', description:'Thợ rèn già trấn Thanh Hà, không muốn con dính vào giới tu sĩ.'},
+    {name:'Hắc Lang Bang', relationship:'Kết oán', standing:'Thù địch', description:'Băng sơn tặc từng bị nhân vật chính phá một vụ chặn đường.'}
+  ],
+  realms:['Phàm Nhân','Luyện Khí','Trúc Cơ','Kim Đan','Nguyên Anh','Hóa Thần','Luyện Hư','Hợp Thể','Đại Thừa','Độ Kiếp'],
+  startingLocation:{name:'Rừng Hắc Vụ', description:'khu rừng sương mù nguy hiểm ven trấn Thanh Hà, tương truyền có linh thú ẩn cư', danger:true},
+  startingHour:21,
+};
+/* PLAYER_PERSONALITIES — ported list (UI-only options 'Để AI quyết định'/'Tùy chỉnh...' dropped) */
+const PLAYER_PERSONALITIES = [
+  'Dũng Cảm, Bộc Trực','Thận Trọng, Đa Nghi','Lạnh Lùng, Ít Nói','Hài Hước, Thích Trêu Chọc',
+  'Nhân Hậu, Vị Tha','Trầm Tính, Thích Quan Sát','Nhút Nhát, Hay Lo Sợ','Tò Mò, Thích Khám Phá',
+  'Trung Thành, Đáng Tin Cậy','Lãng Mạn, Mơ Mộng','Thực Dụng, Coi Trọng Lợi Ích','Chính Trực, Ghét Sự Giả Dối',
+  'Hoài Nghi, Luôn Đặt Câu Hỏi','Lạc Quan, Luôn Nhìn Về Phía Trước','Lý Trí, Giỏi Phân Tích',
+  'Nghệ Sĩ, Tâm Hồn Bay Bổng','Thích Phiêu Lưu, Không Ngại Mạo Hiểm','Cẩn Thận Từng Chi Tiết, Cầu Toàn',
+  'Hào Sảng, Thích Giúp Đỡ Người Khác','Kiên Định, Không Dễ Bỏ Cuộc','Khiêm Tốn, Không Khoe Khoang',
+  'Sáng Tạo, Nhiều Ý Tưởng Độc Đáo','Mưu Mẹo, Gian Xảo','Tham Lam, Ích Kỷ','Khó Lường, Bí Ẩn',
+  'Nóng Nảy, Liều Lĩnh','Kiêu Ngạo, Tự Phụ','Đa Sầu Đa Cảm, Dễ Tổn Thương','Cố Chấp, Bảo Thủ','Lười Biếng, Thích Hưởng Thụ'
+];
+const initialSlots = () => ([
+  {id:1, name:'Lâm Phong',  realm:'Luyện Khí tầng 3', turns:214, minAgo:120,     status:'active',  escalation:false, exported:false, profile:DEFAULT_PROFILE},
+  {id:2, name:'Vô Danh',    realm:'Trúc Cơ tầng 1',   turns:892, minAgo:12*1440, status:'closed',  reason:'death',   exported:false},
+  {id:3, name:'Hàn Sương',  realm:'Luyện Khí tầng 7', turns:301, minAgo:6*1440,  status:'closed',  reason:'quota',   exported:false},
+  {id:4, name:'',           realm:'',                 turns:0,   minAgo:20*1440, status:'corrupt', exported:false},
+]);
+
+const state = {
+  screen:'s1',
+  fontSetting: localStorage.getItem(LS.font) || null,
+  apiMode: localStorage.getItem(LS.apiMode) || 'default',
+  savedKey: localStorage.getItem(LS.userKey) || '',
+  slots: initialSlots(),
+  activeSlot:null,
+  banners:[],
+  menuOpen:false,
+  allowUnexpected:true,   // "Chèn sự kiện bất ngờ" checkbox (ported) — feeds API 1
+  // s2.turns: [{html, plain, cardsBefore}] — cardsBefore = cards shown before that turn (for Undo)
+  s2:{ turns:[], tm:'awaiting', undo:false, freeText:'', chipOn:null, cards:[], err:null, escalated:false },
+  demo:{ slowAI:false, pendingFate:false },
+};
+let timers = [];
+let callSeq = 0;   // invalidates stale AI responses after timeout/reset
+
+/* ================= helpers ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+function timeStr(min){
+  if(min < 60) return `lưu ${min} phút trước`;
+  if(min < 1440) return `lưu ${Math.floor(min/60)} giờ trước`;
+  return `lưu ${Math.floor(min/1440)} ngày trước`;
+}
+function clearTimers(){ timers.forEach(t=>clearTimeout(t)); timers=[]; }
+function later(fn, ms){ const t=setTimeout(fn, ms); timers.push(t); return t; }
+function applyFont(){ document.documentElement.style.fontSize = state.fontSetting ? FONT_SCALE[state.fontSetting] : '100%'; }
+function activeSlotObj(){ return state.slots.find(x=>x.id===state.activeSlot); }
+function activeProfile(){ const s=activeSlotObj(); return (s && s.profile) ? s.profile : DEFAULT_PROFILE; }
+function applyProfile(profile){
+  const s=activeSlotObj(); if(!s) return;
+  s.profile=profile;
+  if(profile.name) s.name=profile.name;
+  if(profile.realms && profile.realms.length) s.realm=`${profile.realms[0]} tầng 1`;
+}
+function playerName(){ const s=activeSlotObj(); return (s && s.name && !s.name.startsWith('(')) ? s.name : 'Ngươi'; }
+/* Real API from the demo build (user directive 2026-08-14) — no canned
+   offline mode. "Mặc định" mirrors the old app's default-key mode: paste the
+   project key into the constant below once (single-user project, local file).
+   "Của tôi" uses the key saved in O-Set and takes precedence when selected. */
+const DEFAULT_API_KEY = '';   // ← dán API key Gemini "mặc định của dự án" vào đây
+function effectiveApiKey(){
+  return state.apiMode==='userKey' ? state.savedKey.trim() : DEFAULT_API_KEY.trim();
+}
+function aiEnabled(){ return effectiveApiKey().length>0; }
+const NO_KEY_MSG = 'Chưa có API key — mở 「Mục」→ Cài đặt, chọn "Của tôi" và nhập key Gemini (hoặc điền DEFAULT_API_KEY ở đầu file cho chế độ Mặc định).';
+function card(label, note){ return {label, note:note||''}; }
+
+/* page-flip stand-in */
+function flip(dir){
+  const el = $('#screen-root');
+  el.classList.remove('flip-fwd','flip-back'); void el.offsetWidth;
+  el.classList.add(dir==='back' ? 'flip-back' : 'flip-fwd');
+}
+function goto(screen, dir){ state.screen=screen; state.menuOpen=false; render(); flip(dir); }
+
+/* ================= banners (paper-strip-banner, max 1, FIFO) ================= */
+const BANNER_COPY = {
+  quota:   'Trình duyệt sắp hết chỗ chứa — cân nhắc chép lại một quyển sổ cũ trước khi xóa bớt.',
+  version: 'Quyển sổ này được viết bằng một bản mực mới hơn — chưa thể mở lại ở đây.',
+  multitab:'Quyển sổ đang được mở ở một trang khác — hãy đóng trang kia trước khi viết tiếp.',
+};
+function pushBanner(kind){ if(!state.banners.includes(kind)) state.banners.push(kind); renderBanner(); }
+function dismissBanner(){ state.banners.shift(); renderBanner(); }
+function renderBanner(){
+  const k = state.banners[0];
+  $('#banner-slot').innerHTML = !k ? '' :
+    `<div class="banner" role="status"><p>${esc(BANNER_COPY[k])}</p>
+     <button class="x" aria-label="Đóng thông báo" onclick="dismissBanner()">✕</button></div>`;
+}
+
+/* ================= AI engine — ported from src/reference.md ================= */
+// Text-out models compatible with generateContent (no TTS/Live/Pro), same ladder as the old app.
+const GEMINI_MODELS = ['gemini-3-flash-preview','gemini-3.5-flash','gemini-3.1-flash-lite','gemini-2.5-flash','gemini-2.5-flash-lite'];
+// 503 circuit breaker: a persistently-overloaded model is skipped for a cooldown window
+// so subsequent calls go straight to a healthy fallback instead of burning seconds retrying.
+const MODEL_COOLDOWN_MS = 90*1000;
+const modelCooldownUntil = new Map();
+// Last model that succeeded is tried FIRST next call ("còn chạy tốt thì cứ bám lấy nó").
+let stickyModel = null;
+const onCooldown = m => (modelCooldownUntil.get(m)||0) > Date.now();
+function markOverloaded(m){ modelCooldownUntil.set(m, Date.now()+MODEL_COOLDOWN_MS); if(stickyModel===m) stickyModel=null; }
+
+async function callGemini(prompt, apiKey, signal, genConfig){
+  const preferred = (stickyModel && GEMINI_MODELS.includes(stickyModel) && !onCooldown(stickyModel)) ? stickyModel : GEMINI_MODELS[0];
+  const ladder = [preferred, ...GEMINI_MODELS.filter(m=>m!==preferred)];
+  const healthy = ladder.filter(m=>!onCooldown(m));
+  const models = healthy.length ? healthy : ladder;   // all on cooldown → try everything anyway
+  const payload = { contents:[{role:'user', parts:[{text:prompt}]}] };
+  if(genConfig) payload.generationConfig = genConfig;
+  let lastErr = null;
+  for(const model of models){
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    for(let attempt=0; attempt<=2; attempt++){
+      try{
+        const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload), signal});
+        if(!r.ok){
+          if(r.status===429){ const e=new Error('Hệ thống AI đã hết lượt sử dụng miễn phí trong lúc này (429 — quá giới hạn quota). Đợi ít phút rồi thử lại, hoặc đổi API key khác trong Cài đặt.'); e.skipModel=true; throw e; }
+          if(r.status===400||r.status===401){ const e=new Error('API key không hợp lệ hoặc đã hết hạn. Kiểm tra lại trong 「Mục」→ Cài đặt.'); e.fatal=true; throw e; }
+          if(r.status===403||r.status===404){ const e=new Error(`Model ${model} không khả dụng (HTTP ${r.status}).`); e.skipModel=true; throw e; }
+          if(r.status===503){ const e=new Error('Server AI đang quá tải tạm thời (503).'); e.overloaded=true; throw e; }
+          throw new Error(`API trả về lỗi HTTP ${r.status}.`);
+        }
+        const res = await r.json();
+        if(res.promptFeedback && res.promptFeedback.blockReason)
+          throw new Error('Nội dung bị bộ lọc an toàn của AI chặn ('+res.promptFeedback.blockReason+').');
+        const cand = res.candidates && res.candidates[0];
+        const text = cand && cand.content && cand.content.parts && cand.content.parts[0] && cand.content.parts[0].text;
+        if(!text || !text.trim()) throw new Error('Phản hồi của AI rỗng.');
+        if(cand.finishReason==='MAX_TOKENS') throw new Error('Phản hồi của AI bị cắt cụt (MAX_TOKENS).');
+        modelCooldownUntil.delete(model); stickyModel = model;   // pin the winner for next call
+        return text;
+      }catch(err){
+        if(err.name==='AbortError' || err.fatal) throw err;
+        lastErr = err;
+        if(err.skipModel) break;                                  // straight to next fallback model
+        if(err.overloaded){
+          if(attempt>=1){ markOverloaded(model); break; }         // 1 quick retry, then trip breaker
+          await sleep(2000); continue;
+        }
+        if(attempt<2) await sleep(1000*(attempt+1));
+      }
+    }
+  }
+  throw lastErr || new Error('Không gọi được AI.');
+}
+
+/* ====== Prompt construction — ported from the old app's 2-API pipeline ======
+   API 1 "EXPERT LOGIC ENGINE": analyze the action → ≥6 scenarios as JSON
+   {probability, summary, classification_tags}, weighted dice roll picks one.
+   API 2 "NARRATIVE ENGINE": novelist writes the chosen scenario as long prose
+   (style/length driven by classification_tags — 'dai' = 3000+ words) with
+   <dialogue speaker="…"> tags, ending in exactly 4 annotated choices.
+   Trimmed vs the original: no [TAG] command system / entity registry /
+   relationship engine (those game systems don't exist in this mockup). */
+
+const TAG_INSTRUCTIONS = {
+  'dai': 'Viết cực kỳ dài và chi tiết (trên 3000 từ). Đi sâu vào tả cảnh, bố cục thế giới, diễn biến tâm lý, biểu cảm, âm mưu phức tạp hoặc tình tiết sắc. Tận dụng tối đa từ vựng phong phú.',
+  'mieuta': 'Tập trung miêu tả cảnh vật, môi trường, và bầu không khí xung quanh.',
+  'doithoai': 'Tập trung vào lời thoại qua lại giữa các nhân vật (Luôn nhớ dùng thẻ <dialogue>).',
+  'hanhdong': 'Sử dụng câu văn ngắn, nhịp điệu dồn dập, tập trung miêu tả tốc độ và uy lực của đòn đánh.',
+  'haihuoc': 'Sử dụng từ ngữ dí dỏm, tạo tình huống trớ trêu, mang tính giải trí.',
+  'kinhdi': 'Tập trung vào yếu tố rùng rợn, ám ảnh, tạo cảm giác sợ hãi, ớn lạnh.',
+  'cangthang': 'Tạo bầu không khí ngột ngạt, hồi hộp, áp lực đè nặng.',
+  'tamly': 'Tập trung sâu vào việc miêu tả suy nghĩ, đấu tranh nội tâm và cảm xúc của các nhân vật.',
+  'tinhcam': 'Tập trung khắc họa tình cảm, sự lãng mạn, rung động và gắn kết cảm xúc giữa các nhân vật.'
+};
+
+const DIALOGUE_RULES = `--- QUY TẮC LỜI THOẠI (BẮT BUỘC, KHÔNG NGOẠI LỆ) ---
+- Cú pháp: <dialogue speaker="Tên Nhân Vật">Nội dung lời thoại ở đây.</dialogue>
+- MỌI câu nói thành lời của BẤT KỲ nhân vật nào (kể cả nhân vật chính) BẮT BUỘC nằm trong thẻ <dialogue> — TUYỆT ĐỐI KHÔNG viết lời thoại trần trong văn tường thuật hay chỉ bọc bằng ngoặc kép “…” thường.
+- Thuộc tính speaker KHÔNG ĐƯỢC ĐỂ TRỐNG. Nếu nhân vật chính nói, BẮT BUỘC viết: <dialogue speaker="Ngươi">…</dialogue>
+- Nếu NPC nhắc đến tên nhân vật chính trong lời thoại, BẮT BUỘC dùng placeholder [NC]. (Ví dụ: <dialogue speaker="NPC">Cảm ơn [NC].</dialogue>)
+- Khi có NPC hiện diện, hãy để nhân vật ĐỐI THOẠI QUA LẠI thành nhiều lượt thoại ngắn xen kẽ văn kể — không dồn hết lời vào một khối, không viết cả cảnh chỉ toàn văn kể suông.
+- Ngoài thẻ <dialogue>, TUYỆT ĐỐI KHÔNG dùng bất kỳ thẻ HTML hay thẻ lệnh [TAG] nào khác.`;
+
+function buildContextBlock(action){
+  const s = activeSlotObj() || {realm:'Phàm Nhân'};
+  const p = activeProfile();
+  const hist = state.s2.turns.slice(-8).map((t,i)=>`[${i+1}] ${t.plain}`).join('\n')
+    || '(Chưa có — đây là những trang đầu tiên của cuốn sổ.)';
+  const souls = (p.initialMartialSouls||[]).map(x=>`${x.name} (${x.description})`).join('; ') || 'Không có.';
+  const traits = (p.initialTraits||[]).map(t=>`(${t.category}) ${t.name}: ${t.description}`).join('; ') || 'Không có.';
+  const rels = (p.initialRelationships||[]).map(r=>`- ${r.name} — ${r.relationship}, thái độ: ${r.standing}.${r.description?` ${r.description}`:''}`).join('\n') || '- Không có.';
+  const loc = p.startingLocation || {name:'Không rõ', description:''};
+  const realms = (p.realms||[]).join(' → ') || 'chưa thiết lập';
+  return `--- THÔNG TIN BỐI CẢNH THỰC TẾ ---
+- Chủ đề: Tiên hiệp, văn phong tiểu thuyết mạng, xưng "ngươi" với nhân vật chính.
+- Bối cảnh thế giới: ${p.setting || '(như đã thiết lập trong phân cảnh mở đầu — giữ nhất quán)'}
+- Hệ thống cảnh giới (thấp → cao): ${realms}
+- Nhân vật chính: ${p.name} (${p.gender||'?'}) — tính cách: ${p.personality||'(như đã thể hiện trong truyện)'}. Vai trò: ${p.role||'(như đã thiết lập)'}. Mục tiêu chính: "${p.goal||'câu chuyện tự phát triển'}". Cảnh giới hiện tại: ${s.realm}. Trạng thái cơ thể: khỏe mạnh, chân khí sung mãn.
+- Ngoại hình: ${p.appearance || '(như đã mô tả trong phân cảnh mở đầu — giữ nhất quán)'}
+- Tiểu sử/Xuất thân: ${p.backstory || '(như đã thiết lập trong phân cảnh mở đầu — giữ nhất quán)'}
+- Võ Hồn (thông tin nền, KHÔNG tự sinh kỹ năng/chỉ số từ đây): ${souls}
+- Thiên phú/đặc điểm khởi đầu: ${traits}
+- Địa điểm hiện tại: ${loc.name}${loc.description?` — ${loc.description}`:''}.${p.startingHour!=null?` Thời điểm trong ngày: khoảng ${p.startingHour} giờ.`:''}
+- CÁC MỐI QUAN HỆ HIỆN CÓ CỦA NHÂN VẬT CHÍNH (tham chiếu khi các nhân vật này xuất hiện, giữ đúng thái độ):
+${rels}
+
+--- LỊCH SỬ THÁM HIỂM GẦN NHẤT ---
+${hist}
+
+--- HÀNH ĐỘNG NHÂN VẬT CHÍNH VỪA CHỌN THỰC HIỆN ---
+"${action}"`;
+}
+
+/* API 1 — logic engine prompt (ported; JSON schema enforced via generationConfig) */
+function buildLogicPrompt(action){
+  return `${buildContextBlock(action)}
+
+CHỈ THỊ TỐI CAO DÀNH CHO API 1 (EXPERT LOGIC ENGINE)
+VAI TRÒ CỦA NGƯƠI LÚC NÀY LÀ MỘT CỖ MÁY TÍNH TOÁN LOGIC.
+NGƯƠI KHÔNG PHẢI LÀ TIỂU THUYẾT GIA. BỎ QUA MỌI YÊU CẦU VIẾT VĂN TƯỜNG THUẬT.
+
+NHIỆM VỤ:
+1. Phân tích hành động của người chơi, đối chiếu với bối cảnh, tính cách đối tượng để suy tính ra ÍT NHẤT 6 kịch bản có thể xảy ra, các kịch bản phải đa chiều, đa dạng (tích cực có, tiêu cực có, đồng thuận có, phản kháng có${state.allowUnexpected?', bị chen ngang bởi người/sự việc bên ngoài,...':',...'}).
+   ${state.allowUnexpected
+     ? 'LƯU Ý VỀ KỊCH BẢN "BỊ CHEN NGANG": Kịch bản chen ngang KHÔNG được phép bỏ qua hay thay thế hành động người chơi vừa mô tả. Bắt buộc: hành động của người chơi phải được thực hiện/xảy ra TRƯỚC hoặc ĐANG diễn ra, và sự chen ngang chỉ xen vào giữa hoặc ngay sau đó như một diễn biến tiếp nối — không phải để né tránh, xóa bỏ, hay làm lu mờ hành động gốc.'
+     : 'LƯU Ý: Người chơi ĐANG TẮT tùy chọn sự kiện bất ngờ. TUYỆT ĐỐI KHÔNG có kịch bản nào chứa SỰ KIỆN/biến cố mới lạ bên ngoài chen ngang, cắt ngang, hay làm gián đoạn hành động đã mô tả. Mọi kịch bản đều phải là các biến thể phản ứng/kết quả TRỰC TIẾP của chính hành động đó (khác nhau ở mức độ thành công, thái độ, cảm xúc,...). NGOẠI LỆ DUY NHẤT: được phép nhắc đến việc một NPC khác xuất hiện/có mặt gần đó như chi tiết nền cuối kịch bản, nhưng NPC đó KHÔNG được có bất kỳ hành động, lời thoại hay tương tác nào trong lượt này — chỉ đơn thuần được nêu tên là đang xuất hiện, không hơn.'}
+2. KIỂM SOÁT HÀNH VI: Áp dụng triệt để "NGUYÊN TẮC TÔN TRỌNG NGƯỜI CHƠI". Chỉ phản hồi lại ĐÚNG VỚI HÀNH ĐỘNG HIỆN TẠI. Tuyệt đối không giả định hoặc bịa thêm hành động, suy nghĩ tiếp theo của người chơi. BẤT KỂ kịch bản nào, 'summary' PHẢI thể hiện rõ chính hành động người chơi mô tả đã thực sự xảy ra như thế nào TRƯỚC KHI thêm bất kỳ diễn biến/nhân vật/sự kiện nào khác.
+
+ĐỐI VỚI MỖI KỊCH BẢN, YÊU CẦU CUNG CẤP:
+1. 'probability': Tỷ lệ phần trăm xảy ra kịch bản này (0-100). Phải đánh giá dựa trên tình tiết hiện tại, đặc biệt là tính cách nhân vật. (Hành động phi logic thì tỷ lệ thành công phải cực thấp).
+2. 'summary': Vài câu thể hiện nội dung kịch bản, chủ yếu nói về phản ứng của sự vật, sự việc với lựa chọn của người chơi. Đừng bịa ra người chơi làm gì thêm. BẮT BUỘC: câu đầu tiên phải thể hiện chính hành động người chơi vừa mô tả đang/đã xảy ra.
+   - LƯU Ý KHI HÀNH ĐỘNG NGƯỜI CHƠI TỰ VIẾT SẴN THÀNH MỘT ĐOẠN TƯỜNG THUẬT DÀI (nhiều câu, nhiều diễn biến nối tiếp): TUYỆT ĐỐI KHÔNG nén toàn bộ chuỗi diễn biến thành một câu kết quả — 'summary' PHẢI giữ lại đầy đủ TỪNG diễn biến chính theo đúng trình tự, vì đây là nguyên liệu để API 2 viết thành văn xuôi đầy đủ.
+3. 'classification_tags': Mảng các nhãn để định hướng API 2.
+   - BẮT BUỘC chọn chính xác 1 nhãn độ dài: 'dai' (Tả cảnh, thế giới, tâm lý sâu sắc, đối thoại 2 hoặc nhiều người).
+   - Chọn thêm các nhãn sắc thái (nếu phù hợp): 'mieuta', 'doithoai', 'hanhdong', 'haihuoc', 'kinhdi', 'cangthang', 'tamly', 'tinhcam'.
+
+YÊU CẦU ĐẦU RA: Chỉ trả về duy nhất một chuỗi JSON sạch đại diện cho mảng gồm chính xác 6 đối tượng. Tuyệt đối không bao bọc kết quả trong ký tự markdown. Không giải thích thêm.`;
+}
+const LOGIC_GENCONFIG = {
+  response_mime_type: 'application/json',
+  response_schema: {
+    type:'ARRAY',
+    items:{ type:'OBJECT',
+      properties:{
+        probability:{type:'NUMBER'},
+        summary:{type:'STRING'},
+        classification_tags:{type:'ARRAY', items:{type:'STRING'}},
+      },
+      required:['probability','summary','classification_tags'] }
+  }
+};
+
+/* Weighted dice roll — verbatim port */
+function rollDiceAndChooseScenario(scenarios){
+  if(!scenarios || scenarios.length===0) return null;
+  if(scenarios.length===1) return scenarios[0];
+  const totalWeight = scenarios.reduce((sum,s)=>sum+(Number(s.probability)||0),0);
+  let randomNum = Math.random()*totalWeight;
+  for(const scenario of scenarios){
+    if(randomNum < (Number(scenario.probability)||0)) return scenario;
+    randomNum -= (Number(scenario.probability)||0);
+  }
+  return scenarios[0];
+}
+
+/* API 2 — narrative engine prompt (ported structure + load-bearing rules) */
+function buildNarrativePrompt(scenario, action){
+  const tagsLower = (scenario.classification_tags||[]).map(t=>String(t).toLowerCase());
+  const appliedStyles = tagsLower.map(t=>TAG_INSTRUCTIONS[t]).filter(Boolean).map(i=>`- ${i}`).join('\n');
+  const sensitiveRule = tagsLower.includes('nsfw')
+    ? `\n- LƯU Ý ĐẶC BIỆT (Kiểm duyệt): Phân cảnh này chứa yếu tố nhạy cảm hoặc bạo lực. Ngươi PHẢI SỬ DỤNG phong cách lãng mạn, hoa mỹ, hoặc ẩn dụ (fade-to-black). TUYỆT ĐỐI KHÔNG mô tả trần trụi. Với cảnh bạo lực, mô tả đầy tính nghệ thuật và ẩn ý.` : '';
+  return `VAI TRÒ: Bạn là Tiểu thuyết gia tài năng, chuyên viết tiểu thuyết mang đề tài và phong cách độc bản sau: "Tiên hiệp". Ngươi phải phát huy tối đa tinh thần của chủ đề này kết hợp với bối cảnh thực tế để tạo nên những trang viết sống động nhất.
+
+KẾT QUẢ ĐÃ ĐỊNH (BẠN BẮT BUỘC DỰA VÀO ĐÂY ĐỂ TƯỜNG THUẬT): "${scenario.summary}"
+
+--- RÀNG BUỘC MỞ ĐẦU TƯỜNG THUẬT (CỰC KỲ QUAN TRỌNG, ĐỌC KỸ) ---
+"KẾT QUẢ ĐÃ ĐỊNH" ở trên mô tả hành động nhân vật chính vừa thực hiện (kể cả lời thoại/tiếng hét, nếu có) NHƯ MỘT SỰ VIỆC ĐANG XẢY RA NGAY BÂY GIỜ trong lượt này — KHÔNG PHẢI chuyện đã xảy ra xong xuôi từ trước.
+Đoạn văn MỞ ĐẦU của bài viết BẮT BUỘC phải khắc họa TRỰC TIẾP, SỐNG ĐỘNG khoảnh khắc hành động đó đang diễn ra (nếu có tiếng hét/lời thoại cụ thể, phải viết ra cảnh nhân vật chính thực sự cất tiếng nói đúng nội dung đó bằng thẻ <dialogue speaker="…">).
+TUYỆT ĐỐI CẤM: mở đầu bằng dư âm, hồi tưởng, hậu quả, hoặc trạng thái "đã rồi" của hành động — hành động phải được TƯỜNG THUẬT NHƯ ĐANG DIỄN RA, không phải được nhắc lại như ký ức.
+NẾU hành động gốc của người chơi là một đoạn văn DÀI mô tả NHIỀU diễn biến nối tiếp nhau: người chơi chỉ đang MÔ TẢ Ý ĐỊNH bằng lời văn của họ, KHÔNG PHẢI đó đã là đoạn văn chính thức của câu chuyện. Nhiệm vụ của ngươi là VIẾT LẠI toàn bộ chuỗi diễn biến đó thành văn xuôi đầy đủ, sống động, đúng văn phong của ngươi (không chép nguyên văn lời người chơi), lần lượt đi qua từng khoảnh khắc chính theo đúng trình tự, RỒI MỚI viết tiếp phần diễn biến tiếp theo/hậu quả. Không nhảy cóc đến đoạn cuối hoặc tóm tắt một câu rồi coi như xong.
+
+CHỈ THỊ VĂN PHONG VÀ ĐỘ DÀI (BẮT BUỘC TUÂN THỦ):
+Hãy điều chỉnh cách hành văn và ĐỘ DÀI VĂN BẢN của ngươi đúng với các yêu cầu sau:
+${appliedStyles || '- Viết tường thuật chi tiết, giàu hình ảnh.'}${sensitiveRule}
+
+${DIALOGUE_RULES}
+
+${buildContextBlock(action)}
+
+YÊU CẦU ĐẦU RA (NGHIÊM NGẶT):
+1. NHẮC LẠI LẦN CUỐI (BẮT BUỘC, BỎ QUA LỊCH SỬ CŨ NẾU MÂU THUẪN): Đoạn văn ngươi viết BẮT BUỘC MỞ ĐẦU bằng việc khắc họa trực tiếp, đang-diễn-ra-ngay-bây-giờ nội dung sau: "${scenario.summary}" (hành động gốc của người chơi: "${action}"). Lịch sử chỉ là bối cảnh nền — nội dung trong ngoặc kép trên mới là thứ PHẢI xảy ra ngay trong đoạn mở đầu của lượt này. Câu chữ người chơi gõ vào CHƯA TỪNG được kể cho người đọc — ngươi là người duy nhất viết nên câu chuyện thật sự.
+2. Sau khi thể hiện xong hành động trên, viết tiếp phần còn lại của câu chuyện. TUYỆT ĐỐI KHÔNG hiện bất kỳ con số chỉ số/cấp độ/sát thương nào — mọi trạng thái miêu tả thuần bằng văn chương.
+3. Kết thúc bằng chính xác 4 lựa chọn hành động mới có đánh số 1., 2., 3., 4., mỗi lựa chọn nằm trên một dòng đơn độc nhất, kèm phần chú thích tỷ lệ thành công và hậu quả bằng ngôn từ văn học (ví dụ: {Tỷ lệ thành công: …, Hậu quả/Phần thưởng: …}). Không sử dụng định dạng Markdown như in đậm (*) trong lựa chọn.
+4. RÀNG BUỘC LOGIC CHO 4 LỰA CHỌN (CỰC KỲ QUAN TRỌNG): 4 lựa chọn BẮT BUỘC chỉ được phản ánh ĐÚNG trạng thái đã thực sự xảy ra trong chính đoạn văn ngươi vừa viết — TUYỆT ĐỐI KHÔNG tự giả định thêm hành động, khiêu khích, âm mưu hay xung đột nào mà đoạn văn chưa hề mô tả:
+   - NPC/phe mới chỉ VỪA xuất hiện mà CHƯA gây hấn → 4 lựa chọn xoay quanh việc nhân vật chính PHẢN ỨNG THẾ NÀO trước sự xuất hiện đó (chào hỏi, cảnh giác quan sát, phớt lờ, dò xét,...).
+   - Kẻ đã bỏ chạy/bị đánh bại/rời đi trong chính đoạn văn này → không lựa chọn nào được coi kẻ đó vẫn còn hiện diện hay còn cần đối phó.
+   - Trước khi viết từng lựa chọn, tự kiểm tra: mọi tiền đề mà lựa chọn dựa vào có thực sự khớp với đoạn văn vừa viết không.
+5. TUYỆT ĐỐI KHÔNG đưa thẻ lệnh kỹ thuật hay tên mã viết hoa nào vào phần lựa chọn hoặc câu chuyện.`;
+}
+
+/* ====== Cold start — ported 2-step initialization from the old app ======
+   Step 0: "Đấng nặn người" (handleGenerateImpromptuCharacter) — JSON character
+   profile. Step 1: initialPrompt "Đấng kể chuyện" — checklist: [REALM_LIST]
+   10-20 realms → location genealogy + [SET_STARTING_LOCATION] →
+   [SET_STARTING_TIME] → opening scene matching that time → 4 choices. */
+function buildCharGenPrompt(idea){
+  return `Bạn là một chuyên gia sáng tạo nhân vật. Dựa trên ý tưởng: "${idea}", và bối cảnh game "Tiên hiệp", hãy tạo ra MỘT nhân vật hoàn chỉnh cùng phần thiết lập thế giới đi kèm.
+
+CHECKLIST (BẮT BUỘC THỰC HIỆN):
+1.  Tạo "setting": mô tả bối cảnh thế giới chi tiết (3-5 câu: đại lục, các thế lực chính, vị trí của phàm nhân trong thế giới đó, nơi nhân vật sinh sống).
+2.  Tạo "name", "gender", "personality", "role", "appearance", "backstory", "goal".
+3.  Tạo một MẢNG tên là "initialMartialSouls" chứa từ 1 đến 3 VÕ HỒN khởi đầu (thông tin nền về bản chất/hình dạng linh hồn của nhân vật, KHÔNG phải kỹ năng).
+    *   Với MỖI Võ Hồn, PHẢI có 2 thuộc tính: "name" (tên hấp dẫn) và "description" (mô tả ngắn gọn 1-2 câu).
+4.  Tạo một MẢNG tên là "initialTraits" chứa 2 ĐẶC ĐIỂM KHỞI ĐẦU.
+    *   Với MỖI đặc điểm trong mảng đó, PHẢI có 3 thuộc tính:
+    *   "category": Quyết định xem nó là "Kỹ năng" hay "Vật phẩm".
+    *   "name": Đặt một cái tên hấp dẫn.
+    *   "description": Viết một mô tả ngắn gọn, gợi mở.
+5.  Tạo một MẢNG tên là "initialRelationships" chứa từ 2 đến 3 MỐI QUAN HỆ CƠ BẢN của nhân vật (người thân, bạn bè/ân sư, và NÊN có ít nhất 1 ân oán/đối đầu).
+    *   Với MỖI quan hệ, PHẢI có: "name" (tên NPC), "relationship" (quan hệ với nhân vật chính), "standing" (thái độ hiện tại của NPC đó), "description" (1-2 câu về NPC).
+
+DANH SÁCH TÍNH CÁCH CHO PHÉP: ${PLAYER_PERSONALITIES.join(', ')}
+
+CHỈ trả về một đối tượng JSON duy nhất theo đúng cấu trúc schema.`;
+}
+const CHAR_GEN_GENCONFIG = {
+  response_mime_type:'application/json',
+  response_schema:{
+    type:'OBJECT',
+    properties:{
+      setting:{type:'STRING'},
+      name:{type:'STRING'},
+      gender:{type:'STRING', enum:['Nam','Nữ','Khác','Không xác định']},
+      personality:{type:'STRING', enum:PLAYER_PERSONALITIES},
+      role:{type:'STRING'},
+      appearance:{type:'STRING'},
+      backstory:{type:'STRING'},
+      goal:{type:'STRING'},
+      initialMartialSouls:{type:'ARRAY', items:{type:'OBJECT',
+        properties:{name:{type:'STRING'}, description:{type:'STRING'}},
+        required:['name','description']}},
+      initialTraits:{type:'ARRAY', items:{type:'OBJECT',
+        properties:{category:{type:'STRING', enum:['Kỹ năng','Vật phẩm']}, name:{type:'STRING'}, description:{type:'STRING'}},
+        required:['category','name','description']}},
+      initialRelationships:{type:'ARRAY', items:{type:'OBJECT',
+        properties:{name:{type:'STRING'}, relationship:{type:'STRING'}, standing:{type:'STRING'}, description:{type:'STRING'}},
+        required:['name','relationship','standing']}}
+    },
+    required:['setting','name','gender','personality','role','appearance','backstory','goal','initialMartialSouls','initialTraits','initialRelationships']
+  }
+};
+
+function buildInitStoryPrompt(){
+  const p = activeProfile();
+  // Player-made profile: empty fields hand the decision to the AI
+  // (old app: "để trống ô nào thì AI tự quyết định ô đó")
+  const orAI = v => (v && String(v).trim()) ? String(v).trim() : '(Chưa rõ — ngươi tự quyết định cho phù hợp với bối cảnh)';
+  const goalLine = (p.goal && p.goal.trim())
+    ? `Mục tiêu chính: "${p.goal.trim()}".`
+    : 'Không có mục tiêu cụ thể, hãy để câu chuyện tự phát triển.';
+  const souls = (p.initialMartialSouls||[]).map(x=>`- ${x.name}: ${x.description}`).join('\n');
+  const traits = (p.initialTraits||[]).map(t=>`- (${t.category}) ${t.name}: ${t.description}`).join('\n');
+  const rels = (p.initialRelationships||[]).map(r=>`- ${r.name} — ${r.relationship}, thái độ: ${r.standing}.${r.description?` ${r.description}`:''}`).join('\n');
+  return `VAI TRÒ: Bạn là một Đấng kể chuyện, chuyên sáng tác tiểu thuyết mạng bằng tiếng Việt theo góc nhìn thứ hai, thể loại "Tiên hiệp".
+THÔNG TIN NỀN (Hệ thống đã cung cấp, ngươi phải tuân thủ):
+*   Nhân vật chính: ${p.name} (${p.gender||'giới tính tùy ngươi'}), ${orAI(p.personality)}. Vai trò: ${orAI(p.role)}. ${goalLine}
+*   Ngoại hình: ${orAI(p.appearance)}
+*   Tiểu sử/Xuất thân: ${orAI(p.backstory)}
+*   Bối cảnh game chi tiết: ${orAI(p.setting)}
+*   Võ Hồn của nhân vật chính (thông tin nền, hãy tham chiếu khi miêu tả nhân vật, KHÔNG tự sinh kỹ năng/chỉ số từ đây):
+${souls || 'Không có.'}
+*   Thiên phú/đặc điểm khởi đầu của nhân vật chính:
+${traits || 'Không có.'}
+*   Các mối quan hệ cơ bản của nhân vật chính (tham chiếu khi các nhân vật này xuất hiện, giữ đúng thái độ):
+${rels || 'Không có.'}
+
+--- CHECKLIST KHỞI TẠO (BẮT BUỘC THỰC HIỆN TUẦN TỰ) ---
+1.  **Thiết Lập Hệ Thống Cảnh Giới** dựa vào bối cảnh, miêu tả để cân nhắc cho phù hợp.
+    *   QUAN TRỌNG: Giá trị của thẻ [REALM_LIST] BẮT BUỘC phải là một MẢNG CHUỖI JSON hợp lệ, có ÍT NHẤT 10 và TỐI ĐA 20 phần tử (TUYỆT ĐỐI KHÔNG chỉ liệt kê 3-4 cảnh giới sơ sài). Chỉ cần đặt tên có chiều sâu, đúng chủ đề cho 10-20 cảnh giới đầu tiên.
+       VÍ DỤ ĐÚNG (đủ số lượng, PHẢI đổi tên cho phù hợp bối cảnh, không copy nguyên văn): [REALM_LIST: ["Phàm Nhân", "Luyện Thể", "Khai Mạch", "Ngưng Khí", "Trúc Cơ", "Kim Đan", "Nguyên Anh", "Hóa Thần", "Luyện Hư", "Hợp Thể", "Đại Thừa", "Độ Kiếp"]]
+2.  **Tạo Phả Hệ Địa Điểm & Vị trí Bắt đầu:**
+    a. Sáng tạo MỘT địa điểm vĩ mô (Lục địa, Cõi, hoặc Quốc gia) làm nền tảng. Dùng thẻ [WORLD_LOCATION: id="loc_me", name="Tên Vùng Đất", description="...", category="Quốc Gia", tier=2].
+    b. Sáng tạo MỘT địa điểm cụ thể nơi nhân vật đang đứng, gắn vào địa điểm vĩ mô trên bằng thẻ [WORLD_LOCATION: id="loc_con", name="Tên Địa Điểm Cụ Thể", description="...", category="Thành Trì", tier=3, parentLocationId="loc_me"].
+    c. Dùng tên chính xác của địa điểm cụ thể đó trong thẻ [SET_STARTING_LOCATION: locationName="Tên Địa Điểm Cụ Thể"].
+    d. Quyết định thời điểm trong ngày phù hợp nhất với phân cảnh mở đầu ngươi sắp viết (KHÔNG mặc định 8h sáng nếu bối cảnh gợi ý khác), quy đổi thành giờ 24h (Sáng sớm=5, Buổi sáng=9, Giữa trưa=12, Chiều=15, Hoàng hôn=18, Tối=21, Nửa đêm=0) rồi xuất thẻ [SET_STARTING_TIME: hour=X].
+3.  **Viết Phân Cảnh Mở Đầu** dài và chi tiết (tối thiểu 5-7 đoạn văn): nhân vật chính xuất hiện tại địa điểm bắt đầu — PHẢI khớp đúng thời điểm trong ngày đã chọn ở bước 2.d. Lồng xuất thân + ngoại hình của nhân vật vào văn qua chi tiết cảm quan (không liệt kê thông tin). NÊN có ít nhất một nhân vật trong danh sách quan hệ xuất hiện và cất lời để mở màn tương tác.
+4.  **Kết Thúc:** Luôn kết thúc bằng chính xác 4 lựa chọn hành động mới, đánh số 1., 2., 3., 4., mỗi lựa chọn một dòng, kèm chú thích {Tỷ lệ thành công: …, Hậu quả/Phần thưởng: …} bằng ngôn từ văn học.
+
+${DIALOGUE_RULES}
+
+LƯU Ý CUỐI: ngoài đúng các thẻ trong CHECKLIST và thẻ <dialogue>, TUYỆT ĐỐI KHÔNG chèn thẻ lệnh nào khác; KHÔNG hiện con số chỉ số trong văn tường thuật.`;
+}
+
+/* Extract the init checklist's command tags (mockup-scale port of the old
+   commandBlock parser — only the tags this mockup actually uses) */
+function parseInitCommands(text){
+  const out = {realms:null, startLoc:null, startHour:null, locations:{}};
+  const realmM = text.match(/\[REALM_LIST:\s*(\[[\s\S]*?\])\s*\]/);
+  if(realmM){ try{ out.realms = JSON.parse(realmM[1]).map(String); }catch(_){} }
+  const locRe = /\[WORLD_LOCATION:([^\]]*)\]/g; let m;
+  while((m = locRe.exec(text)) !== null){
+    const name = (m[1].match(/name="([^"]*)"/)||[])[1];
+    const desc = (m[1].match(/description="([^"]*)"/)||[])[1];
+    if(name) out.locations[name] = desc || '';
+  }
+  const slM = text.match(/\[SET_STARTING_LOCATION:\s*locationName="([^"]*)"\s*\]/);
+  if(slM) out.startLoc = slM[1];
+  const stM = text.match(/\[SET_STARTING_TIME:\s*hour=(\d+)/);
+  if(stM) out.startHour = parseInt(stM[1],10);
+  return out;
+}
+
+/* Response parser — direct port of the old app's mechanism:
+   strip [TAG] command lines, find the LAST line starting "1. ", merge
+   wrapped choice lines, strip numbering, pad to 4 with safe defaults,
+   strip {…} annotations out of the story body. */
+const DEFAULT_CHOICES = [
+  card('Quan sát xung quanh kỹ hơn.','Tỷ lệ thành công: Tuyệt đối. Có thể phát hiện thêm chi tiết.'),
+  card('Kiểm tra lại hành trang.','Tỷ lệ thành công: Tuyệt đối. Sắp xếp lại vật phẩm.'),
+  card('Ngồi xuống vận công điều tức.','Tỷ lệ thành công: Tuyệt đối. Phục hồi tâm thần.'),
+  card('Tiếp tục lên đường.','Tỷ lệ thành công: Tuyệt đối. Thúc đẩy câu chuyện.'),
+];
+function parseTurn(raw){
+  let text = String(raw)
+    .replace(/\[NC\]/gi, playerName())
+    .replace(/\[[A-Z_]+(?::[^\]]*)?\]/g,'')
+    .split('\n').filter(l=>!/^[\*\-_]{3,}\s*$/.test(l.trim())).join('\n');
+  const lines = text.split('\n');
+  let start = -1;
+  for(let i=lines.length-1;i>=0;i--){ if(/^\s*1[\.)]\s/.test(lines[i])){ start=i; break; } }
+  let story = text.trim(), choiceLines = [];
+  if(start!==-1){ story = lines.slice(0,start).join('\n').trim(); choiceLines = lines.slice(start); }
+  const merged=[]; let cur='';
+  choiceLines.forEach(l=>{
+    if(/^\s*(\d+[\.)]|[a-zA-Z]\.)\s/.test(l)){ if(cur) merged.push(cur); cur=l; }
+    else if(cur) cur += ' ' + l.trim();
+  });
+  if(cur) merged.push(cur);
+  let choices = merged
+    .map(l=>l.replace(/^\s*(\d+[\.)]|[a-zA-Z]\.)\s*/,'').trim())
+    .filter(Boolean)
+    .map(c=>{
+      const m = c.match(/\{([^}]*)\}/);
+      const label = c.replace(/\{[^}]*\}/g,'')
+        .replace(/<\/?dialogue[^>]*>/g,'')          // choices are actions, never dialogue markup
+        .replace(/\*+/g,'').trim();
+      return card(label, m ? m[1].trim() : '');
+    })
+    .filter(c=>c.label);
+  while(choices.length<4) choices.push(DEFAULT_CHOICES[choices.length]);
+  choices = choices.slice(0,4);
+  story = story.replace(/\{[^}]+\}/g,'').replace(/(^|\s)\*+|\*+(\s|$)/g,'$1$2').trim();
+  return {story, choices};
+}
+
+/* <dialogue speaker="…"> segmenter — verbatim port of parseStoryWithDialogue */
+function parseStoryWithDialogue(text){
+  if(!text || typeof text!=='string') return [];
+  const segments=[]; let lastIndex=0;
+  const regex=/<dialogue speaker="([^"]+)">([\s\S]*?)<\/dialogue>/g;
+  let m;
+  while((m=regex.exec(text))!==null){
+    if(m.index>lastIndex){
+      const narr=text.substring(lastIndex,m.index).trim();
+      if(narr) segments.push({type:'narrative', content:narr});
+    }
+    segments.push({type:'dialogue', speaker:m[1].trim(), content:m[2].trim()});
+    lastIndex=regex.lastIndex;
+  }
+  if(lastIndex<text.length){
+    const rest=text.substring(lastIndex).trim();
+    if(rest) segments.push({type:'narrative', content:rest});
+  }
+  return segments;
+}
+/* Chat-bubble rendering — ported from the old app's DialogueBubble:
+   speaker "Ngươi" (or the player's real name) → player side, else NPC side */
+function dialogueHtml(speaker, content){
+  const sp = (speaker||'').trim();
+  const spLower = sp.toLowerCase();
+  const pnLower = playerName().trim().toLowerCase();
+  const isPlayer = sp==='Ngươi' || spLower==='ngươi' || (pnLower && spLower===pnLower);
+  const displayName = isPlayer ? 'Ngươi' : (sp || '?');
+  const letter = displayName.charAt(0).toUpperCase();
+  return `<div class="dlg-wrap ${isPlayer?'player':'npc'}"><div class="dlg-row">
+    <span class="dlg-avatar" aria-hidden="true">${esc(letter)}</span>
+    <div>
+      <div class="dlg-name">${esc(displayName)}</div>
+      <div class="dlg-bubble">${esc(content)}</div>
+    </div>
+  </div></div>`;
+}
+function storyToHtml(story){
+  return parseStoryWithDialogue(story).map(sg=>{
+    if(sg.type==='dialogue') return dialogueHtml(sg.speaker, sg.content);
+    return sg.content.split(/\n{2,}|\n/).map(p=>p.trim()).filter(Boolean)
+      .map(p=>`<p>${esc(p)}</p>`).join('');
+  }).join('');
+}
+/* Compact plain-text form for the history block fed back into prompts */
+function plainFrom(story){
+  return story
+    .replace(/<dialogue speaker="([^"]+)">([\s\S]*?)<\/dialogue>/g, (m,s,c)=>`${s} nói: “${c.trim()}”`)
+    .replace(/\s+/g,' ').trim().slice(0,600);
+}
+
+/* ================= S1 ================= */
+function slotSorted(){ return [...state.slots].sort((a,b)=>a.minAgo-b.minAgo); }
+function renderS1(){
+  const invite = state.fontSetting===null ? `
+    <div class="invite" id="invite">
+      Chọn cỡ chữ để đọc thoải mái:
+      <div class="opts">
+        <button onclick="pickFont('S')">S</button>
+        <button onclick="pickFont('M')">M</button>
+        <button onclick="pickFont('L')">L</button>
+      </div>
+    </div>` : '';
+
+  const rows = slotSorted().map(s=>{
+    const days = s.minAgo/1440;
+    const nudge = (s.status!=='corrupt' && days>=EXPORT_NUDGE_DAYS)
+      ? `<div class="nudge"><button onclick="exportSlot(${s.id})">Lâu chưa mở lại — cân nhắc chép lại quyển sổ</button></div>` : '';
+    const exported = s.exported ? `<div class="row-confirm">Đã chép lại quyển sổ</div>` : '';
+    if(s.status==='corrupt') return `
+      <div class="spine-row corrupt" id="row-${s.id}">
+        <div class="spine"></div>
+        <div class="cover"><span class="stamp">?</span>
+          <span class="meta">Trang này đã phai mực</span>
+          <div class="row-links"><button onclick="askDelete(${s.id})">Xóa</button></div>
+        </div>
+      </div>`;
+    const stamp = s.status==='closed' ? `<span class="stamp">${s.reason==='death'?'Vong':'Mãn'}</span>` : '';
+    const closeLink = (s.status==='active' && s.escalation)
+      ? `<button onclick="askClose(${s.id})">Khép quyển sổ này lại</button>` : '';
+    return `
+      <div class="spine-row ${s.status==='active'?'active-slot':'closed-slot'}" id="row-${s.id}">
+        <div class="spine"></div>
+        <button class="cover" onclick="openSlot(${s.id})"
+          aria-label="${esc(s.name)} — ${s.status==='active'?'Tiếp tục':'Xem lại'}">
+          ${stamp}
+          <span class="name">${esc(s.name)} — ${esc(s.realm)}</span>
+          <span class="meta">${s.turns} lượt · ${timeStr(s.minAgo)}</span>
+        </button>
+      </div>
+      <div style="margin:-.45rem 0 .65rem 17px; padding:0 .9rem;">
+        ${nudge}${exported}
+        <div class="row-links">
+          <button onclick="exportSlot(${s.id})">Chép lại</button>
+          <button onclick="askDelete(${s.id})">Xóa</button>
+          ${closeLink}
+        </div>
+      </div>`;
+  }).join('');
+
+  const empty = state.slots.length===0 ? `
+    <div class="empty-state">
+      <div>Chưa có sổ nào — hãy bắt đầu cuốn đầu tiên</div>
+      <div class="sub">mỗi cuốn sổ chỉ thuộc về nơi nó được viết</div>
+    </div>` : '';
+
+  return `
+    <div class="chrome">
+      <button class="marginalia" aria-haspopup="menu" onclick="toggleMenu(event)">「Mục」</button>
+      ${menuHtml(['settings'])}
+    </div>
+    ${invite}
+    <div class="slot-list">
+      <div class="spine-row blank">
+        <div class="spine"></div>
+        <button class="cover" onclick="newSlot()">Bắt đầu mới</button>
+      </div>
+      ${state.slots.length ? rows : empty}
+    </div>`;
+}
+function pickFont(v){
+  state.fontSetting=v; localStorage.setItem(LS.font,v); applyFont();
+  const el=$('#invite'); if(el){ el.classList.add('gone'); later(render,150); } else render();
+}
+function openSlot(id){
+  const s = state.slots.find(x=>x.id===id);
+  if(!s || s.status==='corrupt') return;
+  if(s.status==='closed'){ goto('s4ro','fwd'); return; }
+  state.activeSlot=id;
+  if(state.s2.turns.length===0) seedS2(false);
+  goto('s2','fwd');
+}
+/* ====== Character setup (GameSetupScreen-style) ======
+   The PLAYER sculpts their own character in a form — like the old app's
+   setup screen. "Đấng nặn người" is only the optional auto-fill button
+   (exactly its role in the old app: it fills gameSettings form values).
+   Empty fields → AI decides (old app: "để trống ô nào thì AI tự quyết
+   định ô đó"). Per-field ✨ suggest buttons port the old SuggestButton. */
+function blankSetup(){
+  return { idea:'', name:'', gender:'Nam', personality:'', role:'', appearance:'',
+    backstory:'', goal:'', setting:'',
+    souls:[{name:'',description:''}],
+    traits:[{category:'Kỹ năng',name:'',description:''},{category:'Vật phẩm',name:'',description:''}],
+    rels:[{name:'',relationship:'',standing:'',description:''}],
+    busy:false, busyField:null, ideaMsg:'' };
+}
+function newSlot(){ state.setup=blankSetup(); goto('setup','fwd'); }
+
+function renderSetup(){
+  const f = state.setup || (state.setup=blankSetup());
+  const dis = f.busy?'disabled':'';
+  const sug = (field)=> aiEnabled()
+    ? `<button class="suggest-btn" ${f.busyField?'disabled':''} onclick="suggestField('${field}')" title="AI gợi ý ô này">${f.busyField===field?'…':'✨'}</button>`
+    : '';
+  const persOpts = ['',...PLAYER_PERSONALITIES].map(v=>
+    `<option value="${esc(v)}" ${f.personality===v?'selected':''}>${v?esc(v):'Để AI quyết định'}</option>`).join('');
+  const genOpts = ['Nam','Nữ','Khác','Không xác định'].map(v=>
+    `<option ${f.gender===v?'selected':''}>${v}</option>`).join('');
+  const soulRows = f.souls.map((s,i)=>`
+    <div class="row"><div class="rr">
+      <input type="text" placeholder="Tên võ hồn" value="${esc(s.name)}" oninput="state.setup.souls[${i}].name=this.value">
+      <input type="text" placeholder="Mô tả ngắn (1-2 câu)" value="${esc(s.description)}" oninput="state.setup.souls[${i}].description=this.value">
+    </div><button class="rm" onclick="state.setup.souls.splice(${i},1);render()">Bỏ dòng</button></div>`).join('');
+  const traitRows = f.traits.map((t,i)=>`
+    <div class="row"><div class="rr">
+      <select onchange="state.setup.traits[${i}].category=this.value">
+        <option ${t.category==='Kỹ năng'?'selected':''}>Kỹ năng</option>
+        <option ${t.category==='Vật phẩm'?'selected':''}>Vật phẩm</option>
+      </select>
+      <input type="text" placeholder="Tên thiên phú" value="${esc(t.name)}" oninput="state.setup.traits[${i}].name=this.value">
+      <input type="text" placeholder="Mô tả ngắn, gợi mở" value="${esc(t.description)}" oninput="state.setup.traits[${i}].description=this.value">
+    </div><button class="rm" onclick="state.setup.traits.splice(${i},1);render()">Bỏ dòng</button></div>`).join('');
+  const relRows = f.rels.map((r,i)=>`
+    <div class="row"><div class="rr">
+      <input type="text" placeholder="Tên NPC" value="${esc(r.name)}" oninput="state.setup.rels[${i}].name=this.value">
+      <input type="text" placeholder="Quan hệ (cha, bạn, kết oán…)" value="${esc(r.relationship)}" oninput="state.setup.rels[${i}].relationship=this.value">
+      <input type="text" placeholder="Thái độ hiện tại" value="${esc(r.standing)}" oninput="state.setup.rels[${i}].standing=this.value">
+      <input type="text" placeholder="Mô tả ngắn về NPC" value="${esc(r.description)}" oninput="state.setup.rels[${i}].description=this.value">
+    </div><button class="rm" onclick="state.setup.rels.splice(${i},1);render()">Bỏ dòng</button></div>`).join('');
+  return `<div class="setup">
+    <button class="back-link" onclick="goto('s1','back')">« về danh sách sổ</button>
+    <h1>Nặn Nhân Vật Của Ngươi</h1>
+    ${aiEnabled()?`
+    <div class="idea-box">
+      <label style="display:block; font-size:.85rem; color:var(--ink-60); margin-bottom:.3rem;">Lười điền? Gõ một ý tưởng, để Đấng nặn hộ — rồi chỉnh lại tùy ý:</label>
+      <div class="with-suggest">
+        <input type="text" placeholder="VD: một kẻ nhặt rác vô danh nuốt nhầm linh đan…" value="${esc(f.idea)}" oninput="state.setup.idea=this.value">
+        <button class="suggest-btn" ${dis} onclick="fillFromIdea()" style="min-width:auto; padding:0 .9rem;">${f.busy?'Đấng đang nặn người…':'✨ Nặn toàn bộ'}</button>
+      </div>
+      <p class="msg">${esc(f.ideaMsg)}</p>
+    </div>`:`
+    <p class="grp-note">⚠ Chưa có API key — nút ✨ và "Bắt Đầu" cần key. Mở 「Mục」→ Cài đặt để nhập (hoặc điền DEFAULT_API_KEY đầu file cho chế độ Mặc định).</p>`}
+
+    <div class="fld"><label>Tên nhân vật</label>
+      <div class="with-suggest"><input type="text" placeholder="Để trống → AI tự quyết" value="${esc(f.name)}" oninput="state.setup.name=this.value">${sug('name')}</div></div>
+    <div class="fld"><label>Giới tính</label><select onchange="state.setup.gender=this.value">${genOpts}</select></div>
+    <div class="fld"><label>Tính cách</label><select onchange="state.setup.personality=this.value">${persOpts}</select></div>
+    <div class="fld"><label>Vai trò / thân phận</label>
+      <div class="with-suggest"><input type="text" placeholder="VD: tán tu, đệ tử ngoại môn, thợ rèn…" value="${esc(f.role)}" oninput="state.setup.role=this.value">${sug('role')}</div></div>
+    <div class="fld"><label>Ngoại hình</label>
+      <div class="with-suggest"><textarea rows="2" placeholder="Miêu tả vóc dáng, trang phục, điểm nhấn…" oninput="state.setup.appearance=this.value">${esc(f.appearance)}</textarea>${sug('appearance')}</div></div>
+    <div class="fld"><label>Tiểu sử / Xuất thân</label>
+      <div class="with-suggest"><textarea rows="3" placeholder="Ghi chú về quá khứ, ân oán tình thù…" oninput="state.setup.backstory=this.value">${esc(f.backstory)}</textarea>${sug('backstory')}</div></div>
+    <div class="fld"><label>Mục tiêu chính</label>
+      <div class="with-suggest"><input type="text" placeholder="Để trống → câu chuyện tự phát triển" value="${esc(f.goal)}" oninput="state.setup.goal=this.value">${sug('goal')}</div></div>
+    <div class="fld"><label>Bối cảnh thế giới</label>
+      <div class="with-suggest"><textarea rows="3" placeholder="Đại lục, thế lực, nơi nhân vật sinh sống… Để trống → AI tự dựng" oninput="state.setup.setting=this.value">${esc(f.setting)}</textarea>${sug('setting')}</div></div>
+
+    <div class="grp-title">Võ Hồn khởi đầu (tối đa 3)</div>
+    <p class="grp-note">Thông tin nền về bản chất linh hồn — không phải kỹ năng.</p>
+    ${soulRows}
+    ${f.souls.length<3?`<button class="add-row" onclick="state.setup.souls.push({name:'',description:''});render()">+ Thêm võ hồn</button>`:''}
+
+    <div class="grp-title">Thiên phú khởi đầu</div>
+    ${traitRows}
+    ${f.traits.length<3?`<button class="add-row" onclick="state.setup.traits.push({category:'Kỹ năng',name:'',description:''});render()">+ Thêm thiên phú</button>`:''}
+
+    <div class="grp-title">Quan hệ cơ bản (tối đa 3)</div>
+    <p class="grp-note">Người thân, bạn bè/ân sư, ân oán… NPC sẽ giữ đúng thái độ này khi xuất hiện.</p>
+    ${relRows}
+    ${f.rels.length<3?`<button class="add-row" onclick="state.setup.rels.push({name:'',relationship:'',standing:'',description:''});render()">+ Thêm quan hệ</button>`:''}
+
+    <button class="start-btn" ${dis} onclick="startAdventure()">Bắt Đầu Cuộc Phiêu Lưu</button>
+  </div>`;
+}
+
+/* Per-field AI suggestion — ported from the old app's SuggestButton prompts
+   ("Chỉ trả về ...", no explanations) */
+const FIELD_SUGGEST = {
+  name: f=>`Dựa vào chủ đề "Tiên hiệp" và bối cảnh '${f.setting||'chưa rõ'}', và giới tính nhân vật là '${f.gender}', hãy gợi ý MỘT tên nhân vật bằng tiếng Việt theo phong cách tiểu thuyết mạng. Chỉ trả về tên nhân vật đó, không thêm bất kỳ lời giải thích nào.`,
+  role: f=>`Dựa vào chủ đề "Tiên hiệp" và bối cảnh '${f.setting||'chưa rõ'}', hãy gợi ý MỘT vai trò/thân phận khởi đầu thú vị cho nhân vật (VD: 'tán tu nhặt phế liệu', 'đệ tử ngoại môn bị chèn ép'). Chỉ trả về vai trò, không giải thích.`,
+  appearance: f=>`Dựa trên chủ đề game 'Tiên hiệp' và sơ lược nhân vật '${f.backstory||f.role||'chưa rõ'}', hãy viết MỘT mô tả ngoại hình ngắn (1-2 câu) bằng tiếng Việt cho nhân vật ${f.name||'chính'} (${f.gender}), theo văn phong tiểu thuyết mạng. Chỉ trả về mô tả.`,
+  backstory: f=>`Dựa trên chủ đề game 'Tiên hiệp', bối cảnh '${f.setting||'chưa rõ'}' và vai trò '${f.role||'chưa rõ'}', hãy viết MỘT tiểu sử/xuất thân ngắn (2-3 câu) bằng tiếng Việt cho nhân vật ${f.name||'chính'}, theo văn phong tiểu thuyết mạng, có gợi mở ân oán hoặc bí ẩn. Chỉ trả về nội dung.`,
+  goal: f=>`Dựa trên tiểu sử '${f.backstory||'chưa rõ'}' của nhân vật ${f.name||'chính'} trong thế giới Tiên hiệp, hãy gợi ý MỘT mục tiêu chính (1 câu) thúc đẩy cả hành trình. Chỉ trả về mục tiêu.`,
+  setting: f=>`Dựa trên chủ đề game là 'Tiên hiệp', hãy viết một mô tả bối cảnh thế giới chi tiết (3-5 câu) bằng tiếng Việt theo văn phong tiểu thuyết mạng: đại lục, các thế lực chính, vị trí của phàm nhân trong thế giới đó, nơi nhân vật sinh sống. Chỉ trả về mô tả.`,
+};
+async function suggestField(field){
+  const f=state.setup; if(!f || f.busyField || !aiEnabled()) return;
+  f.busyField=field; render();
+  try{
+    const raw = await callGemini(FIELD_SUGGEST[field](f), effectiveApiKey());
+    f[field] = raw.trim().replace(/^["“]|["”]$/g,'');
+  }catch(err){ f.ideaMsg='Lỗi gợi ý: '+err.message; }
+  f.busyField=null; render();
+}
+async function fillFromIdea(){
+  const f=state.setup; if(!f || f.busy || !aiEnabled()) return;
+  f.busy=true; f.ideaMsg=''; render();
+  try{
+    const idea = f.idea.trim() || 'một phàm nhân vô danh từ đáy xã hội tình cờ chạm vào con đường tu tiên';
+    const raw = await callGemini(buildCharGenPrompt(idea), effectiveApiKey(), undefined, CHAR_GEN_GENCONFIG);
+    const gen = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    Object.assign(f, {
+      name:gen.name||'', gender:gen.gender||'Nam', personality:gen.personality||'',
+      role:gen.role||'', appearance:gen.appearance||'', backstory:gen.backstory||'',
+      goal:gen.goal||'', setting:gen.setting||'',
+      souls:(gen.initialMartialSouls||[]).slice(0,3).map(s=>({name:s.name||'', description:s.description||''})),
+      traits:(gen.initialTraits||[]).slice(0,3).map(t=>({category:t.category||'Kỹ năng', name:t.name||'', description:t.description||''})),
+      rels:(gen.initialRelationships||[]).slice(0,3).map(r=>({name:r.name||'', relationship:r.relationship||'', standing:r.standing||'', description:r.description||''})),
+    });
+    f.ideaMsg='Đấng đã nặn xong — chỉnh sửa tùy ý rồi Bắt Đầu.';
+  }catch(err){ f.ideaMsg='Lỗi: '+(err.message||'không nặn được'); }
+  f.busy=false; render();
+}
+
+function startAdventure(){
+  const f=state.setup || blankSetup();
+  const cleanRows = (arr, keys) => arr.filter(r=>keys.some(k=>String(r[k]||'').trim()));
+  let prof = {
+    setting:f.setting.trim(), name:f.name.trim(), gender:f.gender,
+    personality:f.personality, role:f.role.trim(), appearance:f.appearance.trim(),
+    backstory:f.backstory.trim(), goal:f.goal.trim(),
+    initialMartialSouls:cleanRows(f.souls,['name']),
+    initialTraits:cleanRows(f.traits,['name']),
+    initialRelationships:cleanRows(f.rels,['name']),
+  };
+  if(!aiEnabled()){ f.ideaMsg=NO_KEY_MSG; render(); openSettings(); return; }
+  if(!prof.name) prof.name='Vô Danh';
+  const id = Math.max(0,...state.slots.map(s=>s.id))+1;
+  state.slots.push({id, name:prof.name, realm:'?',
+    turns:0, minAgo:0, status:'active', escalation:false, exported:false, profile:prof});
+  state.activeSlot=id;
+  seedS2(true); goto('s2','fwd');
+}
+function exportSlot(id){
+  const s=state.slots.find(x=>x.id===id); if(!s) return;
+  s.exported=true; render();
+}
+
+/* O-ConfirmDelete — 2 variants + escalation-close */
+function askDelete(id){
+  const s=state.slots.find(x=>x.id===id); if(!s) return;
+  overlayConfirm(s, s.status==='closed' ? 'escalated' : 'normal');
+}
+function askClose(id){ const s=state.slots.find(x=>x.id===id); if(s) overlayConfirm(s,'close'); }
+function overlayConfirm(s, variant){
+  const ref = (s.name && s.name.trim()) ? s.name : 'XÁC NHẬN';
+  const isEsc = variant==='escalated';
+  const title = variant==='close' ? 'Khép quyển sổ này lại?' : 'Xóa quyển sổ này?';
+  const body = variant==='close'
+    ? `<p>Quyển sổ không còn ghi thêm được nữa. Khép lại nghĩa là đời này dừng ở trang hiện tại — vẫn đọc lại được, không viết tiếp được.</p>`
+    : isEsc
+      ? `<p>Cuốn sổ đã khép của <span class="danger-name">${esc(ref)}</span> sẽ bị xóa vĩnh viễn — không thể lấy lại.</p>
+         <p style="font-size:.9rem; color:var(--ink-60);">Gõ lại tên để xác nhận:</p>
+         <div class="field-row"><input id="cf-input" autocomplete="off" aria-label="Gõ lại tên để xác nhận"></div>`
+      : `<p>Quyển sổ sẽ bị xóa vĩnh viễn — không thể lấy lại.</p>`;
+  $('#overlay-root').innerHTML = `
+    <div class="backdrop" onclick="if(event.target===this) closeOverlay()">
+      <div class="panel" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+        <div class="panel-h"><h2>${esc(title)}</h2>
+          <button class="x" aria-label="Đóng" onclick="closeOverlay()">✕</button></div>
+        <div class="panel-b">
+          ${body}
+          <div class="actions">
+            <button onclick="closeOverlay()">Hủy</button>
+            <button id="cf-go" ${isEsc?'disabled':''}
+              onclick="confirmAction(${s.id},'${variant}')">${variant==='close'?'Khép lại':'Xóa'}</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.addEventListener('keydown', overlayKeys);
+  if(isEsc){
+    const inp=$('#cf-input'), go=$('#cf-go');
+    const norm=t=>t.normalize('NFC').trim().toLowerCase();
+    inp.addEventListener('input',()=>{ go.disabled = norm(inp.value)!==norm(ref); });
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!go.disabled) go.click(); });
+    inp.focus();
+  }
+}
+function confirmAction(id, variant){
+  closeOverlay();
+  if(variant==='close'){
+    const s=state.slots.find(x=>x.id===id);
+    if(s){ s.status='closed'; s.reason='quota'; s.escalation=false; }
+    render(); return;
+  }
+  const row=$('#row-'+id);
+  if(row){ row.classList.add('deleting'); }
+  later(()=>{ state.slots=state.slots.filter(x=>x.id!==id); render(); },150);
+}
+function overlayKeys(e){ if(e.key==='Escape') closeOverlay(); }
+function closeOverlay(){
+  $('#overlay-root').innerHTML=''; document.removeEventListener('keydown', overlayKeys);
+  oset=null;
+}
+
+/* ================= marginalia menu ================= */
+function menuHtml(items){
+  if(!state.menuOpen) return '';
+  const li = items.map(it=>{
+    if(it==='settings') return `<button role="menuitem" onclick="openSettings()">Cài đặt</button>`;
+    const locked = state.s2.tm!=='awaiting';
+    return `<button role="menuitem" aria-disabled="${locked}"
+      onclick="${locked?'':'backToSlots()'}">Về danh sách sổ</button>`;
+  }).join('');
+  return `<div class="marginalia-menu" role="menu">${li}</div>`;
+}
+function toggleMenu(e){ e.stopPropagation(); state.menuOpen=!state.menuOpen; render(); }
+document.addEventListener('click',()=>{ if(state.menuOpen){ state.menuOpen=false; render(); }});
+function backToSlots(){ goto('s1','back'); }
+
+/* ================= S2 ================= */
+/* Static suggestion sets — only used as resume-state for the pre-seeded demo
+   slot and as post-undo fallback; every actual turn is real AI. */
+const OFFLINE_CARD_SETS = [
+  ['Lần theo vết cào trên thân trầm','Gọi lớn vào màn sương','Vận công điều tức tại chỗ','Lặng lẽ rút lui khỏi rừng'],
+  ['Đuổi theo tiếng động sau lưng','Hỏi Đường Vũ Đồng về khu rừng','Thắp một nén hương trấn tĩnh','Men theo lối sương vừa mở'],
+  ['Bước vào lối sương hẹp','Hỏi danh tính giọng nói','Đứng yên chờ đối phương lộ diện','Quay đầu rời khỏi rừng'],
+].map(set=>set.map(l=>card(l)));
+const FATE_SET = [card('Kết liễu'), card('Tha mạng'), card('Trói lại tra hỏi'), card('Lục soát rồi bỏ đi')];
+
+function seedS2(coldStart){
+  clearTimers(); callSeq++;
+  state.s2 = { turns:[], tm:'awaiting', undo:false, freeText:'', chipOn:null,
+               cards:OFFLINE_CARD_SETS[0], err:null, escalated:false };
+  if(!coldStart){
+    state.s2.turns = [
+      {html:'<p>Ba ngày trước, ngươi rời trấn Thanh Hà theo lời nhắn khắc trên thẻ trúc.</p>', plain:'Ba ngày trước rời trấn Thanh Hà theo lời nhắn trên thẻ trúc.', cardsBefore:[]},
+      {html:'<p>Trạm dịch cuối cùng đã ở lại sau lưng; trước mặt chỉ còn rừng.</p>', plain:'Đã qua trạm dịch cuối cùng, trước mặt chỉ còn rừng.', cardsBefore:[]},
+    ];
+    return;
+  }
+  // Cold start: AI writes the opening BEFORE the first 4 suggestions appear.
+  // Always real API; without a key we fail loudly instead of faking prose.
+  state.s2.tm='resolving'; state.s2.cards=[];
+  if(aiEnabled()){ runColdAI(); }
+  else { state.s2.tm='awaiting'; aiFail(NO_KEY_MSG, DEFAULT_CHOICES.slice()); }
+}
+
+function renderS2(){
+  const s2=state.s2;
+  const locked = s2.tm!=='awaiting';
+  const paras = s2.turns.map(t=>t.html).join('');
+  const err = s2.err?`<p class="err">${esc(s2.err)}</p>`:'';
+  const writing = locked ? `
+    <div class="writing"><span class="ink-sweep"></span>
+      <span id="writing-text">${s2.escalated?'thế giới vẫn đang viết…':'thế giới đang viết…'}</span></div>`:'';
+  const isFate = s2.cards===FATE_SET;
+  // "✦ Gợi ý hành động" — full numbered list at the end of the story frame
+  // (ported layout); the input bar below only carries compact buttons.
+  const sugPanel = (!locked && s2.cards.length) ? `
+    <div class="sug-panel">
+      <div class="sug-title">✦ Gợi ý hành động</div>
+      ${s2.cards.map((c,i)=>`
+        <div class="sug-item ${isFate&&i<2?'fate':''}">
+          <span class="sug-num">0${i+1}.</span>
+          <div><span class="sug-label">${esc(c.label)}</span>
+            ${c.note?`<span class="sug-note">{${esc(c.note)}}</span>`:''}</div>
+        </div>`).join('')}
+    </div>` : '';
+  const cards = s2.cards.map((c,i)=>`
+    <div class="act-wrap ${isFate&&i<2?'fate':''}">
+      <button class="act-btn" onclick="submitCard(${i})">Hành Động ${i+1}</button>
+      <button class="act-info" aria-label="Xem chi tiết hành động ${i+1}" title="Xem chi tiết"
+        onclick="event.stopPropagation(); showChoiceDetail(${i})">ⓘ</button>
+    </div>`).join('');
+  const rel0 = ((activeProfile().initialRelationships)||[])[0];
+  const chips = isFate ? '' : `
+    <div class="chips">
+      ${rel0?`<span class="grp">${esc(rel0.name)}:</span>${chip('Hỏi chuyện '+rel0.name)}`:''}
+      <span class="grp">·</span>
+      ${chip('Quan sát xung quanh thật kỹ')}${chip('Vận công điều tức')}
+      ${chip('Rời khỏi nơi này')}
+    </div>`;
+  const undo = s2.undo?`<div class="undo-wrap"><button class="undo-btn" id="undo-btn" onclick="doUndo()">Hoàn tác</button></div>`:'';
+  return `
+    <div class="chrome">
+      <button class="marginalia" onclick="openCard(event)">「Thẻ」</button>
+      <button class="marginalia" onclick="goto('s4ro','fwd')">「Lục」</button>
+      <button class="marginalia" aria-haspopup="menu" onclick="toggleMenu(event)">「Mục」</button>
+      ${menuHtml(['back','settings'])}
+    </div>
+    <div class="scene-header">${esc((activeProfile().startingLocation||{}).name||'Không rõ')}${(activeProfile().startingLocation||{}).danger?' <span class="seal">Hiểm</span>':''}</div>
+    <div class="narrative">${paras}${err}${sugPanel}${writing}</div>
+    <div class="input-zone ${locked?'locked':''}" aria-disabled="${locked}">
+      <div class="act-grid">${cards}</div>
+      ${chips}
+      <div class="free-row">
+        <textarea id="free-text" rows="2" placeholder="Miêu tả hành động tùy ý…"
+          oninput="state.s2.freeText=this.value"
+          onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault(); submitFree();}">${esc(s2.freeText)}</textarea>
+        <button onclick="submitFree()">Thực Hiện</button>
+      </div>
+      <label class="unexpected">
+        <input type="checkbox" ${state.allowUnexpected?'checked':''}
+          onchange="state.allowUnexpected=this.checked">
+        Chèn sự kiện/tình tiết bất ngờ trong lúc thực hiện hành động
+      </label>
+      ${undo}
+    </div>
+    <div class="chrome bottom">
+      <div class="grp">
+        <button class="marginalia" onclick="openCard(event)">「Thẻ」</button>
+        <button class="marginalia" onclick="goto('s4ro','fwd')">「Lục」</button>
+        <button class="marginalia" onclick="toggleMenu(event)">「Mục」</button>
+      </div>
+    </div>`;
+}
+/* Choice detail modal — ported from the old app's ChoiceDetailModal:
+   action title, then "Tỷ lệ thành công: …" and "Hậu quả/Phần thưởng: …"
+   parsed out of the {…} annotation, closed by "Đã hiểu" */
+function showChoiceDetail(i){
+  const c = state.s2.cards[i]; if(!c) return;
+  const details = c.note || '';
+  const sr = (details.match(/Tỷ lệ thành công:[^.]+\.?/)||[])[0];
+  const cq = (details.match(/Hậu quả\/Phần thưởng:[^}]+/)||[])[0];
+  $('#overlay-root').innerHTML = `
+    <div class="backdrop" onclick="if(event.target===this) closeOverlay()">
+      <div class="panel" role="dialog" aria-modal="true" aria-label="Chi tiết hành động">
+        <div class="panel-h"><h2>Hành Động ${i+1}</h2>
+          <button class="x" aria-label="Đóng" onclick="closeOverlay()">✕</button></div>
+        <div class="panel-b">
+          <p style="font-weight:600; border-bottom:1px solid var(--ink-15); padding-bottom:.7rem;">${esc(c.label)}</p>
+          ${sr?`<p style="font-size:.88rem; letter-spacing:.06em; color:var(--ink-60); font-weight:600;">${esc(sr)}</p>`:''}
+          ${cq?`<p style="font-size:.95rem;">${esc(cq)}</p>`:''}
+          ${(!sr&&!cq&&details)?`<p style="font-size:.95rem; font-style:italic; color:var(--ink-60);">${esc(details)}</p>`:''}
+          <div class="actions"><button onclick="closeOverlay()">Đã hiểu</button></div>
+        </div>
+      </div>
+    </div>`;
+  document.addEventListener('keydown', overlayKeys);
+}
+function chip(label){
+  const on = state.s2.chipOn===label;
+  return `<button class="${on?'on':''}" onclick="event.stopPropagation(); pickChip(this.textContent)">${esc(label)}</button>`;
+}
+function pickChip(label){ state.s2.chipOn=label; state.s2.freeText=label; render(); }
+function submitCard(i){
+  const c=state.s2.cards[i]; if(!c) return;
+  // old app submits the full choice text incl. its {annotation} — the logic
+  // engine reads the literary odds when weighing scenario probabilities
+  submitAction(c.note ? `${c.label} {${c.note}}` : c.label, false);
+}
+function submitFree(){ if(state.s2.freeText.trim()) submitAction(state.s2.freeText.trim(), true); }
+
+function submitAction(text, fromFree){
+  const s2=state.s2;
+  if(s2.tm!=='awaiting') return;                    // D.1 gate at UI layer
+  s2.tm='resolving'; s2.escalated=false; s2.err=null;
+  const cardsBefore = s2.cards; s2.cards=[]; render();
+  if(!aiEnabled()){ aiFail(NO_KEY_MSG, cardsBefore); return; }
+  runTurnAI(text, cardsBefore, fromFree);
+}
+
+/* Real AI turn — 2-stage pipeline like the old app:
+   API 1 (logic, JSON) → dice roll → API 2 (narrative). Escalation text changes
+   ONCE at 15s of the whole turn; each API call gets its own 30s watchdog
+   (spec ai_call_timeout_seconds applies per call). Free text preserved on
+   every failure path (spec Core Rule #9). */
+/* NOTE (design finding, surfaced 2026-08-14): the GDD knob
+   ai_call_timeout_seconds=30 conflicts with the old app's 'dai' style
+   directive (3000+ words/turn) — long generations routinely exceed 30s.
+   Mockup keeps 30s for the logic call but stretches the narrative call
+   watchdog to 120s so the reference-style output can actually arrive.
+   The GDD owner must reconcile these two numbers before implementation. */
+const AI_NARRATIVE_TIMEOUT_S = 120;
+function timedGemini(prompt, genConfig, ctrl, timeoutS){
+  return new Promise((resolve,reject)=>{
+    const t=setTimeout(()=>{ ctrl.abort();
+      reject(Object.assign(new Error('timeout'),{isTimeout:true})); }, (timeoutS||AI_TIMEOUT_S)*1000);
+    timers.push(t);
+    callGemini(prompt, effectiveApiKey(), ctrl.signal, genConfig)
+      .then(v=>{ clearTimeout(t); resolve(v); })
+      .catch(e=>{ clearTimeout(t); reject(e); });
+  });
+}
+function armEscalation(seq){
+  later(()=>{ if(seq===callSeq && state.s2.tm!=='awaiting'){
+    state.s2.escalated=true; const el=$('#writing-text'); if(el) el.textContent='thế giới vẫn đang viết…';
+  }}, AI_ESCALATION_S*1000);
+}
+async function runTurnAI(action, cardsBefore, fromFree){
+  const seq = ++callSeq;
+  const ctrl = new AbortController();
+  armEscalation(seq);
+  try{
+    // API 1 — logic engine: ≥6 scenarios as JSON
+    const rawScen = await timedGemini(buildLogicPrompt(action), LOGIC_GENCONFIG, ctrl);
+    if(seq!==callSeq) return;
+    let scenarios;
+    try{
+      scenarios = JSON.parse(rawScen.replace(/```json|```/g,'').trim());
+      if(!Array.isArray(scenarios) || scenarios.length===0) throw new Error('empty');
+    }catch(_){ throw new Error('AI phân tích logic thất bại. Vui lòng thử lại.'); }
+    const chosen = rollDiceAndChooseScenario(scenarios);
+    // API 2 — narrative engine writes the chosen scenario as long prose
+    const rawNarr = await timedGemini(buildNarrativePrompt(chosen, action), null, ctrl, AI_NARRATIVE_TIMEOUT_S);
+    if(seq!==callSeq) return;
+    const {story, choices} = parseTurn(rawNarr);
+    commitTurn(story, choices, cardsBefore, fromFree);
+  }catch(err){
+    if(seq!==callSeq) return;
+    callSeq++;
+    const msg = (err.isTimeout || err.name==='AbortError')
+      ? 'Đã chờ quá 30 giây mà thế giới chưa kịp hồi đáp. Hãy thử chấp bút lại.'
+      : (err.message || 'Không gọi được AI.');
+    aiFail(msg, cardsBefore);
+  }
+}
+async function runColdAI(){
+  const seq = ++callSeq;
+  const ctrl = new AbortController();
+  armEscalation(seq);
+  try{
+    // Profile is PLAYER-made (setup form; empty fields → AI decides inside
+    // the prompt). Single init call: initialPrompt "Đấng kể chuyện" —
+    // realms, locations, starting time, opening scene, 4 choices.
+    const raw = await timedGemini(buildInitStoryPrompt(), null, ctrl, AI_NARRATIVE_TIMEOUT_S);
+    if(seq!==callSeq) return;
+    const cmds = parseInitCommands(raw);
+    const p = activeProfile();
+    if(cmds.realms && cmds.realms.length >= 3) p.realms = cmds.realms;
+    if(cmds.startLoc){
+      p.startingLocation = {name:cmds.startLoc, description:cmds.locations[cmds.startLoc]||'', danger:false};
+    }else{
+      const names = Object.keys(cmds.locations);   // AI forgot SET_STARTING_LOCATION → best-effort fallback
+      if(names.length) p.startingLocation = {name:names[names.length-1], description:cmds.locations[names[names.length-1]], danger:false};
+    }
+    if(cmds.startHour!=null) p.startingHour = cmds.startHour;
+    const s = activeSlotObj();
+    if(s && p.realms && p.realms.length) s.realm = `${p.realms[0]} tầng 1`;
+    // strip REALM_LIST greedily first (its JSON array contains ']' which the
+    // generic tag-strip regex would otherwise leave half-eaten)
+    const cleaned = raw.replace(/\[REALM_LIST:[\s\S]*?\]\]/g,'');
+    const {story, choices} = parseTurn(cleaned);
+    commitTurn(story, choices, [], false);
+  }catch(err){
+    if(seq!==callSeq) return;
+    callSeq++;
+    const msg = (err.isTimeout || err.name==='AbortError')
+      ? 'Đã chờ quá lâu mà thế giới chưa kịp hồi đáp. Hãy thử chấp bút lại.'
+      : (err.message || 'Không gọi được AI.');
+    aiFail(msg, DEFAULT_CHOICES.slice());
+  }
+}
+function commitTurn(story, choices, cardsBefore, fromFree){
+  const s2=state.s2;
+  s2.turns.push({ html:storyToHtml(story), plain:plainFrom(story), cardsBefore });
+  if(fromFree){ s2.freeText=''; s2.chipOn=null; }
+  s2.tm='awaiting'; s2.undo = cardsBefore.length>0; s2.escalated=false;
+  // demo toggle: force the Pending Fate card variant on this turn (UI review)
+  if(state.demo.pendingFate){
+    s2.cards = FATE_SET; state.demo.pendingFate=false;
+    const cb=$('#d-fate'); if(cb) cb.checked=false;
+  }else{
+    s2.cards = choices;
+  }
+  const s=activeSlotObj(); if(s){ s.turns++; s.minAgo=0; }
+  render();
+}
+function aiFail(msg, cardsBefore){
+  const s2=state.s2;
+  s2.tm='awaiting'; s2.escalated=false;
+  s2.err='— '+msg+' —';
+  s2.cards = (cardsBefore && cardsBefore.length) ? cardsBefore : DEFAULT_CHOICES.slice();
+  render();                                          // free text untouched by design
+}
+
+function doUndo(){
+  const s2=state.s2; if(s2.tm!=='awaiting'||!s2.undo) return;
+  const btn=$('#undo-btn'); if(btn) btn.classList.add('vanish');   // fade ≤150ms before removal
+  s2.tm='undoing'; render();
+  later(()=>{
+    const popped = s2.turns.pop();
+    s2.undo=false; s2.tm='awaiting';
+    s2.cards = (popped && popped.cardsBefore && popped.cardsBefore.length)
+      ? popped.cardsBefore : DEFAULT_CHOICES.slice();
+    const s=activeSlotObj(); if(s) s.turns=Math.max(0,s.turns-1);
+    render();
+  }, 700);
+}
+function openCard(e){
+  e.stopPropagation();
+  const s = activeSlotObj() || {realm:'?'};
+  const p = activeProfile();
+  const li = (arr, fmt) => (arr&&arr.length) ? arr.map(fmt).join('') : '<li>Không có</li>';
+  $('#overlay-root').innerHTML=`
+    <div class="backdrop" onclick="if(event.target===this) closeOverlay()">
+      <div class="panel" role="dialog" aria-modal="true">
+        <div class="panel-h"><h2>${esc(p.name||'?')} — ${esc(s.realm||'?')}</h2>
+          <button class="x" onclick="closeOverlay()">✕</button></div>
+        <div class="panel-b" style="font-size:.95rem;">
+          <p><b>Tính cách:</b> ${esc(p.personality||'?')} · <b>Vai trò:</b> ${esc(p.role||'?')}</p>
+          <p><b>Mục tiêu:</b> ${esc(p.goal||'?')}</p>
+          <p><b>Ngoại hình:</b> ${esc(p.appearance||'?')}</p>
+          <p><b>Xuất thân:</b> ${esc(p.backstory||'?')}</p>
+          <p style="margin-bottom:.2rem;"><b>Võ Hồn:</b></p>
+          <ul style="margin:.2rem 0 .8rem; padding-left:1.2rem;">
+            ${li(p.initialMartialSouls, x=>`<li><b>${esc(x.name)}</b> — ${esc(x.description||'')}</li>`)}
+          </ul>
+          <p style="margin-bottom:.2rem;"><b>Thiên phú/Kỹ năng khởi đầu:</b></p>
+          <ul style="margin:.2rem 0 .8rem; padding-left:1.2rem;">
+            ${li(p.initialTraits, t=>`<li>(${esc(t.category)}) <b>${esc(t.name)}</b> — ${esc(t.description||'')}</li>`)}
+          </ul>
+          <p style="margin-bottom:.2rem;"><b>Quan hệ:</b></p>
+          <ul style="margin:.2rem 0 .8rem; padding-left:1.2rem;">
+            ${li(p.initialRelationships, r=>`<li><b>${esc(r.name)}</b> — ${esc(r.relationship)}, thái độ: ${esc(r.standing)}.${r.description?' '+esc(r.description):''}</li>`)}
+          </ul>
+          <p style="color:var(--ink-60); font-size:.85rem; font-style:italic;">Nội dung hồ sơ do AI khởi tạo — bố cục thật của O-Card chờ UX spec riêng (chưa có).</p>
+        </div>
+      </div>
+    </div>`;
+  document.addEventListener('keydown', overlayKeys);
+}
+
+/* ================= S4-RO placeholder ================= */
+function renderS4RO(){
+  return `<div class="placeholder">
+    <p>S4 / S4-RO — Nhật Ký (Story Log)</p>
+    <p>Chưa có UX spec (việc số 1 trong hàng đợi: <i>/ux-design story-log</i>).<br>
+    Placeholder có chủ đích — không phải thiết kế.</p>
+    <button class="back" onclick="goto('s1','back')">« về danh sách sổ</button>
+  </div>`;
+}
+
+/* ================= O-Set ================= */
+let oset = null;
+function openSettings(){
+  oset = { draft: state.savedKey, masked:true, dirty:false, fb:null, err:null };
+  renderSettings();
+  document.addEventListener('keydown', overlayKeys);
+}
+function renderSettings(){
+  if(!oset) return;
+  const font = state.fontSetting || 'M';
+  const segF = ['S','M','L'].map(v=>`
+    <button class="g${v.toLowerCase()} ${font===v?'sel':''}" onclick="osetFont('${v}')">${v}</button>`).join('');
+  const segM = [['default','Mặc định'],['userKey','Của tôi']].map(([v,l])=>`
+    <button class="${state.apiMode===v?'sel':''}" onclick="osetMode('${v}')">${l}</button>`).join('');
+  const modeHint = state.apiMode==='default'
+    ? (DEFAULT_API_KEY.trim()
+        ? `<p class="hint">Đang dùng key mặc định của dự án — không cần cung cấp API key.</p>`
+        : `<p class="hint">Bản demo chưa cấu hình key mặc định (hằng DEFAULT_API_KEY ở đầu file).
+           Điền vào đó một lần, hoặc chọn “Của tôi” và nhập key Gemini của ngươi.</p>`)
+    : '';
+  const keyBlock = state.apiMode==='userKey' ? `
+    <p class="grp-label" style="margin-top:.2rem">API key</p>
+    <div class="field-row">
+      <input id="oset-key" type="${oset.masked?'password':'text'}" placeholder="Nhập API key"
+        value="${esc(oset.draft)}" autocomplete="off"
+        oninput="oset.draft=this.value; oset.dirty=true; oset.fb=null; oset.err=null; syncSaveBtn()">
+      <button class="mask-toggle" onclick="oset.masked=!oset.masked; renderSettings()">${oset.masked?'Hiện':'Ẩn'}</button>
+    </div>
+    <div class="err-slot">${oset.err?esc(oset.err):''}</div>
+    <div class="save-row">
+      ${oset.fb?`<span class="fb">${esc(oset.fb)}</span>`:''}
+      <button id="oset-save" ${oset.dirty?'':'disabled'} onclick="osetSave()">Lưu</button>
+    </div>` : '';
+  $('#overlay-root').innerHTML=`
+    <div class="backdrop" id="oset-backdrop">
+      <div class="panel" role="dialog" aria-modal="true" aria-label="Cài đặt">
+        <div class="panel-h"><h2>Cài đặt</h2>
+          <button class="x" aria-label="Đóng" onclick="closeSettings()">✕</button></div>
+        <div class="panel-b">
+          <p class="grp-label">Cỡ chữ</p>
+          <div class="seg">${segF}</div>
+          <p class="grp-label">Cấu hình AI</p>
+          <div class="seg">${segM}</div>
+          ${modeHint}
+          ${keyBlock}
+        </div>
+      </div>
+    </div>`;
+  // tap-outside: 2-step rule ONLY when key field focused with unsaved draft
+  $('#oset-backdrop').addEventListener('mousedown', e=>{
+    if(e.target!==e.currentTarget) return;
+    const inp=$('#oset-key');
+    if(inp && document.activeElement===inp && oset.dirty){ inp.blur(); return; } // step 1: unfocus only
+    closeSettings();                                                            // step 2 (or no draft): close
+  });
+}
+function syncSaveBtn(){ const b=$('#oset-save'); if(b) b.disabled=!oset.dirty; }
+function osetFont(v){ state.fontSetting=v; localStorage.setItem(LS.font,v); applyFont(); renderSettings(); render(); }
+function osetMode(v){ state.apiMode=v; localStorage.setItem(LS.apiMode,v); renderSettings(); aiStatus(); }
+function osetSave(){
+  if(!oset.draft.trim()){ oset.err='Nhập key trước khi lưu'; oset.fb=null; renderSettings(); return; }
+  state.savedKey=oset.draft.trim(); localStorage.setItem(LS.userKey, state.savedKey);
+  oset.dirty=false; oset.fb='Đã lưu'; oset.err=null; renderSettings(); aiStatus();
+}
+function closeSettings(){ oset=null; closeOverlay(); }
+
+/* ================= demo ================= */
+function aiStatus(){
+  const el=$('#ai-status'); if(!el) return;
+  el.innerHTML = aiEnabled()
+    ? `AI: <b>thật</b> (Gemini — ${state.apiMode==='userKey'?'key của ngươi':'key mặc định dự án'}; model ưu tiên: ${stickyModel||GEMINI_MODELS[0]})`
+    : 'AI: <b>chưa có key</b> — nhập trong Cài đặt (Của tôi) hoặc điền DEFAULT_API_KEY đầu file. Không còn chế độ văn bản mẫu.';
+}
+const Demo = {
+  banner: pushBanner,
+  set(k,v){ state.demo[k]=v; },
+  escalation(v){ const s=state.slots.find(x=>x.id===1); if(s) s.escalation=v; render(); },
+  resetFont(){ state.fontSetting=null; localStorage.removeItem(LS.font); applyFont(); render(); },
+  resetAll(){
+    clearTimers(); callSeq++;
+    localStorage.removeItem(LS.font);
+    Object.assign(state,{ screen:'s1', fontSetting:null, activeSlot:null, banners:[], menuOpen:false, allowUnexpected:true,
+      slots:initialSlots(),
+      s2:{turns:[],tm:'awaiting',undo:false,freeText:'',chipOn:null,cards:OFFLINE_CARD_SETS[0],err:null,escalated:false},
+      demo:{slowAI:false,pendingFate:false} });
+    ['d-fate','d-esc'].forEach(id=>{const el=document.getElementById(id); if(el) el.checked=false;});
+    applyFont(); renderBanner(); render(); aiStatus();
+  },
+};
+$('#demo-toggle').addEventListener('click',e=>{ e.stopPropagation(); $('#demo-panel').classList.toggle('open'); aiStatus(); });
+$('#demo-panel').addEventListener('click',e=>e.stopPropagation());
+
+/* ================= root render ================= */
+function render(){
+  const root=$('#screen-root');
+  root.innerHTML = state.screen==='s1' ? renderS1()
+                 : state.screen==='s2' ? renderS2()
+                 : state.screen==='setup' ? renderSetup()
+                 : renderS4RO();
+}
+applyFont(); renderBanner(); render(); aiStatus();
+</script>
+</body>
+</html>
