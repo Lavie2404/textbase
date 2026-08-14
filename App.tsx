@@ -2496,7 +2496,7 @@ const StoryItem = React.memo(({ item, formatStoryText, playerName, onDelete, cha
     if (typeof item.content === 'string') {
         return (
             <Wrapper isSystemOrAction={false}>
-                <div className="whitespace-pre-line text-[#e8d3a1] leading-[1.8] scale-text-lg tracking-wide" style={{ fontFamily: "'Noto Serif Vietnamese', serif", textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
+                <div className="whitespace-pre-line text-[#e8d3a1] leading-[1.8] scale-text-lg tracking-wide" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
                     {formatStoryText(item.content)}
                 </div>
             </Wrapper>
@@ -2505,7 +2505,7 @@ const StoryItem = React.memo(({ item, formatStoryText, playerName, onDelete, cha
     if (Array.isArray(item.content)) {
         return (
             <Wrapper isSystemOrAction={false}>
-                <div className="text-[#e8d3a1] leading-[1.8] scale-text-lg tracking-wide" style={{ fontFamily: "'Noto Serif Vietnamese', serif", textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
+                <div className="text-[#e8d3a1] leading-[1.8] scale-text-lg tracking-wide" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
                     {formatStoryText(item.content)}
                 </div>
             </Wrapper>
