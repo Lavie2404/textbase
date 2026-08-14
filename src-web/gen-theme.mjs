@@ -1,4 +1,5 @@
-// Generates src-web/theme.css — a global override stylesheet that reskins
+// Generates public/theme.css (run: node src-web/gen-theme.mjs > public/theme.css)
+// — a global override stylesheet that reskins
 // App.tsx's dark-fantasy Tailwind palette to the paper/ink palette from
 // prototypes/ui-mockup/index.html, WITHOUT touching App.tsx's 36k lines.
 //
@@ -36,6 +37,7 @@ const COLOR_MAP = [
   ['#050805', '#F5EFE0', [245, 239, 224], 'nền tối nhất (gradient stop) -> giấy'],
   ['#0d160d', '#EDE5D0', [237, 229, 208], 'nền tối vừa (gradient via-stop) -> giấy đậm'],
   ['#080d08', '#EDE5D0', [237, 229, 208], 'nền hộp trạng thái (status box) -> giấy đậm'],
+  ['#4a6b4a', 'rgba(26,21,18,.38)', [26, 21, 18], 'viền track toggle (tắt) -> mực rất nhạt (ink-38)'],
 ];
 
 const SIDE_BORDER_PROPS = {
@@ -176,8 +178,15 @@ function emitTokenRules(tok, bgv, flatVal) {
 for (const [oldHex, flatVal, rgbTriplet, label] of COLOR_MAP) {
   const base = `[#${oldHex.slice(1)}]`;
   out += `/* ${oldHex} -> ${flatVal}  (${label}) */\n`;
-  // bare 100%-opacity token (no numeric suffix)
-  out += emitTokenRules(base, flatVal, flatVal);
+  // bare 100%-opacity token (no numeric suffix). For bg-, always use a
+  // SOLID color even when flatVal is itself an rgba(...) form (the
+  // ink-60/ink-38 muted-text entries) — a translucent ink-60 used as a flat
+  // background blends with whatever's underneath into a washed-out gray
+  // (found on a toggle-switch knob: bg-[#8ba888], no opacity suffix, meant
+  // to read as a solid ink dot, not a faded smudge). text-/border- keep the
+  // muted rgba form, which IS the intended look there.
+  const bgFlatVal = flatVal.startsWith('rgba') ? '#1A1512' : flatVal;
+  out += emitTokenRules(base, bgFlatVal, flatVal);
   // every opacity-suffixed token actually reachable in Tailwind's syntax
   for (const step of OPACITY_STEPS) {
     out += emitTokenRules(`${base}/${step}`, rgba(rgbTriplet, step), flatVal);

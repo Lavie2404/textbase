@@ -9,8 +9,12 @@
          Studio Canvas). The CDN build matches that runtime exactly without
          needing a PostCSS pipeline. -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Giấy-mực theme override — approved 2026-08-14, see src-web/gen-theme.mjs -->
-    <link rel="stylesheet" href="/src-web/theme.css" />
+    <!-- Giấy-mực theme override — approved 2026-08-14, see src-web/gen-theme.mjs.
+         Lives in public/ (served as-is): a .css file under src-web/ gets
+         wrapped in a JS/HMR module by Vite's dev server when linked via
+         <link>, so the browser received JS instead of CSS in dev (worked
+         fine in prod builds, broke only locally — found via verification). -->
+    <link rel="stylesheet" href="/theme.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
