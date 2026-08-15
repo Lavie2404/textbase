@@ -1,0 +1,630 @@
+{
+  "id": "e2bc94fe-9ca9-4098-8211-2a4e612d53de",
+  "currentTurn": 1,
+  "saveVersion": "2.8",
+  "timestamp": "2026-08-15T04:11:44.560Z",
+  "gameSettings": {
+    "storyTitle": "Đấu La Đại Lục",
+    "theme": "Huyền Huyễn, Trùng Sinh, Hành Động",
+    "setting": "Đấu La Đại Lục là một thế giới rộng lớn nơi mỗi người sinh ra đều sở hữu một Võ Hồn riêng biệt. Tại đây, sức mạnh được phân định bởi đẳng cấp Hồn Lực và sự quý hiếm của các Hồn Hoàn thu thập từ việc săn đuổi Hồn Thú.",
+    "playStyle": "RPG",
+    "uiTheme": "DARK_GOLD",
+    "textScale": 100,
+    "customThemeConfig": {
+      "bgMain": "#050505",
+      "bgPanel": "#1a1a24",
+      "accentMain": "#00f3ff",
+      "textMain": "#ffffff",
+      "textMuted": "#8888aa",
+      "bgImage": "",
+      "colorLocation": "#5eead4",
+      "colorItem": "#a5b4fc",
+      "colorUnknown": "#fef3c7",
+      "bubblePlayerFrom": "#162216",
+      "bubblePlayerTo": "#0a0f0a",
+      "bubbleNpcFrom": "#0a0f0a",
+      "bubbleNpcTo": "#101a10",
+      "bubblePlayerText": "#ffffff",
+      "bubbleNpcText": "#ffffff"
+    },
+    "bgmUrl": "",
+    "bgmVolume": 0.5,
+    "narratorPronoun": "Để AI quyết định",
+    "fanFicCharacterType": "Khởi Sinh",
+    "characterName": "Diệp Thần",
+    "characterPersonality": "Hài Hước, Thích Trêu Chọc",
+    "customCharacterPersonality": "",
+    "characterGender": "Nam",
+    "characterBackstory": "Diệp Thần xuyên không đến Đấu La đại lục trước khi Đường Hạo gặp A Ngân nên Đường Tam chưa được sinh ra. Hắn quyết tâm không để Đường Tam làm nhân vật chính của thế giới này nên ngăn không để Đường Tam mang 2 võ hồn đỉnh cấp Hạo Thiên Chùy và Lam Ngân Hoàng bằng cách không để Đường Hạo gặp được A Ngân. Hiện tại hắn mới 6 tuổi và sinh sống tại 1 ngôi làng gần Tinh Đấu sâm lâm. Sau khi thức tỉnh võ hồn và bị nhầm là phế võ hồn, hắn mang theo hành lý 1 mình tiến vào Tinh Đấu sâm lâm tìm kiếm A Ngân đang chuẩn bị hóa hình",
+    "playerAvatarUrl": null,
+    "playerAvatarStoredLocally": false,
+    "difficulty": "Thường",
+    "difficultydescription": "",
+    "allowNsfw": true,
+    "customNsfwText": "",
+    "isNsfwMode": false,
+    "enableParasiticSystem": false,
+    "initialWorldElements": [
+      {
+        "name": "Thôn Thánh Hồn",
+        "type": "LOCATION",
+        "description": "Một ngôi làng nhỏ thanh bình thuộc Thiên Đấu Đế Quốc, nơi bắt đầu cuộc hành trình của những huyền thoại.",
+        "id": "1bd7ff5f-64c7-4984-bb56-ed2ac8c85acb"
+      },
+      {
+        "name": "Tố Vân",
+        "type": "NPC",
+        "description": "Một Hồn Sư cấp cao của Vũ Hồn Điện, người chịu trách nhiệm thực hiện nghi lễ thức tỉnh Võ Hồn cho các thiếu niên trong làng.",
+        "id": "5ada55a2-c3d9-4031-97ac-b32d8518bdff"
+      },
+      {
+        "name": "Sơ Cấp Hồn Sư Học Viện Nặc Đinh",
+        "type": "LOCATION",
+        "description": "Học viện đầu tiên nơi các Hồn Sư tập sự bắt đầu học cách điều khiển Hồn Lực và tìm hiểu về các loại Hồn Thú.",
+        "id": "2538da9d-d126-4692-a428-11798c393181"
+      }
+    ],
+    "useCharacterGoal": false,
+    "characterGoal": "",
+    "allowCustomActionInput": true,
+    "currencyName": "Kim Hồn Tệ",
+    "isFanFictionMode": false,
+    "fanFicOriginalWork": "Đấu La Đại Lục",
+    "fanFicPlotSummary": "",
+    "fanFicCharacter": "Diệp Thần",
+    "fanFicEntryMethod": "Xuyên không",
+    "customFanFicEntryMethod": "",
+    "skipCrisis": true,
+    "initialMartialSouls": [
+      {
+        "id": "a85cfbd3-9b9e-4d36-b6d2-1cb3b0e99fbc",
+        "name": "Thiên diện linh khí",
+        "rarity": "Thần Thoại",
+        "description": "Chiếc mặt nạ có thể thay đổi theo 12 cung hoàng đạo hoặc 12 con giáp. Mỗi chiếc mang 1 sức mạnh khác nhau. Có thể tiến hóa"
+      }
+    ],
+    "initialTraits": [
+      {
+        "id": "6df03bfa-bfe3-4b6a-adbc-928081feabcc",
+        "name": "Mặt nạ Bạch Dương",
+        "description": "Mặt nạ Bạch Dương - 1 trong 12 mặt nạ hoàng đạo",
+        "category": "Vật phẩm",
+        "rarity": "Thần Thoại",
+        "stats": "Tấn Công: 100000000 | Sinh Lực: 100000000 | Phòng Thủ: 100000000 | Tốc Độ: 100000000 | Tỉ Lệ Chí Mạng: 100 | Sát Thương Chí Mạng: 100 | % Tấn Công Cơ Bản: 100",
+        "effects": "Hút máu bằng 100% tổng sát thương gây ra. Khi bắt đầu trận đấu, nhận hiệu ứng 'Hào Quang Chiến Thần' giúp tăng mạnh khả năng công kích. Khi lượng máu giảm xuống dưới 30%, nhận hiệu ứng 'Giáp Cừu Vàng' giúp giảm 30% sát thương nhận vào.",
+        "equipmentType": "Đầu",
+        "usageCondition": "Cấp độ: 1",
+        "skillCategoryChoice": "",
+        "cooldown": ""
+      },
+      {
+        "id": "6f52b78c-968a-42b6-9599-e978ad6f3b9b",
+        "name": "Mặt nạ Kim Ngưu",
+        "description": "Mặt nạ Kim Ngưu - 1 trong 12 mặt nạ hoàng đạo",
+        "category": "Vật phẩm",
+        "rarity": "Thần Thoại",
+        "stats": "Tấn Công: 100000000 | Sinh Lực: 100000000 | Phòng Thủ: 100000000 | Tốc Độ: 100000000 | Tỉ Lệ Chí Mạng: 100 | Sát Thương Chí Mạng: 100 | % Phòng Thủ Cơ Bản: 100",
+        "effects": "Hồi 1% HP tối đa mỗi khi bắt đầu lượt. Khi HP xuống dưới 50%, nhận trạng thái 'Bảo Hộ Kim Ngưu'. Khi gây sát thương, áp dụng trạng thái 'Choáng' lên mục tiêu trong 1 lượt.",
+        "equipmentType": "Phụ kiện",
+        "usageCondition": "Cấp độ: 1",
+        "skillCategoryChoice": "",
+        "cooldown": ""
+      },
+      {
+        "id": "4427f30b-5419-4d0d-9af2-eeb73537fc89",
+        "name": "Mặt nạ Thiên Bình",
+        "description": "Mặt nạ Thiên Bình - 1 trong 12 mặt nạ hoàng đạo",
+        "category": "Vật phẩm",
+        "rarity": "Thần Thoại",
+        "stats": "Tấn Công: 100000000 | Sinh Lực: 100000000 | Phòng Thủ: 100000000 | Tốc Độ: 100000000 | Tỉ Lệ Chí Mạng: 100 | Sát Thương Chí Mạng: 100 | % Tốc Độ Cơ Bản: 100 | Né Tránh: 100",
+        "effects": "Khi bắt đầu trận đấu, nhận hiệu ứng 'Cân Bằng Thần Thánh' tăng 25% Khuếch đại sát thương và 25% Giảm sát thương nhận vào. Khi bị tấn công lúc HP dưới 50%, hồi máu bằng 15% lượng máu đã mất.",
+        "equipmentType": "Phụ kiện",
+        "usageCondition": "Cấp độ: 1",
+        "skillCategoryChoice": "",
+        "cooldown": ""
+      }
+    ],
+    "defaultCombatBackground": "",
+    "defaultEnemyImages": {
+      "base": "",
+      "idle": "",
+      "attack_normal": ""
+    },
+    "characterRole": "Người xuyên không đến thế giới Đấu La thời điểm trước khi Đường Tam được sinh ra",
+    "characterAppearance": "Diệp Thần sở hữu mái tóc màu xanh lam nhạt phóng khoáng và đôi mắt phượng luôn lấp lánh ý cười tinh nghịch, khoác trên mình bộ y phục Hồn Sư gọn gàng toát lên khí chất tiêu sái, phong lưu đầy cuốn hút."
+  },
+  "knowledge": {
+    "time": {
+      "year": 0,
+      "month": 1,
+      "day": 1,
+      "hour": 9
+    },
+    "weather": "Trời trong",
+    "loreLocations": [
+      {
+        "id": "2538da9d-d126-4692-a428-11798c393181",
+        "name": "Sơ Cấp Hồn Sư Học Viện Nặc Đinh",
+        "description": "Học viện đầu tiên nơi các Hồn Sư tập sự bắt đầu học cách điều khiển Hồn Lực và tìm hiểu về các loại Hồn Thú.",
+        "type": "LOCATION"
+      }
+    ],
+    "loreNpcs": [],
+    "loreItems": [],
+    "locations": [
+      {
+        "id": "loc_dl_tl",
+        "description": "Đế quốc hùng mạnh với lãnh thổ rộng lớn trên Đấu La Đại Lục.",
+        "category": "Quốc Gia",
+        "tier": 2,
+        "Name": "Thiên Đấu Đế Quốc"
+      },
+      {
+        "id": "loc_tht",
+        "description": "Ngôi làng nhỏ yên bình nơi bắt đầu những truyền thuyết.",
+        "category": "Thành Trì",
+        "tier": 3,
+        "parentLocationId": "loc_dl_tl",
+        "Name": "Thôn Thánh Hồn"
+      }
+    ],
+    "items": [],
+    "worldItems": [],
+    "relationships": [],
+    "quests": [],
+    "trackedQuestId": null,
+    "realmProgressionList": [
+      "Hồn Sĩ",
+      "Hồn Sư",
+      "Đại Hồn Sư",
+      "Hồn Tôn",
+      "Hồn Tông",
+      "Hồn Vương",
+      "Hồn Đế",
+      "Hồn Thánh",
+      "Hồn Đấu La",
+      "Phong Hào Đấu La"
+    ],
+    "knownRecipes": [],
+    "eventHistory": [],
+    "unlearnedSkillScrolls": [],
+    "pendingItemsToCreate": [],
+    "pendingSkillCreations": [],
+    "characters": [
+      {
+        "id": "player",
+        "isPlayer": true,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "ap": 5,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 0,
+          "atk": 0,
+          "def": 0,
+          "spd": 0
+        },
+        "current_location_id": "loc_tht",
+        "baseHp": 2000,
+        "baseAtk": 200,
+        "baseDef": 100,
+        "baseSpd": 300,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 2000,
+        "maxhp": 2000,
+        "atk": 200,
+        "def": 100,
+        "spd": 300,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [
+          {
+            "Name": "Mặt nạ Bạch Dương",
+            "Type": "Đầu",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Bạch Dương - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:124567,hp:876543,def:432109,spd:156789,cr:100,cdmg:100,atk_percent:1250",
+            "Requirements": "level:1",
+            "Weight": 8.5,
+            "effects": [
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "LAST_DAMAGE_DEALT",
+                      "scale_number": 215,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_DEAL_DAMAGE"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_name": "Hào Quang Chiến Thần",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_COMBAT_START"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_name": "Giáp Cừu Vàng",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_HP_BELOW",
+                    "value": 0.3
+                  }
+                ]
+              }
+            ],
+            "technicaldescription": "Hút máu bằng 215% tổng sát thương gây ra. Khi bắt đầu trận đấu, nhận hiệu ứng 'Hào Quang Chiến Thần' giúp tăng mạnh khả năng công kích. Khi lượng máu giảm xuống dưới 30%, nhận hiệu ứng 'Giáp Cừu Vàng' giúp giảm 30% sát thương nhận vào.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "53eadedb-167b-4386-88dc-8e798b21facc",
+            "Value": 9999900000
+          },
+          {
+            "Name": "Mặt nạ Kim Ngưu",
+            "Type": "Phụ kiện",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Kim Ngưu - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:724582,max_hp:412953,def:893412,spd:234512,cr:100,cdmg:100,def_percent:1240",
+            "Requirements": "level:1",
+            "Weight": 0.8,
+            "effects": [
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "MAX_HP",
+                      "scale_number": 0.01,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_TURN_START"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_name": "Bảo Hộ Kim Ngưu",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_HP_BELOW",
+                    "value": 0.5
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "single_enemy"
+                  },
+                  "status_to_apply": {
+                    "status_name": "Choáng",
+                    "status_type": "debuff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_DEAL_DAMAGE"
+                  }
+                ]
+              }
+            ],
+            "technicaldescription": "Hồi 1% HP tối đa mỗi khi bắt đầu lượt. Khi HP xuống dưới 50%, nhận trạng thái 'Bảo Hộ Kim Ngưu'. Khi gây sát thương, áp dụng trạng thái 'Choáng' lên mục tiêu trong 1 lượt.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "1f03a912-f895-477b-9f89-2bc3ae7dde4e",
+            "Value": 10999890000
+          },
+          {
+            "Name": "Mặt nạ Thiên Bình",
+            "Type": "Phụ kiện",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Thiên Bình - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:125432,atk_percent:845,hp:456213,hp_percent:1205,def:312567,def_percent:982,spd:214567,spd_percent:678,cr:150,cdmg:180,evasion:120",
+            "Requirements": "level:1",
+            "Weight": 0.5,
+            "effects": [
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_id": "cbg_thantai",
+                    "status_name": "Cân Bằng Thần Thánh",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_COMBAT_START"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "MISSING_HP",
+                      "scale_number": 0.15,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_TAKE_DAMAGE",
+                    "value": 0.5
+                  }
+                ]
+              }
+            ],
+            "technicaldescription": "Khi bắt đầu trận đấu, kích hoạt hiệu ứng 'Cân Bằng Thần Thánh'. Khi chịu sát thương lúc HP dưới 50%, hồi máu bằng 15% lượng máu đã mất.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "d2f788bc-af01-4148-94a1-6cd39dd7e73c",
+            "Value": 10999890000
+          }
+        ],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "Name": "Diệp Thần",
+        "Gender": "Nam",
+        "Role": "Người xuyên không đến thế giới Đấu La thời điểm trước khi Đường Tam được sinh ra",
+        "Appearance": "Diệp Thần sở hữu mái tóc màu xanh lam nhạt phóng khoáng và đôi mắt phượng luôn lấp lánh ý cười tinh nghịch, khoác trên mình bộ y phục Hồn Sư gọn gàng toát lên khí chất tiêu sái, phong lưu đầy cuốn hút.",
+        "Backstory": "Diệp Thần xuyên không đến Đấu La đại lục trước khi Đường Hạo gặp A Ngân nên Đường Tam chưa được sinh ra. Hắn quyết tâm không để Đường Tam làm nhân vật chính của thế giới này nên ngăn không để Đường Tam mang 2 võ hồn đỉnh cấp Hạo Thiên Chùy và Lam Ngân Hoàng bằng cách không để Đường Hạo gặp được A Ngân. Hiện tại hắn mới 6 tuổi và sinh sống tại 1 ngôi làng gần Tinh Đấu sâm lâm. Sau khi thức tỉnh võ hồn và bị nhầm là phế võ hồn, hắn mang theo hành lý 1 mình tiến vào Tinh Đấu sâm lâm tìm kiếm A Ngân đang chuẩn bị hóa hình",
+        "MartialSouls": [
+          {
+            "name": "Thiên diện linh khí",
+            "rarity": "Thần Thoại",
+            "description": "Chiếc mặt nạ có thể thay đổi theo 12 cung hoàng đạo hoặc 12 con giáp. Mỗi chiếc mang 1 sức mạnh khác nhau. Có thể tiến hóa"
+          }
+        ],
+        "Personality": "Hài Hước, Thích Trêu Chọc",
+        "isAppraised": true,
+        "description": "",
+        "isCompanion": false,
+        "realm": "Hồn Sĩ",
+        "incomingHealing": 1,
+        "maxExp": 100
+      },
+      {
+        "id": "npc_to_van",
+        "isPlayer": false,
+        "loreId": "5ada55a2-c3d9-4031-97ac-b32d8518bdff",
+        "level": 20,
+        "exp": 0,
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 35,
+          "atk": 35,
+          "def": 35,
+          "spd": 35
+        },
+        "current_location_id": null,
+        "baseHp": 580,
+        "baseAtk": 58,
+        "baseDef": 29,
+        "baseSpd": 49,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 7580,
+        "maxhp": 7580,
+        "atk": 408,
+        "def": 379,
+        "spd": 399,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "description": "Hồn Sư của Vũ Hồn Điện, đang thực hiện nghi lễ thức tỉnh.",
+        "stance": "Trung lập",
+        "personality": "Nghiêm túc",
+        "Gender": "Nam",
+        "sizeCategory": "2",
+        "Name": "Tố Vân",
+        "realm": "Hồn Sư",
+        "incomingHealing": 1,
+        "maxExp": 16099
+      }
+    ],
+    "sharedCooldowns": {
+      "tactical": 0,
+      "potion": 0
+    },
+    "adventureSkillCooldowns": {},
+    "requestNpcDesign": null,
+    "progression": {
+      "recentMeaningfulActions": []
+    },
+    "loreQuests": [],
+    "systemAssistant": {
+      "isActive": false,
+      "dialogue": "",
+      "expression": "idle",
+      "images": {
+        "base": null,
+        "idle": null,
+        "smile": null,
+        "sad": null,
+        "angry": null,
+        "laugh": null
+      }
+    },
+    "pendingCreations": []
+  },
+  "storyHistory": [
+    {
+      "id": "51866e1f-5961-4607-a88d-1a66609c8fc4",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ánh nắng buổi sáng nhuộm vàng những con đường đất nhỏ của *Thôn Thánh Hồn*. Tiếng chim hót líu lo vang vọng quanh những ngôi nhà gỗ cũ kỹ. Tại trung tâm ngôi làng, một nhóm thiếu niên đang tụ tập đầy háo hức trước cửa một tòa nhà gỗ. Hôm nay là ngày trọng đại nhất trong cuộc đời của họ: lễ thức tỉnh Võ Hồn.\n*Diệp Thần* đứng lẫn trong đám đông, bộ dạng lười nhác, tay chống cằm, mắt lim dim vẻ không mấy mặn mà. Cậu liếc nhìn người đàn ông đang đứng trước mặt bọn trẻ, dáng vẻ chững chạc, khí thế tỏa ra nhè nhẹ. Đó là *Tố Vân*, Hồn Sư được cử đến từ *Vũ Hồn Điện*."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Ta là Tố Vân, Hồn Sư của Vũ Hồn Điện. Hôm nay ta sẽ phụ trách thức tỉnh Võ Hồn cho các cháu. Đừng sợ, lần lượt bước lên phía trước."
+        },
+        {
+          "type": "narrative",
+          "content": "Từng đứa trẻ lần lượt bước vào trong. Tiếng hô hoán, tiếng kêu ngạc nhiên từ bên trong vọng ra liên tục. *Diệp Thần* nhếch mép cười, giọng lí nhí:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Thức tỉnh cái gì chứ, không biết mình sẽ biến thành con gì đây? Hy vọng không phải là cái gì quá... kỳ dị."
+        },
+        {
+          "type": "narrative",
+          "content": "Cậu vươn vai một cái thật dài, cảm nhận luồng không khí trong lành của buổi sáng. Sự tĩnh lặng của ngôi làng dường như sắp bị phá vỡ bởi những khả năng vô tận ẩn giấu trong cơ thể mỗi đứa trẻ."
+        }
+      ]
+    }
+  ],
+  "choices": [
+    "Chủ động bước lên phía trước, trêu chọc *Tố Vân* một câu trước khi bắt đầu nghi lễ. {Tỷ lệ thành công: Cao. Hậu quả/Phần thưởng: Tăng sự chú ý từ NPC.}",
+    "Đứng đợi ở cuối hàng, quan sát kỹ cách thức *Tố Vân* vận dụng Hồn Lực để thức tỉnh cho người khác. {Tỷ lệ thành công: Trung bình. Hậu quả/Phần thưởng: Hiểu rõ hơn về cơ chế thức tỉnh.}",
+    "Trốn ra phía sau làng để tìm chỗ nghỉ ngơi, đợi mọi người thức tỉnh xong mới quay lại. {Tỷ lệ thành công: Dễ dàng. Hậu quả/Phần thưởng: Lỡ mất thời điểm quan trọng nhưng tâm trạng thoải mái.}",
+    "Tìm cách bắt chuyện với một đứa trẻ cùng làng đang run rẩy vì lo lắng để giải tỏa áp lực cho cậu ta. {Tỷ lệ thành công: Cao. Hậu quả/Phần thưởng: Tăng hảo cảm với bạn cùng trang lứa.}"
+  ],
+  "gameMode": "EXPLORATION",
+  "activeTrade": {
+    "trader": null,
+    "playerOffer": [],
+    "npcOffer": null,
+    "offerType": "sell",
+    "sellMultiplier": 0,
+    "itemSpecificSellBonuses": {},
+    "itemSpecificBuyBonuses": {}
+  },
+  "storySummaries": [],
+  "adventureTurnCount": 0
+}
