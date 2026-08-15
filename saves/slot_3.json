@@ -2,7 +2,7 @@
   "id": "e2bc94fe-9ca9-4098-8211-2a4e612d53de",
   "currentTurn": 1,
   "saveVersion": "2.8",
-  "timestamp": "2026-08-15T06:03:06.179Z",
+  "timestamp": "2026-08-15T06:13:16.783Z",
   "gameSettings": {
     "storyTitle": "Đấu La Đại Lục",
     "theme": "Huyền Huyễn, Trùng Sinh, Hành Động",
@@ -141,6 +141,10 @@
       "hour": 9
     },
     "weather": "Trời trong",
+    "narrativeCombatState": {
+      "isActive": false,
+      "combatants": []
+    },
     "loreLocations": [
       {
         "id": "2538da9d-d126-4692-a428-11798c393181",
@@ -215,16 +219,16 @@
         "baseDmgAmp": 100,
         "baseDmgRes": 100,
         "baseEvasion": 100,
-        "hp": 200002000,
-        "maxhp": 200002000,
-        "atk": 200000400,
-        "def": 200000200,
-        "spd": 200000300,
+        "hp": 300002000,
+        "maxhp": 300002000,
+        "atk": 300000400,
+        "def": 300000200,
+        "spd": 300000600,
         "cr": 100,
-        "cdmg": 457,
+        "cdmg": 607,
         "dmgAmp": 100,
         "dmgRes": 0,
-        "evasion": 0,
+        "evasion": 100,
         "learnedSkills": [],
         "equippedSkills": {
           "combat_basic_1": null,
@@ -441,65 +445,6 @@
             "id": "7e71e30e-2ca8-4234-8ab9-649d5cd9080f",
             "quantity": 1,
             "Value": 10999890000
-          },
-          {
-            "Name": "Mặt nạ Thiên Bình",
-            "Type": "Phụ kiện",
-            "Rarity": "Thần Thoại",
-            "description": "Mặt nạ Thiên Bình - 1 trong 12 mặt nạ hoàng đạo",
-            "Stats": "atk:124567,hp:289341,def:156782,spd:112345,cr:125,cdmg:138,spd_percent:678,evasion:892",
-            "Requirements": "level:1",
-            "Weight": 0.5,
-            "effects": [
-              {
-                "action": {
-                  "type": "apply_status",
-                  "target": {
-                    "type": "self"
-                  },
-                  "status_to_apply": {
-                    "status_id": "can_bang_than_thanh",
-                    "status_name": "Cân Bằng Thần Thánh",
-                    "status_type": "buff"
-                  }
-                },
-                "conditions": [
-                  {
-                    "trigger": "ON_COMBAT_START"
-                  }
-                ]
-              },
-              {
-                "action": {
-                  "type": "heal",
-                  "target": {
-                    "type": "self"
-                  },
-                  "power_components": [
-                    {
-                      "source_stat": "MISSING_HP",
-                      "scale_number": 0.15,
-                      "based_on": "caster"
-                    }
-                  ]
-                },
-                "conditions": [
-                  {
-                    "trigger": "ON_HP_BELOW",
-                    "value": 0.5
-                  },
-                  {
-                    "trigger": "ON_TAKE_DAMAGE"
-                  }
-                ]
-              }
-            ],
-            "technicaldescription": "Khi bắt đầu trận đấu, kích hoạt 'Cân Bằng Thần Thánh' giúp khuếch đại sát thương và giảm sát thương nhận vào. Khi bị tấn công và HP dưới 50%, hồi máu bằng 15% lượng máu đã mất.",
-            "Consumable": false,
-            "Equippable": true,
-            "id": "bf802c31-b594-4577-b4d9-a3b0a8b0622c",
-            "quantity": 1,
-            "Value": 10999890000
           }
         ],
         "pendingSkillsToLearn": [],
@@ -656,7 +601,65 @@
             "quantity": 1,
             "Value": 10999890000
           },
-          "Phụ kiện 2": null,
+          "Phụ kiện 2": {
+            "Name": "Mặt nạ Thiên Bình",
+            "Type": "Phụ kiện",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Thiên Bình - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:100000000,hp:100000000,def:100000000,spd:100000000,cr:100,cdmg:100,spd_percent:100,evasion:100",
+            "Requirements": "level:1",
+            "Weight": 0.8,
+            "effects": [
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_id": "divine_balance",
+                    "status_name": "Cân Bằng Thần Thánh",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_COMBAT_START"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "MISSING_HP",
+                      "scale_number": 2,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_TAKE_DAMAGE"
+                  },
+                  {
+                    "trigger": "ON_HP_BELOW",
+                    "value": 0.5
+                  }
+                ]
+              }
+            ],
+            "technicaldescription": "Khi bắt đầu trận đấu, nhận hiệu ứng 'Cân Bằng Thần Thánh' tăng 100% Khuếch đại sát thương và 100% Giảm sát thương nhận vào. Khi bị tấn công lúc HP dưới 50%, hồi máu bằng 200% lượng máu đã mất.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "eb57cf45-01c4-4e11-9563-f4a8b312adcc",
+            "quantity": 1,
+            "Value": 10999890000
+          },
           "Phương tiện": null,
           "Trữ vật": null,
           "Dị thường": null
@@ -679,7 +682,8 @@
         "isCompanion": false,
         "realm": "Hồn Sĩ",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "npc_to_van",
@@ -757,7 +761,8 @@
         "Name": "Tố Vân",
         "realm": "Hồn Sư",
         "incomingHealing": 1,
-        "maxExp": 16099
+        "maxExp": 16099,
+        "skills": []
       }
     ],
     "sharedCooldowns": {
