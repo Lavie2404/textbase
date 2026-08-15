@@ -1,0 +1,2695 @@
+{
+  "id": "e2bc94fe-9ca9-4098-8211-2a4e612d53de",
+  "currentTurn": 14,
+  "saveVersion": "2.8",
+  "timestamp": "2026-08-15T18:35:36.418Z",
+  "gameSettings": {
+    "storyTitle": "Đấu La Đại Lục",
+    "theme": "Huyền Huyễn, Trùng Sinh, Hành Động",
+    "setting": "Đấu La Đại Lục là một thế giới rộng lớn nơi mỗi người sinh ra đều sở hữu một Võ Hồn riêng biệt. Tại đây, sức mạnh được phân định bởi đẳng cấp Hồn Lực và sự quý hiếm của các Hồn Hoàn thu thập từ việc săn đuổi Hồn Thú.",
+    "playStyle": "STORY",
+    "uiTheme": "DARK_GOLD",
+    "textScale": 100,
+    "customThemeConfig": {
+      "bgMain": "#050505",
+      "bgPanel": "#1a1a24",
+      "accentMain": "#00f3ff",
+      "textMain": "#ffffff",
+      "textMuted": "#8888aa",
+      "bgImage": "",
+      "colorLocation": "#5eead4",
+      "colorItem": "#a5b4fc",
+      "colorUnknown": "#fef3c7",
+      "bubblePlayerFrom": "#162216",
+      "bubblePlayerTo": "#0a0f0a",
+      "bubbleNpcFrom": "#0a0f0a",
+      "bubbleNpcTo": "#101a10",
+      "bubblePlayerText": "#ffffff",
+      "bubbleNpcText": "#ffffff"
+    },
+    "bgmUrl": "",
+    "bgmVolume": 0.5,
+    "narratorPronoun": "Để AI quyết định",
+    "fanFicCharacterType": "Khởi Sinh",
+    "characterName": "Diệp Thần",
+    "characterPersonality": "Hài Hước, Thích Trêu Chọc",
+    "customCharacterPersonality": "",
+    "characterGender": "Nam",
+    "characterBackstory": "Diệp Thần xuyên không đến Đấu La đại lục trước khi Đường Hạo gặp A Ngân nên Đường Tam chưa được sinh ra. Hắn quyết tâm không để Đường Tam làm nhân vật chính của thế giới này nên ngăn không để Đường Tam mang 2 võ hồn đỉnh cấp Hạo Thiên Chùy và Lam Ngân Hoàng bằng cách không để Đường Hạo gặp được A Ngân. Hiện tại hắn mới 6 tuổi và sinh sống tại 1 ngôi làng gần Tinh Đấu sâm lâm. Sau khi thức tỉnh võ hồn và bị nhầm là phế võ hồn, hắn mang theo hành lý 1 mình tiến vào Tinh Đấu sâm lâm tìm kiếm A Ngân đang chuẩn bị hóa hình",
+    "playerAvatarUrl": null,
+    "playerAvatarStoredLocally": false,
+    "difficulty": "Thường",
+    "difficultydescription": "",
+    "allowNsfw": true,
+    "customNsfwText": "",
+    "isNsfwMode": false,
+    "enableParasiticSystem": false,
+    "initialWorldElements": [
+      {
+        "name": "Thôn Thánh Hồn",
+        "type": "LOCATION",
+        "description": "Một ngôi làng nhỏ thanh bình thuộc Thiên Đấu Đế Quốc, nơi bắt đầu cuộc hành trình của những huyền thoại.",
+        "id": "1bd7ff5f-64c7-4984-bb56-ed2ac8c85acb"
+      },
+      {
+        "name": "Tố Vân",
+        "type": "NPC",
+        "description": "Một Hồn Sư cấp cao của Vũ Hồn Điện, người chịu trách nhiệm thực hiện nghi lễ thức tỉnh Võ Hồn cho các thiếu niên trong làng.",
+        "id": "5ada55a2-c3d9-4031-97ac-b32d8518bdff"
+      },
+      {
+        "name": "Sơ Cấp Hồn Sư Học Viện Nặc Đinh",
+        "type": "LOCATION",
+        "description": "Học viện đầu tiên nơi các Hồn Sư tập sự bắt đầu học cách điều khiển Hồn Lực và tìm hiểu về các loại Hồn Thú.",
+        "id": "2538da9d-d126-4692-a428-11798c393181"
+      }
+    ],
+    "useCharacterGoal": false,
+    "characterGoal": "",
+    "allowCustomActionInput": true,
+    "currencyName": "Kim Hồn Tệ",
+    "isFanFictionMode": false,
+    "fanFicOriginalWork": "Đấu La Đại Lục",
+    "fanFicPlotSummary": "",
+    "fanFicCharacter": "Diệp Thần",
+    "fanFicEntryMethod": "Xuyên không",
+    "customFanFicEntryMethod": "",
+    "skipCrisis": true,
+    "initialMartialSouls": [
+      {
+        "id": "a85cfbd3-9b9e-4d36-b6d2-1cb3b0e99fbc",
+        "name": "Thiên diện linh khí",
+        "rarity": "Thần Thoại",
+        "description": "Chiếc mặt nạ có thể thay đổi theo 12 cung hoàng đạo hoặc 12 con giáp. Mỗi chiếc mang 1 sức mạnh khác nhau. Có thể tiến hóa"
+      }
+    ],
+    "initialTraits": [
+      {
+        "id": "6df03bfa-bfe3-4b6a-adbc-928081feabcc",
+        "name": "Mặt nạ Bạch Dương",
+        "description": "Mặt nạ Bạch Dương - 1 trong 12 mặt nạ hoàng đạo",
+        "category": "Vật phẩm",
+        "rarity": "Thần Thoại",
+        "stats": "Tấn Công: 100000000 | Sinh Lực: 100000000 | Phòng Thủ: 100000000 | Tốc Độ: 100000000 | Tỉ Lệ Chí Mạng: 100 | Sát Thương Chí Mạng: 100 | % Tấn Công Cơ Bản: 100",
+        "effects": "Hút máu bằng 100% tổng sát thương gây ra. Khi bắt đầu trận đấu, nhận hiệu ứng 'Hào Quang Chiến Thần' giúp tăng mạnh khả năng công kích. Khi lượng máu giảm xuống dưới 30%, nhận hiệu ứng 'Giáp Cừu Vàng' giúp giảm 30% sát thương nhận vào.",
+        "equipmentType": "Đầu",
+        "usageCondition": "Cấp độ: 1",
+        "skillCategoryChoice": "",
+        "cooldown": ""
+      },
+      {
+        "id": "6f52b78c-968a-42b6-9599-e978ad6f3b9b",
+        "name": "Mặt nạ Kim Ngưu",
+        "description": "Mặt nạ Kim Ngưu - 1 trong 12 mặt nạ hoàng đạo",
+        "category": "Vật phẩm",
+        "rarity": "Thần Thoại",
+        "stats": "Tấn Công: 100000000 | Sinh Lực: 100000000 | Phòng Thủ: 100000000 | Tốc Độ: 100000000 | Tỉ Lệ Chí Mạng: 100 | Sát Thương Chí Mạng: 100 | % Phòng Thủ Cơ Bản: 100",
+        "effects": "Hồi 1% HP tối đa mỗi khi bắt đầu lượt. Khi HP xuống dưới 50%, nhận trạng thái 'Bảo Hộ Kim Ngưu'. Khi gây sát thương, áp dụng trạng thái 'Choáng' lên mục tiêu trong 1 lượt.",
+        "equipmentType": "Phụ kiện",
+        "usageCondition": "Cấp độ: 1",
+        "skillCategoryChoice": "",
+        "cooldown": ""
+      },
+      {
+        "id": "4427f30b-5419-4d0d-9af2-eeb73537fc89",
+        "name": "Mặt nạ Thiên Bình",
+        "description": "Mặt nạ Thiên Bình - 1 trong 12 mặt nạ hoàng đạo",
+        "category": "Vật phẩm",
+        "rarity": "Thần Thoại",
+        "stats": "Tấn Công: 100000000 | Sinh Lực: 100000000 | Phòng Thủ: 100000000 | Tốc Độ: 100000000 | Tỉ Lệ Chí Mạng: 100 | Sát Thương Chí Mạng: 100 | % Tốc Độ Cơ Bản: 100 | Né Tránh: 100",
+        "effects": "Khi bắt đầu trận đấu, nhận hiệu ứng 'Cân Bằng Thần Thánh' tăng 25% Khuếch đại sát thương và 25% Giảm sát thương nhận vào. Khi bị tấn công lúc HP dưới 50%, hồi máu bằng 15% lượng máu đã mất.",
+        "equipmentType": "Phụ kiện",
+        "usageCondition": "Cấp độ: 1",
+        "skillCategoryChoice": "",
+        "cooldown": ""
+      }
+    ],
+    "defaultCombatBackground": "",
+    "defaultEnemyImages": {
+      "base": "",
+      "idle": "",
+      "attack_normal": ""
+    },
+    "characterRole": "Người xuyên không đến thế giới Đấu La thời điểm trước khi Đường Tam được sinh ra",
+    "characterAppearance": "Diệp Thần sở hữu mái tóc màu xanh lam nhạt phóng khoáng và đôi mắt phượng luôn lấp lánh ý cười tinh nghịch, khoác trên mình bộ y phục Hồn Sư gọn gàng toát lên khí chất tiêu sái, phong lưu đầy cuốn hút."
+  },
+  "knowledge": {
+    "time": {
+      "year": 0,
+      "month": 1,
+      "day": 4,
+      "hour": 12
+    },
+    "weather": "Nắng gắt",
+    "narrativeCombatState": {
+      "isActive": false,
+      "combatants": []
+    },
+    "loreLocations": [],
+    "loreNpcs": [],
+    "loreItems": [],
+    "locations": [
+      {
+        "id": "loc_dl_tl",
+        "description": "Đế quốc hùng mạnh với lãnh thổ rộng lớn trên Đấu La Đại Lục.",
+        "category": "Quốc Gia",
+        "tier": 2,
+        "Name": "Thiên Đấu Đế Quốc"
+      },
+      {
+        "id": "loc_tht",
+        "description": "Ngôi làng nhỏ yên bình nơi bắt đầu những truyền thuyết.",
+        "category": "Thành Trì",
+        "tier": 3,
+        "parentLocationId": "loc_dl_tl",
+        "Name": "Thôn Thánh Hồn"
+      },
+      {
+        "id": "a73eaf8a-a6fc-4604-b445-95f07900062f",
+        "Name": "Đường mòn đến Tinh Đấu sâm lâm",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      },
+      {
+        "id": "loc_lam_ngan_sam_lam",
+        "category": "Rừng Rậm",
+        "tier": 5,
+        "Name": "Lam Ngân Sâm Lâm"
+      },
+      {
+        "id": "2fdecf78-9784-43ce-b0d4-05481ba826d1",
+        "Name": "Thánh địa Lam Ngân Thảo",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      },
+      {
+        "id": "6a0b249d-a218-4f55-b3a7-03f9eb4bcd7e",
+        "Name": "Đường đến Thành phố Nặc Đinh",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      },
+      {
+        "id": "loc_tiem_trang_phuc_01",
+        "category": "Công trình",
+        "tier": 5,
+        "Name": "Tiệm Trang Phục Nặc Đinh"
+      },
+      {
+        "id": "loc_hoc_vien_nac_dinh_01",
+        "category": "Trường Học",
+        "tier": 2,
+        "loreId": "2538da9d-d126-4692-a428-11798c393181",
+        "Name": "Học viện Nặc Đinh"
+      }
+    ],
+    "items": [],
+    "worldItems": [],
+    "relationships": [
+      {
+        "id": "a7fd4212-7006-4b18-b593-ff330f79be09",
+        "NPC": "Tố Vân",
+        "Standing": "Kính nể",
+        "Reason": "Ngươi tôn trọng và xin thư giới thiệu",
+        "AffinityChange": "+10"
+      },
+      {
+        "id": "00d86068-071a-4e9a-b18c-6d15a2512b71",
+        "NPC": "A Ngân",
+        "Standing": "Thân thiết",
+        "Reason": "Nàng ngưỡng mộ khí thái bất biến của ngươi trước áp lực.",
+        "AffinityChange": "+8"
+      },
+      {
+        "id": "97f0ec72-429b-4768-8973-394c9d0f6f74",
+        "NPC": "Thiếu niên to con",
+        "Standing": "Kính sợ",
+        "Reason": "Kinh ngạc trước thực lực vượt trội của ngươi.",
+        "AffinityChange": "-25"
+      },
+      {
+        "id": "aac43db2-fc0d-48e1-afc1-43a266c588b1",
+        "NPC": "Giáo viên",
+        "Standing": "Trung lập",
+        "Reason": "Đánh giá cao khí chất lãnh đạo và bản lĩnh của ngươi.",
+        "AffinityChange": "+5"
+      }
+    ],
+    "quests": [],
+    "trackedQuestId": null,
+    "realmProgressionList": [
+      "Hồn Sĩ",
+      "Hồn Sư",
+      "Đại Hồn Sư",
+      "Hồn Tôn",
+      "Hồn Tông",
+      "Hồn Vương",
+      "Hồn Đế",
+      "Hồn Thánh",
+      "Hồn Đấu La",
+      "Phong Hào Đấu La"
+    ],
+    "knownRecipes": [],
+    "eventHistory": [],
+    "unlearnedSkillScrolls": [],
+    "pendingItemsToCreate": [],
+    "pendingSkillCreations": [],
+    "characters": [
+      {
+        "id": "player",
+        "isPlayer": true,
+        "loreId": null,
+        "level": 4,
+        "exp": 600,
+        "ap": 20,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 0,
+          "atk": 0,
+          "def": 0,
+          "spd": 0
+        },
+        "current_location_id": "6a0b249d-a218-4f55-b3a7-03f9eb4bcd7e",
+        "baseHp": 2000,
+        "baseAtk": 200,
+        "baseDef": 100,
+        "baseSpd": 300,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 300002000,
+        "maxhp": 300002000,
+        "atk": 300000400,
+        "def": 300000200,
+        "spd": 300000600,
+        "cr": 100,
+        "cdmg": 607,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 100,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [
+          {
+            "instanceId": "50d7eefb-6e99-4916-a8f7-c927a05f8e54",
+            "sourceSkillName": "Mặt nạ Bạch Dương",
+            "status_id": "hao_quang_chien_than",
+            "status_name": "Hào Quang Chiến Thần",
+            "status_type": "buff",
+            "duration": 1,
+            "current_stacks": 1,
+            "justApplied": true
+          },
+          {
+            "instanceId": "c584dce6-aefe-44ff-a645-fa2cd711b96f",
+            "sourceSkillName": "Mặt nạ Thiên Bình",
+            "status_id": "divine_balance",
+            "status_name": "Cân Bằng Thần Thánh",
+            "status_type": "buff",
+            "duration": 1,
+            "current_stacks": 1,
+            "justApplied": true
+          }
+        ],
+        "inventory": [
+          {
+            "Name": "Mặt nạ Bạch Dương",
+            "Type": "Đầu",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Bạch Dương - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:124567,hp:876543,def:432109,spd:156789,cr:100,cdmg:100,atk_percent:1250",
+            "Requirements": "level:1",
+            "Weight": 8.5,
+            "effects": [
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "LAST_DAMAGE_DEALT",
+                      "scale_number": 215,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_DEAL_DAMAGE"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_name": "Hào Quang Chiến Thần",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_COMBAT_START"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_name": "Giáp Cừu Vàng",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_HP_BELOW",
+                    "value": 0.3
+                  }
+                ]
+              }
+            ],
+            "technicaldescription": "Hút máu bằng 215% tổng sát thương gây ra. Khi bắt đầu trận đấu, nhận hiệu ứng 'Hào Quang Chiến Thần' giúp tăng mạnh khả năng công kích. Khi lượng máu giảm xuống dưới 30%, nhận hiệu ứng 'Giáp Cừu Vàng' giúp giảm 30% sát thương nhận vào.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "53eadedb-167b-4386-88dc-8e798b21facc",
+            "Value": 9999900000
+          },
+          {
+            "Name": "Mặt nạ Kim Ngưu",
+            "Type": "Phụ kiện",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Kim Ngưu - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:724582,max_hp:412953,def:893412,spd:234512,cr:100,cdmg:100,def_percent:1240",
+            "Requirements": "level:1",
+            "Weight": 0.8,
+            "effects": [
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "MAX_HP",
+                      "scale_number": 0.01,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_TURN_START"
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_name": "Bảo Hộ Kim Ngưu",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_HP_BELOW",
+                    "value": 0.5
+                  }
+                ]
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "single_enemy"
+                  },
+                  "status_to_apply": {
+                    "status_name": "Choáng",
+                    "status_type": "debuff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_DEAL_DAMAGE"
+                  }
+                ]
+              }
+            ],
+            "technicaldescription": "Hồi 1% HP tối đa mỗi khi bắt đầu lượt. Khi HP xuống dưới 50%, nhận trạng thái 'Bảo Hộ Kim Ngưu'. Khi gây sát thương, áp dụng trạng thái 'Choáng' lên mục tiêu trong 1 lượt.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "1f03a912-f895-477b-9f89-2bc3ae7dde4e",
+            "Value": 10999890000
+          }
+        ],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": {
+            "Name": "Mặt nạ Bạch Dương",
+            "Type": "Đầu",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Bạch Dương - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:100000000,hp:100000000,def:100000000,spd:100000000,cr:100,cdmg:100,atk_percent:100",
+            "Requirements": "level:1",
+            "Weight": 6.5,
+            "effects": [
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "LAST_DAMAGE_DEALT",
+                      "scale_number": 1,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_DEAL_DAMAGE"
+                  }
+                ],
+                "instanceId": "19e46ecc-5020-4361-86ff-083be7454506_effect_0"
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_id": "hao_quang_chien_than",
+                    "status_name": "Hào Quang Chiến Thần",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_COMBAT_START"
+                  }
+                ],
+                "instanceId": "19e46ecc-5020-4361-86ff-083be7454506_effect_1"
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_id": "giap_cuu_vang",
+                    "status_name": "Giáp Cừu Vàng",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_HP_BELOW",
+                    "value": 0.3
+                  }
+                ],
+                "instanceId": "19e46ecc-5020-4361-86ff-083be7454506_effect_2"
+              }
+            ],
+            "technicaldescription": "Hồi máu bằng 100% tổng sát thương gây ra. Khi bắt đầu trận đấu, nhận hiệu ứng 'Hào Quang Chiến Thần' giúp tăng mạnh khả năng công kích. Khi lượng máu giảm xuống dưới 30%, nhận hiệu ứng 'Giáp Cừu Vàng' giúp giảm 30% sát thương nhận vào.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "19e46ecc-5020-4361-86ff-083be7454506",
+            "quantity": 1,
+            "Value": 9999900000
+          },
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": {
+            "Name": "Mặt nạ Kim Ngưu",
+            "Type": "Phụ kiện",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Kim Ngưu - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:100000000,hp:100000000,def:100000000,spd:100000000,cr:100,cdmg:100,def_percent:100",
+            "Requirements": "level:1",
+            "Weight": 0.8,
+            "effects": [
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "MAX_HP",
+                      "scale_number": 0.01,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_TURN_START"
+                  }
+                ],
+                "instanceId": "dd87649b-8cab-444f-8e31-de057f8170db_effect_0"
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_id": "bao_ho_kim_nguu",
+                    "status_name": "Bảo Hộ Kim Ngưu",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_HP_BELOW",
+                    "value": 0.5
+                  }
+                ],
+                "instanceId": "dd87649b-8cab-444f-8e31-de057f8170db_effect_1"
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "single_enemy"
+                  },
+                  "status_to_apply": {
+                    "status_id": "stun",
+                    "status_name": "Choáng",
+                    "status_type": "debuff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_DEAL_DAMAGE"
+                  }
+                ],
+                "instanceId": "dd87649b-8cab-444f-8e31-de057f8170db_effect_2"
+              }
+            ],
+            "technicaldescription": "Mỗi khi bắt đầu lượt, hồi 1% HP tối đa cho bản thân. Khi HP dưới 50%, nhận trạng thái 'Bảo Hộ Kim Ngưu' giúp gia tăng khả năng chống chịu. Khi gây sát thương lên kẻ địch, áp dụng trạng thái 'Choáng' lên mục tiêu trong 1 lượt.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "dd87649b-8cab-444f-8e31-de057f8170db",
+            "quantity": 1,
+            "Value": 10999890000
+          },
+          "Phụ kiện 2": {
+            "Name": "Mặt nạ Thiên Bình",
+            "Type": "Phụ kiện",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Thiên Bình - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:100000000,hp:100000000,def:100000000,spd:100000000,cr:100,cdmg:100,spd_percent:100,evasion:100",
+            "Requirements": "level:1",
+            "Weight": 0.8,
+            "effects": [
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_id": "divine_balance",
+                    "status_name": "Cân Bằng Thần Thánh",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_COMBAT_START"
+                  }
+                ],
+                "instanceId": "eb57cf45-01c4-4e11-9563-f4a8b312adcc_effect_0"
+              },
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "MISSING_HP",
+                      "scale_number": 2,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_TAKE_DAMAGE"
+                  },
+                  {
+                    "trigger": "ON_HP_BELOW",
+                    "value": 0.5
+                  }
+                ],
+                "instanceId": "eb57cf45-01c4-4e11-9563-f4a8b312adcc_effect_1"
+              }
+            ],
+            "technicaldescription": "Khi bắt đầu trận đấu, nhận hiệu ứng 'Cân Bằng Thần Thánh' tăng 100% Khuếch đại sát thương và 100% Giảm sát thương nhận vào. Khi bị tấn công lúc HP dưới 50%, hồi máu bằng 200% lượng máu đã mất.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "eb57cf45-01c4-4e11-9563-f4a8b312adcc",
+            "quantity": 1,
+            "Value": 10999890000
+          },
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "Name": "Diệp Thần",
+        "Gender": "Nam",
+        "Role": "Người xuyên không đến thế giới Đấu La thời điểm trước khi Đường Tam được sinh ra",
+        "Appearance": "Diệp Thần sở hữu mái tóc màu xanh lam nhạt phóng khoáng và đôi mắt phượng luôn lấp lánh ý cười tinh nghịch, khoác trên mình bộ y phục Hồn Sư gọn gàng toát lên khí chất tiêu sái, phong lưu đầy cuốn hút.",
+        "Backstory": "Diệp Thần xuyên không đến Đấu La đại lục trước khi Đường Hạo gặp A Ngân nên Đường Tam chưa được sinh ra. Hắn quyết tâm không để Đường Tam làm nhân vật chính của thế giới này nên ngăn không để Đường Tam mang 2 võ hồn đỉnh cấp Hạo Thiên Chùy và Lam Ngân Hoàng bằng cách không để Đường Hạo gặp được A Ngân. Hiện tại hắn mới 6 tuổi và sinh sống tại 1 ngôi làng gần Tinh Đấu sâm lâm. Sau khi thức tỉnh võ hồn và bị nhầm là phế võ hồn, hắn mang theo hành lý 1 mình tiến vào Tinh Đấu sâm lâm tìm kiếm A Ngân đang chuẩn bị hóa hình",
+        "MartialSouls": [
+          {
+            "name": "Thiên diện linh khí",
+            "rarity": "Thần Thoại",
+            "description": "Chiếc mặt nạ có thể thay đổi theo 12 cung hoàng đạo hoặc 12 con giáp. Mỗi chiếc mang 1 sức mạnh khác nhau. Có thể tiến hóa"
+          }
+        ],
+        "Personality": "Hài Hước, Thích Trêu Chọc",
+        "isAppraised": true,
+        "description": "",
+        "isCompanion": false,
+        "realm": "Hồn Sĩ",
+        "incomingHealing": 1,
+        "maxExp": 800,
+        "skills": [],
+        "triggeredEffectUses": {},
+        "shield": 0
+      },
+      {
+        "id": "npc_to_van",
+        "isPlayer": false,
+        "loreId": "5ada55a2-c3d9-4031-97ac-b32d8518bdff",
+        "level": 26,
+        "exp": 0,
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 93,
+          "atk": 91,
+          "def": 91,
+          "spd": 91
+        },
+        "current_location_id": null,
+        "baseHp": 700,
+        "baseAtk": 70,
+        "baseDef": 35,
+        "baseSpd": 55,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 19300,
+        "maxhp": 19300,
+        "atk": 980,
+        "def": 945,
+        "spd": 965,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 10,
+        "description": "",
+        "stance": "Trung lập",
+        "personality": "Nghiêm túc",
+        "Gender": "Nam",
+        "sizeCategory": "2",
+        "Name": "Tố Vân",
+        "realm": "Đại Hồn Sư",
+        "incomingHealing": 1,
+        "maxExp": 42954,
+        "skills": [],
+        "Role": "Chấp sự thuộc Vũ Hồn Điện, chuyên trách thức tỉnh Võ Hồn cho các thiếu niên.",
+        "Appearance": "Vóc dáng gầy gò, mặc đồng phục màu trắng bạc với huy hiệu của Vũ Hồn Điện trên ngực. Khuôn mặt thanh tú nhưng đôi mắt sắc lạnh, luôn toát lên vẻ kiêu ngạo của một kẻ nắm giữ quyền năng thức tỉnh.",
+        "Backstory": "Là một Hồn Sư cấp thấp không có tiềm năng thăng tiến cao trong hàng ngũ Vũ Hồn Điện, hắn dành cả đời đi khắp các thôn làng vùng xa để thực hiện nhiệm vụ thức tỉnh Võ Hồn, hy vọng tìm thấy nhân tài để được ban thưởng.",
+        "Personality": "Thực dụng, kiêu ngạo, có chút hách dịch nhưng biết nhìn thời thế.",
+        "Stance": "Đánh giá nhân vật chính dựa trên tư chất Võ Hồn, thái độ công vụ, không quá thân thiện nhưng cũng không thù địch.",
+        "isAppraised": true
+      },
+      {
+        "id": "npc_a_ngan_01",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 10,
+        "exp": 380,
+        "ap": -140,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 49,
+          "atk": 47,
+          "def": 47,
+          "spd": 47
+        },
+        "current_location_id": "2fdecf78-9784-43ce-b0d4-05481ba826d1",
+        "baseHp": 380,
+        "baseAtk": 38,
+        "baseDef": 19,
+        "baseSpd": 39,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 299521,
+        "maxhp": 299521,
+        "atk": 125075,
+        "def": 707266,
+        "spd": 1325696,
+        "cr": 100,
+        "cdmg": 307,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 100,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [
+          {
+            "instanceId": "bbf22e91-9d93-4bff-8609-7e872b044c9f",
+            "sourceSkillName": "Mặt nạ Thiên Bình",
+            "status_id": "can_bang_than_thanh",
+            "status_name": "Cân Bằng Thần Thánh",
+            "status_type": "buff",
+            "duration": 1,
+            "current_stacks": 1,
+            "justApplied": true
+          }
+        ],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": {
+            "Name": "Mặt nạ Thiên Bình",
+            "Type": "Phụ kiện",
+            "Rarity": "Thần Thoại",
+            "description": "Mặt nạ Thiên Bình - 1 trong 12 mặt nạ hoàng đạo",
+            "Stats": "atk:124567,hp:289341,def:156782,spd:112345,cr:100,cdmg:100,spd_amp:100,evasion:100",
+            "Requirements": "level:1",
+            "Weight": 0.5,
+            "effects": [
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "self"
+                  },
+                  "status_to_apply": {
+                    "status_id": "can_bang_than_thanh",
+                    "status_name": "Cân Bằng Thần Thánh",
+                    "status_type": "buff"
+                  }
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_COMBAT_START"
+                  }
+                ],
+                "instanceId": "7e71e30e-2ca8-4234-8ab9-649d5cd9080f_effect_0"
+              },
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "self"
+                  },
+                  "power_components": [
+                    {
+                      "source_stat": "MISSING_HP",
+                      "scale_number": 0.5,
+                      "based_on": "caster"
+                    }
+                  ]
+                },
+                "conditions": [
+                  {
+                    "trigger": "ON_HP_BELOW",
+                    "value": 0.5
+                  }
+                ],
+                "instanceId": "7e71e30e-2ca8-4234-8ab9-649d5cd9080f_effect_1"
+              }
+            ],
+            "technicaldescription": "Khi bắt đầu trận đấu, kích hoạt 'Cân Bằng Thần Thánh' tăng 100% Khuếch đại sát thương và 100% Giảm sát thương nhận vào. Khi HP dưới 50% và bị tấn công, hồi máu bằng 50% lượng máu đã mất.",
+            "Consumable": false,
+            "Equippable": true,
+            "id": "7e71e30e-2ca8-4234-8ab9-649d5cd9080f",
+            "quantity": 1,
+            "Value": 10999890000
+          },
+          "Phụ kiện 2": {
+            "Name": "Khăn choàng lụa xanh",
+            "Type": "Phụ kiện",
+            "Rarity": "Thường",
+            "description": "Một chiếc khăn choàng lụa đã cũ nhưng vẫn rất mềm mại, dùng để che giấu nhan sắc.",
+            "Stats": "def:549995,spd:549994",
+            "Requirements": "level:1",
+            "Weight": 0.3,
+            "effects": null,
+            "technicaldescription": null,
+            "Consumable": false,
+            "Equippable": true,
+            "id": "3e791623-278a-445f-9c5e-9464e020f3aa",
+            "quantity": 1,
+            "Value": 10999890
+          },
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": true,
+        "affinity": 61,
+        "description": "Thiếu nữ tóc xanh lam, đôi mắt tinh khôi, là Lam Ngân Hoàng hóa hình.",
+        "stance": "Thân thiện",
+        "Name": "A Ngân",
+        "realm": "Hồn Sĩ",
+        "incomingHealing": 1,
+        "maxExp": 3162,
+        "Role": "Lam Ngân Hoàng (Thập Vạn Niên Hồn Thú hóa hình)",
+        "Appearance": "Mái tóc dài màu xanh lam mềm mại như sóng nước, đôi mắt xanh biếc lấp lánh như ngọc bích. Cô mặc một bộ váy lụa màu xanh thanh khiết, làn da trắng như tuyết, toát lên khí chất dịu dàng, thanh cao và tràn đầy sức sống của thiên nhiên.",
+        "Backstory": "Vốn là hoàng đế của loài cỏ Lam Ngân, sau mười vạn năm tu luyện, cô quyết định hóa thân thành người để thấu hiểu nhân loại. Hiện tại cô đang che giấu thân phận thật sự để phiêu bạt khắp đại lục, mang theo trái tim thuần khiết và sự tò mò về thế giới bên ngoài Tinh Đấu Đại Sâm Lâm.",
+        "Personality": "Ôn nhu, lương thiện, đầy lòng trắc ẩn và luôn tò mò về mọi thứ xung quanh. Cô sở hữu một sự điềm tĩnh và thông tuệ vượt xa vẻ ngoài thiếu nữ của mình.",
+        "Stance": "Thân thiện và hiếu kỳ, bị thu hút bởi những người có linh hồn thuần khiết.",
+        "isAppraised": true,
+        "personality": "Dịu dàng, tò mò",
+        "Gender": "Nữ",
+        "inParty": true,
+        "skills": [],
+        "triggeredEffectUses": {},
+        "shield": 0
+      },
+      {
+        "id": "9c4a1065-5965-400f-9212-303ea8360912",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 2,
+          "atk": 1,
+          "def": 1,
+          "spd": 1
+        },
+        "current_location_id": "6a0b249d-a218-4f55-b3a7-03f9eb4bcd7e",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 600,
+        "maxhp": 600,
+        "atk": 30,
+        "def": 20,
+        "spd": 40,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Lý thẩm",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Hồn Sĩ",
+        "incomingHealing": 1,
+        "maxExp": 100
+      },
+      {
+        "id": "1ef72119-50ea-49b5-b231-bebe7084072a",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 2,
+          "atk": 1,
+          "def": 1,
+          "spd": 1
+        },
+        "current_location_id": "6a0b249d-a218-4f55-b3a7-03f9eb4bcd7e",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 600,
+        "maxhp": 600,
+        "atk": 30,
+        "def": 20,
+        "spd": 40,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Người lính gác",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Hồn Sĩ",
+        "incomingHealing": 1,
+        "maxExp": 100
+      },
+      {
+        "id": "edb900c7-672b-49f4-88c3-efcd482fad91",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 2,
+          "atk": 1,
+          "def": 1,
+          "spd": 1
+        },
+        "current_location_id": "6a0b249d-a218-4f55-b3a7-03f9eb4bcd7e",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 600,
+        "maxhp": 600,
+        "atk": 30,
+        "def": 20,
+        "spd": 40,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 5,
+        "Name": "Giáo viên",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Hồn Sĩ",
+        "incomingHealing": 1,
+        "maxExp": 100
+      },
+      {
+        "id": "1008d067-1a2c-49af-bc7e-c8e95d287710",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 6,
+        "exp": 0,
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 11,
+          "atk": 8,
+          "def": 8,
+          "spd": 8
+        },
+        "current_location_id": "6a0b249d-a218-4f55-b3a7-03f9eb4bcd7e",
+        "baseHp": 300,
+        "baseAtk": 30,
+        "baseDef": 15,
+        "baseSpd": 35,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 2500,
+        "maxhp": 2500,
+        "atk": 110,
+        "def": 95,
+        "spd": 115,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [
+          {
+            "id": "c2ff9de7-4d5b-4a6a-b166-f44f1fe1cfbb",
+            "name": "Bất Tỉnh",
+            "type": "injury",
+            "description": "Hôn mê sâu, không thể hành động cho đến khi được cứu chữa bằng phương pháp đặc biệt.",
+            "special_flags": [
+              "PREVENTS_ACTION"
+            ],
+            "status_id": "BAT_TINH",
+            "expiresAt": {
+              "year": 0,
+              "month": 1,
+              "day": 4,
+              "hour": 13
+            }
+          }
+        ],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": -25,
+        "Name": "Thiếu niên to con",
+        "description": "",
+        "Stance": "Coi nhân vật chính là một đối thủ cạnh tranh mới nổi, luôn muốn thử thách để phân cao thấp và khẳng định vị thế của mình tại học viện.",
+        "realm": "Hồn Sĩ",
+        "incomingHealing": 1,
+        "maxExp": 1469,
+        "Role": "Học viên năm nhất tại Học viện Hồn Sư Sơ Cấp, người thừa kế của một lò rèn địa phương.",
+        "Appearance": "Thân hình cao lớn vượt xa bạn đồng lứa, bắp tay cuồn cuộn với làn da ngăm đen khỏe khoắn. Gương mặt chữ điền cương nghị, mái tóc ngắn dựng đứng đầy sức sống. Anh ta thường mặc bộ đồ bảo hộ bằng da thú thô kệch, toát ra khí chất của một thợ rèn trẻ tuổi đầy lực lượng.",
+        "Backstory": "Sinh ra trong một gia đình thợ rèn lâu đời, từ nhỏ đã quen với việc rèn luyện thể chất nặng nhọc. Anh ta sở hữu Võ Hồn là 'Cương Thiết Chùy', một loại vũ khí mạnh về sức mạnh thuần túy. Với mong muốn trở thành một Cường Công Hệ Hồn Sư lừng lẫy, anh ta gia nhập học viện và luôn tìm kiếm đối thủ để rèn luyện kỹ năng chiến đấu.",
+        "Personality": "Bộc trực, nóng nảy và tôn thờ sức mạnh. Anh ta không thích những kẻ dùng mưu mẹo hay nói lời hoa mỹ, luôn tin rằng nắm đấm là cách tốt nhất để giải quyết vấn đề, nhưng bản chất lại là người trượng nghĩa và coi trọng công bằng.",
+        "isAppraised": true
+      },
+      {
+        "id": "cf5c0fb4-3c95-48bd-801f-74d66c87fa37",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 2,
+          "atk": 1,
+          "def": 1,
+          "spd": 1
+        },
+        "current_location_id": "6a0b249d-a218-4f55-b3a7-03f9eb4bcd7e",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 600,
+        "maxhp": 600,
+        "atk": 30,
+        "def": 20,
+        "spd": 40,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Vương Long",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Hồn Sĩ",
+        "incomingHealing": 1,
+        "maxExp": 100
+      }
+    ],
+    "sharedCooldowns": {
+      "tactical": 0,
+      "potion": 0
+    },
+    "adventureSkillCooldowns": {},
+    "requestNpcDesign": null,
+    "progression": {
+      "recentMeaningfulActions": [
+        {
+          "reason": "Hoàn thành thức tỉnh Võ Hồn Dao Bếp và đạt Hồn lực cấp 2, xác định con đường ẩn cư lười biếng",
+          "turn": 2
+        },
+        {
+          "reason": "Thức tỉnh Võ Hồn thành công và che giấu thực lực trước Vũ Hồn Điện, bắt đầu hành trình đến Tinh Đấu sâm lâm",
+          "turn": 3
+        },
+        {
+          "reason": "Hoàn thành bước ngoặt gặp gỡ và kết giao với A Ngân thông qua kỹ năng nhập vai xuất sắc và mưu mẹo.",
+          "turn": 6
+        },
+        {
+          "reason": "Nghỉ ngơi tại Thánh địa, hấp thụ linh khí tự nhiên và thắt chặt nhân duyên với A Ngân qua tâm tình.",
+          "turn": 7
+        },
+        {
+          "reason": "Thuyết phục thành công A Ngân rời khỏi Thánh địa để cùng gia nhập Học viện Nặc Đinh, tạo bước ngoặt quan trọng trong quan hệ và cốt truyện.",
+          "turn": 8
+        },
+        {
+          "reason": "Thể hiện sự thấu hiểu và chấp nhận sâu sắc với đồng hành, xây dựng lòng tin tuyệt đối và tiến vào thành phố Nặc Đinh an toàn.",
+          "turn": 9
+        },
+        {
+          "reason": "Nhập vai bảo vệ đồng hành xuất sắc, xử lý tình huống giao tiếp khéo léo và chuẩn bị tâm thế đối mặt với xung đột tại môi trường mới.",
+          "turn": 10
+        },
+        {
+          "reason": "Giành chiến thắng áp đảo trong trận tỷ thí giao hữu",
+          "turn": 13
+        }
+      ]
+    },
+    "loreQuests": [],
+    "systemAssistant": {
+      "isActive": false,
+      "dialogue": "",
+      "expression": "idle",
+      "images": {
+        "base": null,
+        "idle": null,
+        "smile": null,
+        "sad": null,
+        "angry": null,
+        "laugh": null
+      }
+    },
+    "pendingCreations": [],
+    "stateHistory": [
+      {
+        "time": {
+          "year": 0,
+          "month": 1,
+          "day": 4,
+          "hour": 12
+        },
+        "location_id": "6a0b249d-a218-4f55-b3a7-03f9eb4bcd7e",
+        "weather": "Nắng gắt",
+        "characters": [
+          {
+            "id": "player",
+            "Name": "Diệp Thần",
+            "level": 4,
+            "exp": 435,
+            "hp": 300002000,
+            "maxhp": 300002000,
+            "currency": 0,
+            "inventory": [
+              {
+                "Name": "Mặt nạ Bạch Dương",
+                "quantity": 1
+              },
+              {
+                "Name": "Mặt nạ Kim Ngưu",
+                "quantity": 1
+              }
+            ],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_to_van",
+            "Name": "Tố Vân",
+            "level": 26,
+            "exp": 0,
+            "hp": 19300,
+            "maxhp": 19300,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_a_ngan_01",
+            "Name": "A Ngân",
+            "level": 10,
+            "exp": 0,
+            "hp": 299521,
+            "maxhp": 299521,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "9c4a1065-5965-400f-9212-303ea8360912",
+            "Name": "Lý thẩm",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "1ef72119-50ea-49b5-b231-bebe7084072a",
+            "Name": "Người lính gác",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "edb900c7-672b-49f4-88c3-efcd482fad91",
+            "Name": "Giáo viên",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "1008d067-1a2c-49af-bc7e-c8e95d287710",
+            "Name": "Thiếu niên to con",
+            "level": 6,
+            "exp": 0,
+            "hp": 2500,
+            "maxhp": 2500,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "cf5c0fb4-3c95-48bd-801f-74d66c87fa37",
+            "Name": "Vương Long",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          }
+        ],
+        "quests": []
+      },
+      {
+        "time": {
+          "year": 0,
+          "month": 1,
+          "day": 4,
+          "hour": 12
+        },
+        "location_id": "6a0b249d-a218-4f55-b3a7-03f9eb4bcd7e",
+        "weather": "Nắng gắt",
+        "characters": [
+          {
+            "id": "player",
+            "Name": "Diệp Thần",
+            "level": 4,
+            "exp": 600,
+            "hp": 300002000,
+            "maxhp": 300002000,
+            "currency": 0,
+            "inventory": [
+              {
+                "Name": "Mặt nạ Bạch Dương",
+                "quantity": 1
+              },
+              {
+                "Name": "Mặt nạ Kim Ngưu",
+                "quantity": 1
+              }
+            ],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_to_van",
+            "Name": "Tố Vân",
+            "level": 26,
+            "exp": 0,
+            "hp": 19300,
+            "maxhp": 19300,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_a_ngan_01",
+            "Name": "A Ngân",
+            "level": 10,
+            "exp": 380,
+            "hp": 299521,
+            "maxhp": 299521,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "9c4a1065-5965-400f-9212-303ea8360912",
+            "Name": "Lý thẩm",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "1ef72119-50ea-49b5-b231-bebe7084072a",
+            "Name": "Người lính gác",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "edb900c7-672b-49f4-88c3-efcd482fad91",
+            "Name": "Giáo viên",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "1008d067-1a2c-49af-bc7e-c8e95d287710",
+            "Name": "Thiếu niên to con",
+            "level": 6,
+            "exp": 0,
+            "hp": 2500,
+            "maxhp": 2500,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": [
+              {
+                "id": "c2ff9de7-4d5b-4a6a-b166-f44f1fe1cfbb",
+                "name": "Bất Tỉnh",
+                "type": "injury",
+                "description": "Hôn mê sâu, không thể hành động cho đến khi được cứu chữa bằng phương pháp đặc biệt.",
+                "special_flags": [
+                  "PREVENTS_ACTION"
+                ],
+                "status_id": "BAT_TINH",
+                "expiresAt": {
+                  "year": 0,
+                  "month": 1,
+                  "day": 4,
+                  "hour": 13
+                }
+              }
+            ]
+          },
+          {
+            "id": "cf5c0fb4-3c95-48bd-801f-74d66c87fa37",
+            "Name": "Vương Long",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          }
+        ],
+        "quests": []
+      }
+    ]
+  },
+  "storyHistory": [
+    {
+      "id": "51866e1f-5961-4607-a88d-1a66609c8fc4",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ánh nắng buổi sáng nhuộm vàng những con đường đất nhỏ của *Thôn Thánh Hồn*. Tiếng chim hót líu lo vang vọng quanh những ngôi nhà gỗ cũ kỹ. Tại trung tâm ngôi làng, một nhóm thiếu niên đang tụ tập đầy háo hức trước cửa một tòa nhà gỗ. Hôm nay là ngày trọng đại nhất trong cuộc đời của họ: lễ thức tỉnh Võ Hồn.\n*Diệp Thần* đứng lẫn trong đám đông, bộ dạng lười nhác, tay chống cằm, mắt lim dim vẻ không mấy mặn mà. Cậu liếc nhìn người đàn ông đang đứng trước mặt bọn trẻ, dáng vẻ chững chạc, khí thế tỏa ra nhè nhẹ. Đó là *Tố Vân*, Hồn Sư được cử đến từ *Vũ Hồn Điện*."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Ta là Tố Vân, Hồn Sư của Vũ Hồn Điện. Hôm nay ta sẽ phụ trách thức tỉnh Võ Hồn cho các cháu. Đừng sợ, lần lượt bước lên phía trước."
+        },
+        {
+          "type": "narrative",
+          "content": "Từng đứa trẻ lần lượt bước vào trong. Tiếng hô hoán, tiếng kêu ngạc nhiên từ bên trong vọng ra liên tục. *Diệp Thần* nhếch mép cười, giọng lí nhí:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Thức tỉnh cái gì chứ, không biết mình sẽ biến thành con gì đây? Hy vọng không phải là cái gì quá... kỳ dị."
+        },
+        {
+          "type": "narrative",
+          "content": "Cậu vươn vai một cái thật dài, cảm nhận luồng không khí trong lành của buổi sáng. Sự tĩnh lặng của ngôi làng dường như sắp bị phá vỡ bởi những khả năng vô tận ẩn giấu trong cơ thể mỗi đứa trẻ."
+        }
+      ]
+    },
+    {
+      "id": "58db0a7a-32d4-4746-82f9-91070920e6b9",
+      "type": "user_custom_action",
+      "content": "Ngươi lười biếng ngồi trong góc cuối hàng đợi đến lượt"
+    },
+    {
+      "id": "bd062339-a209-426d-8c68-149fe7768ac5",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ngươi lười biếng ngồi trong góc cuối hàng đợi đến lượt, đôi mắt lim dim theo dõi bóng lưng của những đứa trẻ phía trước đang hồi hộp tiến vào bục thức tỉnh. *Tố Vân* vẫn đều đặn điều khiển luồng ánh sáng vàng từ sáu viên đá đen, không hề để ý đến tư thế thiếu trang nghiêm của ngươi ở phía xa.\nKhông gian bên trong gian nhà gỗ lớn của *Thôn Thánh Hồn* vốn là nơi hội họp của cả làng, nay được dọn dẹp sạch sẽ để làm nơi cử hành nghi lễ thức tỉnh Võ Hồn trang nghiêm. Những tia nắng ban mai của buổi chín giờ sáng rọi qua những kẽ hở của mái lá mục nát, rạch những vệt sáng vàng nhạt xiên chéo qua màn không khí âm u. Trong những luồng sáng ấy, hàng vạn hạt bụi nhỏ li ti đang không ngừng nhảy múa, xoay vần như những tinh cầu thu nhỏ. Bầu không khí bên trong vô cùng ngột ngạt, là sự pha trộn giữa mùi gỗ thông ẩm mốc lâu ngày, mùi mồ hôi rịn ra vì lo lắng của đám trẻ nhỏ, và mùi cỏ dại ngai ngái bám trên những bộ quần áo thô sần, chắp vá của những đứa con nhà nông.\nNgươi tựa tấm lưng nhỏ bé của mình vào một cây cột gỗ loang lổ vết mối mọt ở góc tối nhất của căn phòng. Hai tay khoanh trước ngực, một chân khẽ gác lên chiếc bệ đá bám đầy bụi bặm, tư thế của ngươi toát lên một vẻ bất cần đời, hoàn toàn lạc lõng so với sự run rẩy, thành kính của bảy đứa trẻ đang xếp hàng phía trước. Đôi mắt ngươi khẽ híp lại, chỉ chừa một khe hở nhỏ đủ để thu vào tầm mắt mọi chuyển động phía trước, nhưng thực chất tâm trí ngươi đang trôi dạt về những miền ký ức xa xôi.\nSáu năm. Kể từ khi mở mắt ra ở thế giới này dưới hình hài một đứa trẻ mồ côi tại *Thôn Thánh Hồn*, ngươi đã mất một khoảng thời gian dài để chấp nhận sự thật rằng mình đã trùng sinh. Thế giới này không có súng ống, không có công nghệ hiện đại, mà chỉ có một thứ sức mạnh tối cao chi phối tất cả: Võ Hồn. Những câu chuyện truyền thuyết về các Hồn Sư mạnh mẽ có thể dời non lấp bể, hô phong hoán vũ luôn là đề tài bàn tán sôi nổi của những người dân trong thôn mỗi buổi chiều tà. Thế nhưng đối với ngươi, một kẻ mang linh hồn của một người trưởng thành đã từng trải qua vô vàn thăng trầm và mệt mỏi ở kiếp trước, sự tranh đấu giành giật quyền lực hay danh vọng kia dường như quá xa vời và phiền toái. Ngươi chỉ muốn làm một kẻ đứng ngoài cuộc lười nhác, mỗi ngày trôi qua đều có thể ngủ nướng đến khi mặt trời lên ba sào, thảnh thơi câu cá bên bờ suối và tận hưởng sự yên bình của một thôn dã hẻo lánh.\nNhưng quy luật của thế giới này vốn tàn nhẫn, và nghi lễ thức tỉnh Võ Hồn ở tuổi lên sáu là ngưỡng cửa bắt buộc mà không một ai có thể trốn tránh. \nỞ trung tâm gian phòng, một vòng tròn ánh sáng mờ ảo đang nhẹ nhàng lưu chuyển. Sáu viên đá màu đen nhánh, to bằng nắm tay, đang lơ lửng giữa không trung dưới sự dẫn dắt của một luồng năng lượng ấm áp. Người đàn ông trung niên đứng ở trung tâm vòng tròn ấy chính là *Tố Vân*, một Đại Hồn Sư cấp hai mươi đến từ *Vũ Hồn Điện*. Gương mặt ông ta nghiêm nghị, những nếp nhăn nơi khóe mắt hằn sâu dưới ánh sáng vàng kim nhạt bộc phát từ lòng bàn tay. Chiếc áo choàng màu trắng thêu hoa văn chỉ bạc cùng biểu tượng nắm đấm bao quanh bởi một thanh kiếm sắc lẹm — minh chứng cho thân phận Chấp sự cao quý của *Vũ Hồn Điện* — tung bay nhè nhẹ theo từng chuyển động của luồng khí tức xung quanh ông ta."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Đừng sợ, hãy nhắm mắt lại, cảm nhận luồng ấm áp trong cơ thể và kêu gọi thứ đang ngủ say trong lòng bàn tay cháu bước ra."
+        },
+        {
+          "type": "narrative",
+          "content": "Giọng nói của *Tố Vân* trầm thấp, mang theo một sức trấn an kỳ lạ vang vọng khắp căn phòng gỗ. Đứa trẻ đầu tiên trong hàng — một cậu nhóc gầy gò với mái tóc bù xù như tổ chim — đang run rẩy đứng giữa sáu viên đá đen. Dưới sự điều khiển của *Tố Vân*, sáu viên đá đen phát ra những luồng ánh sáng vàng nhạt, bao bọc lấy cơ thể cậu nhóc. Chỉ vài giây sau, một luồng ánh sáng mờ nhạt hiện ra từ lòng bàn tay phải của nó. Ánh sáng ngưng tụ, cuối cùng biến thành một chiếc liềm nhỏ cũ kỹ, rỉ sét loang lổ.\n*Tố Vân* khẽ thở dài, vẻ thất vọng thoáng qua trên gương mặt góc cạnh của ông ta. Việc thức tỉnh ra một công cụ lao động như chiếc liềm đồng nghĩa với việc đứa trẻ này hầu như không có cơ hội bước chân vào thế giới của các Hồn Sư."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Võ Hồn là Liềm, một công cụ lao động bình thường. Nào, hãy đến đây kiểm tra xem cháu có Hồn lực hay không."
+        },
+        {
+          "type": "narrative",
+          "content": "*Tố Vân* lấy ra một viên pha lê màu xanh lam trong suốt từ trong ngực áo, đưa tới trước mặt đứa trẻ. Cậu nhóc rụt rè đặt bàn tay nhỏ bé, lấm lem bùn đất của mình lên bề mặt lạnh lẽo của viên pha lê. Một giây, hai giây trôi qua... viên pha lê vẫn hoàn toàn im lìm, không có lấy một tia sáng nào lóe lên. Nó vẫn giữ nguyên sự trong suốt vô hồn của một khối thủy tinh thông thường."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Không có Hồn lực. Cháu không thể trở thành Hồn Sư. Hãy xuống đi và nhường chỗ cho người tiếp theo."
+        },
+        {
+          "type": "narrative",
+          "content": "Lời phán quyết lạnh lùng của *Tố Vân* vang lên như một tiếng sét đánh ngang tai, dập tắt đi ngọn lửa hy vọng vừa mới nhen nhóm của đứa trẻ nghèo khó. Cậu nhóc lủi thủi bước xuống, đôi mắt đỏ hoe, cố gắng kiềm chế tiếng khóc nấc nghẹn ngào khi đi về phía góc phòng. Những đứa trẻ xếp hàng phía sau chứng kiến cảnh này, sắc mặt đứa nào đứa nấy đều tái mét, hai hàm răng va vào nhau lập cập.\nNgươi vẫn ngồi yên lặng trong bóng tối, khóe mắt khẽ giật nhẹ. Sự tàn nhẫn của thế giới này chính là như vậy. Số phận của một con người, tương lai của một đứa trẻ nghèo khổ ở thôn quê, đôi khi được quyết định chỉ trong vài giây ngắn ngủi dựa trên việc chúng có sở hữu Hồn lực hay không. Không có Hồn lực, đồng nghĩa với việc cả đời này chúng chỉ có thể bán mặt cho đất, bán lưng cho trời, làm những công việc nặng nhọc nhất để đổi lấy vài miếng bánh mì khô khốc qua ngày.\nNghi lễ tiếp tục diễn ra với một tốc độ khá nhanh. *Tố Vân* dường như đã quá quen thuộc với những kết quả thất vọng này tại các ngôi làng nghèo nàn như *Thôn Thánh Hồn*. Để đẩy nhanh tiến độ và tăng cường sự tập trung của năng lượng thức tỉnh, ông ta quyết định thi triển Võ Hồn của chính mình.\nNgươi chợt cảm nhận được một luồng gió lạnh buốt bất thường đột ngột thổi qua các kẽ hở của căn phòng, làm tà áo mỏng của ngươi bay lật phật. Không khí xung quanh bỗng trở nên ngột ngạt và nặng nề hơn bao giờ hết, một cảm giác ớn lạnh sống lưng chạy dọc theo tủy sống của tất cả những người có mặt. Phía sau lưng *Tố Vân*, một bóng ma khổng lồ màu xám tro đột ngột ngưng tụ. Đó là một con sói lớn hung tợn với đôi mắt rực lửa xanh biếc, hàm răng nanh sắc nhọn hoắt lộ ra ngoài đầy đe dọa. Cơ thể của *Tố Vân* cũng bắt đầu biến đổi một cách kỳ dị: cơ bắp của ông ta phồng lên dưới lớp áo choàng, lông tơ màu xám mọc ra khắp cánh tay, và móng tay hóa thành những bộ vuốt sắc bén như dao cạo. Hai vòng tròn ánh sáng — một trắng, một vàng — từ dưới chân ông ta chậm rãi bay lên, lơ lửng và xoay vần quanh cơ thể.\nĐó là Võ Hồn *Độc Lang* và hai cái Hồn Hoàn của một Đại Hồn Sư cấp hai mươi.\nSự xuất hiện của một quái thú khổng lồ và nửa người nửa thú của *Tố Vân* khiến đám trẻ con hét lên kinh hoàng. Ba đứa trẻ đứng đầu hàng thậm chí đã ngã quỵ xuống đất, khóc lóc thảm thiết, cố gắng bò lùi lại phía sau để tìm kiếm sự an toàn."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Đã bảo là đừng sợ rồi mà! Đây là Võ Hồn của ta, Độc Lang. Nếu các cháu muốn trở thành Hồn Sư mạnh mẽ, đây là thứ các cháu phải đối mặt và làm quen!"
+        },
+        {
+          "type": "narrative",
+          "content": "Giọng nói của *Tố Vân* lúc này mang theo một chút gầm rú của loài thú dữ, vang dội trong căn phòng chật hẹp, khiến những chiếc xà gồ trên mái nhà cũng phải rung lên bần bật. Ông ta khống chế Võ Hồn của mình, giảm bớt áp lực uy hiếp để đám trẻ có thể bình tĩnh lại, nhưng sự kinh hoàng vẫn in hằn sâu sắc trong mắt chúng.\nTrong góc tối, ngươi khẽ nheo mắt lại để cản bớt luồng ánh sáng chói mắt phát ra từ hai cái Hồn Hoàn của *Tố Vân*. Dù cơ thể nhỏ bé của ngươi cũng cảm nhận được một sức ép vô hình đè nặng lên lồng ngực, nhưng tâm trí của một kẻ trùng sinh giúp ngươi giữ được sự điềm tĩnh đến đáng sợ. Đôi mắt ngươi không hề có sự sợ hãi của một đứa trẻ lên sáu, mà chỉ có sự tò mò và đánh giá một cách lý trí. \"Đây chính là sức mạnh của một Đại Hồn Sư sao? Chỉ là cấp hai mươi đã có thể tạo ra uy áp vật lý mạnh mẽ đến thế này, vậy thì những kẻ ở cảnh giới cao hơn, những Phong Hào Đấu La huyền thoại kia sẽ khủng khiếp đến mức nào?\"\nSự tò mò ban đầu dần biến thành một sự dao động nhẹ trong thâm tâm ngươi. Liệu cuộc sống lười nhác, trốn tránh thế sự có thực sự là lựa chọn đúng đắn và an toàn nhất trong một thế giới mà sức mạnh định đoạt tất cả như thế này? Nếu một ngày nào đó tai họa ập đến, nếu không có sức mạnh để tự bảo vệ mình, liệu ngươi có thể giữ được sự bình yên mà mình hằng mong ước?\nTừng đứa trẻ tiếp theo lần lượt bước lên bục thức tỉnh, và kết quả vẫn là một chuỗi những tiếng thở dài thất vọng của *Tố Vân*. Người thì thức tỉnh ra cỏ Lam Ngân — loại cỏ phế vật phổ biến nhất đại lục, người thì thức tỉnh ra một cái cuốc sắt, một chiếc xẻng xúc đất... Và tất cả bọn chúng đều không có một chút Hồn lực nào.\nSự kiên nhẫn của *Tố Vân* đang vơi dần đi theo thời gian. Gương mặt ông ta ngày càng trở nên mệt mỏi, việc duy trì trạng thái nhập thể của Võ Hồn trong thời gian dài tiêu hao không ít hồn lực của một Đại Hồn Sư cấp hai mươi. Ông ta thở dài một tiếng thật dài, thầm nghĩ rằng chuyến đi đến ngôi làng nghèo nàn này lại là một chuyến đi vô ích như mọi năm, không hề tìm kiếm được bất kỳ một mầm non nào có tư chất.\nRốt cuộc, hàng dài những đứa trẻ đã vơi đi hết sạch. Đứa trẻ áp chót vừa đặt tay lên viên pha lê xanh lam, ánh sáng vẫn im lìm không chịu lóe lên. Nó khóc nức nở chạy về phía cửa, nơi có cha mẹ đang lo lắng chờ đợi. \n*Tố Vân* khẽ thu hồi một phần sức mạnh của *Độc Lang*, khiến hình thể sói xám phía sau mờ nhạt đi đôi chút để tiết kiệm năng lượng. Ông ta đưa bàn tay đầy lông tơ lên lau vệt mồ hôi đang rịn ra trên trán, hơi thở có phần dồn dập và mệt mỏi. Đôi mắt sắc bén của ông ta quét qua gian phòng trống trải, cuối cùng dừng lại ở góc tối nơi ngươi đang ngồi thu mình.\nTư thế thiếu trang nghiêm, ánh mắt lim dim hờ hững của ngươi rõ ràng là vô cùng nổi bật và khác biệt giữa một căn phòng đầy rẫy sự sợ hãi và tiếng khóc lóc ban nãy. *Tố Vân* khẽ nhíu mày, trong lòng thoáng qua một sự tò mò nhẹ trước thái độ kỳ lạ của đứa trẻ cuối cùng này."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Đứa trẻ cuối cùng kia, còn đứng đực ra đó làm gì? Mau bước lên đây thực hiện nghi thức thức tỉnh để ta còn kịp di chuyển sang ngôi làng tiếp theo."
+        },
+        {
+          "type": "narrative",
+          "content": "Tiếng gọi của *Tố Vân* kéo mọi ánh mắt còn lại trong phòng đổ dồn về phía ngươi. Những đứa trẻ đã thất bại nhìn ngươi với vẻ tò mò xen lẫn chút thương hại, dường như chúng đã dự đoán trước kết cục của ngươi cũng sẽ chẳng khác gì tụi nó — một người phàm vô dụng.\nNgươi khẽ động đậy bả vai, từ từ rời khỏi điểm tựa là cây cột gỗ mục. Một cảm giác tê rần nhẹ truyền từ bắp chân lên đến thắt lưng do ngồi một tư thế quá lâu. Ngươi vươn vai một cái thật dài, phát ra vài tiếng rắc rắc nhỏ từ các khớp xương, rồi chậm rãi bước ra khỏi góc tối, tiến về phía dải sáng vàng rực rỡ ở trung tâm căn phòng.\nMỗi bước đi của ngươi tuy chậm rãi nhưng vô cùng vững chắc, không hề có sự rụt rè hay sợ hãi của những đứa trẻ trước đó. Khi bước vào phạm vi của sáu viên đá đen, ngươi cảm nhận được một luồng hơi ấm vô hình bao bọc lấy cơ thể, xua tan đi cái lạnh buốt mà Võ Hồn của *Tố Vân* tạo ra ban nãy.\n*Tố Vân* nhìn chằm chằm vào ngươi, sự điềm tĩnh và thái độ hờ hững của ngươi khiến ông ta có chút kinh ngạc. Ở độ tuổi này, hiếm có đứa trẻ nào có thể đối mặt với hình thái Võ Hồn nửa người nửa sói của ông ta mà không hề biến sắc hay run rẩy."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Hãy đứng vào giữa vòng tròn, nhắm mắt lại, giữ cho tâm trí thanh tịnh và tập trung tinh thần."
+        },
+        {
+          "type": "narrative",
+          "content": "*Tố Vân* trầm giọng hướng dẫn, đồng thời chuẩn bị truyền hồn lực vào sáu viên đá đen một lần cuối cùng trong ngày hôm nay. Ngươi khẽ hít một hơi thật sâu, mùi gỗ mục và ánh sáng vàng bao phủ lấy tầm nhìn khi ngươi từ từ nhắm mắt lại, chuẩn bị đối mặt với thứ sức mạnh sắp sửa thức tỉnh từ sâu trong linh hồn mình."
+        }
+      ]
+    },
+    {
+      "id": "f1b074a7-da10-4ae7-9005-86380b3c41b4",
+      "type": "system",
+      "content": "**[Hệ thống]** Chúc mừng **Diệp Thần** đã tăng **1** cấp! Cấp độ hiện tại: **2**.",
+      "transient": true
+    },
+    {
+      "id": "a16d407d-4273-44ba-87b8-7530211dbae5",
+      "type": "user_custom_action",
+      "content": "Giữ nguyên thái độ lười biếng hờ hững và chỉ thực hiện nghi thức một cách đối phó nhất có thể, chuẩn bị sẵn tâm lý chấp nhận bất kỳ kết quả nào kể cả khi không có hồn lực. {Tỷ lệ thành công: 95%. Hậu quả/Phần thưởng: Thức tỉnh một Võ Hồn mặt nạ bình thường và giản dị, nhưng khi kiểm tra hồn lực lại có  hồn lực đạt Tiên thiên mãn hồn lực. Dù Tố Vân kinh ngạc nhưng cũng thất vọng vì 1 phế võ hồn mang hồn lực tiên thiên mãn hồn lực cũng không có tác dụng gì}"
+    },
+    {
+      "id": "b70c8a99-9a1c-4ab3-b68b-1ef579f69069",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* bước lên bục với thái độ lười biếng, thực hiện nghi thức đối phó. Khi sáu viên đá đen rung chuyển, một mặt nạ gỗ giản dị xuất hiện trong lòng bàn tay cậu. *Tố Vân* kinh ngạc khi thấy viên pha lê xanh sáng rực hoàn toàn, biểu thị Tiên thiên mãn hồn lực, nhưng ông chỉ biết thở dài tiếc nuối cho một phế võ hồn.\nKhông gian bên trong gian nhà gỗ vốn đang náo nhiệt bởi tiếng thở dài bỗng chốc trở nên tĩnh lặng đến lạ kỳ. Chỉ còn lại tiếng gió rít nhẹ qua những khe gỗ mục và tiếng thở dốc đầy kinh ngạc của người Hồn Sư. *Diệp Thần* đứng đó, ánh mắt vẫn giữ nguyên vẻ hờ hững vốn có, như thể thứ vừa xuất hiện trong lòng bàn tay mình chỉ là một món đồ chơi rẻ tiền không hơn không kém. Đó là một chiếc mặt nạ gỗ, đường nét chạm khắc thô sơ, màu sắc nâu trầm cũ kỹ, không toát ra chút khí thế hay uy áp nào của một võ hồn mạnh mẽ."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Tiên thiên mãn hồn lực... lại là... một phế võ hồn mặt nạ gỗ?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Tố Vân* lẩm bẩm, giọng ông ta run rẩy. Tay ông ta vẫn còn run lên khi đặt viên pha lê xanh vốn đã không còn lấy một chút ánh sáng dư thừa nào xuống bàn. Ông ta nhìn chằm chằm vào *Diệp Thần*, sự kinh ngạc trên gương mặt dần nhường chỗ cho một nỗi tiếc nuối tột cùng. Viên pha lê xanh tỏa sáng rực rỡ đến mức chói mắt chính là minh chứng cho tư chất cao nhất mà một Hồn Sư có thể có khi thức tỉnh, nhưng thứ võ hồn nằm gọn trong tay thiếu niên kia lại là nghịch lý tàn nhẫn nhất của tạo hóa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Cháu đã nói rồi, kết quả thế nào cũng không quan trọng. Giờ cháu có thể về nhà được chưa?"
+        },
+        {
+          "type": "narrative",
+          "content": "Cậu nhóc uể oải buông tay, chiếc mặt nạ gỗ hóa thành những hạt bụi li ti tan biến vào hư không. *Diệp Thần* xoay người, bước xuống bục gỗ một cách thong dong, không hề bận tâm đến ánh mắt phức tạp của vị Hồn Sư đang đứng ngẩn ngơ phía sau. Trong tâm trí cậu, việc sở hữu hồn lực hay không vốn dĩ không nằm trong danh sách ưu tiên của cuộc đời. Cậu chỉ muốn nhanh chóng quay trở về căn chòi nhỏ ở rìa làng, nơi chiếc giường gỗ ấm áp đang chờ đợi.\n*Tố Vân* nhìn theo bóng lưng gầy gò của *Diệp Thần*, trong lòng vẫn chưa hết bàng hoàng. Ông ta đã chứng kiến hàng ngàn đứa trẻ thức tỉnh võ hồn, nhưng đây là lần đầu tiên ông ta gặp một trường hợp trớ trêu đến thế. Một tiềm năng cực hạn, nhưng lại bị giam cầm trong một hình hài võ hồn vô dụng. Ông ta lấy lại bình tĩnh, thu hồi sáu viên đá đen vào trong túi, đôi mắt thoáng vẻ băn khoăn."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Này cậu bé, với hồn lực này, dù võ hồn không mạnh, cậu vẫn có thể... thử sức ở sơ cấp học viện. Có lẽ sẽ có cơ hội khác."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* dừng lại, chỉ khẽ nghiêng đầu liếc nhìn *Tố Vân* qua khóe mắt. Nụ cười nhạt nhòa hiện lên trên môi, không rõ là ý gì. Đối với cậu, thế giới Hồn Sư vốn dĩ đã quá ồn ào và mệt mỏi, việc mang theo cái danh hiệu \"phế võ hồn\" này có lẽ lại là tấm lá chắn tốt nhất để cậu có thể tiếp tục sống một cuộc đời lười nhác và bình yên.\nBên ngoài, mặt trời đã lên cao, ánh nắng chói chang nhuộm vàng con đường đất nhỏ của *Thôn Thánh Hồn*. Những đứa trẻ khác đang tụ tập, nhìn *Diệp Thần* bằng ánh mắt đầy khó hiểu. Họ không biết chuyện gì đã xảy ra bên trong, chỉ thấy *Tố Vân* bước ra với vẻ mặt đầy suy tư, hoàn toàn trái ngược với thái độ dửng dưng của cậu thiếu niên đang lững thững đi về phía cuối thôn."
+        }
+      ]
+    },
+    {
+      "id": "1347e2b1-8a1b-4de8-93a0-f6752399f57c",
+      "type": "user_custom_action",
+      "content": "Đa tạ Tố Vân rời nhờ ông ấy viết thư giới thiệu tới học viện Nặc Đinh"
+    },
+    {
+      "id": "faa8701a-f610-443c-862d-ef769ec341de",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Dưới ánh nắng vàng rực rỡ của buổi sớm mai, không gian trước sân *Thôn Thánh Hồn* vẫn còn vương lại chút dư âm của buổi lễ thức tỉnh đầy cảm xúc. *Diệp Thần* đứng đối diện với *Tố Vân*, đôi mắt vốn thường ngày lờ đờ, nay bỗng trở nên nghiêm túc một cách lạ thường. Cậu cúi đầu, thái độ cực kỳ cung kính, bày tỏ lòng biết ơn chân thành đến người Hồn Sư vừa thực hiện nghi lễ cho mình."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Cảm ơn đại nhân đã không quản ngại đường xa đến đây. Dù võ hồn của cháu có phần khiêm tốn, nhưng sự chỉ dẫn của ngài hôm nay thực sự là một ân huệ lớn đối với cháu."
+        },
+        {
+          "type": "narrative",
+          "content": "*Tố Vân* khẽ ngẩn người. Vốn dĩ ông đã chuẩn bị tinh thần để đối mặt với những ánh mắt thất vọng hoặc những câu hỏi gặng dồn đầy bực dọc từ đám trẻ thất bại, nhưng thái độ điềm tĩnh và biết điều của thiếu niên này lại khiến ông cảm thấy dễ chịu đến kỳ lạ. Nhìn vào đôi mắt sáng ngời của *Diệp Thần*, vị Hồn Sư vốn đang mệt mỏi sau khi tiêu hao không ít hồn lực, bỗng thở dài một tiếng rồi gật đầu đồng ý. Ông lấy từ trong túi đeo bên hông ra một cuộn giấy nhỏ cùng nghiên mực, cẩn thận viết lên đó những dòng chữ rồng bay phượng múa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tố Vân",
+          "content": "Cầm lấy lá thư này, Diệp Thần. Tuy võ hồn của cháu... khá đặc thù, nhưng với mức hồn lực đó, ta vẫn hy vọng cháu có thể học được cách điều khiển bản thân tại *Học viện Nặc Đinh*. Đừng phụ sự kỳ vọng của ta, dù chỉ là một phần nhỏ."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* nhận lấy lá thư, cảm nhận được hơi ấm và mùi giấy mực còn mới trên bề mặt. Cậu khẽ cúi chào lần nữa, cất lá thư vào túi hành lý đã chuẩn bị sẵn bên người, ánh mắt không giấu nổi vẻ toan tính kín đáo về hành trình sắp tới. Không còn chần chừ, *Diệp Thần* xoay người, dấn bước đi về phía con đường dẫn thẳng đến *Tinh Đấu sâm lâm*. Cậu không hề quay đầu lại, bỏ lại sau lưng tiếng xì xào của đám dân làng và bóng lưng đang dần khuất xa của vị Hồn Sư *Vũ Hồn Điện*.\nCon đường mòn dẫn vào rừng trải đầy lá khô, tiếng chim hót râm ran hòa cùng tiếng gió xào xạc trên những tán cổ thụ. *Diệp Thần* đi một mình, bước chân nhẹ nhàng nhưng đầy kiên định. Cậu không quên mục tiêu chính của chuyến đi này: tìm kiếm *A Ngân* trước khi nàng kịp hóa hình hoàn toàn. Nếu có thể nắm bắt được vận mệnh, ngăn cản *Đường Hạo* gặp gỡ nàng, cậu sẽ thay đổi được hoàn toàn cục diện của thế giới này, hay ít nhất là đảm bảo cho bản thân một cuộc sống yên bình không bị kéo vào vòng xoáy tranh đấu của những nhân vật chính diện hay phản diện trong tương lai. Mặt trời mỗi lúc một cao, những tia nắng len lỏi qua kẽ lá, tạo nên những đốm sáng nhảy múa trên mặt đất, như thể đang cười nhạo sự ngây thơ của kẻ phàm trần muốn nghịch chuyển thiên mệnh."
+        }
+      ]
+    },
+    {
+      "id": "d167a6d2-e25f-4571-90c4-b7c74bc56c04",
+      "type": "user_custom_action",
+      "content": "Lên đường đến Thánh địa Lam Ngân Thảo và chờ đợi A Ngân hóa hình rời khỏi đó. Sau đó tạo tình huống tình cờ gặp gỡ và mời nàng đồng hành"
+    },
+    {
+      "id": "ecd26939-ad32-48e1-90d2-42520d3cb4cf",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ánh nắng ban mai xuyên qua những tán lá dày đặc của *Lam Ngân Sâm Lâm*, tạo thành những dải sáng lung linh nhảy múa trên thảm cỏ xanh mướt. *Diệp Thần* lê bước trên con đường mòn, bộ dạng uể oải như thể xương cốt toàn thân đều đã rã rời. Chiếc áo vải thô sờn bạc màu dán chặt vào lưng, đôi dép cỏ dưới chân phát ra những tiếng sột soạt đều đặn trên nền lá khô. Tuy nhiên, đằng sau vẻ ngoài lười nhác, đôi mắt lim dim như buồn ngủ kia lại không ngừng quan sát từng biến động nhỏ nhất của môi trường xung quanh. Từng khóm *Lam Ngân Thảo* lay động theo gió, từng tiếng chim lách chách trên cành cao đều được cậu thu vào tầm mắt với một sự cẩn trọng đến cực điểm.\nMục tiêu của cậu không gì khác chính là *Thánh địa Lam Ngân Thảo* — nơi linh khí hội tụ đậm đặc nhất, và cũng là nơi ẩn chứa một trong những bí mật lớn nhất của thế giới này."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ôi chao... Cái nắng này thật biết cách hành hạ người khác mà. Ước gì bây giờ có một gốc cây cổ thụ thật to, một bình nước mát và một giấc ngủ dài đến tận hoàng hôn."
+        },
+        {
+          "type": "narrative",
+          "content": "Cậu lầm bầm, giọng nói mang theo vẻ than vãn của một đứa trẻ bị bắt đi làm việc nặng. Thế nhưng, bước chân của cậu lại vô cùng chuẩn xác, hướng thẳng về phía trung tâm của sâm lâm, nơi hơi thở của sự sống đang dần trở nên mạnh mẽ hơn bao giờ hết. Càng tiến sâu vào bên trong, không khí càng trở nên thanh khiết, mùi cỏ dại ngai ngái dần được thay thế bằng một hương thơm dịu nhẹ, thanh tao như mùi của sương sớm hòa quyện với linh khí đất trời.\nSau nhiều giờ di chuyển, *Diệp Thần* dừng chân trước một gốc cây cổ thụ khổng lồ, tán lá che khuất cả một vùng trời, rễ cây trồi lên mặt đất như những con rồng gỗ đang uốn lượn. Cậu không ngần ngại chọn lấy một vị trí râm mát nhất, tựa lưng vào thân cây sần sùi rồi từ từ nhắm mắt lại, hơi thở dần trở nên đều đặn. Cậu không hề ngủ, mà đang dùng toàn bộ giác quan để lắng nghe nhịp đập của sâm lâm.\nĐúng lúc này, từ sâu trong trung tâm địa linh, một luồng ánh sáng xanh lam dịu mắt đột ngột bộc phát, nhẹ nhàng nhưng tràn đầy uy quyền. Không gian xung quanh dường như ngưng đọng lại, hàng vạn đóa *Lam Ngân Thảo* đồng loạt nghiêng mình về phía đó như đang bái lạy nữ hoàng của chúng. Một bóng người thanh tú từ trong màn ánh sáng ấy chậm rãi bước ra.\nĐó là một thiếu nữ với mái tóc dài màu xanh lam như đại dương, đôi mắt tinh khôi chứa đựng sự tò mò vô hạn đối với thế giới bên ngoài. Nàng bước đi nhẹ nhàng trên mặt đất, mỗi bước chân đều khiến cỏ cây xung quanh bừng lên sức sống mãnh liệt. *A Ngân* — vị hoàng hậu của *Lam Ngân Thảo* vừa mới hoàn tất quá trình hóa hình, rời khỏi nơi trú ẩn bấy lâu nay để khám phá nhân gian.\nNàng dừng lại khi nhìn thấy một thân ảnh nhỏ bé đang nằm ngủ gật dưới gốc cây. Trong mắt nàng, đứa trẻ này toát ra một hơi thở vô cùng kỳ lạ — vừa có sự thuần khiết của một sinh linh mới lớn, lại vừa có một chút gì đó thâm trầm, cũ kỹ như một linh hồn đã trải qua nghìn năm tuế nguyệt. Nàng tò mò tiến lại gần, cúi xuống nhìn kỹ khuôn mặt đang \"ngủ say\" của *Diệp Thần*.\nMột sợi tóc xanh của nàng khẽ chạm vào chóp mũi cậu, khiến *Diệp Thần* \"giật mình\" tỉnh giấc. Cậu mở to mắt, nhìn chằm chằm vào khuôn mặt xinh đẹp thoát tục đang ở ngay sát vách mình, biểu cảm từ ngỡ ngàng chuyển sang thẫn thờ, rồi cuối cùng là một nụ cười ngây ngô đầy ngẫu hứng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ôi... Ta đang mơ sao? Chẳng lẽ giấc ngủ trưa này đã đưa ta lên tới thiên giới và gặp được một vị tiên nữ tỷ tỷ?"
+        },
+        {
+          "type": "narrative",
+          "content": "*A Ngân* giật mình lùi lại một bước, đôi má thoáng ửng hồng vì sự bộc trực của đứa nhỏ trước mặt. Nàng khẽ nghiêng đầu, giọng nói trong trẻo như tiếng chuông bạc vang lên:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Ngươi... ngươi tỉnh rồi sao? Tại sao ngươi lại ở một mình trong khu rừng đầy rẫy nguy hiểm này? Không có người lớn đi cùng sao?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* ngồi dậy, phủi phủi lớp bụi trên áo, gương mặt hiện lên vẻ khổ sở xen lẫn lười biếng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Người lớn á? Bọn họ còn bận rộn với cơm áo gạo tiền, ai mà thèm quan tâm đến một kẻ lười nhác chỉ muốn đi ngắm cảnh như ta. Ta vốn chỉ định tìm một chỗ yên tĩnh để ngủ thôi, ai ngờ cái sâm lâm này nhìn thì rộng mà tìm được một gốc cây ưng ý lại khó đến thế."
+        },
+        {
+          "type": "narrative",
+          "content": "Cậu liếc nhìn nàng một cái đầy ẩn ý, rồi tiếp tục bằng giọng điệu hào hứng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Mà tiên nữ tỷ tỷ à, tỷ xinh đẹp thế này, chắc chắn là người của vùng này rồi nhỉ? Ta nghe nói trong sâm lâm này có nhiều loại thảo dược quý lắm, tỷ có thể chỉ đường cho ta không? À mà thôi, chỉ đường thì mệt lắm, hay là tỷ cùng đi với ta một đoạn đi? Có người đẹp đồng hành, con đường dài cũng hóa thành ngắn ngủi."
+        },
+        {
+          "type": "narrative",
+          "content": "*A Ngân* bật cười trước sự lém lỉnh và không biết sợ là gì của cậu bé. Nàng cảm nhận được ở cậu không có bất kỳ ác ý nào, chỉ có một sự chân thành và... một chút lười biếng đến mức đáng yêu. Tuy nhiên, sự cảnh giác tự nhiên của một hồn thú hóa hình vẫn khiến nàng do dự."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Ta cũng chỉ là người qua đường thôi, nhưng ta cũng định đi ra khỏi khu rừng này. Ta có thể đi cùng ngươi một đoạn, nhưng chỉ một đoạn thôi đấy. Để xem một đứa trẻ \"lười nhác\" như ngươi định làm gì ở thế giới rộng lớn ngoài kia."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* nhảy cẫng lên, dù hành động có chút \"quá khích\" so với phong cách lười biếng thường ngày nhưng lại rất phù hợp với vỏ bọc của một đứa trẻ."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Thật sao? Tuyệt quá! Có tỷ tỷ đi cùng, chắc chắn ta sẽ không bị đám yêu thú kia ăn thịt đâu. Đi thôi, đi thôi!"
+        },
+        {
+          "type": "narrative",
+          "content": "Cậu lững thững bước đi trước, nhưng trong thâm tâm lại đang thở phào nhẹ nhõm. Bước đầu tiên trong kế hoạch đã thành công mỹ mãn. Cuộc gặp gỡ tình cờ này chính là chìa khóa để cậu bước vào cuộc đời của nàng, trước khi bất kỳ ai khác — đặc biệt là kẻ mang vận mệnh của trời đất kia — kịp can thiệp.\nGió sâm lâm vẫn thổi, mang theo hương vị của sự khởi đầu mới. Một già, một trẻ — hay nói đúng hơn là một linh hồn già cỗi trong hình hài trẻ thơ và một vị hoàng hậu vừa bước chân vào nhân gian — bắt đầu hành trình của mình dưới tán lá xanh rì của *Lam Ngân Sâm Lâm*.\nTiếng bước chân của họ hòa vào tiếng xào xạc của cỏ cây. *Diệp Thần* thỉnh thoảng lại dừng lại, bẻ một nhành cỏ hay chỉ vào một đóa hoa lạ để hỏi chuyện, tạo ra những tình huống dở khóc dở cười khiến *A Ngân* không khỏi cảm thấy thú vị. Nàng bắt đầu quan sát cậu kỹ hơn, cố gắng thấu hiểu cái \"vẻ ngoài lười nhác\" kia thực chất là gì. Liệu đây là một thiên tài ẩn mình, hay thực sự chỉ là một kẻ may mắn được số phận mỉm cười?"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Ngươi tên là gì? Ta vẫn chưa biết tên của kẻ lười nhất thế giới này đâu."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tỷ gọi ta là *Diệp Thần* được rồi. Còn tỷ tỷ xinh đẹp, danh xưng của tỷ là gì?"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Cứ gọi ta là *A Ngân*."
+        },
+        {
+          "type": "narrative",
+          "content": "Hai bóng người dần khuất xa sau những rặng cây cổ thụ, để lại sau lưng *Thánh địa Lam Ngân Thảo* vẫn đang tỏa sáng một cách thầm lặng dưới ánh mặt trời. Một chương mới trong lịch sử của *Đấu La Đại Lục* dường như đang được viết lại theo một cách mà không một ai có thể ngờ tới."
+        }
+      ]
+    },
+    {
+      "id": "6aa514c5-e7b1-4fe8-bc4d-459067771389",
+      "type": "system",
+      "content": "**[Hệ thống]** Chúc mừng **Diệp Thần** đã tăng **1** cấp! Cấp độ hiện tại: **3**.",
+      "transient": true
+    },
+    {
+      "id": "d9af4253-c62b-4769-a7c9-1438c138a12f",
+      "type": "user_choice",
+      "content": "Đề nghị cùng A Ngân dựng một lều tạm để nghỉ ngơi qua đêm vì trời sắp tối, tạo thêm thời gian để trò chuyện. {Tỷ lệ thành công: 75%. Hậu quả/Phần thưởng: Có thêm nhiều thời gian để hiểu nhau hơn, mối quan hệ trở nên bền chặt hơn trước khi ra khỏi rừng.}"
+    },
+    {
+      "id": "a8e9edfa-7017-4c2d-b0f6-93df3dbdf432",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Màn đêm buông xuống trên *Thánh địa Lam Ngân Thảo*, mang theo một bầu không khí tĩnh mịch và huyền ảo đến lạ thường. Những tia nắng gắt gỏng của ban chiều đã hoàn toàn lùi bước, nhường chỗ cho ánh trăng bạc len lỏi qua từng kẽ lá, rải những hạt bụi sáng lung linh xuống mặt đất. *Diệp Thần* dừng bước chân lững thững của mình lại, cậu đưa tay lên che một cái ngáp dài, đôi mắt lim dim nhìn về phía bầu trời xa xăm nơi những vì sao bắt đầu lấp lánh."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "A Ngân tỷ tỷ, nhìn kìa, trời đã khuya lắm rồi. Với đôi chân nhỏ bé và cái thân hình \"mỏng manh\" này của ta, nếu cứ tiếp tục hành quân trong bóng tối, có lẽ ta sẽ gục ngã vì kiệt sức trước khi kịp thấy ánh bình minh ngày mai mất. Hay là... chúng ta dừng chân tại đây, dựng một lều tạm để nghỉ ngơi qua đêm được không?"
+        },
+        {
+          "type": "narrative",
+          "content": "Cậu quay sang nhìn thiếu nữ tóc xanh bên cạnh, ánh mắt hiện lên vẻ khẩn cầu một cách đầy lém lỉnh. *A Ngân* khẽ dừng lại, nàng nhìn ngắm khuôn mặt trẻ thơ nhưng lại mang nét thâm trầm kỳ lạ của *Diệp Thần*, đôi môi đỏ mọng khẽ nở một nụ cười dịu dàng như gió xuân."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Ngươi thật đúng là kẻ lười nhất mà ta từng gặp, Diệp Thần. Nhưng mà... ngươi nói cũng đúng, bóng đêm của sâm lâm không hề đơn giản như vẻ ngoài của nó. Được thôi, ta đồng ý."
+        },
+        {
+          "type": "narrative",
+          "content": "Dứt lời, *A Ngân* khẽ nhắm mắt lại, đôi bàn tay ngọc ngà của nàng chắp nhẹ trước ngực. Một luồng ánh sáng xanh lam dịu nhẹ, mang theo hơi thở thuần khiết nhất của sự sống, từ từ tỏa ra từ cơ thể nàng. Ngay lập tức, những bụi *Lam Ngân Thảo* xung quanh như nhận được mệnh lệnh của nữ thần, chúng bắt đầu vươn dài, quấn quýt và đan xen vào nhau một cách kỳ diệu. Từng sợi cỏ xanh mướt, dẻo dai tựa như những dải lụa tiên, nhanh chóng dệt nên một mái lều hình vòm chắc chắn, bao phủ lấy một khoảng đất trống mềm mại. \nHương thơm thanh khiết của cỏ cây lan tỏa trong không gian, tạo nên một cảm giác thư thái tuyệt đối. *Diệp Thần* nhìn cảnh tượng trước mắt với vẻ thích thú, cậu không ngần ngại bước vào bên trong \"túp lều xanh\" ấy, cảm nhận sự êm ái của thảm cỏ dưới chân."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Tỷ đúng là vị tiên nữ của rừng xanh mà. Có một mái lều thế này, dù là hoàng cung của đế quốc cũng chưa chắc thoải mái bằng đâu."
+        },
+        {
+          "type": "narrative",
+          "content": "Cậu ngồi xuống, tựa lưng vào vách lều bằng cỏ, ra hiệu cho *A Ngân* cùng ngồi xuống cạnh mình. Trong không gian nhỏ nhắn nhưng ấm cúng ấy, ánh sáng từ những đốm huỳnh quang của rừng đêm hắt vào, khiến gương mặt của cả hai trở nên mờ ảo và gần gũi hơn bao giờ hết."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Ngươi luôn miệng gọi ta là tiên nữ, nhưng ta thấy ngươi mới là kẻ bí ẩn nhất. Một đứa trẻ ở thôn quê, tại sao lại biết nhiều về thế giới bên ngoài, và lại có cái nhìn về tự nhiên... kỳ lạ đến thế?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* khẽ mỉm cười, cậu nhìn ra cửa lều, nơi những cánh hoa *Lam Ngân Thảo* đang khẽ rung rinh trong gió đêm."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Có lẽ vì trong những giấc mơ, ta đã từng đi qua rất nhiều nơi, thấy rất nhiều điều tỷ à. Ta thấy những thành phố khổng lồ với những tòa tháp cao chọc trời, thấy những con người có thể bay lượn trên mây mà không cần cánh... Nhưng tỷ biết không, dù thế giới ngoài kia có rực rỡ đến đâu, nó cũng không thể có được sự bình yên thuần túy như ở đây, bên cạnh tỷ."
+        },
+        {
+          "type": "narrative",
+          "content": "Nàng khẽ nghiêng đầu, đôi mắt xanh thẳm tràn đầy sự hiếu kỳ. Đối với một hồn thú vừa mới hóa hình như nàng, nhân gian là một ẩn số đầy mê hoặc nhưng cũng không kém phần đáng sợ. Những lời kể của *Diệp Thần* giống như một ô cửa sổ nhỏ, hé mở cho nàng thấy một chân trời mà nàng hằng khao khát khám phá.\nHàng giờ trôi qua, tiếng trò chuyện của họ vẫn vang lên đều đặn, hòa lẫn với tiếng côn trùng kêu râm ran. *Diệp Thần* kể cho nàng nghe về những quy tắc của xã hội loài người, về sự phức tạp của lòng người, nhưng cũng không quên vẽ lên những viễn cảnh tươi đẹp về một thế giới mà ở đó, con người và thiên nhiên có thể chung sống hòa hợp. *A Ngân* chăm chú lắng nghe, thỉnh thoảng nàng lại đặt ra những câu hỏi ngây ngô khiến cậu phải phì cười. Sự gắn kết giữa họ, một kẻ mang linh hồn trùng sinh và một vị hoàng hậu của loài cỏ, đang dần trở nên sâu sắc và bền chặt hơn dưới sự chứng kiến của vầng trăng khuyết.\nSương đêm bắt đầu rơi, làm ướt đẫm những tán lá cổ thụ bên ngoài. Bên trong lều, hơi ấm từ hơi thở và sự hiện diện của đối phương khiến cái lạnh của đại ngàn trở nên xa vời. *A Ngân* cảm thấy trái tim mình có một sự rung động nhẹ nhàng, một cảm giác tin tưởng mà nàng chưa từng có đối với bất kỳ sinh linh nào trước đây. Nàng khẽ tựa đầu vào vách cỏ, ánh mắt mơ màng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Thế giới bên ngoài thực sự rộng lớn như vậy sao, Diệp Thần? Ta thực sự rất muốn một ngày nào đó, có thể tận mắt nhìn thấy những điều mà ngươi đã kể."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Chắc chắn sẽ có ngày đó, nàng yên tâm. Chỉ cần có ta ở bên, dù là đi đến tận cùng trời cuối đất, ta cũng sẽ bảo vệ nàng khỏi những giông bão của nhân gian."
+        },
+        {
+          "type": "narrative",
+          "content": "Câu nói của cậu tuy mang giọng điệu nửa đùa nửa thật của một đứa trẻ, nhưng ánh mắt lại chứa đựng một sự kiên định không thể lay chuyển. *A Ngân* không trả lời, nàng chỉ mỉm cười, một nụ cười mang theo sự an tâm tuyệt đối. Đêm đã về khuya, không gian tĩnh lặng đến mức có thể nghe thấy nhịp tim của cả hai đang hòa vào làm một giữa thánh địa xanh mướt này.\nCàng về khuya, không khí trong *Thánh địa Lam Ngân Thảo* càng trở nên huyền ảo. Những bụi cỏ xung quanh không chỉ đan lại thành lều mà còn bắt đầu phát ra những luồng sáng xanh lục dịu nhẹ, như thể chúng đang cùng chung vui với sự yên bình của vị hoàng hậu. *Diệp Thần* cảm nhận được một luồng chân nguyên ấm áp len lỏi trong cơ thể mình, dù cậu chưa chính thức bắt đầu tu luyện bất kỳ công pháp nào của thế giới này, nhưng bản năng của một linh hồn mạnh mẽ giúp cậu dễ dàng hấp thụ linh khí nồng đậm xung quanh.\nCậu liếc nhìn sang *A Ngân*, nàng lúc này đã nhắm mắt, dường như đang chìm vào một trạng thái thiền định sâu sắc để ổn định lại nguồn năng lượng sau khi hóa hình. Làn da nàng trắng sứ dưới ánh sáng huỳnh quang, những sợi tóc xanh xõa dài trên thảm cỏ như những dòng suối nhỏ. *Diệp Thần* thầm nghĩ trong lòng: \"Vận mệnh đã cho ta gặp nàng sớm hơn cả hắn. Lần này, ta nhất định sẽ không để thảm kịch đó xảy ra. *Đường Hạo*, xin lỗi nhé, nhưng đóa hoa này không thuộc về ngươi.\"\nCậu khẽ nhích lại gần hơn một chút, đủ để cảm nhận được hương thơm dịu nhẹ tỏa ra từ cơ thể nàng. Đó không phải là mùi hương của phấn son tầm thường, mà là mùi của nắng sớm, của sương đọng trên lá và của sự sống thuần khiết nhất. Một cảm giác yên bình đến lạ lùng bao trùm lấy tâm trí cậu, xua tan đi mọi toan tính và mệt mỏi của một kẻ đã từng phải sống trong sự tranh đấu khốc liệt ở kiếp trước.\nBất chợt, một cơn gió lạnh lùa qua khe hở nhỏ của mái lều cỏ, khiến *A Ngân* khẽ rùng mình trong cơn mộng mị. Không chút do dự, *Diệp Thần* cởi bỏ chiếc áo khoác mỏng của mình, nhẹ nhàng đắp lên đôi vai gầy của nàng. Hành động của cậu rất khẽ, như sợ sẽ làm phá vỡ không gian tĩnh lặng này. Nàng dường như cảm nhận được hơi ấm, đôi lông mày thanh tú khẽ giãn ra, môi xinh xắn hơi nhếch lên tạo thành một nụ cười mờ ảo.\nCứ thế, dưới sự che chở của *Thánh địa Lam Ngân Thảo*, hai linh hồn khác biệt đang cùng nhau trải qua một đêm thâu đầy ý nghĩa. Những câu chuyện về thế giới bên ngoài, về những giấc mơ viển vông và về những rung động đầu đời đã dệt nên một sợi dây liên kết vô hình nhưng vô cùng bền bỉ. Khi ánh sao trên trời dần mờ đi, nhường chỗ cho những ráng hồng của buổi bình minh sớm, họ biết rằng hành trình thực sự của mình mới chỉ vừa bắt đầu."
+        }
+      ]
+    },
+    {
+      "id": "05a74246-f1c3-44a6-8c90-f19ab1be6a25",
+      "type": "user_custom_action",
+      "content": "A Ngân tỷ năm nay 7 tuổi sao? Tỷ có đến Nặc Đinh học viện học không?"
+    },
+    {
+      "id": "3e1cdf33-c771-4bcc-bad2-5681082f0ab8",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ánh bình minh đầu ngày khẽ khàng len lỏi qua những kẽ hở li ti của mái lều bằng cỏ *Lam Ngân Thảo*, rải những sợi tơ vàng óng ánh xuống gương mặt còn vương nét ngái ngủ của *Diệp Thần*. Trong không gian thanh khiết đượm mùi sương sớm và hương cỏ dại, cậu khẽ cựa mình, đôi mắt lim dim nhìn sang thiếu nữ đang ngồi xếp bằng đối diện, người mà sự hiện diện của nàng dường như đã làm bừng sáng cả một góc rừng già. Nhớ lại những gì vị Hồn Sư *Tố Vân* đã nói và cả những toan tính về tương lai, *Diệp Thần* chống cằm, nghiêng đầu nhìn nàng rồi cất tiếng hỏi, giọng nói trẻ thơ mang theo sự tò mò chân thành:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "A Ngân tỷ, nhìn tỷ trẻ thế này, năm nay chắc cũng chỉ chừng bảy tuổi thôi nhỉ? Tỷ có dự định đến *Học viện Nặc Đinh* để học tập về Võ Hồn cùng với đệ không?"
+        },
+        {
+          "type": "narrative",
+          "content": "*A Ngân* khẽ giật mình khỏi trạng thái tĩnh lặng, nàng ngước đôi mắt xanh biếc như ngọc bích nhìn cậu. Một nụ cười dịu dàng, thanh khiết như đóa hoa vừa chớm nở hiện trên môi nàng, xua tan đi chút hơi lạnh còn sót lại của đêm thâu. Nàng đưa bàn tay búp măng vuốt nhẹ mái tóc dài màu xanh lam, giọng nói trong trẻo như tiếng suối đầu nguồn vang lên:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Tuổi tác sao? Thực ra, ta không có tuổi tác chính xác theo cách tính của nhân loại các ngươi đâu, Diệp Thần. Nhưng nhìn vào hình hài này, có lẽ đệ nói đúng, ta hiện tại tương đương với một thiếu nữ chỉ chừng bảy tám tuổi thôi."
+        },
+        {
+          "type": "narrative",
+          "content": "Nàng hơi khựng lại, đôi lông mày thanh tú khẽ nhíu nhẹ khi nghe đến cái tên lạ lẫm mà *Diệp Thần* vừa nhắc tới."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "*Học viện Nặc Đinh*? Đó là nơi con người các đệ học cách chiến đấu và sử dụng sức mạnh mà các đệ gọi là Võ Hồn sao? Nghe thật thú vị... Ta vốn dĩ hóa hình thành người là để thấu hiểu thế gian này, nếu có thể cùng đệ đến đó khám phá, có lẽ sẽ là một khởi đầu không tồi."
+        },
+        {
+          "type": "narrative",
+          "content": "Ánh sáng ban mai lúc này đã tràn ngập căn lều cỏ, biến những hạt sương đọng trên vách lều thành những viên kim cương lấp lánh. *Diệp Thần* cảm nhận được một sự rung động nhẹ nhàng trong lòng. Kế hoạch của cậu đang diễn ra suôn sẻ hơn cả mong đợi. Việc đưa *A Ngân* rời khỏi *Thánh địa Lam Ngân Thảo* và cùng đến học viện không chỉ giúp cậu bảo vệ nàng khỏi những tai mắt của các thế lực lớn, mà còn là cơ hội để gắn kết sợi dây tình cảm này thêm bền chặt.\nCậu ngồi bật dậy, vẻ lười nhác thường ngày tạm thời bị xua tan bởi sự hào hứng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Thật sao? Nếu tỷ đồng ý thì tuyệt quá! Ở đó có rất nhiều thứ để tìm hiểu, không chỉ là về sức mạnh đâu. Chúng ta sẽ cùng nhau học tập, cùng nhau trưởng thành. Có tỷ đi cùng, con đường phía trước chắc chắn sẽ không còn buồn tẻ nữa."
+        },
+        {
+          "type": "narrative",
+          "content": "*A Ngân* nhìn thấy sự nhiệt huyết trong đôi mắt của thiếu niên trước mặt, nàng cảm nhận được một luồng linh hồn thuần khiết và ấm áp đang bao bọc lấy mình. Đối với nàng, *Diệp Thần* không đơn thuần chỉ là một đứa trẻ, mà là một sự dẫn dắt, một người bạn đầu tiên trên hành trình làm người đầy bỡ ngỡ.\nNàng đứng dậy, tà váy lụa màu xanh khẽ đung đưa theo từng chuyển động. Với một cái phẩy tay nhẹ nhàng, mái lều cỏ vốn che chở cho họ suốt đêm qua bỗng chốc tan biến, hóa thành những sợi cỏ nhỏ bé lặn sâu xuống đất, trả lại vẻ nguyên sơ cho khu rừng. Nắng vàng rót thẳng xuống thảm cỏ xanh mướt, tiếng chim rừng hót líu lo như đang chúc mừng cho quyết định của họ."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Vậy thì ta sẽ đi cùng đệ, Diệp Thần. Hãy cho ta thấy thế giới của con người các đệ rực rỡ đến nhường nào nhé."
+        },
+        {
+          "type": "narrative",
+          "content": "Hai bóng người — một nhỏ bé lém lỉnh, một thanh tao dịu dàng — bắt đầu bước đi trên con đường mòn dẫn ra khỏi *Thánh địa Lam Ngân Thảo*. Bước chân của họ nhẹ nhàng dẫm lên thảm lá khô, hương thơm của cỏ cây dường như vẫn lưu luyến quấn quýt lấy gấu áo. *Diệp Thần* lấy lá thư giới thiệu của *Tố Vân* từ trong túi ra, lật qua lật lại với vẻ đắc ý."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Tỷ xem này, đây là thư giới thiệu đấy. Dù Võ Hồn của đệ chỉ là một cái mặt nạ gỗ, nhưng \"Tiên thiên mãn hồn lực\" thì không phải ai cũng có đâu nha. Chúng ta cứ thế mà tiến thẳng vào học viện thôi!"
+        },
+        {
+          "type": "narrative",
+          "content": "*A Ngân* khẽ bật cười, nàng đưa tay che miệng, ánh mắt tràn đầy sự hiền hòa. Nàng biết rõ tiềm năng thực sự ẩn giấu trong cơ thể thiếu niên này, một sức mạnh mà ngay cả nàng cũng cảm thấy có chút kiêng dè. Nhưng trên hết, nàng cảm thấy yên tâm khi có cậu bên cạnh.\nHọ đi xuyên qua những tán cây cổ thụ khổng lồ, nơi những tia nắng xuyên qua kẽ lá tạo thành những cột sáng lung linh. Không khí trong sâm lâm bắt đầu trở nên loãng dần khi họ tiến gần về phía bìa rừng. Những âm thanh của thiên nhiên hoang dã dần được thay thế bằng tiếng gió thổi qua những cánh đồng lúa chín vàng ở phía xa xa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Đệ nói xem, ở học viện đó, người ta có thân thiện như đệ không? Liệu họ có nhận ra ta là... khác biệt không?"
+        },
+        {
+          "type": "narrative",
+          "content": "Nàng hơi lo lắng, bàn tay khẽ siết chặt vạt áo. *Diệp Thần* dừng lại, cậu quay người lại nhìn thẳng vào mắt nàng, một ánh nhìn đầy sự bảo bọc và kiên định."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Tỷ đừng lo. Ở đó chỉ là những đứa trẻ và những giáo sư đang mải mê với kiến thức thôi. Hơn nữa, có đệ ở đây, bất kể tỷ là ai, đệ cũng sẽ không để ai làm tổn thương tỷ dù chỉ là một sợi tóc. Tỷ cứ việc làm một thiếu nữ xinh đẹp, những chuyện còn lại cứ để đệ lo."
+        },
+        {
+          "type": "narrative",
+          "content": "Lời hứa của một đứa trẻ sáu tuổi nghe có vẻ viển vông, nhưng trong lòng *A Ngân*, nó lại nặng tựa ngàn vàng. Nàng gật đầu, sự lo âu trên gương mặt tan biến, thay vào đó là một sự tin tưởng tuyệt đối. Họ tiếp tục hành trình, bóng của hai người trải dài trên con đường đất, hướng về phía thành phố *Nặc Đinh* đang ẩn hiện dưới chân trời.\nGió từ thảo nguyên thổi tới, mang theo mùi vị của cuộc sống đời thường và cả những thử thách đang chờ đợi phía trước. *Diệp Thần* biết rằng, kể từ khoảnh khắc này, bánh xe vận mệnh đã chính thức đi chệch khỏi quỹ đạo cũ. Một tương lai mới đang mở ra, nơi cậu không còn là kẻ lười nhác đứng ngoài cuộc, mà là người cầm lái cho chính cuộc đời mình và của người thiếu nữ mang linh hồn của rừng xanh này.\nCon đường phía trước dẫu còn dài và đầy rẫy những biến số, nhưng khi nhìn sang người đồng hành xinh đẹp bên cạnh, *Diệp Thần* cảm thấy mọi nỗ lực của mình đều xứng đáng. Cậu khẽ huýt sáo một điệu nhạc vui tai, bước chân trở nên nhẹ hẫng như đang khiêu vũ trên nền đất."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Đi thôi *A Ngân* tỷ! Thành phố *Nặc Đinh* đang chờ đón chúng ta đấy!"
+        },
+        {
+          "type": "narrative",
+          "content": "Họ cứ thế cùng nhau bước đi, để lại sau lưng những bí mật của đại ngàn, mang theo niềm hy vọng về một khởi đầu mới đầy rực rỡ tại học viện đầu tiên của đời người Hồn Sư."
+        }
+      ]
+    },
+    {
+      "id": "53176f73-407a-4605-b0d9-286c1ac86662",
+      "type": "system",
+      "content": "**[Hệ thống]** Chúc mừng **Diệp Thần** đã tăng **1** cấp! Cấp độ hiện tại: **4**.",
+      "transient": true
+    },
+    {
+      "id": "ed5caea6-1e79-4b2e-9bd5-bbc5fb6bcd29",
+      "type": "user_custom_action",
+      "content": "A Ngân tỷ, sao tỷ lại nói thế giới con người bọn đệ? Lẽ nào tỷ không phải con người sao?"
+    },
+    {
+      "id": "c62bbd9f-5de5-4896-bd23-5d87636b9a98",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Dưới ánh bình minh nhạt nhòa của buổi sớm năm giờ sáng, không gian ven rìa *Lam Ngân Sâm Lâm* vẫn còn chìm trong màn sương mỏng tang như dải lụa tiên giăng mắc qua những bụi gai dại. Những tia nắng đầu tiên, yếu ớt và run rẩy, khẽ xuyên qua tán lá cổ thụ, tạo nên những vệt sáng nhảy múa trên con đường đất đỏ dẫn về phía thành phố *Nặc Đinh*. *Diệp Thần* dừng bước, đôi mắt vốn luôn lim dim lười nhác bỗng trở nên trong veo dưới ánh sáng ban mai. Cậu xoay người lại, nhìn thẳng vào đôi mắt tinh khôi của thiếu nữ tóc xanh đang đi bên cạnh mình, rồi chân thành đặt ra một câu hỏi khiến không gian xung quanh dường như ngưng đọng lại."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "A Ngân tỷ, sao tỷ lại nói thế giới con người bọn đệ? Lẽ nào tỷ không phải con người sao?"
+        },
+        {
+          "type": "narrative",
+          "content": "Câu hỏi của *Diệp Thần* rơi vào không trung, thanh thoát nhưng lại nặng tựa ngàn cân. *A Ngân* khựng lại, bước chân nàng vốn đang nhẹ nhàng bỗng chốc trở nên cứng nhắc. Màn sương sớm dường như cũng vì câu nói này mà trở nên lạnh lẽo hơn. Nàng nhìn sâu vào đôi mắt của thiếu niên trước mặt, đôi mắt không có sự phán xét, không có sự tham lam, mà chỉ có một sự hiếu kỳ thuần khiết và một chút gì đó... bao dung đến lạ kỳ. Nàng im lặng một hồi lâu, bàn tay ngọc ngà khẽ siết chặt vạt áo lụa màu xanh lam, hơi thở trở nên dồn dập hơn một chút giữa sự tĩnh lặng của đại ngàn. Gió buổi sớm thổi qua, làm những sợi tóc xanh của nàng bay lòa xòa trước mặt, che đi một phần biểu cảm phức tạp trên gương mặt thoát tục. Cuối cùng, nàng khẽ mím môi, giọng nói trong trẻo nhưng mang theo một chút run rẩy đầy thử thách vang lên:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Nếu... nếu ta thực sự không phải là con người, mà là một yêu tinh rừng xanh bước ra từ những câu chuyện cổ tích, hoặc thậm chí là một thực thể mà các đệ cho là khác biệt, đáng sợ... liệu đệ có thấy sợ hãi, có muốn rời xa hay xa lánh ta không, Diệp Thần?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* không trả lời ngay. Cậu khẽ nghiêng đầu, một lọn tóc đen rũ xuống trán. Trong khoảnh khắc ấy, tâm trí cậu lướt qua biết bao nhiêu ký ức của kiếp trước và cả những dự tính cho kiếp này. Cậu nhìn thấy trong đôi mắt nàng một nỗi sợ hãi nguyên thủy — nỗi sợ bị chối bỏ, nỗi sợ bị săn đuổi và sự cô độc của một sinh linh đơn độc giữa nhân gian rộng lớn. Rồi, cậu khẽ lắc đầu, một cái lắc đầu lười biếng và thong dong như cách cậu vẫn thường làm mỗi khi đối phó với những chuyện phiền phức trong làng. Nụ cười nhạt nhòa hiện lên trên môi, cậu nhún vai một cái, vẻ mặt bất cần đời trở lại."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Tỷ nghĩ nhiều quá rồi. Với một kẻ lười biếng như đệ, việc phải sợ hãi hay ghét bỏ ai đó thực sự là một việc rất tốn sức. Cho dù tỷ là yêu tinh, là thần tiên, hay là bất cứ thứ gì đi chăng nữa, thì tỷ vẫn là *A Ngân* — người đã đồng ý cùng đệ đi đến thành phố *Nặc Đinh*, người đã dựng lều cho đệ ngủ đêm qua. Chỉ bấy nhiêu đó là đủ rồi, đệ quan tâm tỷ là \"cái gì\" để làm chi cho mệt xác?"
+        },
+        {
+          "type": "narrative",
+          "content": "Nhìn thấy cái lắc đầu dứt khoát và nghe những lời nói có phần \"vô tâm\" nhưng lại đầy sự chấp nhận vô điều kiện ấy, *A Ngân* sững người. Mọi sự phòng bị, mọi bức tường ngăn cách mà nàng tự xây dựng bấy lâu nay bỗng chốc sụp đổ hoàn toàn trước thái độ dửng dưng của thiếu niên này. Nàng nhìn thấy sự chân thành ẩn giấu đằng sau vẻ lười nhác kia, một sự chân thành không chút vụ lợi. Một cảm giác ấm áp chưa từng có len lỏi vào trái tim nàng, rực rỡ hơn cả ánh mặt trời đang lên ngoài kia. Nàng mỉm cười rạng rỡ, đôi mắt xanh biếc lấp lánh như chứa đựng cả một bầu trời sao, cảm giác tin tưởng dành cho *Diệp Thần* tăng lên rõ rệt, ràn rụa và mãnh liệt.\nCon đường phía trước dường như bừng sáng hơn sau khoảnh khắc trải lòng ấy. Hai người tiếp tục dấn bước trên con đường mòn, ánh nắng đã bắt đầu nhuộm vàng những cánh đồng lúa mạch ở phía xa xa, báo hiệu họ đang dần rời khỏi phạm vi ảnh hưởng của sâm lâm để tiến vào vùng ngoại ô của thành phố.\nTiếng chim hót líu lo trên những cành cây ven đường như đang hòa nhịp cùng bước chân của họ. *Diệp Thần* lững thững đi phía trước, hai tay ra sau gáy, miệng ngậm một cọng cỏ dại, bộ dạng ung dung như đang đi dạo trong vườn nhà. *A Ngân* đi bên cạnh, bước chân nàng giờ đây đã trở nên nhẹ hẫng, đôi mắt nàng không ngừng quan sát những cảnh vật mới lạ của thế giới loài người — những chiếc xe bò chở đầy nông sản của dân làng đi sớm, những ngôi nhà gạch đỏ thấp thoáng sau rặng tre, và cả mùi khói bếp cay nồng phảng phất trong không trung."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Đệ biết không, Diệp Thần, cảm giác bước đi dưới ánh mặt trời này... thật khác lạ so với khi ở dưới tán cây đại ngàn. Nó có một chút gì đó... hối hả, nhưng cũng rất đầy sức sống."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* khẽ liếc nhìn nàng, thấy nàng đang tò mò nhìn một người nông dân đang dắt trâu ra đồng, cậu không khỏi cảm thấy buồn cười. Đối với nàng, mọi thứ ở đây đều là lần đầu tiên, đều là những ẩn số cần được giải mã."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Đó mới chỉ là khởi đầu thôi tỷ ạ. Khi vào đến thành phố *Nặc Đinh*, tỷ sẽ thấy còn nhiều thứ kỳ lạ hơn nữa. Có những người bán kẹo hồ lô ngọt lịm, có những cửa hiệu quần áo rực rỡ sắc màu, và cả những đám đông ồn ào mà chắc chắn tỷ sẽ thấy hơi nhức đầu đấy."
+        },
+        {
+          "type": "narrative",
+          "content": "Cậu vừa nói vừa lấy lá thư giới thiệu của *Tố Vân* ra, lật qua lật lại. Dù võ hồn của cậu chỉ là một cái mặt nạ gỗ giản dị, nhưng tư chất Tiên thiên mãn hồn lực là thứ mà cậu biết chắc chắn sẽ gây ra không ít sóng gió tại học viện. Tuy nhiên, điều cậu quan tâm hơn lúc này chính là việc làm sao để che chở cho người thiếu nữ bên cạnh. *A Ngân* tuy đã hóa hình, nhưng sự thuần khiết và thiếu kinh nghiệm đối với xã hội loài người của nàng chính là điểm yếu lớn nhất. Cậu cần phải trở thành một \"hàng rào bảo vệ\" vững chắc, che chắn cho nàng khỏi những ánh mắt soi mói của các thế lực Hồn Sư cường đại.\nHành trình tiến về thành phố *Nặc Đinh* cứ thế tiếp tục trong không khí hài hòa. Càng đi, họ càng gặp nhiều người hơn trên đường. Những ánh mắt tò mò của dân làng bắt đầu đổ dồn về phía hai người — một đứa trẻ trông có vẻ nghèo khổ nhưng khí thái bất phàm, và một thiếu nữ xinh đẹp thoát tục như tiên giáng trần. *Diệp Thần* khéo léo điều chỉnh vị trí đi, luôn đứng ở phía bên ngoài để chắn bớt những cái nhìn quá mức khiếm nhã dành cho *A Ngân*."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Này tỷ tỷ, lát nữa vào thành, tỷ nhớ đừng có cứ thế mà mỉm cười với tất cả mọi người nhé. Ở thế giới con người, nụ cười của tỷ đôi khi còn nguy hiểm hơn cả độc dược đấy."
+        },
+        {
+          "type": "narrative",
+          "content": "*A Ngân* khẽ chớp mắt, vẻ mặt ngây ngô hỏi lại:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Tại sao chứ? Chẳng phải mỉm cười là cách để bày tỏ sự thiện chí sao?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* thở dài, vẻ mặt \"ông cụ non\" hiện lên rõ rệt:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Thiện chí thì đúng, nhưng với sắc đẹp của tỷ, thiện chí đó sẽ biến thành rắc rối cho đệ đấy. Đệ chỉ muốn lười biếng một chút, không muốn ngày nào cũng phải đi đánh nhau với những kẻ tranh giành tỷ đâu."
+        },
+        {
+          "type": "narrative",
+          "content": "Nàng bật cười khúc khích, tiếng cười như tiếng chuông bạc lay động lòng người. Nàng biết cậu chỉ đang nói đùa, nhưng trong thâm tâm nàng hiểu rằng cậu đang thực sự lo lắng cho mình. Sự gắn kết giữa hai người, một kẻ mang linh hồn trùng sinh và một hoàng hậu hóa hình, đang ngày càng trở nên khăng khít hơn bao giờ hết. Mỗi câu chuyện phiếm, mỗi cái nhìn trao nhau đều như những viên gạch xây dựng nên một nền móng vững chắc cho mối quan hệ này.\nKhi mặt trời đã lên cao, những bức tường thành bằng đá xám của thành phố *Nặc Đinh* bắt đầu hiện rõ ở phía cuối con đường. Dòng người đổ về cổng thành ngày một đông, tiếng rao hàng, tiếng xe ngựa và tiếng ồn ào của phố thị bắt đầu dội vào tai. *Diệp Thần* khẽ chỉnh lại túi hành lý trên vai, hít một hơi thật sâu. Một chương mới trong cuộc đời cậu tại thế giới này sắp sửa bắt đầu, và lần này, cậu không còn cô đơn nữa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Sắp đến nơi rồi. Tỷ đã sẵn sàng để trở thành một \"học viên\" chưa, *A Ngân* tỷ?"
+        },
+        {
+          "type": "narrative",
+          "content": "*A Ngân* gật đầu mạnh một cái, đôi mắt rực sáng niềm tin. Nàng chủ động bước nhanh hơn, sánh vai cùng cậu tiến về phía cổng thành to lớn kia. Dưới ánh nắng rực rỡ, bóng của hai người quyện vào nhau trên nền đất, như một minh chứng cho sự khởi đầu của một huyền thoại mới, nơi vận mệnh đã được định đoạt lại bằng sự chân thành và lòng tin tưởng tuyệt đối.\nHọ dừng lại trước cổng thành, nơi có hai hàng lính gác đang kiểm tra giấy tờ của khách bộ hành. *Diệp Thần* lấy ra thư giới thiệu và một vài đồng tiền lẻ đã chuẩn bị sẵn, sẵn sàng đối mặt với những thử thách đầu tiên tại nơi này. Cậu khẽ liếc nhìn *A Ngân* một lần cuối để chắc chắn nàng vẫn ổn, rồi cả hai cùng bước vào bên trong cánh cổng thành đồ sộ, để lại sau lưng những cánh rừng xanh thẳm và bước chân vào vòng xoáy của nhân gian."
+        }
+      ]
+    },
+    {
+      "id": "9ecadea8-6638-466c-8101-392f3f1dd9fe",
+      "type": "user_choice",
+      "content": "Dẫn A Ngân đến một cửa hàng trang phục để mua một chiếc khăn choàng hoặc mũ trùm đầu giúp nàng che bớt nhan sắc quá mức nổi bật, tránh rắc rối không đáng có. {Tỷ lệ thành công: 80%. Hậu quả/Phần thưởng: Giảm thiểu khả năng bị các thế lực hoặc NPC khác gây hấn vì nhan sắc của nàng, đồng thời thể hiện sự chu đáo của bạn.}"
+    },
+    {
+      "id": "c79813ac-e3ab-417b-96fa-f772d483e8fb",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Thành phố *Nặc Đinh* hiện ra trước mắt hai người như một con quái thú bằng đá khổng lồ đang nằm phủ phục dưới ánh nắng vàng rực rỡ của buổi sáng. Những bức tường thành cao vút, xám xịt và đầy những vết hằn của thời gian đứng sừng sững, tách biệt sự tĩnh lặng của đại ngàn với vẻ xô bồ, náo nhiệt của nhân gian. *Diệp Thần* dắt tay *A Ngân*, bước chân cậu vẫn giữ vẻ lững thững nhưng đôi mắt lại không ngừng quét qua dòng người đang chen chúc qua cổng thành.\nCàng đi sâu vào trong, tiếng ồn ào của phố thị càng trở nên dữ dội. Tiếng rao hàng của các tiểu thương, tiếng vó ngựa lọc cọc trên mặt đường lát đá, và cả tiếng cười nói râm ran tạo nên một bản giao hưởng hỗn loạn. *A Ngân* khẽ nép sát vào người *Diệp Thần*, đôi mắt xanh biếc tràn đầy sự ngỡ ngàng xen lẫn chút e dè trước những thứ hoàn toàn mới lạ. Nàng giống như một đóa hoa rừng tinh khiết vừa bị ném vào giữa một khu vườn đầy cỏ dại và bụi bặm. Sắc đẹp thoát tục của nàng, dù đã cố gắng che giấu, vẫn khiến không ít khách bộ hành phải ngoái nhìn, tạo nên những ánh mắt tò mò và đôi khi là cả sự thèm khát lộ liễu.\nNhận thấy những ánh nhìn không mấy thiện cảm đang đổ dồn về phía người đồng hành của mình, *Diệp Thần* khẽ nhíu mày. Cậu biết rằng nếu cứ để nguyên thế này mà đi đến học viện, chắc chắn sẽ có không ít rắc rối tìm đến cửa. Ánh mắt cậu đảo quanh, rồi dừng lại ở một cửa hàng trang phục nhỏ nằm khuất trong một con hẻm nhỏ ven đường, nơi có tấm biển gỗ cũ kỹ treo lủng lẳng một mảnh vải lụa đã bạc màu."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Tỷ tỷ, đi theo đệ. Chúng ta cần tìm cho tỷ một thứ để che chắn bớt nụ cười \"nguy hiểm\" kia lại, nếu không đệ sợ mình sẽ phải tốn sức đánh nhau với cả cái thành phố này mất."
+        },
+        {
+          "type": "narrative",
+          "content": "Cậu vừa nói vừa nhẹ nhàng kéo tay nàng rẽ vào con hẻm. *A Ngân* khẽ gật đầu, nàng cảm nhận được sự chu đáo và lo lắng ẩn giấu đằng sau lời nói đùa giỡn của thiếu niên nhỏ tuổi hơn mình. \nBước chân vào bên trong *Tiệm Trang Phục Nặc Đinh*, một không gian ấm cúng và đượm mùi vải vóc mới hiện ra. Những cuộn vải đủ màu sắc được xếp chồng lên nhau trên những kệ gỗ cao sát trần nhà. Ánh nắng ban mai rọi qua ô cửa sổ nhỏ, soi rõ những hạt bụi li ti đang nhảy múa trong không trung. Một người phụ nữ trung niên với gương mặt phúc hậu, mái tóc búi cao gọn gàng đang cặm cụi bên chiếc bàn gỗ lớn, tay cầm chiếc thước gỗ đo đo vẽ vẽ trên một tấm vải xanh. Nghe tiếng chuông gió treo ở cửa kêu lanh lảnh, bà ngẩng đầu lên, nụ cười hiền từ nở trên môi."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Lý thẩm",
+          "content": "Chào hai cháu nhỏ. Hai cháu muốn tìm mua quần áo hay phụ kiện gì sao? Nhìn hai đứa thật là khôi ngô và xinh đẹp quá."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* tiến lên phía trước, cậu khẽ cúi đầu chào một cách đầy lễ phép, gương mặt lười biếng thường ngày biến mất, thay vào đó là vẻ mặt của một cậu bé ngoan ngoãn và hiểu chuyện."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Chào thẩm ạ. Chúng cháu đang muốn tìm một chiếc khăn choàng hoặc mũ trùm đầu nào đó nhẹ nhàng, phù hợp với tỷ tỷ của cháu. Tỷ ấy vốn không quen với nắng gió và sự ồn ào của thành thị, nên cháu muốn tìm thứ gì đó để tỷ ấy cảm thấy thoải mái hơn."
+        },
+        {
+          "type": "narrative",
+          "content": "*Lý thẩm* nhìn hai đứa trẻ, rồi lại nhìn sang *A Ngân*. Bà không khỏi sững sờ trước vẻ đẹp thanh khiết của thiếu nữ tóc xanh. Bà vội vàng đặt chiếc thước xuống, bước ra khỏi quầy và đi tới kệ hàng phía góc phòng. Sau một hồi tìm kiếm, bà lấy ra một chiếc *Khăn choàng lụa xanh* bạc màu nhưng chất liệu vẫn còn rất mềm mại và dai sức."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Lý thẩm",
+          "content": "Đây, cháu xem chiếc khăn này thế nào? Màu xanh này rất hợp với màu tóc của tỷ tỷ cháu, lại là lụa thật, che nắng tốt mà lại rất thoáng mát."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* nhận lấy chiếc khăn, khẽ vuốt ve bề mặt vải. Đúng là một món đồ tốt, dù đã cũ nhưng vẫn toát lên vẻ trang nhã. Cậu nhẹ nhàng quàng chiếc khăn lên đầu *A Ngân*, khéo léo điều chỉnh để nó che bớt một phần khuôn mặt nhưng vẫn giữ được sự thanh thoát cho nàng. *A Ngân* đứng yên, cảm nhận hơi ấm từ bàn tay của cậu và mùi hương dịu nhẹ của chiếc khăn mới. Nàng khẽ soi mình trong chiếc gương đồng ố vàng cạnh đó, đôi mắt xanh thẳm ánh lên niềm vui sướng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Đẹp quá... Cảm ơn đệ, Diệp Thần."
+        },
+        {
+          "type": "narrative",
+          "content": "Nhìn thấy nụ cười của nàng, *Diệp Thần* cũng cảm thấy nhẹ lòng. Thế nhưng, khi cậu đưa tay vào túi để tìm tiền trả, nụ cười ấy bỗng chốc cứng lại. Cậu chợt nhận ra rằng, trong suốt hành trình từ *Thôn Thánh Hồn* đến đây, cậu chẳng có lấy một đồng hồn tệ nào lận lưng. Cả một đời trùng sinh, tính toán đủ điều, vậy mà lại quên mất thứ quan trọng nhất để sinh tồn ở nhân gian. Gương mặt cậu thoáng chút bối rối, tay vẫn không ngừng lục lọi trong chiếc túi rỗng tuếch.\n*Lý thẩm* quan sát biểu cảm của cậu, bà khẽ mỉm cười, đôi mắt lộ rõ vẻ thấu hiểu. Bà bước tới, nhẹ nhàng đặt tay lên vai *Diệp Thần*."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Lý thẩm",
+          "content": "Thôi nào cậu bé, không cần tìm nữa đâu. Nhìn hai đứa cháu yêu thương và quan tâm nhau như vậy, thẩm thấy rất cảm động. Chiếc khăn này vốn là đồ cũ trong tiệm, coi như món quà nhỏ thẩm tặng cho hai đứa làm kỷ niệm khi lần đầu đến *Nặc Đinh*. Diệp Thần à, cháu là một cậu bé tốt, hãy luôn chăm sóc cho tỷ tỷ của mình nhé."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* sững người, cậu không ngờ ở một nơi phố thị xô bồ thế này lại có thể gặp được một người nhân hậu đến vậy. Cậu cúi đầu thật sâu, giọng nói đầy sự chân thành."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Đa tạ thẩm ạ. Tấm lòng của thẩm, chúng cháu nhất định sẽ ghi nhớ. Sau này nếu có dịp, cháu nhất định sẽ quay lại tạ ơn thẩm."
+        },
+        {
+          "type": "narrative",
+          "content": "*A Ngân* cũng khẽ cúi chào, đôi mắt nàng lấp lánh sự cảm kích. Hai đứa trẻ chào tạm biệt bà chủ tiệm tốt bụng rồi bước ra khỏi cửa hàng. Lúc này, với chiếc khăn choàng khéo léo che giấu nhan sắc, họ đã có thể tự tin hơn khi bước đi trên phố.\nNắng trưa bắt đầu gay gắt, nhưng dưới bóng mát của những mái nhà cao tầng, không khí có phần dịu lại. *Diệp Thần* vẫn dắt tay *A Ngân*, dẫn nàng đi sâu vào khu trung tâm. Cậu tranh thủ giới thiệu cho nàng về những kiến trúc đặc trưng, về những bảng hiệu của các tổ chức khác nhau, từ thương hội cho đến các văn phòng của quân đội đế quốc. Mỗi bước đi là một bài học mới cho vị hoàng hậu nhỏ tuổi của rừng xanh."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Con người thật là kỳ lạ, họ xây nên những bức tường đá thật cao, rồi lại tự nhốt mình trong đó. Tại sao họ không cứ để mọi thứ tự nhiên như trong sâm lâm hả đệ?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* mỉm cười, một nụ cười mang chút thâm trầm của kẻ đã sống qua hai kiếp người."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Bởi vì con người luôn sợ hãi tỷ ạ. Họ sợ bóng tối, sợ cái lạnh, và sợ cả chính những đồng loại của mình. Những bức tường này, dù che chắn được gió bão, nhưng cũng vô tình ngăn cách trái tim họ với tự nhiên. Nhưng tỷ đừng lo, thế giới này vẫn còn những người tốt như bà chủ tiệm lúc nãy, và chắc chắn ở học viện cũng sẽ có những điều thú vị đang chờ chúng ta."
+        },
+        {
+          "type": "narrative",
+          "content": "Nói đoạn, cậu lôi lá thư giới thiệu của *Tố Vân* ra xem lại địa chỉ. *Học viện Nặc Đinh* không còn xa nữa, chỉ cần băng qua khu quảng trường trung tâm là tới. Càng gần đến nơi, họ càng gặp nhiều đứa trẻ cùng trang lứa, đứa thì được cha mẹ dắt tay, đứa thì đi cùng những đoàn tùy tùng sang trọng. Sự phân hóa giàu nghèo ở đây hiện lên rõ rệt qua từng bộ trang phục và cách hành xử của đám trẻ.\nBất chợt, từ phía sau một chiếc xe ngựa sang trọng vừa dừng lại, một nhóm thiếu niên ăn mặc lộng lẫy, gương mặt toát lên vẻ kiêu ngạo bước xuống. Kẻ đi đầu là một thiếu niên khoảng tám chín tuổi, mặc áo gấm thêu chỉ vàng, ánh mắt hắn đang quét qua đám đông với sự khinh khỉnh. Khi nhìn thấy bóng dáng thanh tú của *A Ngân* dù đã được che chắn bởi chiếc khăn lụa, đôi mắt hắn bỗng sáng rực lên một cách đầy ác ý.\n*Diệp Thần* cảm nhận được một luồng khí tức không mấy thiện lành đang nhắm về phía mình. Cậu khẽ siết chặt tay *A Ngân*, bước chân vẫn không thay đổi nhịp điệu, giả vờ như không hề hay biết. Cậu không muốn gây rắc rối ngay lúc này, mục tiêu lớn nhất vẫn là vào được học viện một cách êm thấm.\nTuy nhiên, dường như vận mệnh luôn thích trêu đùa những kẻ muốn tìm sự bình yên. Tên thiếu niên kia hất hàm về phía một tên thuộc hạ bên cạnh, khẽ thì thầm điều gì đó. Tên thuộc hạ gật đầu, lập tức tách khỏi đoàn và rảo bước tiến về phía hai đứa trẻ.\nKhông gian xung quanh dường như thu hẹp lại, tiếng ồn ào của chợ búa bỗng chốc lùi xa, chỉ còn lại tiếng bước chân dồn dập của tên thuộc hạ kia trên nền đá. *Diệp Thần* biết rằng, bài kiểm tra thực tế đầu tiên về khả năng bảo vệ của mình đã đến sớm hơn dự kiến. Cậu hít một hơi thật sâu, cảm nhận luồng hồn lực đang ngủ say trong cơ thể, sẵn sàng cho bất kỳ tình huống nào."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Diệp Thần, có người đang tiến lại gần chúng ta. Hơi thở của hắn... rất đục ngầu, không giống như bà chủ tiệm lúc nãy."
+        },
+        {
+          "type": "narrative",
+          "content": "Nàng khẽ thì thầm bên tai cậu, bản năng của một hồn thú giúp nàng nhận diện được những rung cảm cảm xúc tiêu cực một cách cực kỳ nhạy bén. *Diệp Thần* không quay đầu lại, chỉ khẽ đáp:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Diệp Thần",
+          "content": "Đệ biết rồi tỷ tỷ. Cứ đi tiếp như không có chuyện gì xảy ra. Nếu hắn muốn nói chuyện, chúng ta sẽ nghe. Còn nếu hắn muốn làm chuyện khác... thì đệ sẽ cho hắn thấy chiếc mặt nạ gỗ này không chỉ để ngắm đâu."
+        },
+        {
+          "type": "narrative",
+          "content": "Hai người cứ thế bước đi, bóng của họ kéo dài trên con đường lát đá, tiến dần về phía cổng *Học viện Nặc Đinh* đang thấp thoáng hiện ra sau những rặng cây ngô đồng đại thụ. Cuộc sống ở nhân gian, với tất cả sự rực rỡ và tối tăm của nó, đang thực sự mở ra những trang sách đầu tiên trước mắt vị hoàng hậu nhỏ và cậu bé mang linh hồn trùng sinh. Những toan tính, những âm mưu và cả những tình cảm chân thành sẽ cùng nhau thêu dệt nên một tương lai mà không một ai có thể đoán trước được.\nCon đường phía trước vẫn còn dài, và mỗi bước chân của họ đều đang ghi dấu lại một khởi đầu đầy sóng gió nhưng cũng không kém phần rực rỡ của những huyền thoại tương lai. Ánh nắng trưa gay gắt vẫn tỏa xuống thành phố, như một nhân chứng thầm lặng cho mọi sự khởi đầu."
+        }
+      ]
+    },
+    {
+      "id": "4af0a91e-5b95-4c09-b926-14fcb5329330",
+      "type": "user_choice",
+      "content": "Bình tĩnh tiếp tục dẫn A Ngân đi về hướng cổng học viện, phớt lờ hoàn toàn kẻ đang bám theo phía sau. {Tỷ lệ thành công: 70%. Hậu quả/Phần thưởng: Có thể đến được học viện mà không phải giao chiến ngay lập tức, nhưng kẻ bám theo có thể sẽ tìm cách gây khó dễ sau khi các bạn vào trong.}"
+    },
+    {
+      "id": "8fb240cc-bb72-4174-9df7-edbffde84075",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ngươi giữ vững nhịp bước, dẫn *A Ngân* đi thẳng về phía cổng học viện mà không một lần ngoái đầu lại nhìn kẻ bám đuôi. Đôi bàn tay nhỏ bé của ngươi nắm chặt lấy tay nàng, cảm nhận được hơi ấm và cả sự run rẩy nhẹ nhàng từ những ngón tay thon dài của thiếu nữ. Ánh nắng ban trưa của *Thành phố Nặc Đinh* hắt xuống mặt đường lát đá xám, tạo nên những vệt sáng chói lòa và những cái bóng đổ dài, xiêu vẹo. Phía sau lưng, hơi thở đục ngầu và ánh mắt tham lam của tên thuộc hạ kia vẫn như một bóng ma lởn vởn, nhưng ngươi không cho hắn bất kỳ một kẽ hở nào để tiếp cận."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đừng sợ, cứ nhìn thẳng về phía trước thôi tỷ. Những kẻ đó chỉ là những hạt bụi ven đường, không đáng để chúng ta phải dừng bước."
+        },
+        {
+          "type": "narrative",
+          "content": "Giọng nói của ngươi trầm thấp nhưng chứa đựng một sự trấn định lạ lùng, như một mỏ neo vững chắc giữa dòng đời xô bồ. Kẻ theo dõi sau một hồi quan sát, thấy ngươi không hề có sơ hở và hướng đi lại chính là khu vực giáo dục trọng điểm — nơi vốn có sự bảo vệ nghiêm ngặt của quân đội và các hồn sư của học viện — nên hắn đã chủ động lùi lại. Hắn đứng khựng lại bên một sạp hàng cũ, đôi mắt híp lại đầy hằn học, nhìn theo bóng dáng hai đứa trẻ dần tiến xa vào vùng an toàn. Hắn biết rõ luật lệ ở đây, một kẻ tôi tớ như hắn không được phép gây loạn trước cổng học viện nếu không muốn bị tống giam vào ngục tối.\n*A Ngân* khẽ nghiêng đầu, nhìn nghiêng khuôn mặt góc cạnh đầy kiên định của ngươi. Dưới lớp khăn lụa mỏng, đôi mắt xanh biếc của nàng ánh lên một vẻ kinh ngạc xen lẫn sự cảm động sâu sắc. Nàng vốn là hoàng hậu của rừng xanh, luôn bảo bọc muôn loài, nhưng đây là lần đầu tiên nàng cảm thấy mình được che chở bởi một tấm lưng nhỏ bé nhưng vững chãi đến thế. Một cảm xúc tin tưởng mãnh liệt dâng lên trong lòng nàng, lấp đầy những khoảng trống lo âu về nhân gian lạ lẫm. Nàng khẽ siết nhẹ tay ngươi như một lời cảm ơn thầm lặng khi cả hai dừng chân trước cổng trường đồ sộ."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Cảm ơn đệ, Diệp Thần. Có đệ ở bên, tỷ thấy thế giới này không còn đáng sợ như tỷ tưởng nữa."
+        },
+        {
+          "type": "narrative",
+          "content": "Cổng chính của *Học viện Nặc Đinh* hiện ra trước mắt hai người như một pháo đài tri thức đầy kiêu hãnh. Hai trụ đá khổng lồ cao tới hơn mười mét, được chạm khắc những hoa văn cổ xưa uốn lượn, nâng đỡ một tấm biển hiệu bằng gỗ đàn hương đỏ thẫm. Trên đó, dòng chữ \"*Học viện Nặc Đinh*\" được khảm bằng vàng ròng, tỏa sáng lấp lánh dưới ánh mặt trời gay gắt. Một hàng rào bằng sắt đen uốn cong tinh xảo ngăn cách khuôn viên học viện với sự ồn ào của phố thị bên ngoài. Bên trong, những rặng cây ngô đồng đại thụ tỏa bóng mát rượi, che phủ lên những con đường mòn rải sỏi trắng tinh khôi.\nKhông khí ở đây khác hẳn với sự xô bồ ngoài kia. Nó mang theo mùi thơm của sách vở, của cỏ non vừa cắt và một chút thanh khiết của linh lực đang luân chuyển trong các tòa nhà kiến trúc cổ kính. Xung quanh cổng trường lúc này khá đông đúc. Có những đứa trẻ mặc quần áo sang trọng, được cha mẹ dắt tay đi trong sự kiêu hãnh; cũng có những thiếu niên mặc áo vải thô, gương mặt đầy vẻ lo lắng và hy vọng. Tiếng xì xào bàn tán về các loại Võ hồn, về cấp bậc hồn lực vang lên không dứt.\nNgươi dắt *A Ngân* tiến lại gần trạm gác bên cạnh cổng chính. Hai người lính gác mặc bộ giáp nhẹ màu bạc, tay cầm trường thương, đứng thẳng như những pho tượng đá. Ánh mắt họ nghiêm nghị quét qua từng người đang tiến vào. Khi nhìn thấy hai đứa trẻ ăn mặc giản dị, thậm chí là có phần nghèo nàn, người lính gác bên trái khẽ nhíu mày, mũi thương hơi hạ xuống chặn đường."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Chào các vị đại huynh. Chúng cháu đến đây để làm thủ tục nhập học. Đây là thư giới thiệu của Chấp sự *Tố Vân* thuộc *Vũ Hồn Điện*."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi bình thản lấy ra cuộn giấy da hơi ố vàng, đưa lên phía trước. Người lính gác nhận lấy lá thư, mở ra đọc một cách nhanh chóng. Khi đôi mắt ông ta lướt qua dòng chữ \"Tiên thiên mãn hồn lực\", đồng tử bỗng co rút lại một cách dữ dội. Ông ta ngẩng đầu lên, nhìn chằm chằm vào ngươi với vẻ không tin nổi, rồi lại nhìn sang thiếu nữ xinh đẹp bên cạnh dù khuôn mặt đã được che bớt bởi chiếc khăn lụa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Người lính gác",
+          "content": "Tiên thiên mãn hồn lực? Lại còn là thư của *Tố Vân* đại nhân... Thật không ngờ ở cái thôn nhỏ đó lại xuất hiện một quái vật như cháu. Được rồi, hai cháu có thể vào trong. Đi thẳng con đường này đến tòa nhà chính màu trắng phía trước, phòng hành chính ở tầng một sẽ giúp các cháu hoàn tất thủ tục."
+        },
+        {
+          "type": "narrative",
+          "content": "Thái độ của người lính gác thay đổi rõ rệt, từ sự khinh khỉnh ban đầu chuyển sang một sự nể trọng kín đáo. Ông ta bước sang một bên, nhường lối cho hai người. Ngươi khẽ gật đầu chào rồi cùng *A Ngân* bước qua cánh cổng sắt đen. Cảm giác khi bước vào bên trong khuôn viên học viện giống như vừa bước qua một cánh cửa không gian. Tiếng ồn ào của thành phố bị triệt tiêu hoàn toàn, thay vào đó là tiếng lá cây xào xạc và tiếng chim hót líu lo.\n*A Ngân* nhìn ngắm xung quanh với vẻ hiếu kỳ cực độ. Nàng tò mò chạm tay vào lớp vỏ xù xì của một gốc cây ngô đồng, rồi lại ngước nhìn những tòa nhà cao tầng với những ô cửa sổ kính lấp lánh."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Đệ xem kìa, ở đây có nhiều loại thực vật thật lạ. Chúng có vẻ rất hạnh phúc khi được sống trong một môi trường yên tĩnh thế này."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đây mới chỉ là khởi đầu thôi tỷ. Trong học viện này còn nhiều thứ để khám phá lắm. Nhưng chúng ta cần nhanh chóng làm thủ tục, đệ muốn tỷ có một chỗ nghỉ ngơi thật thoải mái trước khi trời tối."
+        },
+        {
+          "type": "narrative",
+          "content": "Hai người rảo bước trên con đường sỏi. Dọc đường đi, các học viên khác cũng bắt đầu chú ý đến sự xuất hiện của hai người. Những đứa trẻ quý tộc nhìn ngươi với ánh mắt dò xét và có phần ganh tị, trong khi những học viên nghèo hơn lại nhìn với vẻ tò mò. Sự hiện diện của *A Ngân*, dù đã được che chắn, vẫn tỏa ra một khí chất thanh cao, thoát tục, khiến ai đi ngang qua cũng phải ngoái nhìn.\nNgươi cảm thấy một luồng hồn lực nhè nhẹ đang dao động xung quanh tòa nhà chính. Đó là nơi tập trung của nhiều vị giáo viên và hồn sư mạnh mẽ. Kiếp trước, ngươi đã trải qua đủ loại gian khổ, lần này trùng sinh, mục tiêu của ngươi không chỉ là sống một cuộc đời bình yên mà còn là bảo vệ những gì mình trân trọng. Việc đưa *A Ngân* vào học viện này là bước đi đầu tiên để nàng có một thân phận hợp pháp và được bảo vệ bởi các quy tắc của đế quốc.\nĐứng trước tòa nhà chính màu trắng với những cột đá cẩm thạch tráng lệ, ngươi dừng lại một chút để chỉnh lại quần áo cho *A Ngân*. Nàng mỉm cười nhìn ngươi, nụ cười ẩn hiện sau lớp khăn lụa rạng rỡ như nắng sớm."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Đệ đừng lo cho tỷ quá. Tỷ sẽ cố gắng học tập thật tốt để không làm đệ thất vọng. Chỉ cần có đệ ở đây, tỷ tin rằng chúng ta sẽ vượt qua được mọi chuyện."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi khẽ gật đầu, lòng thầm quyết tâm. Những sóng gió ở học viện này chắc chắn sẽ không ít, nhất là với một \"phế võ hồn\" mang hồn lực thiên tài như ngươi. Nhưng với trí tuệ của một linh hồn trùng sinh và sự đồng hành của Lam Ngân Hoàng, ngươi tin rằng mình sẽ viết nên một huyền thoại mới ngay tại nơi này.\nTiếng chuông học viện vang lên ngân nga, báo hiệu một giờ học mới bắt đầu. Ngươi nắm tay *A Ngân*, cùng bước vào sảnh chính của tòa nhà. Không gian bên trong rộng lớn với trần nhà cao vút, sàn nhà được lát đá hoa cương bóng loáng đến mức có thể soi gương được. Các bức tranh sơn dầu vẽ chân dung các vị viện trưởng tiền nhiệm được treo trang trọng dọc hai bên tường, như đang quan sát những thế hệ học viên mới.\nTại quầy tiếp tân, một vị giáo viên trung niên đang bận rộn sắp xếp các chồng hồ sơ. Ngươi tiến lại gần, đặt lá thư giới thiệu lên bàn. Một lần nữa, cái tên \"Tiên thiên mãn hồn lực\" lại tạo nên một sự rung động nhẹ. Vị giáo viên ngẩng đầu lên, kính lão hơi trễ xuống mũi, ánh mắt đầy vẻ thăm dò."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Giáo viên",
+          "content": "Cậu bé này chính là chủ nhân của lá thư? Võ hồn mặt nạ gỗ... Thật là một sự kết hợp kỳ lạ. Còn cô bé bên cạnh là ai? Cô bé có thư giới thiệu không?"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Dạ, đây là tỷ tỷ của cháu. Tỷ ấy đi cùng cháu để chăm sóc và cũng muốn xin vào học theo diện tự túc nếu được ạ."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi khéo léo đưa ra lý do. Thực tế, việc một học viên có tư chất đặc biệt như ngươi mang theo người thân là chuyện không hiếm, nhất là khi ngươi có sự bảo lãnh của *Vũ Hồn Điện*. Vị giáo viên gật gù, ghi chép gì đó vào một cuốn sổ lớn màu xanh."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Giáo viên",
+          "content": "Được rồi, tạm thời hai cháu sẽ được sắp xếp vào ký túc xá khu B dành cho học viên nghèo. Thủ tục kiểm tra chi tiết sẽ diễn ra vào sáng mai. Bây giờ hai cháu có thể đi nhận phòng."
+        },
+        {
+          "type": "narrative",
+          "content": "Nhận lấy chìa khóa và phù hiệu tạm thời, ngươi dẫn *A Ngân* đi về phía khu ký túc xá. Con đường đi qua một vườn hoa hồng rực rỡ, nơi hương thơm nồng nàn lan tỏa trong không khí. *A Ngân* dường như rất thích thú với những đóa hoa này, nàng khẽ cúi xuống hít hà một hơi dài, gương mặt lộ rõ vẻ hạnh phúc."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Đệ xem, con người cũng biết cách tôn vinh vẻ đẹp của thiên nhiên đấy chứ. Những đóa hoa này thật kiêu sa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đúng vậy tỷ, cái gì đẹp thì con người đều muốn giữ cho riêng mình. Chúng ta cũng vậy, cần phải giữ gìn sự bình yên của mình thật kỹ."
+        },
+        {
+          "type": "narrative",
+          "content": "Khu ký túc xá khu B hiện ra trước mắt, đó là một tòa nhà ba tầng bằng gạch đỏ khá giản dị nhưng sạch xẽ. Trước cửa tòa nhà, một vài học viên đang tụ tập trò chuyện. Một thiếu niên có vóc dáng khá to con, gương mặt hơi thô kệch đang đứng chắn giữa lối đi, tay cầm một chiếc roi cỏ, vẻ mặt có chút hống hách. Khi thấy hai người lạ mặt tiến tới, hắn khẽ nheo mắt lại, vẻ mặt không mấy thân thiện."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thiếu niên to con",
+          "content": "Này, hai đứa kia! Là học viên mới đến à? Có biết luật lệ ở khu ký túc xá này không? Đến đây phải chào hỏi đại ca *Vương Long* này một tiếng chứ."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi khẽ nhíu mày. Lại là một kẻ thích phô trương sức mạnh ở nơi dành cho những kẻ yếu thế. Ngươi không muốn gây sự, nhưng nếu kẻ này chạm đến giới hạn của ngươi, nhất là khi có *A Ngân* ở đây, ngươi sẽ không ngại cho hắn một bài học về sự khiêm tốn. Ngươi vẫn dắt tay *A Ngân*, bước tiếp về phía cửa chính như thể không nghe thấy gì."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tỷ tỷ, đừng để ý. Chúng ta chỉ cần tìm đúng phòng của mình để nghỉ ngơi thôi."
+        },
+        {
+          "type": "narrative",
+          "content": "Sự phớt lờ của ngươi khiến tên thiếu niên kia đỏ mặt vì giận dữ. Hắn vung chiếc roi cỏ trong tay, tạo nên một tiếng \"vút\" xé gió ngay trước mặt hai người. Các học viên xung quanh bắt đầu im lặng, ánh mắt đổ dồn về phía này với vẻ chờ đợi một cuộc xung đột sắp xảy ra."
+        }
+      ]
+    },
+    {
+      "id": "3743eb45-5d7b-4081-8650-08bc12a6b3f2",
+      "type": "user_choice",
+      "content": "Nhìn thẳng vào mắt tên thiếu niên với ánh mắt lạnh lùng, cảnh cáo hắn không được làm phiền hai người {Tỷ lệ thành công: 70%. Hậu quả/Phần thưởng: Thể hiện được khí thái và khiến hắn có chút e dè, nhưng có thể dẫn đến một màn so tài hồn lực ngay lập tức để định đoạt vị thế.}"
+    },
+    {
+      "id": "46e93552-fcc8-47bc-a230-ecc65b28de22",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Dưới ánh nắng gay gắt của buổi trưa mười hai giờ, không gian trước cửa *Ký túc xá khu B* thuộc *Học viện Nặc Đinh* dường như ngưng đọng lại trong một bầu không khí oi bức và ngột ngạt đến tột độ. Tiếng xào xạc của rặng cây ngô đồng đại thụ bên rìa sân không thể làm dịu đi cái nóng như thiêu như đốt đang bốc lên từ nền đất nện loang lổ vết nứt. Ngươi nhìn thẳng vào mắt tên thiếu niên to con với ánh mắt lạnh lùng, cảnh cáo hắn không được làm phiền hai người các ngươi. Cơn giận bùng lên lấn át lý trí, tên thiếu niên to con hét lớn và vung mạnh chiếc roi cỏ tấn công thẳng về phía ngươi, khơi mào một trận chiến ngay trước cửa ký túc xá."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tránh ra. Ta không có thời gian và hứng thú để chơi đùa với ngươi. Đừng tự chuốc lấy rắc rối."
+        },
+        {
+          "type": "narrative",
+          "content": "Lời cảnh báo trầm thấp, mang theo sự thâm trầm và lạnh lẽo của một linh hồn trùng sinh đã từng trải qua biết bao sóng gió, vang lên giữa khoảng sân vắng. Ánh mắt ngươi híp lại thành một đường chỉ sắc lẹm, khóa chặt lấy gương mặt thô kệch đang đỏ bừng vì giận dữ của đối phương. Sự điềm tĩnh đến đáng sợ của một đứa trẻ sáu tuổi trước mặt đám đông không những không làm tên thiếu niên to con e dè, mà ngược lại, nó giống như một gáo dầu dội thẳng vào ngọn lửa kiêu ngạo vốn đã ngút trời của kẻ quen thói bắt nạt kẻ yếu."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thiếu niên to con",
+          "content": "Thằng nhóc ranh! Ngươi là cái thá gì mà dám ăn nói với *Vương Long* này như thế? Hôm nay ta sẽ dạy cho ngươi biết thế nào là quy củ ở đây!"
+        },
+        {
+          "type": "narrative",
+          "content": "Hắn hét lớn, tiếng hét mang theo sự phẫn nộ tột cùng dội vào những bức tường gạch đỏ cũ kỹ của tòa ký túc xá. Trong cơn giận dữ lấn át toàn bộ lý trí, cánh tay thô ráp của hắn vung mạnh, luồng hồn lực yếu ớt màu xanh nhạt bỗng chốc ngưng tụ nơi lòng bàn tay, hóa thành một chiếc roi cỏ dài đầy gai nhọn hoắt. Chiếc roi xé gió quất mạnh về phía ngươi, tạo nên một tiếng \"vút\" chói tai, mang theo quyết tâm muốn hạ gục kẻ mới đến ngay lập tức để thị uy trước mặt đám đông học viên đang vây quanh xem náo nhiệt.\nThế nhưng, quy luật của thế giới Hồn Sư luôn nghiêm ngặt. Ngay khi đòn đánh đầu tiên chuẩn bị chạm đích, một luồng áp lực vô hình từ quy tắc giao chiến của các Hồn Sư bỗng chốc bao trùm lấy cả hai. Hồn lực trong cơ thể hai bên tự động dao động, bắt buộc các bên phải thực hiện nghi thức báo danh công khai trước khi chính thức bước vào cuộc so tài."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Vương Long",
+          "content": "Vương Long - Cấp 1 - Cường công hệ Hồn Sĩ - Võ hồn Roi Cỏ."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngay sau câu xướng danh đầy kiêu hãnh nhưng có phần vội vã của hắn, ngươi cũng không hề chậm trễ. Ngươi khẽ hít một hơi thật sâu, luồng hồn lực dồi dào của Tiên thiên mãn hồn lực đang ngủ say trong đan điền bỗng chốc thức tỉnh, cuồn cuộn chảy trôi qua các kinh mạch. Một luồng ánh sáng nâu trầm dịu nhẹ nhưng vô cùng cô đọng bộc phát từ lòng bàn tay phải của ngươi, ngưng tụ thành một chiếc mặt nạ gỗ giản dị, thô sơ lơ lửng bên cạnh bả vai. Áp lực từ cấp độ mười của ngươi đột ngột ép xuống, khiến không khí xung quanh dường như chìm xuống vài phần, áp chế hoàn toàn luồng hồn lực mỏng manh của đối phương."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Diệp Thần - Cấp 4 - Khống chế hệ Hồn Sĩ - Võ hồn Mặt Nạ Gỗ."
+        },
+        {
+          "type": "narrative",
+          "content": "Tiếng báo danh của ngươi vừa dứt, cả khoảng sân trước ký túc xá bỗng chốc rơi vào một sự tĩnh lặng đến đáng sợ. Những học viên đang đứng xem xung quanh, vốn dĩ đang chuẩn bị cười cợt kẻ mới đến nghèo khổ, giờ đây đều trợn tròn mắt kinh ngạc. Những tiếng xì xào bàn tán vang lên đầy dồn dập và hoảng hốt.\n\"Cái gì? Cấp mười? Tiên thiên mãn hồn lực sao?\"\n\"Trời đất ơi, một phế võ hồn như mặt nạ gỗ mà lại có hồn lực cấp mười? Điều này làm sao có thể!\"\n\"Vương Long lần này đụng phải đá cứng thật rồi...\"\n*Vương Long* nghe thấy ba chữ \"Cấp mười\" cùng danh hiệu \"Tiên thiên mãn hồn lực\", đồng tử của hắn lập tức co rút lại một cách kịch liệt. Sự kiêu ngạo trên gương mặt thô kệch bỗng chốc cứng đờ, thay vào đó là một sự hoảng hốt và hối hận tột cùng dâng lên trong lòng. Hắn biết rõ sự chênh lệch giữa cấp một và cấp mười là khủng khiếp đến mức nào. Tuy nhiên, đòn tấn công của hắn đã tung ra, chiếc roi cỏ mang theo kình phong sắc bén đã ở ngay sát vách đầu ngươi, không cách nào thu hồi lại được nữa.\nPhía sau lưng ngươi, *A Ngân* đứng im lặng dưới bóng mát của mái hiên ký túc xá. Chiếc khăn choàng lụa màu xanh khẽ lay động theo làn gió nóng, che giấu đi khuôn mặt xinh đẹp thoát tục của nàng, nhưng đôi mắt xanh biếc như ngọc bích kia lại đang phản chiếu rõ nét từng chuyển động của ngươi. Nàng không hề tỏ ra sợ hãi hay lo lắng cho ngươi, bởi lẽ bản năng của một Lam Ngân Hoàng giúp nàng cảm nhận được sự vượt trội tuyệt đối về mặt hồn lực của ngươi so với đối thủ. Nàng khẽ siết chặt vạt áo, trong lòng tràn ngập sự tò mò muốn xem xem vị đệ đệ lười nhác này sẽ giải quyết trận chiến đầu tiên ở nhân gian như thế nào.\nChiếc roi cỏ của *Vương Long* quất tới với tốc độ khá nhanh so với một đứa trẻ bình thường, nhưng đối với một kẻ mang linh hồn của một người trưởng thành trùng sinh và sở hữu hồn lực cấp mười như ngươi, chuyển động đó lại chậm chạp đến mức nực cười. Ngươi khẽ nghiêng người sang một bên, động tác vô cùng thong dong và chuẩn xác, chiếc roi cỏ sắc bén sượt qua bả vai ngươi chỉ trong gang tấc, đập mạnh xuống nền đất nện tạo nên một vệt rách nhỏ, tung bụi mù mịt.\nSức mạnh từ cú quật hụt khiến trọng tâm của *Vương Long* bị mất đà, hắn lảo đảo suýt ngã về phía trước. Ngươi nhìn thấy rõ sơ hở chết người đó của hắn, chiếc mặt nạ gỗ lơ lửng bên cạnh khẽ xoay tròn, sẵn sàng cho một đòn phản công quyết định. Trận chiến giao hữu này mới chỉ vừa bắt đầu, và quyền chủ động hoàn toàn nằm trong tay ngươi."
+        }
+      ]
+    },
+    {
+      "id": "d38af140-56c6-41a5-96a4-04be069bccad",
+      "type": "system",
+      "content": "**[Chiến đấu]** Trận chiến bắt đầu! Đối mặt: Thiếu niên to con."
+    },
+    {
+      "id": "a00d63bb-91ab-4e7c-9450-fb7d20ac1eae",
+      "type": "system",
+      "content": "**[Chiến đấu]** Diệp Thần thực hiện [Đánh Thường] nhắm vào Thiếu niên to con."
+    },
+    {
+      "id": "793f6cba-584c-419a-8700-5082ba22e923",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Trận tỷ thí kết thúc nhanh chóng đến mức bụi trần trên sân còn chưa kịp lắng xuống. *Thiếu niên to con* kia, dẫu sở hữu thân hình tráng thước như một ngọn thạch sơn, nhưng trước mặt ngươi lại chẳng khác nào một pho tượng đất mong manh. Sau một thoáng xuất chiêu chớp nhoáng, hắn thậm chí còn chưa kịp định thần thì đã thấy trời đất đảo lộn, tấm thân hộ pháp đổ rầm xuống mặt đất, bụi bay mù mịt.\nNgươi phủi phủi vạt áo, khóe môi khẽ nhếch lên một nụ cười phóng khoáng, đôi mắt hiện rõ vẻ trêu chọc thường thấy. Trong khi đó, *A Ngân* khẽ bước tới, tà áo xanh lam lay động như sóng nước. Nàng cúi xuống nhìn đối thủ đang bất tỉnh nhân sự, đôi mắt tinh khôi hiện lên một tia trắc ẩn nhàn nhạt. Ánh sáng từ *Lam Ngân Thảo* xung quanh dường như cũng cảm nhận được tâm ý của chủ nhân, khẽ đung đưa tỏa ra hơi thở ôn hòa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Diệp Thần, huynh ra tay dường như hơi nặng rồi. Vị tiểu huynh đệ này tuy có phần lỗ mãng, nhưng bản tính không xấu, chỉ là muốn thử sức mà thôi."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi khoanh tay trước ngực, nhìn thiếu niên đang nằm ngay đơ dưới đất, cười đáp:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ta đã tận lực nương tay rồi đó chứ! Chỉ là không ngờ hắn nhìn thì oai phong lẫm liệt, mà khí thế lại giống như bong bóng xà phòng, chạm nhẹ một cái đã vỡ tan tành rồi."
+        },
+        {
+          "type": "narrative",
+          "content": "*A Ngân* khẽ lắc đầu, nụ cười dịu dàng như gió xuân thoảng qua, nàng đưa tay thi triển một đạo hồn lực xanh biếc như ngọc, giúp ổn định khí huyết cho kẻ thua cuộc. Bầu không khí căng thẳng của trận đấu hoàn toàn tan biến, chỉ còn lại sự yên bình của chốn sơn dã."
+        }
+      ]
+    },
+    {
+      "id": "a6eec5ef-bc53-459b-bf38-724c314c7d6e",
+      "type": "user_custom_action",
+      "content": "Ngươi chỉ tay vào đứa trẻ đi cùng Vương Long nói: 'Ngươi. Mang hắn xuống phòng y tế đi.' Nói xong ngươi quay người dắt A Ngân về căn phòng được phân"
+    },
+    {
+      "id": "95332c64-5b81-40d2-a8cf-dc5b92c2419b",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ngươi đứng sừng sững giữa khoảng sân đầy nắng của *Ký túc xá khu B*, bóng lưng nhỏ bé của một đứa trẻ sáu tuổi nhưng lại toát ra một thứ uy nghiêm lạnh lùng, áp đảo hoàn toàn bầu không khí xung quanh. Chiếc mặt nạ gỗ giản dị lơ lửng bên cạnh vai ngươi khẽ xoay tròn một vòng rồi từ từ tiêu tán vào hư không, trả lại sự yên bình cho không gian. Dưới đất, *Vương Long* đang nằm co quắp, gương mặt thô kệch tái mét, hơi thở dồn dập sau khi bị luồng hồn lực mạnh mẽ của ngươi đánh bại hoàn toàn chỉ trong một chiêu thức chớp nhoáng. Đám đông học viên xung quanh vẫn chưa hết bàng hoàng, những tiếng xì xào kinh ngạc ban nãy đã hoàn toàn biến mất, nhường chỗ cho một sự im lặng đầy kính sợ.\nNgươi không thèm liếc nhìn kẻ bại trận dưới đất lấy một cái, đôi mắt lạnh lùng khẽ dịch chuyển, dừng lại trên thân ảnh một đứa trẻ gầy gò khác đang đứng run rẩy cạnh đó — kẻ vốn là tay sai đi cùng *Vương Long* để diễu võ dương oai. Ngươi đưa một ngón tay lên, chỉ thẳng vào mặt đứa trẻ đó, cất giọng ra lệnh đầy dứt khoát:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ngươi. Mang hắn xuống phòng y tế đi."
+        },
+        {
+          "type": "narrative",
+          "content": "Giọng nói của ngươi tuy còn non nớt của một đứa trẻ, nhưng âm điệu trầm thấp, không chứa một chút độ ấm nào, mang theo một sức ép vô hình khiến đứa trẻ kia không tự chủ được mà run rẩy bắn người lên. Nó nhìn ngươi với ánh mắt tràn đầy sự sợ hãi, hai chân líu ríu vào nhau như muốn khuỵu xuống. Không dám chần chừ dù chỉ một giây, nó vội vàng gật đầu lia lịa, lắp bắp đáp lời:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Vương Long",
+          "content": "Dạ... dạ! Cháu mang đại ca đi ngay... đi ngay đây ạ!"
+        },
+        {
+          "type": "narrative",
+          "content": "Nói rồi, đứa trẻ gầy gò vội vàng cúi xuống, dùng hết sức bình sinh để dìu tấm thân hộ pháp của *Vương Long* dậy. Những bước chân lảo đảo, vội vã của hai đứa trẻ nhanh chóng rời khỏi khoảng sân, để lại sau lưng một khoảng trống trải đầy nắng gắt.\nNgươi khẽ thở ra một hơi nhẹ chỉnh lại vạt áo vải thô của mình, gương mặt lạnh lùng ban nãy bỗng chốc tan biến, thay vào đó là vẻ lười nhác hờ hững thường ngày. Ngươi xoay người lại, nhìn về phía thiếu nữ đang đứng yên lặng dưới bóng râm của mái hiên. *A Ngân* vẫn đứng đó, chiếc *Khăn choàng lụa xanh* che khuất nửa khuôn mặt thanh tú, nhưng đôi mắt xanh biếc như chứa đựng cả tinh hoa của đại ngàn kia lại đang nhìn ngươi với một sự dịu dàng và tin tưởng tuyệt đối. Ngươi bước tới, tự nhiên nắm lấy bàn tay mềm mại, nhỏ nhắn của nàng. Bàn tay nàng khẽ siết nhẹ lấy tay ngươi, truyền đi một luồng ấm áp dịu nhẹ xua tan đi cái nóng nực, bực dọc của trận chiến vừa rồi."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đi thôi tỷ tỷ, chúng ta đi nhận phòng ký túc xá của mình. Đứng ngoài nắng thế này thật là tốn sức quá đi."
+        },
+        {
+          "type": "narrative",
+          "content": "*A Ngân* khẽ bật cười khúc khích dưới lớp khăn choàng lụa, tiếng cười trong trẻo như tiếng chuông gió lay động lòng người. Nàng gật đầu, bước chân nhẹ nhàng sánh bước cùng ngươi đi vào bên trong sảnh chính của tòa ký túc xá gạch đỏ."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Đệ đó, lúc nào cũng tỏ ra lười biếng, vậy mà ra tay lại dứt khoát đến thế. Làm tỷ cứ lo lắng không thôi."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Có gì phải lo đâu tỷ, một kẻ chỉ biết dựa vào chút sức mạnh cỏn con để bắt nạt người khác thì không xứng đáng làm đệ tốn nhiều thời gian. Chúng ta còn có nhiều việc quan trọng hơn phải làm mà."
+        },
+        {
+          "type": "narrative",
+          "content": "Hai người vừa dứt lời thì từ góc khuất của hành lang sảnh chính, một bóng người trung niên chậm rãi bước ra. Đó là một vị *Giáo viên* của học viện, người đã đứng quan sát toàn bộ diễn biến trận đấu từ đầu đến cuối dưới bóng mát của rặng cây ngô đồng bên ngoài. Vị *Giáo viên* này mặc một bộ lễ phục sư phạm màu xám tro chỉnh tề, mái tóc hoa râm được chải chuốt gọn gàng, gương mặt nghiêm nghị nhưng đôi mắt sắc sảo sau cặp kính gọng tròn lại đang ánh lên một tia sáng đầy tán thưởng.\nÔng bước đến trước mặt ngươi và *A Ngân*, bước chân không nhanh không chậm nhưng toát ra phong thái của một bậc tri thức có tu vi thâm hậu. Ông khẽ ho một tiếng nhẹ để thu hút sự chú ý của hai đứa trẻ, rồi mỉm cười hiền từ nhìn ngươi."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Giáo viên",
+          "content": "Cậu bé, bản lĩnh thật khá. Ta là giáo viên phụ trách quản lý khu ký túc xá này. Ban nãy ta đã chứng kiến toàn bộ sự việc. Không chỉ có tư chất Tiên thiên mãn hồn lực hiếm thấy, mà điều làm ta đánh giá cao ở cháu chính là phong thái bình tĩnh, sự dứt khoát và khí chất lãnh đạo thiên bẩm khi đối phó với kẻ khiêu khích."
+        },
+        {
+          "type": "narrative",
+          "content": "Vị *Giáo viên* ngừng lại một chút, ánh mắt lướt qua chiếc chìa khóa phòng ký túc xá thông thường mà ngươi đang cầm trên tay, rồi lắc đầu nhẹ. Ông lấy từ trong túi áo ra một chiếc chìa khóa đồng cổ kính khác, trên đó có khắc một ký hiệu hình chiếc lá tinh xảo, đưa tới trước mặt ngươi."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Giáo viên",
+          "content": "Căn phòng ghi trên chìa khóa cũ của các cháu nằm ở khu vực khá ồn ào đầu hành lang, không thích hợp cho việc tu luyện và nghỉ ngơi của một thiên tài. Đây là chìa khóa của căn phòng số 308 ở cuối hành lang tầng ba. Đó là vị trí yên tĩnh nhất của khu B này, có cửa sổ hướng ra đồi ngô đồng phía sau, linh khí đất trời nơi đó cũng thanh khiết hơn nhiều. Hãy nhận lấy nó đi, đây là sự ưu ái đặc biệt của ta dành cho bản lĩnh của cháu ngày hôm nay."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi khẽ ngạc nhiên trước sự xuất hiện và ý tốt của vị *Giáo viên* này. Với trí tuệ của một kẻ trùng sinh, ngươi lập tức hiểu được giá trị của việc tạo ấn tượng tốt với những người có quyền lực trong học viện. Ngươi nhận lấy chiếc chìa khóa đồng cổ kính, khẽ cúi đầu chào một cách lễ phép và đầy chuẩn mực."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đa tạ thầy đã quan tâm và chiếu cố. Sự dạy dỗ và giúp đỡ của thầy hôm nay, chúng cháu nhất định sẽ không quên."
+        },
+        {
+          "type": "narrative",
+          "content": "Vị *Giáo viên* gật đầu đầy hài lòng, ánh mắt nhìn ngươi càng thêm phần yêu mến và kỳ vọng. Ông vỗ vai ngươi một cái nhẹ rồi xoay người bước đi, để lại không gian yên tĩnh cho hai đứa trẻ.\nNgươi dắt tay *A Ngân* chậm rãi bước lên những bậc cầu thang bằng đá xám dẫn lên tầng ba của tòa nhà. Tiếng bước chân của hai người vang vọng đều đặn trong khoảng không gian yên tĩnh của hành lang. Hành lang khu B được thiết kế khá đơn giản nhưng sạch sẽ, ánh nắng trưa rọi qua những ô cửa sổ kính lớn, vẽ nên những vệt sáng vàng nhạt trên nền đất đá. Càng đi sâu về phía cuối hành lang tầng ba, tiếng ồn ào từ phía sân tập và khu cổng trường càng mờ nhạt dần, thay vào đó là tiếng xào xạc của những tán lá cây ngô đồng đại thụ ngoài cửa sổ thổi vào, mang theo hương vị thanh mát của đất trời và cây cỏ.\n*A Ngân* khẽ hít một hơi thật sâu, gương mặt sau lớp khăn choàng lụa lộ rõ vẻ thư thái và hạnh phúc. Nàng cảm nhận được luồng khí tức tự nhiên nồng đượm đang luân chuyển quanh khu vực này."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Diệp Thần, vị giáo viên kia thật là tốt bụng. Nơi này... tỷ có thể cảm nhận được hơi thở của rừng xanh, dù rất mỏng manh nhưng lại vô cùng thân thuộc. Căn phòng này chắc chắn sẽ rất tuyệt vời."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đúng vậy tỷ tỷ, thế giới loài người tuy đầy rẫy những kẻ xấu xa và hám lợi như tên Vương Long ban nãy, nhưng cũng không thiếu những người tốt biết trân trọng nhân tài. Chỉ cần chúng ta có đủ bản lĩnh để khẳng định vị thế của mình, tự khắc sẽ có những điều tốt đẹp tìm đến."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi dừng bước trước cánh cửa gỗ màu nâu trầm của căn phòng số 308. Chiếc khóa đồng cổ kính khẽ cạch một tiếng nhỏ dưới sự điều khiển của chiếc chìa khóa mới nhận. Ngươi đẩy nhẹ cánh cửa bước vào trong, kéo theo *A Ngân*.\nMột không gian yên tĩnh, trang nhã hiện ra trước mắt hai người. Căn phòng không quá rộng lớn nhưng lại vô cùng ngăn nắp và sạch sẽ. Giữa phòng là hai chiếc giường gỗ đơn giản được trải đệm trắng tinh khôi, một chiếc bàn học bằng gỗ thông thơm mùi nhựa mới đặt cạnh ô cửa sổ lớn bằng kính. Ánh nắng chiều tà khẽ xuyên qua những tán lá ngô đồng xào xạc ngoài cửa sổ, rọi vào phòng những vệt sáng lấp lánh như những hạt kim cương nhỏ. Đứng từ cửa sổ nhìn ra ngoài, có thể thấy toàn bộ ngọn đồi nhỏ xanh mướt phía sau học viện, nơi những khóm hoa dại đang khoe sắc dưới ánh nắng.\n*A Ngân* không giấu nổi sự vui sướng, nàng vội vàng tháo chiếc khăn choàng lụa xanh trên đầu ra, để lộ mái tóc dài màu xanh lam mềm mại như sóng nước và gương mặt xinh đẹp thoát tục rạng rỡ dưới ánh nắng. Nàng chạy đến bên bậu cửa sổ, đưa hai tay ra đón lấy làn gió mát rượi thổi vào từ ngọn đồi."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "A Ngân",
+          "content": "Đẹp quá, Diệp Thần! Nơi này thật sự rất yên tĩnh và dễ chịu. Tỷ có thể cảm nhận được tiếng hát của những ngọn cỏ trên đồi kia nữa đấy. Cảm ơn đệ đã luôn bảo vệ và mang lại cho tỷ những điều tuyệt vời thế này."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi đặt chiếc túi hành lý nhỏ xuống góc phòng, lững thững đi đến bên cạnh nàng, tựa lưng vào bậu cửa sổ, nhìn ngắm nụ cười rạng rỡ của người thiếu nữ bên cạnh. Một cảm giác yên bình, ấm áp chưa từng có len lỏi vào tâm trí ngươi, xua tan đi mọi mệt mỏi và toan tính của một ngày dài thám hiểm."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tỷ thích là tốt rồi. Đây chỉ là bước khởi đầu thôi, sau này đệ nhất định sẽ tìm cho tỷ một nơi còn đẹp và yên bình hơn thế này gấp trăm ngàn lần. Bây giờ, chúng ta hãy cùng dọn dẹp hành lý rồi nghỉ ngơi một lát đi, ngày mai còn phải đối mặt với buổi kiểm tra chính thức của học viện nữa."
+        },
+        {
+          "type": "narrative",
+          "content": "*A Ngân* gật đầu mạnh một cái, đôi mắt xanh biếc lấp lánh niềm tin. Hai đứa trẻ cùng nhau bắt tay vào dọn dẹp căn phòng mới, dệt nên những mảnh ký ức đầu tiên đầy ấm áp và rực rỡ tại nơi bắt đầu của một hành trình huyền thoại mới ở nhân gian."
+        }
+      ]
+    }
+  ],
+  "choices": [
+    "Ngồi xuống giường thiền định vận chuyển chân nguyên để củng cố hồn lực cấp mười vừa thức tỉnh trước khi bước vào buổi kiểm tra chính thức sáng mai. {Tỷ lệ thành công: 85%. Hậu quả/Phần thưởng: Hồn lực được củng cố vững chắc, cơ thể khỏe khoắn và sẵn sàng bộc phát trạng thái tốt nhất cho ngày mai.}",
+    "Cùng A Ngân sắp xếp hành lý dọn dẹp căn phòng và trò chuyện sâu hơn để tìm hiểu về những ký ức ban đầu của nàng trước khi hóa hình. {Tỷ lệ thành công: 90%. Hậu quả/Phần thưởng: Gia tăng sự gắn kết tình cảm sâu sắc giữa hai người, giúp A Ngân cảm thấy tin tưởng và an tâm tuyệt đối.}",
+    "Đi ra bậu cửa sổ quan sát địa hình ngọn đồi ngô đồng phía sau phòng để tìm kiếm một vị trí thích hợp cho việc tập luyện kín đáo sau này. {Tỷ lệ thành công: 75%. Hậu quả/Phần thưởng: Phát hiện ra một khu vực linh khí tụ hội rất tốt trên đồi, thích hợp làm nơi tu luyện bí mật.}",
+    "Đóng cửa phòng lại và đề nghị cùng A Ngân đi xuống nhà bếp của học viện để tìm chút thức ăn lót dạ sau một ngày dài di chuyển mệt mỏi. {Tỷ lệ thành công: 80%. Hậu quả/Phần thưởng: Lấp đầy chiếc bụng đói, đồng thời có cơ hội làm quen gián tiếp với một vài học viên hoặc nhân viên phục vụ tốt bụng.}"
+  ],
+  "gameMode": "EXPLORATION",
+  "activeTrade": {
+    "trader": null,
+    "playerOffer": [],
+    "npcOffer": null,
+    "offerType": "sell",
+    "sellMultiplier": 0,
+    "itemSpecificSellBonuses": {},
+    "itemSpecificBuyBonuses": {}
+  },
+  "storySummaries": [],
+  "adventureTurnCount": 14
+}
