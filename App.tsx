@@ -2183,12 +2183,15 @@ const INITIAL_STATS = {
     },
 };
 // HÀM MỚI: Lấy màu sắc cho VẬT PHẨM và KỸ NĂNG CHIẾN ĐẤU dựa trên phẩm chất
+// Viền chữ đen mỏng cho các sắc thái trắng/xám nhạt (phẩm chất "Thường" trở xuống) —
+// nếu không có viền, chữ gần như vô hình trên nền sáng (parchment). Xem báo cáo lỗi UI Hành Trang.
+const RARITY_PALE_TEXT_OUTLINE = '[-webkit-text-stroke:0.5px_black] [paint-order:stroke_fill]';
 const getItemRarityColor = (item) => {
-    if (!item) return 'text-gray-300'; 
-    
+    if (!item) return `text-gray-300 ${RARITY_PALE_TEXT_OUTLINE}`;
+
     // Kiểm tra cả Rarity (viết hoa) và rarity (viết thường)
     const rarity = item.Rarity || item.rarity;
-    if (!rarity) return 'text-gray-300'; // Mặc định nếu không có phẩm chất
+    if (!rarity) return `text-gray-300 ${RARITY_PALE_TEXT_OUTLINE}`; // Mặc định nếu không có phẩm chất
 
     switch (rarity.toLowerCase()) {
         case 'thần thoại': return 'rarity-mythical font-extrabold';
@@ -2197,8 +2200,8 @@ const getItemRarityColor = (item) => {
         case 'cực phẩm': return 'text-purple-400';
         case 'hiếm': return 'text-blue-400';
         case 'tốt': return 'text-green-400';
-        case 'thường': return 'text-gray-100';
-        default: return 'text-gray-300';
+        case 'thường': return `text-gray-100 ${RARITY_PALE_TEXT_OUTLINE}`;
+        default: return `text-gray-300 ${RARITY_PALE_TEXT_OUTLINE}`;
     }
 };
 const getSkillColorClass = (skill) => {
@@ -11841,15 +11844,17 @@ const CraftingModal = ({
     };
     const typeProbs = calculateTypeProbabilities();
 
+    // Trả về object { text, bg } thay vì 1 chuỗi tách bằng split(' ') — an toàn hơn khi
+    // class chữ cần nhiều token (VD: viền đen cho phẩm chất nhạt màu).
     const getRarityColorCSS = (rarity) => {
         switch (rarity) {
-            case 'Thần Thoại': return 'rarity-mythical rarity-mythical-dot';
-            case 'Huyền Thoại': return 'text-red-500 bg-red-500';
-            case 'Siêu Phẩm': return 'text-orange-400 bg-orange-400';
-            case 'Cực Phẩm': return 'text-purple-400 bg-purple-400';
-            case 'Hiếm': return 'text-blue-400 bg-blue-400';
-            case 'Tốt': return 'text-green-400 bg-green-400';
-            default: return 'text-gray-300 bg-gray-300';
+            case 'Thần Thoại': return { text: 'rarity-mythical', bg: 'rarity-mythical-dot' };
+            case 'Huyền Thoại': return { text: 'text-red-500', bg: 'bg-red-500' };
+            case 'Siêu Phẩm': return { text: 'text-orange-400', bg: 'bg-orange-400' };
+            case 'Cực Phẩm': return { text: 'text-purple-400', bg: 'bg-purple-400' };
+            case 'Hiếm': return { text: 'text-blue-400', bg: 'bg-blue-400' };
+            case 'Tốt': return { text: 'text-green-400', bg: 'bg-green-400' };
+            default: return { text: `text-gray-300 ${RARITY_PALE_TEXT_OUTLINE}`, bg: 'bg-gray-300' };
         }
     };
 
@@ -11939,11 +11944,11 @@ const CraftingModal = ({
                                     {fusionMaterials.length < 2 ? <div className="h-8 bg-[#162216] border border-[#8ba888]/10"></div> : (
                                         <div className="animate-fade-in">
                                             <div className="flex justify-between text-[9px] font-bold uppercase mb-1">
-                                                <span className={getRarityColorCSS(baseRarity).split(' ')[0]}>{baseRarity}</span>
-                                                {nextRarity && <span className={getRarityColorCSS(nextRarity).split(' ')[0]}>{nextRarity}</span>}
+                                                <span className={getRarityColorCSS(baseRarity).text}>{baseRarity}</span>
+                                                {nextRarity && <span className={getRarityColorCSS(nextRarity).text}>{nextRarity}</span>}
                                             </div>
                                             <div className="w-full bg-[#162216] h-1 border border-[#8ba888]/20 relative">
-                                                <div className={`h-full transition-all duration-500 ${getRarityColorCSS(baseRarity).split(' ')[1]}`} style={{ width: `${progressPercent}%` }}></div>
+                                                <div className={`h-full transition-all duration-500 ${getRarityColorCSS(baseRarity).bg}`} style={{ width: `${progressPercent}%` }}></div>
                                             </div>
                                         </div>
                                     )}
@@ -11995,7 +12000,8 @@ const ItemTooltip = ({ item, inlineStyle }) => {
             case 'cực phẩm': return 'text-purple-400';
             case 'hiếm': return 'text-blue-400';
             case 'tốt': return 'text-green-400';
-            default: return 'text-gray-300';
+            case 'thường': return `text-gray-100 ${RARITY_PALE_TEXT_OUTLINE}`;
+            default: return `text-gray-300 ${RARITY_PALE_TEXT_OUTLINE}`;
         }
     };
 
