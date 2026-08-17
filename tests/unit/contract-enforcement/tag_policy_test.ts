@@ -95,9 +95,17 @@ describe('classifyTag allow/strip matrix', () => {
 
   it('test_character_update_writing_mechanical_fields_is_forbidden', () => {
     expect(classifyTag('CHARACTER_UPDATE', { target: 'p1', exp: '900' }, PLAYER)).toBe('strip_and_log');
-    expect(classifyTag('CHARACTER_UPDATE', { target: 'p1', hp: '10' }, PLAYER)).toBe('strip_and_log');
     expect(classifyTag('CHARACTER_UPDATE', { target: 'npc_7', hp: '10' }, PLAYER)).toBe('allow');
     expect(classifyTag('CHARACTER_UPDATE', { target: 'p1', Appearance: 'rách rưới' }, PLAYER)).toBe('allow');
+  });
+
+  it('test_player_hp_writes_are_allowed_by_default_and_barred_on_opt_in', () => {
+    // STORY mode has no CombatLoop owning HP, so redacting it would delete all
+    // damage from the scene - the bar is opt-in per mode.
+    expect(classifyTag('CHARACTER_UPDATE', { target: 'p1', hp: '10' }, PLAYER)).toBe('allow');
+    expect(
+      classifyTag('CHARACTER_UPDATE', { target: 'p1', hp: '10' }, { ...PLAYER, forbidPlayerHpWrites: true }),
+    ).toBe('strip_and_log');
   });
 
   it('test_silent_strip_list_produces_a_plain_strip', () => {

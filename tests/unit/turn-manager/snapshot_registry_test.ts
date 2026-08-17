@@ -127,6 +127,9 @@ describe('app state undo adapter (plan.md risk R5)', () => {
       'currentTurn',
       'gameSettings',
       'choices',
+      'gameMode',
+      'activeTrade',
+      'adventureTurnCount',
     ]);
   });
 

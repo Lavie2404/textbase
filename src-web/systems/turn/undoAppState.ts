@@ -35,11 +35,42 @@ export interface AppUndoableState {
   storySummaries: unknown;
   /** `currentTurn:19017` - the App's own turn counter (distinct from world_time). */
   currentTurn: number;
-  /** `gameSettings:18965` - a turn may change e.g. difficulty-adjacent fields. */
+  /**
+   * A PROJECTION of `gameSettings:18965`, never the whole object - see
+   * `TURN_RELEVANT_SETTINGS_KEYS`. The setter MUST merge it
+   * (`setGameSettings(prev => ({ ...prev, ...s.gameSettings }))`), never assign
+   * it, because the keys outside the projection are deliberately absent.
+   */
   gameSettings: unknown;
   /** `choices:19555` - the rendered suggestion set. */
   choices: unknown;
+
+  // -- Optional fields (added after the first P4b wiring pass). Absent keys are
+  // NOT written into the snapshot, so an older caller keeps its exact shape.
+
+  /** `gameMode` - EXPLORATION | COMBAT | TRADE. A turn can switch it via tags. */
+  gameMode?: unknown;
+  /** `activeTrade` - the whole trade session object; a turn can open/close it. */
+  activeTrade?: unknown;
+  /** `adventureTurnCount` - the adventure-skill clock, incremented per turn. */
+  adventureTurnCount?: number;
 }
+
+/**
+ * Keys of `gameSettings` the TURN PIPELINE may mutate, and therefore the only
+ * ones Undo has to restore.
+ *
+ * AUDITED EMPTY. Every `setGameSettings` call site in App.tsx belongs to world
+ * creation, the settings screen, the BGM controls, or a save load - none of them
+ * runs inside the turn cycle, and none of them is inside the undo window. So the
+ * projection is `{}` and restoring it is a no-op merge, which is exactly right:
+ * capturing the full object would deep-clone `initialWorldElements` and the
+ * custom theme config on EVERY turn for nothing.
+ *
+ * If a turn-pipeline setting ever appears, add its key here - that is the whole
+ * change needed, and `makeAppStateUndoable` picks it up automatically.
+ */
+export const TURN_RELEVANT_SETTINGS_KEYS: readonly string[] = [];
 
 /** Field order is fixed so a snapshot is diffable and stable across sessions. */
 export const APP_UNDOABLE_FIELDS: readonly (keyof AppUndoableState)[] = [
@@ -49,6 +80,20 @@ export const APP_UNDOABLE_FIELDS: readonly (keyof AppUndoableState)[] = [
   'currentTurn',
   'gameSettings',
   'choices',
+  'gameMode',
+  'activeTrade',
+  'adventureTurnCount',
+];
+
+/**
+ * Fields a caller may omit. They are copied only when the getter actually
+ * returns them, so a snapshot taken by a caller that predates them contains no
+ * `undefined` placeholders and restores byte-identically.
+ */
+export const APP_UNDOABLE_OPTIONAL_FIELDS: readonly (keyof AppUndoableState)[] = [
+  'gameMode',
+  'activeTrade',
+  'adventureTurnCount',
 ];
 
 export interface AppStateAccessors {
@@ -61,6 +106,12 @@ export interface AppStateAccessors {
   set(next: AppUndoableState): void;
   /** Optional deep-clone override. Defaults to `structuredClone` + JSON fallback. */
   clone?: <T>(value: T) => T;
+  /**
+   * Overrides how `gameSettings` is narrowed to its turn-relevant projection.
+   * Defaults to picking `TURN_RELEVANT_SETTINGS_KEYS`. A caller that stores its
+   * settings somewhere other than a plain object can supply its own picker.
+   */
+  settingsProjection?: (settings: unknown, keys: readonly string[]) => unknown;
   /** Diagnostics sink for clone fallbacks; never throws out of the adapter. */
   onWarning?: (message: string) => void;
 }
@@ -97,11 +148,23 @@ export function deepCloneState<T>(value: T, onWarning?: (m: string) => void): T 
   }
 }
 
+/** Default projection: pick the listed keys, skipping ones the object lacks. */
+export function projectSettings(settings: unknown, keys: readonly string[]): unknown {
+  if (keys.length === 0) return {};
+  if (!settings || typeof settings !== 'object') return {};
+  const src = settings as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const k of keys) if (k in src) out[k] = src[k];
+  return out;
+}
+
 /** Picks exactly the enumerated fields, dropping anything else the caller passed. */
 function pickFields(state: AppUndoableState): AppUndoableState {
   const out = {} as AppUndoableState;
+  const src = state as unknown as Record<string, unknown>;
   for (const key of APP_UNDOABLE_FIELDS) {
-    (out as unknown as Record<string, unknown>)[key] = (state as unknown as Record<string, unknown>)[key];
+    if (APP_UNDOABLE_OPTIONAL_FIELDS.includes(key) && !(key in src)) continue;
+    (out as unknown as Record<string, unknown>)[key] = src[key];
   }
   return out;
 }
@@ -125,12 +188,16 @@ export interface AppStateUndoable extends UndoableSystem {
  */
 export function makeAppStateUndoable(accessors: AppStateAccessors): AppStateUndoable {
   const clone = accessors.clone ?? (<T>(v: T) => deepCloneState(v, accessors.onWarning));
+  const project = accessors.settingsProjection ?? projectSettings;
 
   return {
     fields: APP_UNDOABLE_FIELDS,
 
     captureSnapshot(): AppStateSnapshot {
       const live = pickFields(accessors.get());
+      // Narrow gameSettings BEFORE cloning: the full object carries the world
+      // creation payload and the theme config, none of which a turn can change.
+      live.gameSettings = project(live.gameSettings, TURN_RELEVANT_SETTINGS_KEYS);
       return { kind: 'app_state', version: 1, fields: clone(live) };
     },
 

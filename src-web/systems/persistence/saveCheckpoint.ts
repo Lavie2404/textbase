@@ -31,6 +31,7 @@ import {
 } from './bundle';
 import { isWritable, type SlotRecord } from './slotRecord';
 import {
+  KEY_PREFIX,
   checkpointKey,
   persistenceError,
   slotKey,
@@ -266,18 +267,44 @@ export async function saveCheckpoint(
 /** `N` for the default registry (gdd-05 B3 "Registered systems"). */
 export const REGISTERED_SYSTEM_COUNT = SYSTEM_IDS.length;
 
+/** `ckpt:<slot_id>:` - the list() prefix covering one slot's checkpoints. */
+export function checkpointPrefix(slotId: string): string {
+  return `${KEY_PREFIX.checkpoint}${slotId}:`;
+}
+
 /**
  * Bounds checkpoint growth in the reduced variant: keeps the newest `keep`
  * checkpoints of a slot and deletes the rest. Off the critical path - the caller
- * runs it during Awaiting Action idle, never inside the durability gate.
+ * runs it during Awaiting Action idle, never inside the durability gate, and it
+ * NEVER throws (a failed delete leaves the checkpoint in place; the next prune
+ * retries it).
+ *
+ * IDEMPOTENT: re-running it deletes nothing once the slot is already at or below
+ * `keep`, so it is safe to call after every turn, on load, and on resume without
+ * tracking whether it already ran.
+ *
+ * `keep` defaults to `PERSISTENCE_KNOBS.max_checkpoints_per_slot` and is clamped
+ * to at least 1: pruning a slot down to zero checkpoints would delete the very
+ * state a load needs.
  */
 export async function pruneCheckpoints(
   backend: StorageBackend,
   slotId: string,
-  keep = 2,
+  keep: number = PERSISTENCE_KNOBS.max_checkpoints_per_slot,
 ): Promise<number> {
-  const keys = await backend.list(checkpointKey(slotId, 0).slice(0, `ckpt:${slotId}:`.length));
-  const doomed = keys.slice(0, Math.max(0, keys.length - Math.max(1, keep)));
-  for (const key of doomed) await backend.delete(key);
-  return doomed.length;
+  const keys = await backend.list(checkpointPrefix(slotId));
+  // Keys pad world_time, so lexicographic order IS numeric order; sorting here
+  // removes any dependence on the backend's own listing order.
+  const sorted = [...keys].sort();
+  const doomed = sorted.slice(0, Math.max(0, sorted.length - Math.max(1, Math.floor(keep))));
+  let deleted = 0;
+  for (const key of doomed) {
+    try {
+      await backend.delete(key);
+      deleted += 1;
+    } catch {
+      /* a checkpoint that refuses to delete is pruned on the next pass */
+    }
+  }
+  return deleted;
 }

@@ -85,6 +85,18 @@ export const AI_KNOBS = {
    * `ai_call_timeout_seconds` so model fallback stays possible.
    */
   request_timeout_default: 45,
+  /**
+   * gdd-01 C.5 / plan.md C-10 DEVIATION #2 (per-call-type budgets).
+   * A `narration_call` in "dai" length mode asks for ~3000 words; measured
+   * round-trips run past the uniform 60s budget and the call was being killed
+   * mid-stream, so narration gets its own 150s logical / 120s per-request pair
+   * while short JSON/background calls keep 60/45. `narration_request_timeout_default`
+   * must stay strictly below `narration_call_timeout_seconds` for the same
+   * reason the uniform pair must: otherwise model fallback is unreachable.
+   */
+  narration_call_timeout_seconds: 150,
+  /** See `narration_call_timeout_seconds` (plan.md C-10 deviation #2). */
+  narration_request_timeout_default: 120,
   /** gdd-01 C.5: fixed wait before retrying the same model after a 503. */
   overload_retry_wait_seconds: 2,
   /** gdd-01 C.5: linear backoff base for non-503 transient errors. */
@@ -325,6 +337,13 @@ export const PERSISTENCE_KNOBS = {
   blob_gather_timeout_ms: 100,
   /** gdd-05 B5 (ADR D1): full-flush cadence in turns. */
   FLUSH_EVERY_N_TURNS: 50,
+  /**
+   * plan.md D "P3 rut gon": the reduced variant writes a FULL bundle per
+   * checkpoint, so storage grows O(state) per turn unless bounded. This is the
+   * number of newest checkpoints `pruneCheckpoints` keeps per slot; 2 is the
+   * minimum that still allows a post-undo rollback to a previous checkpoint.
+   */
+  max_checkpoints_per_slot: 2,
   /**
    * gdd-05 B6/R8: release-bound technical value, not a knob. Bumped on schema
    * change. P3a raised it from 1 to 2 - three R8 triggers fired at once: the

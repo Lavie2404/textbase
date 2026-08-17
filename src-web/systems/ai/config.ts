@@ -57,6 +57,38 @@ export const SAFETY_SETTINGS_BLOCK_NONE: readonly SafetySetting[] = [
   { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
 ];
 
+/**
+ * One (logical budget, per-request budget) pair.
+ *
+ * plan.md C-10 DEVIATION #2 (per-call-type budgets): the original C-10 raised a
+ * SINGLE uniform pair to 60/45. That is right for short JSON calls but kills a
+ * "dai" (~3000 word) narration mid-stream, so the budget became a function of
+ * `call_type` instead of a constant. Documented as a deviation because C-10 as
+ * written names one pair for the whole layer.
+ */
+export interface CallBudget {
+  /** Whole-logical-call budget in seconds (F2), including retries + backoff. */
+  ai_call_timeout_seconds: number;
+  /** Cap for ONE HTTP request; must stay strictly below the logical budget. */
+  request_timeout_default: number;
+}
+
+/**
+ * Keyed by `CallType` (`promptBuilder.ts`). Typed as `string` rather than
+ * `CallType` on purpose: `promptBuilder` imports this module, so importing
+ * `CallType` back would close an import cycle for a key type that buys nothing.
+ * An unlisted call type falls back to the config's top-level pair.
+ */
+export type CallBudgetMap = Readonly<Record<string, CallBudget>>;
+
+/** Default overrides: only `narration_call` deviates from the 60/45 pair. */
+export const DEFAULT_CALL_BUDGETS: CallBudgetMap = {
+  narration_call: {
+    ai_call_timeout_seconds: AI_KNOBS.narration_call_timeout_seconds,
+    request_timeout_default: AI_KNOBS.narration_request_timeout_default,
+  },
+};
+
 export interface AiLlmTuningConfig {
   /** Ordered fallback ladder (R4). An empty list is a config error, not a crash. */
   model_ladder: readonly string[];
@@ -77,6 +109,12 @@ export interface AiLlmTuningConfig {
   /** Endpoint base; injected so tests never touch a real host. */
   endpoint_base: string;
   safety_settings: readonly SafetySetting[];
+  /**
+   * Per-call-type budget overrides (plan.md C-10 deviation #2). Absent key =>
+   * use the top-level `ai_call_timeout_seconds` / `request_timeout_default`.
+   * Set to `{}` to force the uniform legacy behaviour.
+   */
+  budget_by_call_type?: CallBudgetMap;
   /** Extra generationConfig applied to every call. */
   generation_config?: Record<string, unknown>;
 }
@@ -92,7 +130,44 @@ export const DEFAULT_AI_CONFIG: AiLlmTuningConfig = {
   model_cooldown_seconds: AI_KNOBS.model_cooldown_seconds,
   endpoint_base: GEMINI_ENDPOINT_BASE,
   safety_settings: SAFETY_SETTINGS_BLOCK_NONE,
+  budget_by_call_type: DEFAULT_CALL_BUDGETS,
 };
+
+/** Per-request overrides a single caller may pass (see `AiRequest.overrides`). */
+export interface CallBudgetOverrides {
+  ai_call_timeout_seconds?: number;
+  request_timeout_default?: number;
+}
+
+/**
+ * Resolves the budget actually used for one logical call.
+ *
+ * Precedence: per-call `overrides` > `cfg.budget_by_call_type[call_type]` >
+ * the config's top-level uniform pair. The result is clamped so
+ * `request_timeout_default` stays strictly below `ai_call_timeout_seconds`
+ * (a caller that inverts them would otherwise make model fallback unreachable);
+ * the clamp is silent because this runs per call, and `validateAiConfig` is the
+ * loud path for a bad config.
+ */
+export function resolveCallBudget(
+  cfg: AiLlmTuningConfig,
+  callType: string,
+  overrides: CallBudgetOverrides = {},
+): CallBudget {
+  const perType = cfg.budget_by_call_type?.[callType];
+  const logical =
+    overrides.ai_call_timeout_seconds ??
+    perType?.ai_call_timeout_seconds ??
+    cfg.ai_call_timeout_seconds;
+  const perRequest =
+    overrides.request_timeout_default ??
+    perType?.request_timeout_default ??
+    cfg.request_timeout_default;
+  return {
+    ai_call_timeout_seconds: logical,
+    request_timeout_default: Math.min(perRequest, logical),
+  };
+}
 
 export interface ConfigProblem {
   knob: string;
@@ -133,6 +208,20 @@ export function validateAiConfig(cfg: AiLlmTuningConfig): ConfigProblem[] {
   }
   if (cfg.model_cooldown_seconds <= 0) {
     problems.push({ knob: 'model_cooldown_seconds', message: 'must be > 0' });
+  }
+  for (const [callType, budget] of Object.entries(cfg.budget_by_call_type ?? {})) {
+    if (budget.request_timeout_default >= budget.ai_call_timeout_seconds) {
+      problems.push({
+        knob: `budget_by_call_type.${callType}`,
+        message:
+          'request_timeout_default must be strictly below ai_call_timeout_seconds (' +
+          budget.ai_call_timeout_seconds +
+          '), otherwise model fallback is unreachable for this call type',
+      });
+    }
+    if (budget.ai_call_timeout_seconds <= 0 || budget.request_timeout_default <= 0) {
+      problems.push({ knob: `budget_by_call_type.${callType}`, message: 'budgets must be > 0' });
+    }
   }
   if (new Set(cfg.model_ladder).size !== cfg.model_ladder.length) {
     problems.push({ knob: 'model_ladder', message: 'contains duplicate model ids' });

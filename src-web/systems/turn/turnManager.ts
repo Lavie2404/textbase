@@ -586,6 +586,18 @@ export class TurnManager {
     this._pending_write_record = null;
   }
 
+  /**
+   * Alias of `hydrate` under the name the load path uses. App calls
+   * `tm.rehydrate(bundle.turn_manager)` right after a slot load, symmetrically
+   * with `tm.toPersistable()` on the save path; `hydrate` stays for the existing
+   * callers. Same contract: volatile fields (a pending locked result, the
+   * snapshot array) are NOT restored, so a reload mid-Resolving lands in
+   * `awaiting_action` with nothing dangling (AC-14).
+   */
+  rehydrate(s: TurnManagerPersistedState): void {
+    this.hydrate(s);
+  }
+
   // -- the pipeline ----------------------------------------------------------
 
   /**

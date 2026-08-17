@@ -32,6 +32,8 @@ export interface ScriptedResponse {
   headers?: Record<string, string>;
   /** Simulates a transport-level failure (DNS, connection reset). */
   throwError?: string;
+  /** Raw body text returned for a NON-200 status (the API's error message). */
+  errorBody?: string;
   /** Never resolves until the test aborts it (drives the AbortController path). */
   hang?: boolean;
   /** Suspends the request until the test resolves this promise. */
@@ -87,7 +89,14 @@ export function makeHarness(
   const timerLog: number[] = [];
   let aborts = 0;
 
-  const config = makeAiConfig({ endpoint_base: 'https://example.invalid/models', ...cfgOverrides });
+  const config = makeAiConfig({
+    endpoint_base: 'https://example.invalid/models',
+    // The harness keeps the LEGACY uniform 60/45 budget by default so the F2
+    // budget suite stays readable; the per-call-type map (plan.md C-10 deviation
+    // #2) is opt-in per test via `cfgOverrides.budget_by_call_type`.
+    budget_by_call_type: {},
+    ...cfgOverrides,
+  });
 
   const fetchImpl = async (url: string, init: FetchInit): Promise<HttpResponseLike> => {
     const i = calls.length;
@@ -105,6 +114,10 @@ export function makeHarness(
     return {
       status: spec.status,
       json: async () => spec.body ?? {},
+      // Non-200 bodies are read as TEXT by `requestAi` (the API's own message is
+      // what App's `translateGeminiApiError` matches on). `errorBody` opts a
+      // scripted response into that path; omitting it means "body unreadable".
+      text: spec.errorBody === undefined ? undefined : async () => spec.errorBody as string,
       headers: { get: (n: string) => spec.headers?.[n] ?? null },
     };
   };
@@ -130,6 +143,10 @@ export function makeHarness(
     abortFactory,
     session: createAiSessionState(),
     config,
+    // A resolvable key by default: `requestAi` now fails CLOSED with
+    // `config_error` before touching the ladder when no key resolves, so a
+    // harness without credentials would never reach `fetchImpl` at all.
+    credentials: { apiMode: 'default', defaultKey: 'harness-key' },
     timer: (ms, cb) => {
       const entry = { ms, fire: cb };
       timers.push(entry);

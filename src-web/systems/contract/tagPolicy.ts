@@ -107,10 +107,41 @@ export const FORBIDDEN_ATTRS: Record<string, readonly string[]> = {
   AFFINITY_CHANGED: ['AffinityChange', 'amount', 'value'],
 };
 
-/** Attribute keys barred only when the tag targets the player character. */
+/**
+ * Attribute keys barred only when the tag targets the player character AND the
+ * caller opted in via `ctx.forbidPlayerHpWrites`.
+ *
+ * DEFAULT IS OFF. HP is the one "mechanical" field the AI legitimately writes in
+ * STORY mode, where there is no CombatLoop to own it - barring it unconditionally
+ * silently deletes damage from every non-combat scene. Turn it on for the modes
+ * where a deterministic module does own HP.
+ */
 export const FORBIDDEN_ATTRS_PLAYER_ONLY: Record<string, readonly string[]> = {
-  CHARACTER_UPDATE: ['hp', 'maxhp', 'maxHp'],
+  CHARACTER_UPDATE: ['hp', 'maxhp', 'maxHp', 'HP', 'MaxHp'],
 };
+
+/**
+ * The SHIPPED `CHARACTER_UPDATE` shape is
+ * `[CHARACTER_UPDATE: Name="X", Stats="hp:-9999, exp:+50, level:5, currency:-10"]`
+ * (app-map.md section 3): the mechanical keys live INSIDE the `Stats` string, not
+ * as tag attributes. Keys here are matched case-insensitively against the part
+ * before the `:` of each `Stats` sub-entry, for the PLAYER only.
+ */
+export const FORBIDDEN_STATS_KEYS: readonly string[] = [
+  'exp',
+  'maxExp',
+  'level',
+  'realm',
+  'affinity',
+  'alive',
+  'isPermanentlyDead',
+];
+
+/** Added to `FORBIDDEN_STATS_KEYS` only when `ctx.forbidPlayerHpWrites` is on. */
+export const FORBIDDEN_STATS_KEYS_HP: readonly string[] = ['hp', 'maxHp', 'maxhp'];
+
+/** Attribute name carrying the sub-entry string, matched case-insensitively. */
+const STATS_ATTR_NAMES = ['stats'];
 
 /**
  * Tags that keep their world-content half when their mechanical attributes are
@@ -143,9 +174,22 @@ export interface ParsedTag {
   attrs: Record<string, string>;
   /** Comma-separated bare arguments (App's `[TAG a,b,c]` shape). */
   positional: string[];
+  /** Offset of `[` in the source block. Set by `parseTags`; -1 when synthetic. */
+  start: number;
+  /** Offset just past `]` in the source block. Set by `parseTags`. */
+  end: number;
 }
 
-const TAG_RE = /\[([A-Z][A-Z0-9_]*)(?::)?([^\]]*)\]/g;
+/**
+ * Tag matcher.
+ *
+ * The body allows ONE level of nested brackets: `[REALM_LIST: [Luyen Khi, Truc
+ * Co]]` is a real shipped tag, and a naive `[^\]]*` body stops at the inner `]`,
+ * which truncates the tag, leaves a stray `]` in the block and drops the tag
+ * from `keptTags`. The two alternatives start with disjoint character classes,
+ * so there is no backtracking blowup.
+ */
+const TAG_RE = /\[([A-Z][A-Z0-9_]*)(?::)?((?:[^[\]]|\[[^[\]]*\])*)\]/g;
 const ATTR_RE = /([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^,\]]*))/g;
 
 /** Splits a command block into tags. Unknown text between tags is preserved by index. */
@@ -156,9 +200,58 @@ export function parseTags(block: string): ParsedTag[] {
   let m: RegExpExecArray | null;
   while ((m = TAG_RE.exec(block)) !== null) {
     const [raw, name, body = ''] = m;
-    out.push({ name, raw, attrs: parseAttrs(body), positional: parsePositional(body) });
+    out.push({
+      name,
+      raw,
+      attrs: parseAttrs(body),
+      positional: parsePositional(body),
+      start: m.index,
+      end: m.index + raw.length,
+    });
   }
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// `Stats` sub-entry parsing (the real CHARACTER_UPDATE shape)
+// ---------------------------------------------------------------------------
+
+export interface StatsEntry {
+  /** Text before the first `:`, trimmed. `''` when the entry has no key. */
+  key: string;
+  /** The sub-entry exactly as written, so a rebuild is byte-faithful. */
+  raw: string;
+}
+
+/**
+ * Splits `"hp:-9999, exp:+50; level:5"` into keyed sub-entries. Separators are
+ * `,` and `;`; the key is everything before the FIRST `:` (values are signed
+ * numbers, so a later `:` never appears, but slicing on the first one is the
+ * safe reading either way).
+ */
+export function parseStatsString(stats: string): StatsEntry[] {
+  if (!stats) return [];
+  return stats
+    .split(/[,;]/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+    .map((seg) => {
+      const i = seg.indexOf(':');
+      return { key: (i >= 0 ? seg.slice(0, i) : seg).trim(), raw: seg };
+    });
+}
+
+/** Rebuilds a `Stats` string from sub-entries, preserving their original text. */
+export function buildStatsString(entries: readonly StatsEntry[]): string {
+  return entries.map((e) => e.raw).join(', ');
+}
+
+/** The attribute actually holding the sub-entries, whatever its casing. */
+function statsAttrNameOf(attrs: Record<string, string>): string | null {
+  for (const k of Object.keys(attrs)) {
+    if (STATS_ATTR_NAMES.includes(k.toLowerCase())) return k;
+  }
+  return null;
 }
 
 function parseAttrs(body: string): Record<string, string> {
@@ -202,16 +295,34 @@ export interface TagPolicyContext {
   encounterRewardEpCap?: number;
   /** Tags to drop silently (no violation): host app noise. */
   silentStripTags?: readonly string[];
+  /**
+   * Bars the AI from writing the PLAYER's HP (tag attribute or `Stats`
+   * sub-entry). DEFAULT FALSE: in STORY mode no deterministic module owns HP, so
+   * redacting it deletes all damage from the scene. Set true for the modes where
+   * CombatLoop / death own it.
+   */
+  forbidPlayerHpWrites?: boolean;
 }
 
+/**
+ * Thrown by `sanitizeCommandBlock` in `dev` mode.
+ *
+ * FAILING CLOSED: the error carries the full `SanitizeResult`, so a caller that
+ * catches it can still apply `err.result.kept` - the block with the violation
+ * already removed - instead of choosing between "apply the raw, unsafe block"
+ * and "lose the turn's world content entirely".
+ */
 export class ContractViolationError extends Error {
   readonly tag: string;
   readonly reason: string;
-  constructor(tag: string, reason: string) {
+  /** The sanitised outcome, present whenever `sanitizeCommandBlock` threw it. */
+  readonly result?: SanitizeResult;
+  constructor(tag: string, reason: string, result?: SanitizeResult) {
     super('contract violation: [' + tag + '] ' + reason);
     this.name = 'ContractViolationError';
     this.tag = tag;
     this.reason = reason;
+    this.result = result;
   }
 }
 
@@ -270,7 +381,7 @@ export function classifyTag(
   ctx: TagPolicyContext = {},
   positional: string[] = [],
 ): TagVerdict {
-  const tag: ParsedTag = { name, raw: '', attrs, positional };
+  const tag: ParsedTag = { name, raw: '', attrs, positional, start: -1, end: -1 };
   const isPlayer = resolveIsPlayer(ctx);
   const target = targetOf(tag);
 
@@ -304,10 +415,13 @@ export function classifyTag(
       // Always mechanical: it writes HP for everyone in the scene.
       return 'strip_and_log';
     case 'CHARACTER_UPDATE': {
-      const banned = FORBIDDEN_ATTRS.CHARACTER_UPDATE;
-      const playerOnly = isPlayer(target) ? FORBIDDEN_ATTRS_PLAYER_ONLY.CHARACTER_UPDATE : [];
-      const hit = [...banned, ...playerOnly].some((k) => attrs[k] !== undefined);
-      return hit ? 'strip_and_log' : 'allow';
+      const player = isPlayer(target);
+      const hit = forbiddenAttrKeysFor(tag, ctx).length > 0;
+      if (hit) return 'strip_and_log';
+      // The shipped shape hides the mechanical keys inside the `Stats` string.
+      // NPC `Stats` are world content (their economy is not module-owned) and
+      // stay untouched; only the PLAYER's forbidden sub-entries are a violation.
+      return player && forbiddenStatsEntriesFor(tag, ctx).length > 0 ? 'strip_and_log' : 'allow';
     }
     default:
       break;
@@ -374,34 +488,43 @@ export function sanitizeCommandBlock(
   commandBlock: string,
   ctx: TagPolicyContext = {},
 ): SanitizeResult {
+  const source = commandBlock ?? '';
   const stripped: StrippedEntry[] = [];
   const keptTags: ParsedTag[] = [];
-  const tags = parseTags(commandBlock ?? '');
-  let kept = commandBlock ?? '';
+  const tags = parseTags(source);
+
+  // OFFSET-BASED REBUILD. `String.replace(tag.raw, x)` was wrong twice over: it
+  // rewrites only the FIRST occurrence (so the second of two identical tags
+  // survived a strip), and it interprets dollar-sign replacement patterns, so
+  // a tag value containing a dollar sign corrupted the block. Slicing on the
+  // match indices has neither problem and is O(n).
+  const pieces: string[] = [];
+  let cursor = 0;
 
   for (const tag of tags) {
+    pieces.push(source.slice(cursor, tag.start));
+    cursor = tag.end;
+
     const verdict = classifyTag(tag.name, tag.attrs, ctx, tag.positional);
     if (verdict === 'allow') {
+      pieces.push(tag.raw);
       keptTags.push(tag);
       continue;
     }
 
-    const redactableKeys = redactionKeysFor(tag, ctx);
-    if (verdict === 'strip_and_log' && REDACTABLE_TAGS.includes(tag.name) && redactableKeys.length > 0) {
-      const attrs = { ...tag.attrs };
-      for (const k of redactableKeys) delete attrs[k];
-      const replacement = rebuildTag(tag.name, attrs);
-      kept = kept.replace(tag.raw, replacement);
-      keptTags.push({ ...tag, raw: replacement, attrs });
+    const redaction = redactionOf(tag, ctx);
+    if (verdict === 'strip_and_log' && REDACTABLE_TAGS.includes(tag.name) && redaction !== null) {
+      const replacement = rebuildTag(tag.name, redaction.attrs);
+      pieces.push(replacement);
+      keptTags.push({ ...tag, raw: replacement, attrs: redaction.attrs });
       stripped.push({
         tag: tag.name,
         raw: tag.raw,
         verdict,
-        redacted_attrs: redactableKeys,
+        redacted_attrs: redaction.redacted,
         reason: 'mechanical attributes are owned by a deterministic system (C-1)',
       });
     } else {
-      kept = kept.replace(tag.raw, '');
       stripped.push({
         tag: tag.name,
         raw: tag.raw,
@@ -413,22 +536,96 @@ export function sanitizeCommandBlock(
       });
     }
   }
+  pieces.push(source.slice(cursor));
+
+  const result: SanitizeResult = {
+    kept: pieces.join('').replace(/[ \t]{2,}/g, ' ').trim(),
+    keptTags,
+    stripped,
+  };
 
   const mode = ctx.mode ?? 'prod';
   const shouldThrow = ctx.throwOnViolation ?? mode === 'dev';
   if (shouldThrow) {
     const first = stripped.find((s) => s.verdict === 'strip_and_log');
-    if (first) throw new ContractViolationError(first.tag, first.reason);
+    // The sanitised block travels WITH the error (see `ContractViolationError`):
+    // dev mode must be loud without forcing the caller to choose between the raw
+    // unsafe block and losing the turn. `err.result.kept` is the safe block.
+    if (first) throw new ContractViolationError(first.tag, first.reason, result);
   }
 
-  return { kept: kept.replace(/[ \t]{2,}/g, ' ').trim(), keptTags, stripped };
+  return result;
+}
+
+/**
+ * Computes the redacted attribute set for one tag, or `null` when nothing on it
+ * is redactable (the caller then removes the tag whole).
+ *
+ * Two independent redactions happen here:
+ *  1. forbidden TAG ATTRIBUTES are deleted (`AffinityChange`, `exp`, ...);
+ *  2. forbidden `Stats` SUB-ENTRIES are filtered out of the `Stats` string of a
+ *     PLAYER-targeted `CHARACTER_UPDATE`, and the string is rebuilt. An empty
+ *     survivor list drops the `Stats` attribute rather than leaving `Stats=""`.
+ */
+function redactionOf(
+  tag: ParsedTag,
+  ctx: TagPolicyContext,
+): { attrs: Record<string, string>; redacted: string[] } | null {
+  const attrKeys = forbiddenAttrKeysFor(tag, ctx);
+  const isPlayer = resolveIsPlayer(ctx);
+  const statsAttr = tag.name === 'CHARACTER_UPDATE' ? statsAttrNameOf(tag.attrs) : null;
+  const badStats =
+    statsAttr !== null && isPlayer(targetOf(tag)) ? forbiddenStatsEntriesFor(tag, ctx) : [];
+
+  if (attrKeys.length === 0 && badStats.length === 0) return null;
+
+  const attrs = { ...tag.attrs };
+  for (const k of attrKeys) delete attrs[k];
+
+  if (statsAttr !== null && badStats.length > 0) {
+    const banned = new Set(badStats.map((e) => e.raw));
+    const survivors = parseStatsString(tag.attrs[statsAttr]).filter((e) => !banned.has(e.raw));
+    if (survivors.length > 0) attrs[statsAttr] = buildStatsString(survivors);
+    else delete attrs[statsAttr];
+  }
+
+  return {
+    attrs,
+    // `Stats.exp` disambiguates a redacted sub-entry from a same-named tag
+    // attribute in the violation log.
+    redacted: [...attrKeys, ...badStats.map((e) => statsAttr + '.' + e.key)],
+  };
 }
 
 function redactionKeysFor(tag: ParsedTag, ctx: TagPolicyContext): string[] {
+  return forbiddenAttrKeysFor(tag, ctx);
+}
+
+/**
+ * Forbidden TAG-ATTRIBUTE keys present on this tag. Player-only keys (HP) are
+ * included only when `ctx.forbidPlayerHpWrites` is on - see
+ * `FORBIDDEN_ATTRS_PLAYER_ONLY` for why that defaults to off.
+ */
+function forbiddenAttrKeysFor(tag: ParsedTag, ctx: TagPolicyContext): string[] {
   const isPlayer = resolveIsPlayer(ctx);
   const base = FORBIDDEN_ATTRS[tag.name] ?? [];
-  const playerOnly = isPlayer(targetOf(tag)) ? FORBIDDEN_ATTRS_PLAYER_ONLY[tag.name] ?? [] : [];
+  const playerOnly =
+    isPlayer(targetOf(tag)) && ctx.forbidPlayerHpWrites === true
+      ? FORBIDDEN_ATTRS_PLAYER_ONLY[tag.name] ?? []
+      : [];
   return [...base, ...playerOnly].filter((k) => tag.attrs[k] !== undefined);
+}
+
+/** Forbidden `Stats` sub-entries of a PLAYER-targeted tag, in written order. */
+function forbiddenStatsEntriesFor(tag: ParsedTag, ctx: TagPolicyContext): StatsEntry[] {
+  const attrName = statsAttrNameOf(tag.attrs);
+  if (!attrName) return [];
+  const forbidden = new Set(
+    [...FORBIDDEN_STATS_KEYS, ...(ctx.forbidPlayerHpWrites === true ? FORBIDDEN_STATS_KEYS_HP : [])].map(
+      (k) => k.toLowerCase(),
+    ),
+  );
+  return parseStatsString(tag.attrs[attrName]).filter((e) => forbidden.has(e.key.toLowerCase()));
 }
 
 /** True when the tag family is on the mechanical-result list at all. */

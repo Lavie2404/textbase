@@ -28,8 +28,10 @@ import type { Suggestion } from '../types';
 import {
   DEFAULT_AI_CONFIG,
   resolveApiKey,
+  resolveCallBudget,
   type AiCredentials,
   type AiLlmTuningConfig,
+  type CallBudgetOverrides,
 } from './config';
 import {
   buildRequestBody,
@@ -40,6 +42,7 @@ import {
 } from './promptBuilder';
 
 export type { CallType, AiPayload } from './promptBuilder';
+export type { CallBudget, CallBudgetOverrides } from './config';
 
 // ---------------------------------------------------------------------------
 // Labels
@@ -73,6 +76,13 @@ export type CallState = 'idle' | 'requesting' | 'retrying_network' | 'success' |
 export interface HttpResponseLike {
   status: number;
   json(): Promise<unknown>;
+  /**
+   * Optional so a mock can omit it. On a NON-200 this is where the API's own
+   * message lives ("API key not valid", the quota text) and App's
+   * `translateGeminiApiError` matches on exactly that string, so it is read
+   * (guarded) and threaded into the failure `detail`.
+   */
+  text?(): Promise<string>;
   headers?: { get(name: string): string | null };
 }
 
@@ -152,6 +162,13 @@ export interface AiRequest {
   background?: boolean;
   /** Overrides the built body. Used only by internal retries and tests. */
   bodyOverride?: GeminiRequestBody;
+  /**
+   * Per-call timeout budget override (plan.md C-10 deviation #2). Highest
+   * precedence, above `config.budget_by_call_type`. Use it for the "dai"
+   * narration length mode, which asks for ~3000 words and legitimately needs
+   * more than the default `narration_call` pair.
+   */
+  overrides?: CallBudgetOverrides;
 }
 
 export type AiResult =
@@ -272,8 +289,18 @@ export function logicalCallCount(types: Iterable<CallType>): number {
 // Response shape helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * A part with `thought: true` is the model's internal reasoning trace, not the
+ * answer. Joining it into the narration leaks chain-of-thought straight into the
+ * story text (and into the leak detector's input).
+ */
+interface GeminiPart {
+  text?: string;
+  thought?: boolean;
+}
+
 interface GeminiCandidate {
-  content?: { parts?: { text?: string }[] };
+  content?: { parts?: GeminiPart[] };
   finishReason?: string;
 }
 interface GeminiReply {
@@ -281,11 +308,17 @@ interface GeminiReply {
   promptFeedback?: { blockReason?: string };
 }
 
+/**
+ * Joins the answer parts of candidate 0. Thought parts (`thought === true`) are
+ * dropped first; everything else keeps the plain concatenation semantics the
+ * shipped App relies on (a multi-part answer must not gain separators).
+ */
 export function extractText(data: unknown): string {
   const reply = (data ?? {}) as GeminiReply;
   const parts = reply.candidates?.[0]?.content?.parts ?? [];
   return parts
-    .map((p) => p.text ?? '')
+    .filter((p) => p?.thought !== true)
+    .map((p) => p?.text ?? '')
     .join('')
     .trim();
 }
@@ -317,6 +350,13 @@ interface AttemptOutcome {
   detail?: string;
 }
 
+/** Non-200 bodies are truncated before they reach a log or a UI string. */
+export const MAX_ERROR_DETAIL_CHARS = 500;
+
+function joinDetail(base: string, extra?: string): string {
+  return extra && extra.length > 0 ? base + ': ' + extra : base;
+}
+
 /**
  * The one and only entry point (R1). Returns a result object for every failure;
  * the single exception it throws is `ContractCheckpointError`, because a
@@ -328,8 +368,25 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
   const session = deps.session;
   const background = req.background === true;
   const timer = deps.timer ?? defaultTimer;
+  // plan.md C-10 deviation #2: the budget is a FUNCTION of `call_type`, not a
+  // constant. `narration_call` defaults to 150s logical / 120s per request.
+  const budget = resolveCallBudget(cfg, req.call_type, req.overrides);
   const t_start = deps.clock();
   let attempts = 0;
+
+  /**
+   * Diagnostics must never change control flow. A throwing `onEvent` (setState
+   * on an unmounted tree, a logger with a bad sink) would otherwise propagate
+   * out of `requestAi` and leave `in_flight === true` forever - which makes
+   * every later call return BUSY with no way back short of a reload.
+   */
+  const emit = (e: AiEvent): void => {
+    try {
+      deps.onEvent?.(e);
+    } catch {
+      /* diagnostics only */
+    }
+  };
 
   const finish = (result: AiResult): AiResult => {
     // `strict` is off in tsconfig.json, which disables boolean-literal
@@ -385,159 +442,241 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
   }
 
   // Checkpoint 1 lives inside buildRequestBody and THROWS - zero requests sent.
+  // Deliberately BEFORE `in_flight` is raised: nothing to unwind if it throws.
   const body = req.bodyOverride ?? buildRequestBody(req.call_type, req.payload, cfg);
 
-  if (!background) {
-    session.in_flight = true;
-    session.state = 'requesting';
-  }
+  /** The whole ladder walk. Every exit path goes through `fail` / `finish`. */
+  const run = async (): Promise<AiResult> => {
+    // Zero-request failure modes, in the order the pseudocode lists them.
+    const key = resolveApiKey(deps.credentials);
+    if (key === null) {
+      // No usable key: fail BEFORE the ladder - one logical attempt, zero HTTP
+      // requests, zero cooldown writes. Walking five models with no key only
+      // multiplies one 400 into five and blinds the whole ladder for 90s each.
+      if (!deps.credentials) return fail('config_error', 'no credentials provided');
+      return deps.credentials.apiMode === 'userKey'
+        ? fail('not_configured', 'apiMode=userKey with an empty key')
+        : fail('config_error', 'no project key configured');
+    }
+    if (cfg.model_ladder.length === 0) {
+      return fail('config_error', 'model_ladder is empty');
+    }
 
-  // Zero-request failure modes, in the order the pseudocode lists them.
-  const key = resolveApiKey(deps.credentials);
-  if (deps.credentials && key === null) {
-    return deps.credentials.apiMode === 'userKey'
-      ? fail('not_configured', 'apiMode=userKey with an empty key')
-      : fail('config_error', 'no project key configured');
-  }
-  if (cfg.model_ladder.length === 0) {
-    return fail('config_error', 'model_ladder is empty');
-  }
+    const tried = new Set<string>();
+    const elapsedSec = () => (deps.clock() - t_start) / 1000;
+    const nowSec = () => deps.clock() / 1000;
 
-  const tried = new Set<string>();
-  const elapsedSec = () => (deps.clock() - t_start) / 1000;
-  const nowSec = () => deps.clock() / 1000;
+    const ladderNow = () =>
+      applyStickyPreference(
+        healthyLadder(cfg.model_ladder, session.cooldown_until, nowSec()),
+        session.preferred_model,
+      );
 
-  const ladderNow = () =>
-    applyStickyPreference(
-      healthyLadder(cfg.model_ladder, session.cooldown_until, nowSec()),
-      session.preferred_model,
-    );
+    let model = nextModel(ladderNow(), tried);
+    let parseRetryUsed = false;
+    /** Last non-200 body / transport message, threaded into the final detail. */
+    let lastDetail: string | undefined;
+    /** True when the most recent attempt returned 200 with an EMPTY candidate. */
+    let lastWasEmptyText = false;
 
-  let model = nextModel(ladderNow(), tried);
-  let parseRetryUsed = false;
+    while (model !== null) {
+      tried.add(model);
+      let attempt_index = 0;
 
-  while (model !== null) {
-    tried.add(model);
-    let attempt_index = 0;
+      // Inner loop: attempts against the CURRENT model.
+      for (;;) {
+        const t_rem = budget.ai_call_timeout_seconds - elapsedSec();
+        if (t_rem <= 0) return fail('timeout', 'budget exhausted before attempt on ' + model);
 
-    // Inner loop: attempts against the CURRENT model.
-    for (;;) {
-      const t_rem = cfg.ai_call_timeout_seconds - elapsedSec();
-      if (t_rem <= 0) return fail('timeout', 'budget exhausted before attempt on ' + model);
+        attempts += 1;
+        // C-10: per-request deadline = min(request_timeout_default, t_remaining),
+        // enforced with a real AbortController so a hung request cannot freeze the
+        // game (App.tsx today has no timeout at all).
+        const perRequestSec = Math.min(budget.request_timeout_default, t_rem);
+        emit({ type: 'request_start', model, elapsed_ms: deps.clock() - t_start });
+        const outcome = await httpAttempt(deps, cfg, model, body, key, perRequestSec, timer);
+        if (outcome.detail) lastDetail = outcome.detail;
+        lastWasEmptyText = false;
 
-      attempts += 1;
-      // C-10: per-request deadline = min(request_timeout_default, t_remaining),
-      // enforced with a real AbortController so a hung request cannot freeze the
-      // game (App.tsx today has no timeout at all).
-      const perRequestSec = Math.min(cfg.request_timeout_default, t_rem);
-      deps.onEvent?.({ type: 'request_start', model, elapsed_ms: deps.clock() - t_start });
-      const outcome = await httpAttempt(deps, cfg, model, body, key, perRequestSec, timer);
+        if (outcome.kind === 'response') {
+          const status = outcome.status ?? 0;
 
-      if (outcome.kind === 'response' && outcome.status === 200) {
-        const blocked = blockReasonOf(outcome.data);
-        if (blocked) {
-          // R5: never fabricate a result to mask an error, and never retry a
-          // safety block - every model in the ladder shares the same policy.
-          return fail('safety_blocked', 'promptFeedback.blockReason=' + blocked);
+          if (status === 200) {
+            const blocked = blockReasonOf(outcome.data);
+            if (blocked) {
+              // R5: never fabricate a result to mask an error, and never retry a
+              // safety block - every model in the ladder shares the same policy.
+              return fail('safety_blocked', 'promptFeedback.blockReason=' + blocked);
+            }
+            const text = extractText(outcome.data);
+            const finishReason = finishReasonOf(outcome.data);
+            if (finishReason === 'MAX_TOKENS' && text === '') {
+              return fail('truncated', 'finishReason=MAX_TOKENS with empty text');
+            }
+
+            if (text !== '') {
+              session.preferred_model = model;
+              if (req.call_type === 'narration_call') {
+                return finish({
+                  ok: true,
+                  call_type: req.call_type,
+                  text,
+                  model,
+                  attempts,
+                  elapsed_ms: deps.clock() - t_start,
+                  truncated: finishReason === 'MAX_TOKENS' ? true : undefined,
+                  counted: !background,
+                });
+              }
+
+              const parsed = parseSuggestions(text, req.payload.allowed_envelope_menu);
+              if (parsed.valid) {
+                return finish({
+                  ok: true,
+                  call_type: req.call_type,
+                  text,
+                  suggestions: parsed.suggestions,
+                  model,
+                  attempts,
+                  elapsed_ms: deps.clock() - t_start,
+                  counted: !background,
+                });
+              }
+              if (!parseRetryUsed) {
+                // Exactly ONE internal parse retry, inside the same time budget and
+                // never counted in calls_per_turn (C.6).
+                parseRetryUsed = true;
+                continue;
+              }
+              return fail('parse_failed', parsed.error);
+            }
+
+            // 200 with an EMPTY candidate. The shipped `fetchWithRetries` treats
+            // this as a transient glitch, not a verdict, so fall through to the
+            // transient block: retry this model, then the next one. It only
+            // becomes `parse_failed` once the ladder is exhausted.
+            lastWasEmptyText = true;
+            lastDetail = 'empty candidate text';
+          } else if (status === 429) {
+            // Quota: no retry, forward any suggested wait (R5).
+            return fail('quota_429', joinDetail('HTTP 429', outcome.detail), outcome.retryAfter);
+          } else if (status === 403 || status === 404) {
+            // Ported from App.tsx: this model is unusable for THIS key - skip it
+            // WITHOUT a cooldown (the model is not overloaded, it is unavailable
+            // to this project). DELIBERATE EXCEPTION to the "4xx never walks the
+            // ladder" rule below: the next model may well be permitted.
+            emit({ type: 'model_switch', model, elapsed_ms: deps.clock() - t_start });
+            break;
+          } else if (status >= 400 && status < 500) {
+            // 400 (malformed request / invalid key), 401, 402, 405+: the REQUEST
+            // is wrong, not the model. Retrying repeats it verbatim, walking the
+            // ladder multiplies it by the ladder length, and a cooldown write
+            // would blind a HEALTHY model for 90s. Return immediately, carrying
+            // the API's own message so App's `translateGeminiApiError` sees it.
+            return fail('config_error', joinDetail('HTTP ' + status, outcome.detail));
+          }
         }
-        const text = extractText(outcome.data);
-        const finishReason = finishReasonOf(outcome.data);
-        if (finishReason === 'MAX_TOKENS' && text === '') {
-          return fail('truncated', 'finishReason=MAX_TOKENS with empty text');
-        }
-        if (text === '') {
-          return fail('parse_failed', 'empty candidate text');
-        }
 
-        session.preferred_model = model;
-        if (req.call_type === 'narration_call') {
-          return finish({
-            ok: true,
-            call_type: req.call_type,
-            text,
+        const cls: ErrorClass =
+          outcome.kind === 'response' && outcome.status === 503 ? 'OVERLOADED' : 'TRANSIENT_OTHER';
+        // A cooldown asserts "this model is UNAVAILABLE for the next 90s". Only a
+        // 503 or a genuine transport failure/timeout is evidence of that; a 500 or
+        // an empty candidate is not - those just move on to the next model.
+        const earnsCooldown =
+          (outcome.kind === 'response' && outcome.status === 503) ||
+          outcome.kind === 'network_error' ||
+          outcome.kind === 'aborted';
+
+        if (isLastAllowedAttempt(attempt_index, cls, cfg)) {
+          // Mark overloaded and switch models IMMEDIATELY, with w = 0.
+          if (earnsCooldown) session.cooldown_until[model] = nowSec() + cfg.model_cooldown_seconds;
+          if (session.preferred_model === model) session.preferred_model = null;
+          session.state = 'retrying_network';
+          emit({
+            type: 'retrying_network',
             model,
-            attempts,
             elapsed_ms: deps.clock() - t_start,
-            truncated: finishReason === 'MAX_TOKENS' ? true : undefined,
-            counted: !background,
+            error_class: cls,
           });
+          break;
         }
 
-        const parsed = parseSuggestions(text, req.payload.allowed_envelope_menu);
-        if (parsed.valid) {
-          return finish({
-            ok: true,
-            call_type: req.call_type,
-            text,
-            suggestions: parsed.suggestions,
-            model,
-            attempts,
-            elapsed_ms: deps.clock() - t_start,
-            counted: !background,
-          });
+        const w = backoffSeconds(attempt_index, cls, cfg);
+        if (budget.ai_call_timeout_seconds - elapsedSec() <= w) {
+          return fail('timeout', 'no budget left for a ' + w + 's backoff');
         }
-        if (!parseRetryUsed) {
-          // Exactly ONE internal parse retry, inside the same time budget and
-          // never counted in calls_per_turn (C.6).
-          parseRetryUsed = true;
-          continue;
-        }
-        return fail('parse_failed', parsed.error);
-      }
-
-      if (outcome.kind === 'response' && outcome.status === 429) {
-        // Quota: no retry, forward any suggested wait (R5).
-        return fail('quota_429', 'HTTP 429', outcome.retryAfter);
-      }
-      if (outcome.kind === 'response' && outcome.status === 401) {
-        // Ported from App.tsx `fetchWithRetries`: an auth failure is a config
-        // error and never heals by retrying.
-        return fail('config_error', 'HTTP 401');
-      }
-      if (outcome.kind === 'response' && (outcome.status === 403 || outcome.status === 404)) {
-        // Ported from App.tsx: this model is unusable for this key - skip it,
-        // WITHOUT a cooldown (the model is not overloaded, it is unavailable).
-        deps.onEvent?.({ type: 'model_switch', model, elapsed_ms: deps.clock() - t_start });
-        break;
-      }
-
-      const cls: ErrorClass =
-        outcome.kind === 'response' && outcome.status === 503 ? 'OVERLOADED' : 'TRANSIENT_OTHER';
-
-      if (isLastAllowedAttempt(attempt_index, cls, cfg)) {
-        // Mark overloaded and switch models IMMEDIATELY, with w = 0.
-        session.cooldown_until[model] = nowSec() + cfg.model_cooldown_seconds;
-        if (session.preferred_model === model) session.preferred_model = null;
         session.state = 'retrying_network';
-        deps.onEvent?.({
+        emit({
           type: 'retrying_network',
           model,
           elapsed_ms: deps.clock() - t_start,
           error_class: cls,
         });
-        break;
+        await deps.sleep(w * 1000);
+        attempt_index += 1;
       }
 
-      const w = backoffSeconds(attempt_index, cls, cfg);
-      if (cfg.ai_call_timeout_seconds - elapsedSec() <= w) {
-        return fail('timeout', 'no budget left for a ' + w + 's backoff');
-      }
-      session.state = 'retrying_network';
-      deps.onEvent?.({
-        type: 'retrying_network',
-        model,
-        elapsed_ms: deps.clock() - t_start,
-        error_class: cls,
-      });
-      await deps.sleep(w * 1000);
-      attempt_index += 1;
+      // Ladder recomputed every hop; `tried` is NEVER reset (AC-31).
+      model = nextModel(ladderNow(), tried);
     }
 
-    // Ladder recomputed every hop; `tried` is NEVER reset (AC-31).
-    model = nextModel(ladderNow(), tried);
-  }
+    if (lastWasEmptyText) {
+      // The ladder is exhausted and the API's last word was an empty candidate -
+      // now, and only now, is it a parse failure.
+      return fail('parse_failed', 'empty candidate text on every model in the ladder');
+    }
+    return fail('no_models_left', joinDetail('every model in the ladder was tried', lastDetail));
+  };
 
-  return fail('no_models_left', 'every model in the ladder was tried');
+  if (!background) {
+    session.in_flight = true;
+    session.state = 'requesting';
+  }
+  try {
+    return await run();
+  } finally {
+    // C.3: `in_flight` is cleared on EVERY exit path, including a throw out of an
+    // injected dep, because a leaked flag turns every later call into BUSY.
+    if (!background) session.in_flight = false;
+  }
+}
+
+/**
+ * Best-effort read of a NON-200 body.
+ *
+ * Gemini puts the human-readable cause here ("API key not valid. Please pass a
+ * valid API key.", the quota text), and App's `translateGeminiApiError` matches
+ * on exactly that string - dropping it turns every failure into a generic one.
+ *
+ * Guarded twice over: `text()` is optional on the injected seam, and a body that
+ * is already consumed, empty, or not text must NEVER turn an HTTP error into a
+ * thrown exception. Truncated so a huge HTML error page cannot reach a toast.
+ */
+async function readErrorBody(res: HttpResponseLike): Promise<string | undefined> {
+  const clip = (s: string): string | undefined => {
+    const t = s.trim();
+    return t.length > 0 ? t.slice(0, MAX_ERROR_DETAIL_CHARS) : undefined;
+  };
+  try {
+    if (typeof res.text === 'function') {
+      const raw = await res.text();
+      if (typeof raw === 'string') return clip(raw);
+    }
+  } catch {
+    /* fall through to the JSON seam */
+  }
+  try {
+    if (typeof res.json === 'function') {
+      const parsed = (await res.json()) as { error?: { message?: string } } | null;
+      const message = parsed?.error?.message;
+      if (typeof message === 'string') return clip(message);
+      const dumped = JSON.stringify(parsed ?? {});
+      return dumped === '{}' || dumped === 'null' ? undefined : clip(dumped);
+    }
+  } catch {
+    /* body unreadable - the status code alone has to carry the failure */
+  }
+  return undefined;
 }
 
 /**
@@ -574,16 +713,19 @@ async function httpAttempt(
       signal: controller.signal,
     });
     let data: unknown = null;
+    let detail: string | undefined;
     if (res.status === 200) {
       try {
         data = await res.json();
       } catch {
         return { kind: 'response', status: 200, data: {} };
       }
+    } else {
+      detail = await readErrorBody(res);
     }
     const retryAfterRaw = res.headers?.get?.('retry-after') ?? null;
     const retryAfter = retryAfterRaw ? Number(retryAfterRaw) : undefined;
-    return { kind: 'response', status: res.status, data, retryAfter };
+    return { kind: 'response', status: res.status, data, retryAfter, detail };
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
     return timedOut ? { kind: 'aborted', detail } : { kind: 'network_error', detail };
