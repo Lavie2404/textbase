@@ -1,0 +1,26 @@
+name: Unit tests
+
+# P7 of production/gdd-integration/plan.md: the deterministic systems under
+# src-web/systems/ are covered by Vitest; this is a blocking gate on every
+# push and PR (coding-standards.md § CI/CD Rules).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
