@@ -38,6 +38,7 @@ import {
 } from '../types';
 import { PERSISTENCE_KNOBS } from '../registry';
 import { wrapUntrusted } from '../contract/narrationDirectives';
+import { ContractViolationError, sanitizeCommandBlock } from '../contract/tagPolicy';
 
 // ---------------------------------------------------------------------------
 // 1. The accumulator `applyUpdates` writes into
@@ -389,6 +390,12 @@ export interface AppSaveStateLike {
   adventureTurnCount?: number;
   gameId?: string;
   worldMemory?: unknown;
+  /**
+   * `turnManager.toPersistable()` (code review C-9). Without it a reload
+   * restarts `turn_id` / `world_time` at 0 and forgets `death_turn_ids`, so a
+   * death turn became undoable again after a refresh.
+   */
+  turnManager?: unknown;
 }
 
 export interface BundleMetaArgs {
@@ -422,6 +429,7 @@ export function buildSaveBundle(
     activeTrade: state.activeTrade === undefined ? null : state.activeTrade,
     adventureTurnCount: toFiniteInt(state.adventureTurnCount, 0),
     gameId: state.gameId,
+    turnManager: state.turnManager === undefined ? null : state.turnManager,
     meta: {
       slot_id: String(meta.slot_id || 'slot_default'),
       schema_version: toFiniteInt(
@@ -478,4 +486,213 @@ export function entitiesInScopeFromKnowledge(knowledge: unknown, max = 8): strin
 function toFiniteInt(value: unknown, fallback: number): number {
   const n = Number(value);
   return Number.isFinite(n) ? Math.trunc(n) : fallback;
+}
+
+// ---------------------------------------------------------------------------
+// 8. AI credentials (code review C-3)
+// ---------------------------------------------------------------------------
+
+/**
+ * The App's own API-mode vocabulary.
+ *
+ * `App.tsx` stores `'userKey' | 'defaultGemini'`; the AI layer's `AiCredentials`
+ * speaks `'userKey' | 'default'`. The mapping between the two lived nowhere, so
+ * `fetchWithRetries` re-derived the key by REGEX-PARSING `?key=` back out of the
+ * URL it had just built - which silently produced NO credentials at all once
+ * `requestAi` started requiring them.
+ */
+export type AppApiMode = 'userKey' | 'defaultGemini' | string;
+
+export interface AppCredentialInputs {
+  /** `apiMode` React state. */
+  apiMode?: AppApiMode;
+  /** `apiKey` React state - the user-supplied key. */
+  apiKey?: string;
+  /** Legacy fallback: the key parsed off the request URL's `?key=`. */
+  apiKeyFromUrl?: string;
+  /** A platform / free-tier key the build ships with, if any. */
+  defaultKey?: string;
+}
+
+export interface AiCredentialsLike {
+  apiMode: 'userKey' | 'default';
+  userKey?: string;
+  defaultKey?: string;
+}
+
+/**
+ * Builds `deps.credentials` for `requestAi` out of the app's REAL state.
+ *
+ * Rules (code review C-3):
+ * - `userKey` mode uses the React `apiKey`, falling back to the URL key so a
+ *   legacy call site that inlined its own key keeps working;
+ * - `defaultGemini` mode uses the platform key when the build defines one;
+ * - a non-empty URL key in default mode is still honoured (same legacy reason);
+ * - otherwise the credentials are returned EMPTY on purpose, so `requestAi`
+ *   fails fast with `config_error` instead of burning the whole model ladder on
+ *   requests that cannot possibly authenticate.
+ */
+export function buildAiCredentials(
+  input: AppCredentialInputs | null | undefined,
+): AiCredentialsLike {
+  const src = input || {};
+  const fromUrl = String(src.apiKeyFromUrl || '').trim();
+  if (src.apiMode === 'userKey') {
+    const userKey = String(src.apiKey || '').trim() || fromUrl;
+    return { apiMode: 'userKey', userKey };
+  }
+  const defaultKey = String(src.defaultKey || '').trim();
+  if (defaultKey) return { apiMode: 'default', defaultKey };
+  if (fromUrl) return { apiMode: 'userKey', userKey: fromUrl };
+  return { apiMode: 'default', defaultKey: '' };
+}
+
+/** True when the credentials can authenticate a request at all. */
+export function credentialsAreUsable(creds: AiCredentialsLike | null | undefined): boolean {
+  if (!creds) return false;
+  return creds.apiMode === 'userKey'
+    ? String(creds.userKey || '').trim() !== ''
+    : String(creds.defaultKey || '').trim() !== '';
+}
+
+// ---------------------------------------------------------------------------
+// 9. Narration budget overrides (code review C-4, plan.md C-10 deviation #2)
+// ---------------------------------------------------------------------------
+
+/** API-1's classification tag that asks API-2 for a 3000+ word narration. */
+export const LONG_NARRATION_TAG = 'dai';
+
+/**
+ * Budget for a `'dai'` turn. The default `narration_call` pair (150s/120s) is
+ * sized for a normal-length turn; a 3000-word answer routinely outlives it, and
+ * the abort reads to the player as "AI khong phan hoi".
+ */
+export const LONG_NARRATION_BUDGET = Object.freeze({
+  ai_call_timeout_seconds: 240,
+  request_timeout_default: 200,
+});
+
+/**
+ * Returns `AiRequest.overrides` for one narration call, or `undefined` to let
+ * the config's own `narration_call` budget apply.
+ */
+export function narrationBudgetOverrides(
+  classificationTags: readonly unknown[] | null | undefined,
+): { ai_call_timeout_seconds: number; request_timeout_default: number } | undefined {
+  if (!Array.isArray(classificationTags)) return undefined;
+  const wantsLong = classificationTags.some(
+    (t) => typeof t === 'string' && t.trim().toLowerCase() === LONG_NARRATION_TAG,
+  );
+  return wantsLong ? { ...LONG_NARRATION_BUDGET } : undefined;
+}
+
+// ---------------------------------------------------------------------------
+// 10. Undo generation guard (code review C-5)
+// ---------------------------------------------------------------------------
+
+/**
+ * Background work (the API-3 state monitor, the summariser) is scheduled DURING
+ * a turn and lands after it. If the player undid that turn while the call was
+ * in flight, applying the result re-injects state the rollback just removed.
+ *
+ * The App keeps a monotonically increasing `undoGenerationRef`; every scheduler
+ * captures it and every applier re-checks it. A mismatch means "at least one
+ * undo happened since I was scheduled" - drop the result.
+ */
+export function isStaleGeneration(
+  scheduledGeneration: number | null | undefined,
+  currentGeneration: number | null | undefined,
+): boolean {
+  // `Number(null)` is 0, which is finite - so null/undefined must be rejected
+  // BEFORE the numeric check, or a missing generation would read as generation 0
+  // and drop every background result.
+  if (scheduledGeneration === null || scheduledGeneration === undefined) return false;
+  if (currentGeneration === null || currentGeneration === undefined) return false;
+  const scheduled = Number(scheduledGeneration);
+  const current = Number(currentGeneration);
+  if (!Number.isFinite(scheduled) || !Number.isFinite(current)) return false;
+  return current !== scheduled;
+}
+
+// ---------------------------------------------------------------------------
+// 11. Turn Manager self-heal (code review C-1)
+// ---------------------------------------------------------------------------
+
+/**
+ * Detects a Turn Manager left `input_locked` by a previous turn that returned
+ * early without committing or failing.
+ *
+ * The App's own `isProcessingAction` is the liveness signal: when no action is
+ * in flight, nothing can still be legitimately holding the lock.
+ */
+export function shouldSelfHealTurnManager(state: {
+  inputLocked?: boolean;
+  isProcessingAction?: boolean;
+}): boolean {
+  const s = state || {};
+  return s.inputLocked === true && s.isProcessingAction !== true;
+}
+
+// ---------------------------------------------------------------------------
+// 12. Fail-closed command-block sanitising (code review C-8)
+// ---------------------------------------------------------------------------
+
+export type SanitizeDegradation = 'none' | 'contract_violation' | 'prod_fallback' | 'empty';
+
+export interface SanitizeForApplyResult {
+  /** The block the reducer is allowed to apply. NEVER the raw input. */
+  kept: string;
+  stripped: unknown[];
+  degraded: SanitizeDegradation;
+  error?: unknown;
+}
+
+export interface SanitizeForApplyContext {
+  mode?: 'dev' | 'prod';
+  playerIds?: readonly string[];
+  [key: string]: unknown;
+}
+
+/**
+ * Runs `sanitizeCommandBlock` so that NO failure path can leak the raw,
+ * unsanitised block into `applyUpdates` (plan.md C-1).
+ *
+ * Ladder:
+ * 1. `dev` mode throws `ContractViolationError` on a mechanical tag - that error
+ *    CARRIES the sanitised block, so we apply `err.result.kept` (fail CLOSED);
+ * 2. any other throw is re-run in `prod` mode, which only logs;
+ * 3. if that throws too, the command block becomes EMPTY. Losing a turn's world
+ *    content is strictly better than applying AI-authored mechanical numbers.
+ */
+export function sanitizeCommandBlockForApply(
+  commandBlock: string,
+  ctx: SanitizeForApplyContext = {},
+): SanitizeForApplyResult {
+  try {
+    const result = sanitizeCommandBlock(commandBlock ?? '', ctx as never);
+    return { kept: result.kept, stripped: result.stripped as unknown[], degraded: 'none' };
+  } catch (err) {
+    if (err instanceof ContractViolationError && err.result) {
+      return {
+        kept: String(err.result.kept ?? ''),
+        stripped: (err.result.stripped as unknown[]) || [],
+        degraded: 'contract_violation',
+        error: err,
+      };
+    }
+    try {
+      const retried = sanitizeCommandBlock(commandBlock ?? '', {
+        ...(ctx as object),
+        mode: 'prod',
+      } as never);
+      return {
+        kept: retried.kept,
+        stripped: retried.stripped as unknown[],
+        degraded: 'prod_fallback',
+        error: err,
+      };
+    } catch (fatal) {
+      return { kept: '', stripped: [], degraded: 'empty', error: fatal };
+    }
+  }
 }

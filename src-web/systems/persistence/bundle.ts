@@ -58,6 +58,12 @@ export interface SaveBundle {
   activeTrade?: unknown;
   adventureTurnCount?: number;
   gameId?: string;
+  /**
+   * `TurnManager.toPersistable()` (code review C-9). Rides inside the existing
+   * `turnManager` blob under `turn_manager` so no new registered system id is
+   * introduced; absent in bundles written before P6c, hence optional.
+   */
+  turnManager?: unknown;
 }
 
 /** Persistence-owned, NOT opaque (gdd-05 B3 note on `SlotRecord`). */
@@ -102,6 +108,7 @@ export function toBlobs(bundle: SaveBundle): RegisteredBlob[] {
       choices: bundle.choices ?? null,
       activeTrade: bundle.activeTrade ?? null,
       adventureTurnCount: bundle.adventureTurnCount ?? 0,
+      turn_manager: bundle.turnManager ?? null,
     },
     worldMemory: bundle.worldMemory ?? null,
   };
@@ -135,6 +142,7 @@ export function fromBlobs(blobs: readonly RegisteredBlob[], meta: BundleMeta): S
     choices: turn.choices ?? undefined,
     activeTrade: turn.activeTrade ?? undefined,
     adventureTurnCount: (turn.adventureTurnCount as number) ?? undefined,
+    turnManager: turn.turn_manager ?? undefined,
     worldMemory: parse('worldMemory', null) as SaveBundle['worldMemory'],
     meta,
   };

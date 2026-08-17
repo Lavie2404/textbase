@@ -68,7 +68,8 @@ import { WorldMemory } from './src-web/systems/worldMemory/worldMemory';
 import { worldMemoryFromAppHistory } from './src-web/systems/worldMemory/fromAppHistory';
 import { createTurnManager } from './src-web/systems/turn/turnManager';
 import { makeAppStateUndoable } from './src-web/systems/turn/undoAppState';
-import { sanitizeCommandBlock } from './src-web/systems/contract/tagPolicy';
+// `sanitizeCommandBlock` is now reached through `turnGlue.sanitizeCommandBlockForApply`
+// (code review C-8), which owns the fail-closed degradation ladder.
 import { createSessionLeakLog, leakCheckAndRecord } from './src-web/systems/contract/leakDetector';
 import { createAiSessionState, requestAi } from './src-web/systems/ai/requestAi';
 import { DEFAULT_AI_CONFIG, SAFETY_SETTINGS_BLOCK_NONE } from './src-web/systems/ai/config';
@@ -16791,6 +16792,15 @@ const SUPABASE_ANON_KEY = "sb_publishable_GjYTTTowUg-P9paHkTvaOg_nW4C3Fye";
 // --- CẤU HÌNH LƯU TRỮ QUA GITHUB (dùng cho "Lưu Ngay" — đồng bộ đa thiết bị) ---
 // Token PHẢI được đặt trong .env.local (VITE_GITHUB_TOKEN) — KHÔNG BAO GIỜ hardcode/commit token vào source code.
 const GITHUB_SAVE_REPO = import.meta.env.VITE_GITHUB_REPO || 'Lavie2404/textbase';
+/**
+ * The key used when the player has not supplied one (`apiMode === 'defaultGemini'`).
+ *
+ * Empty in a build that ships no platform key - `requestAi` then fails fast with
+ * `config_error` instead of walking the whole model ladder against an endpoint
+ * that cannot authenticate (code review C-3). The user-facing message stays the
+ * existing Vietnamese auth error below.
+ */
+const PLATFORM_DEFAULT_GEMINI_KEY = (import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) || '';
 const GITHUB_SAVE_TOKEN = import.meta.env.VITE_GITHUB_TOKEN || '';
 const GITHUB_SAVES_DIR = 'saves';
 const GITHUB_SAVE_SLOT_COUNT = 5;
@@ -18559,7 +18569,7 @@ let stickyPreferredModel = null;
  * `globalApiQueue` still sits in FRONT of the call, so its spacing delay stays
  * outside `t_elapsed` (plan.md C-10).
  */
-const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2, retryDelay = 1000, callSite = 'generic') => {
+const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2, retryDelay = 1000, callSite = 'generic', budgetOverrides = null) => {
     const urlMatch = (apiUrl || '').match(/\/models\/([^:?]+):generateContent(?:\?key=(.*))?$/);
     const requestedModel = urlMatch ? urlMatch[1] : null;
     const apiKeyFromUrl = urlMatch && urlMatch[2] ? urlMatch[2] : '';
@@ -18580,6 +18590,16 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
         : [requestedModel];
 
     const background = turnGlue.chooseBackgroundFlag(callSite);
+    // Code review C-3: `requestAi` REQUIRES credentials. Deriving them by
+    // regex-parsing the `?key=` we just wrote into the URL produced NO
+    // credentials at all in `defaultGemini` mode; they now come from the app's
+    // real state, with the URL key kept only as the legacy fallback.
+    const credentials = turnGlue.buildAiCredentials({
+        apiMode,
+        apiKey,
+        apiKeyFromUrl,
+        defaultKey: PLATFORM_DEFAULT_GEMINI_KEY,
+    });
     const config = {
         ...DEFAULT_AI_CONFIG,
         model_ladder: modelLadder,
@@ -18603,6 +18623,9 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
                     ...payload,
                     safetySettings: (payload && payload.safetySettings) || SAFETY_SETTINGS_BLOCK_NONE,
                 },
+                // Code review C-4: only set for a narration turn API-1 tagged
+                // 'dai' (3000+ words); everything else keeps the config budget.
+                ...(budgetOverrides ? { overrides: budgetOverrides } : {}),
             },
             {
                 fetchImpl: async (url, init) => {
@@ -18623,7 +18646,7 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
                 abortFactory: () => new AbortController(),
                 session: aiSessionState,
                 config,
-                credentials: apiKeyFromUrl ? { apiMode: 'userKey', userKey: apiKeyFromUrl } : undefined,
+                credentials,
                 onEvent: (event) => {
                     if (event.type === 'retrying_network' && onRetry) onRetry(1, maxRetries);
                 },
@@ -20699,14 +20722,26 @@ const makeAppUndoable = useCallback(() => makeAppStateUndoable({
         currentTurn: liveUndoableStateRef.current.currentTurn,
         gameSettings: liveUndoableStateRef.current.gameSettings,
         choices: liveUndoableStateRef.current.choices,
+        // Code review C-5: a turn can flip any of these three through a command
+        // tag ([ENTER_TRADE_MODE], [START_COMBAT], an adventure-skill tick), so
+        // leaving them out of the snapshot left ghost state behind after Undo.
+        gameMode: liveUndoableStateRef.current.gameMode,
+        activeTrade: liveUndoableStateRef.current.activeTrade,
+        adventureTurnCount: liveUndoableStateRef.current.adventureTurnCount,
     }),
     set: (next) => {
         setknowledge(next.knowledge);
         setStoryHistory(next.storyHistory || []);
         setStorySummaries(next.storySummaries || []);
         setCurrentTurn(next.currentTurn || 0);
-        setGameSettings(next.gameSettings);
+        // MERGE, never assign: gameSettings is snapshotted as a PROJECTION
+        // (undoAppState.TURN_RELEVANT_SETTINGS_KEYS), so assigning it would wipe
+        // every key outside that projection - the whole world-creation payload.
+        setGameSettings(prev => ({ ...prev, ...(next.gameSettings || {}) }));
         setChoices(next.choices || []);
+        if (next.gameMode !== undefined) setGameMode(next.gameMode);
+        if (next.activeTrade !== undefined) setActiveTrade(next.activeTrade);
+        if (next.adventureTurnCount !== undefined) setAdventureTurnCount(next.adventureTurnCount || 0);
         const lastStory = (next.storyHistory || []).filter(h => h && h.type === 'story').pop();
         setCurrentStory(lastStory ? lastStory.content : '');
     },
@@ -20752,6 +20787,15 @@ const buildSystemsBundle = useCallback((worldTime) => {
     } catch (wmError) {
         console.error('[systems] Khong serialize duoc World Memory:', wmError);
     }
+    // Code review C-9: without this the Turn Manager restarts at turn_id 0 on
+    // every reload, and death_turn_ids is forgotten - a death turn became
+    // undoable again after a refresh (gdd-01 CR#9).
+    let turnManagerJson = null;
+    try {
+        turnManagerJson = turnManagerRef.current ? turnManagerRef.current.toPersistable() : null;
+    } catch (tmError) {
+        console.error('[systems] Khong serialize duoc Turn Manager:', tmError);
+    }
     return turnGlue.buildSaveBundle({
         knowledge: live.knowledge,
         storyHistory: live.storyHistory,
@@ -20763,6 +20807,7 @@ const buildSystemsBundle = useCallback((worldTime) => {
         adventureTurnCount: live.adventureTurnCount,
         gameId: currentGameIdRef.current,
         worldMemory: worldMemoryJson,
+        turnManager: turnManagerJson,
     }, {
         slot_id: currentGameIdRef.current || 'slot_default',
         world_time: worldTime,
@@ -21005,6 +21050,13 @@ const handleUndoTurn = useCallback(async () => {
     if (!tm || !tm.undo_available || isUndoingTurn) return;
     setIsUndoingTurn(true);
     try {
+        // Code review C-5: an API-3 / summariser call scheduled by the turn being
+        // undone may still be in flight. Let it settle FIRST (allSettled - a
+        // rejected background call must not block the rollback), then bump the
+        // generation so anything that lands later is dropped instead of applied.
+        if (activeCriticalPromisesRef.current.length > 0) {
+            await Promise.allSettled(activeCriticalPromisesRef.current);
+        }
         const result = await tm.undo({
             resolveMechanics: () => null,
             narrate: async () => ({ ok: false, label: 'unused' }),
@@ -21021,6 +21073,7 @@ const handleUndoTurn = useCallback(async () => {
             log: (entry) => console.log('[systems] undo:', entry.label, entry.turn_id),
         });
         if (result && result.ok) {
+            undoGenerationRef.current += 1;
             try { contractSessionLog.markUndone(result.turn_id); } catch (logError) { console.warn('[systems]', logError); }
             setStoryHistory(prev => [...prev, { id: crypto.randomUUID(), type: 'system', content: '**[Hệ thống]** Đã hoàn tác lượt vừa rồi.', transient: true }]);
         } else if (result) {
@@ -21042,6 +21095,15 @@ const handleUndoTurn = useCallback(async () => {
  */
 /** Set by `processPlayerAction` while a manually driven turn is in flight. */
 const pendingTurnRef = useRef(null);
+/** Live mirror of `isProcessingAction` for the C-1 self-heal check. */
+const isProcessingActionRef = useRef(false);
+/**
+ * Bumped on every confirmed Undo (code review C-5). Background work captures it
+ * at schedule time and drops its result if the value moved while it was in
+ * flight - otherwise an API-3 / summariser response re-injects state the
+ * rollback just removed.
+ */
+const undoGenerationRef = useRef(0);
 
 const buildWorldMemoryBlock = useCallback((knowledgeForTurn) => {
     try {
@@ -21133,6 +21195,7 @@ const hydrateSystemsForSlot = useCallback(async (gameData) => {
     turnManagerRef.current = null;
     worldMemoryRef.current = null;
     slotRecordRef.current = null;
+    let persistedTurnManager = null;
     try {
         const backend = getSystemsBackend();
         if (backend) {
@@ -21140,6 +21203,7 @@ const hydrateSystemsForSlot = useCallback(async (gameData) => {
             if (loaded.ok && loaded.bundle) {
                 worldMemoryRef.current = worldMemoryFromBundle(loaded.bundle);
                 slotRecordRef.current = loaded.slotRecord || null;
+                persistedTurnManager = loaded.bundle.turnManager || null;
             } else if (loaded.error) {
                 console.warn('[systems] Khong doc duoc slot moi (dung duong cu):', loaded.error.code);
             }
@@ -21161,7 +21225,14 @@ const hydrateSystemsForSlot = useCallback(async (gameData) => {
     }
     setCanUndoTurn(false);
     setPersistenceWarning(null);
-    getTurnManager();
+    const tm = getTurnManager();
+    // Code review C-9: continue the slot's turn_id / world_time / death_turn_ids
+    // instead of restarting at 0. Volatile fields (snapshots, a pending locked
+    // result) are deliberately NOT restored, so Undo stays unavailable here.
+    if (tm && persistedTurnManager) {
+        try { tm.rehydrate(persistedTurnManager); }
+        catch (rehydrateError) { console.error('[systems] rehydrate Turn Manager:', rehydrateError); }
+    }
 }, [getTurnManager]);
 
 /** Reads the whole append-only log out of World Memory (may be empty). */
@@ -21224,14 +21295,72 @@ const handleExportContractLog = useCallback(() => {
     }
 }, []);
 
-/** An AI/user failure abandons the turn: no record, no checkpoint, no Undo. */
-const abortSystemsTurn = useCallback(() => {
-    if (!pendingTurnRef.current) return;
+/**
+ * An AI/user failure abandons the turn: no record, no checkpoint, no Undo.
+ *
+ * `force` also runs when no turn is pending: that is the self-heal path for a
+ * Turn Manager left `input_locked` by an earlier turn that returned early
+ * (code review C-1).
+ */
+const abortSystemsTurn = useCallback((options = {}) => {
+    if (!pendingTurnRef.current && !options.force) return;
     pendingTurnRef.current = null;
     try { turnManagerRef.current && turnManagerRef.current.failManualTurn(); }
     catch (tmError) { console.error('[systems] failManualTurn:', tmError); }
     syncUndoAvailability();
 }, [syncUndoAvailability]);
+
+/**
+ * gdd-01 A.4 phase 1 for a manually driven turn: snapshot + open the turn.
+ *
+ * Code review C-1: this used to sit near the TOP of `processPlayerAction`, so
+ * every early return between there and the narration call (a missing trader, an
+ * unconfigured API key, a rejected action) left the Turn Manager locked FOREVER
+ * - and a locked Turn Manager silently stops every later turn from reaching
+ * World Memory and the durability gate. It is now opened immediately before the
+ * only `await` it guards, and the caller closes it in a `finally`.
+ *
+ * Returns true when a turn is open (freshly begun OR already open - the combat
+ * resolution path deliberately reuses one).
+ */
+const beginSystemsTurn = useCallback((actionText) => {
+    try {
+        const tm = getTurnManager();
+        if (!tm) return false;
+        if (turnGlue.shouldSelfHealTurnManager({
+            inputLocked: tm.input_locked,
+            isProcessingAction: isProcessingActionRef.current,
+        })) {
+            console.warn('[systems] TM self-heal');
+            abortSystemsTurn({ force: true });
+        }
+        if (pendingTurnRef.current) return true; // tolerated: already open
+        const begun = tm.beginManualTurn();
+        if (!begun) {
+            console.warn('[systems] Turn Manager dang ban - khong mo duoc luot moi.');
+            return false;
+        }
+        pendingTurnRef.current = { action: actionText, turn_id: begun.turn_id, handed_off: false };
+        setCanUndoTurn(false);
+        setPersistenceWarning(null);
+        return true;
+    } catch (turnError) {
+        console.error('[systems] beginManualTurn:', turnError);
+        return false;
+    }
+}, [abortSystemsTurn, getTurnManager]);
+
+/**
+ * Closes a manually driven turn that never reached `finalizeSystemsTurn`.
+ *
+ * `processAndUpdateState` stamps `handed_off` SYNCHRONOUSLY before queueing the
+ * React update, because `finalizeSystemsTurn` itself only runs once React
+ * executes the `setknowledge` updater - which is after this `finally`.
+ */
+const settleSystemsTurnAfterCall = useCallback(() => {
+    const pending = pendingTurnRef.current;
+    if (pending && !pending.handed_off) abortSystemsTurn();
+}, [abortSystemsTurn]);
 const mainPlayer = knowledge.characters.find(c => c.isPlayer === true);
 
 const defaultPlayerObject = {
@@ -21303,7 +21432,8 @@ useLayoutEffect(() => {
         }
     }
 }, [storyHistory]);
-const [isProcessingAction, setIsProcessingAction] = useState(false); 
+const [isProcessingAction, setIsProcessingAction] = useState(false);
+isProcessingActionRef.current = isProcessingAction; 
 const [isCheckingMemory, setIsCheckingMemory] = useState(false);
 const [combatants, setCombatants] = useState([]); 
 const [combatTurnOrder, setCombatTurnOrder] = useState([]); // Mảng ID theo thứ tự lượt đi
@@ -24098,9 +24228,16 @@ const handleLevelUp = (character, realmList) => {
     // du, phan du bi huy) va nhan vat chuyen sang trang thai "Cho Dot Pha". Chi
     // `try_execute_breakthrough` moi dua nhan vat qua cong nay.
     if (!workingChar.progressionState) workingChar.progressionState = PROGRESSION_STATE_NORMAL;
+    // Code review C-6: only a PROGRESSION SUBJECT (the player, or a companion
+    // currently in the party) is gated by "Cho Dot Pha". Plain NPCs never run
+    // `try_execute_breakthrough`, so gating them froze them at every 10th level
+    // forever. They keep the pre-gate cascade instead - chosen over running a
+    // breakthrough attempt for every EXP-gaining character, which would put an
+    // RNG roll on dozens of off-screen NPCs per turn.
+    const isProgressionSubject = !!(workingChar.isPlayer || (workingChar.isCompanion && workingChar.inParty !== false));
     let enteredBreakthroughGate = false;
     while (workingChar.maxExp > 0) {
-        if (workingChar.level % 10 === 0) {
+        if (isProgressionSubject && workingChar.level % 10 === 0) {
             if (workingChar.exp >= workingChar.maxExp) {
                 workingChar.exp = workingChar.maxExp;
                 if (workingChar.progressionState !== PROGRESSION_STATE_WAITING) enteredBreakthroughGate = true;
@@ -24534,20 +24671,26 @@ const parseGeminiResponseAndUpdateState = async (text, knowledgeToUse, setActive
     // plan.md C-1 (hybrid): world-content tags survive, mechanical-result tags are
     // stripped or redacted BEFORE anything can apply them. The numbers they used to
     // carry are owned by the deterministic modules (exp/, affinity/, death/).
-    try {
-        const playerIdsForContract = ((knowledgeToUse && knowledgeToUse.characters) || [])
-            .filter(c => c && c.isPlayer)
-            .reduce((acc, c) => acc.concat([c.id, c.Name]), [])
-            .filter(Boolean);
-        const sanitized = sanitizeCommandBlock(commandBlock, { mode: 'prod', playerIds: playerIdsForContract });
-        if (sanitized.stripped.length > 0 && import.meta.env && import.meta.env.DEV) {
-            console.warn('[systems] The co che bi chan (C-1):',
-                sanitized.stripped.map(s => s.tag + ' -> ' + s.reason));
-        }
-        commandBlock = sanitized.kept;
-    } catch (contractError) {
-        console.error('[systems] sanitizeCommandBlock:', contractError);
+    const playerIdsForContract = ((knowledgeToUse && knowledgeToUse.characters) || [])
+        .filter(c => c && c.isPlayer)
+        .reduce((acc, c) => acc.concat([c.id, c.Name]), [])
+        .filter(Boolean);
+    // Code review C-8: `dev` mode THROWS on a mechanical tag; the old catch
+    // swallowed that and applied the RAW block - failing wide open, exactly the
+    // opposite of C-1. `sanitizeCommandBlockForApply` degrades closed instead:
+    // the violation error's own sanitised block, then a prod re-run, then empty.
+    const sanitized = turnGlue.sanitizeCommandBlockForApply(commandBlock, {
+        mode: (import.meta.env && import.meta.env.DEV) ? 'dev' : 'prod',
+        playerIds: playerIdsForContract,
+    });
+    if (sanitized.degraded !== 'none') {
+        console.error('[systems] sanitizeCommandBlock degraded (' + sanitized.degraded + '):', sanitized.error);
     }
+    if (sanitized.stripped.length > 0 && import.meta.env && import.meta.env.DEV) {
+        console.warn('[systems] The co che bi chan (C-1):',
+            sanitized.stripped.map(s => s.tag + ' -> ' + s.reason));
+    }
+    commandBlock = sanitized.kept;
 
     let match;
     while ((match = tagWithDataRegex.exec(commandBlock)) !== null) {
@@ -26218,6 +26361,9 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
 
         } catch (error) {
             console.error('Lỗi trong callGeminiAPI (Khởi tạo/Kịch bản đơn):', error);
+            // Symmetric with the hybrid catch below (code review C-1): a failed
+            // call must release the Turn Manager, or every later turn is locked out.
+            abortSystemsTurn();
             setModalMessage({ show: true, title: 'Lỗi Giao Tiếp AI', content: error.message, type: 'error' });
             if (options.isAITurn && activeCombatLoop) setTimeout(() => activeCombatLoop.nextTurn(), 1500);
             return null;
@@ -26492,7 +26638,8 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
         // of the turn (gdd-01 C.4 F2 / plan.md C-9).
         try { turnManagerRef.current && turnManagerRef.current.markCall('narration_call'); }
         catch (callError) { console.warn('[systems] markCall:', callError); }
-        const narrativeText = await fetchWithRetries(apiUrl, narrativePayload, null, 2, 1500, 'narration');
+        const narrativeText = await fetchWithRetries(apiUrl, narrativePayload, null, 2, 1500, 'narration',
+            turnGlue.narrationBudgetOverrides(tagsLower));
 
         console.log("=========================================");
         console.log("📖 [API 2 - NARRATIVE ENGINE] PHẢN HỒI NHẬN VỀ (RAW):");
@@ -28956,6 +29103,12 @@ const finalizeCombatEnd = async (outcome, data, finalSharedCooldowns) => {
         });
 
         setknowledge(knowledgeAfterSandbox);
+        // Code review C-2: no AI call on the training-dummy path, so checkpoint
+        // the EXP it just granted directly once React has flushed.
+        setTimeout(() => {
+            const tm = turnManagerRef.current;
+            runSystemsCheckpoint('turn_confirm', null, tm ? tm.world_time : (liveUndoableStateRef.current.currentTurn || 0));
+        }, 0);
         return;
     }
 
@@ -29090,17 +29243,35 @@ const finalizeCombatEnd = async (outcome, data, finalSharedCooldowns) => {
     // inside `applyUpdates` consumes it exactly once and clears it.
     try {
         const combatHandoff = toCombatHandoff({ outcome, data, combatType }, knowledgeAfterCombat);
-        // Attach to the local copy too: callGeminiAPI below hands `knowledgeAfterCombat`
-        // straight to applyUpdates, so the same-turn reconciliation can consume it;
-        // the setknowledge write is the fallback if that AI call fails.
+        // Attach to the local copy: `callGeminiAPI` hands `knowledgeAfterCombat` to
+        // `processAndUpdateState`, which (code review C-7) now MERGES it over the
+        // live state, so the same-turn EXP reconciliation consumes it there. The
+        // `setknowledge` write stays as the fallback for a failed AI call.
         knowledgeAfterCombat.lastCombatHandoff = combatHandoff;
         setknowledge(prev => ({ ...prev, lastCombatHandoff: combatHandoff }));
     } catch (handoffError) {
         console.error('[combatAdapter] Khong dung duoc combat hand-off:', handoffError);
     }
 
+    // Code review C-2: combat resolution mutates EXP, affinity, deaths and loot,
+    // but ran entirely OUTSIDE a Turn Manager turn - so none of it reached the
+    // World Memory append or a durability checkpoint. Combat logic itself is
+    // untouched (plan.md P1: read-only wrapper); only the turn bookkeeping is
+    // added around the narration call it already makes.
     if (prompt) {
-        await callGeminiAPI(prompt, false, { inCombat: false }, knowledgeAfterCombat);
+        beginSystemsTurn('Ket qua tran dau: ' + outcome);
+        try {
+            await callGeminiAPI(prompt, false, { inCombat: false }, knowledgeAfterCombat);
+        } finally {
+            settleSystemsTurnAfterCall();
+        }
+    } else {
+        // No AI call on this path: checkpoint the settled post-battle state
+        // directly, once React has flushed the writes above.
+        setTimeout(() => {
+            const tm = turnManagerRef.current;
+            runSystemsCheckpoint('turn_confirm', null, tm ? tm.world_time : (liveUndoableStateRef.current.currentTurn || 0));
+        }, 0);
     }
 };
 
@@ -29496,24 +29667,10 @@ const processPlayerAction = async (actionText, actionType, flavorText = '') => {
             }        
             
 
-            // gdd-01 A.4 phase 1: snapshot BEFORE anything mutates, then open the
-            // turn on the Turn Manager (manual mode - see the P3b/P4b block above).
-            try {
-                const tm = getTurnManager();
-                if (tm) {
-                    const begun = tm.beginManualTurn();
-                    if (begun) {
-                        pendingTurnRef.current = { action: trimmedAction, turn_id: begun.turn_id };
-                        setCanUndoTurn(false);
-                        setPersistenceWarning(null);
-                    } else {
-                        console.warn('[systems] Turn Manager dang ban - khong mo duoc luot moi.');
-                    }
-                }
-            } catch (turnError) {
-                console.error('[systems] beginManualTurn:', turnError);
-            }
-
+            // gdd-01 A.4 phase 1 (snapshot + open the turn) is NOT done here any
+            // more: several branches below still return early (no trader, no API
+            // key), and each of those left the Turn Manager locked forever.
+            // `beginSystemsTurn` now runs immediately before the narration call.
             setIsProcessingAction(true);
             setChoices([]);
             setCustomActionInput('');
@@ -30027,7 +30184,14 @@ ${noNewEventReinforcementBlock}
                 `;
 
         }
-        await callGeminiAPI(promptToSendToAI, false, {}, knowledge, trimmedAction);
+        // gdd-01 A.4 phase 1: snapshot BEFORE the narration call, close it in the
+        // `finally` so no early return or throw can strand the Turn Manager.
+        beginSystemsTurn(trimmedAction);
+        try {
+            await callGeminiAPI(promptToSendToAI, false, {}, knowledge, trimmedAction);
+        } finally {
+            settleSystemsTurnAfterCall();
+        }
     }, 0);
 };
 
@@ -30618,6 +30782,10 @@ const questCheckSchema = {
 
 const runAPI3StateMonitor = async (currentStoryText, currentKnowledge, retries = 3, delay = 3000) => {
     if (gameMode !== 'EXPLORATION') return;
+    // Code review C-5: stamp the turn generation at SCHEDULE time. If the player
+    // undoes the turn while this call is in flight, the result belongs to a turn
+    // that no longer exists and must be dropped, not applied.
+    const scheduledGeneration = undoGenerationRef.current;
     const effectiveApiKey = apiMode === 'userKey' ? apiKey : "";
     const stateHistoryData = currentKnowledge.stateHistory || [];
 
@@ -30744,9 +30912,17 @@ QUY TẮC PHÁN QUYẾT:
             console.log(text);
             console.log("=========================================");
 
+            if (turnGlue.isStaleGeneration(scheduledGeneration, undoGenerationRef.current)) {
+                console.warn('[systems] Bo qua ket qua API 3 cua luot da bi hoan tac.');
+                return;
+            }
             if (text && text.trim() !== '') {
                 console.log("⚡ [API 3 ngầm] Khởi chạy cập nhật thực tại thành công:", text);
                 const { story, choices: newChoices, updates, commandBlock } = await parseGeminiResponseAndUpdateState(text, currentKnowledge);
+                if (turnGlue.isStaleGeneration(scheduledGeneration, undoGenerationRef.current)) {
+                    console.warn('[systems] Bo qua ket qua API 3 cua luot da bi hoan tac.');
+                    return;
+                }
                 processAndUpdateState(updates, commandBlock, currentKnowledge, story);
                 
                 return;
@@ -31229,6 +31405,9 @@ const handleHtabChat = async (userText) => {
                 const tagName = match[1];
                 const dataString = match[2];
                 
+                // C-1 note: this HTAB path deliberately bypasses `sanitizeCommandBlock`.
+                // HTAB affinity is a separate 0..100 system, not the NPC affinity the
+                // contract owns, so it is out of C-1 scope.
                 if (tagName === 'AFFINITY_CHANGED') {
                     const parsedAffinity = parseKeyValueString(dataString);
                     const delta = parseInt(parsedAffinity.value, 10);
@@ -32158,6 +32337,9 @@ const HandbookModal = ({ show, onClose }) => {
 };
 
 const runSummarizationInBackground = async (turnsToSummarize, existingSummaries, startTurn, endTurn) => {
+    // Code review C-5: same generation guard as the API-3 monitor - a summary
+    // computed for a turn the player has since undone must not be written back.
+    const scheduledGeneration = undoGenerationRef.current;
     const formatTurnsForPrompt = (turns) => {
         return turns.map((turn) => {
             return `Lượt ${turn.turnNum}: ${formatHistoryItemForPrompt(turn, 'text_thuong')}`;
@@ -32227,6 +32409,10 @@ ${summariesToMeta.map(s => `[Giai đoạn lượt ${s.startTurn || '?'} - ${s.en
         }
     }
 
+    if (turnGlue.isStaleGeneration(scheduledGeneration, undoGenerationRef.current)) {
+        console.warn('[systems] Bo qua ban tom tat cua luot da bi hoan tac.');
+        return;
+    }
     setStorySummaries(workingSummaries);
 
     const summarizedIds = new Set(turnsToSummarize.map(t => t.id));
@@ -33984,9 +34170,23 @@ const runQuestCheckAPI = async (currentKnowledge) => {
     registerCriticalPromise(runAPI3StateMonitor(rawStoryText, currentKnowledge));
 };
 
+/**
+ * @param knowledgeOverride the knowledge object the AI call was BUILT from.
+ *        Code review C-7: it used to be accepted and then ignored, which is why
+ *        `finalizeCombatEnd` had to mirror its combat hand-off through a second
+ *        `setknowledge`. It is now MERGED OVER the live state (never used as a
+ *        bare replacement) so a field the override does not carry - anything a
+ *        concurrent background update wrote - is preserved.
+ */
 const processAndUpdateState = (updates, commandBlock, knowledgeOverride = null, storyText = "") => {
+    // Code review C-1: mark the pending turn as handed over to
+    // `finalizeSystemsTurn` NOW. The `setknowledge` updater below (which calls
+    // it) only runs when React flushes, i.e. after the caller's `finally`.
+    if (pendingTurnRef.current) pendingTurnRef.current.handed_off = true;
     setknowledge(prevKnowledge => {
-        const baseKnowledge = prevKnowledge;
+        const baseKnowledge = knowledgeOverride
+            ? { ...prevKnowledge, ...knowledgeOverride }
+            : prevKnowledge;
         
         const currentSnapshot = {
             time: { ...baseKnowledge.time },
