@@ -18,8 +18,8 @@ Commit 1 lần mỗi giai đoạn khi test + build xanh, không push.
 - [x] P2 — Affinity D.1–D.6 (7 dải, deep_hostile −80) + Death (death_roll/severity/recovery, crippled = longTermStatus)
 - [x] P3 — World Memory fact store + Persistence v2 (IndexedDB nguồn chân lý, durability gate, schema_version)
 - [x] P4 — Turn Manager (Undo) + Contract (chặn tag cơ học, leak detector) + AI wrapper (timeout 60/45s)
-- [ ] P6 — Character Card, Settings gom nhóm, Customization validators
-- [ ] P7 — CI vitest
+- [x] P6 — Character Card, Settings gom nhóm, Customization validators
+- [x] P7 — CI vitest
 
 ---
 

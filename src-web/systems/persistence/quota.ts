@@ -77,7 +77,7 @@ export interface QuotaWarning {
 export function evaluateQuotaWarning(
   measuredTotalBytes: number,
   quotaBytesTotal: number | null | undefined,
-  warnThreshold = PERSISTENCE_KNOBS.quota_warn_threshold,
+  warnThreshold: number = PERSISTENCE_KNOBS.quota_warn_threshold,
 ): QuotaWarning {
   if (
     quotaBytesTotal === null ||

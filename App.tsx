@@ -75,6 +75,25 @@ import { DEFAULT_AI_CONFIG, SAFETY_SETTINGS_BLOCK_NONE } from './src-web/systems
 import { AI_KNOBS, PERSISTENCE_KNOBS } from './src-web/systems/registry';
 import * as turnGlue from './src-web/systems/glue/turnGlue';
 
+// === P6b - UI wiring (plan.md P6 reduced: Card + Settings grouping + Customize
+// validators). Same contract as P1-P4b: these modules are pure TS and own every
+// display RULE; App.tsx only renders what they return and keeps its own
+// handlers. Song Tu (handleSongTu + the affinity >= 80 gate) and CombatLoop are
+// explicitly out of scope (plan.md C-6) and are only READ from here.
+import { buildCardBlocks } from './src-web/systems/card/cardBlocks';
+import { expToNextForCard, expBarRatio, AWAITING_BREAKTHROUGH } from './src-web/systems/card/expToNext';
+import { baseStatCompletenessCheck } from './src-web/systems/card/baseStatCompleteness';
+import { groupedSettings } from './src-web/systems/ui/settingsGroups';
+import { FONT_SIZE_LABELS, FONT_SIZE_SETTINGS, applyPreset, applyAdvancedSlider, effectiveScale, presetFromTextScale } from './src-web/systems/ui/fontScale';
+import { isWriteActionAllowed, undoButtonState } from './src-web/systems/ui/writeActionAllowed';
+import { createBannerQueue } from './src-web/systems/ui/bannerQueue';
+import { TOUCH_TARGET_MIN } from './src-web/systems/ui/touchTarget';
+import { customizeButtonVisibility, validateProgressZone, isValidBaseStatSet, isValidSkillSubmit, isValidItemSubmit } from './src-web/systems/customize/validators';
+import { createCommitController } from './src-web/systems/customize/commitFlow';
+import { estimateOriginQuota } from './src-web/systems/persistence/quota';
+import { pruneCheckpoints } from './src-web/systems/persistence/saveCheckpoint';
+import * as uiGlue from './src-web/systems/glue/uiGlue';
+
 // gdd-02 A3 / EC-8: every tuning constant is validated ONCE at load, before a
 // play session begins - never with a release-stripped assert. In dev the throw
 // stops the app so the bad value is fixed immediately; in a production build we
@@ -125,6 +144,29 @@ const DEATH_KNOBS = deathKnobsFromGameConfig();
  * instead of a combat multiplier, so `CombatLoop` stays untouched. This id is
  * the single source of truth for that link.
  */
+/**
+ * gdd-06 B D.5 `base_stat_completeness_check`. DEVIATION (plan.md P6b, recorded
+ * deliberately): the GDD blocks turn confirmation on an incomplete base-stat
+ * record. The shipped App has only 9 of the GDD's 12 stats and generates NPCs
+ * from AI text, so blocking would stall the game on a CONTENT gap the player
+ * cannot fix. We log the gap under "[systems]" instead and let the turn proceed.
+ */
+const logBaseStatCompleteness = (appChar, where) => {
+    try {
+        const result = baseStatCompletenessCheck(uiGlue.gddBaseStatsFromApp(appChar));
+        if (!result.ok) {
+            console.warn(
+                '[systems] Thiếu chỉ số gốc (' + where + ') cho "' + ((appChar && (appChar.Name || appChar.name)) || '?') + '":',
+                result.issues.map(issue => issue.stat + ':' + issue.reason).join(', ')
+            );
+        }
+        return result;
+    } catch (statCheckError) {
+        console.error('[systems] baseStatCompletenessCheck:', statCheckError);
+        return null;
+    }
+};
+
 const CRIPPLED_STATUS_ID = 'PHE_DAN_DIEN';
 const CRIPPLED_STATUS_NAME = 'Phế Đan Điền';
 
@@ -7089,9 +7131,22 @@ const CharacterInfoModal = ({
         
         const level = finalStatsCharacter.level || 1;
         const realmInfo = getRealmInfoFromLevel(level, knowledge.realmProgressionList);
-        const expPercent = (finalStatsCharacter.maxExp && finalStatsCharacter.maxExp > 0)
-            ? ((finalStatsCharacter.exp || 0) / finalStatsCharacter.maxExp) * 100
-            : 0;
+        // gdd-06 B D.3 (`exp_to_next`): the EXP element is PROTAGONIST-only and
+        // must respect the "Chờ Đột Phá" sentinel - a full bar with no remaining
+        // number, never a negative or a wrapped value. The bar ratio comes from
+        // the same pure module so the two can never disagree.
+        const cardExpProgress = {
+            level,
+            current_exp: finalStatsCharacter.exp || 0,
+            is_player: finalStatsCharacter.isPlayer === true,
+        };
+        const expToNextValue = expToNextForCard(cardExpProgress);
+        const expPercent = expBarRatio(cardExpProgress) * 100;
+        const expRemainingText = expToNextValue === null
+            ? null
+            : (expToNextValue === AWAITING_BREAKTHROUGH
+                ? 'Chờ Đột Phá'
+                : 'còn ' + (Number.isInteger(expToNextValue) ? expToNextValue : expToNextValue.toFixed(1)) + ' EXP tới cấp kế');
     
         const StatRow = ({ icon, label, value, valueColor, unit = '' }) => (
             <div className="flex items-center justify-between text-sm py-2 px-3 border-b border-[#cda45e]/20 last:border-0 hover:bg-[#162216] transition-colors">
@@ -7200,6 +7255,7 @@ const CharacterInfoModal = ({
                         </div>
                         <p className="text-[10px] text-[#8ba888] mt-2 font-mono font-bold tracking-widest uppercase">
                             {finalStatsCharacter.exp || 0} / {finalStatsCharacter.maxExp || '??'} EXP
+                            {expRemainingText && <span className="ml-2 normal-case text-[#a3b8a3]">({expRemainingText})</span>}
                         </p>
                     </div>
                 </div>
@@ -7751,116 +7807,183 @@ const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledg
             skillsToShow = finalStats.skills || [];
         }
 
+        // gdd-06 B4 "card build algorithm": the six blocks, their order, the
+        // concealment badges and the two mutating buttons are decided by the PURE
+        // module; this component only prints what it returns. plan.md C-6: the
+        // Song Tu threshold stays here in App.tsx and is injected as a predicate,
+        // so the card itself holds no number of its own.
+        const weaponItem = (finalStats.equippedItems && finalStats.equippedItems['Vũ khí chính']) || null;
+        const isCrippled = (finalStats.longTermStatuses || []).some(st => st && (st.id === CRIPPLED_STATUS_ID || st.Name === CRIPPLED_STATUS_NAME));
+        const card = buildCardBlocks(
+            uiGlue.cardCharacterFromApp({ ...finalStats, displayName: displayCharacterName }),
+            uiGlue.cardContextFromApp({
+                appChar: finalStats,
+                tmLocked: !!isProcessingAction,
+                weaponName: weaponItem ? (weaponItem.Name || weaponItem.name) : null,
+                skillNames: skillsToShow.map(sk => sk && (sk.Name || sk.name)).filter(Boolean),
+                showSongTuButton: (npc) => (npc.affinity || 0) >= 80,
+                realmNames: knowledge.realmProgressionList,
+                crippled: isCrippled,
+            })
+        );
+
+        const CardFieldLine = ({ field }) => (
+            <p className="scale-text-sm text-[#e8d3a1]">
+                <strong className="text-[#8ba888]">{field.label}:</strong>{' '}
+                <ExpandableText text={String(field.text || '—')} maxLength={140} />
+                {field.badge && (
+                    <span className="ml-2 scale-text-xs text-[#a3b8a3] border border-[#a3b8a3]/40 px-1 py-0.5 align-middle">「{field.badge}」</span>
+                )}
+            </p>
+        );
+
+        const renderCardBlock = (blockId) => {
+            switch (blockId) {
+                case 'profile':
+                    return (
+                        <div key="profile" className="p-4 bg-[#101a10] border border-[#cda45e]/30 space-y-3">
+                            <h5 className="font-bold text-[#cda45e] uppercase tracking-widest scale-text-sm border-b border-[#cda45e]/20 pb-1" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>{card.profile.label}</h5>
+                            {finalStats.titles?.length > 0 && (
+                                <p className="scale-text-sm text-pink-300">({finalStats.titles.join(', ')})</p>
+                            )}
+                            {card.profile.fields.filter(f => (f.text !== '' && f.text !== 'null') || f.badge).map(f => <CardFieldLine key={f.key} field={f} />)}
+                            {finalStats.Stance && <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Thái độ:</strong> {finalStats.Stance}</p>}
+                            {card.statusLines.length > 0 && (
+                                <p className="scale-text-xs text-[#a3b8a3] italic">{card.statusLines.join(' · ')}</p>
+                            )}
+
+                            {/* Các nút hành động giữ nguyên handler cũ (plan.md C-6). */}
+                            {!finalStats.isPlayer && (finalStats.affinity || 0) >= 50 && !finalStats.isCompanion && handleRecruitCompanion && (
+                                <div className="mt-3 pt-3 border-t border-[#cda45e]/20 text-center">
+                                    <button
+                                        onClick={() => handleRecruitCompanion(finalStats.id)}
+                                        disabled={isProcessingAction}
+                                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                        className="bg-[#1b2a1b] border border-pink-400 hover:bg-pink-400/20 text-pink-300 font-bold py-2 px-4 uppercase tracking-widest scale-text-xs shadow-[inset_0_0_10px_rgba(244,114,182,0.1)] transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <SparklesIcon className="w-4 h-4 inline-block mr-1 -mt-1"/> Mời Đồng Hành Gia Nhập Tổ Đội
+                                    </button>
+                                </div>
+                            )}
+
+                            {!finalStats.isPlayer && !finalStats.isCompanion && !finalStats.isAppraised && !finalStats.posSlot && handleAppraiseNpc && (
+                                <div className="mt-3 pt-3 border-t border-[#cda45e]/20 text-center">
+                                    <button
+                                        onClick={() => {
+                                            onClose();
+                                            handleAppraiseNpc(finalStats.id);
+                                        }}
+                                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                        className="bg-[#1b2a1b] border border-[#cda45e] hover:bg-[#cda45e]/20 text-[#cda45e] font-bold py-2 px-4 uppercase tracking-widest scale-text-xs shadow-[inset_0_0_10px_rgba(205,164,94,0.1)] transition-colors w-full"
+                                    >
+                                        <SparklesIcon className="w-4 h-4 inline-block mr-1 -mt-1"/> Giám Định Tiểu Sử
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    );
+                case 'combat_stats':
+                    if (finalStats.level === undefined) return null;
+                    return (
+                        <div key="combat_stats" className="p-3 bg-[#101a10] border border-[#cda45e]/30 relative overflow-hidden">
+                            <h5 className="font-bold text-[#ff4d4d] uppercase tracking-widest scale-text-sm mb-2" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>{card.combatStats.label}</h5>
+
+                            <div className="flex justify-between items-center bg-[#0a0f0a] border border-[#cda45e]/10 p-2 mb-2 flex-wrap gap-x-2">
+                                <span className="text-[#8ba888] scale-text-xs uppercase tracking-widest">Cấp Độ:</span>
+                                <span className="font-bold text-[#e8d3a1] tracking-wider scale-text-sm">
+                                    Cấp {card.combatStats.level.text} ({realmInfo?.realmName} Tầng {realmInfo?.realmTier})
+                                    {card.combatStats.level.badge && (
+                                        <span className="ml-2 scale-text-xs text-[#a3b8a3] border border-[#a3b8a3]/40 px-1">「{card.combatStats.level.badge}」</span>
+                                    )}
+                                    {/* gdd-02 Core Rule #12 - tín hiệu Chờ Đột Phá trên thẻ nhân vật. */}
+                                    {finalStats.progressionState === 'Chờ Đột Phá' && (
+                                        <span className="ml-2 text-[#ff4d4d] scale-text-xs uppercase tracking-widest">• Chờ Đột Phá</span>
+                                    )}
+                                </span>
+                            </div>
+
+                            {card.combatStats.exp && (
+                                <p className="scale-text-xs text-[#8ba888] mb-2 font-mono tracking-widest">{card.combatStats.exp.text}</p>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 scale-text-sm mt-2 bg-[#0a0f0a] border border-[#cda45e]/10 p-2">
+                                <div className="md:col-span-2 flex justify-between border-b border-[#cda45e]/10 pb-1">
+                                    <span className="text-[#8ba888]">Sinh Lực:</span>
+                                    <span className="font-mono font-bold text-[#ff4d4d]">{finalStats.hp + ' / ' + finalStats.maxhp}</span>
+                                </div>
+                                {card.combatStats.stats.filter(st => st.text !== '' && st.text !== 'null').map(st => (
+                                    <div key={st.key} className="flex justify-between border-b border-[#cda45e]/10 pb-1">
+                                        <span className="text-[#8ba888]">{st.label}:</span>
+                                        <span className="font-mono font-bold text-[#e8d3a1]">
+                                            {st.text}
+                                            {st.badge && <span className="ml-1 scale-text-xs text-[#a3b8a3]">「{st.badge}」</span>}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                case 'affinity':
+                    if (!card.affinity) return null;
+                    return (
+                        <div key="affinity" className="p-3 bg-[#101a10] border border-[#cda45e]/30">
+                            <h5 className="font-bold text-[#cda45e] uppercase tracking-widest scale-text-sm mb-2" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>{card.affinity.label}</h5>
+                            <div className="flex justify-between items-center mb-1 scale-text-sm flex-wrap gap-x-2">
+                                <span className="text-[#8ba888]">
+                                    <strong>Hảo Cảm với Ngươi:</strong>
+                                    {(() => {
+                                        const standing = (knowledge.relationships || []).find(r => r.NPC === displayCharacterName)?.Standing;
+                                        return standing ? ' (' + standing + ')' : '';
+                                    })()}
+                                </span>
+                                {/* gdd-03 1.3: the attitude BAND is what the card shows; the raw
+                                    integer stays as a small secondary read-out. */}
+                                <span className="flex items-baseline gap-2">
+                                    <strong className={card.affinity.value < 0 ? 'text-red-300' : 'text-pink-200'}>{card.affinity.descriptor}</strong>
+                                    <span className={'font-mono text-[10px] opacity-70 ' + (card.affinity.value < 0 ? 'text-red-400' : 'text-pink-300')}>{card.affinity.value > 0 ? '+' + card.affinity.value : card.affinity.value}/100</span>
+                                </span>
+                            </div>
+                            <div className="w-full bg-[#0a0f0a] h-2 border border-[#cda45e]/10 overflow-hidden">
+                                <div className={'h-full transition-all ' + (card.affinity.value < 0 ? 'bg-gradient-to-r from-red-600 to-red-400' : 'bg-gradient-to-r from-pink-500 to-pink-300')} style={{ width: Math.min(100, Math.abs(card.affinity.value)) + '%' }}></div>
+                            </div>
+
+                            {/* plan.md C-6: visibility comes from the injected predicate
+                                (affinity >= 80); handleSongTu itself is untouched. */}
+                            {card.affinity.song_tu_button.visible && handleSongTu && (
+                                <div className="mt-3 pt-3 border-t border-[#cda45e]/20 text-center">
+                                    <button
+                                        onClick={() => handleSongTu(finalStats.id)}
+                                        disabled={isProcessingAction || !card.affinity.song_tu_button.enabled}
+                                        title={card.affinity.song_tu_button.disabled_reasons.join(' · ')}
+                                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                        className="bg-[#1b2a1b] border border-pink-400 hover:bg-pink-400/20 text-pink-300 font-bold py-2 px-4 uppercase tracking-widest scale-text-xs shadow-[inset_0_0_10px_rgba(244,114,182,0.1)] transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <SparklesIcon className="w-4 h-4 inline-block mr-1 -mt-1"/> {card.affinity.song_tu_button.label}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    );
+                case 'status_badges':
+                    if (!card.statusBadges) return null;
+                    return (
+                        <div key="status_badges" className="p-3 bg-[#101a10] border border-[#8b1515]/40">
+                            <h5 className="font-bold text-[#ff4d4d] uppercase tracking-widest scale-text-sm mb-2" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>{card.statusBadges.label}</h5>
+                            <div className="flex flex-wrap gap-2">
+                                {card.statusBadges.badges.map(b => (
+                                    <span key={b.code} className="scale-text-xs text-[#ff9d5c] border border-[#ff9d5c]/40 px-2 py-1">{b.label}</span>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                default:
+                    return null;
+            }
+        };
+
         return (
             <div className="space-y-4 scale-text-sm">
-                <div className="p-4 bg-[#101a10] border border-[#cda45e]/30 space-y-3">
-                    <h5 className="font-bold text-[#cda45e] uppercase tracking-widest scale-text-sm border-b border-[#cda45e]/20 pb-1" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Hồ Sơ Thực Thể</h5>
-                    <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Tên gọi:</strong> {displayCharacterName}{finalStats.titles?.length > 0 && <span className="text-pink-300"> ({finalStats.titles.join(', ')})</span>}</p>
-                    {finalStats.Gender && <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Giới tính:</strong> {finalStats.Gender}</p>}
-                    {finalStats.Role && <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Thân phận/Vai trò:</strong> <ExpandableText text={finalStats.Role} maxLength={60} /></p>}
-                    {finalStats.Stance && <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Thái độ:</strong> {finalStats.Stance}</p>}
-                    {finalStats.Personality && <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Tính cách:</strong> <ExpandableText text={finalStats.Personality} maxLength={80} /></p>}
-                    {finalStats.Appearance && <p className="scale-text-sm text-[#e8d3a1] italic"><strong className="text-[#8ba888]">Ngoại hình:</strong> <ExpandableText text={finalStats.Appearance} maxLength={100} /></p>}
-                    {(finalStats.Backstory || finalStats.description) && <p className="scale-text-sm text-[#a3b8a3]"><strong className="text-[#8ba888]">Tiểu sử / Ghi chú:</strong> <ExpandableText text={finalStats.Backstory || finalStats.description} maxLength={200} /></p>}
-
-                    {!finalStats.isPlayer && (() => {
-                        const affinityValue = finalStats.affinity ?? 0;
-                        const isHostile = affinityValue < 0;
-                        return (
-                            <div className="pt-2 mt-1 border-t border-[#cda45e]/20">
-                                <div className="flex justify-between items-center mb-1 scale-text-sm">
-                                    <span className="text-[#8ba888]">
-                                        <strong>Hảo Cảm với Ngươi:</strong>
-                                        {(() => {
-                                            const standing = (knowledge.relationships || []).find(r => r.NPC === displayCharacterName)?.Standing;
-                                            return standing ? ` (${standing})` : '';
-                                        })()}
-                                    </span>
-                                    {/* gdd-03 1.3: the attitude BAND is what the card shows; the raw
-                                        integer stays as a small secondary read-out. The Song Tu button
-                                        below keeps its own affinity >= 80 gate untouched (plan.md C-6). */}
-                                    <span className="flex items-baseline gap-2">
-                                        <strong className={isHostile ? 'text-red-300' : 'text-pink-200'}>{attitudeBand(affinityValue)}</strong>
-                                        <span className={`font-mono text-[10px] opacity-70 ${isHostile ? 'text-red-400' : 'text-pink-300'}`}>{affinityValue > 0 ? `+${affinityValue}` : affinityValue}/100</span>
-                                    </span>
-                                </div>
-                                <div className="w-full bg-[#0a0f0a] h-2 border border-[#cda45e]/10 overflow-hidden">
-                                    <div className={`h-full transition-all ${isHostile ? 'bg-gradient-to-r from-red-600 to-red-400' : 'bg-gradient-to-r from-pink-500 to-pink-300'}`} style={{ width: `${Math.min(100, Math.abs(affinityValue))}%` }}></div>
-                                </div>
-                            </div>
-                        );
-                    })()}
-
-                    {!finalStats.isPlayer && (finalStats.affinity || 0) >= 50 && !finalStats.isCompanion && handleRecruitCompanion && (
-                        <div className="mt-3 pt-3 border-t border-[#cda45e]/20 text-center">
-                            <button
-                                onClick={() => handleRecruitCompanion(finalStats.id)}
-                                disabled={isProcessingAction}
-                                className="bg-[#1b2a1b] border border-pink-400 hover:bg-pink-400/20 text-pink-300 font-bold py-2 px-4 uppercase tracking-widest scale-text-xs shadow-[inset_0_0_10px_rgba(244,114,182,0.1)] transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <SparklesIcon className="w-4 h-4 inline-block mr-1 -mt-1"/> Mời Đồng Hành Gia Nhập Tổ Đội
-                            </button>
-                        </div>
-                    )}
-
-                    {!finalStats.isPlayer && (finalStats.affinity || 0) >= 80 && handleSongTu && (
-                        <div className="mt-3 pt-3 border-t border-[#cda45e]/20 text-center">
-                            <button
-                                onClick={() => handleSongTu(finalStats.id)}
-                                disabled={isProcessingAction}
-                                className="bg-[#1b2a1b] border border-pink-400 hover:bg-pink-400/20 text-pink-300 font-bold py-2 px-4 uppercase tracking-widest scale-text-xs shadow-[inset_0_0_10px_rgba(244,114,182,0.1)] transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <SparklesIcon className="w-4 h-4 inline-block mr-1 -mt-1"/> Song Tu
-                            </button>
-                        </div>
-                    )}
-
-                    {!finalStats.isPlayer && !finalStats.isCompanion && !finalStats.isAppraised && !finalStats.posSlot && handleAppraiseNpc && (
-                        <div className="mt-3 pt-3 border-t border-[#cda45e]/20 text-center">
-                            <button
-                                onClick={() => {
-                                    onClose();
-                                    handleAppraiseNpc(finalStats.id);
-                                }}
-                                className="bg-[#1b2a1b] border border-[#cda45e] hover:bg-[#cda45e]/20 text-[#cda45e] font-bold py-2 px-4 uppercase tracking-widest scale-text-xs shadow-[inset_0_0_10px_rgba(205,164,94,0.1)] transition-colors w-full"
-                            >
-                                <SparklesIcon className="w-4 h-4 inline-block mr-1 -mt-1"/> Giám Định Tiểu Sử
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                {finalStats.level !== undefined && (
-                    <div className="p-3 bg-[#101a10] border border-[#cda45e]/30 relative overflow-hidden">
-                        <h5 className="font-bold text-[#ff4d4d] uppercase tracking-widest scale-text-sm mb-2" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Chỉ Số Chiến Đấu</h5>
-                        
-                        <div className="flex justify-between items-center bg-[#0a0f0a] border border-[#cda45e]/10 p-2 mb-2">
-                            <span className="text-[#8ba888] scale-text-xs uppercase tracking-widest">Cấp Độ:</span>
-                            <span className="font-bold text-[#e8d3a1] tracking-wider scale-text-sm">
-                                Cấp {finalStats.level} ({realmInfo?.realmName} Tầng {realmInfo?.realmTier})
-                                {/* gdd-02 Core Rule #12 - tin hieu Cho Dot Pha tren the nhan vat. */}
-                                {finalStats.progressionState === 'Chờ Đột Phá' && (
-                                    <span className="ml-2 text-[#ff4d4d] scale-text-xs uppercase tracking-widest">• Chờ Đột Phá</span>
-                                )}
-                            </span>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 scale-text-sm mt-2 bg-[#0a0f0a] border border-[#cda45e]/10 p-2">
-                           <div className="space-y-1">
-                               <div className="flex justify-between border-b border-[#cda45e]/10 pb-1"><span className="text-[#8ba888]">Sinh Lực:</span><span className="font-mono font-bold text-[#ff4d4d]">{`${finalStats.hp} / ${finalStats.maxhp}`}</span></div>
-                               <div className="flex justify-between border-b border-[#cda45e]/10 pb-1"><span className="text-[#8ba888]">Tấn Công:</span><span className="font-mono font-bold text-[#e8d3a1]">{finalStats.atk}</span></div>
-                               <div className="flex justify-between border-b border-[#cda45e]/10 pb-1"><span className="text-[#8ba888]">Phòng Thủ:</span><span className="font-mono font-bold text-[#a3b8a3]">{finalStats.def}</span></div>
-                               <div className="flex justify-between pb-1"><span className="text-[#8ba888]">Tốc Độ:</span><span className="font-mono font-bold text-[#cda45e]">{finalStats.spd}</span></div>
-                           </div>
-                           <div className="space-y-1">
-                               <div className="flex justify-between border-b border-[#cda45e]/10 pb-1"><span className="text-[#8ba888]">Tỉ lệ Chí Mạng:</span><span className="font-mono font-bold text-[#ffb3b3]">{finalStats.cr}%</span></div>
-                               <div className="flex justify-between border-b border-[#cda45e]/10 pb-1"><span className="text-[#8ba888]">Sát Thương Bạo:</span><span className="font-mono font-bold text-[#ff8080]">{finalStats.cdmg}%</span></div>
-                               <div className="flex justify-between border-b border-[#cda45e]/10 pb-1"><span className="text-[#8ba888]">Né Tránh:</span><span className="font-mono font-bold text-[#a3b8a3]">{finalStats.evasion || 0}%</span></div>
-                               <div className="flex justify-between pb-1"><span className="text-[#8ba888]">Giảm Thương:</span><span className="font-mono font-bold text-[#8ba888]">{finalStats.dmgRes || 0}%</span></div>
-                           </div>
-                        </div>
-                    </div>
-                )}
+                {card.order.map(blockId => renderCardBlock(blockId))}
 
                 {skillsToShow.length > 0 && (
                     <div className="p-3 bg-[#101a10] border border-[#cda45e]/30">
@@ -8153,8 +8276,14 @@ const SettingsMenu = ({
     bgmUrl, bgmVolume, isPlayingBgm, onBgmUrlChange, onBgmVolumeChange, onToggleBgm, onOpenCacheManager, onOpenGallery,
     onDebugAwakenHtab, gameMode,
     onExportKeepsake, onExportQaLog, onExportContractLog,
-    textScale, onTextScaleChange 
+    textScale, onTextScaleChange,
+    hackModeEnabled, onToggleHackMode, onOpenCustomize, customizeVisibility = 'hidden'
 }) => {
+
+    // plan.md C-3: the 4 group labels are DATA (src-web/systems/ui/settingsGroups.ts),
+    // never re-literalled here, so the settings taxonomy has one owner.
+    const settingsGroupList = groupedSettings();
+    const groupLabel = (id) => (settingsGroupList.find(g => g.group.id === id)?.group.label) || id;
 
     const [showThemeList, setShowThemeList] = useState(false);
     const audioInputRef = useRef(null);
@@ -8204,7 +8333,111 @@ const SettingsMenu = ({
                 </div>
 
                 <div className="p-5 overflow-y-auto max-h-[75vh] space-y-6 scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-transparent">
-                    
+                    <h3 className="text-xs font-bold text-[#e8d3a1] uppercase tracking-[0.25em] border-l-2 border-[#cda45e] pl-2 mt-2">{groupLabel('display')}</h3>
+                    <div>
+                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Cỡ Chữ</h4>
+                        {/* gdd-06 A5 / plan.md C-3: three presets S/M/L are the primary
+                            control; the shipped 90-140 slider survives as "Nâng cao".
+                            Both write through the pure `fontScale` module so the
+                            FONT_SCALE_STEP[S] < [M] < [L] invariant cannot drift. */}
+                        <div className="bg-[#101a10] border border-[#cda45e]/30 p-3 space-y-3 shadow-inner">
+                            <div className="grid grid-cols-3 gap-2">
+                                {FONT_SIZE_SETTINGS.map(sizeKey => {
+                                    const isActive = presetFromTextScale(textScale) === sizeKey;
+                                    return (
+                                        <button
+                                            key={sizeKey}
+                                            onClick={() => onTextScaleChange(applyPreset(sizeKey).text_scale)}
+                                            style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                            aria-pressed={isActive}
+                                            className={'font-bold uppercase tracking-widest text-xs border transition-colors ' + (isActive ? 'bg-[#cda45e]/20 border-[#cda45e] text-[#e8d3a1]' : 'bg-[#162216] border-[#8ba888]/40 text-[#8ba888]')}
+                                        >
+                                            {FONT_SIZE_LABELS[sizeKey]}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <details>
+                                <summary className="text-[10px] text-[#8ba888] uppercase tracking-widest cursor-pointer select-none py-2">Nâng cao (thanh trượt 90-140%)</summary>
+                                <div className="flex items-center justify-between mt-2">
+                                    <button
+                                        onClick={() => onTextScaleChange(applyAdvancedSlider(textScale - 10).text_scale)}
+                                        disabled={textScale <= 90}
+                                        style={{ minHeight: TOUCH_TARGET_MIN + 'px', minWidth: TOUCH_TARGET_MIN + 'px' }}
+                                        className="bg-[#162216] border border-[#8ba888]/40 text-[#8ba888] font-bold text-xl flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    >
+                                        -
+                                    </button>
+                                    <span className="text-[#e8d3a1] font-mono font-bold tracking-widest text-lg">{textScale}%</span>
+                                    <button
+                                        onClick={() => onTextScaleChange(applyAdvancedSlider(textScale + 10).text_scale)}
+                                        disabled={textScale >= 140}
+                                        style={{ minHeight: TOUCH_TARGET_MIN + 'px', minWidth: TOUCH_TARGET_MIN + 'px' }}
+                                        className="bg-[#162216] border border-[#8ba888]/40 text-[#8ba888] font-bold text-xl flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                                <p className="text-[10px] text-[#8ba888] mt-2 tracking-wider">Hệ số áp dụng: {effectiveScale({ font_size_setting: presetFromTextScale(textScale), text_scale: textScale }).toFixed(3)}</p>
+                            </details>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Giao Diện (Theme)</h4>
+                        <div className="bg-[#101a10] border border-[#cda45e]/30 flex flex-col transition-all">
+                            <div 
+                                onClick={() => setShowThemeList(!showThemeList)}
+                                className="w-full relative cursor-pointer hover:bg-[#1b2a1b] p-4 flex items-center justify-between group"
+                            >
+                                <div className="flex-1 pr-4">
+                                    <p className={`font-bold text-base tracking-wider text-[#cda45e]`} style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
+                                        {uiTheme === 'PINK_FLOWER' ? 'Vườn Hoa (Hồng Nhạt)' : uiTheme === 'HELL_RED' ? 'Địa Ngục (Đỏ Đen)' : uiTheme === 'CUSTOM' ? 'Tùy Chỉnh (Custom)' : 'Mặc Định (Vàng Đen)'}
+                                    </p>
+                                    <p className="text-xs text-[#a3b8a3] mt-1.5 leading-relaxed">Chạm để mở danh sách chủ đề.</p>
+                                </div>
+                                <ChevronDownIcon className={`w-5 h-5 text-[#cda45e] transition-transform ${showThemeList ? 'rotate-180' : ''}`} />
+                            </div>
+
+                            {showThemeList && (
+                                <div className="flex flex-col border-t border-[#cda45e]/20 bg-[#0a0f0a]">
+                                    <button onClick={() => { onSetTheme('DARK_GOLD'); setShowThemeList(false); }} className={`p-3 pl-6 text-left text-sm font-bold tracking-wider border-b border-[#cda45e]/10 ${uiTheme === 'DARK_GOLD' ? 'text-[#e8d3a1] bg-[#1b2a1b]' : 'text-[#8ba888] hover:text-[#cda45e] hover:bg-[#162216]'}`}>Mặc Định (Vàng Đen)</button>
+                                    <button onClick={() => { onSetTheme('PINK_FLOWER'); setShowThemeList(false); }} className={`p-3 pl-6 text-left text-sm font-bold tracking-wider border-b border-[#cda45e]/10 ${uiTheme === 'PINK_FLOWER' ? 'text-[#e8d3a1] bg-[#1b2a1b]' : 'text-[#8ba888] hover:text-[#cda45e] hover:bg-[#162216]'}`}>Vườn Hoa (Hồng Nhạt)</button>
+                                    <button onClick={() => { onSetTheme('HELL_RED'); setShowThemeList(false); }} className={`p-3 pl-6 text-left text-sm font-bold tracking-wider border-b border-[#cda45e]/10 ${uiTheme === 'HELL_RED' ? 'text-[#e8d3a1] bg-[#1b2a1b]' : 'text-[#8ba888] hover:text-[#cda45e] hover:bg-[#162216]'}`}>Địa Ngục (Đỏ Đen)</button>
+                                    
+                                    <div className={`flex justify-between items-center border-b border-[#cda45e]/10 ${uiTheme === 'CUSTOM' ? 'bg-[#1b2a1b]' : 'hover:bg-[#162216]'}`}>
+                                        <button onClick={() => { onSetTheme('CUSTOM'); setShowThemeList(false); }} className={`flex-1 p-3 pl-6 text-left text-sm font-bold tracking-wider ${uiTheme === 'CUSTOM' ? 'text-[#e8d3a1]' : 'text-[#8ba888] hover:text-[#cda45e]'}`}>
+                                            Tùy Chỉnh (Custom)
+                                        </button>
+                                        <button onClick={(e) => { e.stopPropagation(); onOpenThemeEditor(); }} className="p-3 text-[#cda45e] hover:text-white" title="Chỉnh sửa mã màu">
+                                            <WrenchIcon className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <div>
+                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Trải nghiệm cốt truyện</h4>
+                        <div 
+                            onClick={onTogglePlayStyle}
+                            className="w-full relative cursor-pointer bg-[#101a10] border border-[#cda45e]/30 hover:border-[#cda45e]/60 p-4 flex items-center justify-between transition-all group"
+                        >
+                            <div className="flex-1 pr-4">
+                                <p className={`font-bold text-base tracking-wider ${currentPlayStyle === 'RPG' ? 'text-[#cda45e]' : 'text-[#8ba888]'}`} style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
+                                    {currentPlayStyle === 'RPG' ? 'Nhập Vai (RPG)' : 'Kể Chuyện (Story)'}
+                                </p>
+                                <p className="text-xs text-[#a3b8a3] mt-1.5 leading-relaxed">
+                                    {currentPlayStyle === 'RPG' ? 'Hiển thị giao diện chiến đấu, mua bán. Cần tính toán chỉ số.' : 'Ẩn các giao diện game. Tập trung đọc truyện và lựa chọn.'}
+                                </p>
+                            </div>
+                            <div className={`w-14 h-8 relative transition-colors duration-300 ease-in-out flex-shrink-0 border border-[#cda45e]/50 ${currentPlayStyle === 'RPG' ? 'bg-[#1b2a1b]' : 'bg-[#2a1b1b]'}`}>
+                                <div className={`absolute top-0.5 left-1 w-6 h-6 bg-[#e8d3a1] shadow-[0_0_5px_rgba(232,211,161,0.5)] transform transition-transform duration-300 ease-in-out flex items-center justify-center ${currentPlayStyle === 'RPG' ? 'translate-x-6' : 'translate-x-0'}`}>
+                                    {currentPlayStyle === 'RPG' ? <SwordIcon className="w-4 h-4 text-[#1b2a1b]"/> : <BookOpenIcon className="w-4 h-4 text-[#8b1515]"/>}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 className="text-xs font-bold text-[#e8d3a1] uppercase tracking-[0.25em] border-l-2 border-[#cda45e] pl-2 mt-2">{groupLabel('audio')}</h3>
                     <div>
                         <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Nhạc Nền (BGM)</h4>
                         <div className="bg-[#101a10] border border-[#cda45e]/30 p-3 space-y-3">
@@ -8261,91 +8494,7 @@ const SettingsMenu = ({
                             </div>
                         </div>
                     </div>
-
-                    <div>
-                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Trải nghiệm cốt truyện</h4>
-                        <div 
-                            onClick={onTogglePlayStyle}
-                            className="w-full relative cursor-pointer bg-[#101a10] border border-[#cda45e]/30 hover:border-[#cda45e]/60 p-4 flex items-center justify-between transition-all group"
-                        >
-                            <div className="flex-1 pr-4">
-                                <p className={`font-bold text-base tracking-wider ${currentPlayStyle === 'RPG' ? 'text-[#cda45e]' : 'text-[#8ba888]'}`} style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
-                                    {currentPlayStyle === 'RPG' ? 'Nhập Vai (RPG)' : 'Kể Chuyện (Story)'}
-                                </p>
-                                <p className="text-xs text-[#a3b8a3] mt-1.5 leading-relaxed">
-                                    {currentPlayStyle === 'RPG' ? 'Hiển thị giao diện chiến đấu, mua bán. Cần tính toán chỉ số.' : 'Ẩn các giao diện game. Tập trung đọc truyện và lựa chọn.'}
-                                </p>
-                            </div>
-                            <div className={`w-14 h-8 relative transition-colors duration-300 ease-in-out flex-shrink-0 border border-[#cda45e]/50 ${currentPlayStyle === 'RPG' ? 'bg-[#1b2a1b]' : 'bg-[#2a1b1b]'}`}>
-                                <div className={`absolute top-0.5 left-1 w-6 h-6 bg-[#e8d3a1] shadow-[0_0_5px_rgba(232,211,161,0.5)] transform transition-transform duration-300 ease-in-out flex items-center justify-center ${currentPlayStyle === 'RPG' ? 'translate-x-6' : 'translate-x-0'}`}>
-                                    {currentPlayStyle === 'RPG' ? <SwordIcon className="w-4 h-4 text-[#1b2a1b]"/> : <BookOpenIcon className="w-4 h-4 text-[#8b1515]"/>}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Cỡ Chữ</h4>
-                        <div className="bg-[#101a10] border border-[#cda45e]/30 p-3 flex items-center justify-between shadow-inner">
-                            <button 
-                                onClick={() => onTextScaleChange(Math.max(90, textScale - 10))} 
-                                disabled={textScale <= 90}
-                                className="w-12 h-10 bg-[#162216] border border-[#8ba888]/40 text-[#8ba888] hover:text-[#e8d3a1] hover:border-[#cda45e] font-bold text-xl flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                            >
-                                -
-                            </button>
-                            <span className="text-[#e8d3a1] font-mono font-bold tracking-widest text-lg">{textScale}%</span>
-                            <button 
-                                onClick={() => onTextScaleChange(Math.min(140, textScale + 10))} 
-                                disabled={textScale >= 140}
-                                className="w-12 h-10 bg-[#162216] border border-[#8ba888]/40 text-[#8ba888] hover:text-[#e8d3a1] hover:border-[#cda45e] font-bold text-xl flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                            >
-                                +
-                            </button>
-                        </div>
-                    </div>
-                    <div>
-                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Giao Diện (Theme)</h4>
-                        <div className="bg-[#101a10] border border-[#cda45e]/30 flex flex-col transition-all">
-                            <div 
-                                onClick={() => setShowThemeList(!showThemeList)}
-                                className="w-full relative cursor-pointer hover:bg-[#1b2a1b] p-4 flex items-center justify-between group"
-                            >
-                                <div className="flex-1 pr-4">
-                                    <p className={`font-bold text-base tracking-wider text-[#cda45e]`} style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
-                                        {uiTheme === 'PINK_FLOWER' ? 'Vườn Hoa (Hồng Nhạt)' : uiTheme === 'HELL_RED' ? 'Địa Ngục (Đỏ Đen)' : uiTheme === 'CUSTOM' ? 'Tùy Chỉnh (Custom)' : 'Mặc Định (Vàng Đen)'}
-                                    </p>
-                                    <p className="text-xs text-[#a3b8a3] mt-1.5 leading-relaxed">Chạm để mở danh sách chủ đề.</p>
-                                </div>
-                                <ChevronDownIcon className={`w-5 h-5 text-[#cda45e] transition-transform ${showThemeList ? 'rotate-180' : ''}`} />
-                            </div>
-
-                            {showThemeList && (
-                                <div className="flex flex-col border-t border-[#cda45e]/20 bg-[#0a0f0a]">
-                                    <button onClick={() => { onSetTheme('DARK_GOLD'); setShowThemeList(false); }} className={`p-3 pl-6 text-left text-sm font-bold tracking-wider border-b border-[#cda45e]/10 ${uiTheme === 'DARK_GOLD' ? 'text-[#e8d3a1] bg-[#1b2a1b]' : 'text-[#8ba888] hover:text-[#cda45e] hover:bg-[#162216]'}`}>Mặc Định (Vàng Đen)</button>
-                                    <button onClick={() => { onSetTheme('PINK_FLOWER'); setShowThemeList(false); }} className={`p-3 pl-6 text-left text-sm font-bold tracking-wider border-b border-[#cda45e]/10 ${uiTheme === 'PINK_FLOWER' ? 'text-[#e8d3a1] bg-[#1b2a1b]' : 'text-[#8ba888] hover:text-[#cda45e] hover:bg-[#162216]'}`}>Vườn Hoa (Hồng Nhạt)</button>
-                                    <button onClick={() => { onSetTheme('HELL_RED'); setShowThemeList(false); }} className={`p-3 pl-6 text-left text-sm font-bold tracking-wider border-b border-[#cda45e]/10 ${uiTheme === 'HELL_RED' ? 'text-[#e8d3a1] bg-[#1b2a1b]' : 'text-[#8ba888] hover:text-[#cda45e] hover:bg-[#162216]'}`}>Địa Ngục (Đỏ Đen)</button>
-                                    
-                                    <div className={`flex justify-between items-center border-b border-[#cda45e]/10 ${uiTheme === 'CUSTOM' ? 'bg-[#1b2a1b]' : 'hover:bg-[#162216]'}`}>
-                                        <button onClick={() => { onSetTheme('CUSTOM'); setShowThemeList(false); }} className={`flex-1 p-3 pl-6 text-left text-sm font-bold tracking-wider ${uiTheme === 'CUSTOM' ? 'text-[#e8d3a1]' : 'text-[#8ba888] hover:text-[#cda45e]'}`}>
-                                            Tùy Chỉnh (Custom)
-                                        </button>
-                                        <button onClick={(e) => { e.stopPropagation(); onOpenThemeEditor(); }} className="p-3 text-[#cda45e] hover:text-white" title="Chỉnh sửa mã màu">
-                                            <WrenchIcon className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Điều Hướng Chính</h4>
-                        <div className="grid grid-cols-2 gap-3">
-                            <MenuItem icon={<ArrowPathIcon />} label="Bắt Đầu Lại" onClick={onRestart} colorClass="text-[#e8d3a1]" subtext="Chơi lại từ đầu" />
-                            <MenuItem icon={<ArrowLeftStartOnRectangleIcon />} label="Về Trang Chủ" onClick={onGoHome} colorClass="text-[#e8d3a1]" subtext="Thoát khỏi màn chơi" />
-                        </div>
-                    </div>
-
+                    <h3 className="text-xs font-bold text-[#e8d3a1] uppercase tracking-[0.25em] border-l-2 border-[#cda45e] pl-2 mt-2">{groupLabel('ai_data')}</h3>
                     <div>
                         <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Lưu trữ tiến trình</h4>
                         <div className="grid grid-cols-3 gap-2">
@@ -8356,7 +8505,6 @@ const SettingsMenu = ({
                             <MenuItem icon={<FolderOpenIcon />} label="Tải Game" onClick={onLoadFromCloud} colorClass="text-[#8ba888]" subtext="Mở kho lưu trữ" />
                         </div>
                     </div>
-
                     <div>
                         <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Tệp Tin (Ngoại Tuyến)</h4>
                         <div className="space-y-3">
@@ -8374,7 +8522,6 @@ const SettingsMenu = ({
                             </div>
                         </div>
                     </div>
-
                     <div>
                             <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Hệ Thống & Dọn Dẹp</h4>
                             <div className="space-y-3">
@@ -8384,6 +8531,48 @@ const SettingsMenu = ({
                                 <MenuItem icon={<WrenchIcon />} label="Quản Lý Bộ Nhớ Thống Cục" onClick={onOpenCacheManager} colorClass="text-yellow-400" subtext="Xem danh sách và xóa từng ảnh cục bộ" />
                             </div>
                         </div>
+                    <h3 className="text-xs font-bold text-[#e8d3a1] uppercase tracking-[0.25em] border-l-2 border-[#cda45e] pl-2 mt-2">{groupLabel('customize')}</h3>
+                    <div>
+                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Bảng tùy chỉnh</h4>
+                        {/* gdd-06 C2 #1: a DEVICE-level toggle, default OFF, persisted in
+                            localStorage. It only GATES the entry point; every write still
+                            goes through the validators + commit controller. */}
+                        <div className="bg-[#101a10] border border-[#cda45e]/30 p-3 space-y-3">
+                            <button
+                                onClick={onToggleHackMode}
+                                aria-pressed={!!hackModeEnabled}
+                                style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                className="w-full flex items-center justify-between gap-3 px-3 py-2 bg-[#162216] border border-[#cda45e]/30 transition-colors"
+                            >
+                                <span className="text-left">
+                                    <span className="block font-bold text-xs tracking-wide text-[#e8d3a1]">Tùy chỉnh nhân vật</span>
+                                    <span className="block text-[9px] text-[#8ba888] mt-1 leading-tight">Mặc định TẮT. Bật để hiện nút mở bảng tùy chỉnh.</span>
+                                </span>
+                                <span className={'w-12 h-7 flex-shrink-0 border relative transition-colors ' + (hackModeEnabled ? 'border-[#cda45e] bg-[#1b2a1b]' : 'border-[#8ba888]/40 bg-[#0a0f0a]')}>
+                                    <span className={'absolute top-0.5 w-5 h-5 bg-[#e8d3a1] transition-transform ' + (hackModeEnabled ? 'translate-x-6' : 'translate-x-1')}></span>
+                                </span>
+                            </button>
+                            {customizeVisibility !== 'hidden' && (
+                                <MenuItem
+                                    icon={<WrenchIcon />}
+                                    label="Mở bảng tùy chỉnh"
+                                    onClick={onOpenCustomize}
+                                    disabled={customizeVisibility !== 'enabled'}
+                                    colorClass="text-[#a5b4fc]"
+                                    subtext={customizeVisibility === 'enabled' ? 'Ba vùng ghi độc lập, mỗi lần lưu là một giao dịch' : 'Tạm khóa khi đang xử lý lượt hoặc đang giao tranh'}
+                                />
+                            )}
+                        </div>
+                    </div>
+                    <div className="border-t border-[#cda45e]/20 pt-4">
+                    <div>
+                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Điều Hướng Chính</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                            <MenuItem icon={<ArrowPathIcon />} label="Bắt Đầu Lại" onClick={onRestart} colorClass="text-[#e8d3a1]" subtext="Chơi lại từ đầu" />
+                            <MenuItem icon={<ArrowLeftStartOnRectangleIcon />} label="Về Trang Chủ" onClick={onGoHome} colorClass="text-[#e8d3a1]" subtext="Thoát khỏi màn chơi" />
+                        </div>
+                    </div>
+                    </div>
 
                 </div>
             </div>
@@ -8398,7 +8587,8 @@ const MobileFunctionsModal = ({
     onShowEquip,
     onShowSkills,
     onShowCrafting,
-    onShowCustomization
+    onShowCustomization,
+    customizeVisibility = 'hidden'
 }) => {
     if (!show) return null;
     const FunctionButton = ({ icon, label, onClick }) => ( 
@@ -8422,7 +8612,10 @@ const MobileFunctionsModal = ({
                 <FunctionButton icon={<ArmorIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#8ba888]" />} label="Trang Bị" onClick={onShowEquip} /> 
                 <FunctionButton icon={<BoltIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#cda45e]" />} label="Kỹ Năng" onClick={onShowSkills} /> 
                 <FunctionButton icon={<FireIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#8b1515]" />} label="Dung Hợp" onClick={onShowCrafting} />
-                <FunctionButton icon={<Cog6ToothIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#a5b4fc]" />} label="Tùy Chỉnh" onClick={onShowCustomization} />
+                {/* gdd-06 C2 #2: hidden entirely while the Settings toggle is off. */}
+                {customizeVisibility !== 'hidden' && (
+                    <FunctionButton icon={<Cog6ToothIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#a5b4fc]" />} label="Tùy Chỉnh" onClick={onShowCustomization} />
+                )}
             </div>
         </div>
     );
@@ -8494,7 +8687,49 @@ const CustomizationModal = ({
     onFlipDefaultEnemyImage
 }) => {
     const [levelInput, setLevelInput] = useState(1);
+    const [expInput, setExpInput] = useState('');
+    const [progressStateInput, setProgressStateInput] = useState('');
     const [statsInput, setStatsInput] = useState({});
+    // gdd-06 C2 #6a: ONE in-flight lock shared by every Save button, plus a
+    // per-zone message slot - a failure in one zone never touches another.
+    const [committingZone, setCommittingZone] = useState(null);
+    const [zoneMessage, setZoneMessage] = useState({});
+
+    const showZoneResult = (zone, result) => {
+        const errorText = uiGlue.issuesToText(result && result.errors);
+        setZoneMessage(prev => ({
+            ...prev,
+            [zone]: {
+                ok: !!(result && result.ok),
+                text: result && result.ok
+                    ? [result.message, uiGlue.issuesToText(result.warnings)].filter(Boolean).join(' · ')
+                    : (errorText || (result && result.message) || 'Không ghi được.'),
+            },
+        }));
+    };
+
+    const submitZone = async (zone, run) => {
+        if (committingZone) return null;
+        setCommittingZone(zone);
+        try {
+            const result = await run();
+            showZoneResult(zone, result);
+            return result;
+        } catch (commitError) {
+            showZoneResult(zone, { ok: false, errors: [{ message: String(commitError && commitError.message || commitError) }] });
+            return null;
+        } finally {
+            setCommittingZone(null);
+        }
+    };
+
+    const ZoneMessage = ({ zone }) => {
+        const message = zoneMessage[zone];
+        if (!message) return null;
+        return (
+            <p className={'mt-2 text-xs leading-snug ' + (message.ok ? 'text-[#8ba888]' : 'text-[#ff9d5c]')}>{message.text}</p>
+        );
+    };
     const [skillDraft, setSkillDraft] = useState(EMPTY_CUSTOMIZATION_SKILL_DRAFT);
     const [itemDraft, setItemDraft] = useState(EMPTY_CUSTOMIZATION_ITEM_DRAFT);
     const updateSkillDraft = (field, value) => setSkillDraft(prev => ({ ...prev, [field]: value }));
@@ -8519,6 +8754,9 @@ const CustomizationModal = ({
     useEffect(() => {
         if (show && playerCharacter) {
             setLevelInput(playerCharacter.level || 1);
+            setExpInput('');
+            setProgressStateInput('');
+            setZoneMessage({});
             const nextStats = {};
             statFields.forEach(f => { nextStats[f.key] = playerCharacter[f.key] ?? 0; });
             setStatsInput(nextStats);
@@ -8540,10 +8778,39 @@ const CustomizationModal = ({
                 {/* CẤP ĐỘ */}
                 <div className="bg-[#101a10] border border-[#cda45e]/30 p-4">
                     <h3 className="text-base font-bold text-[#e8d3a1] mb-3 uppercase tracking-wider">Cấp Độ</h3>
-                    <div className="flex gap-2">
-                        <input type="number" min="1" value={levelInput} onChange={(e) => setLevelInput(e.target.value)} className="flex-grow p-2.5 bg-[#0a0f0a] border border-[#cda45e]/30 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none" />
-                        <button onClick={() => { const lvl = parseInt(levelInput, 10); if (!isNaN(lvl) && lvl > 0) onApplyLevel(lvl); }} className="bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold px-6 uppercase tracking-widest text-sm transition-colors">Áp Dụng</button>
+                    {/* gdd-06 C4 D.2b: (cấp, EXP, trạng thái) là MỘT bộ ba nguyên tử.
+                        Để trống EXP/trạng thái = giữ nguyên nếu cấp không đổi. */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                        <div>
+                            <label className="block text-xs font-semibold text-[#8ba888] mb-1">Cấp độ</label>
+                            <input type="number" min="1" value={levelInput} onChange={(e) => setLevelInput(e.target.value)} className="w-full p-2.5 bg-[#0a0f0a] border border-[#cda45e]/30 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-[#8ba888] mb-1">EXP hiện tại (để trống = tự động)</label>
+                            <input type="number" min="0" value={expInput} onChange={(e) => setExpInput(e.target.value)} className="w-full p-2.5 bg-[#0a0f0a] border border-[#cda45e]/30 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-[#8ba888] mb-1">Trạng thái tu luyện</label>
+                            <select value={progressStateInput} onChange={(e) => setProgressStateInput(e.target.value)} className="w-full p-2.5 bg-[#0a0f0a] border border-[#cda45e]/30 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none appearance-none">
+                                <option value="" className="bg-[#101a10]">Tự động</option>
+                                <option value="Tu Luyện Thường" className="bg-[#101a10]">Tu Luyện Thường</option>
+                                <option value="Chờ Đột Phá" className="bg-[#101a10]">Chờ Đột Phá</option>
+                            </select>
+                        </div>
                     </div>
+                    <button
+                        onClick={() => submitZone('progress', () => onApplyLevel({
+                            level: parseInt(levelInput, 10),
+                            current_exp: String(expInput).trim() === '' ? undefined : Number(expInput),
+                            state: progressStateInput || null,
+                        }))}
+                        disabled={!!committingZone}
+                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                        className="w-full bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold uppercase tracking-widest text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                        {committingZone === 'progress' ? 'Đang ghi...' : 'Áp Dụng'}
+                    </button>
+                    <ZoneMessage zone="progress" />
                 </div>
 
                 {/* CHỈ SỐ GỐC */}
@@ -8557,19 +8824,21 @@ const CustomizationModal = ({
                             </div>
                         ))}
                     </div>
+                    {/* gdd-06 C4 D.3: ô để trống KHÔNG được hiểu là 0 - giá trị cũ
+                        được giữ lại, và cả 12 chỉ số được ghi trong cùng một lần lưu. */}
                     <button
                         onClick={() => {
-                            const parsed = {};
-                            statFields.forEach(f => {
-                                const n = parseFloat(statsInput[f.key]);
-                                parsed[f.key] = isNaN(n) ? 0 : n;
-                            });
-                            onApplyStats(parsed);
+                            const draft = {};
+                            statFields.forEach(f => { draft[f.key] = statsInput[f.key]; });
+                            return submitZone('base_stats', () => onApplyStats(draft));
                         }}
-                        className="w-full bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-2.5 uppercase tracking-widest text-sm transition-colors"
+                        disabled={!!committingZone}
+                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                        className="w-full bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-2.5 uppercase tracking-widest text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                        Áp Dụng Chỉ Số
+                        {committingZone === 'base_stats' ? 'Đang ghi...' : 'Áp Dụng Chỉ Số'}
                     </button>
+                    <ZoneMessage zone="base_stats" />
                 </div>
 
                 {/* TẠO KỸ NĂNG */}
@@ -8619,16 +8888,18 @@ const CustomizationModal = ({
                         </div>
                     </div>
                     <button
-                        onClick={() => {
+                        onClick={async () => {
                             if (!skillDraft.name.trim()) return;
-                            onCreateSkill({ ...skillDraft, name: skillDraft.name.trim(), description: skillDraft.description.trim() || skillDraft.name.trim() });
-                            setSkillDraft(EMPTY_CUSTOMIZATION_SKILL_DRAFT);
+                            const result = await submitZone('entries', () => onCreateSkill({ ...skillDraft, name: skillDraft.name.trim(), description: skillDraft.description.trim() || skillDraft.name.trim() }));
+                            if (result && result.ok) setSkillDraft(EMPTY_CUSTOMIZATION_SKILL_DRAFT);
                         }}
-                        disabled={!skillDraft.name.trim()}
+                        disabled={!skillDraft.name.trim() || !!committingZone}
+                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
                         className="w-full bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-2.5 uppercase tracking-widest text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                        Lĩnh Hội Kỹ Năng
+                        {committingZone === 'entries' ? 'Đang ghi...' : 'Lĩnh Hội Kỹ Năng'}
                     </button>
+                    <ZoneMessage zone="entries" />
                     <button onClick={onOpenSkillCreation} className="w-full mt-2 bg-transparent text-[#8ba888] hover:text-[#e8d3a1] font-semibold py-1.5 uppercase tracking-widest text-xs transition-colors underline underline-offset-2">Hoặc tự tay tạo thủ công (Bảng Kỹ Năng)</button>
                 </div>
 
@@ -8677,16 +8948,18 @@ const CustomizationModal = ({
                         </div>
                     </div>
                     <button
-                        onClick={() => {
+                        onClick={async () => {
                             if (!itemDraft.name.trim()) return;
-                            onCreateItem({ ...itemDraft, name: itemDraft.name.trim(), description: itemDraft.description.trim() || itemDraft.name.trim() });
-                            setItemDraft(EMPTY_CUSTOMIZATION_ITEM_DRAFT);
+                            const result = await submitZone('entries', () => onCreateItem({ ...itemDraft, name: itemDraft.name.trim(), description: itemDraft.description.trim() || itemDraft.name.trim() }));
+                            if (result && result.ok) setItemDraft(EMPTY_CUSTOMIZATION_ITEM_DRAFT);
                         }}
-                        disabled={!itemDraft.name.trim()}
+                        disabled={!itemDraft.name.trim() || !!committingZone}
+                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
                         className="w-full bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-2.5 uppercase tracking-widest text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                        Tạo Vật Phẩm
+                        {committingZone === 'entries' ? 'Đang ghi...' : 'Tạo Vật Phẩm'}
                     </button>
+                    <ZoneMessage zone="entries" />
                 </div>
 
                 {/* NỀN TRẬN ĐẤU MẶC ĐỊNH */}
@@ -9365,6 +9638,7 @@ const GameplayScreen = ({
     gameMode, goHome, gameSettings, restartGame, storyHistory, setGameSettings, setStoryHistory, isLoading, currentStory, handleActionRequest,
     choices, handleChoice, formatStoryText, customActionInput, setCustomActionInput,
     canUndoTurn, onUndoTurn, isUndoingTurn, persistenceWarning,
+    visibleBanner, onDismissBanner, hackModeEnabled, onToggleHackMode,
     onExportKeepsake, onExportQaLog, onExportContractLog, 
     handleCustomAction, setShowCharacterInfoModal, bgmUrl, bgmVolume, isPlayingBgm, onBgmUrlChange, onBgmVolumeChange, onToggleBgm,
     isProcessingAction, handleGenerateSuggestedActions, isGeneratingSuggestedActions,  
@@ -9398,6 +9672,29 @@ const GameplayScreen = ({
     showHtabInfoModal, setShowHtabInfoModal,
     allowUnexpectedEvent, setAllowUnexpectedEvent
 }) => {
+
+    // gdd-06 A4 D.1 `write_action_allowed(action, tm_state, screen)`: the play
+    // screen never re-derives "is this button live?" from ad-hoc booleans - it
+    // asks the pure matrix. The App has no explicit `tm_state`, so `uiGlue`
+    // folds its three loading booleans into one (`resolving` while the AI writes,
+    // `undoing` during a rollback).
+    const tmState = uiGlue.tmStateFromApp({ isProcessingAction, isLoading, isUndoingTurn });
+    const writeCtx = { tm_state: tmState, screen: 'S2' };
+    const canSubmitWriteAction = isWriteActionAllowed('submit_action', writeCtx);
+    // gdd-06 A5: dimmed, not hidden - the controls stay in place so the layout
+    // never jumps while a turn resolves.
+    const writeControlOpacity = canSubmitWriteAction ? 1 : 0.38;
+    // gdd-06 A2 #6 / AC-07: "hidden" and "dimmed" are two DIFFERENT mechanisms.
+    const undoState = undoButtonState(!!canUndoTurn, writeCtx);
+    // gdd-06 C2 #2 (plan.md C-7: this project has no death-turn lock-out screen,
+    // so `is_death_turn` is always false here).
+    const customizeVisibility = customizeButtonVisibility({
+        toggle_enabled: !!hackModeEnabled,
+        screen: 'gameplay',
+        tm_state: tmState,
+        in_combat: gameMode === 'COMBAT',
+        is_death_turn: false,
+    });
 
     const [showSettingsMenu, setShowSettingsMenu] = useState(false); 
     const [isTopBarCollapsed, setIsTopBarCollapsed] = useState(false);
@@ -9874,12 +10171,14 @@ const renderDefaultActions = () => {
                            placeholder={knowledge.systemAssistant?.isActive ? "Trò chuyện với Hệ thống tối cao..." : (gameSettings.difficulty === 'Ác Mộng' ? "Chế độ Ác Mộng: Khóa nhập hành động tự do!" : "Miêu tả hành động tùy ý...")}
                            rows={2}
                            className="flex-grow p-3 bg-[#0a0f0a]/60 border border-[#cda45e]/40 text-[#e8d3a1] focus:border-[#cda45e] outline-none text-sm placeholder-[#8ba888] disabled:opacity-50 disabled:cursor-not-allowed resize-y break-words whitespace-pre-wrap"
-                           onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !isProcessingAction && gameSettings.difficulty !== 'Ác Mộng') { e.preventDefault(); handleCustomAction(customActionInput); } }}
-                           disabled={isLoading || isProcessingAction || gameSettings.difficulty === 'Ác Mộng'}
+                           onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && canSubmitWriteAction && gameSettings.difficulty !== 'Ác Mộng') { e.preventDefault(); handleCustomAction(customActionInput); } }}
+                           style={{ opacity: writeControlOpacity }}
+                           disabled={!canSubmitWriteAction || gameSettings.difficulty === 'Ác Mộng'}
                         />
                         <button
                            onClick={() => handleCustomAction(customActionInput)}
-                           disabled={isLoading || isProcessingAction || gameSettings.difficulty === 'Ác Mộng'}
+                           style={{ opacity: writeControlOpacity, minHeight: TOUCH_TARGET_MIN + 'px' }}
+                           disabled={!canSubmitWriteAction || gameSettings.difficulty === 'Ác Mộng'}
                            className="bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-3 px-6 shadow-[inset_0_0_10px_rgba(205,164,94,0.1)] uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed self-start"
                         >
                             Thực Hiện
@@ -9908,23 +10207,19 @@ const renderDefaultActions = () => {
                    </div>
                )}
 
-               {/* plan.md C-13 / gdd-01 F3: the Undo button EXISTS only while
-                   `undo_available` is true - it is never shown disabled. */}
-               {canUndoTurn && (
+               {/* plan.md C-13 / gdd-01 F3 + gdd-06 A2 #6: the button is HIDDEN
+                   when `undo_available` is false and merely DIMMED while a turn is
+                   resolving - `undoButtonState` owns that distinction. */}
+               {undoState !== 'hidden' && (
                    <div className="w-full mb-2 flex justify-end">
                        <button
                            onClick={onUndoTurn}
-                           disabled={isProcessingAction || isUndoingTurn}
-                           style={{ minHeight: '44px' }}
+                           disabled={undoState !== 'enabled'}
+                           style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
                            className="px-4 py-2 text-xs font-bold tracking-wide border border-[#cda45e]/60 text-[#e8d3a1] bg-[#101a10] hover:bg-[#1b2a1b] disabled:opacity-40 disabled:cursor-not-allowed"
                        >
                            {isUndoingTurn ? 'Đang hoàn tác...' : '↶ Hoàn tác lượt vừa rồi'}
                        </button>
-                   </div>
-               )}
-               {persistenceWarning && (
-                   <div className="w-full mb-2 px-3 py-2 text-[11px] text-[#ff9d5c] border border-[#ff9d5c]/40 bg-[#1a1008]">
-                       {persistenceWarning}
                    </div>
                )}
 
@@ -10009,6 +10304,22 @@ const renderDefaultActions = () => {
     // return chính của GameplayScreen
     return (
         <div ref={gameplayScreenRef} className="fixed inset-0 w-full h-[100dvh] overflow-hidden bg-transparent text-[#e8d3a1] flex flex-col font-sans">
+            {/* gdd-06 A2 #1: the banner tier sits ABOVE every screen, is never
+                modal, never navigates by itself and NEVER auto-dismisses (AC-43)
+                - the paper strip stays until the player taps it away. */}
+            {visibleBanner && (
+                <div className="flex-shrink-0 w-full bg-[#1a1008] border-b border-[#ff9d5c]/50 px-3 py-2 flex items-start gap-3 z-[80] shadow-[0_2px_10px_rgba(0,0,0,0.6)]">
+                    <span className="flex-grow text-[11px] leading-snug text-[#ff9d5c] tracking-wide">{visibleBanner.text}</span>
+                    <button
+                        onClick={onDismissBanner}
+                        style={{ minHeight: TOUCH_TARGET_MIN + 'px', minWidth: TOUCH_TARGET_MIN + 'px' }}
+                        className="flex-shrink-0 text-[#ff9d5c] hover:text-[#e8d3a1] text-xl leading-none font-bold"
+                        aria-label="Đóng thông báo"
+                    >
+                        ×
+                    </button>
+                </div>
+            )}
             <div className="flex flex-col flex-1 min-h-0 overflow-hidden relative">
                 <TopBar />
 
@@ -10208,6 +10519,7 @@ const renderDefaultActions = () => {
                     onShowEquip={() => { setShowFunctionsModal(false); setShowCharacterEquipModal(true); }}
                     onShowSkills={() => { setShowFunctionsModal(false); setShowSkillManagementModal(true); }}
                     onShowCrafting={() => { setShowFunctionsModal(false); setShowCraftingModal(true); }}
+                    customizeVisibility={customizeVisibility}
                     onShowCustomization={() => { setShowFunctionsModal(false); setShowCustomizationModal(true); }}
                 />
 
@@ -10282,6 +10594,10 @@ const renderDefaultActions = () => {
                     gameMode={gameMode}
                     textScale={gameSettings.textScale || 100} 
                     onTextScaleChange={(newScale) => setGameSettings(prev => ({ ...prev, textScale: newScale }))}
+                    hackModeEnabled={hackModeEnabled}
+                    onToggleHackMode={onToggleHackMode}
+                    customizeVisibility={customizeVisibility}
+                    onOpenCustomize={() => { setShowSettingsMenu(false); setShowCustomizationModal(true); }}
                 />
                 <VisualGalleryModal
                     show={showVisualGallery}
@@ -17173,6 +17489,7 @@ const handleAppraiseNpc = async (npcId) => {
                 
                 // Cập nhật lại chỉ số cuối
                 newKnowledge.characters[charIndex] = calculateFinalStats(charToUpdate);
+                logBaseStatCompleteness(newKnowledge.characters[charIndex], 'handleAppraiseNpc');
             }
             return newKnowledge;
         });
@@ -17234,15 +17551,18 @@ const noteCustomizationWrite = () => {
     }
 };
 
-const handleCustomizeLevel = (newLevel) => {
+const handleCustomizeLevel = (newLevel, newExp = 0, newState = PROGRESSION_STATE_NORMAL) => {
     setknowledge(prev => {
         const newKnowledge = JSON.parse(JSON.stringify(prev));
         const playerIndex = newKnowledge.characters.findIndex(c => c.isPlayer);
         if (playerIndex === -1) return prev;
 
+        // gdd-06 C4 D.2b: (level, current_exp, state) is ONE atomic triple - the
+        // panel may never write the level alone and leave EXP/state stale.
         let player = newKnowledge.characters[playerIndex];
         player.level = newLevel;
-        player.exp = 0;
+        player.exp = newExp;
+        player.progressionState = newState;
 
         const totalAp = calculateTotalAP(newLevel);
         const spentAp = Object.values(player.allocatedPoints || {}).reduce((sum, points) => sum + points, 0);
@@ -17293,7 +17613,9 @@ const handleCustomizeCreateItem = (itemDraft) => {
         newKnowledge.pendingCreations.push({ type: 'item', payload: { itemIdea } });
         return newKnowledge;
     });
-    noteCustomizationWrite();
+    // P6b: the commit controller now owns invalidate + hack flag (gdd-06 C4
+    // step 6b/6c). Calling it here too would consume the pending snapshot before
+    // the controller can report "Undo lượt trước đã khóa".
     setModalMessage({ show: true, title: 'Đang Tạo Vật Phẩm...', content: `Đấng đang giám định vật phẩm "${itemIdea.name}", vật phẩm sẽ xuất hiện trong Hành Trang sau ít giây...`, type: 'info' });
 };
 
@@ -17320,7 +17642,8 @@ const handleCustomizeCreateSkill = (skillDraft) => {
         newKnowledge.pendingCreations.push({ type: 'skill', payload: { skillIdea, sourceRarity: null, targetCharacterId: playerId } });
         return newKnowledge;
     });
-    noteCustomizationWrite();
+    // See handleCustomizeCreateItem: invalidate + hack flag belong to the
+    // commit controller now (gdd-06 C4 step 6b/6c).
     setModalMessage({ show: true, title: 'Đang Lĩnh Hội...', content: `Đấng đang giám định kỹ năng "${skillIdea.name}", kỹ năng sẽ xuất hiện trong Bảng Kỹ Năng sau ít giây...`, type: 'info' });
 };
 
@@ -20319,6 +20642,41 @@ currentGameIdRef.current = currentGameId;
 const [canUndoTurn, setCanUndoTurn] = useState(false);
 /** Vietnamese banner shown when a turn could not be made durable (plan.md C-2 reduced). */
 const [persistenceWarning, setPersistenceWarning] = useState(null);
+
+// === P6b UI state (plan.md P6 reduced) ======================================
+// gdd-06 A2 #1: at most ONE banner is visible; the rest queue FIFO and a write
+// failure preempts an open quota warning. The queue itself is the pure module;
+// React only mirrors its `visible` slot into state so it can re-render.
+const bannerQueueRef = useRef(createBannerQueue());
+const [visibleBanner, setVisibleBanner] = useState(null);
+const quotaBannerRaisedRef = useRef(false);
+
+/** gdd-06 C2 #1: device-level, default OFF, persisted outside every save. */
+const [hackModeEnabled, setHackModeEnabled] = useState(() =>
+    uiGlue.readHackModeFlag(typeof window !== 'undefined' ? window.localStorage : null)
+);
+
+const pushBanner = useCallback((banner) => {
+    if (!banner) return;
+    bannerQueueRef.current.push(banner);
+    setVisibleBanner(bannerQueueRef.current.visible);
+}, []);
+
+const dismissBanner = useCallback(() => {
+    bannerQueueRef.current.dismiss();
+    setVisibleBanner(bannerQueueRef.current.visible);
+    quotaBannerRaisedRef.current = bannerQueueRef.current.snapshot().queue.some(b => b.kind === 'QUOTA_WARNING')
+        || bannerQueueRef.current.visible?.kind === 'QUOTA_WARNING';
+}, []);
+
+const toggleHackMode = useCallback(() => {
+    setHackModeEnabled(prev => {
+        const next = !prev;
+        uiGlue.writeHackModeFlag(typeof window !== 'undefined' ? window.localStorage : null, next);
+        return next;
+    });
+}, []);
+
 const [isUndoingTurn, setIsUndoingTurn] = useState(false);
 
 const getWorldMemory = useCallback(() => {
@@ -20414,6 +20772,45 @@ const buildSystemsBundle = useCallback((worldTime) => {
 }, [getWorldMemory]);
 
 /**
+ * plan.md P6b: the P4b `persistenceWarning` string is promoted into the banner
+ * tier so it renders at the top of the screen on every screen, instead of being
+ * buried above the choice grid.
+ */
+useEffect(() => {
+    const banner = uiGlue.persistenceBanner(persistenceWarning);
+    if (banner) pushBanner(banner);
+}, [persistenceWarning, pushBanner]);
+
+/**
+ * gdd-05 B4 Formula #3 + B5: after every durable checkpoint, measure the ORIGIN
+ * quota and raise ONE warning banner at >= 0.85 utilisation, then prune old
+ * checkpoints. Both run OFF the critical path - a failure here never touches the
+ * turn. The banner is raised at most once per session until it is dismissed.
+ */
+const CHECKPOINT_KEEP_COUNT = 2; // no registry knob exists for this; see plan.md P3 (reduced)
+
+const runIdleMaintenance = useCallback(async (slotId) => {
+    try {
+        const measured = await estimateOriginQuota();
+        if (!quotaBannerRaisedRef.current) {
+            const banner = uiGlue.quotaBanner({ usage: measured.usage, quota: measured.quota });
+            if (banner) {
+                quotaBannerRaisedRef.current = true;
+                pushBanner(banner);
+            }
+        }
+    } catch (quotaError) {
+        console.warn('[systems] Khong do duoc han muc luu tru:', quotaError);
+    }
+    try {
+        const backend = getSystemsBackend();
+        if (backend) await pruneCheckpoints(backend, slotId, CHECKPOINT_KEEP_COUNT);
+    } catch (pruneError) {
+        console.warn('[systems] pruneCheckpoints:', pruneError);
+    }
+}, [pushBanner]);
+
+/**
  * gdd-05 R1 checkpoint. Returns `{durability_confirmed}`; NEVER throws, so a
  * storage failure degrades to a banner instead of losing the turn (plan.md C-2
  * reduced variant: the UI is not rolled back).
@@ -20445,13 +20842,158 @@ const runSystemsCheckpoint = useCallback(async (reason, turnRecord, worldTime) =
         }
         if (!result.durability_confirmed) {
             console.error('[systems] Checkpoint that bai:', result.error);
+        } else {
+            // Fire-and-forget: quota probe + checkpoint pruning while idle.
+            Promise.resolve().then(() => runIdleMaintenance(slotId));
         }
         return result;
     } catch (checkpointError) {
         console.error('[systems] Checkpoint nem loi ngoai du kien:', checkpointError);
         return { durability_confirmed: false, error: { code: 'WRITE_FAILED_INTERNAL' } };
     }
-}, [buildSystemsBundle]);
+}, [buildSystemsBundle, runIdleMaintenance]);
+
+/**
+ * gdd-06 C4 "Apply / validate / rollback flow" (PART C, Core Rules #6a-#6d).
+ *
+ * Every Save press in the customization panel goes through ONE controller so
+ * the order is guaranteed: validate -> lock -> durable write-through checkpoint
+ * -> apply in memory -> invalidate the pending Undo snapshot -> raise
+ * `hack_mode_used_this_slot` -> log -> unlock. Nothing is applied when the
+ * write fails, and the in-flight lock is what dims all three Save buttons.
+ *
+ * The zone-specific validator and the in-memory apply are handed over per press
+ * through `pendingCustomizeOpRef`, because the controller's deps are fixed at
+ * construction while the drafts change on every keystroke.
+ */
+const pendingCustomizeOpRef = useRef(null);
+
+const customizeCommitController = useMemo(() => createCommitController({
+    validate: () => {
+        const op = pendingCustomizeOpRef.current;
+        return op ? op.validate() : { ok: true, errors: [], warnings: [] };
+    },
+    applyInMemory: () => {
+        const op = pendingCustomizeOpRef.current;
+        if (op) op.apply();
+    },
+    writeCheckpoint: async (payload) => {
+        const result = await runSystemsCheckpoint('hack_write', null, payload.world_time);
+        return {
+            ok: !!result.durability_confirmed,
+            error: result.error ? String(result.error.code || result.error) : undefined,
+        };
+    },
+    // gdd-06 C2 #6b / AC-34: only called when a snapshot is actually pending.
+    hasPendingSnapshot: () => !!(turnManagerRef.current && turnManagerRef.current.undo_available),
+    // The P4b glue already does invalidate + hack flag + button state in one go.
+    invalidatePendingSnapshot: () => noteCustomizationWrite(),
+    setHackModeUsed: () => {
+        if (slotRecordRef.current) slotRecordRef.current.hack_mode_used_this_slot = true;
+    },
+    emitLog: (entry) => console.log('[systems] hack_write:', entry.zone, entry.type, 'seq', entry.hack_seq),
+    clock: () => Date.now(),
+    worldTime: () => liveUndoableStateRef.current.currentTurn || 0,
+}), [runSystemsCheckpoint]);
+
+const runCustomizeCommit = useCallback(async (op) => {
+    pendingCustomizeOpRef.current = { validate: op.validate, apply: op.apply };
+    try {
+        return await customizeCommitController.commit({
+            zone: op.zone,
+            type: op.type,
+            values: op.values,
+            ...(op.entry_ids ? { entry_ids: op.entry_ids } : {}),
+        });
+    } finally {
+        pendingCustomizeOpRef.current = null;
+    }
+}, [customizeCommitController]);
+
+/** Zone 1 - the atomic progress triple (D.2/D.2b). */
+const commitCustomizeProgress = useCallback(async (draft) => {
+    const player = (knowledge.characters || []).find(c => c.isPlayer);
+    const ctx = {
+        old_level: (player && player.level) || 1,
+        old_current_exp: (player && player.exp) || 0,
+        old_state: (player && player.progressionState) || PROGRESSION_STATE_NORMAL,
+    };
+    let write = null;
+    return await runCustomizeCommit({
+        zone: 'progress',
+        type: 'progress',
+        values: draft,
+        validate: () => {
+            const result = validateProgressZone(draft, ctx);
+            write = result.write;
+            return result;
+        },
+        apply: () => {
+            if (write) handleCustomizeLevel(write.level, write.current_exp, write.state);
+        },
+    });
+}, [knowledge, runCustomizeCommit]);
+
+/** Zone 2 - the 12 base stats, all-or-nothing (D.3). */
+const commitCustomizeBaseStats = useCallback(async (appDraft) => {
+    const player = (knowledge.characters || []).find(c => c.isPlayer);
+    const gddDraft = uiGlue.baseStatDraftToGdd(appDraft, uiGlue.gddBaseStatsFromApp(player));
+    return await runCustomizeCommit({
+        zone: 'base_stats',
+        type: 'base_stats',
+        values: gddDraft,
+        validate: () => isValidBaseStatSet(gddDraft),
+        apply: () => handleCustomizeBaseStats(uiGlue.gddStatsToAppBaseFields(gddDraft)),
+    });
+}, [knowledge, runCustomizeCommit]);
+
+/** Zone 3a - a custom item. The App's items are not recovery items by default,
+ *  so D.4's mandatory `efficacy` gate is only applied when the draft says so. */
+const commitCustomizeItem = useCallback(async (itemDraft) => {
+    const existing = {
+        item: (knowledge.items || []).map(it => String(it.Name || it.name || '')),
+        skill: [],
+        thuc: [],
+    };
+    const name = String(itemDraft.name || '').trim();
+    return await runCustomizeCommit({
+        zone: 'entries',
+        type: 'create_item',
+        values: itemDraft,
+        entry_ids: [name],
+        validate: () => isValidItemSubmit(
+            { item_id: name, is_recovery_item: false },
+            existing
+        ),
+        apply: () => handleCustomizeCreateItem(itemDraft),
+    });
+}, [knowledge, runCustomizeCommit]);
+
+/** Zone 3b - a custom skill. DEVIATION (documented): the App generates a
+ *  skill's `thuc` list from the AI AFTER the submit, so the D.4 cardinality gate
+ *  is satisfied with one provisional thuc id rather than blocking a feature the
+ *  players already use. Id collisions are still hard-blocked. */
+const commitCustomizeSkill = useCallback(async (skillDraft) => {
+    const player = (knowledge.characters || []).find(c => c.isPlayer);
+    const existing = {
+        item: [],
+        skill: (player?.learnedSkills || []).map(sk => String(sk.Name || sk.name || '')),
+        thuc: [],
+    };
+    const name = String(skillDraft.name || '').trim();
+    return await runCustomizeCommit({
+        zone: 'entries',
+        type: 'create_skill',
+        values: skillDraft,
+        entry_ids: [name],
+        validate: () => isValidSkillSubmit(
+            { skill_id: name, thuc_ids: [name + ' · Thức 1'], known_skill_count: existing.skill.length },
+            existing
+        ),
+        apply: () => handleCustomizeCreateSkill(skillDraft),
+    });
+}, [knowledge, runCustomizeCommit]);
+
 
 /**
  * gdd-01 A.4 `undo()`. The Turn Manager restores every registered system
@@ -32202,6 +32744,7 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                     } else {
                         newKnowledge.characters.push(npcToUpdate);
                     }
+                    logBaseStatCompleteness(npcToUpdate, 'CREATE_NPC');
                 };
 
     const isNameInLoreTag = (tagName, entityName) => {
@@ -35204,6 +35747,10 @@ const formatStoryText = useCallback((text) => {
                                 onUndoTurn={handleUndoTurn}
                                 isUndoingTurn={isUndoingTurn}
                                 persistenceWarning={persistenceWarning}
+                                visibleBanner={visibleBanner}
+                                onDismissBanner={dismissBanner}
+                                hackModeEnabled={hackModeEnabled}
+                                onToggleHackMode={toggleHackMode}
                                 allowUnexpectedEvent={allowUnexpectedEvent}
                                 setAllowUnexpectedEvent={setAllowUnexpectedEvent}
                                 setGameSettings={setGameSettings}
@@ -35749,10 +36296,10 @@ const formatStoryText = useCallback((text) => {
                     show={showCustomizationModal}
                     onClose={() => setShowCustomizationModal(false)}
                     playerCharacter={playerCharacter}
-                    onApplyLevel={handleCustomizeLevel}
-                    onApplyStats={handleCustomizeBaseStats}
-                    onCreateItem={handleCustomizeCreateItem}
-                    onCreateSkill={handleCustomizeCreateSkill}
+                    onApplyLevel={commitCustomizeProgress}
+                    onApplyStats={commitCustomizeBaseStats}
+                    onCreateItem={commitCustomizeItem}
+                    onCreateSkill={commitCustomizeSkill}
                     onOpenSkillCreation={() => { setShowCustomizationModal(false); setShowSkillManagementModal(true); }}
                     gameSettings={gameSettings}
                     onUpdateDefaultCombatBackground={handleUpdateDefaultCombatBackground}
