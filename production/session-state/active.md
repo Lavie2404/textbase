@@ -1,6 +1,29 @@
-# Session State — Checkpoint 2026-08-14
+# Session State — Checkpoint 2026-08-17
 
 ## ĐANG LÀM (mở phiên mới → đọc mục này trước)
+
+**TÁC VỤ LỚN (17-08): Tích hợp GDD vào game (`App.tsx`).** User yêu cầu
+"Đưa các GDD đã thiết lập vào game", **trừ Combat GDD và Song Tu** (giữ
+nguyên code hiện tại, chỉ đọc qua adapter). Toàn bộ kế hoạch + 14 quyết
+định xung đột đã chốt: `production/gdd-integration/plan.md` (đọc mục
+"Quyết định đã chốt" đầu file). Hợp đồng triển khai từng GDD (bản chắt
+lọc, tiếng Anh): `production/gdd-integration/gdd-0{1..6}-*.md`; bản đồ
+kiến trúc App.tsx kèm số dòng: `production/gdd-integration/app-map.md`.
+Lộ trình rút gọn: P0 → P1 → P2 → P3(rút gọn) → P4 → P6(rút gọn); bỏ P5.
+Commit 1 lần mỗi giai đoạn khi test + build xanh, không push.
+
+**Tiến độ giai đoạn:**
+- [x] P0 — Vitest scaffold, `src-web/systems/{types,registry,math,configValidation}.ts`, adapters combat/songTu
+- [ ] P1 — EXP & Realm (cổng Chờ Đột Phá, 4 nguồn tất định) + Equipment data
+- [ ] P2 — Affinity D.1–D.6 (7 dải, deep_hostile −80) + Death (death_roll/severity/recovery, crippled = longTermStatus)
+- [ ] P3 — World Memory fact store + Persistence v2 (IndexedDB nguồn chân lý, durability gate, schema_version)
+- [ ] P4 — Turn Manager (Undo) + Contract (chặn tag cơ học, leak detector) + AI wrapper (timeout 60/45s)
+- [ ] P6 — Character Card, Settings gom nhóm, Customization validators
+- [ ] P7 — CI vitest
+
+---
+
+## (Cũ, 14-08) ĐANG LÀM trước đó
 
 **MỚI NHẤT (14-08, phiên sau)**: `prototypes/ui-mockup/index.html` — mockup
 HTML tương tác 1 file cho 3 màn đã APPROVED (S1 + S2 + O-Set), kèm
