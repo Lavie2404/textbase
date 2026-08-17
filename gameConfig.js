@@ -238,4 +238,79 @@ export const GAME_CONFIG = {
         min_thuc_per_skill: 3,              // dưới mức này: cảnh báo khi tạo kỹ năng mới
         max_known_skills_per_character: 6,  // vượt mức này: cảnh báo, không chặn
     },
+    // ------------------------------------------------------------------------
+    // 19. HẢO CẢM NPC (GDD 03 phần 1) — 21 hằng số
+    //     Mọi thay đổi hảo cảm đều do module tất định tính (quyết định C-1):
+    //     AI chỉ được nói "quan hệ đã đổi", ĐỘ LỚN luôn tra từ bảng D.1 dưới đây.
+    //     Dấu đã nằm sẵn trong giá trị (INSULT_DELTA = -8), KHÔNG đảo dấu lần nữa.
+    //     Delta ÂM không bao giờ bị giảm dần/mệt mỏi/chặn trần — mất lòng luôn
+    //     rẻ hơn lấy lòng, đó là bất đối xứng cố ý của GDD.
+    // ------------------------------------------------------------------------
+    affinity: {
+        // D.1 — bảng sự kiện -> delta gốc
+        GIFT_DELTA: 5,                    // tặng quà (an toàn 2..10)
+        SMALL_HELP_DELTA: 3,              // giúp việc nhỏ (1..6)
+        SAVE_LIFE_DELTA: 15,              // cứu mạng (8..25)
+        LOSS_VS_NPC_DELTA: -3,            // thua NPC trong trận (-6..0)
+        COMBAT_WIN_BASE: 5,               // thắng NPC: phần nền của -(BASE + SCALE*margin)
+        COMBAT_WIN_MARGIN_SCALE: 10,      // thắng càng áp đảo càng bị ghét (0..15)
+        SEVERE_WIN_MARGIN_THRESHOLD: 0.7, // >= mức này: mức độ nghiêm trọng 2 -> 3 (lan truyền được)
+        INSULT_DELTA: -8,                 // xúc phạm (-15..-3)
+        THREATEN_DELTA: -12,              // đe dọa (-20..-6)
+        BETRAY_DELTA: -30,                // phản bội (-45..-15)
+        KILL_WITNESS_DELTA: -25,          // giết người, tính CHO MỖI nhân chứng (-40..-15)
+
+        // D.2 — giảm dần khi hảo cảm đã cao (chỉ áp cho delta DƯƠNG)
+        DIMINISH_EXPONENT: 3,             // độ cong (2..5)
+        DIMINISH_FLOOR: 0.1,              // sàn, TUYỆT ĐỐI không được là 0 (0.05..0.3)
+
+        // D.3 — mệt mỏi khi lặp lại, cửa sổ trượt theo lượt
+        FATIGUE_RATE: 0.15,               // mỗi lần lặp giảm 15% (0.05..0.3)
+        FATIGUE_FLOOR: 0.25,              // sàn hệ số mệt mỏi (0.1..0.5)
+        FATIGUE_WINDOW_TURNS: 5,          // 3..8, BẮT BUỘC >= POSITIVE_SOCIAL_COOLDOWN_TURNS
+
+        // D.4 — trần tổng delta DƯƠNG mỗi NPC mỗi lượt (không áp cho delta âm)
+        CAP_POSITIVE_PER_TURN: 20,        // 15..25
+
+        // D.5 — lan truyền 1 bước qua đồ thị link_strength
+        PROPAGATION_RATE: 0.5,            // luôn < 1 (0.3..0.7)
+        CRUELTY_REP_DELTA: -2,            // tiếng ác cộng thêm cho mỗi người liên đới (-5..-1)
+        PROPAGATION_SEVERITY_MIN: 3,      // chỉ lan khi mức nghiêm trọng >= 3 (2..4)
+
+        // Song Tu NẰM NGOÀI phạm vi (quyết định C-6): hằng số này chỉ để đồng bộ
+        // cấu hình, không module nào đọc. Ngưỡng 80 của handleSongTu giữ nguyên.
+        SONG_TU_COOLDOWN_TURNS: 5,
+    },
+
+    // ------------------------------------------------------------------------
+    // 20. CÁI CHẾT & HẬU QUẢ (GDD 03 phần 2) — 12 hằng số
+    //     Quyết định C-7: GIỮ hồi sinh (handleRespawn) — module chỉ quyết định
+    //     NGƯỜI CHƠI CÓ CHẾT HAY KHÔNG thay cho AI, không khóa slot, không làm
+    //     chết vĩnh viễn. Quyết định C-11: "thương tật nặng" = trạng thái dài hạn
+    //     "Phế Đan Điền" (chặn EXP + giảm chỉ số), KHÔNG đụng vào CombatLoop.
+    //     3 cặp MIN < MAX bên dưới là bất biến bắt buộc, được kiểm lúc nạp cấu hình.
+    // ------------------------------------------------------------------------
+    death: {
+        // D.1 — xác suất tử vong: P = clamp(BASE + SCALE * margin, MIN, MAX)
+        DEATH_ROLL_BASE: 0.10,            // 0..0.3
+        DEATH_ROLL_SCALE: 0.85,           // 0..1
+        DEATH_ROLL_MIN: 0.05,             // không bao giờ 0% (0..0.2)
+        DEATH_ROLL_MAX: 0.95,             // không bao giờ 100% (0.8..1.0)
+
+        // D.2 — bậc hậu quả theo margin của kẻ thắng
+        SEVERITY_MILD_THRESHOLD: 0.35,    // < mức này: nhẹ "trọng thương" (0.2..0.5)
+        SEVERITY_SEVERE_THRESHOLD: 0.75,  // >= mức này: nặng "phế đan điền" (0.6..0.85)
+
+        // D.3 — hồi phục khỏi trạng thái phế đan điền
+        RECOVERY_FORTUNE_RATE: 0.70,      // đại cơ duyên (0.5..0.9)
+        RECOVERY_ITEM_MIN: 0.05,          // sàn hiệu lực tiên thảo dị bảo (0..0.2)
+        RECOVERY_ITEM_MAX: 0.90,          // trần hiệu lực (0.7..0.95)
+        RECOVERY_SELF_RATE: 0.12,         // tự tu, đường rẻ nhất mà đắt nhất về thời gian (0.03..0.15)
+        RECOVERY_SELF_COOLDOWN_TURNS: 5,  // số lượt chờ giữa 2 lần tự tu (5..15)
+
+        // Sai lệch có chủ ý (C-11): GDD dùng hệ số này nhân vào sức chiến đấu.
+        // Combat nằm ngoài phạm vi nên hiệu ứng được thể hiện qua trạng thái
+        // "Phế Đan Điền"; hằng số giữ lại để đồng bộ cấu hình và cho test.
+        CRIPPLED_PENALTY_MULT: 0.85,
+    },
 };

@@ -37,6 +37,8 @@ import {
   type StatGrowthConfig,
 } from './statGrowth';
 import type { EquipmentKnobs } from '../equipment/validateDataset';
+import { assertAffinityKnobs, type AffinityKnobs } from '../affinity/table';
+import { assertDeathKnobs, type DeathKnobs } from '../death/deathRoll';
 
 type AnyConfig = Record<string, unknown>;
 
@@ -88,6 +90,21 @@ export function equipmentKnobsFromGameConfig(
 }
 
 /**
+ * `GAME_CONFIG.affinity` -> `AffinityKnobs` (gdd-03 1.5, 21 knobs, phase P2).
+ * Missing keys stay missing so `assertAffinityKnobs` can name them.
+ */
+export function affinityKnobsFromGameConfig(
+  gc: AnyConfig = GAME_CONFIG as AnyConfig,
+): AffinityKnobs {
+  return { ...(block(gc, 'affinity') as unknown as AffinityKnobs) };
+}
+
+/** `GAME_CONFIG.death` -> `DeathKnobs` (gdd-03 2.5, 12 knobs, phase P2). */
+export function deathKnobsFromGameConfig(gc: AnyConfig = GAME_CONFIG as AnyConfig): DeathKnobs {
+  return { ...(block(gc, 'death') as unknown as DeathKnobs) };
+}
+
+/**
  * Full cross-system config: registry defaults overridden by whatever
  * `gameConfig.js` actually declares. Only the three P1 blocks are wired; the
  * remaining sections keep their registry defaults until their own phase lands.
@@ -107,6 +124,17 @@ export function systemsConfigFromGameConfig(
     }
   }
   cfg.equipment = { ...cfg.equipment, ...equipmentKnobsFromGameConfig(gc) };
+  // P2 blocks: gdd-03 affinity + death. `validateSystemsConfig` already knows the
+  // cross-system invariants for both (DIMINISH_FLOOR > 0, the three MIN<MAX pairs,
+  // FATIGUE_WINDOW_TURNS >= POSITIVE_SOCIAL_COOLDOWN_TURNS, ...).
+  cfg.affinity = {
+    ...cfg.affinity,
+    ...(affinityKnobsFromGameConfig(gc) as unknown as Record<string, number>),
+  };
+  cfg.death = {
+    ...cfg.death,
+    ...(deathKnobsFromGameConfig(gc) as unknown as Record<string, number>),
+  };
   return cfg;
 }
 
@@ -122,4 +150,9 @@ export function validateGameConfig(gc: AnyConfig = GAME_CONFIG as AnyConfig): vo
   const knobs = assertExpKnobs(expKnobsFromGameConfig(gc));
   assertEconomyInvariant(knobs, [...CONTENT_EXCHANGE_ESTIMATE_RANGE]);
   assertStatGrowthConfig(statGrowthConfigFromGameConfig(gc));
+  // gdd-03 1.5 / 2.5 (phase P2): a missing affinity or death knob is fail-loud
+  // for the same reason EXP knobs are - a silent 0 would quietly disable a whole
+  // dampening rule (D.2/D.3/D.4) or make `medium` severity unreachable.
+  assertAffinityKnobs(affinityKnobsFromGameConfig(gc));
+  assertDeathKnobs(deathKnobsFromGameConfig(gc));
 }

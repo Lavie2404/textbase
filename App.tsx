@@ -25,6 +25,34 @@ import { tierFromLevel } from './src-web/systems/math';
 import { makeThucId } from './src-web/systems/equipment/schema';
 import { markEverEquipped } from './src-web/systems/equipment/loadout';
 
+// === P2 - NPC Affinity + Death & Consequence (plan.md P2, gdd-03) ============
+// Same contract as P1: pure modules own every mechanical NUMBER, App.tsx only
+// classifies what the AI said and applies what the module locked (plan.md C-1).
+import {
+    affinityKnobsFromGameConfig,
+    deathKnobsFromGameConfig,
+} from './src-web/systems/exp/gameConfigAdapter';
+import { resolveTurnAffinity } from './src-web/systems/affinity/resolveTurnAffinity';
+import { attitudeBand, bandCrossingMessage } from './src-web/systems/affinity/bands';
+import { ensureAffinityState } from './src-web/systems/affinity/state';
+import {
+    classifyRelationshipTag,
+    classifyFromCombatHandoff,
+    classifyKillWitnessed,
+} from './src-web/systems/affinity/classifyFromTags';
+import {
+    resolveDeathConsequence,
+    resolvePendingFate,
+    CRIPPLED_RECOVERED_MESSAGE,
+} from './src-web/systems/death/resolveDeathConsequence';
+import {
+    ensureDeathState,
+    getDeathCharState,
+    withDeathCharState,
+} from './src-web/systems/death/state';
+import { classifyFateIntent } from './src-web/systems/death/pendingFate';
+import { attemptRecovery, RECOVERY_METHOD_LABELS } from './src-web/systems/death/recovery';
+
 // gdd-02 A3 / EC-8: every tuning constant is validated ONCE at load, before a
 // play session begins - never with a release-stripped assert. In dev the throw
 // stops the app so the bad value is fixed immediately; in a production build we
@@ -38,6 +66,18 @@ try {
 
 /** gdd-02 A5 knob block, read once from gameConfig.js section 16. */
 const EXP_KNOBS = expKnobsFromGameConfig();
+
+/** gdd-03 1.5 / 2.5 knob blocks, read once from gameConfig.js sections 19 and 20. */
+const AFFINITY_KNOBS = affinityKnobsFromGameConfig();
+const DEATH_KNOBS = deathKnobsFromGameConfig();
+
+/**
+ * plan.md C-11: the GDD "crippled" consequence ships as a long-term status
+ * instead of a combat multiplier, so `CombatLoop` stays untouched. This id is
+ * the single source of truth for that link.
+ */
+const CRIPPLED_STATUS_ID = 'PHE_DAN_DIEN';
+const CRIPPLED_STATUS_NAME = 'Phế Đan Điền';
 
 const Cog6ToothIcon = ({className="w-5 h-5"}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path fillRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.905 1.523L9.017 8.429a1.875 1.875 0 0 1-.445 1.035l-2.833 2.833a1.875 1.875 0 0 0 0 2.652l2.833 2.833c.28.28.626.445.994.445s.714-.165.994-.445l2.832-2.833a1.875 1.875 0 0 1 1.036-.445l4.906-.153c.94-.03 1.686-.786 1.686-1.727V9.28c0-.94-.747-1.697-1.686-1.727l-4.906-.153a1.875 1.875 0 0 1-1.036-.445l-2.832-2.833A1.875 1.875 0 0 0 11.078 2.25ZM12.75 9a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Z" clipRule="evenodd" /></svg>;
 const CircleStackIcon = ({className="w-4 h-4"}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}><path d="M10 1a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM9 5.5a.75.75 0 0 1 .75-.75h.5a.75.75 0 0 1 0 1.5h-.5A.75.75 0 0 1 9 5.5Zm1 2.25a.75.75 0 0 0-1.5 0v3.5a.75.75 0 0 0 1.5 0v-3.5Z" /></svg>;
@@ -4222,6 +4262,17 @@ const LONG_TERM_STATUS_TEMPLATES = {
         description: "Vết thương không ngừng rỉ máu, khiến cơ thể suy yếu dần theo thời gian.",
         effects_per_day: { hp_percent_loss: 5 } // Mất 5% HP tối đa mỗi ngày
     },
+    // Phế Đan Điền (gdd-03 D.2 bậc "nặng" — quyết định C-11)
+    // Không đụng vào CombatLoop: hiệu ứng suy yếu đi qua hạ tầng trạng thái dài
+    // hạn sẵn có (parseStatsBonus), đồng thời chặn tích lũy EXP ở khối đối soát
+    // cuối applyUpdates. Chỉ D.3 (hồi phục thành công) mới gỡ được.
+    PHE_DAN_DIEN: {
+        id: "PHE_DAN_DIEN",
+        name: "Phế Đan Điền",
+        type: "injury",
+        description: "Đan điền vỡ nát, kinh mạch tổn hại. Tu vi không thể tích lũy cho tới khi được chữa trị bằng đại cơ duyên, tiên thảo dị bảo hoặc khổ công tự tu.",
+        stats: "atk_amp:-15,def_amp:-15,spd_amp:-15",
+    },
     // Trúng độc (Vĩnh viễn, mất máu theo ngày)
     TRUNG_DOC: {
         id: "TRUNG_DOC",
@@ -6856,6 +6907,8 @@ const CharacterInfoModal = ({
     generatingAvatars,
     generatingSprites,
     handleRegenerateSingleSprite,
+    handleRecoveryAttempt,
+    currentTurn = 0,
     initialTab = 'character'
 }) => {
     const [activeInfoTab, setActiveInfoTab] = useState('character');
@@ -7126,6 +7179,41 @@ const CharacterInfoModal = ({
                                     <h4 className="text-sm font-bold text-[#cda45e] uppercase tracking-widest mb-4 flex items-center border-b border-[#cda45e]/20 pb-2">
                                         <ClipboardDocumentCheckIcon className="w-5 h-5 mr-2" /> Trạng Thái
                                     </h4>
+                                    {/* gdd-03 D.2/D.3 (plan.md P2): consequence tier, the crippled flag
+                                        and the self-cultivation recovery attempt. Player-facing copy is
+                                        Vietnamese; the mechanics live in src-web/systems/death/. */}
+                                    {(() => {
+                                        const deathRecord = (knowledge.deathState || {})[finalStatsCharacter.id];
+                                        if (!deathRecord) return null;
+                                        const crippled = deathRecord.death_and_consequence_blocked === true;
+                                        if (!crippled && !deathRecord.severity) return null;
+                                        const lastAttempt = deathRecord.recovery_progress ? deathRecord.recovery_progress.last_self_attempt_turn : null;
+                                        const turnsLeft = (lastAttempt === null || lastAttempt === undefined)
+                                            ? 0
+                                            : Math.max(0, DEATH_KNOBS.RECOVERY_SELF_COOLDOWN_TURNS - (currentTurn - lastAttempt));
+                                        return (
+                                            <div className="mb-3 p-2 bg-[#0a0f0a] border border-red-500/30">
+                                                <p className="text-[11px] text-red-300">
+                                                    <strong>Hậu quả bại trận:</strong> {deathRecord.consequence_type || 'không rõ'}
+                                                    {deathRecord.severity ? ` (mức ${deathRecord.severity === 'severe' ? 'nặng' : deathRecord.severity === 'medium' ? 'vừa' : 'nhẹ'})` : ''}
+                                                </p>
+                                                {crippled && (
+                                                    <>
+                                                        <p className="text-[11px] text-red-400 mt-1">Đan điền bị phế: không thể tích lũy tu vi cho tới khi hồi phục.</p>
+                                                        {handleRecoveryAttempt && finalStatsCharacter.isPlayer && (
+                                                            <button
+                                                                onClick={() => handleRecoveryAttempt(finalStatsCharacter.id, 'tu_tu')}
+                                                                disabled={turnsLeft > 0}
+                                                                className="mt-2 w-full bg-[#1b2a1b] border border-[#cda45e] hover:bg-[#cda45e]/20 text-[#cda45e] font-bold py-1.5 px-3 uppercase tracking-widest text-[10px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                Tự Tu Hồi Phục{turnsLeft > 0 ? ` (còn ${turnsLeft} lượt)` : ''}
+                                                            </button>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
                                     <div className="space-y-3">
                                         {Object.keys(groupedStatuses).length > 0 ? (
                                             Object.entries(groupedStatuses).map(([groupName, statuses]) => (
@@ -7639,7 +7727,13 @@ const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledg
                                             return standing ? ` (${standing})` : '';
                                         })()}
                                     </span>
-                                    <span className={`font-mono font-bold ${isHostile ? 'text-red-400' : 'text-pink-300'}`}>{affinityValue > 0 ? `+${affinityValue}` : affinityValue}/100</span>
+                                    {/* gdd-03 1.3: the attitude BAND is what the card shows; the raw
+                                        integer stays as a small secondary read-out. The Song Tu button
+                                        below keeps its own affinity >= 80 gate untouched (plan.md C-6). */}
+                                    <span className="flex items-baseline gap-2">
+                                        <strong className={isHostile ? 'text-red-300' : 'text-pink-200'}>{attitudeBand(affinityValue)}</strong>
+                                        <span className={`font-mono text-[10px] opacity-70 ${isHostile ? 'text-red-400' : 'text-pink-300'}`}>{affinityValue > 0 ? `+${affinityValue}` : affinityValue}/100</span>
+                                    </span>
                                 </div>
                                 <div className="w-full bg-[#0a0f0a] h-2 border border-[#cda45e]/10 overflow-hidden">
                                     <div className={`h-full transition-all ${isHostile ? 'bg-gradient-to-r from-red-600 to-red-400' : 'bg-gradient-to-r from-pink-500 to-pink-300'}`} style={{ width: `${Math.min(100, Math.abs(affinityValue))}%` }}></div>
@@ -16612,6 +16706,10 @@ const [initializationSteps, setInitializationSteps] = useState([]);
 const [backupCustomActionInput, setBackupCustomActionInput] = useState('');
 const [backupChoices, setBackupChoices] = useState([]);
 const activeCriticalPromisesRef = useRef([]);
+// gdd-03 Branch B (plan.md P2): the player's OWN input for the current turn.
+// Classifying player input is contract-legal (it is not AI narration) and is
+// what `classifyFateIntent` needs to tell "Kết liễu" from "Tha mạng".
+const lastPlayerActionRef = useRef('');
 const [isGateWaiting, setIsGateWaiting] = useState(false);
 
 const registerCriticalPromise = (promise) => {
@@ -28130,6 +28228,8 @@ ${postCombatRules}
 const processPlayerAction = async (actionText, actionType, flavorText = '') => {
     const trimmedAction = (actionText || '').trim();
     if (!trimmedAction || isProcessingAction) return;
+    // gdd-03 Branch B: remember the player's own words for this turn.
+    lastPlayerActionRef.current = trimmedAction;
     setPvpTurnTimeLeft(null);
 
     if (activeCriticalPromisesRef.current.length > 0) {
@@ -31130,6 +31230,45 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
     
     const directStatChanges = {}; 
 
+    // === gdd-03 (plan.md P2) per-turn buffers ================================
+    // The AI tags no longer WRITE affinity or death; they are classified into
+    // events here and resolved once, deterministically, in the reconciliation
+    // block at the end of this function (order: death -> affinity -> EXP).
+    const pendingSocialEvents = [];
+    let playerNarrativeDeathTriggered = false;
+    const playerForTurn = (newKnowledge.characters || []).find(c => c && c.isPlayer);
+    const playerIdForTurn = playerForTurn ? playerForTurn.id : null;
+    // gdd-03 CR#3a / AC-03: every affinity read of this turn uses the value as of
+    // the START of the turn, snapshotted before any delta is applied.
+    const affinityAtTurnStart = {};
+    (newKnowledge.characters || []).forEach(c => {
+        if (c && c.id) affinityAtTurnStart[c.id] = typeof c.affinity === 'number' ? c.affinity : 0;
+    });
+    const affinityAtTurnStartOf = (id) => (typeof affinityAtTurnStart[id] === 'number' ? affinityAtTurnStart[id] : 0);
+    const npcIdByName = (name) => {
+        if (!name) return null;
+        const target = String(name).trim().toLowerCase();
+        const found = (newKnowledge.characters || []).find(c =>
+            c && !c.isPlayer && String(c.Name || c.name || '').trim().toLowerCase() === target);
+        return found ? found.id : null;
+    };
+    const isTrackedNpcId = (id) => (newKnowledge.characters || []).some(c => c && c.id === id && !c.isPlayer);
+    const nameOfCharId = (id) => {
+        const found = (newKnowledge.characters || []).find(c => c && c.id === id);
+        return found ? (found.Name || found.name || id) : id;
+    };
+    // `entities_in_scope` is owned by Situation Gen (phase P5, dropped from the
+    // shortened roadmap). Stand-in: living non-player characters sharing the
+    // player's location, plus the party. Deterministic and stable within a turn.
+    const entitiesInScopeForTurn = (() => {
+        const locationId = playerForTurn ? playerForTurn.current_location_id : null;
+        return (newKnowledge.characters || [])
+            .filter(c => c && c.id && !c.isPlayer && !c.isPermanentlyDead)
+            .filter(c => c.inParty === true || (locationId && c.current_location_id === locationId))
+            .map(c => c.id);
+    })();
+    const witnessesExcluding = (excludedId) => entitiesInScopeForTurn.filter(id => id !== excludedId);
+
     const normalizeNameProperty = (obj) => {
         if (!obj) return obj;
         const nameValue = obj.Name || obj.name || obj.title;
@@ -31237,7 +31376,12 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
             if (charIndex > -1) {
                 const character = newKnowledge.characters[charIndex];
                 if (character.isPlayer) {
-                    setTimeout(() => setShowGameOverModal(true), 500);
+                    // gdd-03 2.2 + plan.md C-1: the tag is only a TRIGGER now. The
+                    // death_roll in `resolveDeathConsequence` decides whether the
+                    // player actually dies; the soul stub / GameOverModal path
+                    // below is applied by the reconciliation block if it says yes.
+                    playerNarrativeDeathTriggered = true;
+                    return;
                 }
                 const soulObject = {
                     id: character.id, Name: character.Name, description: character.description,
@@ -31246,6 +31390,21 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                 };
                 newKnowledge.characters[charIndex] = soulObject;
                 justDiedIds.add(character.id);
+                // gdd-03 D.1 `kill_witnessed`: -25 per witness, the victim itself is
+                // excluded (it is dead and has no affinity left to move). Zero
+                // witnesses is the "perfect crime" and writes no field at all.
+                if (playerIdForTurn) {
+                    pendingSocialEvents.push(
+                        classifyKillWitnessed(character.id, witnessesExcluding(character.id), playerIdForTurn));
+                }
+                // Death & Consequence owns `alive` / `death_flag` for EVERY character.
+                const deathStateForKill = ensureDeathState(newKnowledge.deathState);
+                newKnowledge.deathState = withDeathCharState(deathStateForKill, character.id, {
+                    ...getDeathCharState(deathStateForKill, character.id),
+                    alive: false,
+                    death_flag: true,
+                    pending_fate: null,
+                });
             }
         }
     });
@@ -31345,6 +31504,13 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
         const revivedCharName = reviveData.Name || reviveData.name;
         if (revivedCharName) {
             const charIndex = newKnowledge.characters.findIndex(c => c && (c.Name || c.name) === revivedCharName);
+            // plan.md C-1 + gdd-03 CR#5: only Death & Consequence (and the shipped
+            // handleRespawn, decision C-7) may bring the PLAYER back. An AI tag
+            // trying to do it is logged and dropped, never applied.
+            if (charIndex > -1 && playerIdForTurn && newKnowledge.characters[charIndex].id === playerIdForTurn) {
+                console.warn('[CHARACTER_REVIVE] Tu choi the AI hoi sinh nguoi choi - chi handleRespawn duoc phep (plan.md C-1/C-7).');
+                return;
+            }
             if (charIndex > -1 && newKnowledge.characters[charIndex].isPermanentlyDead) {
                 const soul = newKnowledge.characters[charIndex];
                 
@@ -32017,20 +32183,20 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
     }
     
     (updates.relationships || []).forEach(rel => {
+        // Văn bản quan hệ (Standing/Reason) vẫn do AI viết và vẫn được lưu như cũ.
         updateOrCreateInArray(newKnowledge.relationships, rel, 'NPC');
-        // Đồng bộ "AffinityChange" (nếu AI có gửi) vào đúng chỉ số affinity của nhân vật NPC tương ứng.
-        const affinityDeltaRaw = rel.AffinityChange ?? rel.affinityChange;
-        const affinityDelta = parseInt(affinityDeltaRaw, 10);
-        if (!isNaN(affinityDelta)) {
-            const npcIndex = newKnowledge.characters.findIndex(c => c && c.Name === rel.NPC);
-            if (npcIndex > -1) {
-                const currentAffinity = newKnowledge.characters[npcIndex].affinity ?? 0;
-                // Hảo cảm đã chạm mốc tuyệt đối (+100/-100) thì khóa vĩnh viễn, không cho thay đổi thêm.
-                if (currentAffinity !== 100 && currentAffinity !== -100) {
-                    newKnowledge.characters[npcIndex].affinity = Math.max(-100, Math.min(100, currentAffinity + affinityDelta));
-                }
-            }
-        }
+        // gdd-03 CR#2 + plan.md C-1: CON SỐ hảo cảm KHÔNG còn do AI quyết định.
+        // Thẻ chỉ được phân loại thành một sự kiện xã hội theo bảng D.1; độ lớn
+        // luôn tra từ bảng đó, dấu (+/-) của AI chỉ dùng làm phương án dự phòng
+        // khi không khớp từ khóa nào. `resolve_turn_affinity` ở khối đối soát
+        // cuối hàm này mới là nơi duy nhất ghi `character.affinity`.
+        if (!playerIdForTurn) return;
+        const socialEvent = classifyRelationshipTag(rel, {
+            actor: playerIdForTurn,
+            npcIdByName,
+            witnesses: entitiesInScopeForTurn,
+        });
+        if (socialEvent) pendingSocialEvents.push(socialEvent);
     });
     (updates.affinityChanged || []).forEach(change => {
         const delta = parseInt(change.value, 10);
@@ -32286,13 +32452,211 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
         setTimeout(() => setAdventureTurnCount(prev => prev + 1), 0);
     }
 
+    // === gdd-03 - Death & Consequence, then NPC Affinity (plan.md P2 hook point) ==
+    // MANDATORY ORDER (gdd-03 2.2 CR#2): combat hand-off -> death -> affinity ->
+    // EXP. Death runs first so a `kill_witnessed` it produces is available to the
+    // same turn's affinity pass; EXP runs last so it sees the crippled flag.
+    const p2CombatHandoff = newKnowledge.lastCombatHandoff || null;
+    const p2Messages = [];
+    let deathStateForTurn = ensureDeathState(newKnowledge.deathState);
+    let playerDiedThisTurn = false;
+    let isDeathTurn = false;
+
+    const findCharIndexById = (id) => newKnowledge.characters.findIndex(c => c && c.id === id);
+
+    // plan.md C-11: "crippled" is expressed through the existing long-term status
+    // infrastructure (stat penalty via parseStatsBonus) - CombatLoop is untouched.
+    const applyCrippledStatus = (character) => {
+        if (!character) return false;
+        if (!character.longTermStatuses) character.longTermStatuses = [];
+        const already = character.longTermStatuses.some(st =>
+            st && ((st.status_id || st.id) === CRIPPLED_STATUS_ID || st.name === CRIPPLED_STATUS_NAME));
+        if (already) return false;
+        const template = LONG_TERM_STATUS_TEMPLATES[CRIPPLED_STATUS_ID];
+        character.longTermStatuses.push({
+            id: crypto.randomUUID(),
+            status_id: CRIPPLED_STATUS_ID,
+            name: template.name,
+            type: template.type,
+            description: template.description,
+            source: 'Hau qua bai tran',
+            stats: template.stats,
+        });
+        return true;
+    };
+
+    if (playerIdForTurn) {
+        const deathDeps = {
+            turn: currentTurn,
+            playerId: playerIdForTurn,
+            affinityOf: affinityAtTurnStartOf,
+            isTrackedNpc: isTrackedNpcId,
+            entitiesInScope: entitiesInScopeForTurn,
+            nameOf: nameOfCharId,
+            npcTagOf: () => null,
+            rng: Math.random,
+            knobs: DEATH_KNOBS,
+        };
+
+        const applyDeathResolution = (resolution) => {
+            if (!resolution || !resolution.resolved) return;
+            deathStateForTurn = resolution.state;
+            if (resolution.messages.length > 0) p2Messages.push(...resolution.messages);
+            if (resolution.social_events.length > 0) pendingSocialEvents.push(...resolution.social_events);
+            if (resolution.is_death_turn) isDeathTurn = true;
+            if (resolution.player_died) playerDiedThisTurn = true;
+            if (resolution.crippled_applied) {
+                const idx = findCharIndexById(playerIdForTurn);
+                if (idx > -1) applyCrippledStatus(newKnowledge.characters[idx]);
+            }
+        };
+
+        // (1) A Pending Fate window opened by a previous win resolves at the next
+        //     turn confirmation. Sparing is the DEFAULT (gdd-03 CR#4/AC-11); an
+        //     execution needs either an explicit player intent or the NPC actually
+        //     dying this turn.
+        Object.keys(deathStateForTurn).forEach(charId => {
+            const fate = deathStateForTurn[charId] && deathStateForTurn[charId].pending_fate;
+            if (!fate) return;
+            if (currentTurn <= fate.opened_turn) return;
+            const intent = justDiedIds.has(fate.npc_id)
+                ? 'execute'
+                : classifyFateIntent(lastPlayerActionRef.current);
+            const fateResolution = resolvePendingFate({
+                fate,
+                intent,
+                turn: currentTurn,
+                playerId: playerIdForTurn,
+                nameOf: nameOfCharId,
+                npcTagOf: () => null,
+                knobs: DEATH_KNOBS,
+                state: deathStateForTurn,
+            });
+            deathStateForTurn = fateResolution.state;
+            if (fateResolution.messages.length > 0) p2Messages.push(...fateResolution.messages);
+            // The kill event may duplicate the one the [CHARACTER_DEATH] branch
+            // already produced for the same victim; keep exactly one.
+            fateResolution.social_events.forEach(evt => {
+                const duplicate = pendingSocialEvents.some(existing =>
+                    existing.type === evt.type && existing.target === evt.target);
+                if (!duplicate) pendingSocialEvents.push(evt);
+            });
+            if (fateResolution.crippled_applied) {
+                const idx = findCharIndexById(fate.npc_id);
+                if (idx > -1) applyCrippledStatus(newKnowledge.characters[idx]);
+            }
+        });
+
+        // (2) Branch A / Branch B from the combat hand-off. A friendly spar, a
+        //     `no_outcome`, or a battle still running all resolve to nothing.
+        if (p2CombatHandoff) {
+            try {
+                applyDeathResolution(resolveDeathConsequence({
+                    ...deathDeps,
+                    handoff: p2CombatHandoff,
+                    state: deathStateForTurn,
+                }));
+            } catch (deathError) {
+                console.error('[Death] Khong giai quyet duoc hau qua tran dau:', deathError);
+            }
+        }
+
+        // (3) The AI [CHARACTER_DEATH] tag aimed at the player: a trigger, not a
+        //     verdict (plan.md C-1, module assumption A1).
+        if (playerNarrativeDeathTriggered && !playerDiedThisTurn) {
+            try {
+                applyDeathResolution(resolveDeathConsequence({
+                    ...deathDeps,
+                    narrativeDeathTrigger: true,
+                    state: deathStateForTurn,
+                }));
+            } catch (deathError) {
+                console.error('[Death] Khong giai quyet duoc cai chet do AI kich hoat:', deathError);
+            }
+        }
+
+        // (4) The player really died: the SHIPPED path takes over unchanged (soul
+        //     stub + GameOverModal + handleRespawn). plan.md C-7 keeps
+        //     resurrection, so no slot is locked and no run ends here.
+        if (playerDiedThisTurn) {
+            const idx = findCharIndexById(playerIdForTurn);
+            if (idx > -1 && !newKnowledge.characters[idx].isPermanentlyDead) {
+                const character = newKnowledge.characters[idx];
+                newKnowledge.characters[idx] = {
+                    id: character.id, Name: character.Name, description: character.description,
+                    Personality: character.Personality, levelAtDeath: character.level,
+                    isPermanentlyDead: true, isPlayer: false, isCompanion: false
+                };
+                justDiedIds.add(character.id);
+            }
+            setTimeout(() => setShowGameOverModal(true), 500);
+        }
+        newKnowledge.deathState = deathStateForTurn;
+        newKnowledge.isDeathTurn = isDeathTurn;
+    }
+
+    // --- NPC Affinity (gdd-03 D.6) ------------------------------------------
+    // Combat itself also produces a classified event (`combat_win_vs_npc` /
+    // `combat_loss_vs_npc`); it is built here rather than inside combat code so
+    // that CombatLoop stays out of scope.
+    if (playerIdForTurn && p2CombatHandoff) {
+        try {
+            pendingSocialEvents.push(...classifyFromCombatHandoff(p2CombatHandoff, {
+                actor: playerIdForTurn,
+                playerId: playerIdForTurn,
+                npcIdByName: (name) => (isTrackedNpcId(name) ? name : npcIdByName(name)),
+                witnesses: entitiesInScopeForTurn,
+            }));
+        } catch (combatEventError) {
+            console.error('[Affinity] Khong phan loai duoc su kien tu tran dau:', combatEventError);
+        }
+    }
+
+    if (playerIdForTurn && pendingSocialEvents.length > 0 && !playerDiedThisTurn) {
+        try {
+            const affinityResult = resolveTurnAffinity({
+                turn: currentTurn,
+                events: pendingSocialEvents,
+                knobs: AFFINITY_KNOBS,
+                state: ensureAffinityState(newKnowledge.affinityState),
+                affinityOf: affinityAtTurnStartOf,
+                aliveOf: (id) => !justDiedIds.has(id) && getDeathCharState(deathStateForTurn, id).alive !== false,
+                isTrackedNpc: isTrackedNpcId,
+                nameOf: nameOfCharId,
+                songTuActiveNpcIds: getSongTuActiveNpcIds(newKnowledge),
+            });
+            newKnowledge.affinityState = affinityResult.state;
+            affinityResult.changes.forEach(change => {
+                const idx = findCharIndexById(change.npc_id);
+                if (idx < 0) return;
+                // The module already clamped to [-100, +100]; this is the single
+                // write path for character.affinity (gdd-03 CR#1/CR#9).
+                newKnowledge.characters[idx].affinity = change.after;
+                // Direction only - the prompt never sees the number (gdd-03 1.3).
+                newKnowledge.characters[idx].affinityDirection =
+                    change.after > change.before ? 'đang ấm lên' : 'đang lạnh đi';
+                const crossing = bandCrossingMessage(nameOfCharId(change.npc_id), change.before, change.after);
+                if (crossing) p2Messages.push(crossing);
+            });
+        } catch (affinityError) {
+            console.error('[Affinity] Khong tinh duoc hao cam luot nay:', affinityError);
+        }
+    }
+
+    if (p2Messages.length > 0) {
+        setTimeout(() => {
+            const entries = p2Messages.map(msg => ({ id: crypto.randomUUID(), type: 'system', content: '**[He thong]** ' + msg, transient: true }));
+            setStoryHistory(prevHistory => [...prevHistory, ...entries]);
+        }, 100);
+    }
+
     // === gdd-02 D.6/D.7 - deterministic per-turn EXP (plan.md P1 hook point) ======
     // Runs at most ONCE per `currentTurn`, for the player and every companion in the
     // party. The combat side is read through the P0 adapter hand-off published by
     // `finalizeCombatEnd`; with no hand-off the turn is an ordinary out-of-combat turn
     // and only the passive / Song Tu sources can tick (gdd-02 Core Rule #2 gate A1).
     if (!newKnowledge.progression) newKnowledge.progression = { recentMeaningfulActions: [] };
-    const combatHandoffForTurn = newKnowledge.lastCombatHandoff || null;
+    const combatHandoffForTurn = p2CombatHandoff;
     // Once per turn - EXCEPT that a freshly published combat hand-off is always
     // resolved (combat actions do not advance `currentTurn`, so the post-battle
     // reconciliation may share a turn id with the pre-battle one; with a hand-off
@@ -32316,10 +32680,16 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
         // roadmap (plan.md P5), so the predicate stays permissive but injectable.
         breakthroughRequirementMet: () => true,
         // gdd-02 Rule 9; plan.md C-11 expresses "phe dan dien" as a long-term status.
+        // gdd-02 Rule 9 / gdd-03 CR#6: EXP is blocked while the character is
+        // crippled. Both representations are accepted - the authoritative flag in
+        // `knowledge.deathState` (phase P2) and the long-term status that carries
+        // the stat penalty (plan.md C-11) - so an old save keeps working.
         deathAndConsequenceBlocked: (self) => {
+            const flagged = getDeathCharState(newKnowledge.deathState, self.char_id).death_and_consequence_blocked === true;
+            if (flagged) return true;
             const c = (newKnowledge.characters || []).find(x => x.id === self.char_id);
             return Array.isArray(c?.longTermStatuses)
-                && c.longTermStatuses.some(st => typeof st?.name === 'string' && st.name.includes('Phế Đan Điền'));
+                && c.longTermStatuses.some(st => typeof st?.name === 'string' && st.name.includes(CRIPPLED_STATUS_NAME));
         },
     };
     const progressionMessages = [];
@@ -32569,9 +32939,24 @@ const handleRespawn = () => {
     setknowledge(prevKnowledge => {
         // Tạo một bản sao sâu để làm việc
         const newKnowledge = JSON.parse(JSON.stringify(prevKnowledge));
-        
+
         // Tìm vị trí của người chơi trong mảng characters
         const playerIndex = newKnowledge.characters.findIndex(c => c.isPlayer);
+
+        // plan.md C-7: resurrection is KEPT. Death & Consequence owns `alive` /
+        // `death_flag`, so the one sanctioned revival path has to clear them here;
+        // the crippled flag is a SEPARATE consequence and deliberately survives.
+        if (playerIndex > -1) {
+            const respawnId = newKnowledge.characters[playerIndex].id;
+            const deathState = ensureDeathState(newKnowledge.deathState);
+            newKnowledge.deathState = withDeathCharState(deathState, respawnId, {
+                ...getDeathCharState(deathState, respawnId),
+                alive: true,
+                death_flag: false,
+                pending_fate: null,
+            });
+            newKnowledge.isDeathTurn = false;
+        }
 
         if (playerIndex > -1) {
             let player = newKnowledge.characters[playerIndex];
@@ -32605,6 +32990,70 @@ const handleRespawn = () => {
     // --- BƯỚC 5: ĐÓNG CỬA SỔ GAME OVER ---
     // Lưu ý: handleCombatEnd đã được gọi trước đó và đặt gameMode về EXPLORATION.
     setShowGameOverModal(false);
+};
+
+/**
+ * gdd-03 D.3 `recovery_attempt` (plan.md P2). The odds, the cooldown and the
+ * "cost is always paid" rule live in src-web/systems/death/recovery.ts; this
+ * wrapper only injects the RNG, applies the returned flags and removes the
+ * "Phế Đan Điền" long-term status on success (the only path that clears it).
+ */
+const handleRecoveryAttempt = (characterId, method = 'tu_tu', itemEfficacy = undefined) => {
+    const deathState = ensureDeathState(knowledge.deathState);
+    const charState = getDeathCharState(deathState, characterId);
+    const character = (knowledge.characters || []).find(c => c && c.id === characterId);
+    const hasCrippledStatus = Array.isArray(character?.longTermStatuses)
+        && character.longTermStatuses.some(st => st && ((st.status_id || st.id) === CRIPPLED_STATUS_ID || st.name === CRIPPLED_STATUS_NAME));
+
+    const result = attemptRecovery({
+        method,
+        blocked: charState.death_and_consequence_blocked === true || hasCrippledStatus,
+        currentTurn,
+        lastSelfAttemptTurn: charState.recovery_progress.last_self_attempt_turn,
+        itemEfficacy,
+        rng: Math.random,
+        knobs: DEATH_KNOBS,
+    });
+
+    if (!result.accepted) {
+        const reasons = {
+            not_crippled: 'Ngươi không mang thương tật cần chữa trị.',
+            invalid_method: 'Phương pháp hồi phục không hợp lệ.',
+            self_cooldown: `Chưa đủ ${DEATH_KNOBS.RECOVERY_SELF_COOLDOWN_TURNS} lượt tĩnh dưỡng kể từ lần tự tu trước.`,
+            missing_item_efficacy: 'Linh dược này không có dược lực rõ ràng.',
+        };
+        setModalMessage({ show: true, title: 'Không thể hồi phục', content: reasons[result.rejected_reason] || 'Không thể thực hiện.', type: 'error' });
+        return result;
+    }
+
+    setknowledge(prev => {
+        const next = JSON.parse(JSON.stringify(prev));
+        const state = ensureDeathState(next.deathState);
+        const before = getDeathCharState(state, characterId);
+        next.deathState = withDeathCharState(state, characterId, {
+            ...before,
+            death_and_consequence_blocked: result.blocked_after,
+            recovery_progress: {
+                last_self_attempt_turn: result.last_self_attempt_turn,
+                attempts: (before.recovery_progress.attempts || 0) + 1,
+            },
+        });
+        if (result.success) {
+            const idx = next.characters.findIndex(c => c && c.id === characterId);
+            if (idx > -1 && Array.isArray(next.characters[idx].longTermStatuses)) {
+                next.characters[idx].longTermStatuses = next.characters[idx].longTermStatuses.filter(
+                    st => !(st && ((st.status_id || st.id) === CRIPPLED_STATUS_ID || st.name === CRIPPLED_STATUS_NAME)));
+                next.characters[idx] = calculateFinalStats(next.characters[idx], next.characters, { preserveHp: true });
+            }
+        }
+        return next;
+    });
+
+    const message = result.success
+        ? CRIPPLED_RECOVERED_MESSAGE
+        : `Một lần ${RECOVERY_METHOD_LABELS[method] || method} thất bại — thương thế vẫn còn đó.`;
+    setStoryHistory(prev => [...prev, { id: crypto.randomUUID(), type: 'system', content: `**[Hệ thống]** ${message}`, transient: true }]);
+    return result;
 };
 
 const handleSlotSelection = async (slotNumber) => {
@@ -33673,7 +34122,14 @@ const formatEntityForPrompt = (entityInfo) => {
     else if (data.Backstory) details += `: "${data.Backstory}"`;
 
     if (type === 'NPC') {
-        details += ` (Cấp ${data.level || 1}, Thái độ: ${data.Stance || 'Trung lập'}, Tính cách: ${data.Personality || 'Bình thường'}`;
+        // gdd-03 1.3 / AC-37b: the AI receives the attitude BAND plus a direction
+        // of change, never the raw affinity integer and never the delta.
+        const attitudeLine = typeof data.affinity === 'number'
+            ? `${attitudeBand(data.affinity)}${data.affinityDirection ? ', ' + data.affinityDirection : ''}`
+            : null;
+        details += ` (Cấp ${data.level || 1}, Thái độ: ${data.Stance || 'Trung lập'}`;
+        if (attitudeLine) details += `, Hảo cảm với ngươi: ${attitudeLine}`;
+        details += `, Tính cách: ${data.Personality || 'Bình thường'}`;
         if (data.Role) details += `, Thân phận: ${data.Role}`;
         details += `)`;
     } else if (type === 'Địa điểm') {
@@ -34412,6 +34868,8 @@ const formatStoryText = useCallback((text) => {
             handleUserUploadNpcAvatar={handleUserUploadNpcAvatar}
             handleUserUploadPlayerAvatar={handleUserUploadPlayerAvatar}
             handleTrackQuest={handleTrackQuest}
+            handleRecoveryAttempt={handleRecoveryAttempt}
+            currentTurn={currentTurn}
             handleDebugUpdateCharacter={handleDebugUpdateCharacter}
             setModalMessage={setModalMessage}
             handleUpdateCharacterImages={handleUpdateCharacterImages}
