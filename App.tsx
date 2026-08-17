@@ -6,6 +6,39 @@ import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateD
 import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { GAME_CONFIG } from './gameConfig.js';
 
+// === P1 - deterministic gameplay systems (production/gdd-integration/plan.md P1) ===
+// These modules are pure TS (no React, no fetch). App.tsx only CALLS them at the
+// fixed hook points listed in plan.md; it never re-implements their formulas.
+import { validateGameConfig, expKnobsFromGameConfig } from './src-web/systems/exp/gameConfigAdapter';
+import { expThreshold as systemsExpThreshold } from './src-web/systems/exp/expThreshold';
+import {
+    PROGRESSION_STATE_NORMAL,
+    PROGRESSION_STATE_WAITING,
+    computeTurnExp,
+    tryExecuteBreakthrough,
+    turnViewFromHandoff,
+    idleTurnView,
+} from './src-web/systems/exp/resolveTurnExp';
+import { toCombatHandoff } from './src-web/systems/adapters/combatAdapter';
+import { getSongTuActiveNpcIds } from './src-web/systems/adapters/songTuAdapter';
+import { tierFromLevel } from './src-web/systems/math';
+import { makeThucId } from './src-web/systems/equipment/schema';
+import { markEverEquipped } from './src-web/systems/equipment/loadout';
+
+// gdd-02 A3 / EC-8: every tuning constant is validated ONCE at load, before a
+// play session begins - never with a release-stripped assert. In dev the throw
+// stops the app so the bad value is fixed immediately; in a production build we
+// log loudly instead of bricking an existing player's save.
+try {
+    validateGameConfig();
+} catch (configError) {
+    if (import.meta.env && import.meta.env.DEV) throw configError;
+    console.error('[gameConfig] Cau hinh he thong khong hop le:', configError);
+}
+
+/** gdd-02 A5 knob block, read once from gameConfig.js section 16. */
+const EXP_KNOBS = expKnobsFromGameConfig();
+
 const Cog6ToothIcon = ({className="w-5 h-5"}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path fillRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.905 1.523L9.017 8.429a1.875 1.875 0 0 1-.445 1.035l-2.833 2.833a1.875 1.875 0 0 0 0 2.652l2.833 2.833c.28.28.626.445.994.445s.714-.165.994-.445l2.832-2.833a1.875 1.875 0 0 1 1.036-.445l4.906-.153c.94-.03 1.686-.786 1.686-1.727V9.28c0-.94-.747-1.697-1.686-1.727l-4.906-.153a1.875 1.875 0 0 1-1.036-.445l-2.832-2.833A1.875 1.875 0 0 0 11.078 2.25ZM12.75 9a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Z" clipRule="evenodd" /></svg>;
 const CircleStackIcon = ({className="w-4 h-4"}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}><path d="M10 1a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM9 5.5a.75.75 0 0 1 .75-.75h.5a.75.75 0 0 1 0 1.5h-.5A.75.75 0 0 1 9 5.5Zm1 2.25a.75.75 0 0 0-1.5 0v3.5a.75.75 0 0 0 1.5 0v-3.5Z" /></svg>;
 const ChartBarIcon = ({className="w-5 h-5"}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}><path d="M2 3a1 1 0 0 1 1-1h1.5a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3ZM8.5 3a1 1 0 0 1 1-1h1.5a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H9.5a1 1 0 0 1-1-1V3ZM15 3a1 1 0 0 1 1-1h1.5a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H16a1 1 0 0 1-1-1V3Z" /></svg>;
@@ -2119,6 +2152,9 @@ const INITIAL_STATS = {
     loreId: null, // ID của bản ghi LORE gốc (nếu có)
     level: 1,
     exp: 0,
+    // gdd-02 A3: hai trang thai duy nhat, "Tu Luyen Thuong" | "Cho Dot Pha".
+    // `tier` la gia tri DAN XUAT (tierFromLevel) - tuyet doi khong luu.
+    progressionState: 'Tu Luyện Thường',
     ap: GAME_CONFIG.startingStats.ap,
     currency: 0,
     allocatedPoints: { hp: 0, atk: 0, def: 0, spd: 0 },
@@ -7048,6 +7084,13 @@ const CharacterInfoModal = ({
                         <p className="text-base md:text-lg font-bold text-[#cda45e] tracking-widest uppercase mb-2">
                             {`Cấp ${level} - ${realmInfo.realmName} Tầng ${realmInfo.realmTier}`}
                         </p>
+                        {/* gdd-02 Core Rule #12: trang thai Cho Dot Pha BAT BUOC co tin hieu
+                            dinh tinh cho nguoi choi, va tin hieu do KHONG duoc tiet lo dieu kien. */}
+                        {finalStatsCharacter.progressionState === 'Chờ Đột Phá' && (
+                            <p className="text-[10px] md:text-xs font-bold text-[#ff4d4d] tracking-widest uppercase mb-2 border border-[#ff4d4d]/40 px-2 py-0.5 bg-[#2a1010]">
+                                Chờ Đột Phá
+                            </p>
+                        )}
                         <div className="w-full bg-[#0a0f0a] h-2.5 border border-[#cda45e]/30 shadow-[inset_0_0_5px_rgba(0,0,0,0.8)] relative overflow-hidden">
                             <div className="bg-gradient-to-r from-[#cda45e]/50 to-[#e8d3a1] h-full transition-all duration-700 ease-out relative" style={{ width: `${expPercent}%` }}>
                                 <div className="absolute inset-0 bg-white/10"></div>
@@ -7650,7 +7693,13 @@ const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledg
                         
                         <div className="flex justify-between items-center bg-[#0a0f0a] border border-[#cda45e]/10 p-2 mb-2">
                             <span className="text-[#8ba888] scale-text-xs uppercase tracking-widest">Cấp Độ:</span>
-                            <span className="font-bold text-[#e8d3a1] tracking-wider scale-text-sm">Cấp {finalStats.level} ({realmInfo?.realmName} Tầng {realmInfo?.realmTier})</span>
+                            <span className="font-bold text-[#e8d3a1] tracking-wider scale-text-sm">
+                                Cấp {finalStats.level} ({realmInfo?.realmName} Tầng {realmInfo?.realmTier})
+                                {/* gdd-02 Core Rule #12 - tin hieu Cho Dot Pha tren the nhan vat. */}
+                                {finalStats.progressionState === 'Chờ Đột Phá' && (
+                                    <span className="ml-2 text-[#ff4d4d] scale-text-xs uppercase tracking-widest">• Chờ Đột Phá</span>
+                                )}
+                            </span>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 scale-text-sm mt-2 bg-[#0a0f0a] border border-[#cda45e]/10 p-2">
@@ -15217,11 +15266,11 @@ const generateHtabBlessing = (rollNum) => {
 };
 
 const AP_CONVERSION_RATES = GAME_CONFIG.apConversionRates;
-const calculateMaxExpForLevel = (level) => {
-    const { base, levelExponent, realmMultiplier } = GAME_CONFIG.expFormula;
-    const realmIndex = Math.floor((level - 1) / 10);
-    return Math.floor(base * Math.pow(level, levelExponent) * Math.pow(realmMultiplier, realmIndex));
-};
+// gdd-02 D.1 `exp_threshold(level)` (decision C-4: the App curve IS the GDD
+// threshold). The arithmetic now lives in src-web/systems/exp/expThreshold.ts so
+// the deterministic EXP modules and the UI can never drift apart; the numbers
+// are byte-for-byte identical to the previous inline formula.
+const calculateMaxExpForLevel = (level) => systemsExpThreshold(level);
 
 const calculateTrueBaseStats = (character) => {
     if (!character) return {};
@@ -22560,15 +22609,25 @@ ${skillIdea.requiredEffects ? `// - Mô tả Hiệu ứng mong muốn: "${skillI
                 maxExp: calculateMaxSkillExpForRarity(skillIdea.rarity),
             };
         } else { 
+             // gdd-02 PART B Rule #3: moi "thuc" (mot active_action) phai co id DUY NHAT
+             // TOAN CUC, vi Combat dua vao do de thuc thi luat "khong lap lai thuc trong
+             // mot tran". Id duoc sinh tat dinh tu `<skill_id>:<index>` (makeThucId).
+             const adventureSkillId = crypto.randomUUID();
+             const activeActionsWithThucIds = Array.isArray(details.active_actions)
+                ? details.active_actions.map((action, index) => ({
+                    ...action,
+                    thuc_id: action?.thuc_id || makeThucId(adventureSkillId, index),
+                }))
+                : null;
              return {
-                id: crypto.randomUUID(),
+                id: adventureSkillId,
                 sourceIdeaId: skillIdea.id,
                 skillType: 'adventure',
                 Name: details.Name,
                 description: details.description,
                 Rarity: details.Rarity,
                 passive_effects: details.passive_effects || null,
-                active_actions: details.active_actions || null,
+                active_actions: activeActionsWithThucIds,
                 exp: 0,
                 maxExp: calculateMaxSkillExpForRarity(details.Rarity),
             };
@@ -22836,6 +22895,36 @@ const calculateLevelFromRealmString = (realmString, realmList) => {
     const calculatedLevel = (realmIndex * 10) + finalTier;
     return Math.max(1, calculatedLevel); // Đảm bảo cấp độ luôn >= 1
 };
+// gdd-02 D.6/D.7 `process_character_turn` for one App character record.
+// The pure logic lives in src-web/systems/exp/resolveTurnExp.ts; this wrapper only
+// translates between the App's character shape and the module's ProgressionRecord,
+// and mutates `character` in place (it is already a deep clone inside applyUpdates).
+// Order is mandatory: breakthrough FIRST (gdd-02 EC-2/AC-33), so this turn's EXP is
+// measured against exp_threshold(level + 1), then the four deterministic sources.
+const resolveProgressionTurnForCharacter = (character, turnView, expDeps) => {
+    if (!character.progressionState) character.progressionState = PROGRESSION_STATE_NORMAL;
+    const record = {
+        char_id: character.id,
+        level: character.level || 1,
+        exp: character.exp || 0,
+        state: character.progressionState,
+        exp_multiplier: character.expMultiplier,
+        tam_phap_type: character.tamPhapType || null,
+        isPlayer: character.isPlayer === true,
+    };
+
+    const breakthrough = tryExecuteBreakthrough(record, turnView, expDeps);
+    if (breakthrough.executed) {
+        character.level = breakthrough.record.level;
+        character.exp = breakthrough.record.exp;
+        character.progressionState = breakthrough.record.state;
+        character.maxExp = calculateMaxExpForLevel(character.level);
+    }
+
+    const breakdown = computeTurnExp(breakthrough.record, turnView, expDeps);
+    return { gain: breakdown.final_gain, breakthrough: breakthrough.executed, breakdown };
+};
+
 const handleLevelUp = (character, realmList) => {
     // Luôn làm việc trên một bản sao sâu để đảm bảo không thay đổi state gốc một cách bất ngờ
     let workingChar = JSON.parse(JSON.stringify(character));
@@ -22848,10 +22937,28 @@ const handleLevelUp = (character, realmList) => {
     }
 
     // BƯỚC 1: VÒNG LẶP XỬ LÝ LÊN CẤP
-    while (workingChar.exp >= workingChar.maxExp && workingChar.maxExp > 0) {
-        workingChar.exp -= workingChar.maxExp;
-        workingChar.level += 1;
-        workingChar.maxExp = calculateMaxExpForLevel(workingChar.level);
+    // gdd-02 D.7 `apply_exp_gain` + Core Rule #5 "cong Cho Dot Pha":
+    // o moi cap boi so cua 10, EXP bi CHAN cung tai dung 100% nguong (khong danh
+    // du, phan du bi huy) va nhan vat chuyen sang trang thai "Cho Dot Pha". Chi
+    // `try_execute_breakthrough` moi dua nhan vat qua cong nay.
+    if (!workingChar.progressionState) workingChar.progressionState = PROGRESSION_STATE_NORMAL;
+    let enteredBreakthroughGate = false;
+    while (workingChar.maxExp > 0) {
+        if (workingChar.level % 10 === 0) {
+            if (workingChar.exp >= workingChar.maxExp) {
+                workingChar.exp = workingChar.maxExp;
+                if (workingChar.progressionState !== PROGRESSION_STATE_WAITING) enteredBreakthroughGate = true;
+                workingChar.progressionState = PROGRESSION_STATE_WAITING;
+            }
+            break; // gdd-02 Rule 5: never cascade past the decade gate.
+        }
+        if (workingChar.exp >= workingChar.maxExp) {
+            workingChar.exp -= workingChar.maxExp;
+            workingChar.level += 1;
+            workingChar.maxExp = calculateMaxExpForLevel(workingChar.level);
+            continue;
+        }
+        break;
     }
     
     // BƯỚC 2: XỬ LÝ PHẦN THƯỞNG VÀ CÁC SỰ KIỆN SAU KHI LÊN CẤP
@@ -22879,6 +22986,13 @@ const handleLevelUp = (character, realmList) => {
         if (newRealmInfo.realmName !== oldRealmInfo.realmName) {
             levelUpMessages.push(`**Đột phá!** Cảnh giới mới: **${newRealmInfo.realmName} Tầng ${newRealmInfo.realmTier}**. Ngươi nhận thêm điểm tiềm năng!`);
         }
+    }
+
+    // gdd-02 Core Rule #12: buoc vao Cho Dot Pha BAT BUOC phai co it nhat mot tin
+    // hieu dinh tinh cho nguoi choi - va tin hieu do khong duoc tiet lo dieu kien.
+    if (enteredBreakthroughGate) {
+        const gateRealmInfo = getRealmInfoFromLevel(workingChar.level, realmList);
+        levelUpMessages.push(`**${workingChar.Name}** đã tu vi viên mãn ở **${gateRealmInfo.realmName} Tầng ${gateRealmInfo.realmTier}** — kinh nghiệm không thể tích thêm nữa. Trạng thái: **Chờ Đột Phá**.`);
     }
 
     // BƯỚC 3: TRẢ VỀ KẾT QUẢ CUỐI CÙNG
@@ -26849,8 +26963,13 @@ const handleEquipItem = useCallback((itemToEquip, slot, characterId) => {
             }
         }
 
-        // 3. Trang bị vật phẩm mới vào ô (Không đổi)
-        characterToUpdate.equippedItems[slot] = itemToEquip;
+        // 3. Trang bị vật phẩm mới vào ô
+        // gdd-02 PART B Rule #9: `was_ever_equipped` la co ghi-mot-lan, VINH VIEN,
+        // ngu nghia qua khu hoan thanh (khac voi "dang deo o slot nao"). Character
+        // Customization Mode dung no lam cong chan xoa vat pham.
+        const equippedInstance = { ...itemToEquip };
+        markEverEquipped(equippedInstance);
+        characterToUpdate.equippedItems[slot] = equippedInstance;
         
         // 4. THAY ĐỔI CỐT LÕI NẰM Ở ĐÂY
         // Thay vì .split(','), chúng ta coi toàn bộ chuỗi Effect là một hiệu ứng duy nhất
@@ -27782,6 +27901,22 @@ const finalizeCombatEnd = async (outcome, data, finalSharedCooldowns) => {
         prompt = combatType === 'Sparring'
             ? buildDefeatSparringPrompt(playerPartyFormatted, enemyPartyFormatted, gameSettings, combatBlowByBlowFormatted)
             : buildDefeatLethalPrompt(playerPartyFormatted, enemyPartyFormatted, gameSettings, combatBlowByBlowFormatted);
+    }
+
+    // plan.md P1 hook: Combat itself is OUT OF SCOPE and is not modified. This is a
+    // read-only wrapper - it projects the combat result onto the GDD hand-off shape
+    // (`battle_active` / `outcome.winner_id` / `.loser_id` / `in_combat`) through the
+    // P0 adapter and parks it on `knowledge.lastCombatHandoff`. The EXP reconciliation
+    // inside `applyUpdates` consumes it exactly once and clears it.
+    try {
+        const combatHandoff = toCombatHandoff({ outcome, data, combatType }, knowledgeAfterCombat);
+        // Attach to the local copy too: callGeminiAPI below hands `knowledgeAfterCombat`
+        // straight to applyUpdates, so the same-turn reconciliation can consume it;
+        // the setknowledge write is the fallback if that AI call fails.
+        knowledgeAfterCombat.lastCombatHandoff = combatHandoff;
+        setknowledge(prev => ({ ...prev, lastCombatHandoff: combatHandoff }));
+    } catch (handoffError) {
+        console.error('[combatAdapter] Khong dung duoc combat hand-off:', handoffError);
     }
 
     if (prompt) {
@@ -31018,8 +31153,17 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
             
             if (charIndex > -1) {
                 const character = newKnowledge.characters[charIndex];
+                // plan.md C-1: `level` cua NGUOI CHOI thuoc so huu cua he EXP tat dinh
+                // (src-web/systems/exp/), AI khong duoc ghi thang. Duong tuy chinh hop le
+                // duy nhat la CustomizationModal -> handleCustomizeLevel, khong di qua day.
+                const allowPlayerLevelWrite = newKnowledge.hackMode?.allowAiLevelWrite === true;
+                if (character.isPlayer && !allowPlayerLevelWrite) {
+                    console.warn(`[SET_LEVEL] Tu choi the AI ghi cap do cho nguoi choi (value=${value}). Cap do nguoi choi do he EXP quyet dinh - xem plan.md C-1.`);
+                    return;
+                }
                 character.level = value;
                 character.exp = 0;
+                character.progressionState = PROGRESSION_STATE_NORMAL;
                 
                 const totalAp = calculateTotalAP(value);
                 const spentAp = Object.values(character.allocatedPoints || {}).reduce((s, p) => s + p, 0);
@@ -31993,7 +32137,17 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                         const breakthroughRatio = Math.pow(finalEpScore / 100, 2) * 0.5;
                         const expBreakthrough = maxExp * breakthroughRatio;
                         
-                        const totalInstantExp = Math.floor(expBasic + expGrowth + expBreakthrough);
+                        // plan.md C-1: `[ENCOUNTER_REWARD]` la EXP do AI CHAM diem, nen no bi HA CAP -
+                        // khong con la nguon EXP duy nhat va khong con vo han. Phan dong gop cua no
+                        // trong 1 luot bi chan tai FREE_EVENT_EXP_CAP_FRACTION * exp_threshold(level),
+                        // roi van di qua `apply_exp_gain` (handleLevelUp) nen cong "Cho Dot Pha" ap dung
+                        // cho no y het 4 nguon tat dinh.
+                        const rawInstantExp = Math.floor(expBasic + expGrowth + expBreakthrough);
+                        const freeEventCeiling = Math.floor(maxExp * (EXP_KNOBS.FREE_EVENT_EXP_CAP_FRACTION || 0));
+                        const totalInstantExp = freeEventCeiling > 0 ? Math.min(rawInstantExp, freeEventCeiling) : rawInstantExp;
+                        if (totalInstantExp < rawInstantExp) {
+                            console.warn(`[EXP cap] ENCOUNTER_REWARD cho "${character.Name}" bi chan: ${rawInstantExp} -> ${totalInstantExp} (tran ${(EXP_KNOBS.FREE_EVENT_EXP_CAP_FRACTION * 100).toFixed(0)}% nguong cap ${character.level}).`);
+                        }
 
                         if (totalInstantExp > 0) {
                             if (!directStatChanges[character.id]) directStatChanges[character.id] = {};
@@ -32132,11 +32286,53 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
         setTimeout(() => setAdventureTurnCount(prev => prev + 1), 0);
     }
 
+    // === gdd-02 D.6/D.7 - deterministic per-turn EXP (plan.md P1 hook point) ======
+    // Runs at most ONCE per `currentTurn`, for the player and every companion in the
+    // party. The combat side is read through the P0 adapter hand-off published by
+    // `finalizeCombatEnd`; with no hand-off the turn is an ordinary out-of-combat turn
+    // and only the passive / Song Tu sources can tick (gdd-02 Core Rule #2 gate A1).
+    if (!newKnowledge.progression) newKnowledge.progression = { recentMeaningfulActions: [] };
+    const combatHandoffForTurn = newKnowledge.lastCombatHandoff || null;
+    // Once per turn - EXCEPT that a freshly published combat hand-off is always
+    // resolved (combat actions do not advance `currentTurn`, so the post-battle
+    // reconciliation may share a turn id with the pre-battle one; with a hand-off
+    // present the turn view is `in_combat`, so passive/Song Tu cannot double-tick).
+    const shouldResolveTurnExp = newKnowledge.progression.lastExpResolvedTurn !== currentTurn || !!combatHandoffForTurn;
+    const expTurnView = combatHandoffForTurn
+        ? turnViewFromHandoff(combatHandoffForTurn, false)
+        : idleTurnView(false);
+    const expDeps = {
+        knobs: EXP_KNOBS,
+        expThreshold: calculateMaxExpForLevel,
+        songTuActiveNpcIds: getSongTuActiveNpcIds(newKnowledge),
+        // gdd-02 EC-1: an opponent with no Character Card tier is a data bug, so the
+        // lookup returns `undefined` and the module raises EXP_ERROR_OPPONENT_TIER_UNDEFINED
+        // instead of silently defaulting to 0.
+        opponentTier: (charId) => {
+            const opponent = (newKnowledge.characters || []).find(c => c.id === charId);
+            return opponent && Number.isFinite(opponent.level) ? tierFromLevel(opponent.level) : undefined;
+        },
+        // gdd-02 Core Rule #6's owner (Setting & Canon) is dropped from the shortened
+        // roadmap (plan.md P5), so the predicate stays permissive but injectable.
+        breakthroughRequirementMet: () => true,
+        // gdd-02 Rule 9; plan.md C-11 expresses "phe dan dien" as a long-term status.
+        deathAndConsequenceBlocked: (self) => {
+            const c = (newKnowledge.characters || []).find(x => x.id === self.char_id);
+            return Array.isArray(c?.longTermStatuses)
+                && c.longTermStatuses.some(st => typeof st?.name === 'string' && st.name.includes('Phế Đan Điền'));
+        },
+    };
+    const progressionMessages = [];
+    if (shouldResolveTurnExp) newKnowledge.progression.lastExpResolvedTurn = currentTurn;
+
     newKnowledge.characters.forEach((char, index) => {
         if (!char.isPermanentlyDead) {
             let finalChar = newKnowledge.characters[index];
             const changesForThisChar = directStatChanges[finalChar.id];
             let expGained = 0;
+
+            // Old saves carry no `progressionState`; a missing value IS the default.
+            if (!finalChar.progressionState) finalChar.progressionState = PROGRESSION_STATE_NORMAL;
 
             if (changesForThisChar) {
                 for (const key in changesForThisChar) {
@@ -32151,6 +32347,21 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                 }
             }
             
+            const isProgressionSubject = finalChar.isPlayer === true
+                || (finalChar.isCompanion === true && finalChar.inParty === true);
+            if (shouldResolveTurnExp && isProgressionSubject) {
+                try {
+                    const progression = resolveProgressionTurnForCharacter(finalChar, expTurnView, expDeps);
+                    expGained += progression.gain;
+                    if (progression.breakthrough) {
+                        const btRealm = getRealmInfoFromLevel(finalChar.level, newKnowledge.realmProgressionList);
+                        progressionMessages.push(`**Đột phá thành công!** **${finalChar.Name}** đã bước vào **${btRealm.realmName} Tầng ${btRealm.realmTier}**.`);
+                    }
+                } catch (expError) {
+                    console.error(`[EXP] Khong tinh duoc EXP luot nay cho "${finalChar.Name}":`, expError);
+                }
+            }
+
             if (expGained > 0) {
                 finalChar.exp = (finalChar.exp || 0) + expGained;
                 const { updatedChar, levelUpMessages, newLoreQuest } = handleLevelUp(finalChar, newKnowledge.realmProgressionList);
@@ -32184,6 +32395,16 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
             newKnowledge.characters[index] = calculateFinalStats(finalChar, newKnowledge.characters);
         }
     });
+
+    // The hand-off is single-use: consumed here and cleared, so a later turn cannot
+    // award combat EXP a second time for a battle that already resolved.
+    if (shouldResolveTurnExp && combatHandoffForTurn) delete newKnowledge.lastCombatHandoff;
+    if (progressionMessages.length > 0) {
+        setTimeout(() => {
+            const entries = progressionMessages.map(msg => ({ id: crypto.randomUUID(), type: 'system', content: `**[Hệ thống]** ${msg}`, transient: true }));
+            setStoryHistory(prevHistory => [...prevHistory, ...entries]);
+        }, 100);
+    }
 
     if (updates.activateAdventureSkill && Array.isArray(updates.activateAdventureSkill)) {
         updates.activateAdventureSkill.forEach(activation => {

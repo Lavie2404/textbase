@@ -143,4 +143,99 @@ export const GAME_CONFIG = {
     // 15. LƯỢNG EXP KỸ NĂNG NHẬN ĐƯỢC MỖI LẦN "DÙNG"
     skillExpPerUse: 10,              // Kỹ năng chiến đấu: mỗi lần tung chiêu trong trận.
     skillExpPerAdventureTrigger: 10, // Kỹ năng phiêu lưu: mỗi lần sự kiện liên quan xảy ra (bán/mua/chế tạo/rớt đồ/qua lượt...).
+
+    // ------------------------------------------------------------------------
+    // 16. TIẾN TRÌNH EXP & CẢNH GIỚI (GDD 02 phần A — "EXP & Realm Progression")
+    //     Mọi tỷ lệ dưới đây được nhân với exp_threshold(level) — tức là chính
+    //     công thức expFormula ở mục 3 (quyết định C-4: GIỮ đường cong của game,
+    //     chỉ lấy 4 nguồn EXP tất định + cổng "Chờ Đột Phá" của GDD).
+    //     Logic nằm ở src-web/systems/exp/, không nằm trong App.tsx.
+    // ------------------------------------------------------------------------
+    expProgression: {
+        // Hai hằng số ngưỡng của GDD. Theo C-4 chúng chỉ còn ý nghĩa HIỂN THỊ +
+        // kiểm tra hợp lệ lúc nạp cấu hình (BASE > 0, INCREMENT >= 0); đường cong
+        // thật vẫn là expFormula ở mục 3.
+        BASE_EXP_THRESHOLD: 100,
+        EXP_THRESHOLD_INCREMENT: 10,
+
+        // Nguồn 1 — THẮNG TRẬN: WIN_EXP_BASE_FRACTION * ngưỡng * hệ số chênh cảnh giới.
+        // Hệ số = clamp(1 + WIN_EXP_TIER_BONUS * (cảnh giới địch - cảnh giới ta), FLOOR, CEIL).
+        WIN_EXP_BASE_FRACTION: 0.20,
+        WIN_EXP_TIER_BONUS: 0.25,
+        WIN_EXP_FLOOR_MULT: 0.30,   // sàn: đánh kẻ yếu hơn nhiều vẫn được 30%
+        WIN_EXP_CEIL_MULT: 3.0,     // trần: đánh vượt cảnh giới tối đa x3
+
+        // Nguồn 2 — THUA TRẬN (không phụ thuộc cảnh giới đối thủ).
+        // BẤT BIẾN BẮT BUỘC: WIN_EXP_BASE_FRACTION * WIN_EXP_FLOOR_MULT >= LOSS_EXP_RATE,
+        // nếu không, cố tình thua sẽ có lợi hơn thắng (0.20 * 0.30 = 0.06 >= 0.04 ✔).
+        LOSS_EXP_RATE: 0.04,
+
+        // Nguồn 3 — TU LUYỆN THỤ ĐỘNG: mỗi lượt NGOÀI chiến đấu.
+        PASSIVE_EXP_RATE: 0.001,
+
+        // Nguồn 4 — SONG TU: chỉ khi tâm pháp loại "song tu" VÀ đang có đạo lữ,
+        // VÀ đang ngoài chiến đấu. KHÔNG cộng dồn theo số lượng đạo lữ.
+        SONG_TU_EXP_RATE: 0.0015,
+
+        // Trần EXP mỗi lượt, tính theo bội số của ngưỡng cấp hiện tại. GDD tự thừa
+        // nhận không có cơ chế nào chặn nhảy nhiều cấp trong 1 lượt nếu hệ số tâm
+        // pháp quá lớn (A9 #2) — đây là van an toàn cho lỗ hổng đó. Đặt 0 để tắt.
+        TURN_EXP_CAP_FRACTION: 20,
+
+        // Trần EXP cho nguồn "sự kiện tự do" do AI chấm ([ENCOUNTER_REWARD]).
+        // Quyết định C-1: tag này bị HẠ CẤP, không còn là nguồn EXP duy nhất/vô hạn.
+        FREE_EVENT_EXP_CAP_FRACTION: 0.10,
+
+        // Trần khuyến nghị cho hệ số nhân EXP của tâm pháp (hệ tâm pháp chưa làm).
+        TAM_PHAP_EXP_MULTIPLIER_MAX: 3.0,
+
+        // Trần cho các chỉ số dạng phần trăm ở mục 17 (quy về hệ số 0..1).
+        PERCENT_STAT_CAP: 0.95,
+    },
+
+    // ------------------------------------------------------------------------
+    // 17. TĂNG TRƯỞNG CHỈ SỐ THEO CẤP/CẢNH GIỚI (GDD 02 D.5)
+    //     chỉ_số = gốc + LEVEL_GROWTH_X * (cấp - 1) + BREAKTHROUGH_BONUS_X * (cảnh giới - 1)
+    //              + điểm AP người chơi tự phân bổ (quyết định C-5: GIỮ hệ AP).
+    //     4 chỉ số thô (HP/ATK/DEF/SPD) không bị chặn trần; 8 chỉ số phần trăm bị
+    //     chặn bởi PERCENT_STAT_CAP ở mục 16 và tính theo hệ số 0..1 (0.008 = 0.8%).
+    //     GDD mới tune 3/12 chỉ số (HP, ATK, Tỉ lệ chí mạng); 9 chỉ số còn lại là
+    //     giá trị tạm, chờ một đợt cân bằng riêng.
+    // ------------------------------------------------------------------------
+    statGrowth: {
+        LEVEL_GROWTH_HP: 8,
+        LEVEL_GROWTH_ATK: 1.5,
+        LEVEL_GROWTH_DEF: 1.2,
+        LEVEL_GROWTH_SPD: 0.5,
+        LEVEL_GROWTH_CRIT_RATE: 0.008,
+        LEVEL_GROWTH_CRIT_DAMAGE: 0.004,
+        LEVEL_GROWTH_ACC: 0.004,
+        LEVEL_GROWTH_EVASION: 0.003,
+        LEVEL_GROWTH_LIFESTEAL: 0.002,
+        LEVEL_GROWTH_HP_REGEN: 0.002,
+        LEVEL_GROWTH_AMP: 0.003,
+        LEVEL_GROWTH_MITIGATION: 0.003,
+
+        BREAKTHROUGH_BONUS_HP: 50,
+        BREAKTHROUGH_BONUS_ATK: 8,
+        BREAKTHROUGH_BONUS_DEF: 6,
+        BREAKTHROUGH_BONUS_SPD: 3,
+        BREAKTHROUGH_BONUS_CRIT_RATE: 0.02,
+        BREAKTHROUGH_BONUS_CRIT_DAMAGE: 0.02,
+        BREAKTHROUGH_BONUS_ACC: 0.01,
+        BREAKTHROUGH_BONUS_EVASION: 0.01,
+        BREAKTHROUGH_BONUS_LIFESTEAL: 0.01,
+        BREAKTHROUGH_BONUS_HP_REGEN: 0.01,
+        BREAKTHROUGH_BONUS_AMP: 0.01,
+        BREAKTHROUGH_BONUS_MITIGATION: 0.01,
+    },
+
+    // ------------------------------------------------------------------------
+    // 18. DỮ LIỆU TRANG BỊ & KỸ NĂNG (GDD 02 phần B)
+    //     Chỉ là ngưỡng CẢNH BÁO lúc tạo nội dung, không chặn game chạy.
+    // ------------------------------------------------------------------------
+    equipment: {
+        min_thuc_per_skill: 3,              // dưới mức này: cảnh báo khi tạo kỹ năng mới
+        max_known_skills_per_character: 6,  // vượt mức này: cảnh báo, không chặn
+    },
 };

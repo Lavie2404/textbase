@@ -325,8 +325,19 @@ export const PERSISTENCE_KNOBS = {
   blob_gather_timeout_ms: 100,
   /** gdd-05 B5 (ADR D1): full-flush cadence in turns. */
   FLUSH_EVERY_N_TURNS: 50,
-  /** gdd-05 B6: release-bound technical value, not a knob. Bumped on schema change. */
-  schema_version: 1,
+  /**
+   * gdd-05 B6/R8: release-bound technical value, not a knob. Bumped on schema
+   * change. P3a raised it from 1 to 2 - three R8 triggers fired at once: the
+   * turn-record key shape became `[slot_id, world_time, hack_seq]`, `SlotRecord`
+   * gained its metadata fields, and the bundle gained a checksum.
+   */
+  schema_version: 2,
+  /**
+   * gdd-05 B4 "Backup prompt threshold": days since `last_saved_at` after which
+   * a slot row shows the faint diegetic "Chep lai quyen so" invitation. Kept
+   * below the ~7-day Safari ITP eviction window.
+   */
+  backup_prompt_days: 5,
 } as const;
 
 // ---------------------------------------------------------------------------

@@ -5,7 +5,10 @@ import { defineConfig } from 'vitest/config';
 // imported by unit tests — see production/gdd-integration/plan.md.
 export default defineConfig({
   test: {
-    include: ['tests/unit/**/*.test.ts'],
+    // Two patterns on purpose: `*.test.ts` is the repo's existing convention, and
+    // `*_test.ts` is the naming the GDD acceptance criteria mandate
+    // (`[system]_[feature]_test.*`, coding-standards.md "Automated Test Rules").
+    include: ['tests/unit/**/*.test.ts', 'tests/unit/**/*_test.ts'],
     environment: 'node',
   },
 });
