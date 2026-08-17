@@ -19,7 +19,16 @@ Commit 1 lần mỗi giai đoạn khi test + build xanh, không push.
 - [x] P3 — World Memory fact store + Persistence v2 (IndexedDB nguồn chân lý, durability gate, schema_version)
 - [x] P4 — Turn Manager (Undo) + Contract (chặn tag cơ học, leak detector) + AI wrapper (timeout 60/45s)
 - [x] P6 — Character Card, Settings gom nhóm, Customization validators
-- [x] P7 — CI vitest
+- [x] P7 — CI vitest (.github/workflows/test.yml)
+- [x] Review lead-programmer 26 phát hiện → đã sửa (2 BLOCKER + 5 HIGH + MEDIUM/LOW), commit 52237f3 + dbd9a73
+- [x] Smoke boot Chrome headless (build với env Firebase giả): mount OK, màn chọn chế độ OK — `production/qa/evidence/smoke-setup-2026-08-17.png`
+
+**Trạng thái**: HOÀN TẤT lộ trình rút gọn — 12 commit, 1231 unit test xanh, build xanh.
+**Còn treo (không chặn, ghi từ báo cáo agent)**: Story Log S4 phân trang UI; live-window
+eviction; delete-batch UI của Customization (`validateDeleteBatch` chưa dùng); khối ⑤
+combat status trên thẻ (không truyền ctx combat); nhãn `callSite` cụ thể cho ~20 call
+nền (đang là 'generic'); HTAB AFFINITY_CHANGED nằm ngoài C-1; API-3 chưa thu hẹp về
+chỉ thời gian/vị trí (C-9 giai đoạn 2); chưa test thật với Gemini key (cần chơi thử).
 
 ---
 
