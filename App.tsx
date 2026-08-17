@@ -53,6 +53,28 @@ import {
 import { classifyFateIntent } from './src-web/systems/death/pendingFate';
 import { attemptRecovery, RECOVERY_METHOD_LABELS } from './src-web/systems/death/recovery';
 
+// === P3b / P4b wiring (production/gdd-integration/plan.md sections D/P3, D/P4) ===
+// Persistence v2 (C-2: IndexedDB is the source of truth, GitHub is a backup),
+// World Memory fact store (C-8: runs ALONGSIDE the AI summariser), Turn Manager
+// + one-turn Undo (C-13), Contract Enforcement (C-1 hybrid tag policy + leak
+// detector) and the single AI call site (C-9 background exemption, C-10 timeouts).
+import { IndexedDbBackend } from './src-web/systems/persistence/storageBackend';
+import { saveCheckpoint } from './src-web/systems/persistence/saveCheckpoint';
+import { loadSlot, worldMemoryFromBundle } from './src-web/systems/persistence/loadSlot';
+import { createSlotRecord, CURRENT_SCHEMA_VERSION } from './src-web/systems/persistence/slotRecord';
+import { exportKeepsake } from './src-web/systems/persistence/exportKeepsake';
+import { exportQaLogJson } from './src-web/systems/persistence/exportQaLog';
+import { WorldMemory } from './src-web/systems/worldMemory/worldMemory';
+import { worldMemoryFromAppHistory } from './src-web/systems/worldMemory/fromAppHistory';
+import { createTurnManager } from './src-web/systems/turn/turnManager';
+import { makeAppStateUndoable } from './src-web/systems/turn/undoAppState';
+import { sanitizeCommandBlock } from './src-web/systems/contract/tagPolicy';
+import { createSessionLeakLog, leakCheckAndRecord } from './src-web/systems/contract/leakDetector';
+import { createAiSessionState, requestAi } from './src-web/systems/ai/requestAi';
+import { DEFAULT_AI_CONFIG, SAFETY_SETTINGS_BLOCK_NONE } from './src-web/systems/ai/config';
+import { AI_KNOBS, PERSISTENCE_KNOBS } from './src-web/systems/registry';
+import * as turnGlue from './src-web/systems/glue/turnGlue';
+
 // gdd-02 A3 / EC-8: every tuning constant is validated ONCE at load, before a
 // play session begins - never with a release-stripped assert. In dev the throw
 // stops the app so the bad value is fixed immediately; in a production build we
@@ -66,6 +88,33 @@ try {
 
 /** gdd-02 A5 knob block, read once from gameConfig.js section 16. */
 const EXP_KNOBS = expKnobsFromGameConfig();
+
+// === P3b/P4b session-scoped singletons ======================================
+// One IndexedDB backend per document (gdd-05 B3: a slot is opened once, and the
+// multi-tab lock lives on the backend). Created lazily so a browser without
+// IndexedDB - or a unit-test environment that never touches App.tsx - never
+// pays for it. Every consumer goes through try/catch: a persistence failure
+// logs under "[systems]" and never blocks a turn (plan.md P4b rule 8).
+let systemsBackendInstance = null;
+const getSystemsBackend = () => {
+    if (systemsBackendInstance) return systemsBackendInstance;
+    try {
+        systemsBackendInstance = new IndexedDbBackend();
+    } catch (backendError) {
+        console.error('[systems] Khong khoi tao duoc kho luu tru IndexedDB:', backendError);
+        systemsBackendInstance = null;
+    }
+    return systemsBackendInstance;
+};
+
+/** gdd-01 C.3 AiLayerState. Wall-clock cooldowns, deliberately NOT persisted. */
+const aiSessionState = createAiSessionState();
+
+/** gdd-01 B.5 F2/F3 session log; exported from Settings as "Nhat ky khe uoc". */
+const contractSessionLog = createSessionLeakLog();
+
+/** Kept for the Settings export; the newest entries are the useful ones. */
+const CONTRACT_LOG_EXPORT_LIMIT = 500;
 
 /** gdd-03 1.5 / 2.5 knob blocks, read once from gameConfig.js sections 19 and 20. */
 const AFFINITY_KNOBS = affinityKnobsFromGameConfig();
@@ -8103,6 +8152,7 @@ const SettingsMenu = ({
     show, onClose, onSaveToLocal, onSaveToCloud, onLoadFromCloud, onSaveToFile, onLoadFromFile, onRestart, onGoHome, onClearCache, currentPlayStyle, onTogglePlayStyle, uiTheme, onSetTheme, onOpenThemeEditor,
     bgmUrl, bgmVolume, isPlayingBgm, onBgmUrlChange, onBgmVolumeChange, onToggleBgm, onOpenCacheManager, onOpenGallery,
     onDebugAwakenHtab, gameMode,
+    onExportKeepsake, onExportQaLog, onExportContractLog,
     textScale, onTextScaleChange 
 }) => {
 
@@ -8299,7 +8349,9 @@ const SettingsMenu = ({
                     <div>
                         <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Lưu trữ tiến trình</h4>
                         <div className="grid grid-cols-3 gap-2">
-                            <MenuItem icon={<SaveIcon />} label="Lưu Ngay" onClick={onSaveToLocal} disabled={isCombatOrTrade} colorClass="text-[#cda45e]" subtext={isCombatOrTrade ? "Khóa khi chiến đấu" : "Lưu lên GitHub (5 slot)"} />
+                            {/* plan.md C-2: IndexedDB is the source of truth; GitHub is a
+                                multi-device BACKUP, which is what the label now says. */}
+                            <MenuItem icon={<SaveIcon />} label="Sao lưu lên GitHub" onClick={onSaveToLocal} disabled={isCombatOrTrade} colorClass="text-[#cda45e]" subtext={isCombatOrTrade ? "Khóa khi chiến đấu" : "Bản sao dự phòng (5 slot)"} />
                             <MenuItem icon={<Upload />} label="Lưu Đám Mây" onClick={onSaveToCloud} disabled={isCombatOrTrade} colorClass="text-[#a3b8a3]" subtext={isCombatOrTrade ? "Khóa khi chiến đấu" : "Đồng bộ (Tốn thời gian)"} />
                             <MenuItem icon={<FolderOpenIcon />} label="Tải Game" onClick={onLoadFromCloud} colorClass="text-[#8ba888]" subtext="Mở kho lưu trữ" />
                         </div>
@@ -8313,6 +8365,13 @@ const SettingsMenu = ({
                                 <MenuItem icon={<Upload />} label="Xuất Tệp Nhẹ" onClick={() => onSaveToFile(false)} disabled={isCombatOrTrade} colorClass="text-[#a3b8a3]" subtext={isCombatOrTrade ? "Chặn khi đang chiến đấu" : "Chỉ lưu chữ"} />
                             </div>
                             <MenuItem icon={<ArrowPathIcon />} label="Nhập Tệp" onClick={onLoadFromFile} colorClass="text-[#e8d3a1]" subtext="Tải file save từ máy lên" />
+                            {/* gdd-05 B8: the keepsake + QA exports, and the contract
+                                session log of gdd-01 B.5 (AI & Dữ liệu group). */}
+                            <div className="grid grid-cols-3 gap-2">
+                                <MenuItem icon={<Upload />} label="Xuất kỷ vật (văn bản)" onClick={onExportKeepsake} colorClass="text-[#e8d3a1]" subtext="Chép lại quyển sổ, chỉ văn kể" />
+                                <MenuItem icon={<Upload />} label="Xuất nhật ký QA" onClick={onExportQaLog} colorClass="text-[#a3b8a3]" subtext="5 trường cho kiểm thử" />
+                                <MenuItem icon={<Upload />} label="Nhật ký khế ước" onClick={onExportContractLog} colorClass="text-[#8ba888]" subtext="Thống kê rò rỉ số liệu" />
+                            </div>
                         </div>
                     </div>
 
@@ -9304,7 +9363,9 @@ const getUniqueCombatantNames = (combatants) => {
 // COMPONENT 3: THAY THẾ TOÀN BỘ GAMEPLAYSCREEN
 const GameplayScreen = ({ 
     gameMode, goHome, gameSettings, restartGame, storyHistory, setGameSettings, setStoryHistory, isLoading, currentStory, handleActionRequest,
-    choices, handleChoice, formatStoryText, customActionInput, setCustomActionInput, 
+    choices, handleChoice, formatStoryText, customActionInput, setCustomActionInput,
+    canUndoTurn, onUndoTurn, isUndoingTurn, persistenceWarning,
+    onExportKeepsake, onExportQaLog, onExportContractLog, 
     handleCustomAction, setShowCharacterInfoModal, bgmUrl, bgmVolume, isPlayingBgm, onBgmUrlChange, onBgmVolumeChange, onToggleBgm,
     isProcessingAction, handleGenerateSuggestedActions, isGeneratingSuggestedActions,  
     handleSaveGame , handleOpenGithubSaveModal, setShowCraftingModal, currentTurn, setShowCharacterEquipModal, setShowSkillManagementModal, formatTimeOfDay,
@@ -9847,6 +9908,26 @@ const renderDefaultActions = () => {
                    </div>
                )}
 
+               {/* plan.md C-13 / gdd-01 F3: the Undo button EXISTS only while
+                   `undo_available` is true - it is never shown disabled. */}
+               {canUndoTurn && (
+                   <div className="w-full mb-2 flex justify-end">
+                       <button
+                           onClick={onUndoTurn}
+                           disabled={isProcessingAction || isUndoingTurn}
+                           style={{ minHeight: '44px' }}
+                           className="px-4 py-2 text-xs font-bold tracking-wide border border-[#cda45e]/60 text-[#e8d3a1] bg-[#101a10] hover:bg-[#1b2a1b] disabled:opacity-40 disabled:cursor-not-allowed"
+                       >
+                           {isUndoingTurn ? 'Đang hoàn tác...' : '↶ Hoàn tác lượt vừa rồi'}
+                       </button>
+                   </div>
+               )}
+               {persistenceWarning && (
+                   <div className="w-full mb-2 px-3 py-2 text-[11px] text-[#ff9d5c] border border-[#ff9d5c]/40 bg-[#1a1008]">
+                       {persistenceWarning}
+                   </div>
+               )}
+
                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-2 animate-fade-in-up">
                    {choices.map((choice, index) => (
                        <ChoiceButton 
@@ -10195,6 +10276,9 @@ const renderDefaultActions = () => {
                     onToggleBgm={onToggleBgm}
                     onOpenCacheManager={() => setShowLocalCacheManager(true)}
                     onDebugAwakenHtab={() => handleAwakenHtab("MILESTONE_AWAKENING", true)}
+                    onExportKeepsake={onExportKeepsake}
+                    onExportQaLog={onExportQaLog}
+                    onExportContractLog={onExportContractLog}
                     gameMode={gameMode}
                     textScale={gameSettings.textScale || 100} 
                     onTextScaleChange={(newScale) => setGameSettings(prev => ({ ...prev, textScale: newScale }))}
@@ -17135,6 +17219,21 @@ const handleDebugUpdateCharacter = (characterId, updates) => {
 };
 
 // Bảng Tùy Chỉnh: đặt thẳng cấp độ nhân vật chính. Chỉ số gốc không đổi, chỉ tính lại AP còn trống — KHÔNG ghi lịch sử cốt truyện.
+/**
+ * gdd-01 F3: Character Customization Mode is the ONLY legitimate caller of
+ * `invalidate_pending_snapshot()`. A hack write also raises the write-once-true
+ * `hack_mode_used_this_slot` flag on the slot record (gdd-06 C5).
+ */
+const noteCustomizationWrite = () => {
+    try {
+        if (turnManagerRef.current) turnManagerRef.current.invalidatePendingSnapshot();
+        if (slotRecordRef.current) slotRecordRef.current.hack_mode_used_this_slot = true;
+        setCanUndoTurn(false);
+    } catch (hackError) {
+        console.error('[systems] invalidatePendingSnapshot:', hackError);
+    }
+};
+
 const handleCustomizeLevel = (newLevel) => {
     setknowledge(prev => {
         const newKnowledge = JSON.parse(JSON.stringify(prev));
@@ -17194,6 +17293,7 @@ const handleCustomizeCreateItem = (itemDraft) => {
         newKnowledge.pendingCreations.push({ type: 'item', payload: { itemIdea } });
         return newKnowledge;
     });
+    noteCustomizationWrite();
     setModalMessage({ show: true, title: 'Đang Tạo Vật Phẩm...', content: `Đấng đang giám định vật phẩm "${itemIdea.name}", vật phẩm sẽ xuất hiện trong Hành Trang sau ít giây...`, type: 'info' });
 };
 
@@ -17220,6 +17320,7 @@ const handleCustomizeCreateSkill = (skillDraft) => {
         newKnowledge.pendingCreations.push({ type: 'skill', payload: { skillIdea, sourceRarity: null, targetCharacterId: playerId } });
         return newKnowledge;
     });
+    noteCustomizationWrite();
     setModalMessage({ show: true, title: 'Đang Lĩnh Hội...', content: `Đấng đang giám định kỹ năng "${skillIdea.name}", kỹ năng sẽ xuất hiện trong Bảng Kỹ Năng sau ít giây...`, type: 'info' });
 };
 
@@ -17608,6 +17709,8 @@ const loadGameAndResetHistory = async (gameData) => {
         setShowLoadGameModal(false);
         setCurrentScreen('gameplay');
         justLoadedRef.current = true;
+        // P3b: rebuild World Memory / slot record / Turn Manager for this slot.
+        hydrateSystemsForSlot({ ...activeGameData, id: gameIdToSetFromData });
         setModalMessage({ show: true, title: 'Thành Công', content: 'Tiến trình đã được khôi phục kèm hình ảnh hoàn chỉnh.', type: 'success' });
     } catch (error) {
         console.error("Lỗi khi tải dữ liệu game:", error);
@@ -18109,136 +18212,140 @@ const isModelOnCooldown = (model) => (overloadedModelUntil.get(model) || 0) > Da
 let stickyPreferredModel = null;
 
 // Hàm fetch lõi nay đã được bọc qua hệ thống xếp hàng
-const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2, retryDelay = 1000) => {
+/**
+ * The single outbound Gemini call site (gdd-01 C.2 R1 / plan.md P4).
+ *
+ * The shipped call sites keep this exact signature; the body now delegates to
+ * `src-web/systems/ai/requestAi.ts`, which owns the model ladder (monotonic
+ * `tried`), the 503 breaker, F1 backoff, `safetySettings: BLOCK_NONE` and - new
+ * in P4b - a real AbortController with the plan.md C-10 budgets (60s logical /
+ * 45s per request, read from `AI_KNOBS`).
+ *
+ * `callSite` (6th argument, optional) classifies the caller so plan.md C-9 can
+ * exempt background work from the per-turn AI budget and from the BUSY guard.
+ * Only API-2 narration passes 'narration'; everything else defaults to a
+ * background call, which is the safe default for a legacy call site.
+ *
+ * DEVIATION, documented: every request is sent with `call_type: 'narration_call'`
+ * regardless of `callSite`, because that is the AI layer's "return the raw text
+ * unparsed" mode. Using 'suggestion_call' would run the strict 4-element JSON
+ * suggestion parser over responses that are free prose or app-specific JSON
+ * schemas. The budget / BUSY semantics plan.md C-9 actually cares about ride on
+ * the independent `background` flag, not on `call_type`.
+ *
+ * `globalApiQueue` still sits in FRONT of the call, so its spacing delay stays
+ * outside `t_elapsed` (plan.md C-10).
+ */
+const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2, retryDelay = 1000, callSite = 'generic') => {
+    const urlMatch = (apiUrl || '').match(/\/models\/([^:?]+):generateContent(?:\?key=(.*))?$/);
+    const requestedModel = urlMatch ? urlMatch[1] : null;
+    const apiKeyFromUrl = urlMatch && urlMatch[2] ? urlMatch[2] : '';
 
-    // Đóng gói logic fetch vào một hàm closure
-    const executeFetch = async () => {
-        const urlMatch = apiUrl.match(/\/models\/([^:]+):generateContent\?key=(.*)$/);
-        const requestedModel = urlMatch?.[1];
-        const apiKey = urlMatch?.[2];
-        let modelsToTry;
-        if (requestedModel && apiKey !== undefined && GEMINI_TEXT_MODEL_FALLBACKS.includes(requestedModel)) {
-            // Ưu tiên model vừa chạy thành công gần nhất (nếu còn hợp lệ và không đang cooldown),
-            // chỉ rơi về requestedModel mặc định khi chưa có/không còn model ưu tiên nào.
-            const preferredModel = (stickyPreferredModel && GEMINI_TEXT_MODEL_FALLBACKS.includes(stickyPreferredModel) && !isModelOnCooldown(stickyPreferredModel))
-                ? stickyPreferredModel
-                : requestedModel;
-            const fullLadder = [preferredModel, ...GEMINI_TEXT_MODEL_FALLBACKS.filter(m => m !== preferredModel)];
-            const healthyLadder = fullLadder.filter(m => !isModelOnCooldown(m));
-            // Nếu tất cả model đều đang cooldown (Google sập diện rộng) thì đành thử lại toàn bộ thang.
-            modelsToTry = healthyLadder.length > 0 ? healthyLadder : fullLadder;
-            if (healthyLadder.length < fullLadder.length) {
-                console.log(`[Cầu dao 503] Tạm bỏ qua model đang quá tải: ${fullLadder.filter(m => isModelOnCooldown(m)).join(', ')}. Gọi thẳng: ${modelsToTry[0]}`);
-            }
-        } else {
-            modelsToTry = [null]; // apiUrl không khớp mẫu model dự phòng -> chỉ gọi đúng apiUrl gốc, không fallback
-        }
+    if (!requestedModel) {
+        // A URL this wrapper cannot classify (a non-generateContent endpoint) is a
+        // caller bug rather than a runtime error - fail loudly instead of silently
+        // opening a second, unmanaged HTTP path (gdd-01 C.2 R1).
+        throw new Error('fetchWithRetries: URL không phải endpoint generateContent hợp lệ.');
+    }
 
-        let lastError = null;
+    // The requested model always leads the ladder; the shipped fallback list
+    // follows it (App.tsx behaviour before P4b). A model outside the list gets a
+    // one-entry ladder, exactly like the old `modelsToTry = [null]` branch.
+    const inFallbackList = GEMINI_TEXT_MODEL_FALLBACKS.includes(requestedModel);
+    const modelLadder = inFallbackList
+        ? [requestedModel, ...GEMINI_TEXT_MODEL_FALLBACKS.filter(m => m !== requestedModel)]
+        : [requestedModel];
 
-        for (const model of modelsToTry) {
-            const modelUrl = model ? `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}` : apiUrl;
-
-            for (let attempt = 0; attempt <= maxRetries; attempt++) {
-                try {
-                    const response = await fetch(modelUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload),
-                    });
-
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        if (response.status === 429) {
-                            const quotaError = new Error(`Hệ thống AI đã hết lượt sử dụng miễn phí trong thời gian này (Lỗi 429 - Quá giới hạn quota). Vui lòng đợi ít phút rồi thử lại, hoặc vào "Thiết Lập API Key" ở màn hình chính để dùng API Key Gemini miễn phí của riêng ngươi và tiếp tục ngay lập tức.`);
-                            quotaError.isQuotaError = true;
-                            quotaError.isModelUnavailable = true;
-                            throw quotaError;
-                        }
-                        if (response.status === 401) {
-                            const authError = new Error(`Lỗi Xác Thực (401): API Key không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra lại trong "Thiết Lập API Key".`);
-                            authError.isAuthError = true;
-                            throw authError;
-                        }
-                        if (response.status === 403 || response.status === 404) {
-                            const unavailableError = new Error(`Model "${model || requestedModel}" không khả dụng (HTTP ${response.status}): ${errorText}`);
-                            unavailableError.isModelUnavailable = true;
-                            throw unavailableError;
-                        }
-                        if (response.status === 503) {
-                            const overloadedError = new Error(`Server AI của Google đang quá tải tạm thời (Lỗi 503). Đây không phải lỗi từ game, hệ thống sẽ tự thử lại sau ít giây. Nếu vẫn thất bại, vui lòng thử lại sau vài phút.`);
-                            overloadedError.isOverloadedError = true;
-                            throw overloadedError;
-                        }
-                        throw new Error(`API trả về lỗi HTTP ${response.status}: ${errorText}`);
-                    }
-
-                    const responseText = await response.text();
-                    if (!responseText) {
-                        throw new Error("Phản hồi từ API rỗng.");
-                    }
-
-                    const result = JSON.parse(responseText);
-                    const blockReason = result.promptFeedback?.blockReason;
-                    if (blockReason) {
-                        throw new Error(`AI Safety Filter: ${blockReason}`);
-                    }
-
-                    const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (!jsonText || jsonText.trim() === '') {
-                        throw new Error("Nội dung text trong phản hồi của AI rỗng.");
-                    }
-
-                    const finishReason = result.candidates?.[0]?.finishReason;
-                    if (finishReason === 'MAX_TOKENS') {
-                        console.error('AI response bị cắt do vượt MAX_TOKENS. Raw text nhận được trước khi cắt:', jsonText);
-                        throw new Error("Phản hồi của AI bị cắt cụt do vượt quá giới hạn token (MAX_TOKENS) trước khi hoàn thành JSON. Hãy thử rút gọn yêu cầu Chỉ số/Hiệu ứng hoặc thử lại.");
-                    }
-
-                    if (model) {
-                        overloadedModelUntil.delete(model);
-                        stickyPreferredModel = model; // Ghim model vừa thành công làm ưu tiên cho lần gọi sau.
-                    }
-                    return jsonText;
-
-                } catch (error) {
-                    if (error.isAuthError) throw error;
-                    lastError = error;
-                    console.warn(`[${model || requestedModel}] Lần gọi API thứ ${attempt + 1} thất bại:`, error.message);
-
-                    // Hết quota/không có quyền/không tồn tại -> bỏ qua retry, chuyển sang model dự phòng tiếp theo ngay
-                    if (error.isModelUnavailable) break;
-
-                    // Server quá tải (503): chỉ thử lại đúng 1 lần với khoảng chờ ngắn. Nếu vẫn 503,
-                    // đánh dấu cầu dao để các lần gọi sau trong phiên bỏ qua model này, rồi chuyển ngay
-                    // sang model dự phòng — thay vì đốt 5-10 giây chờ trên một model đang hỏng.
-                    if (error.isOverloadedError) {
-                        if (attempt >= Math.min(1, maxRetries)) {
-                            markModelOverloaded(model);
-                            break;
-                        }
-                        if (onRetry) onRetry(attempt + 1, maxRetries);
-                        await new Promise(resolve => setTimeout(resolve, 2000));
-                        continue;
-                    }
-
-                    if (attempt < maxRetries) {
-                        if (onRetry) onRetry(attempt + 1, maxRetries);
-                        await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt + 1)));
-                    }
-                }
-            }
-        }
-        if (lastError.isQuotaError) {
-            throw lastError;
-        }
-        if (lastError.isOverloadedError) {
-            throw lastError;
-        }
-        throw new Error(`AI không phản hồi hợp lệ sau khi thử tất cả các model. Lỗi cuối cùng: ${lastError.message}`);
+    const background = turnGlue.chooseBackgroundFlag(callSite);
+    const config = {
+        ...DEFAULT_AI_CONFIG,
+        model_ladder: modelLadder,
+        // Preserve each call site's own retry appetite (`maxRetries` counts EXTRA
+        // attempts, the module counts total attempts).
+        max_same_model_attempts_transient: Math.max(1, (Number(maxRetries) || 0) + 1),
+        transient_retry_base_seconds: Math.max(0.05, (Number(retryDelay) || 1000) / 1000),
     };
 
-    // Ném task vào hàng chờ và trả về Promise, nó sẽ tự động resolve khi chạy xong
+    const executeFetch = async () => {
+        const result = await requestAi(
+            {
+                call_type: 'narration_call',
+                payload: { lockedResultSummary: '(App.tsx dung prompt rieng)' },
+                background,
+                // The app builds its own payloads (system instructions, response
+                // schemas, tool config). They pass through untouched except for the
+                // system-wide BLOCK_NONE safety block (gdd-01 C.2 R7), which App.tsx
+                // never set on any of its payloads before P4b.
+                bodyOverride: {
+                    ...payload,
+                    safetySettings: (payload && payload.safetySettings) || SAFETY_SETTINGS_BLOCK_NONE,
+                },
+            },
+            {
+                fetchImpl: async (url, init) => {
+                    const res = await fetch(url, {
+                        method: init.method,
+                        headers: init.headers,
+                        body: init.body,
+                        signal: init.signal,
+                    });
+                    return {
+                        status: res.status,
+                        json: () => res.json(),
+                        headers: { get: (name) => res.headers.get(name) },
+                    };
+                },
+                clock: () => Date.now(),
+                sleep: (ms) => new Promise(resolve => setTimeout(resolve, ms)),
+                abortFactory: () => new AbortController(),
+                session: aiSessionState,
+                config,
+                credentials: apiKeyFromUrl ? { apiMode: 'userKey', userKey: apiKeyFromUrl } : undefined,
+                onEvent: (event) => {
+                    if (event.type === 'retrying_network' && onRetry) onRetry(1, maxRetries);
+                },
+            },
+        );
+
+        if (result.ok) return result.text;
+
+        // The four canonical labels of gdd-01 C.7, mapped back onto the error
+        // flags the legacy call sites already branch on.
+        const label = result.label;
+        if (label === 'quota_429') {
+            const quotaError = new Error('Hệ thống AI đã hết lượt sử dụng miễn phí trong thời gian này (Lỗi 429 - Quá giới hạn quota). Vui lòng đợi ít phút rồi thử lại, hoặc vào "Thiết Lập API Key" ở màn hình chính để dùng API Key Gemini miễn phí của riêng ngươi và tiếp tục ngay lập tức.');
+            quotaError.isQuotaError = true;
+            quotaError.isModelUnavailable = true;
+            throw quotaError;
+        }
+        if (label === 'config_error' || label === 'not_configured') {
+            const authError = new Error('Lỗi Xác Thực: API Key không hợp lệ, đã hết hạn hoặc chưa được cấu hình. Vui lòng kiểm tra lại trong "Thiết Lập API Key".');
+            authError.isAuthError = true;
+            throw authError;
+        }
+        if (label === 'timeout') {
+            const timeoutError = new Error(`AI không phản hồi trong ${AI_KNOBS.ai_call_timeout_seconds} giây nên yêu cầu đã bị hủy. Hãy thử lại, hoặc rút ngắn hành động vừa nhập.`);
+            timeoutError.isOverloadedError = true;
+            throw timeoutError;
+        }
+        if (label === 'safety_blocked') {
+            throw new Error(`AI Safety Filter: ${result.detail || 'nội dung bị chặn'}`);
+        }
+        if (label === 'truncated') {
+            throw new Error('Phản hồi của AI bị cắt cụt do vượt quá giới hạn token (MAX_TOKENS) trước khi hoàn thành. Hãy thử rút gọn yêu cầu rồi thử lại.');
+        }
+        if (label === 'BUSY') {
+            const busyError = new Error('Thiên Đạo đang diễn hóa một lượt khác. Vui lòng đợi lượt hiện tại kết thúc rồi thử lại.');
+            busyError.isBusyError = true;
+            throw busyError;
+        }
+        const lastError = new Error(`AI không phản hồi hợp lệ sau khi thử tất cả các model (${label}${result.detail ? ': ' + result.detail : ''}).`);
+        lastError.isOverloadedError = label === 'no_models_left';
+        throw lastError;
+    };
+
+    // Ném task vào hàng chờ và trả về Promise, nó sẽ tự động resolve khi chạy xong.
+    // Hàng đợi nằm NGOÀI ngân sách thời gian của một logical call (plan.md C-10).
     return globalApiQueue.enqueue(executeFetch);
 };
 
@@ -20185,6 +20292,404 @@ const [knowledge, setknowledge] = useState({
        images: { base: null, idle: null, smile: null, sad: null, angry: null, laugh: null, raw: null }
    }
 });
+
+// ===========================================================================
+// P3b / P4b - systems wiring (plan.md D/P3 + D/P4)
+// ---------------------------------------------------------------------------
+// The App keeps its own turn spine (`processPlayerAction`); the Turn Manager is
+// used in MANUAL mode: the App calls `beginManualTurn()` / `commitManualTurn()`
+// / `failManualTurn()` around the existing pipeline instead of handing the whole
+// turn to `submitAction()`. That is a documented deviation from gdd-01 A.4 -
+// rewriting `processPlayerAction` into `submitAction` was judged too high a
+// regression risk for this phase (plan.md risk R1). The phase ORDER the GDD
+// cares about is preserved: snapshot -> resolve -> narrate -> World Memory
+// append -> checkpoint -> commit.
+// ===========================================================================
+
+/** Live mirror of the undoable React state; refreshed on every render (gdd-01 A.9). */
+const liveUndoableStateRef = useRef({});
+liveUndoableStateRef.current = { knowledge, storyHistory, storySummaries, currentTurn, gameSettings, choices, currentStory, gameMode, adventureTurnCount, activeTrade };
+
+const worldMemoryRef = useRef(null);
+const turnManagerRef = useRef(null);
+const slotRecordRef = useRef(null);
+const currentGameIdRef = useRef(null);
+currentGameIdRef.current = currentGameId;
+/** Mirrors `turnManager.undo_available` into React so the button can re-render. */
+const [canUndoTurn, setCanUndoTurn] = useState(false);
+/** Vietnamese banner shown when a turn could not be made durable (plan.md C-2 reduced). */
+const [persistenceWarning, setPersistenceWarning] = useState(null);
+const [isUndoingTurn, setIsUndoingTurn] = useState(false);
+
+const getWorldMemory = useCallback(() => {
+    if (!worldMemoryRef.current) worldMemoryRef.current = new WorldMemory();
+    return worldMemoryRef.current;
+}, []);
+
+/**
+ * The undoable view of App-owned React state.
+ *
+ * `currentStory` is NOT one of the six enumerated fields of `undoAppState.ts`,
+ * so it is rebuilt from the restored `storyHistory` instead of being snapshotted
+ * (it is a derived display value, not independent state).
+ */
+const makeAppUndoable = useCallback(() => makeAppStateUndoable({
+    get: () => ({
+        knowledge: liveUndoableStateRef.current.knowledge,
+        storyHistory: liveUndoableStateRef.current.storyHistory,
+        storySummaries: liveUndoableStateRef.current.storySummaries,
+        currentTurn: liveUndoableStateRef.current.currentTurn,
+        gameSettings: liveUndoableStateRef.current.gameSettings,
+        choices: liveUndoableStateRef.current.choices,
+    }),
+    set: (next) => {
+        setknowledge(next.knowledge);
+        setStoryHistory(next.storyHistory || []);
+        setStorySummaries(next.storySummaries || []);
+        setCurrentTurn(next.currentTurn || 0);
+        setGameSettings(next.gameSettings);
+        setChoices(next.choices || []);
+        const lastStory = (next.storyHistory || []).filter(h => h && h.type === 'story').pop();
+        setCurrentStory(lastStory ? lastStory.content : '');
+    },
+    onWarning: (message) => console.warn('[systems] undo snapshot:', message),
+}), []);
+
+/**
+ * Registration ORDER is the snapshot index order and must never change
+ * mid-session (gdd-01 A.3): app state first, World Memory second.
+ */
+const getTurnManager = useCallback(() => {
+    if (!turnManagerRef.current) {
+        try {
+            const tm = createTurnManager({ slotId: currentGameIdRef.current || 'slot_default' });
+            tm.registry.register(makeAppUndoable(), 'app_state');
+            tm.registry.register(getWorldMemory(), 'world_memory');
+            tm.begin();
+            turnManagerRef.current = tm;
+        } catch (tmError) {
+            console.error('[systems] Khong khoi tao duoc Turn Manager:', tmError);
+            return null;
+        }
+    }
+    return turnManagerRef.current;
+}, [getWorldMemory, makeAppUndoable]);
+
+const syncUndoAvailability = useCallback(() => {
+    try {
+        const tm = turnManagerRef.current;
+        setCanUndoTurn(!!tm && tm.undo_available);
+    } catch (undoError) {
+        console.warn('[systems] undo_available:', undoError);
+        setCanUndoTurn(false);
+    }
+}, []);
+
+/** The bundle every checkpoint writes (gdd-05 B3, blob-per-system). */
+const buildSystemsBundle = useCallback((worldTime) => {
+    const live = liveUndoableStateRef.current;
+    let worldMemoryJson = null;
+    try {
+        worldMemoryJson = getWorldMemory().toJSON();
+    } catch (wmError) {
+        console.error('[systems] Khong serialize duoc World Memory:', wmError);
+    }
+    return turnGlue.buildSaveBundle({
+        knowledge: live.knowledge,
+        storyHistory: live.storyHistory,
+        storySummaries: live.storySummaries,
+        gameSettings: live.gameSettings,
+        currentTurn: live.currentTurn,
+        choices: live.choices,
+        gameMode: live.gameMode,
+        adventureTurnCount: live.adventureTurnCount,
+        gameId: currentGameIdRef.current,
+        worldMemory: worldMemoryJson,
+    }, {
+        slot_id: currentGameIdRef.current || 'slot_default',
+        world_time: worldTime,
+        saved_at: Date.now(),
+        hack_mode_used_this_slot: !!(slotRecordRef.current && slotRecordRef.current.hack_mode_used_this_slot),
+    });
+}, [getWorldMemory]);
+
+/**
+ * gdd-05 R1 checkpoint. Returns `{durability_confirmed}`; NEVER throws, so a
+ * storage failure degrades to a banner instead of losing the turn (plan.md C-2
+ * reduced variant: the UI is not rolled back).
+ */
+const runSystemsCheckpoint = useCallback(async (reason, turnRecord, worldTime) => {
+    const backend = getSystemsBackend();
+    if (!backend) return { durability_confirmed: false, error: { code: 'UNSUPPORTED' } };
+    const slotId = currentGameIdRef.current || 'slot_default';
+    try {
+        if (!slotRecordRef.current || slotRecordRef.current.slot_id !== slotId) {
+            const live = liveUndoableStateRef.current;
+            const player = ((live.knowledge && live.knowledge.characters) || []).find(c => c && c.isPlayer);
+            slotRecordRef.current = createSlotRecord({
+                slot_id: slotId,
+                character_name: (player && player.Name) || 'Vô Danh',
+                now: Date.now(),
+                world_time: (live.knowledge && live.knowledge.time) || null,
+            });
+        }
+        const bundle = buildSystemsBundle(worldTime);
+        const result = await saveCheckpoint(backend, slotId, bundle, reason, {
+            slotRecord: slotRecordRef.current,
+            turnRecord: turnRecord || null,
+            clock: () => Date.now(),
+        });
+        if (result.slotRecord) slotRecordRef.current = result.slotRecord;
+        if (result.budget_violation) {
+            console.warn('[systems] Autosave vuot ngan sach do tre:', result.duration_ms, 'ms');
+        }
+        if (!result.durability_confirmed) {
+            console.error('[systems] Checkpoint that bai:', result.error);
+        }
+        return result;
+    } catch (checkpointError) {
+        console.error('[systems] Checkpoint nem loi ngoai du kien:', checkpointError);
+        return { durability_confirmed: false, error: { code: 'WRITE_FAILED_INTERNAL' } };
+    }
+}, [buildSystemsBundle]);
+
+/**
+ * gdd-01 A.4 `undo()`. The Turn Manager restores every registered system
+ * (React state through the undoable setters, then World Memory), then a
+ * `post_undo` checkpoint makes the rollback itself durable.
+ */
+const handleUndoTurn = useCallback(async () => {
+    const tm = turnManagerRef.current;
+    if (!tm || !tm.undo_available || isUndoingTurn) return;
+    setIsUndoingTurn(true);
+    try {
+        const result = await tm.undo({
+            resolveMechanics: () => null,
+            narrate: async () => ({ ok: false, label: 'unused' }),
+            appendMemory: () => {},
+            markMemoryUndone: () => {
+                try { getWorldMemory().undoLast(); } catch (wmError) { console.error('[systems] undoLast:', wmError); }
+            },
+            checkpoint: async (ctx) => {
+                const r = await runSystemsCheckpoint('post_undo', null, ctx.world_time);
+                return { durability_confirmed: !!r.durability_confirmed, error_code: r.error && r.error.code };
+            },
+            clock: () => Date.now(),
+            slotId: currentGameIdRef.current || 'slot_default',
+            log: (entry) => console.log('[systems] undo:', entry.label, entry.turn_id),
+        });
+        if (result && result.ok) {
+            try { contractSessionLog.markUndone(result.turn_id); } catch (logError) { console.warn('[systems]', logError); }
+            setStoryHistory(prev => [...prev, { id: crypto.randomUUID(), type: 'system', content: '**[Hệ thống]** Đã hoàn tác lượt vừa rồi.', transient: true }]);
+        } else if (result) {
+            setModalMessage({ show: true, title: 'Không Thể Hoàn Tác', content: result.label === 'death_turn'
+                ? 'Lượt kết thúc bằng cái chết không thể hoàn tác.'
+                : 'Không thể hoàn tác lượt này (dữ liệu đã được ghi hoặc đã có lượt mới).', type: 'info' });
+        }
+    } catch (undoError) {
+        console.error('[systems] Hoan tac that bai:', undoError);
+    } finally {
+        setIsUndoingTurn(false);
+        syncUndoAvailability();
+    }
+}, [getWorldMemory, isUndoingTurn, runSystemsCheckpoint, syncUndoAvailability]);
+
+/**
+ * gdd-04 A4: the fact-store context block that rides ALONGSIDE the AI summaries
+ * (plan.md C-8). Returns '' on any failure so the prompt is never blocked.
+ */
+/** Set by `processPlayerAction` while a manually driven turn is in flight. */
+const pendingTurnRef = useRef(null);
+
+const buildWorldMemoryBlock = useCallback((knowledgeForTurn) => {
+    try {
+        const entities = turnGlue.entitiesInScopeFromKnowledge(knowledgeForTurn);
+        if (entities.length === 0) return '';
+        const built = getWorldMemory().buildContext(entities, { hardTokenBudget: AI_KNOBS.ai_context_hard_token_budget });
+        return turnGlue.buildWorldMemoryPromptBlock(turnGlue.renderWorldMemoryContext(built));
+    } catch (wmError) {
+        console.error('[systems] Khong dung duoc khoi ky uc the gioi:', wmError);
+        return '';
+    }
+}, [getWorldMemory]);
+
+/**
+ * Phases 4-6 of gdd-01 A.4 for a manually driven turn: leak check -> World
+ * Memory append -> durability gate -> commit. Deferred to a macrotask so it
+ * never runs inside a React state updater.
+ */
+const finalizeSystemsTurn = useCallback((knowledgeAfterUpdates, storyText) => {
+    const tm = turnManagerRef.current;
+    const pending = pendingTurnRef.current;
+    if (!tm || !pending) return; // not a player turn (AI turn, init call, godmode)
+    pendingTurnRef.current = null;
+    setTimeout(async () => {
+        try {
+            const turnId = tm.turn_id;
+            const worldTime = tm.world_time + 1;
+            const locked = turnGlue.assembleLockedResultFromKnowledge(knowledgeAfterUpdates, {
+                turn_id: turnId,
+                world_time: worldTime,
+            });
+            const record = turnGlue.buildTurnRecordFromTurn({
+                slot_id: currentGameIdRef.current || 'slot_default',
+                turn_id: turnId,
+                world_time: worldTime,
+                action_text: pending.action,
+                narration: storyText,
+                locked_result: locked,
+                choices: liveUndoableStateRef.current.choices,
+                created_at: Date.now(),
+            });
+
+            // gdd-01 B.4 F1 - post-hoc leak detection. Never blocks the turn.
+            try {
+                const leak = leakCheckAndRecord(record, contractSessionLog, AI_KNOBS.leak_detection_enabled);
+                if (leak.violations.length > 0) {
+                    console.warn('[systems] Ro ri so lieu trong van ke (contract):', leak.violations);
+                }
+            } catch (leakError) {
+                console.error('[systems] leakCheck:', leakError);
+            }
+
+            // gdd-04 A4 - World Memory append (full log + rule-extracted facts).
+            try {
+                getWorldMemory().asWriter().append(record, locked);
+            } catch (memoryError) {
+                console.error('[systems] World Memory append:', memoryError);
+            }
+
+            // gdd-05 R1 - the durability gate.
+            const result = await runSystemsCheckpoint('turn_confirm', record, worldTime);
+            tm.commitManualTurn(!!result.durability_confirmed, {
+                is_death_turn: locked.is_death_turn,
+                suggestions: turnGlue.suggestionsFromChoices(liveUndoableStateRef.current.choices),
+            });
+            // plan.md C-2 (reduced): a failed write warns but never rolls the UI back.
+            setPersistenceWarning(result.durability_confirmed
+                ? null
+                : 'Chưa lưu được lượt này — kiểm tra dung lượng trình duyệt.');
+        } catch (finalizeError) {
+            console.error('[systems] Khong hoan tat duoc luot:', finalizeError);
+            try { tm.failManualTurn(); } catch (tmError) { console.error('[systems]', tmError); }
+        } finally {
+            syncUndoAvailability();
+        }
+    }, 0);
+}, [getWorldMemory, runSystemsCheckpoint, syncUndoAvailability]);
+
+/**
+ * Rebuilds the systems for a freshly opened slot (gdd-05 R3 load path).
+ *
+ * Order: IndexedDB slot bundle first (the source of truth, plan.md C-2); a
+ * legacy save with no bundle falls back to rebuilding World Memory from the
+ * App's own `storyHistory`. Snapshots are in-memory only, so Undo is correctly
+ * unavailable immediately after a load.
+ */
+const hydrateSystemsForSlot = useCallback(async (gameData) => {
+    const slotId = (gameData && gameData.id) || currentGameIdRef.current || 'slot_default';
+    turnManagerRef.current = null;
+    worldMemoryRef.current = null;
+    slotRecordRef.current = null;
+    try {
+        const backend = getSystemsBackend();
+        if (backend) {
+            const loaded = await loadSlot(backend, slotId, { acquireLock: true });
+            if (loaded.ok && loaded.bundle) {
+                worldMemoryRef.current = worldMemoryFromBundle(loaded.bundle);
+                slotRecordRef.current = loaded.slotRecord || null;
+            } else if (loaded.error) {
+                console.warn('[systems] Khong doc duoc slot moi (dung duong cu):', loaded.error.code);
+            }
+        }
+    } catch (loadError) {
+        console.error('[systems] loadSlot:', loadError);
+    }
+    if (!worldMemoryRef.current) {
+        try {
+            worldMemoryRef.current = worldMemoryFromAppHistory((gameData && gameData.storyHistory) || [], {
+                slot_id: slotId,
+                schema_version: CURRENT_SCHEMA_VERSION,
+                clock: () => Date.now(),
+                dropTransient: true,
+            });
+        } catch (importError) {
+            console.error('[systems] Khong nhap duoc ky uc tu lich su cu:', importError);
+        }
+    }
+    setCanUndoTurn(false);
+    setPersistenceWarning(null);
+    getTurnManager();
+}, [getTurnManager]);
+
+/** Reads the whole append-only log out of World Memory (may be empty). */
+const readTurnRecords = useCallback(() => {
+    try {
+        return getWorldMemory().toJSON().full_log || [];
+    } catch (readError) {
+        console.error('[systems] Khong doc duoc nhat ky luot:', readError);
+        return [];
+    }
+}, [getWorldMemory]);
+
+/** Downloads a text/JSON payload without touching the existing export helpers. */
+const downloadSystemsFile = (filename, text, mime) => {
+    try {
+        const blob = new Blob([text], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        URL.revokeObjectURL(url);
+    } catch (downloadError) {
+        console.error('[systems] Khong tai duoc tep:', downloadError);
+    }
+};
+
+/** gdd-05 B8 "Chép lại quyển sổ": narration only, plain text, no numbers. */
+const handleExportKeepsake = useCallback(() => {
+    const records = readTurnRecords();
+    if (records.length === 0) {
+        setModalMessage({ show: true, title: 'Chưa Có Gì Để Xuất', content: 'Quyển sổ chưa ghi được lượt nào kể từ khi mở phiên này.', type: 'info' });
+        return;
+    }
+    const player = ((liveUndoableStateRef.current.knowledge || {}).characters || []).find(c => c && c.isPlayer);
+    const text = exportKeepsake(records, { title: (player && player.Name) || 'Hồi Ký' });
+    downloadSystemsFile('ky-vat.txt', text, 'text/plain;charset=utf-8');
+}, [readTurnRecords]);
+
+/** gdd-05 B8 QA export: exactly the 5 keys, JSON. */
+const handleExportQaLog = useCallback(() => {
+    const records = readTurnRecords();
+    downloadSystemsFile('nhat-ky-qa.json', exportQaLogJson(records), 'application/json');
+}, [readTurnRecords]);
+
+/** gdd-01 B.5 F2/F3: the contract session log (leak stats + attribution). */
+const handleExportContractLog = useCallback(() => {
+    try {
+        const payload = {
+            stats: contractSessionLog.stats(),
+            per_field: contractSessionLog.perField(),
+            gate: contractSessionLog.gate(),
+            entries: contractSessionLog.all().slice(-CONTRACT_LOG_EXPORT_LIMIT),
+        };
+        downloadSystemsFile('nhat-ky-khe-uoc.json', JSON.stringify(payload, null, 2), 'application/json');
+    } catch (logError) {
+        console.error('[systems] Khong xuat duoc nhat ky khe uoc:', logError);
+    }
+}, []);
+
+/** An AI/user failure abandons the turn: no record, no checkpoint, no Undo. */
+const abortSystemsTurn = useCallback(() => {
+    if (!pendingTurnRef.current) return;
+    pendingTurnRef.current = null;
+    try { turnManagerRef.current && turnManagerRef.current.failManualTurn(); }
+    catch (tmError) { console.error('[systems] failManualTurn:', tmError); }
+    syncUndoAvailability();
+}, [syncUndoAvailability]);
 const mainPlayer = knowledge.characters.find(c => c.isPlayer === true);
 
 const defaultPlayerObject = {
@@ -20796,6 +21301,13 @@ const handleConfirmGithubSaveSlot = async (slotNumber) => {
     setModalMessage({ show: true, title: 'Đang Lưu Lên GitHub...', content: 'Đang đóng gói và tải dữ liệu lên kho lưu trữ. Vui lòng không đóng trình duyệt...', type: 'info' });
 
     try {
+        // plan.md C-2: GitHub is a best-effort MIRROR. The local checkpoint is
+        // written first, with the reason that never gates a turn.
+        try {
+            await runSystemsCheckpoint('manual_backup', null, currentTurn);
+        } catch (mirrorError) {
+            console.error('[systems] manual_backup checkpoint:', mirrorError);
+        }
         const saveDataObject = await buildGithubSaveDataObject();
         const slotPath = `${GITHUB_SAVES_DIR}/slot_${slotNumber}.json`;
 
@@ -22109,6 +22621,10 @@ const addInitialTrait = () => {
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${inputApiKey}`;
 
     try {
+      // DOCUMENTED EXCEPTION to gdd-01 C.2 R1: the API-key probe needs the raw HTTP
+      // status and the raw Google error body for translateGeminiApiError, which the
+      // wrapper deliberately abstracts away. It is not a game call - no turn, no
+      // narration, no model fallback, no locked result.
       const executeTestFetch = async () => {
         const response = await fetch(apiUrl, {
           method: 'POST',
@@ -22151,7 +22667,7 @@ const fetchGenericGeminiText = async (promptText) => {
     try {
         // THAY ĐỔI CỐT LÕI NẰM Ở ĐÂY
         // Hàm fetchWithRetries đã trích xuất sẵn phần text, chúng ta chỉ cần nhận và trả về nó.
-        const narrativeText = await fetchWithRetries(apiUrl, payload); 
+        const narrativeText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'generic'); 
         return narrativeText ? narrativeText.trim() : null;
 
     } catch (error) {
@@ -22400,7 +22916,7 @@ ${itemIdea.requiredUsageCondition ? `// - Mô tả Điều kiện sử dụng mo
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
 
     try {
-        const jsonText = await fetchWithRetries(apiUrl, payload);
+        const jsonText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'creation_drain');
 
         try {
             let cleanJsonText = jsonText;
@@ -22663,7 +23179,7 @@ ${skillIdea.requiredEffects ? `// - Mô tả Hiệu ứng mong muốn: "${skillI
     try {
         let jsonText;
         try {
-            jsonText = await fetchWithRetries(apiUrl, payload);
+            jsonText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'creation_drain');
         } catch (fetchError) {
             fetchError.prompt = prompt; 
             throw fetchError;
@@ -23397,7 +23913,7 @@ NHIỆM VỤ CỦA AI: Ngươi là một Giám Định Sư nhiệm vụ bậc th
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
 
     try {
-        const jsonText = await fetchWithRetries(apiUrl, payload);
+        const jsonText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'creation_drain');
         try {
             return JSON.parse(jsonText);
         } catch (e) {
@@ -23472,6 +23988,24 @@ const parseGeminiResponseAndUpdateState = async (text, knowledgeToUse, setActive
         }
     });
     let narrativeBlock = narrativeLines.join('\n').trim();
+
+    // plan.md C-1 (hybrid): world-content tags survive, mechanical-result tags are
+    // stripped or redacted BEFORE anything can apply them. The numbers they used to
+    // carry are owned by the deterministic modules (exp/, affinity/, death/).
+    try {
+        const playerIdsForContract = ((knowledgeToUse && knowledgeToUse.characters) || [])
+            .filter(c => c && c.isPlayer)
+            .reduce((acc, c) => acc.concat([c.id, c.Name]), [])
+            .filter(Boolean);
+        const sanitized = sanitizeCommandBlock(commandBlock, { mode: 'prod', playerIds: playerIdsForContract });
+        if (sanitized.stripped.length > 0 && import.meta.env && import.meta.env.DEV) {
+            console.warn('[systems] The co che bi chan (C-1):',
+                sanitized.stripped.map(s => s.tag + ' -> ' + s.reason));
+        }
+        commandBlock = sanitized.kept;
+    } catch (contractError) {
+        console.error('[systems] sanitizeCommandBlock:', contractError);
+    }
 
     let match;
     while ((match = tagWithDataRegex.exec(commandBlock)) !== null) {
@@ -25229,7 +25763,8 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
             generationConfig: { response_mime_type: "application/json", response_schema: logicSchema }
         };
 
-        const logicResponseText = await fetchWithRetries(apiUrl, logicPayload, null, 2, 1500);
+        // API-1 is a logic roll, not the turn's narration: background under C-9.
+        const logicResponseText = await fetchWithRetries(apiUrl, logicPayload, null, 2, 1500, 'logic');
         
         console.log("=========================================");
         console.log("🧠 [API 1 - LOGIC ENGINE] PHẢN HỒI NHẬN VỀ (RAW):");
@@ -25411,7 +25946,11 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
             contents: [{ role: "user", parts: [{ text: narrativePrompt }] }]
         };
 
-        const narrativeText = await fetchWithRetries(apiUrl, narrativePayload, null, 2, 1500);
+        // API-2 IS the turn's `narration_call` - the only critical-path AI call
+        // of the turn (gdd-01 C.4 F2 / plan.md C-9).
+        try { turnManagerRef.current && turnManagerRef.current.markCall('narration_call'); }
+        catch (callError) { console.warn('[systems] markCall:', callError); }
+        const narrativeText = await fetchWithRetries(apiUrl, narrativePayload, null, 2, 1500, 'narration');
 
         console.log("=========================================");
         console.log("📖 [API 2 - NARRATIVE ENGINE] PHẢN HỒI NHẬN VỀ (RAW):");
@@ -25460,6 +25999,7 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
 
     } catch (error) {
         console.error('Lỗi trong quy trình 2 bước Hybrid:', error);
+        abortSystemsTurn();
         setModalMessage({ show: true, title: 'Lỗi Giao Tiếp AI', content: error.message, type: 'error' });
         return null;
     } finally {
@@ -28414,6 +28954,24 @@ const processPlayerAction = async (actionText, actionType, flavorText = '') => {
             }        
             
 
+            // gdd-01 A.4 phase 1: snapshot BEFORE anything mutates, then open the
+            // turn on the Turn Manager (manual mode - see the P3b/P4b block above).
+            try {
+                const tm = getTurnManager();
+                if (tm) {
+                    const begun = tm.beginManualTurn();
+                    if (begun) {
+                        pendingTurnRef.current = { action: trimmedAction, turn_id: begun.turn_id };
+                        setCanUndoTurn(false);
+                        setPersistenceWarning(null);
+                    } else {
+                        console.warn('[systems] Turn Manager dang ban - khong mo duoc luot moi.');
+                    }
+                }
+            } catch (turnError) {
+                console.error('[systems] beginManualTurn:', turnError);
+            }
+
             setIsProcessingAction(true);
             setChoices([]);
             setCustomActionInput('');
@@ -28889,6 +29447,9 @@ ${relevantObjectives.join('\n')}
 --- NHẮC LẠI BẮT BUỘC (ĐỌC NGAY TRƯỚC KHI VIẾT — ƯU TIÊN CAO HƠN LỊCH SỬ Ở TRÊN) ---
 Người chơi ĐANG TẮT tùy chọn sự kiện bất ngờ. Toàn bộ tường thuật lượt này CHỈ được xoay quanh DUY NHẤT hành động đã mô tả ở mục A.1: "${trimmedAction}". Dù lịch sử phía trên có gợi mở nhân vật/xung đột nào, KHÔNG được để bất kỳ NPC nào (kể cả NPC đã từng xuất hiện trước đó) chen vào lượt này với lời thoại, hành động, cử chỉ hay phản ứng riêng nếu NPC đó không phải là đối tượng chính của hành động A.1. Nếu cần nhắc tới một NPC khác, chỉ được nêu tên xuất hiện/có mặt ở câu cuối cùng của đoạn tường thuật, sau đó DỪNG LẠI — không cho NPC đó nói hay làm gì.
 ` : '';
+            // plan.md C-8: the rule-extracted fact store rides ALONGSIDE the AI
+            // summaries above, wrapped in the contract delimiters (gdd-01 B AC-33).
+            const worldMemoryBlock = buildWorldMemoryBlock(knowledge);
             const finalRequestBlock = `
 --- E. YÊU CẦU ĐẦU RA CHO LƯỢT NÀY ---
 1.  **PHÂN TÍCH:** Đọc kỹ Bối cảnh (A), thực hiện Yêu cầu Ưu tiên (B) nếu có, và **đặc biệt chú ý đến Danh mục thực thể (F)**.
@@ -28911,6 +29472,7 @@ ${noNewEventReinforcementBlock}
                 .map(h => formatHistoryItemForPrompt(h, 'xml_nguoi'))
                 .join('\n')}
 
+                ${worldMemoryBlock}
                 ${contextBlock}
                 ${combatContextBlock}
                 ${priorityInstructionBlock}
@@ -29629,19 +30191,11 @@ QUY TẮC PHÁN QUYẾT:
 
     for (let i = 0; i < retries; i++) {
         try {
-            const executeMonitorFetch = async () => {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-
-                return await response.json();
-            };
-            const resJson = await globalApiQueue.enqueue(executeMonitorFetch);
-            const text = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
+            // gdd-01 C.2 R1: this used to be a second, unmanaged HTTP path. It now
+            // goes through the one wrapper as a BACKGROUND call, so it obeys the model
+            // ladder, the 503 breaker and the AbortController budget while staying
+            // exempt from the per-turn AI budget (plan.md C-9).
+            const text = await fetchWithRetries(apiUrl, payload, null, 1, 1500, 'state_monitor');
             
             console.log("=========================================");
             console.log("👁️ [API 3 - STATE MONITOR] PHẢN HỒI NHẬN VỀ (RAW):");
@@ -32457,6 +33011,13 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
     // EXP. Death runs first so a `kill_witnessed` it produces is available to the
     // same turn's affinity pass; EXP runs last so it sees the crippled flag.
     const p2CombatHandoff = newKnowledge.lastCombatHandoff || null;
+    // gdd-01 A.3 `locked_result`: the mechanical outcome of THIS turn, collected
+    // as the P1/P2 blocks below compute it. World Memory extracts facts from it,
+    // the leak detector checks the narration against it, and the turn record
+    // stores it (plan.md P4b). It is parked on `knowledge` because `applyUpdates`
+    // is a reducer - it cannot return a second value.
+    const lockedAccum = turnGlue.createLockedAccumulator(currentTurn, currentTurn);
+    turnGlue.recordCombatView(lockedAccum, p2CombatHandoff);
     const p2Messages = [];
     let deathStateForTurn = ensureDeathState(newKnowledge.deathState);
     let playerDiedThisTurn = false;
@@ -32593,6 +33154,12 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
         }
         newKnowledge.deathState = deathStateForTurn;
         newKnowledge.isDeathTurn = isDeathTurn;
+        // `death_flag_<char_id>` for every character that died this turn; only the
+        // PLAYER's death sets `is_death_turn` (gdd-01 CR#9 - it is what locks Undo).
+        justDiedIds.forEach(diedId => {
+            turnGlue.recordDeathFlag(lockedAccum, diedId, diedId === playerIdForTurn);
+        });
+        lockedAccum.is_death_turn = isDeathTurn === true;
     }
 
     // --- NPC Affinity (gdd-03 D.6) ------------------------------------------
@@ -32632,6 +33199,7 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                 // The module already clamped to [-100, +100]; this is the single
                 // write path for character.affinity (gdd-03 CR#1/CR#9).
                 newKnowledge.characters[idx].affinity = change.after;
+                turnGlue.recordAffinityDelta(lockedAccum, change.npc_id, change.after - change.before);
                 // Direction only - the prompt never sees the number (gdd-03 1.3).
                 newKnowledge.characters[idx].affinityDirection =
                     change.after > change.before ? 'đang ấm lên' : 'đang lạnh đi';
@@ -32724,6 +33292,7 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                     const progression = resolveProgressionTurnForCharacter(finalChar, expTurnView, expDeps);
                     expGained += progression.gain;
                     if (progression.breakthrough) {
+                        turnGlue.recordBreakthroughFlag(lockedAccum, finalChar.id);
                         const btRealm = getRealmInfoFromLevel(finalChar.level, newKnowledge.realmProgressionList);
                         progressionMessages.push(`**Đột phá thành công!** **${finalChar.Name}** đã bước vào **${btRealm.realmName} Tầng ${btRealm.realmTier}**.`);
                     }
@@ -32733,6 +33302,7 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
             }
 
             if (expGained > 0) {
+                turnGlue.recordExpDelta(lockedAccum, finalChar.id, expGained);
                 finalChar.exp = (finalChar.exp || 0) + expGained;
                 const { updatedChar, levelUpMessages, newLoreQuest } = handleLevelUp(finalChar, newKnowledge.realmProgressionList);
                 finalChar = updatedChar;
@@ -32852,6 +33422,9 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
             }
         });
     }
+    // Published for `processAndUpdateState` to read back (single writer: this
+    // reducer). Overwritten every turn - it is the CURRENT turn's lock, not a log.
+    newKnowledge[turnGlue.LOCKED_ACCUM_KEY] = lockedAccum;
     return newKnowledge;
 };
 
@@ -32931,11 +33504,23 @@ const processAndUpdateState = (updates, commandBlock, knowledgeOverride = null, 
             }, 100);
         }
         
+        // P4b: World Memory append + durability gate + Turn Confirmed. Deferred
+        // inside, so this call is safe from within a React state updater.
+        finalizeSystemsTurn(knowledgeAfterUpdates, storyText);
+
         return knowledgeAfterUpdates;
     });
 };
 
 const handleRespawn = () => {
+    // plan.md C-7 keeps resurrection. gdd-01 CR#11 parks the Turn Manager in
+    // `idle` after a death turn, so re-open it here - otherwise no later turn
+    // would ever reach World Memory or the durability gate again. The death turn
+    // itself stays permanently un-undoable (its id is in `death_turn_ids`).
+    try {
+        if (turnManagerRef.current) turnManagerRef.current.begin();
+        setCanUndoTurn(false);
+    } catch (respawnError) { console.error('[systems] respawn begin:', respawnError); }
     setknowledge(prevKnowledge => {
         // Tạo một bản sao sâu để làm việc
         const newKnowledge = JSON.parse(JSON.stringify(prevKnowledge));
@@ -33343,6 +33928,11 @@ const handleAutosave = useCallback(async () => {
         effectiveGameId = newId;
     }
 
+    // P3b (plan.md C-2): the DURABLE, turn-gating checkpoint is written every
+    // confirmed turn by `finalizeSystemsTurn` through `saveCheckpoint` into the
+    // `vdl_saves` store. This legacy every-5-turns `autosave_<gameId>` write is
+    // KEPT as a secondary mirror so existing saves and the Load Game list keep
+    // working unchanged; it is no longer the source of truth.
     const autosaveDocId = `autosave_${effectiveGameId}`;
     setAutosaveStatus('saving');
     try {
@@ -33441,6 +34031,14 @@ useEffect(() => {
   };
 
 const performStateCleanup = () => {
+    // P3b: a new run is a NEW slot - drop the previous slot's World Memory,
+    // Turn Manager and slot record so nothing leaks across runs (gdd-05 R3).
+    worldMemoryRef.current = null;
+    turnManagerRef.current = null;
+    slotRecordRef.current = null;
+    pendingTurnRef.current = null;
+    setCanUndoTurn(false);
+    setPersistenceWarning(null);
     setCurrentGameId(null);
     setCurrentStory('');
     setChoices([]);
@@ -34599,6 +35197,13 @@ const formatStoryText = useCallback((text) => {
 
                     {currentScreen === 'gameplay' && (
                             <GameplayScreen
+                                onExportKeepsake={handleExportKeepsake}
+                                onExportQaLog={handleExportQaLog}
+                                onExportContractLog={handleExportContractLog}
+                                canUndoTurn={canUndoTurn}
+                                onUndoTurn={handleUndoTurn}
+                                isUndoingTurn={isUndoingTurn}
+                                persistenceWarning={persistenceWarning}
                                 allowUnexpectedEvent={allowUnexpectedEvent}
                                 setAllowUnexpectedEvent={setAllowUnexpectedEvent}
                                 setGameSettings={setGameSettings}

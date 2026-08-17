@@ -66,6 +66,9 @@ export const WORLD_CONTENT_TAGS: readonly string[] = [
   'HTAB_AWAKEN',
   'SYSTEM_LEAVE',
   'QUEST_CHECK',
+  // P4b: the App's narrative-combat opener. World content (it announces a scene),
+  // never a mechanical result - the numbers still come from CombatLoop.
+  'NARRATIVE_COMBAT_START',
 ];
 
 /** Prefixes whose whole family is world content (`SYSTEM_*`, `QUEST_*`, `CRISIS_*`). */

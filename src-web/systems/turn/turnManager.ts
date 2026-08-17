@@ -456,6 +456,93 @@ export class TurnManager {
     return n;
   }
 
+  // -- manual mode (P4b) -----------------------------------------------------
+  //
+  // `submitAction()` owns the whole turn. App.tsx cannot hand it the whole turn:
+  // its mechanical results are produced INSIDE the reducer that runs after the
+  // narration call, not before it (plan.md risk R1 - rewriting that pipeline was
+  // judged too high a regression risk for P4b). These three methods expose the
+  // same bookkeeping - turn id, call budget, snapshot capture/validity, death
+  // turn set, `world_time` derivation, undo availability - so a host that drives
+  // its own pipeline still gets a correct `undo_available` and a correct
+  // `world_time`. The phase ORDER remains the caller's responsibility.
+
+  /**
+   * Starts a manually driven turn: bumps `turn_id`, resets the call budget and
+   * captures the pre-turn snapshot. Returns `null` when the machine is busy
+   * (the caller must then reject the input, exactly like a BUSY submit).
+   */
+  beginManualTurn(): { turn_id: number; world_time: number } | null {
+    if (this._input_locked || !ACCEPTING_STATES.includes(this._state)) return null;
+    this._turn_id += 1;
+    this._calls = emptyCallTypeSet();
+    this._is_death_turn = false;
+    this._write_retry_index = 0;
+    this._input_locked = true;
+    this.transitionTo('resolving');
+    // Phase 1 - snapshot BEFORE anything mutates (ADR-0004).
+    this.registry.captureAll();
+    return { turn_id: this._turn_id, world_time: this.world_time };
+  }
+
+  /**
+   * Ends a manually driven turn. `durability_confirmed` is THE gate (gdd-05 R1):
+   * false leaves the machine in `failed` with the snapshot invalidated, so Undo
+   * cannot offer to roll back a turn that was never stored.
+   */
+  commitManualTurn(
+    durabilityConfirmed: boolean,
+    opts: { is_death_turn?: boolean; suggestions?: readonly Suggestion[] } = {},
+  ): boolean {
+    if (this._state === 'resolving' || this._state === 'narrating') this.transitionTo('committing');
+    if (this._state !== 'committing') return false;
+
+    if (opts.is_death_turn) {
+      // gdd-01 CR#9: a death turn is hard-locked out of Undo, permanently.
+      this._is_death_turn = true;
+      this._death_turn_ids.add(this._turn_id);
+    }
+
+    if (!durabilityConfirmed) {
+      this.registry.invalidatePendingSnapshot();
+      this._input_locked = false;
+      this.transitionTo('failed');
+      return false;
+    }
+
+    this._confirmed.push({
+      turn_id: this._turn_id,
+      undone: false,
+      is_death_turn: this._is_death_turn,
+    });
+    this._last_confirmed_turn_id = this._turn_id;
+    this._no_newer_turn_confirmed = true;
+    this.registry.markValid();
+    this._input_locked = false;
+    this.transitionTo('turn_confirmed');
+    this._suggestions = this._is_death_turn
+      ? []
+      : padSuggestions(opts.suggestions, this.suggestedActionCount);
+    if (this._is_death_turn) this.transitionTo('idle');
+    return true;
+  }
+
+  /**
+   * Abandons a manually driven turn (AI error, user cancellation). The snapshot
+   * is invalidated rather than restored: the host owns its own rollback policy,
+   * and offering Undo for a turn that never confirmed would be a lie.
+   */
+  failManualTurn(): void {
+    if (
+      this._state === 'resolving' ||
+      this._state === 'narrating' ||
+      this._state === 'committing'
+    ) {
+      this.transitionTo('failed');
+    }
+    this.registry.invalidatePendingSnapshot();
+    this._input_locked = false;
+  }
   /** AC-14/AC-15: only this subset survives a reload. */
   toPersistable(): TurnManagerPersistedState {
     return {
