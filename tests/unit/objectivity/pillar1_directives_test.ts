@@ -13,6 +13,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   DIRECTIVE_P1_AFFECTION_NOT_APPRAISAL,
+  DIRECTIVE_P1_GROUNDED_PRAISE,
   DIRECTIVE_P1_CANON_NOT_PLAYER_CENTRIC,
   DIRECTIVE_P1_HONEST_PROBABILITY,
   DIRECTIVE_P1_NO_TOP_DOWN_AGGRESSION,
@@ -34,8 +35,8 @@ describe('Pillar 1 directive content', () => {
     expect(PILLAR1_DIRECTIVES_LOGIC).toHaveLength(6);
   });
 
-  it('test_narration_set_has_five_directives', () => {
-    expect(PILLAR1_DIRECTIVES_NARRATION).toHaveLength(5);
+  it('test_narration_set_has_six_directives', () => {
+    expect(PILLAR1_DIRECTIVES_NARRATION).toHaveLength(6);
   });
 
   it('test_npc_self_interest_forbids_plot_convenience', () => {
@@ -61,6 +62,18 @@ describe('Pillar 1 directive content', () => {
     expect(DIRECTIVE_P1_AFFECTION_NOT_APPRAISAL).toContain('vẫn được bộc lộ tình cảm');
     expect(DIRECTIVE_P1_AFFECTION_NOT_APPRAISAL).toContain('sự thật khách quan');
     expect(DIRECTIVE_P1_AFFECTION_NOT_APPRAISAL).toContain('<dialogue>');
+  });
+
+
+  it('test_grounded_praise_requires_concrete_basis_and_power_scaled_tone', () => {
+    expect(DIRECTIVE_P1_GROUNDED_PRAISE).toContain('MỘT VIỆC CỤ THỂ');
+    expect(DIRECTIVE_P1_GROUNDED_PRAISE).toContain('TỶ LỆ với chênh lệch thực lực');
+    expect(DIRECTIVE_P1_GROUNDED_PRAISE).toContain('yêu không có nghĩa là mù');
+    expect(DIRECTIVE_P1_GROUNDED_PRAISE).toContain('SAI');
+    expect(DIRECTIVE_P1_GROUNDED_PRAISE).toContain('ĐÚNG');
+    // Ordering: grounded praise follows the affection rule it qualifies.
+    const i = PILLAR1_DIRECTIVES_NARRATION.indexOf(DIRECTIVE_P1_AFFECTION_NOT_APPRAISAL);
+    expect(PILLAR1_DIRECTIVES_NARRATION[i + 1]).toBe(DIRECTIVE_P1_GROUNDED_PRAISE);
   });
 
   it('test_outcome_field_directive_names_the_three_values', () => {

@@ -255,6 +255,24 @@ export const DIRECTIVE_P1_AFFECTION_NOT_APPRAISAL =
   '"thực lực khiến cả đám cao thủ chấn động") khi dữ liệu cơ học không hề nói vậy. ' +
   'Muốn khen, hãy để một NHÂN VẬT nói ra bằng thẻ <dialogue>, kèm thiên kiến của riêng họ.';
 
+/**
+ * Owner follow-up (2026-08-21): affection may not become blind flattery.
+ * Praise must point at something concrete and scale with the real power gap.
+ */
+export const DIRECTIVE_P1_GROUNDED_PRAISE =
+  'KHEN PHẢI CÓ CĂN CỨ VÀ ĐÚNG TẦM: lời khen của NPC (dù hảo cảm cao đến đâu) PHẢI bám vào MỘT VIỆC CỤ THỂ ' +
+  'mà nhân vật chính vừa làm hoặc đang có — đòn vừa đánh, lựa chọn vừa đưa ra, món đồ đang cầm, câu vừa nói — ' +
+  'TUYỆT ĐỐI KHÔNG khen năng lực tổng quát mà diễn biến chưa hề chứng minh ("thiên tài", "vô song", "phi phàm", "tương lai vô hạn"). ' +
+  'Mức khen phải TỶ LỆ với chênh lệch thực lực thật: NPC cao hơn nhiều cảnh giới khen kiểu bề trên, dè dặt ' +
+  '("có chút tư chất", "không tệ", "đỡ hơn ta tưởng"), không khen như với đối thủ ngang tầm; NPC yếu hơn được phép ngưỡng mộ ' +
+  'mạnh hơn nhưng vẫn phải chỉ vào việc cụ thể. Hảo cảm cao khiến NPC BAO DUNG, BÊNH VỰC, LO LẮNG nhiều hơn — ' +
+  'KHÔNG khiến họ đánh giá sai thực lực: yêu không có nghĩa là mù.\n' +
+  '  * SAI (hảo cảm 90, người chơi Cấp 5 vừa chém hụt một con sói): <dialogue speaker="Tiểu Vân">Chàng quả là thiên tài vô song, ' +
+  'ta tin chàng sẽ đứng trên đỉnh thiên hạ!</dialogue> ' +
+  'ĐÚNG: <dialogue speaker="Tiểu Vân">Đòn vừa rồi nhanh hơn hôm qua rồi đó… nhưng chàng đừng liều thế nữa, ta sợ.</dialogue>\n' +
+  '  * SAI (trưởng lão Cấp 60 hảo cảm cao với người chơi Cấp 12): "Trưởng lão kinh ngạc: ngươi là kỳ tài trăm năm hiếm có." ' +
+  'ĐÚNG: <dialogue speaker="Trưởng lão">Ừm. Bộ pháp có chút nền tảng. Về luyện thêm ba tháng rồi hãy nói chuyện.</dialogue>';
+
 /** API-2 mirror of the "clouds of their own layer" rule. */
 export const DIRECTIVE_P1_NARRATION_NO_TOP_DOWN =
   'MÂY TẦNG NÀO GẶP GIÓ TẦNG NẤY (LỜI KỂ): không tự thêm cao thủ vượt tầm xuất hiện để gây sự, thử thách hay ' +
@@ -274,6 +292,7 @@ export const DIRECTIVE_P1_EXAMPLES_NARRATION =
 export const PILLAR1_DIRECTIVES_NARRATION: readonly string[] = [
   DIRECTIVE_P1_NARRATION_SELF_INTEREST,
   DIRECTIVE_P1_AFFECTION_NOT_APPRAISAL,
+  DIRECTIVE_P1_GROUNDED_PRAISE,
   DIRECTIVE_P1_NARRATION_NO_TOP_DOWN,
   DIRECTIVE_P1_CANON_NOT_PLAYER_CENTRIC,
   DIRECTIVE_P1_EXAMPLES_NARRATION,
