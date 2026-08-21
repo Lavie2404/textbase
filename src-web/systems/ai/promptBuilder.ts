@@ -19,6 +19,7 @@ import type { LockedResult, Suggestion } from '../types';
 import {
   DIRECTIVE_CONCEALMENT,
   NARRATION_DIRECTIVES,
+  PILLAR1_DIRECTIVES_NARRATION,
   SUGGESTION_DIRECTIVES,
   wrapUntrusted,
 } from '../contract/narrationDirectives';
@@ -247,6 +248,9 @@ export function buildNarrationPrompt(payload: AiPayload): string {
 
   const blocks: string[] = [];
   blocks.push(NARRATION_DIRECTIVES.join('\n'));
+  // Pillar 1 "The Gioi Khach Quan" (game-concept.md 243-255): objective-world
+  // directives ride alongside the two mandatory narration directives.
+  blocks.push(PILLAR1_DIRECTIVES_NARRATION.join('\n'));
   if (payload.style) blocks.push('Giọng kể yêu cầu: ' + payload.style);
   if (payload.npc_tag?.concealment_active) {
     blocks.push(DIRECTIVE_CONCEALMENT);

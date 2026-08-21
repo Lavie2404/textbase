@@ -415,3 +415,47 @@ export const EQUIPMENT_KNOBS = {
   /** gdd-02 B / gdd-06 C6: exceeding this warns, never blocks. */
   max_known_skills_per_character: 6,
 } as const;
+
+// ---------------------------------------------------------------------------
+// Pillar 1 - Objective World (design/gdd/game-concept.md, "Pillar 1")
+// ---------------------------------------------------------------------------
+
+/**
+ * Knobs for the two Pillar-1 mechanics that carry numbers:
+ * - the level-gap injury (owner rule: a hostile more than
+ *   `HOSTILE_INITIATIVE_LEVEL_GAP_MAX` levels above the player is gravely
+ *   wounded, so its EFFECTIVE level is capped at `player.level + GAP`);
+ * - the overreach success cap applied to API-1's scenario weights.
+ *
+ * `HOSTILE_INITIATIVE_LEVEL_GAP_MAX` itself is a LOCKED constant (gdd-05 A5)
+ * and deliberately does NOT live in this knob block.
+ */
+export const OBJECTIVITY_KNOBS = {
+  /**
+   * Owner rule is unconditional: even a hostile the player personally provoked
+   * is still capped. Flipping this to `true` would exempt a provoked NPC from
+   * the injury - documented for the designer, default OFF.
+   */
+  GAP_INJURY_EXEMPT_WHEN_PROVOKED: false,
+  /** One "tier"/realm is 10 levels everywhere in this app (gdd-02, App realm math). */
+  OVERREACH_TIER_SIZE: 10,
+  /** Max total weight `success` scenarios may keep when the target is 1 tier up. */
+  OVERREACH_SUCCESS_CAP_TIER1: 0.35,
+  /** ... 2 tiers up. Must be <= TIER1. */
+  OVERREACH_SUCCESS_CAP_TIER2: 0.1,
+  /** ... 3 or more tiers up. Must be <= TIER2. */
+  OVERREACH_SUCCESS_CAP_TIER3: 0.03,
+  /** `partial` gets `mult x` the success cap. Must be >= 1. */
+  OVERREACH_PARTIAL_CAP_MULT: 2,
+} as const;
+
+/** Success-weight cap for a given tier gap (0 = no cap). */
+export function overreachSuccessCap(
+  tierGap: number,
+  knobs: { [k: string]: number | boolean } = OBJECTIVITY_KNOBS as never,
+): number {
+  if (!Number.isFinite(tierGap) || tierGap < 1) return 1;
+  if (tierGap >= 3) return Number(knobs.OVERREACH_SUCCESS_CAP_TIER3);
+  if (tierGap >= 2) return Number(knobs.OVERREACH_SUCCESS_CAP_TIER2);
+  return Number(knobs.OVERREACH_SUCCESS_CAP_TIER1);
+}

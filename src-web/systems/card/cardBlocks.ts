@@ -21,6 +21,7 @@
  */
 
 import { UI_KNOBS, PERCENT_STAT_KEYS, type GddStatKey } from '../registry';
+import { GAP_INJURY_CARD_LINE } from '../objectivity/levelGapInjury';
 import { tierFromLevel } from '../math';
 import {
   attitudeBand,
@@ -215,6 +216,12 @@ export interface CardBlocksContext {
   in_combat?: boolean;
   alive?: boolean;
   death_and_consequence_blocked?: boolean;
+  /**
+   * Pillar 1 (game-concept.md 243-255): this NPC carries the level-gap injury,
+   * so the level shown is the SUPPRESSED one. The card never reveals the true
+   * level as a number - only that the realm is being held down and can be healed.
+   */
+  gap_injured?: boolean;
   equipment?: {
     weapon_name?: string | null;
     skill_names?: readonly string[];
@@ -335,6 +342,7 @@ export function buildCardBlocks(c: CardCharacter, ctx: CardBlocksContext = {}): 
   const alive = ctx.alive ?? c.alive ?? true;
   const inCombat = ctx.in_combat === true;
   const blocked = ctx.death_and_consequence_blocked === true;
+  const gapInjured = ctx.gap_injured === true;
   const tmLocked = ctx.tm_locked === true;
   const thresholdFn = ctx.expThresholdFn ?? expThreshold;
 
@@ -487,6 +495,8 @@ export function buildCardBlocks(c: CardCharacter, ctx: CardBlocksContext = {}): 
   const statusLines: string[] = [];
   if (!alive) statusLines.push('Đã tử vong');
   if (blocked) statusLines.push('Phế đan điền');
+  // Pillar 1: no number, ever - just the fact that the realm is suppressed.
+  if (gapInjured) statusLines.push(GAP_INJURY_CARD_LINE);
   if (concealmentActive(c, flags)) statusLines.push('Đang che giấu thân phận');
   if (isProtagonist && combatStats.exp?.to_next === AWAITING_BREAKTHROUGH) {
     statusLines.push('Chờ Đột Phá');

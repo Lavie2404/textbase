@@ -164,3 +164,130 @@ export function hasMandatoryNarrationDirectives(promptText: string): boolean {
 export function hasMandatorySuggestionDirectives(promptText: string): boolean {
   return SUGGESTION_DIRECTIVES.every((d) => promptText.includes(d));
 }
+
+// ---------------------------------------------------------------------------
+// Pillar 1 - "The Gioi Khach Quan" (objective world)
+//
+// Design doc: design/gdd/game-concept.md, "Boi Canh" (lines 38-100) and
+// "Pillar 1" (lines 243-255). The world does not bend around the protagonist:
+// NPCs act on their own interests, the narrator never asserts the protagonist's
+// superiority as objective fact, high-level characters do not go looking for
+// weaklings to bully, and probabilities are scored honestly against the real
+// power gap.
+//
+// Two sets, because the two calls have different jobs:
+// - `PILLAR1_DIRECTIVES_LOGIC` goes to API-1 (the logic engine that scores
+//   `probability` and `outcome_for_player`).
+// - `PILLAR1_DIRECTIVES_NARRATION` goes to API-2 (the narrator) and to the
+//   shared single-shot rules block.
+// ---------------------------------------------------------------------------
+
+/** API-1: NPCs are agents with their own interests, not plot devices. */
+export const DIRECTIVE_P1_NPC_SELF_INTEREST =
+  'THẾ GIỚI KHÁCH QUAN — NPC TỰ CHỦ: mỗi NPC quyết định dựa trên lợi ích, tính cách và thực lực của chính họ, ' +
+  'không phải dựa trên việc điều gì sẽ khiến câu chuyện "đẹp" hơn cho nhân vật chính. ' +
+  'TUYỆT ĐỐI KHÔNG cho NPC nhượng bộ, tha thứ, xuống nước hay tự nhiên thất bại chỉ vì "đẹp cốt truyện" ' +
+  'hoặc vì nhân vật chính cần thắng. Nếu lợi ích của họ là từ chối, họ từ chối; nếu là ra tay tàn nhẫn, họ ra tay.';
+
+/** API-1: honest probability scoring against the real power gap. */
+export const DIRECTIVE_P1_HONEST_PROBABILITY =
+  'CHẤM XÁC SUẤT TRUNG THỰC: trường "probability" phải phản ánh đúng chênh lệch thực lực (cấp độ, cảnh giới, ' +
+  'trang bị, số đông, địa lợi) giữa nhân vật chính và đối tượng — TUYỆT ĐỐI KHÔNG thiên vị người chơi. ' +
+  'Hành động vượt tầm (khiêu chiến/áp chế/lừa gạt/quyến rũ một đối tượng mạnh hơn hẳn) PHẢI nhận xác suất RẤT THẤP, ' +
+  'kể cả khi người chơi mô tả hành động đó rất hùng hồn hay rất chi tiết. Văn hay không làm tăng xác suất.';
+
+/** API-1: the "clouds meet clouds of their own layer" rule. */
+export const DIRECTIVE_P1_NO_TOP_DOWN_AGGRESSION =
+  'MÂY TẦNG NÀO GẶP GIÓ TẦNG NẤY: cao thủ/kẻ mạnh vượt trội KHÔNG chủ động đi tìm người yếu hơn nhiều để gây sự, ' +
+  'khiêu khích hay tỉ thí — với họ đó là việc vô nghĩa, mất mặt và tốn thời gian. ' +
+  'Chỉ tạo kịch bản kẻ mạnh ra tay khi CHÍNH nhân vật chính (hoặc diễn biến) đã cho họ một lý do cụ thể, ' +
+  'hoặc khi họ vốn đã có mối thù/lợi ích trực tiếp ở đó.';
+
+/** API-1 + API-2: canon characters have their own lives. */
+export const DIRECTIVE_P1_CANON_NOT_PLAYER_CENTRIC =
+  'NHÂN VẬT NGUYÊN TÁC KHÔNG XOAY QUANH NGƯỜI CHƠI: các nhân vật/thế lực có sẵn trong nguyên tác vẫn theo đuổi ' +
+  'mục tiêu, lịch trình và tuyến truyện riêng của họ. TUYỆT ĐỐI KHÔNG biến họ thành người hướng dẫn, người bảo hộ, ' +
+  'kẻ si mê hay kẻ thù truyền kiếp của nhân vật chính chỉ vì nhân vật chính vừa xuất hiện.';
+
+/** API-1: the new `outcome_for_player` field must be filled honestly. */
+export const DIRECTIVE_P1_OUTCOME_FIELD =
+  'TRƯỜNG "outcome_for_player" (BẮT BUỘC): tự chấm mỗi kịch bản là "success" (nhân vật chính đạt được điều họ muốn), ' +
+  '"partial" (đạt một phần, kèm cái giá hoặc kết quả nửa vời) hay "failure" (không đạt được, hoặc phản tác dụng). ' +
+  'Chấm trung thực theo nội dung "summary" của chính kịch bản đó — KHÔNG được gán "success" cho một kịch bản mà ' +
+  'trong đó nhân vật chính thực chất bị từ chối, bị đánh bại hay bị phớt lờ.';
+
+/** API-1: three short right/wrong examples. */
+export const DIRECTIVE_P1_EXAMPLES_LOGIC =
+  'VÍ DỤ ĐÚNG/SAI (Thế Giới Khách Quan):\n' +
+  '  * SAI: Nhân vật chính Cấp 5 lớn tiếng thách thức một trưởng lão Cấp 60 → kịch bản "trưởng lão nể phục khí phách, ' +
+  'nhận làm đồ đệ" với probability 45. ĐÚNG: kịch bản đó vẫn được phép tồn tại nhưng probability 1-3; ' +
+  'các kịch bản xác suất cao là bị phớt lờ, bị đuổi đi, hoặc bị một tùy tùng dạy cho một bài học.\n' +
+  '  * SAI: Một sát thủ Cấp 70 tự nhiên xuất hiện, chọn đúng nhân vật chính Cấp 8 vô danh để ra tay. ' +
+  'ĐÚNG: kẻ mạnh chỉ ra tay khi có lý do cụ thể đã được thiết lập trong diễn biến (đã bị cướp đồ, bị vạ lây, có mối thù).\n' +
+  '  * SAI: NPC thương nhân bán lỗ vốn "vì thấy ngươi có duyên". ĐÚNG: hắn tính lời lãi như mọi thương nhân, ' +
+  'trừ khi hảo cảm hoặc một lợi ích cụ thể giải thích được việc giảm giá.';
+
+/** Full API-1 (logic engine) Pillar-1 set, in fixed order. */
+export const PILLAR1_DIRECTIVES_LOGIC: readonly string[] = [
+  DIRECTIVE_P1_NPC_SELF_INTEREST,
+  DIRECTIVE_P1_HONEST_PROBABILITY,
+  DIRECTIVE_P1_NO_TOP_DOWN_AGGRESSION,
+  DIRECTIVE_P1_CANON_NOT_PLAYER_CENTRIC,
+  DIRECTIVE_P1_OUTCOME_FIELD,
+  DIRECTIVE_P1_EXAMPLES_LOGIC,
+];
+
+/** API-2: NPCs still act for themselves inside the narration. */
+export const DIRECTIVE_P1_NARRATION_SELF_INTEREST =
+  'THẾ GIỚI KHÁCH QUAN — NPC TỰ CHỦ TRONG LỜI KỂ: khi tường thuật, NPC phản ứng theo lợi ích, tính cách và thực lực ' +
+  'của chính họ. TUYỆT ĐỐI KHÔNG viết NPC bỗng nhiên nhượng bộ, khiếp sợ hay quy phục nhân vật chính chỉ vì ' +
+  '"đẹp cốt truyện" — kết quả cơ học đã khóa là giới hạn duy nhất, ngoài giới hạn đó NPC vẫn giữ nguyên lập trường của họ.';
+
+/**
+ * The subtle one: affection is allowed, objective-superiority claims are not.
+ * A fond NPC may gush; the NARRATOR may not certify that the gushing is true.
+ */
+export const DIRECTIVE_P1_AFFECTION_NOT_APPRAISAL =
+  'TÌNH CẢM ĐƯỢC PHÉP, TÁN TỤNG KHÁCH QUAN THÌ KHÔNG: NPC có hảo cảm vẫn được bộc lộ tình cảm tự nhiên ' +
+  '(khen ngợi, lo lắng, ghen tuông, tình tứ, ngưỡng mộ) — đó là GÓC NHÌN CHỦ QUAN của nhân vật đó và hoàn toàn hợp lệ. ' +
+  'NHƯNG lời kể của người dẫn chuyện TUYỆT ĐỐI KHÔNG được khẳng định nhân vật chính vượt trội như một sự thật khách quan ' +
+  '(cấm các kiểu "thiên phú nghìn năm có một", "kẻ mạnh nhất nơi này", "ai cũng phải thừa nhận hắn hơn người", ' +
+  '"thực lực khiến cả đám cao thủ chấn động") khi dữ liệu cơ học không hề nói vậy. ' +
+  'Muốn khen, hãy để một NHÂN VẬT nói ra bằng thẻ <dialogue>, kèm thiên kiến của riêng họ.';
+
+/** API-2 mirror of the "clouds of their own layer" rule. */
+export const DIRECTIVE_P1_NARRATION_NO_TOP_DOWN =
+  'MÂY TẦNG NÀO GẶP GIÓ TẦNG NẤY (LỜI KỂ): không tự thêm cao thủ vượt tầm xuất hiện để gây sự, thử thách hay ' +
+  '"để mắt tới" nhân vật chính. Kẻ mạnh có việc của kẻ mạnh; nhân vật chính chưa đủ tầm để lọt vào tầm mắt họ.';
+
+/** API-2: two short right/wrong examples. */
+export const DIRECTIVE_P1_EXAMPLES_NARRATION =
+  'VÍ DỤ ĐÚNG/SAI (Lời kể khách quan):\n' +
+  '  * SAI (người kể tự khẳng định): "Một luồng khí thế kinh người bùng lên, khiến toàn bộ cao thủ có mặt phải biến sắc — ' +
+  'thiên phú của ngươi quả thật vô song." ĐÚNG (đặt vào miệng nhân vật, kèm thiên kiến): ' +
+  '<dialogue speaker="Tiểu Vân">Chàng… chàng đánh ra đòn đó thật sự rất đẹp, ta chưa từng thấy ai như vậy.</dialogue> ' +
+  'rồi mô tả mấy người xung quanh chỉ liếc qua một cái rồi quay lại việc của mình.\n' +
+  '  * SAI: "Trưởng lão nhìn ngươi hồi lâu, trong mắt hiện lên vẻ tán thưởng, dường như đã quyết định sẽ dõi theo ngươi." ' +
+  'ĐÚNG: "Trưởng lão liếc qua ngươi đúng một cái, như liếc một viên sỏi bên đường, rồi tiếp tục câu chuyện đang dở."';
+
+/** Full API-2 (narration) Pillar-1 set, in fixed order. */
+export const PILLAR1_DIRECTIVES_NARRATION: readonly string[] = [
+  DIRECTIVE_P1_NARRATION_SELF_INTEREST,
+  DIRECTIVE_P1_AFFECTION_NOT_APPRAISAL,
+  DIRECTIVE_P1_NARRATION_NO_TOP_DOWN,
+  DIRECTIVE_P1_CANON_NOT_PLAYER_CENTRIC,
+  DIRECTIVE_P1_EXAMPLES_NARRATION,
+];
+
+/** Convenience: each set rendered as one prompt block. */
+export const PILLAR1_LOGIC_BLOCK: string = PILLAR1_DIRECTIVES_LOGIC.join('\n');
+export const PILLAR1_NARRATION_BLOCK: string = PILLAR1_DIRECTIVES_NARRATION.join('\n');
+
+/** Assertion helpers used by the prompt-builder tests (mirrors AC-24 style). */
+export function hasPillar1LogicDirectives(promptText: string): boolean {
+  return PILLAR1_DIRECTIVES_LOGIC.every((d) => promptText.includes(d));
+}
+
+export function hasPillar1NarrationDirectives(promptText: string): boolean {
+  return PILLAR1_DIRECTIVES_NARRATION.every((d) => promptText.includes(d));
+}

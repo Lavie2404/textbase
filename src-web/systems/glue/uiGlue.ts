@@ -27,6 +27,7 @@ import { NOT_MEASURED, evaluateQuotaWarning, type NotMeasured } from '../persist
 import { BANNER_TEXT, type Banner, type BannerKind } from '../ui/bannerQueue';
 import type { TmState } from '../ui/writeActionAllowed';
 import { SETTINGS_ITEMS, groupedSettings, type GroupedSettings } from '../ui/settingsGroups';
+import { isGapInjured } from '../objectivity/levelGapInjury';
 
 // ---------------------------------------------------------------------------
 // 1. Stat projection: App character -> the GDD's 12 stats
@@ -188,6 +189,8 @@ export interface CardContextInput {
   realmNames?: readonly string[] | null;
   /** `longTermStatus` contains "Phe Dan Dien" (plan.md C-11). */
   crippled?: boolean;
+  /** Pillar 1: NPC carries the level-gap injury (game-concept.md 243-255). */
+  gapInjured?: boolean;
 }
 
 /** Builds the `buildCardBlocks` context from what `QuickLoreModal` already has. */
@@ -199,6 +202,8 @@ export function cardContextFromApp(input: CardContextInput): CardBlocksContext {
     in_combat: input.inCombat === true,
     alive: !(Number.isFinite(hp) && hp <= 0),
     death_and_consequence_blocked: input.crippled === true,
+    // Pillar 1: derived from the record itself, so any caller gets it for free.
+    gap_injured: input.gapInjured === true || isGapInjured(c),
     equipment: {
       weapon_name: input.weaponName ?? null,
       skill_names: input.skillNames ?? [],

@@ -32,6 +32,18 @@
 | C-13 | **Làm Undo 1 lượt**. |
 | C-14 | Không áp dụng (P5 bỏ). |
 
+## Bổ sung 2026-08-21 — Pillar 1 "Thế Giới Khách Quan" (chủ sản phẩm chốt)
+
+Phát hiện sau khi hoàn tất lộ trình rút gọn: Pillar 1 mới được áp dụng
+bằng cơ chế (AI không ghi được exp/affinity/chết), nhưng CHƯA có luật
+tường thuật chống thiên vị và luật "20 cấp" (thuộc P5 đã bỏ). Chốt làm:
+
+| # | Quyết định |
+|---|---|
+| P1-a | Chỉ thị Pillar 1 tường minh trong CẢ API-1 (chấm xác suất trung thực, NPC theo lợi ích riêng) lẫn API-2 (cấm khẳng định nhân vật chính vượt trội như sự thật; NPC có hảo cảm vẫn được bộc lộ tình cảm). |
+| P1-b | **Luật trọng thương theo chênh cấp**: đối thủ THÙ ĐỊCH cao hơn người chơi > 20 cấp khi xuất hiện/gây chiến/đổi sang thù địch PHẢI đang "Trọng Thương (Cảnh Giới Suy Giảm)": cấp hiệu lực = cấp người chơi + 20, cấp thật được giữ (`gapInjury.trueLevel`), chỉ số tính lại theo cấp hiệu lực. KHÔNG tự hồi theo thời gian; hồi phục HOÀN TOÀN qua linh đan / kỳ ngộ / danh y (tag `[RECOVER_INJURY]`, dùng thuốc, gỡ trạng thái). NPC trung lập/thân thiện miễn. Áp vô điều kiện (knob `GAP_INJURY_EXEMPT_WHEN_PROVOKED` mặc định false). Không đụng CombatLoop — chỉ đổi dữ liệu NPC. |
+| P1-c | **Trần xác suất vượt tầm**: API-1 trả thêm `outcome_for_player`; module tất định giới hạn tổng xác suất kịch bản "success" theo chênh bậc với NPC mạnh nhất liên quan (1 bậc → 35%, ≥2 bậc → 10%, ≥3 bậc → 3%; knob `OBJECTIVITY_KNOBS`), tính theo cấp HIỆU LỰC (NPC bị trọng thương tính cấp đã giảm). Thay thế rẻ cho envelope/chip (C-12). |
+
 ## Quy trình
 
 - Mỗi giai đoạn: module TS thuần dưới `src-web/systems/`, unit test Vitest

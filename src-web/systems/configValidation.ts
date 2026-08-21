@@ -31,6 +31,7 @@ import {
   LEVEL_GROWTH,
   MAX_NPC_PER_SCENE,
   MEMORY_KNOBS,
+  OBJECTIVITY_KNOBS,
   PERSISTENCE_KNOBS,
   SITUATION_KNOBS,
   TURN_KNOBS,
@@ -59,6 +60,8 @@ export const CONFIG_ERROR = {
   SITUATION_RANGE: 'SITUATION_ERROR_RANGE',
   MEMORY_ENTITY_BUDGET: 'MEMORY_ERROR_ENTITY_BUDGET_BELOW_SCENE_CAP',
   MEMORY_RANGE: 'MEMORY_ERROR_RANGE',
+  OBJECTIVITY_RANGE: 'OBJECTIVITY_ERROR_RANGE',
+  OBJECTIVITY_CAP_ORDER: 'OBJECTIVITY_ERROR_SUCCESS_CAP_NOT_MONOTONIC',
   AI_TIMEOUT_ORDER: 'AI_ERROR_TIMEOUT_ORDER',
   UI_FONT_SCALE_ORDER: 'UI_ERROR_FONT_SCALE_ORDER',
   UI_TRANSITION_ORDER: 'UI_ERROR_TRANSITION_ORDER',
@@ -101,6 +104,8 @@ export interface SystemsConfig {
   death: Record<string, number>;
   situation: Record<string, number>;
   memory: Record<string, number>;
+  /** Pillar 1 - objective world (game-concept.md). */
+  objectivity: Record<string, number | boolean>;
   ai: Record<string, number | boolean>;
   ui: {
     log_page_size: number;
@@ -136,6 +141,7 @@ export const DEFAULT_SYSTEMS_CONFIG: SystemsConfig = {
   death: { ...DEATH_KNOBS },
   situation: { ...SITUATION_KNOBS },
   memory: { ...MEMORY_KNOBS },
+  objectivity: { ...OBJECTIVITY_KNOBS },
   ai: { ...AI_KNOBS },
   ui: {
     ...UI_KNOBS,
@@ -158,6 +164,7 @@ export function cloneDefaultSystemsConfig(): SystemsConfig {
     death: { ...DEFAULT_SYSTEMS_CONFIG.death },
     situation: { ...DEFAULT_SYSTEMS_CONFIG.situation },
     memory: { ...DEFAULT_SYSTEMS_CONFIG.memory },
+    objectivity: { ...DEFAULT_SYSTEMS_CONFIG.objectivity },
     ai: { ...DEFAULT_SYSTEMS_CONFIG.ai },
     ui: {
       ...DEFAULT_SYSTEMS_CONFIG.ui,
@@ -194,6 +201,7 @@ export function validateSystemsConfig(cfg: SystemsConfig): SystemsConfig {
   const death = cfg.death ?? {};
   const situation = cfg.situation ?? {};
   const memory = cfg.memory ?? {};
+  const objectivity = cfg.objectivity ?? {};
   const ai = cfg.ai ?? {};
   const ui = cfg.ui;
   const turn = cfg.turn ?? {};
@@ -609,6 +617,53 @@ export function validateSystemsConfig(cfg: SystemsConfig): SystemsConfig {
       CONFIG_ERROR.PERSISTENCE_RANGE,
       'FLUSH_EVERY_N_TURNS >= 1',
       `FLUSH_EVERY_N_TURNS must be >= 1, got ${persistence.FLUSH_EVERY_N_TURNS} (gdd-05 B5)`,
+    );
+  }
+
+  // --- Pillar 1 objective world (game-concept.md 243-255) -------------------
+  // The three success caps are a MONOTONIC NON-INCREASING ladder: a bigger tier
+  // gap must never be easier than a smaller one. A single out-of-order value
+  // silently inverts the whole rule, so it is asserted, not documented.
+  const capNames = [
+    'OVERREACH_SUCCESS_CAP_TIER1',
+    'OVERREACH_SUCCESS_CAP_TIER2',
+    'OVERREACH_SUCCESS_CAP_TIER3',
+  ] as const;
+  for (const name of capNames) {
+    const v = objectivity[name];
+    if (isNumber(v) && (v <= 0 || v > 1)) {
+      add(
+        CONFIG_ERROR.OBJECTIVITY_RANGE,
+        `0 < ${name} <= 1`,
+        `${name} must be within (0, 1], got ${v} (game-concept.md Pillar 1)`,
+      );
+    }
+  }
+  for (let i = 0; i + 1 < capNames.length; i += 1) {
+    const a = objectivity[capNames[i]];
+    const b = objectivity[capNames[i + 1]];
+    if (isNumber(a) && isNumber(b) && b > a) {
+      add(
+        CONFIG_ERROR.OBJECTIVITY_CAP_ORDER,
+        `${capNames[i]} >= ${capNames[i + 1]}`,
+        `overreach success caps must not increase with the tier gap: ` +
+          `${capNames[i]}=${a} < ${capNames[i + 1]}=${b} (game-concept.md Pillar 1)`,
+      );
+    }
+  }
+  if (isNumber(objectivity.OVERREACH_TIER_SIZE) && objectivity.OVERREACH_TIER_SIZE < 1) {
+    add(
+      CONFIG_ERROR.OBJECTIVITY_RANGE,
+      'OVERREACH_TIER_SIZE >= 1',
+      `OVERREACH_TIER_SIZE must be >= 1, got ${objectivity.OVERREACH_TIER_SIZE} (game-concept.md Pillar 1)`,
+    );
+  }
+  if (isNumber(objectivity.OVERREACH_PARTIAL_CAP_MULT) && objectivity.OVERREACH_PARTIAL_CAP_MULT < 1) {
+    add(
+      CONFIG_ERROR.OBJECTIVITY_RANGE,
+      'OVERREACH_PARTIAL_CAP_MULT >= 1',
+      `OVERREACH_PARTIAL_CAP_MULT must be >= 1 (partial is never stricter than success), ` +
+        `got ${objectivity.OVERREACH_PARTIAL_CAP_MULT} (game-concept.md Pillar 1)`,
     );
   }
 

@@ -23,7 +23,9 @@ Commit 1 lần mỗi giai đoạn khi test + build xanh, không push.
 - [x] Review lead-programmer 26 phát hiện → đã sửa (2 BLOCKER + 5 HIGH + MEDIUM/LOW), commit 52237f3 + dbd9a73
 - [x] Smoke boot Chrome headless (build với env Firebase giả): mount OK, màn chọn chế độ OK — `production/qa/evidence/smoke-setup-2026-08-17.png`
 
-**Trạng thái**: HOÀN TẤT lộ trình rút gọn — 12 commit, 1231 unit test xanh, build xanh.
+- [x] Pillar 1 bổ sung (21-08, user chốt a+b+c): chỉ thị khách quan trong API-1/API-2; luật TRỌNG THƯƠNG theo chênh cấp >20 (cấp hiệu lực = player+20, cấp thật giữ trong `gapInjury.trueLevel`, hồi phục qua linh đan/kỳ ngộ/`[RECOVER_INJURY]`, không tự hồi theo thời gian); trần xác suất vượt tầm (`outcome_for_player` + `capOverreach`). Module `src-web/systems/objectivity/`, 113 test.
+
+**Trạng thái**: HOÀN TẤT lộ trình rút gọn + Pillar 1 — 12 commit, 1231 unit test xanh, build xanh.
 **Còn treo (không chặn, ghi từ báo cáo agent)**: Story Log S4 phân trang UI; live-window
 eviction; delete-batch UI của Customization (`validateDeleteBatch` chưa dùng); khối ⑤
 combat status trên thẻ (không truyền ctx combat); nhãn `callSite` cụ thể cho ~20 call

@@ -313,4 +313,38 @@ export const GAME_CONFIG = {
         // "Phế Đan Điền"; hằng số giữ lại để đồng bộ cấu hình và cho test.
         CRIPPLED_PENALTY_MULT: 0.85,
     },
+
+    // ------------------------------------------------------------------------
+    // 21. THẾ GIỚI KHÁCH QUAN (Pillar 1 — design/gdd/game-concept.md)
+    //     Thế giới KHÔNG xoay quanh nhân vật chính. Hai cơ chế có con số:
+    //     (a) TRỌNG THƯƠNG DO CHÊNH CẤP: kẻ ĐỊCH cao hơn người chơi quá 20 cấp
+    //         (hằng số khóa HOSTILE_INITIATIVE_LEVEL_GAP_MAX, không nằm ở đây)
+    //         BẮT BUỘC mang cựu thương: cảnh giới HIỆU LỰC bị kéo về
+    //         (cấp người chơi + 20), cảnh giới THẬT được lưu lại, và thương thế
+    //         CÓ THỂ HỒI PHỤC HOÀN TOÀN (linh đan / kỳ ngộ / danh y). Thời gian
+    //         trôi qua KHÔNG tự chữa lành. NPC trung lập/thân thiện được miễn.
+    //     (b) TRẦN THÀNH CÔNG KHI VƯỢT TẦM: khi NPC liên quan mạnh hơn người
+    //         chơi từ 1 cảnh giới (10 cấp) trở lên, tổng trọng số các kịch bản
+    //         "success" do API 1 chấm bị chặn trần; phần dư được chia lại cho
+    //         "failure"/"partial". Đây là sàn cơ học đỡ cho phần chỉ thị prompt.
+    //     Logic nằm ở src-web/systems/objectivity/, không nằm trong App.tsx.
+    // ------------------------------------------------------------------------
+    objectivity: {
+        // (a) Miễn trọng thương nếu chính người chơi khiêu khích trước?
+        // Quy tắc của chủ dự án là VÔ ĐIỀU KIỆN => để false. Bật true chỉ khi
+        // muốn "chọc tổ ong vò vẽ thì ráng chịu" trở thành luật chơi.
+        GAP_INJURY_EXEMPT_WHEN_PROVOKED: false,
+
+        // (b) Một "cảnh giới" = bao nhiêu cấp (toàn game dùng 10).
+        OVERREACH_TIER_SIZE: 10,
+
+        // (b) Trần TỔNG trọng số kịch bản "success" theo số cảnh giới chênh.
+        // BẮT BUỘC không tăng dần: TIER1 >= TIER2 >= TIER3, và đều nằm trong (0, 1].
+        OVERREACH_SUCCESS_CAP_TIER1: 0.35,  // chênh 1 cảnh giới (10-19 cấp)
+        OVERREACH_SUCCESS_CAP_TIER2: 0.10,  // chênh 2 cảnh giới (20-29 cấp)
+        OVERREACH_SUCCESS_CAP_TIER3: 0.03,  // chênh >= 3 cảnh giới (30+ cấp)
+
+        // (b) Trần cho "partial" = trần "success" nhân hệ số này (>= 1).
+        OVERREACH_PARTIAL_CAP_MULT: 2,
+    },
 };

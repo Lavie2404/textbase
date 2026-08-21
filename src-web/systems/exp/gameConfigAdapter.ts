@@ -135,6 +135,12 @@ export function systemsConfigFromGameConfig(
     ...cfg.death,
     ...(deathKnobsFromGameConfig(gc) as unknown as Record<string, number>),
   };
+  // Pillar 1 (game-concept.md 243-255): the objective-world block. Same shape as
+  // the P2 blocks - registry defaults, overridden by whatever gameConfig.js says.
+  cfg.objectivity = {
+    ...cfg.objectivity,
+    ...(block(gc, 'objectivity') as unknown as Record<string, number | boolean>),
+  };
   return cfg;
 }
 

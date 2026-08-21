@@ -69,6 +69,14 @@ export const WORLD_CONTENT_TAGS: readonly string[] = [
   // P4b: the App's narrative-combat opener. World content (it announces a scene),
   // never a mechanical result - the numbers still come from CombatLoop.
   'NARRATIVE_COMBAT_START',
+  // Pillar 1 (game-concept.md 243-255): lifts the level-gap injury off an NPC.
+  // World content, not a mechanical result: it only says "the old wound healed
+  // in the fiction". The level restoration itself is done by
+  // `objectivity/levelGapInjury.recoverGapInjury`, from the snapshot the engine
+  // took when the injury was applied - the tag carries no number and cannot
+  // invent one. The AI is told it may emit this ONLY when the narration
+  // contains an explicit recovery event (linh dan / ky ngo / danh y).
+  'RECOVER_INJURY',
 ];
 
 /** Prefixes whose whole family is world content (`SYSTEM_*`, `QUEST_*`, `CRISIS_*`). */

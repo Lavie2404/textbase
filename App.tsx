@@ -90,6 +90,33 @@ import { isWriteActionAllowed, undoButtonState } from './src-web/systems/ui/writ
 import { createBannerQueue } from './src-web/systems/ui/bannerQueue';
 import { TOUCH_TARGET_MIN } from './src-web/systems/ui/touchTarget';
 import { customizeButtonVisibility, validateProgressZone, isValidBaseStatSet, isValidSkillSubmit, isValidItemSubmit } from './src-web/systems/customize/validators';
+
+// === Pillar 1 - "The Gioi Khach Quan" (design/gdd/game-concept.md 38-100, 243-255)
+// Three features, all pure modules + thin hooks here:
+//   (a) prompt directives that stop the world bending around the protagonist;
+//   (b) the LEVEL-GAP INJURY: a hostile more than HOSTILE_INITIATIVE_LEVEL_GAP_MAX
+//       levels above the player is "Trong Thuong" - effective level capped at
+//       player.level + 20, true level preserved, fully recoverable;
+//   (c) the OVERREACH SUCCESS CAP on API-1's scenario weights.
+import {
+    PILLAR1_DIRECTIVES_LOGIC,
+    PILLAR1_DIRECTIVES_NARRATION,
+} from './src-web/systems/contract/narrationDirectives';
+import {
+    GAP_INJURY_STATUS_ID,
+    GAP_INJURY_STATUS_NAME,
+    GAP_INJURY_PROMPT_HINT,
+    applyGapInjury,
+    recoverGapInjury,
+    shouldApplyGapInjury,
+    isGapInjured,
+    hasGapInjuryStatus,
+    isHostileStance,
+    gapInjuryAppliedMessage,
+    gapInjuryRecoveredMessage,
+} from './src-web/systems/objectivity/levelGapInjury';
+import { capOverreach } from './src-web/systems/objectivity/overreachCap';
+import { HOSTILE_INITIATIVE_LEVEL_GAP_MAX, OBJECTIVITY_KNOBS } from './src-web/systems/registry';
 import { createCommitController } from './src-web/systems/customize/commitFlow';
 import { estimateOriginQuota } from './src-web/systems/persistence/quota';
 import { pruneCheckpoints } from './src-web/systems/persistence/saveCheckpoint';
@@ -7825,6 +7852,9 @@ const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledg
                 showSongTuButton: (npc) => (npc.affinity || 0) >= 80,
                 realmNames: knowledge.realmProgressionList,
                 crippled: isCrippled,
+                // Pillar 1: the card shows the SUPPRESSED level plus a "can be
+                // healed" line; `trueLevel` is never rendered as a number.
+                gapInjured: isGapInjured(finalStats) || hasGapInjuryStatus(finalStats),
             })
         );
 
@@ -18157,6 +18187,123 @@ const autoAllocateNpcAp = (npc) => {
     return workingNpc;
 };
 
+// === Pillar 1 (game-concept.md 243-255) - NPC stat rebuild for a changed level.
+// The level-gap injury module is PURE and must not know the App's creation
+// formula, so it receives this as an injected `recomputeStatsForLevel`. The
+// numbers below are the SAME ones `handleCreateNpc` and the `[WORLD_NPC]` path
+// use (200 + 20*(lvl-1) etc.) - kept in one helper so the two never drift.
+const recomputeNpcStatsForLevel = (npc, level) => {
+    const lvl = Math.max(1, Math.floor(Number(level) || 1));
+    let working = { ...npc, level: lvl };
+    working.baseHp = 200 + (lvl - 1) * 20;
+    working.baseAtk = 20 + (lvl - 1) * 2;
+    working.baseDef = 10 + (lvl - 1) * 1;
+    working.baseSpd = 30 + (lvl - 1) * 1;
+    // AP is re-derived from scratch: an NPC dropped from level 90 to level 25 must
+    // not keep the 90-level allocation, or the "injury" would be cosmetic.
+    working.allocatedPoints = { hp: 0, atk: 0, def: 0, spd: 0 };
+    working.ap = calculateTotalAP(lvl);
+    if (working.ap > 0) working = autoAllocateNpcAp(working);
+    const finalised = calculateFinalStats(working);
+    // A suppressed realm should feel like a wounded body, not a full-health one.
+    finalised.hp = Math.min(Number(finalised.hp) || finalised.maxhp, finalised.maxhp);
+    return finalised;
+};
+
+/**
+ * Pillar 1: is this NPC a HOSTILE opponent for gap-injury purposes?
+ * `Stance` is the primary signal; a Lethal combat start counts as hostile even
+ * when the stance string has not caught up yet. Companions/player never qualify.
+ */
+const isHostileForGapInjury = (npc, opts = {}) => {
+    if (!npc || npc.isPlayer || npc.isCompanion) return false;
+    if (opts.forceHostile === true) return true;
+    if (isHostileStance(npc)) return true;
+    return opts.combatType === 'Lethal';
+};
+
+/**
+ * Pillar 1: apply the level-gap injury to `npc` if the rule says so.
+ * Returns the (possibly new) npc record plus a Vietnamese system message.
+ * Never throws - every call site wraps it anyway, this is belt and braces.
+ */
+const maybeApplyGapInjury = (npc, playerLevel, opts = {}) => {
+    try {
+        if (!npc) return { npc, message: null, applied: false };
+        if (!isHostileForGapInjury(npc, opts)) return { npc, message: null, applied: false };
+        const already = isGapInjured(npc) || hasGapInjuryStatus(npc);
+        if (!shouldApplyGapInjury({
+            npcLevel: Number(npc.level) || 1,
+            playerLevel: Number(playerLevel) || 1,
+            hostile: true,
+            alreadyInjured: already,
+            provoked: opts.provoked === true,
+            knobs: OBJECTIVITY_KNOBS,
+            gapMax: HOSTILE_INITIATIVE_LEVEL_GAP_MAX,
+        })) return { npc, message: null, applied: false };
+
+        const injured = applyGapInjury(npc, playerLevel, {
+            turn: Number(opts.turn) || 0,
+            recomputeStatsForLevel: recomputeNpcStatsForLevel,
+            gapMax: HOSTILE_INITIATIVE_LEVEL_GAP_MAX,
+        });
+        if (injured === npc) return { npc, message: null, applied: false };
+        console.log('[objectivity] gap injury applied:', npc.Name, '->', injured.level,
+            '(true', injured.gapInjury && injured.gapInjury.trueLevel, ')');
+        return { npc: injured, message: gapInjuryAppliedMessage(npc.Name), applied: true };
+    } catch (gapError) {
+        console.warn('[objectivity] maybeApplyGapInjury:', gapError);
+        return { npc, message: null, applied: false };
+    }
+};
+
+/**
+ * Pillar 1: does this item count as an explicit recovery event for the
+ * level-gap injury? Deliberately narrow - a random food buff must not silently
+ * hand a level-90 enemy its true power back mid-scene.
+ * Structured effects win; the Vietnamese keyword list is the fallback for the
+ * (common) case where the AI wrote a pill with prose only.
+ */
+const GAP_INJURY_HEALING_ITEM_TYPES = ['Đan dược', 'Thực phẩm', 'Đa năng', 'Dị thường'];
+const GAP_INJURY_HEALING_KEYWORDS = [
+    'hồi phục', 'hoi phuc', 'chữa trị', 'chua tri', 'trị thương', 'tri thuong',
+    'liệu thương', 'lieu thuong', 'tái tạo', 'tai tao', 'cải tử', 'cai tu',
+    'hoàn hồn', 'hoan hon', 'tục mệnh', 'tuc menh', 'giải độc', 'giai doc',
+    'khôi phục', 'khoi phuc', 'hồi xuân', 'hoi xuan', 'sinh cơ', 'sinh co',
+];
+const isHealingItemForGapInjury = (item) => {
+    if (!item) return false;
+    const type = String(item.Type || item.type || '');
+    if (GAP_INJURY_HEALING_ITEM_TYPES.indexOf(type) === -1) return false;
+    const effects = String(item.effectsString || item.effects || '');
+    if (/heal|dispel|remove_status|cleanse/i.test(effects)) return true;
+    const prose = (String(item.Name || '') + ' ' + String(item.description || '')).toLowerCase();
+    return GAP_INJURY_HEALING_KEYWORDS.some(k => prose.indexOf(k) > -1);
+};
+
+/**
+ * Pillar 1: the suffix shown to the AI for a gap-injured NPC. NEVER a number -
+ * the model must know the shown realm is suppressed, and must NOT know by how
+ * much, or it would narrate the true level straight back at the player.
+ */
+const gapInjuryPromptSuffix = (npc) => (isGapInjured(npc) ? ' [' + GAP_INJURY_PROMPT_HINT + ']' : '');
+
+/** Pillar 1: lift the injury, restoring the exact pre-injury level and stats. */
+const maybeRecoverGapInjury = (npc) => {
+    try {
+        if (!npc || (!isGapInjured(npc) && !hasGapInjuryStatus(npc))) {
+            return { npc, message: null, recovered: false };
+        }
+        const healed = recoverGapInjury(npc, { recomputeStatsForLevel: recomputeNpcStatsForLevel });
+        if (healed === npc) return { npc, message: null, recovered: false };
+        console.log('[objectivity] gap injury recovered:', npc.Name, '->', healed.level);
+        return { npc: healed, message: gapInjuryRecoveredMessage(npc.Name), recovered: true };
+    } catch (gapError) {
+        console.warn('[objectivity] maybeRecoverGapInjury:', gapError);
+        return { npc, message: null, recovered: false };
+    }
+};
+
 const updateOrCreateInArray = (array, newItem, keyField = 'Name') => {
     if (!array || !newItem) {
         return;
@@ -24634,6 +24781,8 @@ const parseGeminiResponseAndUpdateState = async (text, knowledgeToUse, setActive
         longTermStatusesToAdd: [],
         healParticipants: null, 
         itemsToUse: [],
+        // Pillar 1 (game-concept.md 243-255): [RECOVER_INJURY: Name="..."]
+        recoverInjuryFor: [],
     };
 
     const tagWithDataRegex = /\[([A-Z_]+):\s*([^\]]+)\]/g;
@@ -24718,6 +24867,13 @@ const parseGeminiResponseAndUpdateState = async (text, knowledgeToUse, setActive
                 case 'REMOVE_WORLD_ITEM': 
                     if (!updates.worldItemsToRemove) updates.worldItemsToRemove = []; 
                     updates.worldItemsToRemove.push(parsedData);  
+                    break;
+                // Pillar 1 (game-concept.md 243-255): explicit narrative recovery of
+                // the level-gap injury. Carries no number - the true level and the
+                // pre-injury stats come from the snapshot the engine itself took.
+                case 'RECOVER_INJURY':
+                    if (!updates.recoverInjuryFor) updates.recoverInjuryFor = [];
+                    updates.recoverInjuryFor.push(parsedData);
                     break;
                 case 'LORE_LOCATION': if (!updates.locations) updates.locations = []; updates.locations.push(parsedData); break;
                 case 'LOCATION_STATE_UPDATE': if (!updates.locationStateUpdates) updates.locationStateUpdates = []; updates.locationStateUpdates.push(parsedData); break;
@@ -25065,6 +25221,41 @@ const handlePendingModeChange = (changeRequest, currentKnowledge) => {
             setCustomActionInput('');
             
             // Tạo một prompt đặc biệt yêu cầu AI mô tả trận chiến bắt đầu
+            // === Pillar 1 HOOK 2b (game-concept.md 243-255) ======================
+            // Narrative combat has no CombatLoop, but the same rule must hold: a
+            // hostile more than HOSTILE_INITIATIVE_LEVEL_GAP_MAX levels up enters
+            // the scene already wounded, so the AI arbitrates against the REDUCED
+            // level it sees in the prompt.
+            try {
+                const ncPlayer = (currentKnowledge.characters || []).find(c => c && c.isPlayer);
+                const ncPlayerLevel = Number(ncPlayer && ncPlayer.level) || 1;
+                const ncMessages = [];
+                (currentKnowledge.narrativeCombatState?.combatants || []).forEach(id => {
+                    const idx = (currentKnowledge.characters || []).findIndex(c => c && c.id === id);
+                    if (idx === -1) return;
+                    const result = maybeApplyGapInjury(currentKnowledge.characters[idx], ncPlayerLevel, {
+                        turn: adventureTurnCount,
+                        combatType: 'Lethal',
+                    });
+                    if (!result.applied) return;
+                    currentKnowledge.characters[idx] = result.npc;
+                    if (result.message) ncMessages.push(result.message);
+                    setknowledge(prev => {
+                        const next = { ...prev, characters: (prev.characters || []).slice() };
+                        const k = next.characters.findIndex(c => c && c.id === id);
+                        if (k > -1) next.characters[k] = result.npc;
+                        return next;
+                    });
+                });
+                if (ncMessages.length > 0) {
+                    setStoryHistory(prev => [...prev, ...ncMessages.map(msg => ({
+                        id: crypto.randomUUID(), type: 'system', content: '**[Hệ thống]** ' + msg, transient: true,
+                    }))]);
+                }
+            } catch (gapNarrativeError) {
+                console.warn('[objectivity] hook narrativeCombatStart:', gapNarrativeError);
+            }
+
             const combatantsInvolved = (currentKnowledge.narrativeCombatState?.combatants || [])
                 .map(id => currentKnowledge.characters.find(c => c.id === id)?.Name)
                 .filter(Boolean);
@@ -25170,6 +25361,43 @@ const handlePendingModeChange = (changeRequest, currentKnowledge) => {
                 return;
             }
             
+            // === Pillar 1 HOOK 2 (game-concept.md 243-255) =======================
+            // Applied BEFORE the CombatLoop is constructed, so combat reads the
+            // REDUCED level and the recomputed stats. The persistent NPC record is
+            // updated too (the injury must survive the battle and stay recoverable);
+            // the combat clone below is taken from the already-injured template.
+            const gapInjuryMessages = [];
+            finalTargetsFiltered.forEach((target, i) => {
+                try {
+                    // The gap is measured against the PLAYER, not whoever happens to
+                    // lead the party array (a companion may be listed first).
+                    const playerForGap = playerParty_Objects.find(c => c && c.isPlayer) || playerParty_Objects[0];
+                    const pLevel = Number(playerForGap && playerForGap.level) || 1;
+                    const result = maybeApplyGapInjury(target, pLevel, {
+                        turn: adventureTurnCount,
+                        combatType: changeRequest.combatType,
+                    });
+                    if (!result.applied) return;
+                    finalTargetsFiltered[i] = result.npc;
+                    if (result.message) gapInjuryMessages.push(result.message);
+                    const worldIdx = currentKnowledge.characters.findIndex(c => c && c.id === target.id);
+                    if (worldIdx > -1) currentKnowledge.characters[worldIdx] = result.npc;
+                    setknowledge(prev => {
+                        const next = { ...prev, characters: (prev.characters || []).slice() };
+                        const k = next.characters.findIndex(c => c && c.id === target.id);
+                        if (k > -1) next.characters[k] = result.npc;
+                        return next;
+                    });
+                } catch (gapCombatError) {
+                    console.warn('[objectivity] hook startCombat:', gapCombatError);
+                }
+            });
+            if (gapInjuryMessages.length > 0) {
+                setStoryHistory(prev => [...prev, ...gapInjuryMessages.map(msg => ({
+                    id: crypto.randomUUID(), type: 'system', content: '**[Hệ thống]** ' + msg, transient: true,
+                }))]);
+            }
+
             const enemiesToFight_Objects = finalTargetsFiltered.map(template => ({
                 ...JSON.parse(JSON.stringify(template)),
                 id: crypto.randomUUID() 
@@ -26396,6 +26624,9 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
                 : '   LƯU Ý: Người chơi ĐANG TẮT tùy chọn sự kiện bất ngờ. TUYỆT ĐỐI KHÔNG có kịch bản nào chứa SỰ KIỆN/biến cố mới lạ bên ngoài chen ngang, cắt ngang, hay làm gián đoạn hành động đã mô tả. Mọi kịch bản đều phải là các biến thể phản ứng/kết quả TRỰC TIẾP của chính hành động đó (khác nhau ở mức độ thành công, thái độ, cảm xúc,...). NGOẠI LỆ DUY NHẤT: được phép nhắc đến việc một NPC khác xuất hiện/có mặt gần đó như chi tiết nền cuối kịch bản, nhưng NPC đó KHÔNG được có bất kỳ hành động, lời thoại hay tương tác nào trong lượt này — chỉ đơn thuần được nêu tên là đang xuất hiện, không hơn.'}
             2. KIỂM SOÁT HÀNH VI: Áp dụng triệt để "NGUYÊN TẮC TÔN TRỌNG NGƯỜI CHƠI". Chỉ phản hồi lại ĐÚNG VỚI HÀNH ĐỘNG HIỆN TẠI. Tuyệt đối không giả định hoặc bịa thêm hành động, suy nghĩ tiếp theo của người chơi. BẤT KỂ kịch bản nào (kể cả kịch bản bị chen ngang), 'summary' PHẢI thể hiện rõ chính hành động người chơi mô tả đã thực sự xảy ra như thế nào TRƯỚC KHI thêm bất kỳ diễn biến/nhân vật/sự kiện nào khác — tuyệt đối cấm việc summary nhảy thẳng sang tình tiết khác mà bỏ qua hành động gốc.
 
+            3. THẾ GIỚI KHÁCH QUAN (PILLAR 1 - BẮT BUỘC, ƯU TIÊN CAO): thế giới KHÔNG xoay quanh nhân vật chính.
+${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
+
             ĐỐI VỚI MỖI KỊCH BẢN, YÊU CẦU CUNG CẤP:
             1. 'probability': Tỷ lệ phần trăm xảy ra kịch bản này (0-100). Phải đánh giá dựa trên tình tiết hiện tại, đặc biệt là tính cách nhân vật. (Hành động phi logic thì tỷ lệ thành công phải cực thấp).
             2. 'summary': Vài câu thể hiện nội dung kịch bản, chủ yếu nói về phản ứng của sự vật, sự việc phản ứng với lựa chọn của người chơi. Ghi nhớ: Đừng bịa ra người chơi làm gì thêm trong câu này. BẮT BUỘC: câu đầu tiên (hoặc các câu đầu) phải thể hiện chính hành động người chơi vừa mô tả đang/đã xảy ra — kể cả khi kịch bản có yếu tố chen ngang, phải viết rõ hành động gốc trước rồi mới đến sự chen ngang, TUYỆT ĐỐI không mở đầu summary bằng một sự việc/nhân vật không liên quan rồi mới nhắc hoặc bỏ hẳn hành động gốc.
@@ -26426,6 +26657,7 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
                  + [QUEST_OBJECTIVE_COMPLETED: questTitle="...", objectiveId="...", quantity=X] (Cập nhật tiến độ nhiệm vụ).
                  + [QUEST_UPDATED: title="...", status="completed/failed"] (Kết thúc nhiệm vụ).
                  + [RELATIONSHIP_CHANGED: NPC="...", Standing="...", Reason="...", AffinityChange="+X" hoặc "-X"] (BẮT BUỘC dùng mỗi khi hành động của người chơi làm biến động thái độ/hảo cảm của một NPC dành cho họ — kể cả các cuộc trò chuyện, cử chỉ thân mật, giúp đỡ hay xúc phạm nhẹ, không chỉ giới hạn ở sự kiện lớn. Nếu 'summary' của kịch bản có nhắc đến việc hảo cảm/thiện cảm/tình cảm tăng hoặc giảm, PHẢI xuất thẻ này tương ứng, TUYỆT ĐỐI không được chỉ mô tả suông mà bỏ quên thẻ lệnh).
+                 + [RECOVER_INJURY: Name="Tên nhân vật"] (Giải trừ trạng thái "Trọng Thương (Cảnh Giới Suy Giảm)" — cựu thương đè nén cảnh giới — cho một nhân vật ĐANG mang trạng thái đó, trả họ về tu vi thật. RÀNG BUỘC TUYỆT ĐỐI: CHỈ được xuất thẻ này khi chính 'summary' của kịch bản có một SỰ KIỆN CHỮA TRỊ TƯỜNG MINH: uống linh đan/thần dược đúng công dụng, gặp kỳ ngộ lớn (suối linh, tiên duyên, bảo vật), hoặc được một danh y/cao nhân ra tay chữa trị. TUYỆT ĐỐI KHÔNG xuất thẻ này chỉ vì thời gian trôi qua, chỉ vì nhân vật nghỉ ngơi/tự tu, hay vì cốt truyện cần họ mạnh lên.)
                - TUYỆT ĐỐI KHÔNG tự chế ra các cấu trúc thẻ lệnh không nằm trong danh sách trên.
 
             YÊU CẦU ĐẦU RA: Chỉ trả về duy nhất một chuỗi JSON sạch đại diện cho mảng gồm chính xác 6 đối tượng. Tuyệt đối không bao bọc kết quả trong ký tự markdown như \`\`\`json ... \`\`\`. Không giải thích thêm.
@@ -26440,9 +26672,14 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
                     summary: { type: "STRING" },
                     classification_tags: { type: "ARRAY", items: { type: "STRING" } },
                     relevant_entities: { type: "ARRAY", items: { type: "STRING" } },
-                    commands: { type: "STRING" }
+                    commands: { type: "STRING" },
+                    // Pillar 1 (game-concept.md 243-255): API-1 self-scores whether the
+                    // scenario is a win for the protagonist. `overreachCap` uses it to
+                    // hold the total weight of "success" scenarios down when the target
+                    // is a tier or more above the player.
+                    outcome_for_player: { type: "STRING", enum: ["success", "partial", "failure"] }
                 },
-                required: ["probability", "summary", "classification_tags", "relevant_entities", "commands"]
+                required: ["probability", "summary", "classification_tags", "relevant_entities", "commands", "outcome_for_player"]
             }
         };
 
@@ -26480,6 +26717,45 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
             throw new Error("AI phân tích logic thất bại. Vui lòng thử lại.");
         }
         
+        // === Pillar 1 (c) OVERREACH SUCCESS CAP - game-concept.md 243-255 =====
+        // Prompt directives are advisory; this is the mechanical floor under them.
+        // When the strongest relevant NPC is a tier or more above the player, the
+        // TOTAL weight of `success` scenarios is capped and the excess moves to
+        // `failure`/`partial`. Runs BETWEEN the API-1 parse and the dice roll, so
+        // the roll itself is untouched.
+        // An injured NPC counts at its EFFECTIVE (reduced) level - being wounded is
+        // supposed to make it beatable.
+        try {
+            const capPlayer = knowledgeToUse.characters.find(c => c.isPlayer);
+            const capPlayerLevel = Number(capPlayer && capPlayer.level) || 1;
+            const seenNames = new Set();
+            const targetLevels = [];
+            scenarios.forEach(sc => {
+                (sc && sc.relevant_entities ? sc.relevant_entities : []).forEach(entityName => {
+                    if (!entityName || seenNames.has(entityName)) return;
+                    seenNames.add(entityName);
+                    const info = findLoreEntity(entityName, knowledgeToUse, capPlayer);
+                    if (!info || info.type !== 'NPC' || !info.data) return;
+                    if (info.data.isPlayer || info.data.isCompanion) return;
+                    const lvl = Number(info.data.level);
+                    if (Number.isFinite(lvl) && lvl > 0) targetLevels.push(lvl);
+                });
+            });
+            const capResult = capOverreach(scenarios, {
+                playerLevel: capPlayerLevel,
+                targetLevels,
+                knobs: OBJECTIVITY_KNOBS,
+            });
+            if (capResult.capped.applied) {
+                console.log('[objectivity] overreach cap applied:', capResult.capped);
+                scenarios = capResult.scenarios;
+            } else if (capResult.capped.tierGap >= 1) {
+                console.log('[objectivity] overreach cap checked, no change:', capResult.capped.notes);
+            }
+        } catch (capError) {
+            console.warn('[objectivity] overreach cap:', capError);
+        }
+
         const chosenScenario = rollDiceAndChooseScenario(scenarios);
         if (!chosenScenario) throw new Error("Không thể chọn kịch bản.");
 
@@ -26566,7 +26842,7 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
                     })
                     .map(npc => {
                         const profile = npc.isAppraised ? `Vai trò: ${npc.Role}. Thái độ: ${npc.Stance}. Tính cách: ${npc.Personality}. Ngoại hình: ${npc.Appearance}. Quá khứ: ${npc.Backstory}` : `Ghi chú: ${npc.description}`;
-                        return `${npc.Name} (Cấp ${npc.level} - ${profile})`;
+                        return `${npc.Name} (Cấp ${npc.level} - ${profile})${gapInjuryPromptSuffix(npc)}`;
                     })
                     .join('\n      - ') || "Không có ai khác ở quanh đây";
 
@@ -27077,6 +27353,11 @@ ${getModeInstruction()}
 
     const narrative = `
 ${supernaturalSealRules}
+// --- QUY TẮC THẾ GIỚI KHÁCH QUAN (PILLAR 1 - BẮT BUỘC, ÁP DỤNG CHO MỌI LƯỢT KỂ) ---
+// Nguồn: design/gdd/game-concept.md, trụ cột 1 "Thế Giới Khách Quan".
+// Thế giới có logic riêng và KHÔNG uốn cong quanh nhân vật chính.
+${PILLAR1_DIRECTIVES_NARRATION.map(x => '//    * ' + x).join('\n')}
+
 // QUY TẮC TƯỜNG THUẬT & TRÌNH BÀY
 
 // 0. VĂN PHONG & TỪ NGỮ (PHỤ THUỘC THỂ LOẠI THẾ GIỚI — xem "Chủ đề & Thể loại" ở mục A.5 bối cảnh):
@@ -29946,7 +30227,7 @@ ${questDetails}
                 })
                 .map(npc => {
                     const profile = npc.isAppraised ? `Vai trò: ${npc.Role}. Thái độ: ${npc.Stance}. Tính cách: ${npc.Personality}. Ngoại hình: ${npc.Appearance}. Quá khứ: ${npc.Backstory}` : `Ghi chú: ${npc.description}`;
-                    return `${npc.Name} (Cấp ${npc.level} - ${profile})${getCharacterStatusesString(npc)}${getCharacterTitleTag(npc)}`;
+                    return `${npc.Name} (Cấp ${npc.level} - ${profile})${gapInjuryPromptSuffix(npc)}${getCharacterStatusesString(npc)}${getCharacterTitleTag(npc)}`;
                 })
                 .join('\n      - ') || "Không có ai khác ở quanh đây";
             
@@ -32517,6 +32798,10 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
     // events here and resolved once, deterministically, in the reconciliation
     // block at the end of this function (order: death -> affinity -> EXP).
     const pendingSocialEvents = [];
+    // Pillar 1 (game-concept.md 243-255): system messages emitted when a level-gap
+    // injury is applied or healed this turn. Declared here (not near `p2Messages`,
+    // which is declared much further down) so the NPC-creation hook can reach it.
+    const objectivityMessages = [];
     let playerNarrativeDeathTriggered = false;
     const playerForTurn = (newKnowledge.characters || []).find(c => c && c.isPlayer);
     const playerIdForTurn = playerForTurn ? playerForTurn.id : null;
@@ -32727,6 +33012,24 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                 return;
             }
             
+            // === Pillar 1 RECOVERY PATH (i) - game-concept.md 243-255 ==========
+            // A healing/cleansing pill used ON a gap-injured character lifts the
+            // old wound: the status is dropped here and the reconciliation sweep
+            // at the end of this function restores the true level and the exact
+            // pre-injury stats from the snapshot.
+            try {
+                if (isGapInjured(character) || hasGapInjuryStatus(character)) {
+                    if (isHealingItemForGapInjury(itemToUse)) {
+                        character.longTermStatuses = (character.longTermStatuses || []).filter(st =>
+                            !(st && ((st.status_id || st.id) === GAP_INJURY_STATUS_ID || st.name === GAP_INJURY_STATUS_NAME)));
+                        console.log('[objectivity] healing item cleared gap injury status:',
+                            character.Name, '<-', itemToUse.Name);
+                    }
+                }
+            } catch (gapItemError) {
+                console.warn('[objectivity] hook useItemRecovery:', gapItemError);
+            }
+
             switch (itemToUse.Type) {
                 case 'Thực phẩm':
                 case 'Đan dược': {
@@ -32925,6 +33228,23 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                         npcToUpdate = autoAllocateNpcAp(npcToUpdate); 
                         console.log(`NPC mới "${npcToUpdate.Name}" nhận được ${bonusAp} AP thưởng.`);
                     }
+                    // === Pillar 1 HOOK 1 (game-concept.md 243-255) ==============
+                    // [WORLD_NPC]/[CREATE_NPC] with a hostile stance more than
+                    // HOSTILE_INITIATIVE_LEVEL_GAP_MAX levels above the player is
+                    // born already carrying an old wound: effective level capped,
+                    // true level preserved, recoverable. Uses the player's CURRENT
+                    // level at creation time.
+                    try {
+                        const pLevelForGap = Number(currentPlayer && currentPlayer.level) || 1;
+                        const gapResult = maybeApplyGapInjury(npcToUpdate, pLevelForGap, { turn: currentTurn });
+                        if (gapResult.applied) {
+                            npcToUpdate = gapResult.npc;
+                            if (gapResult.message) objectivityMessages.push(gapResult.message);
+                        }
+                    } catch (gapHookError) {
+                        console.warn('[objectivity] hook createNpc:', gapHookError);
+                    }
+
                     if (existingNpcIndex > -1) {
                         newKnowledge.characters[existingNpcIndex] = npcToUpdate;
                     } else {
@@ -33468,6 +33788,33 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
     (updates.relationships || []).forEach(rel => {
         // Văn bản quan hệ (Standing/Reason) vẫn do AI viết và vẫn được lưu như cũ.
         updateOrCreateInArray(newKnowledge.relationships, rel, 'NPC');
+        // === Pillar 1 HOOK 3a (game-concept.md 243-255) ======================
+        // A `Standing` that flips the NPC to hostile is a stance flip: an NPC who
+        // was harmless at +40 levels is now an opponent, so the gap rule applies.
+        // The band-based half of this hook runs in the reconciliation sweep at the
+        // end of this function, after affinity has actually been written.
+        try {
+            const relName = rel && (rel.NPC || rel.npc || rel.Name || rel.name);
+            if (relName && isHostileStance(rel.Standing || rel.standing)) {
+                const idx = newKnowledge.characters.findIndex(c => c && c.Name === relName);
+                const pLevel = Number(playerForTurn && playerForTurn.level) || 1;
+                if (idx > -1) {
+                    // `forceHostile`: the flip lives in the AI's Standing text, not
+                    // in `character.Stance` - do NOT overwrite the stored stance here.
+                    const gapResult = maybeApplyGapInjury(
+                        newKnowledge.characters[idx],
+                        pLevel,
+                        { turn: currentTurn, provoked: true, forceHostile: true },
+                    );
+                    if (gapResult.applied) {
+                        newKnowledge.characters[idx] = gapResult.npc;
+                        if (gapResult.message) objectivityMessages.push(gapResult.message);
+                    }
+                }
+            }
+        } catch (gapHookError) {
+            console.warn('[objectivity] hook relationshipStance:', gapHookError);
+        }
         // gdd-03 CR#2 + plan.md C-1: CON SỐ hảo cảm KHÔNG còn do AI quyết định.
         // Thẻ chỉ được phân loại thành một sự kiện xã hội theo bảng D.1; độ lớn
         // luôn tra từ bảng đó, dấu (+/-) của AI chỉ dùng làm phương án dự phòng
@@ -33938,6 +34285,82 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
         } catch (affinityError) {
             console.error('[Affinity] Khong tinh duoc hao cam luot nay:', affinityError);
         }
+    }
+
+    // === Pillar 1 RECONCILIATION SWEEP (game-concept.md 243-255) =============
+    // Single place where the level-gap injury is reconciled with the world state,
+    // so EVERY status-clear path (RECOVER_INJURY, a healing pill, an API-3
+    // status write, a CHARACTER_UPDATE `longtermstatuses:-...`) restores the true
+    // level through exactly one code path.
+    //
+    // Order matters:
+    //   1. `[RECOVER_INJURY]` strips the status (the tag itself carries no number);
+    //   2. every NPC whose record says "injured" but whose status is gone is healed
+    //      - true level and the exact pre-injury base stats come from the snapshot;
+    //   3. hostility that emerged from the AFFINITY BAND this turn (hook 3b) is
+    //      caught, unless the NPC was healed at some point (see below).
+    //
+    // ASSUMPTION (documented): once healed, an NPC is NOT re-injured by a later
+    // band flip. The wound is a one-time piece of backstory, not a rubber band; a
+    // healed grandmaster is genuinely out of the player's league, which is exactly
+    // what Pillar 1 asks for. A fresh hostile encounter/creation may still injure a
+    // DIFFERENT NPC, and the prompt directives keep such a grandmaster from hunting
+    // the player unprovoked.
+    try {
+        const swpPlayer = (newKnowledge.characters || []).find(c => c && c.isPlayer);
+        const swpPlayerLevel = Number(swpPlayer && swpPlayer.level) || 1;
+
+        (updates.recoverInjuryFor || []).forEach(entry => {
+            const rname = entry && (entry.Name || entry.name || entry.target || entry.NPC);
+            if (!rname) return;
+            const idx = (newKnowledge.characters || []).findIndex(c => c && c.Name === rname);
+            if (idx === -1) {
+                console.warn('[objectivity] RECOVER_INJURY: khong tim thay nhan vat', rname);
+                return;
+            }
+            const ch = newKnowledge.characters[idx];
+            if (!isGapInjured(ch) && !hasGapInjuryStatus(ch)) {
+                console.warn('[objectivity] RECOVER_INJURY bi bo qua - nhan vat khong trong thuong:', rname);
+                return;
+            }
+            ch.longTermStatuses = (ch.longTermStatuses || []).filter(st =>
+                !(st && ((st.status_id || st.id) === GAP_INJURY_STATUS_ID || st.name === GAP_INJURY_STATUS_NAME)));
+        });
+
+        (newKnowledge.characters || []).forEach((ch, idx) => {
+            if (!ch || ch.isPlayer) return;
+            if (isGapInjured(ch) && !hasGapInjuryStatus(ch)) {
+                const healed = maybeRecoverGapInjury(ch);
+                if (healed.recovered) {
+                    healed.npc.gapInjuryHealed = true;
+                    newKnowledge.characters[idx] = healed.npc;
+                    if (healed.message) objectivityMessages.push(healed.message);
+                }
+            }
+        });
+
+        (newKnowledge.characters || []).forEach((ch, idx) => {
+            if (!ch || ch.isPlayer || ch.isCompanion || ch.isPermanentlyDead) return;
+            if (ch.gapInjuryHealed === true) return;
+            const band = typeof ch.affinity === 'number' ? attitudeBand(ch.affinity) : null;
+            if (!band || !isHostileStance(band)) return;
+            const applied = maybeApplyGapInjury(ch, swpPlayerLevel, { turn: currentTurn, forceHostile: true });
+            if (applied.applied) {
+                newKnowledge.characters[idx] = applied.npc;
+                if (applied.message) objectivityMessages.push(applied.message);
+            }
+        });
+    } catch (sweepError) {
+        console.warn('[objectivity] reconciliation sweep:', sweepError);
+    }
+
+    if (objectivityMessages.length > 0) {
+        setTimeout(() => {
+            const entries = objectivityMessages.map(msg => ({
+                id: crypto.randomUUID(), type: 'system', content: '**[Hệ thống]** ' + msg, transient: true,
+            }));
+            setStoryHistory(prevHistory => [...prevHistory, ...entries]);
+        }, 100);
     }
 
     if (p2Messages.length > 0) {
@@ -35469,6 +35892,8 @@ const formatEntityForPrompt = (entityInfo) => {
             ? `${attitudeBand(data.affinity)}${data.affinityDirection ? ', ' + data.affinityDirection : ''}`
             : null;
         details += ` (Cấp ${data.level || 1}, Thái độ: ${data.Stance || 'Trung lập'}`;
+        // Pillar 1: say the realm is suppressed, never say by how much.
+        if (isGapInjured(data)) details += `, Thương thế: ${GAP_INJURY_PROMPT_HINT}`;
         if (attitudeLine) details += `, Hảo cảm với ngươi: ${attitudeLine}`;
         details += `, Tính cách: ${data.Personality || 'Bình thường'}`;
         if (data.Role) details += `, Thân phận: ${data.Role}`;
