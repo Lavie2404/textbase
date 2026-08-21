@@ -1,6 +1,42 @@
-# Session State — Checkpoint 2026-08-14
+# Session State — Checkpoint 2026-08-17
 
 ## ĐANG LÀM (mở phiên mới → đọc mục này trước)
+
+**TÁC VỤ LỚN (17-08): Tích hợp GDD vào game (`App.tsx`).** User yêu cầu
+"Đưa các GDD đã thiết lập vào game", **trừ Combat GDD và Song Tu** (giữ
+nguyên code hiện tại, chỉ đọc qua adapter). Toàn bộ kế hoạch + 14 quyết
+định xung đột đã chốt: `production/gdd-integration/plan.md` (đọc mục
+"Quyết định đã chốt" đầu file). Hợp đồng triển khai từng GDD (bản chắt
+lọc, tiếng Anh): `production/gdd-integration/gdd-0{1..6}-*.md`; bản đồ
+kiến trúc App.tsx kèm số dòng: `production/gdd-integration/app-map.md`.
+Lộ trình rút gọn: P0 → P1 → P2 → P3(rút gọn) → P4 → P6(rút gọn); bỏ P5.
+Commit 1 lần mỗi giai đoạn khi test + build xanh, không push.
+
+**Tiến độ giai đoạn:**
+- [x] P0 — Vitest scaffold, `src-web/systems/{types,registry,math,configValidation}.ts`, adapters combat/songTu
+- [x] P1 — EXP & Realm (cổng Chờ Đột Phá, 4 nguồn tất định) + Equipment data
+- [x] P2 — Affinity D.1–D.6 (7 dải, deep_hostile −80) + Death (death_roll/severity/recovery, crippled = longTermStatus)
+- [x] P3 — World Memory fact store + Persistence v2 (IndexedDB nguồn chân lý, durability gate, schema_version)
+- [x] P4 — Turn Manager (Undo) + Contract (chặn tag cơ học, leak detector) + AI wrapper (timeout 60/45s)
+- [x] P6 — Character Card, Settings gom nhóm, Customization validators
+- [x] P7 — CI vitest (.github/workflows/test.yml)
+- [x] Review lead-programmer 26 phát hiện → đã sửa (2 BLOCKER + 5 HIGH + MEDIUM/LOW), commit 52237f3 + dbd9a73
+- [x] Smoke boot Chrome headless (build với env Firebase giả): mount OK, màn chọn chế độ OK — `production/qa/evidence/smoke-setup-2026-08-17.png`
+
+- [x] Pillar 1 bổ sung (21-08, user chốt a+b+c): chỉ thị khách quan trong API-1/API-2; luật TRỌNG THƯƠNG theo chênh cấp >20 (cấp hiệu lực = player+20, cấp thật giữ trong `gapInjury.trueLevel`, hồi phục qua linh đan/kỳ ngộ/`[RECOVER_INJURY]`, không tự hồi theo thời gian); trần xác suất vượt tầm (`outcome_for_player` + `capOverreach`). Module `src-web/systems/objectivity/`, 113 test.
+
+- [x] Pillar 1 siết thêm (21-08): chỉ thị "Khen phải có căn cứ và đúng tầm" — NPC hảo cảm cao chỉ được khen việc cụ thể, mức khen tỷ lệ chênh lệch thực lực; bộ chỉ thị API-2 = 6 mục (`d6069bc`).
+
+**Trạng thái**: HOÀN TẤT lộ trình rút gọn + Pillar 1 — 12 commit, 1231 unit test xanh, build xanh.
+**Còn treo (không chặn, ghi từ báo cáo agent)**: Story Log S4 phân trang UI; live-window
+eviction; delete-batch UI của Customization (`validateDeleteBatch` chưa dùng); khối ⑤
+combat status trên thẻ (không truyền ctx combat); nhãn `callSite` cụ thể cho ~20 call
+nền (đang là 'generic'); HTAB AFFINITY_CHANGED nằm ngoài C-1; API-3 chưa thu hẹp về
+chỉ thời gian/vị trí (C-9 giai đoạn 2); chưa test thật với Gemini key (cần chơi thử).
+
+---
+
+## (Cũ, 14-08) ĐANG LÀM trước đó
 
 **MỚI NHẤT (14-08, phiên sau)**: `prototypes/ui-mockup/index.html` — mockup
 HTML tương tác 1 file cho 3 màn đã APPROVED (S1 + S2 + O-Set), kèm

@@ -6,6 +6,198 @@ import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateD
 import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { GAME_CONFIG } from './gameConfig.js';
 
+// === P1 - deterministic gameplay systems (production/gdd-integration/plan.md P1) ===
+// These modules are pure TS (no React, no fetch). App.tsx only CALLS them at the
+// fixed hook points listed in plan.md; it never re-implements their formulas.
+import { validateGameConfig, expKnobsFromGameConfig } from './src-web/systems/exp/gameConfigAdapter';
+import { expThreshold as systemsExpThreshold } from './src-web/systems/exp/expThreshold';
+import {
+    PROGRESSION_STATE_NORMAL,
+    PROGRESSION_STATE_WAITING,
+    computeTurnExp,
+    tryExecuteBreakthrough,
+    turnViewFromHandoff,
+    idleTurnView,
+} from './src-web/systems/exp/resolveTurnExp';
+import { toCombatHandoff } from './src-web/systems/adapters/combatAdapter';
+import { getSongTuActiveNpcIds } from './src-web/systems/adapters/songTuAdapter';
+import { tierFromLevel } from './src-web/systems/math';
+import { makeThucId } from './src-web/systems/equipment/schema';
+import { markEverEquipped } from './src-web/systems/equipment/loadout';
+
+// === P2 - NPC Affinity + Death & Consequence (plan.md P2, gdd-03) ============
+// Same contract as P1: pure modules own every mechanical NUMBER, App.tsx only
+// classifies what the AI said and applies what the module locked (plan.md C-1).
+import {
+    affinityKnobsFromGameConfig,
+    deathKnobsFromGameConfig,
+} from './src-web/systems/exp/gameConfigAdapter';
+import { resolveTurnAffinity } from './src-web/systems/affinity/resolveTurnAffinity';
+import { attitudeBand, bandCrossingMessage } from './src-web/systems/affinity/bands';
+import { ensureAffinityState } from './src-web/systems/affinity/state';
+import {
+    classifyRelationshipTag,
+    classifyFromCombatHandoff,
+    classifyKillWitnessed,
+} from './src-web/systems/affinity/classifyFromTags';
+import {
+    resolveDeathConsequence,
+    resolvePendingFate,
+    CRIPPLED_RECOVERED_MESSAGE,
+} from './src-web/systems/death/resolveDeathConsequence';
+import {
+    ensureDeathState,
+    getDeathCharState,
+    withDeathCharState,
+} from './src-web/systems/death/state';
+import { classifyFateIntent } from './src-web/systems/death/pendingFate';
+import { attemptRecovery, RECOVERY_METHOD_LABELS } from './src-web/systems/death/recovery';
+
+// === P3b / P4b wiring (production/gdd-integration/plan.md sections D/P3, D/P4) ===
+// Persistence v2 (C-2: IndexedDB is the source of truth, GitHub is a backup),
+// World Memory fact store (C-8: runs ALONGSIDE the AI summariser), Turn Manager
+// + one-turn Undo (C-13), Contract Enforcement (C-1 hybrid tag policy + leak
+// detector) and the single AI call site (C-9 background exemption, C-10 timeouts).
+import { IndexedDbBackend } from './src-web/systems/persistence/storageBackend';
+import { saveCheckpoint } from './src-web/systems/persistence/saveCheckpoint';
+import { loadSlot, worldMemoryFromBundle } from './src-web/systems/persistence/loadSlot';
+import { createSlotRecord, CURRENT_SCHEMA_VERSION } from './src-web/systems/persistence/slotRecord';
+import { exportKeepsake } from './src-web/systems/persistence/exportKeepsake';
+import { exportQaLogJson } from './src-web/systems/persistence/exportQaLog';
+import { WorldMemory } from './src-web/systems/worldMemory/worldMemory';
+import { worldMemoryFromAppHistory } from './src-web/systems/worldMemory/fromAppHistory';
+import { createTurnManager } from './src-web/systems/turn/turnManager';
+import { makeAppStateUndoable } from './src-web/systems/turn/undoAppState';
+// `sanitizeCommandBlock` is now reached through `turnGlue.sanitizeCommandBlockForApply`
+// (code review C-8), which owns the fail-closed degradation ladder.
+import { createSessionLeakLog, leakCheckAndRecord } from './src-web/systems/contract/leakDetector';
+import { createAiSessionState, requestAi } from './src-web/systems/ai/requestAi';
+import { DEFAULT_AI_CONFIG, SAFETY_SETTINGS_BLOCK_NONE } from './src-web/systems/ai/config';
+import { AI_KNOBS, PERSISTENCE_KNOBS } from './src-web/systems/registry';
+import * as turnGlue from './src-web/systems/glue/turnGlue';
+
+// === P6b - UI wiring (plan.md P6 reduced: Card + Settings grouping + Customize
+// validators). Same contract as P1-P4b: these modules are pure TS and own every
+// display RULE; App.tsx only renders what they return and keeps its own
+// handlers. Song Tu (handleSongTu + the affinity >= 80 gate) and CombatLoop are
+// explicitly out of scope (plan.md C-6) and are only READ from here.
+import { buildCardBlocks } from './src-web/systems/card/cardBlocks';
+import { expToNextForCard, expBarRatio, AWAITING_BREAKTHROUGH } from './src-web/systems/card/expToNext';
+import { baseStatCompletenessCheck } from './src-web/systems/card/baseStatCompleteness';
+import { groupedSettings } from './src-web/systems/ui/settingsGroups';
+import { FONT_SIZE_LABELS, FONT_SIZE_SETTINGS, applyPreset, applyAdvancedSlider, effectiveScale, presetFromTextScale } from './src-web/systems/ui/fontScale';
+import { isWriteActionAllowed, undoButtonState } from './src-web/systems/ui/writeActionAllowed';
+import { createBannerQueue } from './src-web/systems/ui/bannerQueue';
+import { TOUCH_TARGET_MIN } from './src-web/systems/ui/touchTarget';
+import { customizeButtonVisibility, validateProgressZone, isValidBaseStatSet, isValidSkillSubmit, isValidItemSubmit } from './src-web/systems/customize/validators';
+
+// === Pillar 1 - "The Gioi Khach Quan" (design/gdd/game-concept.md 38-100, 243-255)
+// Three features, all pure modules + thin hooks here:
+//   (a) prompt directives that stop the world bending around the protagonist;
+//   (b) the LEVEL-GAP INJURY: a hostile more than HOSTILE_INITIATIVE_LEVEL_GAP_MAX
+//       levels above the player is "Trong Thuong" - effective level capped at
+//       player.level + 20, true level preserved, fully recoverable;
+//   (c) the OVERREACH SUCCESS CAP on API-1's scenario weights.
+import {
+    PILLAR1_DIRECTIVES_LOGIC,
+    PILLAR1_DIRECTIVES_NARRATION,
+} from './src-web/systems/contract/narrationDirectives';
+import {
+    GAP_INJURY_STATUS_ID,
+    GAP_INJURY_STATUS_NAME,
+    GAP_INJURY_PROMPT_HINT,
+    applyGapInjury,
+    recoverGapInjury,
+    shouldApplyGapInjury,
+    isGapInjured,
+    hasGapInjuryStatus,
+    isHostileStance,
+    gapInjuryAppliedMessage,
+    gapInjuryRecoveredMessage,
+} from './src-web/systems/objectivity/levelGapInjury';
+import { capOverreach } from './src-web/systems/objectivity/overreachCap';
+import { HOSTILE_INITIATIVE_LEVEL_GAP_MAX, OBJECTIVITY_KNOBS } from './src-web/systems/registry';
+import { createCommitController } from './src-web/systems/customize/commitFlow';
+import { estimateOriginQuota } from './src-web/systems/persistence/quota';
+import { pruneCheckpoints } from './src-web/systems/persistence/saveCheckpoint';
+import * as uiGlue from './src-web/systems/glue/uiGlue';
+
+// gdd-02 A3 / EC-8: every tuning constant is validated ONCE at load, before a
+// play session begins - never with a release-stripped assert. In dev the throw
+// stops the app so the bad value is fixed immediately; in a production build we
+// log loudly instead of bricking an existing player's save.
+try {
+    validateGameConfig();
+} catch (configError) {
+    if (import.meta.env && import.meta.env.DEV) throw configError;
+    console.error('[gameConfig] Cau hinh he thong khong hop le:', configError);
+}
+
+/** gdd-02 A5 knob block, read once from gameConfig.js section 16. */
+const EXP_KNOBS = expKnobsFromGameConfig();
+
+// === P3b/P4b session-scoped singletons ======================================
+// One IndexedDB backend per document (gdd-05 B3: a slot is opened once, and the
+// multi-tab lock lives on the backend). Created lazily so a browser without
+// IndexedDB - or a unit-test environment that never touches App.tsx - never
+// pays for it. Every consumer goes through try/catch: a persistence failure
+// logs under "[systems]" and never blocks a turn (plan.md P4b rule 8).
+let systemsBackendInstance = null;
+const getSystemsBackend = () => {
+    if (systemsBackendInstance) return systemsBackendInstance;
+    try {
+        systemsBackendInstance = new IndexedDbBackend();
+    } catch (backendError) {
+        console.error('[systems] Khong khoi tao duoc kho luu tru IndexedDB:', backendError);
+        systemsBackendInstance = null;
+    }
+    return systemsBackendInstance;
+};
+
+/** gdd-01 C.3 AiLayerState. Wall-clock cooldowns, deliberately NOT persisted. */
+const aiSessionState = createAiSessionState();
+
+/** gdd-01 B.5 F2/F3 session log; exported from Settings as "Nhat ky khe uoc". */
+const contractSessionLog = createSessionLeakLog();
+
+/** Kept for the Settings export; the newest entries are the useful ones. */
+const CONTRACT_LOG_EXPORT_LIMIT = 500;
+
+/** gdd-03 1.5 / 2.5 knob blocks, read once from gameConfig.js sections 19 and 20. */
+const AFFINITY_KNOBS = affinityKnobsFromGameConfig();
+const DEATH_KNOBS = deathKnobsFromGameConfig();
+
+/**
+ * plan.md C-11: the GDD "crippled" consequence ships as a long-term status
+ * instead of a combat multiplier, so `CombatLoop` stays untouched. This id is
+ * the single source of truth for that link.
+ */
+/**
+ * gdd-06 B D.5 `base_stat_completeness_check`. DEVIATION (plan.md P6b, recorded
+ * deliberately): the GDD blocks turn confirmation on an incomplete base-stat
+ * record. The shipped App has only 9 of the GDD's 12 stats and generates NPCs
+ * from AI text, so blocking would stall the game on a CONTENT gap the player
+ * cannot fix. We log the gap under "[systems]" instead and let the turn proceed.
+ */
+const logBaseStatCompleteness = (appChar, where) => {
+    try {
+        const result = baseStatCompletenessCheck(uiGlue.gddBaseStatsFromApp(appChar));
+        if (!result.ok) {
+            console.warn(
+                '[systems] Thiếu chỉ số gốc (' + where + ') cho "' + ((appChar && (appChar.Name || appChar.name)) || '?') + '":',
+                result.issues.map(issue => issue.stat + ':' + issue.reason).join(', ')
+            );
+        }
+        return result;
+    } catch (statCheckError) {
+        console.error('[systems] baseStatCompletenessCheck:', statCheckError);
+        return null;
+    }
+};
+
+const CRIPPLED_STATUS_ID = 'PHE_DAN_DIEN';
+const CRIPPLED_STATUS_NAME = 'Phế Đan Điền';
+
 const Cog6ToothIcon = ({className="w-5 h-5"}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path fillRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.905 1.523L9.017 8.429a1.875 1.875 0 0 1-.445 1.035l-2.833 2.833a1.875 1.875 0 0 0 0 2.652l2.833 2.833c.28.28.626.445.994.445s.714-.165.994-.445l2.832-2.833a1.875 1.875 0 0 1 1.036-.445l4.906-.153c.94-.03 1.686-.786 1.686-1.727V9.28c0-.94-.747-1.697-1.686-1.727l-4.906-.153a1.875 1.875 0 0 1-1.036-.445l-2.832-2.833A1.875 1.875 0 0 0 11.078 2.25ZM12.75 9a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Z" clipRule="evenodd" /></svg>;
 const CircleStackIcon = ({className="w-4 h-4"}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}><path d="M10 1a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM9 5.5a.75.75 0 0 1 .75-.75h.5a.75.75 0 0 1 0 1.5h-.5A.75.75 0 0 1 9 5.5Zm1 2.25a.75.75 0 0 0-1.5 0v3.5a.75.75 0 0 0 1.5 0v-3.5Z" /></svg>;
 const ChartBarIcon = ({className="w-5 h-5"}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}><path d="M2 3a1 1 0 0 1 1-1h1.5a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3ZM8.5 3a1 1 0 0 1 1-1h1.5a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H9.5a1 1 0 0 1-1-1V3ZM15 3a1 1 0 0 1 1-1h1.5a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H16a1 1 0 0 1-1-1V3Z" /></svg>;
@@ -2119,6 +2311,9 @@ const INITIAL_STATS = {
     loreId: null, // ID của bản ghi LORE gốc (nếu có)
     level: 1,
     exp: 0,
+    // gdd-02 A3: hai trang thai duy nhat, "Tu Luyen Thuong" | "Cho Dot Pha".
+    // `tier` la gia tri DAN XUAT (tierFromLevel) - tuyet doi khong luu.
+    progressionState: 'Tu Luyện Thường',
     ap: GAME_CONFIG.startingStats.ap,
     currency: 0,
     allocatedPoints: { hp: 0, atk: 0, def: 0, spd: 0 },
@@ -4185,6 +4380,17 @@ const LONG_TERM_STATUS_TEMPLATES = {
         type: "injury",
         description: "Vết thương không ngừng rỉ máu, khiến cơ thể suy yếu dần theo thời gian.",
         effects_per_day: { hp_percent_loss: 5 } // Mất 5% HP tối đa mỗi ngày
+    },
+    // Phế Đan Điền (gdd-03 D.2 bậc "nặng" — quyết định C-11)
+    // Không đụng vào CombatLoop: hiệu ứng suy yếu đi qua hạ tầng trạng thái dài
+    // hạn sẵn có (parseStatsBonus), đồng thời chặn tích lũy EXP ở khối đối soát
+    // cuối applyUpdates. Chỉ D.3 (hồi phục thành công) mới gỡ được.
+    PHE_DAN_DIEN: {
+        id: "PHE_DAN_DIEN",
+        name: "Phế Đan Điền",
+        type: "injury",
+        description: "Đan điền vỡ nát, kinh mạch tổn hại. Tu vi không thể tích lũy cho tới khi được chữa trị bằng đại cơ duyên, tiên thảo dị bảo hoặc khổ công tự tu.",
+        stats: "atk_amp:-15,def_amp:-15,spd_amp:-15",
     },
     // Trúng độc (Vĩnh viễn, mất máu theo ngày)
     TRUNG_DOC: {
@@ -6820,6 +7026,8 @@ const CharacterInfoModal = ({
     generatingAvatars,
     generatingSprites,
     handleRegenerateSingleSprite,
+    handleRecoveryAttempt,
+    currentTurn = 0,
     initialTab = 'character'
 }) => {
     const [activeInfoTab, setActiveInfoTab] = useState('character');
@@ -6951,9 +7159,22 @@ const CharacterInfoModal = ({
         
         const level = finalStatsCharacter.level || 1;
         const realmInfo = getRealmInfoFromLevel(level, knowledge.realmProgressionList);
-        const expPercent = (finalStatsCharacter.maxExp && finalStatsCharacter.maxExp > 0)
-            ? ((finalStatsCharacter.exp || 0) / finalStatsCharacter.maxExp) * 100
-            : 0;
+        // gdd-06 B D.3 (`exp_to_next`): the EXP element is PROTAGONIST-only and
+        // must respect the "Chờ Đột Phá" sentinel - a full bar with no remaining
+        // number, never a negative or a wrapped value. The bar ratio comes from
+        // the same pure module so the two can never disagree.
+        const cardExpProgress = {
+            level,
+            current_exp: finalStatsCharacter.exp || 0,
+            is_player: finalStatsCharacter.isPlayer === true,
+        };
+        const expToNextValue = expToNextForCard(cardExpProgress);
+        const expPercent = expBarRatio(cardExpProgress) * 100;
+        const expRemainingText = expToNextValue === null
+            ? null
+            : (expToNextValue === AWAITING_BREAKTHROUGH
+                ? 'Chờ Đột Phá'
+                : 'còn ' + (Number.isInteger(expToNextValue) ? expToNextValue : expToNextValue.toFixed(1)) + ' EXP tới cấp kế');
     
         const StatRow = ({ icon, label, value, valueColor, unit = '' }) => (
             <div className="flex items-center justify-between text-sm py-2 px-3 border-b border-[#cda45e]/20 last:border-0 hover:bg-[#162216] transition-colors">
@@ -7048,6 +7269,13 @@ const CharacterInfoModal = ({
                         <p className="text-base md:text-lg font-bold text-[#cda45e] tracking-widest uppercase mb-2">
                             {`Cấp ${level} - ${realmInfo.realmName} Tầng ${realmInfo.realmTier}`}
                         </p>
+                        {/* gdd-02 Core Rule #12: trang thai Cho Dot Pha BAT BUOC co tin hieu
+                            dinh tinh cho nguoi choi, va tin hieu do KHONG duoc tiet lo dieu kien. */}
+                        {finalStatsCharacter.progressionState === 'Chờ Đột Phá' && (
+                            <p className="text-[10px] md:text-xs font-bold text-[#ff4d4d] tracking-widest uppercase mb-2 border border-[#ff4d4d]/40 px-2 py-0.5 bg-[#2a1010]">
+                                Chờ Đột Phá
+                            </p>
+                        )}
                         <div className="w-full bg-[#0a0f0a] h-2.5 border border-[#cda45e]/30 shadow-[inset_0_0_5px_rgba(0,0,0,0.8)] relative overflow-hidden">
                             <div className="bg-gradient-to-r from-[#cda45e]/50 to-[#e8d3a1] h-full transition-all duration-700 ease-out relative" style={{ width: `${expPercent}%` }}>
                                 <div className="absolute inset-0 bg-white/10"></div>
@@ -7055,6 +7283,7 @@ const CharacterInfoModal = ({
                         </div>
                         <p className="text-[10px] text-[#8ba888] mt-2 font-mono font-bold tracking-widest uppercase">
                             {finalStatsCharacter.exp || 0} / {finalStatsCharacter.maxExp || '??'} EXP
+                            {expRemainingText && <span className="ml-2 normal-case text-[#a3b8a3]">({expRemainingText})</span>}
                         </p>
                     </div>
                 </div>
@@ -7083,6 +7312,41 @@ const CharacterInfoModal = ({
                                     <h4 className="text-sm font-bold text-[#cda45e] uppercase tracking-widest mb-4 flex items-center border-b border-[#cda45e]/20 pb-2">
                                         <ClipboardDocumentCheckIcon className="w-5 h-5 mr-2" /> Trạng Thái
                                     </h4>
+                                    {/* gdd-03 D.2/D.3 (plan.md P2): consequence tier, the crippled flag
+                                        and the self-cultivation recovery attempt. Player-facing copy is
+                                        Vietnamese; the mechanics live in src-web/systems/death/. */}
+                                    {(() => {
+                                        const deathRecord = (knowledge.deathState || {})[finalStatsCharacter.id];
+                                        if (!deathRecord) return null;
+                                        const crippled = deathRecord.death_and_consequence_blocked === true;
+                                        if (!crippled && !deathRecord.severity) return null;
+                                        const lastAttempt = deathRecord.recovery_progress ? deathRecord.recovery_progress.last_self_attempt_turn : null;
+                                        const turnsLeft = (lastAttempt === null || lastAttempt === undefined)
+                                            ? 0
+                                            : Math.max(0, DEATH_KNOBS.RECOVERY_SELF_COOLDOWN_TURNS - (currentTurn - lastAttempt));
+                                        return (
+                                            <div className="mb-3 p-2 bg-[#0a0f0a] border border-red-500/30">
+                                                <p className="text-[11px] text-red-300">
+                                                    <strong>Hậu quả bại trận:</strong> {deathRecord.consequence_type || 'không rõ'}
+                                                    {deathRecord.severity ? ` (mức ${deathRecord.severity === 'severe' ? 'nặng' : deathRecord.severity === 'medium' ? 'vừa' : 'nhẹ'})` : ''}
+                                                </p>
+                                                {crippled && (
+                                                    <>
+                                                        <p className="text-[11px] text-red-400 mt-1">Đan điền bị phế: không thể tích lũy tu vi cho tới khi hồi phục.</p>
+                                                        {handleRecoveryAttempt && finalStatsCharacter.isPlayer && (
+                                                            <button
+                                                                onClick={() => handleRecoveryAttempt(finalStatsCharacter.id, 'tu_tu')}
+                                                                disabled={turnsLeft > 0}
+                                                                className="mt-2 w-full bg-[#1b2a1b] border border-[#cda45e] hover:bg-[#cda45e]/20 text-[#cda45e] font-bold py-1.5 px-3 uppercase tracking-widest text-[10px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                Tự Tu Hồi Phục{turnsLeft > 0 ? ` (còn ${turnsLeft} lượt)` : ''}
+                                                            </button>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
                                     <div className="space-y-3">
                                         {Object.keys(groupedStatuses).length > 0 ? (
                                             Object.entries(groupedStatuses).map(([groupName, statuses]) => (
@@ -7571,104 +7835,186 @@ const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledg
             skillsToShow = finalStats.skills || [];
         }
 
+        // gdd-06 B4 "card build algorithm": the six blocks, their order, the
+        // concealment badges and the two mutating buttons are decided by the PURE
+        // module; this component only prints what it returns. plan.md C-6: the
+        // Song Tu threshold stays here in App.tsx and is injected as a predicate,
+        // so the card itself holds no number of its own.
+        const weaponItem = (finalStats.equippedItems && finalStats.equippedItems['Vũ khí chính']) || null;
+        const isCrippled = (finalStats.longTermStatuses || []).some(st => st && (st.id === CRIPPLED_STATUS_ID || st.Name === CRIPPLED_STATUS_NAME));
+        const card = buildCardBlocks(
+            uiGlue.cardCharacterFromApp({ ...finalStats, displayName: displayCharacterName }),
+            uiGlue.cardContextFromApp({
+                appChar: finalStats,
+                tmLocked: !!isProcessingAction,
+                weaponName: weaponItem ? (weaponItem.Name || weaponItem.name) : null,
+                skillNames: skillsToShow.map(sk => sk && (sk.Name || sk.name)).filter(Boolean),
+                showSongTuButton: (npc) => (npc.affinity || 0) >= 80,
+                realmNames: knowledge.realmProgressionList,
+                crippled: isCrippled,
+                // Pillar 1: the card shows the SUPPRESSED level plus a "can be
+                // healed" line; `trueLevel` is never rendered as a number.
+                gapInjured: isGapInjured(finalStats) || hasGapInjuryStatus(finalStats),
+            })
+        );
+
+        const CardFieldLine = ({ field }) => (
+            <p className="scale-text-sm text-[#e8d3a1]">
+                <strong className="text-[#8ba888]">{field.label}:</strong>{' '}
+                <ExpandableText text={String(field.text || '—')} maxLength={140} />
+                {field.badge && (
+                    <span className="ml-2 scale-text-xs text-[#a3b8a3] border border-[#a3b8a3]/40 px-1 py-0.5 align-middle">「{field.badge}」</span>
+                )}
+            </p>
+        );
+
+        const renderCardBlock = (blockId) => {
+            switch (blockId) {
+                case 'profile':
+                    return (
+                        <div key="profile" className="p-4 bg-[#101a10] border border-[#cda45e]/30 space-y-3">
+                            <h5 className="font-bold text-[#cda45e] uppercase tracking-widest scale-text-sm border-b border-[#cda45e]/20 pb-1" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>{card.profile.label}</h5>
+                            {finalStats.titles?.length > 0 && (
+                                <p className="scale-text-sm text-pink-300">({finalStats.titles.join(', ')})</p>
+                            )}
+                            {card.profile.fields.filter(f => (f.text !== '' && f.text !== 'null') || f.badge).map(f => <CardFieldLine key={f.key} field={f} />)}
+                            {finalStats.Stance && <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Thái độ:</strong> {finalStats.Stance}</p>}
+                            {card.statusLines.length > 0 && (
+                                <p className="scale-text-xs text-[#a3b8a3] italic">{card.statusLines.join(' · ')}</p>
+                            )}
+
+                            {/* Các nút hành động giữ nguyên handler cũ (plan.md C-6). */}
+                            {!finalStats.isPlayer && (finalStats.affinity || 0) >= 50 && !finalStats.isCompanion && handleRecruitCompanion && (
+                                <div className="mt-3 pt-3 border-t border-[#cda45e]/20 text-center">
+                                    <button
+                                        onClick={() => handleRecruitCompanion(finalStats.id)}
+                                        disabled={isProcessingAction}
+                                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                        className="bg-[#1b2a1b] border border-pink-400 hover:bg-pink-400/20 text-pink-300 font-bold py-2 px-4 uppercase tracking-widest scale-text-xs shadow-[inset_0_0_10px_rgba(244,114,182,0.1)] transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <SparklesIcon className="w-4 h-4 inline-block mr-1 -mt-1"/> Mời Đồng Hành Gia Nhập Tổ Đội
+                                    </button>
+                                </div>
+                            )}
+
+                            {!finalStats.isPlayer && !finalStats.isCompanion && !finalStats.isAppraised && !finalStats.posSlot && handleAppraiseNpc && (
+                                <div className="mt-3 pt-3 border-t border-[#cda45e]/20 text-center">
+                                    <button
+                                        onClick={() => {
+                                            onClose();
+                                            handleAppraiseNpc(finalStats.id);
+                                        }}
+                                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                        className="bg-[#1b2a1b] border border-[#cda45e] hover:bg-[#cda45e]/20 text-[#cda45e] font-bold py-2 px-4 uppercase tracking-widest scale-text-xs shadow-[inset_0_0_10px_rgba(205,164,94,0.1)] transition-colors w-full"
+                                    >
+                                        <SparklesIcon className="w-4 h-4 inline-block mr-1 -mt-1"/> Giám Định Tiểu Sử
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    );
+                case 'combat_stats':
+                    if (finalStats.level === undefined) return null;
+                    return (
+                        <div key="combat_stats" className="p-3 bg-[#101a10] border border-[#cda45e]/30 relative overflow-hidden">
+                            <h5 className="font-bold text-[#ff4d4d] uppercase tracking-widest scale-text-sm mb-2" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>{card.combatStats.label}</h5>
+
+                            <div className="flex justify-between items-center bg-[#0a0f0a] border border-[#cda45e]/10 p-2 mb-2 flex-wrap gap-x-2">
+                                <span className="text-[#8ba888] scale-text-xs uppercase tracking-widest">Cấp Độ:</span>
+                                <span className="font-bold text-[#e8d3a1] tracking-wider scale-text-sm">
+                                    Cấp {card.combatStats.level.text} ({realmInfo?.realmName} Tầng {realmInfo?.realmTier})
+                                    {card.combatStats.level.badge && (
+                                        <span className="ml-2 scale-text-xs text-[#a3b8a3] border border-[#a3b8a3]/40 px-1">「{card.combatStats.level.badge}」</span>
+                                    )}
+                                    {/* gdd-02 Core Rule #12 - tín hiệu Chờ Đột Phá trên thẻ nhân vật. */}
+                                    {finalStats.progressionState === 'Chờ Đột Phá' && (
+                                        <span className="ml-2 text-[#ff4d4d] scale-text-xs uppercase tracking-widest">• Chờ Đột Phá</span>
+                                    )}
+                                </span>
+                            </div>
+
+                            {card.combatStats.exp && (
+                                <p className="scale-text-xs text-[#8ba888] mb-2 font-mono tracking-widest">{card.combatStats.exp.text}</p>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 scale-text-sm mt-2 bg-[#0a0f0a] border border-[#cda45e]/10 p-2">
+                                <div className="md:col-span-2 flex justify-between border-b border-[#cda45e]/10 pb-1">
+                                    <span className="text-[#8ba888]">Sinh Lực:</span>
+                                    <span className="font-mono font-bold text-[#ff4d4d]">{finalStats.hp + ' / ' + finalStats.maxhp}</span>
+                                </div>
+                                {card.combatStats.stats.filter(st => st.text !== '' && st.text !== 'null').map(st => (
+                                    <div key={st.key} className="flex justify-between border-b border-[#cda45e]/10 pb-1">
+                                        <span className="text-[#8ba888]">{st.label}:</span>
+                                        <span className="font-mono font-bold text-[#e8d3a1]">
+                                            {st.text}
+                                            {st.badge && <span className="ml-1 scale-text-xs text-[#a3b8a3]">「{st.badge}」</span>}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                case 'affinity':
+                    if (!card.affinity) return null;
+                    return (
+                        <div key="affinity" className="p-3 bg-[#101a10] border border-[#cda45e]/30">
+                            <h5 className="font-bold text-[#cda45e] uppercase tracking-widest scale-text-sm mb-2" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>{card.affinity.label}</h5>
+                            <div className="flex justify-between items-center mb-1 scale-text-sm flex-wrap gap-x-2">
+                                <span className="text-[#8ba888]">
+                                    <strong>Hảo Cảm với Ngươi:</strong>
+                                    {(() => {
+                                        const standing = (knowledge.relationships || []).find(r => r.NPC === displayCharacterName)?.Standing;
+                                        return standing ? ' (' + standing + ')' : '';
+                                    })()}
+                                </span>
+                                {/* gdd-03 1.3: the attitude BAND is what the card shows; the raw
+                                    integer stays as a small secondary read-out. */}
+                                <span className="flex items-baseline gap-2">
+                                    <strong className={card.affinity.value < 0 ? 'text-red-300' : 'text-pink-200'}>{card.affinity.descriptor}</strong>
+                                    <span className={'font-mono text-[10px] opacity-70 ' + (card.affinity.value < 0 ? 'text-red-400' : 'text-pink-300')}>{card.affinity.value > 0 ? '+' + card.affinity.value : card.affinity.value}/100</span>
+                                </span>
+                            </div>
+                            <div className="w-full bg-[#0a0f0a] h-2 border border-[#cda45e]/10 overflow-hidden">
+                                <div className={'h-full transition-all ' + (card.affinity.value < 0 ? 'bg-gradient-to-r from-red-600 to-red-400' : 'bg-gradient-to-r from-pink-500 to-pink-300')} style={{ width: Math.min(100, Math.abs(card.affinity.value)) + '%' }}></div>
+                            </div>
+
+                            {/* plan.md C-6: visibility comes from the injected predicate
+                                (affinity >= 80); handleSongTu itself is untouched. */}
+                            {card.affinity.song_tu_button.visible && handleSongTu && (
+                                <div className="mt-3 pt-3 border-t border-[#cda45e]/20 text-center">
+                                    <button
+                                        onClick={() => handleSongTu(finalStats.id)}
+                                        disabled={isProcessingAction || !card.affinity.song_tu_button.enabled}
+                                        title={card.affinity.song_tu_button.disabled_reasons.join(' · ')}
+                                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                        className="bg-[#1b2a1b] border border-pink-400 hover:bg-pink-400/20 text-pink-300 font-bold py-2 px-4 uppercase tracking-widest scale-text-xs shadow-[inset_0_0_10px_rgba(244,114,182,0.1)] transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <SparklesIcon className="w-4 h-4 inline-block mr-1 -mt-1"/> {card.affinity.song_tu_button.label}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    );
+                case 'status_badges':
+                    if (!card.statusBadges) return null;
+                    return (
+                        <div key="status_badges" className="p-3 bg-[#101a10] border border-[#8b1515]/40">
+                            <h5 className="font-bold text-[#ff4d4d] uppercase tracking-widest scale-text-sm mb-2" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>{card.statusBadges.label}</h5>
+                            <div className="flex flex-wrap gap-2">
+                                {card.statusBadges.badges.map(b => (
+                                    <span key={b.code} className="scale-text-xs text-[#ff9d5c] border border-[#ff9d5c]/40 px-2 py-1">{b.label}</span>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                default:
+                    return null;
+            }
+        };
+
         return (
             <div className="space-y-4 scale-text-sm">
-                <div className="p-4 bg-[#101a10] border border-[#cda45e]/30 space-y-3">
-                    <h5 className="font-bold text-[#cda45e] uppercase tracking-widest scale-text-sm border-b border-[#cda45e]/20 pb-1" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Hồ Sơ Thực Thể</h5>
-                    <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Tên gọi:</strong> {displayCharacterName}{finalStats.titles?.length > 0 && <span className="text-pink-300"> ({finalStats.titles.join(', ')})</span>}</p>
-                    {finalStats.Gender && <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Giới tính:</strong> {finalStats.Gender}</p>}
-                    {finalStats.Role && <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Thân phận/Vai trò:</strong> <ExpandableText text={finalStats.Role} maxLength={60} /></p>}
-                    {finalStats.Stance && <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Thái độ:</strong> {finalStats.Stance}</p>}
-                    {finalStats.Personality && <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Tính cách:</strong> <ExpandableText text={finalStats.Personality} maxLength={80} /></p>}
-                    {finalStats.Appearance && <p className="scale-text-sm text-[#e8d3a1] italic"><strong className="text-[#8ba888]">Ngoại hình:</strong> <ExpandableText text={finalStats.Appearance} maxLength={100} /></p>}
-                    {(finalStats.Backstory || finalStats.description) && <p className="scale-text-sm text-[#a3b8a3]"><strong className="text-[#8ba888]">Tiểu sử / Ghi chú:</strong> <ExpandableText text={finalStats.Backstory || finalStats.description} maxLength={200} /></p>}
-
-                    {!finalStats.isPlayer && (() => {
-                        const affinityValue = finalStats.affinity ?? 0;
-                        const isHostile = affinityValue < 0;
-                        return (
-                            <div className="pt-2 mt-1 border-t border-[#cda45e]/20">
-                                <div className="flex justify-between items-center mb-1 scale-text-sm">
-                                    <span className="text-[#8ba888]">
-                                        <strong>Hảo Cảm với Ngươi:</strong>
-                                        {(() => {
-                                            const standing = (knowledge.relationships || []).find(r => r.NPC === displayCharacterName)?.Standing;
-                                            return standing ? ` (${standing})` : '';
-                                        })()}
-                                    </span>
-                                    <span className={`font-mono font-bold ${isHostile ? 'text-red-400' : 'text-pink-300'}`}>{affinityValue > 0 ? `+${affinityValue}` : affinityValue}/100</span>
-                                </div>
-                                <div className="w-full bg-[#0a0f0a] h-2 border border-[#cda45e]/10 overflow-hidden">
-                                    <div className={`h-full transition-all ${isHostile ? 'bg-gradient-to-r from-red-600 to-red-400' : 'bg-gradient-to-r from-pink-500 to-pink-300'}`} style={{ width: `${Math.min(100, Math.abs(affinityValue))}%` }}></div>
-                                </div>
-                            </div>
-                        );
-                    })()}
-
-                    {!finalStats.isPlayer && (finalStats.affinity || 0) >= 50 && !finalStats.isCompanion && handleRecruitCompanion && (
-                        <div className="mt-3 pt-3 border-t border-[#cda45e]/20 text-center">
-                            <button
-                                onClick={() => handleRecruitCompanion(finalStats.id)}
-                                disabled={isProcessingAction}
-                                className="bg-[#1b2a1b] border border-pink-400 hover:bg-pink-400/20 text-pink-300 font-bold py-2 px-4 uppercase tracking-widest scale-text-xs shadow-[inset_0_0_10px_rgba(244,114,182,0.1)] transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <SparklesIcon className="w-4 h-4 inline-block mr-1 -mt-1"/> Mời Đồng Hành Gia Nhập Tổ Đội
-                            </button>
-                        </div>
-                    )}
-
-                    {!finalStats.isPlayer && (finalStats.affinity || 0) >= 80 && handleSongTu && (
-                        <div className="mt-3 pt-3 border-t border-[#cda45e]/20 text-center">
-                            <button
-                                onClick={() => handleSongTu(finalStats.id)}
-                                disabled={isProcessingAction}
-                                className="bg-[#1b2a1b] border border-pink-400 hover:bg-pink-400/20 text-pink-300 font-bold py-2 px-4 uppercase tracking-widest scale-text-xs shadow-[inset_0_0_10px_rgba(244,114,182,0.1)] transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <SparklesIcon className="w-4 h-4 inline-block mr-1 -mt-1"/> Song Tu
-                            </button>
-                        </div>
-                    )}
-
-                    {!finalStats.isPlayer && !finalStats.isCompanion && !finalStats.isAppraised && !finalStats.posSlot && handleAppraiseNpc && (
-                        <div className="mt-3 pt-3 border-t border-[#cda45e]/20 text-center">
-                            <button
-                                onClick={() => {
-                                    onClose();
-                                    handleAppraiseNpc(finalStats.id);
-                                }}
-                                className="bg-[#1b2a1b] border border-[#cda45e] hover:bg-[#cda45e]/20 text-[#cda45e] font-bold py-2 px-4 uppercase tracking-widest scale-text-xs shadow-[inset_0_0_10px_rgba(205,164,94,0.1)] transition-colors w-full"
-                            >
-                                <SparklesIcon className="w-4 h-4 inline-block mr-1 -mt-1"/> Giám Định Tiểu Sử
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                {finalStats.level !== undefined && (
-                    <div className="p-3 bg-[#101a10] border border-[#cda45e]/30 relative overflow-hidden">
-                        <h5 className="font-bold text-[#ff4d4d] uppercase tracking-widest scale-text-sm mb-2" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Chỉ Số Chiến Đấu</h5>
-                        
-                        <div className="flex justify-between items-center bg-[#0a0f0a] border border-[#cda45e]/10 p-2 mb-2">
-                            <span className="text-[#8ba888] scale-text-xs uppercase tracking-widest">Cấp Độ:</span>
-                            <span className="font-bold text-[#e8d3a1] tracking-wider scale-text-sm">Cấp {finalStats.level} ({realmInfo?.realmName} Tầng {realmInfo?.realmTier})</span>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 scale-text-sm mt-2 bg-[#0a0f0a] border border-[#cda45e]/10 p-2">
-                           <div className="space-y-1">
-                               <div className="flex justify-between border-b border-[#cda45e]/10 pb-1"><span className="text-[#8ba888]">Sinh Lực:</span><span className="font-mono font-bold text-[#ff4d4d]">{`${finalStats.hp} / ${finalStats.maxhp}`}</span></div>
-                               <div className="flex justify-between border-b border-[#cda45e]/10 pb-1"><span className="text-[#8ba888]">Tấn Công:</span><span className="font-mono font-bold text-[#e8d3a1]">{finalStats.atk}</span></div>
-                               <div className="flex justify-between border-b border-[#cda45e]/10 pb-1"><span className="text-[#8ba888]">Phòng Thủ:</span><span className="font-mono font-bold text-[#a3b8a3]">{finalStats.def}</span></div>
-                               <div className="flex justify-between pb-1"><span className="text-[#8ba888]">Tốc Độ:</span><span className="font-mono font-bold text-[#cda45e]">{finalStats.spd}</span></div>
-                           </div>
-                           <div className="space-y-1">
-                               <div className="flex justify-between border-b border-[#cda45e]/10 pb-1"><span className="text-[#8ba888]">Tỉ lệ Chí Mạng:</span><span className="font-mono font-bold text-[#ffb3b3]">{finalStats.cr}%</span></div>
-                               <div className="flex justify-between border-b border-[#cda45e]/10 pb-1"><span className="text-[#8ba888]">Sát Thương Bạo:</span><span className="font-mono font-bold text-[#ff8080]">{finalStats.cdmg}%</span></div>
-                               <div className="flex justify-between border-b border-[#cda45e]/10 pb-1"><span className="text-[#8ba888]">Né Tránh:</span><span className="font-mono font-bold text-[#a3b8a3]">{finalStats.evasion || 0}%</span></div>
-                               <div className="flex justify-between pb-1"><span className="text-[#8ba888]">Giảm Thương:</span><span className="font-mono font-bold text-[#8ba888]">{finalStats.dmgRes || 0}%</span></div>
-                           </div>
-                        </div>
-                    </div>
-                )}
+                {card.order.map(blockId => renderCardBlock(blockId))}
 
                 {skillsToShow.length > 0 && (
                     <div className="p-3 bg-[#101a10] border border-[#cda45e]/30">
@@ -7960,8 +8306,15 @@ const SettingsMenu = ({
     show, onClose, onSaveToLocal, onSaveToCloud, onLoadFromCloud, onSaveToFile, onLoadFromFile, onRestart, onGoHome, onClearCache, currentPlayStyle, onTogglePlayStyle, uiTheme, onSetTheme, onOpenThemeEditor,
     bgmUrl, bgmVolume, isPlayingBgm, onBgmUrlChange, onBgmVolumeChange, onToggleBgm, onOpenCacheManager, onOpenGallery,
     onDebugAwakenHtab, gameMode,
-    textScale, onTextScaleChange 
+    onExportKeepsake, onExportQaLog, onExportContractLog,
+    textScale, onTextScaleChange,
+    hackModeEnabled, onToggleHackMode, onOpenCustomize, customizeVisibility = 'hidden'
 }) => {
+
+    // plan.md C-3: the 4 group labels are DATA (src-web/systems/ui/settingsGroups.ts),
+    // never re-literalled here, so the settings taxonomy has one owner.
+    const settingsGroupList = groupedSettings();
+    const groupLabel = (id) => (settingsGroupList.find(g => g.group.id === id)?.group.label) || id;
 
     const [showThemeList, setShowThemeList] = useState(false);
     const audioInputRef = useRef(null);
@@ -8011,7 +8364,111 @@ const SettingsMenu = ({
                 </div>
 
                 <div className="p-5 overflow-y-auto max-h-[75vh] space-y-6 scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-transparent">
-                    
+                    <h3 className="text-xs font-bold text-[#e8d3a1] uppercase tracking-[0.25em] border-l-2 border-[#cda45e] pl-2 mt-2">{groupLabel('display')}</h3>
+                    <div>
+                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Cỡ Chữ</h4>
+                        {/* gdd-06 A5 / plan.md C-3: three presets S/M/L are the primary
+                            control; the shipped 90-140 slider survives as "Nâng cao".
+                            Both write through the pure `fontScale` module so the
+                            FONT_SCALE_STEP[S] < [M] < [L] invariant cannot drift. */}
+                        <div className="bg-[#101a10] border border-[#cda45e]/30 p-3 space-y-3 shadow-inner">
+                            <div className="grid grid-cols-3 gap-2">
+                                {FONT_SIZE_SETTINGS.map(sizeKey => {
+                                    const isActive = presetFromTextScale(textScale) === sizeKey;
+                                    return (
+                                        <button
+                                            key={sizeKey}
+                                            onClick={() => onTextScaleChange(applyPreset(sizeKey).text_scale)}
+                                            style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                            aria-pressed={isActive}
+                                            className={'font-bold uppercase tracking-widest text-xs border transition-colors ' + (isActive ? 'bg-[#cda45e]/20 border-[#cda45e] text-[#e8d3a1]' : 'bg-[#162216] border-[#8ba888]/40 text-[#8ba888]')}
+                                        >
+                                            {FONT_SIZE_LABELS[sizeKey]}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <details>
+                                <summary className="text-[10px] text-[#8ba888] uppercase tracking-widest cursor-pointer select-none py-2">Nâng cao (thanh trượt 90-140%)</summary>
+                                <div className="flex items-center justify-between mt-2">
+                                    <button
+                                        onClick={() => onTextScaleChange(applyAdvancedSlider(textScale - 10).text_scale)}
+                                        disabled={textScale <= 90}
+                                        style={{ minHeight: TOUCH_TARGET_MIN + 'px', minWidth: TOUCH_TARGET_MIN + 'px' }}
+                                        className="bg-[#162216] border border-[#8ba888]/40 text-[#8ba888] font-bold text-xl flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    >
+                                        -
+                                    </button>
+                                    <span className="text-[#e8d3a1] font-mono font-bold tracking-widest text-lg">{textScale}%</span>
+                                    <button
+                                        onClick={() => onTextScaleChange(applyAdvancedSlider(textScale + 10).text_scale)}
+                                        disabled={textScale >= 140}
+                                        style={{ minHeight: TOUCH_TARGET_MIN + 'px', minWidth: TOUCH_TARGET_MIN + 'px' }}
+                                        className="bg-[#162216] border border-[#8ba888]/40 text-[#8ba888] font-bold text-xl flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                                <p className="text-[10px] text-[#8ba888] mt-2 tracking-wider">Hệ số áp dụng: {effectiveScale({ font_size_setting: presetFromTextScale(textScale), text_scale: textScale }).toFixed(3)}</p>
+                            </details>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Giao Diện (Theme)</h4>
+                        <div className="bg-[#101a10] border border-[#cda45e]/30 flex flex-col transition-all">
+                            <div 
+                                onClick={() => setShowThemeList(!showThemeList)}
+                                className="w-full relative cursor-pointer hover:bg-[#1b2a1b] p-4 flex items-center justify-between group"
+                            >
+                                <div className="flex-1 pr-4">
+                                    <p className={`font-bold text-base tracking-wider text-[#cda45e]`} style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
+                                        {uiTheme === 'PINK_FLOWER' ? 'Vườn Hoa (Hồng Nhạt)' : uiTheme === 'HELL_RED' ? 'Địa Ngục (Đỏ Đen)' : uiTheme === 'CUSTOM' ? 'Tùy Chỉnh (Custom)' : 'Mặc Định (Vàng Đen)'}
+                                    </p>
+                                    <p className="text-xs text-[#a3b8a3] mt-1.5 leading-relaxed">Chạm để mở danh sách chủ đề.</p>
+                                </div>
+                                <ChevronDownIcon className={`w-5 h-5 text-[#cda45e] transition-transform ${showThemeList ? 'rotate-180' : ''}`} />
+                            </div>
+
+                            {showThemeList && (
+                                <div className="flex flex-col border-t border-[#cda45e]/20 bg-[#0a0f0a]">
+                                    <button onClick={() => { onSetTheme('DARK_GOLD'); setShowThemeList(false); }} className={`p-3 pl-6 text-left text-sm font-bold tracking-wider border-b border-[#cda45e]/10 ${uiTheme === 'DARK_GOLD' ? 'text-[#e8d3a1] bg-[#1b2a1b]' : 'text-[#8ba888] hover:text-[#cda45e] hover:bg-[#162216]'}`}>Mặc Định (Vàng Đen)</button>
+                                    <button onClick={() => { onSetTheme('PINK_FLOWER'); setShowThemeList(false); }} className={`p-3 pl-6 text-left text-sm font-bold tracking-wider border-b border-[#cda45e]/10 ${uiTheme === 'PINK_FLOWER' ? 'text-[#e8d3a1] bg-[#1b2a1b]' : 'text-[#8ba888] hover:text-[#cda45e] hover:bg-[#162216]'}`}>Vườn Hoa (Hồng Nhạt)</button>
+                                    <button onClick={() => { onSetTheme('HELL_RED'); setShowThemeList(false); }} className={`p-3 pl-6 text-left text-sm font-bold tracking-wider border-b border-[#cda45e]/10 ${uiTheme === 'HELL_RED' ? 'text-[#e8d3a1] bg-[#1b2a1b]' : 'text-[#8ba888] hover:text-[#cda45e] hover:bg-[#162216]'}`}>Địa Ngục (Đỏ Đen)</button>
+                                    
+                                    <div className={`flex justify-between items-center border-b border-[#cda45e]/10 ${uiTheme === 'CUSTOM' ? 'bg-[#1b2a1b]' : 'hover:bg-[#162216]'}`}>
+                                        <button onClick={() => { onSetTheme('CUSTOM'); setShowThemeList(false); }} className={`flex-1 p-3 pl-6 text-left text-sm font-bold tracking-wider ${uiTheme === 'CUSTOM' ? 'text-[#e8d3a1]' : 'text-[#8ba888] hover:text-[#cda45e]'}`}>
+                                            Tùy Chỉnh (Custom)
+                                        </button>
+                                        <button onClick={(e) => { e.stopPropagation(); onOpenThemeEditor(); }} className="p-3 text-[#cda45e] hover:text-white" title="Chỉnh sửa mã màu">
+                                            <WrenchIcon className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <div>
+                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Trải nghiệm cốt truyện</h4>
+                        <div 
+                            onClick={onTogglePlayStyle}
+                            className="w-full relative cursor-pointer bg-[#101a10] border border-[#cda45e]/30 hover:border-[#cda45e]/60 p-4 flex items-center justify-between transition-all group"
+                        >
+                            <div className="flex-1 pr-4">
+                                <p className={`font-bold text-base tracking-wider ${currentPlayStyle === 'RPG' ? 'text-[#cda45e]' : 'text-[#8ba888]'}`} style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
+                                    {currentPlayStyle === 'RPG' ? 'Nhập Vai (RPG)' : 'Kể Chuyện (Story)'}
+                                </p>
+                                <p className="text-xs text-[#a3b8a3] mt-1.5 leading-relaxed">
+                                    {currentPlayStyle === 'RPG' ? 'Hiển thị giao diện chiến đấu, mua bán. Cần tính toán chỉ số.' : 'Ẩn các giao diện game. Tập trung đọc truyện và lựa chọn.'}
+                                </p>
+                            </div>
+                            <div className={`w-14 h-8 relative transition-colors duration-300 ease-in-out flex-shrink-0 border border-[#cda45e]/50 ${currentPlayStyle === 'RPG' ? 'bg-[#1b2a1b]' : 'bg-[#2a1b1b]'}`}>
+                                <div className={`absolute top-0.5 left-1 w-6 h-6 bg-[#e8d3a1] shadow-[0_0_5px_rgba(232,211,161,0.5)] transform transition-transform duration-300 ease-in-out flex items-center justify-center ${currentPlayStyle === 'RPG' ? 'translate-x-6' : 'translate-x-0'}`}>
+                                    {currentPlayStyle === 'RPG' ? <SwordIcon className="w-4 h-4 text-[#1b2a1b]"/> : <BookOpenIcon className="w-4 h-4 text-[#8b1515]"/>}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 className="text-xs font-bold text-[#e8d3a1] uppercase tracking-[0.25em] border-l-2 border-[#cda45e] pl-2 mt-2">{groupLabel('audio')}</h3>
                     <div>
                         <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Nhạc Nền (BGM)</h4>
                         <div className="bg-[#101a10] border border-[#cda45e]/30 p-3 space-y-3">
@@ -8068,100 +8525,17 @@ const SettingsMenu = ({
                             </div>
                         </div>
                     </div>
-
-                    <div>
-                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Trải nghiệm cốt truyện</h4>
-                        <div 
-                            onClick={onTogglePlayStyle}
-                            className="w-full relative cursor-pointer bg-[#101a10] border border-[#cda45e]/30 hover:border-[#cda45e]/60 p-4 flex items-center justify-between transition-all group"
-                        >
-                            <div className="flex-1 pr-4">
-                                <p className={`font-bold text-base tracking-wider ${currentPlayStyle === 'RPG' ? 'text-[#cda45e]' : 'text-[#8ba888]'}`} style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
-                                    {currentPlayStyle === 'RPG' ? 'Nhập Vai (RPG)' : 'Kể Chuyện (Story)'}
-                                </p>
-                                <p className="text-xs text-[#a3b8a3] mt-1.5 leading-relaxed">
-                                    {currentPlayStyle === 'RPG' ? 'Hiển thị giao diện chiến đấu, mua bán. Cần tính toán chỉ số.' : 'Ẩn các giao diện game. Tập trung đọc truyện và lựa chọn.'}
-                                </p>
-                            </div>
-                            <div className={`w-14 h-8 relative transition-colors duration-300 ease-in-out flex-shrink-0 border border-[#cda45e]/50 ${currentPlayStyle === 'RPG' ? 'bg-[#1b2a1b]' : 'bg-[#2a1b1b]'}`}>
-                                <div className={`absolute top-0.5 left-1 w-6 h-6 bg-[#e8d3a1] shadow-[0_0_5px_rgba(232,211,161,0.5)] transform transition-transform duration-300 ease-in-out flex items-center justify-center ${currentPlayStyle === 'RPG' ? 'translate-x-6' : 'translate-x-0'}`}>
-                                    {currentPlayStyle === 'RPG' ? <SwordIcon className="w-4 h-4 text-[#1b2a1b]"/> : <BookOpenIcon className="w-4 h-4 text-[#8b1515]"/>}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Cỡ Chữ</h4>
-                        <div className="bg-[#101a10] border border-[#cda45e]/30 p-3 flex items-center justify-between shadow-inner">
-                            <button 
-                                onClick={() => onTextScaleChange(Math.max(90, textScale - 10))} 
-                                disabled={textScale <= 90}
-                                className="w-12 h-10 bg-[#162216] border border-[#8ba888]/40 text-[#8ba888] hover:text-[#e8d3a1] hover:border-[#cda45e] font-bold text-xl flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                            >
-                                -
-                            </button>
-                            <span className="text-[#e8d3a1] font-mono font-bold tracking-widest text-lg">{textScale}%</span>
-                            <button 
-                                onClick={() => onTextScaleChange(Math.min(140, textScale + 10))} 
-                                disabled={textScale >= 140}
-                                className="w-12 h-10 bg-[#162216] border border-[#8ba888]/40 text-[#8ba888] hover:text-[#e8d3a1] hover:border-[#cda45e] font-bold text-xl flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                            >
-                                +
-                            </button>
-                        </div>
-                    </div>
-                    <div>
-                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Giao Diện (Theme)</h4>
-                        <div className="bg-[#101a10] border border-[#cda45e]/30 flex flex-col transition-all">
-                            <div 
-                                onClick={() => setShowThemeList(!showThemeList)}
-                                className="w-full relative cursor-pointer hover:bg-[#1b2a1b] p-4 flex items-center justify-between group"
-                            >
-                                <div className="flex-1 pr-4">
-                                    <p className={`font-bold text-base tracking-wider text-[#cda45e]`} style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
-                                        {uiTheme === 'PINK_FLOWER' ? 'Vườn Hoa (Hồng Nhạt)' : uiTheme === 'HELL_RED' ? 'Địa Ngục (Đỏ Đen)' : uiTheme === 'CUSTOM' ? 'Tùy Chỉnh (Custom)' : 'Mặc Định (Vàng Đen)'}
-                                    </p>
-                                    <p className="text-xs text-[#a3b8a3] mt-1.5 leading-relaxed">Chạm để mở danh sách chủ đề.</p>
-                                </div>
-                                <ChevronDownIcon className={`w-5 h-5 text-[#cda45e] transition-transform ${showThemeList ? 'rotate-180' : ''}`} />
-                            </div>
-
-                            {showThemeList && (
-                                <div className="flex flex-col border-t border-[#cda45e]/20 bg-[#0a0f0a]">
-                                    <button onClick={() => { onSetTheme('DARK_GOLD'); setShowThemeList(false); }} className={`p-3 pl-6 text-left text-sm font-bold tracking-wider border-b border-[#cda45e]/10 ${uiTheme === 'DARK_GOLD' ? 'text-[#e8d3a1] bg-[#1b2a1b]' : 'text-[#8ba888] hover:text-[#cda45e] hover:bg-[#162216]'}`}>Mặc Định (Vàng Đen)</button>
-                                    <button onClick={() => { onSetTheme('PINK_FLOWER'); setShowThemeList(false); }} className={`p-3 pl-6 text-left text-sm font-bold tracking-wider border-b border-[#cda45e]/10 ${uiTheme === 'PINK_FLOWER' ? 'text-[#e8d3a1] bg-[#1b2a1b]' : 'text-[#8ba888] hover:text-[#cda45e] hover:bg-[#162216]'}`}>Vườn Hoa (Hồng Nhạt)</button>
-                                    <button onClick={() => { onSetTheme('HELL_RED'); setShowThemeList(false); }} className={`p-3 pl-6 text-left text-sm font-bold tracking-wider border-b border-[#cda45e]/10 ${uiTheme === 'HELL_RED' ? 'text-[#e8d3a1] bg-[#1b2a1b]' : 'text-[#8ba888] hover:text-[#cda45e] hover:bg-[#162216]'}`}>Địa Ngục (Đỏ Đen)</button>
-                                    
-                                    <div className={`flex justify-between items-center border-b border-[#cda45e]/10 ${uiTheme === 'CUSTOM' ? 'bg-[#1b2a1b]' : 'hover:bg-[#162216]'}`}>
-                                        <button onClick={() => { onSetTheme('CUSTOM'); setShowThemeList(false); }} className={`flex-1 p-3 pl-6 text-left text-sm font-bold tracking-wider ${uiTheme === 'CUSTOM' ? 'text-[#e8d3a1]' : 'text-[#8ba888] hover:text-[#cda45e]'}`}>
-                                            Tùy Chỉnh (Custom)
-                                        </button>
-                                        <button onClick={(e) => { e.stopPropagation(); onOpenThemeEditor(); }} className="p-3 text-[#cda45e] hover:text-white" title="Chỉnh sửa mã màu">
-                                            <WrenchIcon className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Điều Hướng Chính</h4>
-                        <div className="grid grid-cols-2 gap-3">
-                            <MenuItem icon={<ArrowPathIcon />} label="Bắt Đầu Lại" onClick={onRestart} colorClass="text-[#e8d3a1]" subtext="Chơi lại từ đầu" />
-                            <MenuItem icon={<ArrowLeftStartOnRectangleIcon />} label="Về Trang Chủ" onClick={onGoHome} colorClass="text-[#e8d3a1]" subtext="Thoát khỏi màn chơi" />
-                        </div>
-                    </div>
-
+                    <h3 className="text-xs font-bold text-[#e8d3a1] uppercase tracking-[0.25em] border-l-2 border-[#cda45e] pl-2 mt-2">{groupLabel('ai_data')}</h3>
                     <div>
                         <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Lưu trữ tiến trình</h4>
                         <div className="grid grid-cols-3 gap-2">
-                            <MenuItem icon={<SaveIcon />} label="Lưu Ngay" onClick={onSaveToLocal} disabled={isCombatOrTrade} colorClass="text-[#cda45e]" subtext={isCombatOrTrade ? "Khóa khi chiến đấu" : "Lưu lên GitHub (5 slot)"} />
+                            {/* plan.md C-2: IndexedDB is the source of truth; GitHub is a
+                                multi-device BACKUP, which is what the label now says. */}
+                            <MenuItem icon={<SaveIcon />} label="Sao lưu lên GitHub" onClick={onSaveToLocal} disabled={isCombatOrTrade} colorClass="text-[#cda45e]" subtext={isCombatOrTrade ? "Khóa khi chiến đấu" : "Bản sao dự phòng (5 slot)"} />
                             <MenuItem icon={<Upload />} label="Lưu Đám Mây" onClick={onSaveToCloud} disabled={isCombatOrTrade} colorClass="text-[#a3b8a3]" subtext={isCombatOrTrade ? "Khóa khi chiến đấu" : "Đồng bộ (Tốn thời gian)"} />
                             <MenuItem icon={<FolderOpenIcon />} label="Tải Game" onClick={onLoadFromCloud} colorClass="text-[#8ba888]" subtext="Mở kho lưu trữ" />
                         </div>
                     </div>
-
                     <div>
                         <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Tệp Tin (Ngoại Tuyến)</h4>
                         <div className="space-y-3">
@@ -8170,9 +8544,15 @@ const SettingsMenu = ({
                                 <MenuItem icon={<Upload />} label="Xuất Tệp Nhẹ" onClick={() => onSaveToFile(false)} disabled={isCombatOrTrade} colorClass="text-[#a3b8a3]" subtext={isCombatOrTrade ? "Chặn khi đang chiến đấu" : "Chỉ lưu chữ"} />
                             </div>
                             <MenuItem icon={<ArrowPathIcon />} label="Nhập Tệp" onClick={onLoadFromFile} colorClass="text-[#e8d3a1]" subtext="Tải file save từ máy lên" />
+                            {/* gdd-05 B8: the keepsake + QA exports, and the contract
+                                session log of gdd-01 B.5 (AI & Dữ liệu group). */}
+                            <div className="grid grid-cols-3 gap-2">
+                                <MenuItem icon={<Upload />} label="Xuất kỷ vật (văn bản)" onClick={onExportKeepsake} colorClass="text-[#e8d3a1]" subtext="Chép lại quyển sổ, chỉ văn kể" />
+                                <MenuItem icon={<Upload />} label="Xuất nhật ký QA" onClick={onExportQaLog} colorClass="text-[#a3b8a3]" subtext="5 trường cho kiểm thử" />
+                                <MenuItem icon={<Upload />} label="Nhật ký khế ước" onClick={onExportContractLog} colorClass="text-[#8ba888]" subtext="Thống kê rò rỉ số liệu" />
+                            </div>
                         </div>
                     </div>
-
                     <div>
                             <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Hệ Thống & Dọn Dẹp</h4>
                             <div className="space-y-3">
@@ -8182,6 +8562,48 @@ const SettingsMenu = ({
                                 <MenuItem icon={<WrenchIcon />} label="Quản Lý Bộ Nhớ Thống Cục" onClick={onOpenCacheManager} colorClass="text-yellow-400" subtext="Xem danh sách và xóa từng ảnh cục bộ" />
                             </div>
                         </div>
+                    <h3 className="text-xs font-bold text-[#e8d3a1] uppercase tracking-[0.25em] border-l-2 border-[#cda45e] pl-2 mt-2">{groupLabel('customize')}</h3>
+                    <div>
+                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Bảng tùy chỉnh</h4>
+                        {/* gdd-06 C2 #1: a DEVICE-level toggle, default OFF, persisted in
+                            localStorage. It only GATES the entry point; every write still
+                            goes through the validators + commit controller. */}
+                        <div className="bg-[#101a10] border border-[#cda45e]/30 p-3 space-y-3">
+                            <button
+                                onClick={onToggleHackMode}
+                                aria-pressed={!!hackModeEnabled}
+                                style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                className="w-full flex items-center justify-between gap-3 px-3 py-2 bg-[#162216] border border-[#cda45e]/30 transition-colors"
+                            >
+                                <span className="text-left">
+                                    <span className="block font-bold text-xs tracking-wide text-[#e8d3a1]">Tùy chỉnh nhân vật</span>
+                                    <span className="block text-[9px] text-[#8ba888] mt-1 leading-tight">Mặc định TẮT. Bật để hiện nút mở bảng tùy chỉnh.</span>
+                                </span>
+                                <span className={'w-12 h-7 flex-shrink-0 border relative transition-colors ' + (hackModeEnabled ? 'border-[#cda45e] bg-[#1b2a1b]' : 'border-[#8ba888]/40 bg-[#0a0f0a]')}>
+                                    <span className={'absolute top-0.5 w-5 h-5 bg-[#e8d3a1] transition-transform ' + (hackModeEnabled ? 'translate-x-6' : 'translate-x-1')}></span>
+                                </span>
+                            </button>
+                            {customizeVisibility !== 'hidden' && (
+                                <MenuItem
+                                    icon={<WrenchIcon />}
+                                    label="Mở bảng tùy chỉnh"
+                                    onClick={onOpenCustomize}
+                                    disabled={customizeVisibility !== 'enabled'}
+                                    colorClass="text-[#a5b4fc]"
+                                    subtext={customizeVisibility === 'enabled' ? 'Ba vùng ghi độc lập, mỗi lần lưu là một giao dịch' : 'Tạm khóa khi đang xử lý lượt hoặc đang giao tranh'}
+                                />
+                            )}
+                        </div>
+                    </div>
+                    <div className="border-t border-[#cda45e]/20 pt-4">
+                    <div>
+                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Điều Hướng Chính</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                            <MenuItem icon={<ArrowPathIcon />} label="Bắt Đầu Lại" onClick={onRestart} colorClass="text-[#e8d3a1]" subtext="Chơi lại từ đầu" />
+                            <MenuItem icon={<ArrowLeftStartOnRectangleIcon />} label="Về Trang Chủ" onClick={onGoHome} colorClass="text-[#e8d3a1]" subtext="Thoát khỏi màn chơi" />
+                        </div>
+                    </div>
+                    </div>
 
                 </div>
             </div>
@@ -8196,7 +8618,8 @@ const MobileFunctionsModal = ({
     onShowEquip,
     onShowSkills,
     onShowCrafting,
-    onShowCustomization
+    onShowCustomization,
+    customizeVisibility = 'hidden'
 }) => {
     if (!show) return null;
     const FunctionButton = ({ icon, label, onClick }) => ( 
@@ -8220,7 +8643,10 @@ const MobileFunctionsModal = ({
                 <FunctionButton icon={<ArmorIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#8ba888]" />} label="Trang Bị" onClick={onShowEquip} /> 
                 <FunctionButton icon={<BoltIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#cda45e]" />} label="Kỹ Năng" onClick={onShowSkills} /> 
                 <FunctionButton icon={<FireIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#8b1515]" />} label="Dung Hợp" onClick={onShowCrafting} />
-                <FunctionButton icon={<Cog6ToothIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#a5b4fc]" />} label="Tùy Chỉnh" onClick={onShowCustomization} />
+                {/* gdd-06 C2 #2: hidden entirely while the Settings toggle is off. */}
+                {customizeVisibility !== 'hidden' && (
+                    <FunctionButton icon={<Cog6ToothIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#a5b4fc]" />} label="Tùy Chỉnh" onClick={onShowCustomization} />
+                )}
             </div>
         </div>
     );
@@ -8292,7 +8718,49 @@ const CustomizationModal = ({
     onFlipDefaultEnemyImage
 }) => {
     const [levelInput, setLevelInput] = useState(1);
+    const [expInput, setExpInput] = useState('');
+    const [progressStateInput, setProgressStateInput] = useState('');
     const [statsInput, setStatsInput] = useState({});
+    // gdd-06 C2 #6a: ONE in-flight lock shared by every Save button, plus a
+    // per-zone message slot - a failure in one zone never touches another.
+    const [committingZone, setCommittingZone] = useState(null);
+    const [zoneMessage, setZoneMessage] = useState({});
+
+    const showZoneResult = (zone, result) => {
+        const errorText = uiGlue.issuesToText(result && result.errors);
+        setZoneMessage(prev => ({
+            ...prev,
+            [zone]: {
+                ok: !!(result && result.ok),
+                text: result && result.ok
+                    ? [result.message, uiGlue.issuesToText(result.warnings)].filter(Boolean).join(' · ')
+                    : (errorText || (result && result.message) || 'Không ghi được.'),
+            },
+        }));
+    };
+
+    const submitZone = async (zone, run) => {
+        if (committingZone) return null;
+        setCommittingZone(zone);
+        try {
+            const result = await run();
+            showZoneResult(zone, result);
+            return result;
+        } catch (commitError) {
+            showZoneResult(zone, { ok: false, errors: [{ message: String(commitError && commitError.message || commitError) }] });
+            return null;
+        } finally {
+            setCommittingZone(null);
+        }
+    };
+
+    const ZoneMessage = ({ zone }) => {
+        const message = zoneMessage[zone];
+        if (!message) return null;
+        return (
+            <p className={'mt-2 text-xs leading-snug ' + (message.ok ? 'text-[#8ba888]' : 'text-[#ff9d5c]')}>{message.text}</p>
+        );
+    };
     const [skillDraft, setSkillDraft] = useState(EMPTY_CUSTOMIZATION_SKILL_DRAFT);
     const [itemDraft, setItemDraft] = useState(EMPTY_CUSTOMIZATION_ITEM_DRAFT);
     const updateSkillDraft = (field, value) => setSkillDraft(prev => ({ ...prev, [field]: value }));
@@ -8317,6 +8785,9 @@ const CustomizationModal = ({
     useEffect(() => {
         if (show && playerCharacter) {
             setLevelInput(playerCharacter.level || 1);
+            setExpInput('');
+            setProgressStateInput('');
+            setZoneMessage({});
             const nextStats = {};
             statFields.forEach(f => { nextStats[f.key] = playerCharacter[f.key] ?? 0; });
             setStatsInput(nextStats);
@@ -8338,10 +8809,39 @@ const CustomizationModal = ({
                 {/* CẤP ĐỘ */}
                 <div className="bg-[#101a10] border border-[#cda45e]/30 p-4">
                     <h3 className="text-base font-bold text-[#e8d3a1] mb-3 uppercase tracking-wider">Cấp Độ</h3>
-                    <div className="flex gap-2">
-                        <input type="number" min="1" value={levelInput} onChange={(e) => setLevelInput(e.target.value)} className="flex-grow p-2.5 bg-[#0a0f0a] border border-[#cda45e]/30 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none" />
-                        <button onClick={() => { const lvl = parseInt(levelInput, 10); if (!isNaN(lvl) && lvl > 0) onApplyLevel(lvl); }} className="bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold px-6 uppercase tracking-widest text-sm transition-colors">Áp Dụng</button>
+                    {/* gdd-06 C4 D.2b: (cấp, EXP, trạng thái) là MỘT bộ ba nguyên tử.
+                        Để trống EXP/trạng thái = giữ nguyên nếu cấp không đổi. */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                        <div>
+                            <label className="block text-xs font-semibold text-[#8ba888] mb-1">Cấp độ</label>
+                            <input type="number" min="1" value={levelInput} onChange={(e) => setLevelInput(e.target.value)} className="w-full p-2.5 bg-[#0a0f0a] border border-[#cda45e]/30 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-[#8ba888] mb-1">EXP hiện tại (để trống = tự động)</label>
+                            <input type="number" min="0" value={expInput} onChange={(e) => setExpInput(e.target.value)} className="w-full p-2.5 bg-[#0a0f0a] border border-[#cda45e]/30 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-[#8ba888] mb-1">Trạng thái tu luyện</label>
+                            <select value={progressStateInput} onChange={(e) => setProgressStateInput(e.target.value)} className="w-full p-2.5 bg-[#0a0f0a] border border-[#cda45e]/30 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none appearance-none">
+                                <option value="" className="bg-[#101a10]">Tự động</option>
+                                <option value="Tu Luyện Thường" className="bg-[#101a10]">Tu Luyện Thường</option>
+                                <option value="Chờ Đột Phá" className="bg-[#101a10]">Chờ Đột Phá</option>
+                            </select>
+                        </div>
                     </div>
+                    <button
+                        onClick={() => submitZone('progress', () => onApplyLevel({
+                            level: parseInt(levelInput, 10),
+                            current_exp: String(expInput).trim() === '' ? undefined : Number(expInput),
+                            state: progressStateInput || null,
+                        }))}
+                        disabled={!!committingZone}
+                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                        className="w-full bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold uppercase tracking-widest text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                        {committingZone === 'progress' ? 'Đang ghi...' : 'Áp Dụng'}
+                    </button>
+                    <ZoneMessage zone="progress" />
                 </div>
 
                 {/* CHỈ SỐ GỐC */}
@@ -8355,19 +8855,21 @@ const CustomizationModal = ({
                             </div>
                         ))}
                     </div>
+                    {/* gdd-06 C4 D.3: ô để trống KHÔNG được hiểu là 0 - giá trị cũ
+                        được giữ lại, và cả 12 chỉ số được ghi trong cùng một lần lưu. */}
                     <button
                         onClick={() => {
-                            const parsed = {};
-                            statFields.forEach(f => {
-                                const n = parseFloat(statsInput[f.key]);
-                                parsed[f.key] = isNaN(n) ? 0 : n;
-                            });
-                            onApplyStats(parsed);
+                            const draft = {};
+                            statFields.forEach(f => { draft[f.key] = statsInput[f.key]; });
+                            return submitZone('base_stats', () => onApplyStats(draft));
                         }}
-                        className="w-full bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-2.5 uppercase tracking-widest text-sm transition-colors"
+                        disabled={!!committingZone}
+                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                        className="w-full bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-2.5 uppercase tracking-widest text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                        Áp Dụng Chỉ Số
+                        {committingZone === 'base_stats' ? 'Đang ghi...' : 'Áp Dụng Chỉ Số'}
                     </button>
+                    <ZoneMessage zone="base_stats" />
                 </div>
 
                 {/* TẠO KỸ NĂNG */}
@@ -8417,16 +8919,18 @@ const CustomizationModal = ({
                         </div>
                     </div>
                     <button
-                        onClick={() => {
+                        onClick={async () => {
                             if (!skillDraft.name.trim()) return;
-                            onCreateSkill({ ...skillDraft, name: skillDraft.name.trim(), description: skillDraft.description.trim() || skillDraft.name.trim() });
-                            setSkillDraft(EMPTY_CUSTOMIZATION_SKILL_DRAFT);
+                            const result = await submitZone('entries', () => onCreateSkill({ ...skillDraft, name: skillDraft.name.trim(), description: skillDraft.description.trim() || skillDraft.name.trim() }));
+                            if (result && result.ok) setSkillDraft(EMPTY_CUSTOMIZATION_SKILL_DRAFT);
                         }}
-                        disabled={!skillDraft.name.trim()}
+                        disabled={!skillDraft.name.trim() || !!committingZone}
+                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
                         className="w-full bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-2.5 uppercase tracking-widest text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                        Lĩnh Hội Kỹ Năng
+                        {committingZone === 'entries' ? 'Đang ghi...' : 'Lĩnh Hội Kỹ Năng'}
                     </button>
+                    <ZoneMessage zone="entries" />
                     <button onClick={onOpenSkillCreation} className="w-full mt-2 bg-transparent text-[#8ba888] hover:text-[#e8d3a1] font-semibold py-1.5 uppercase tracking-widest text-xs transition-colors underline underline-offset-2">Hoặc tự tay tạo thủ công (Bảng Kỹ Năng)</button>
                 </div>
 
@@ -8475,16 +8979,18 @@ const CustomizationModal = ({
                         </div>
                     </div>
                     <button
-                        onClick={() => {
+                        onClick={async () => {
                             if (!itemDraft.name.trim()) return;
-                            onCreateItem({ ...itemDraft, name: itemDraft.name.trim(), description: itemDraft.description.trim() || itemDraft.name.trim() });
-                            setItemDraft(EMPTY_CUSTOMIZATION_ITEM_DRAFT);
+                            const result = await submitZone('entries', () => onCreateItem({ ...itemDraft, name: itemDraft.name.trim(), description: itemDraft.description.trim() || itemDraft.name.trim() }));
+                            if (result && result.ok) setItemDraft(EMPTY_CUSTOMIZATION_ITEM_DRAFT);
                         }}
-                        disabled={!itemDraft.name.trim()}
+                        disabled={!itemDraft.name.trim() || !!committingZone}
+                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
                         className="w-full bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-2.5 uppercase tracking-widest text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                        Tạo Vật Phẩm
+                        {committingZone === 'entries' ? 'Đang ghi...' : 'Tạo Vật Phẩm'}
                     </button>
+                    <ZoneMessage zone="entries" />
                 </div>
 
                 {/* NỀN TRẬN ĐẤU MẶC ĐỊNH */}
@@ -9161,7 +9667,10 @@ const getUniqueCombatantNames = (combatants) => {
 // COMPONENT 3: THAY THẾ TOÀN BỘ GAMEPLAYSCREEN
 const GameplayScreen = ({ 
     gameMode, goHome, gameSettings, restartGame, storyHistory, setGameSettings, setStoryHistory, isLoading, currentStory, handleActionRequest,
-    choices, handleChoice, formatStoryText, customActionInput, setCustomActionInput, 
+    choices, handleChoice, formatStoryText, customActionInput, setCustomActionInput,
+    canUndoTurn, onUndoTurn, isUndoingTurn, persistenceWarning,
+    visibleBanner, onDismissBanner, hackModeEnabled, onToggleHackMode,
+    onExportKeepsake, onExportQaLog, onExportContractLog, 
     handleCustomAction, setShowCharacterInfoModal, bgmUrl, bgmVolume, isPlayingBgm, onBgmUrlChange, onBgmVolumeChange, onToggleBgm,
     isProcessingAction, handleGenerateSuggestedActions, isGeneratingSuggestedActions,  
     handleSaveGame , handleOpenGithubSaveModal, setShowCraftingModal, currentTurn, setShowCharacterEquipModal, setShowSkillManagementModal, formatTimeOfDay,
@@ -9194,6 +9703,29 @@ const GameplayScreen = ({
     showHtabInfoModal, setShowHtabInfoModal,
     allowUnexpectedEvent, setAllowUnexpectedEvent
 }) => {
+
+    // gdd-06 A4 D.1 `write_action_allowed(action, tm_state, screen)`: the play
+    // screen never re-derives "is this button live?" from ad-hoc booleans - it
+    // asks the pure matrix. The App has no explicit `tm_state`, so `uiGlue`
+    // folds its three loading booleans into one (`resolving` while the AI writes,
+    // `undoing` during a rollback).
+    const tmState = uiGlue.tmStateFromApp({ isProcessingAction, isLoading, isUndoingTurn });
+    const writeCtx = { tm_state: tmState, screen: 'S2' };
+    const canSubmitWriteAction = isWriteActionAllowed('submit_action', writeCtx);
+    // gdd-06 A5: dimmed, not hidden - the controls stay in place so the layout
+    // never jumps while a turn resolves.
+    const writeControlOpacity = canSubmitWriteAction ? 1 : 0.38;
+    // gdd-06 A2 #6 / AC-07: "hidden" and "dimmed" are two DIFFERENT mechanisms.
+    const undoState = undoButtonState(!!canUndoTurn, writeCtx);
+    // gdd-06 C2 #2 (plan.md C-7: this project has no death-turn lock-out screen,
+    // so `is_death_turn` is always false here).
+    const customizeVisibility = customizeButtonVisibility({
+        toggle_enabled: !!hackModeEnabled,
+        screen: 'gameplay',
+        tm_state: tmState,
+        in_combat: gameMode === 'COMBAT',
+        is_death_turn: false,
+    });
 
     const [showSettingsMenu, setShowSettingsMenu] = useState(false); 
     const [isTopBarCollapsed, setIsTopBarCollapsed] = useState(false);
@@ -9670,12 +10202,14 @@ const renderDefaultActions = () => {
                            placeholder={knowledge.systemAssistant?.isActive ? "Trò chuyện với Hệ thống tối cao..." : (gameSettings.difficulty === 'Ác Mộng' ? "Chế độ Ác Mộng: Khóa nhập hành động tự do!" : "Miêu tả hành động tùy ý...")}
                            rows={2}
                            className="flex-grow p-3 bg-[#0a0f0a]/60 border border-[#cda45e]/40 text-[#e8d3a1] focus:border-[#cda45e] outline-none text-sm placeholder-[#8ba888] disabled:opacity-50 disabled:cursor-not-allowed resize-y break-words whitespace-pre-wrap"
-                           onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !isProcessingAction && gameSettings.difficulty !== 'Ác Mộng') { e.preventDefault(); handleCustomAction(customActionInput); } }}
-                           disabled={isLoading || isProcessingAction || gameSettings.difficulty === 'Ác Mộng'}
+                           onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && canSubmitWriteAction && gameSettings.difficulty !== 'Ác Mộng') { e.preventDefault(); handleCustomAction(customActionInput); } }}
+                           style={{ opacity: writeControlOpacity }}
+                           disabled={!canSubmitWriteAction || gameSettings.difficulty === 'Ác Mộng'}
                         />
                         <button
                            onClick={() => handleCustomAction(customActionInput)}
-                           disabled={isLoading || isProcessingAction || gameSettings.difficulty === 'Ác Mộng'}
+                           style={{ opacity: writeControlOpacity, minHeight: TOUCH_TARGET_MIN + 'px' }}
+                           disabled={!canSubmitWriteAction || gameSettings.difficulty === 'Ác Mộng'}
                            className="bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-3 px-6 shadow-[inset_0_0_10px_rgba(205,164,94,0.1)] uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed self-start"
                         >
                             Thực Hiện
@@ -9701,6 +10235,22 @@ const renderDefaultActions = () => {
                        <span className={`px-4 py-1.5 rounded-full text-xs font-bold font-mono tracking-widest border ${pvpTurnTimeLeft <= 10 ? 'bg-[#8b1515]/20 text-[#ff4d4d] border-[#ff4d4d] animate-pulse' : 'bg-[#cda45e]/10 text-[#cda45e] border-[#cda45e]'}`}>
                            ⏳ Tự động qua lượt sau: {pvpTurnTimeLeft} giây
                        </span>
+                   </div>
+               )}
+
+               {/* plan.md C-13 / gdd-01 F3 + gdd-06 A2 #6: the button is HIDDEN
+                   when `undo_available` is false and merely DIMMED while a turn is
+                   resolving - `undoButtonState` owns that distinction. */}
+               {undoState !== 'hidden' && (
+                   <div className="w-full mb-2 flex justify-end">
+                       <button
+                           onClick={onUndoTurn}
+                           disabled={undoState !== 'enabled'}
+                           style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                           className="px-4 py-2 text-xs font-bold tracking-wide border border-[#cda45e]/60 text-[#e8d3a1] bg-[#101a10] hover:bg-[#1b2a1b] disabled:opacity-40 disabled:cursor-not-allowed"
+                       >
+                           {isUndoingTurn ? 'Đang hoàn tác...' : '↶ Hoàn tác lượt vừa rồi'}
+                       </button>
                    </div>
                )}
 
@@ -9785,6 +10335,22 @@ const renderDefaultActions = () => {
     // return chính của GameplayScreen
     return (
         <div ref={gameplayScreenRef} className="fixed inset-0 w-full h-[100dvh] overflow-hidden bg-transparent text-[#e8d3a1] flex flex-col font-sans">
+            {/* gdd-06 A2 #1: the banner tier sits ABOVE every screen, is never
+                modal, never navigates by itself and NEVER auto-dismisses (AC-43)
+                - the paper strip stays until the player taps it away. */}
+            {visibleBanner && (
+                <div className="flex-shrink-0 w-full bg-[#1a1008] border-b border-[#ff9d5c]/50 px-3 py-2 flex items-start gap-3 z-[80] shadow-[0_2px_10px_rgba(0,0,0,0.6)]">
+                    <span className="flex-grow text-[11px] leading-snug text-[#ff9d5c] tracking-wide">{visibleBanner.text}</span>
+                    <button
+                        onClick={onDismissBanner}
+                        style={{ minHeight: TOUCH_TARGET_MIN + 'px', minWidth: TOUCH_TARGET_MIN + 'px' }}
+                        className="flex-shrink-0 text-[#ff9d5c] hover:text-[#e8d3a1] text-xl leading-none font-bold"
+                        aria-label="Đóng thông báo"
+                    >
+                        ×
+                    </button>
+                </div>
+            )}
             <div className="flex flex-col flex-1 min-h-0 overflow-hidden relative">
                 <TopBar />
 
@@ -9984,6 +10550,7 @@ const renderDefaultActions = () => {
                     onShowEquip={() => { setShowFunctionsModal(false); setShowCharacterEquipModal(true); }}
                     onShowSkills={() => { setShowFunctionsModal(false); setShowSkillManagementModal(true); }}
                     onShowCrafting={() => { setShowFunctionsModal(false); setShowCraftingModal(true); }}
+                    customizeVisibility={customizeVisibility}
                     onShowCustomization={() => { setShowFunctionsModal(false); setShowCustomizationModal(true); }}
                 />
 
@@ -10052,9 +10619,16 @@ const renderDefaultActions = () => {
                     onToggleBgm={onToggleBgm}
                     onOpenCacheManager={() => setShowLocalCacheManager(true)}
                     onDebugAwakenHtab={() => handleAwakenHtab("MILESTONE_AWAKENING", true)}
+                    onExportKeepsake={onExportKeepsake}
+                    onExportQaLog={onExportQaLog}
+                    onExportContractLog={onExportContractLog}
                     gameMode={gameMode}
                     textScale={gameSettings.textScale || 100} 
                     onTextScaleChange={(newScale) => setGameSettings(prev => ({ ...prev, textScale: newScale }))}
+                    hackModeEnabled={hackModeEnabled}
+                    onToggleHackMode={onToggleHackMode}
+                    customizeVisibility={customizeVisibility}
+                    onOpenCustomize={() => { setShowSettingsMenu(false); setShowCustomizationModal(true); }}
                 />
                 <VisualGalleryModal
                     show={showVisualGallery}
@@ -15217,11 +15791,11 @@ const generateHtabBlessing = (rollNum) => {
 };
 
 const AP_CONVERSION_RATES = GAME_CONFIG.apConversionRates;
-const calculateMaxExpForLevel = (level) => {
-    const { base, levelExponent, realmMultiplier } = GAME_CONFIG.expFormula;
-    const realmIndex = Math.floor((level - 1) / 10);
-    return Math.floor(base * Math.pow(level, levelExponent) * Math.pow(realmMultiplier, realmIndex));
-};
+// gdd-02 D.1 `exp_threshold(level)` (decision C-4: the App curve IS the GDD
+// threshold). The arithmetic now lives in src-web/systems/exp/expThreshold.ts so
+// the deterministic EXP modules and the UI can never drift apart; the numbers
+// are byte-for-byte identical to the previous inline formula.
+const calculateMaxExpForLevel = (level) => systemsExpThreshold(level);
 
 const calculateTrueBaseStats = (character) => {
     if (!character) return {};
@@ -16248,6 +16822,15 @@ const SUPABASE_ANON_KEY = "sb_publishable_GjYTTTowUg-P9paHkTvaOg_nW4C3Fye";
 // --- CẤU HÌNH LƯU TRỮ QUA GITHUB (dùng cho "Lưu Ngay" — đồng bộ đa thiết bị) ---
 // Token PHẢI được đặt trong .env.local (VITE_GITHUB_TOKEN) — KHÔNG BAO GIỜ hardcode/commit token vào source code.
 const GITHUB_SAVE_REPO = import.meta.env.VITE_GITHUB_REPO || 'Lavie2404/textbase';
+/**
+ * The key used when the player has not supplied one (`apiMode === 'defaultGemini'`).
+ *
+ * Empty in a build that ships no platform key - `requestAi` then fails fast with
+ * `config_error` instead of walking the whole model ladder against an endpoint
+ * that cannot authenticate (code review C-3). The user-facing message stays the
+ * existing Vietnamese auth error below.
+ */
+const PLATFORM_DEFAULT_GEMINI_KEY = (import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) || '';
 const GITHUB_SAVE_TOKEN = import.meta.env.VITE_GITHUB_TOKEN || '';
 const GITHUB_SAVES_DIR = 'saves';
 const GITHUB_SAVE_SLOT_COUNT = 5;
@@ -16563,6 +17146,10 @@ const [initializationSteps, setInitializationSteps] = useState([]);
 const [backupCustomActionInput, setBackupCustomActionInput] = useState('');
 const [backupChoices, setBackupChoices] = useState([]);
 const activeCriticalPromisesRef = useRef([]);
+// gdd-03 Branch B (plan.md P2): the player's OWN input for the current turn.
+// Classifying player input is contract-legal (it is not AI narration) and is
+// what `classifyFateIntent` needs to tell "Kết liễu" from "Tha mạng".
+const lastPlayerActionRef = useRef('');
 const [isGateWaiting, setIsGateWaiting] = useState(false);
 
 const registerCriticalPromise = (promise) => {
@@ -16942,6 +17529,7 @@ const handleAppraiseNpc = async (npcId) => {
                 
                 // Cập nhật lại chỉ số cuối
                 newKnowledge.characters[charIndex] = calculateFinalStats(charToUpdate);
+                logBaseStatCompleteness(newKnowledge.characters[charIndex], 'handleAppraiseNpc');
             }
             return newKnowledge;
         });
@@ -16988,15 +17576,33 @@ const handleDebugUpdateCharacter = (characterId, updates) => {
 };
 
 // Bảng Tùy Chỉnh: đặt thẳng cấp độ nhân vật chính. Chỉ số gốc không đổi, chỉ tính lại AP còn trống — KHÔNG ghi lịch sử cốt truyện.
-const handleCustomizeLevel = (newLevel) => {
+/**
+ * gdd-01 F3: Character Customization Mode is the ONLY legitimate caller of
+ * `invalidate_pending_snapshot()`. A hack write also raises the write-once-true
+ * `hack_mode_used_this_slot` flag on the slot record (gdd-06 C5).
+ */
+const noteCustomizationWrite = () => {
+    try {
+        if (turnManagerRef.current) turnManagerRef.current.invalidatePendingSnapshot();
+        if (slotRecordRef.current) slotRecordRef.current.hack_mode_used_this_slot = true;
+        setCanUndoTurn(false);
+    } catch (hackError) {
+        console.error('[systems] invalidatePendingSnapshot:', hackError);
+    }
+};
+
+const handleCustomizeLevel = (newLevel, newExp = 0, newState = PROGRESSION_STATE_NORMAL) => {
     setknowledge(prev => {
         const newKnowledge = JSON.parse(JSON.stringify(prev));
         const playerIndex = newKnowledge.characters.findIndex(c => c.isPlayer);
         if (playerIndex === -1) return prev;
 
+        // gdd-06 C4 D.2b: (level, current_exp, state) is ONE atomic triple - the
+        // panel may never write the level alone and leave EXP/state stale.
         let player = newKnowledge.characters[playerIndex];
         player.level = newLevel;
-        player.exp = 0;
+        player.exp = newExp;
+        player.progressionState = newState;
 
         const totalAp = calculateTotalAP(newLevel);
         const spentAp = Object.values(player.allocatedPoints || {}).reduce((sum, points) => sum + points, 0);
@@ -17047,6 +17653,9 @@ const handleCustomizeCreateItem = (itemDraft) => {
         newKnowledge.pendingCreations.push({ type: 'item', payload: { itemIdea } });
         return newKnowledge;
     });
+    // P6b: the commit controller now owns invalidate + hack flag (gdd-06 C4
+    // step 6b/6c). Calling it here too would consume the pending snapshot before
+    // the controller can report "Undo lượt trước đã khóa".
     setModalMessage({ show: true, title: 'Đang Tạo Vật Phẩm...', content: `Đấng đang giám định vật phẩm "${itemIdea.name}", vật phẩm sẽ xuất hiện trong Hành Trang sau ít giây...`, type: 'info' });
 };
 
@@ -17073,6 +17682,8 @@ const handleCustomizeCreateSkill = (skillDraft) => {
         newKnowledge.pendingCreations.push({ type: 'skill', payload: { skillIdea, sourceRarity: null, targetCharacterId: playerId } });
         return newKnowledge;
     });
+    // See handleCustomizeCreateItem: invalidate + hack flag belong to the
+    // commit controller now (gdd-06 C4 step 6b/6c).
     setModalMessage({ show: true, title: 'Đang Lĩnh Hội...', content: `Đấng đang giám định kỹ năng "${skillIdea.name}", kỹ năng sẽ xuất hiện trong Bảng Kỹ Năng sau ít giây...`, type: 'info' });
 };
 
@@ -17461,6 +18072,8 @@ const loadGameAndResetHistory = async (gameData) => {
         setShowLoadGameModal(false);
         setCurrentScreen('gameplay');
         justLoadedRef.current = true;
+        // P3b: rebuild World Memory / slot record / Turn Manager for this slot.
+        hydrateSystemsForSlot({ ...activeGameData, id: gameIdToSetFromData });
         setModalMessage({ show: true, title: 'Thành Công', content: 'Tiến trình đã được khôi phục kèm hình ảnh hoàn chỉnh.', type: 'success' });
     } catch (error) {
         console.error("Lỗi khi tải dữ liệu game:", error);
@@ -17572,6 +18185,123 @@ const autoAllocateNpcAp = (npc) => {
     workingNpc.ap = 0;
     
     return workingNpc;
+};
+
+// === Pillar 1 (game-concept.md 243-255) - NPC stat rebuild for a changed level.
+// The level-gap injury module is PURE and must not know the App's creation
+// formula, so it receives this as an injected `recomputeStatsForLevel`. The
+// numbers below are the SAME ones `handleCreateNpc` and the `[WORLD_NPC]` path
+// use (200 + 20*(lvl-1) etc.) - kept in one helper so the two never drift.
+const recomputeNpcStatsForLevel = (npc, level) => {
+    const lvl = Math.max(1, Math.floor(Number(level) || 1));
+    let working = { ...npc, level: lvl };
+    working.baseHp = 200 + (lvl - 1) * 20;
+    working.baseAtk = 20 + (lvl - 1) * 2;
+    working.baseDef = 10 + (lvl - 1) * 1;
+    working.baseSpd = 30 + (lvl - 1) * 1;
+    // AP is re-derived from scratch: an NPC dropped from level 90 to level 25 must
+    // not keep the 90-level allocation, or the "injury" would be cosmetic.
+    working.allocatedPoints = { hp: 0, atk: 0, def: 0, spd: 0 };
+    working.ap = calculateTotalAP(lvl);
+    if (working.ap > 0) working = autoAllocateNpcAp(working);
+    const finalised = calculateFinalStats(working);
+    // A suppressed realm should feel like a wounded body, not a full-health one.
+    finalised.hp = Math.min(Number(finalised.hp) || finalised.maxhp, finalised.maxhp);
+    return finalised;
+};
+
+/**
+ * Pillar 1: is this NPC a HOSTILE opponent for gap-injury purposes?
+ * `Stance` is the primary signal; a Lethal combat start counts as hostile even
+ * when the stance string has not caught up yet. Companions/player never qualify.
+ */
+const isHostileForGapInjury = (npc, opts = {}) => {
+    if (!npc || npc.isPlayer || npc.isCompanion) return false;
+    if (opts.forceHostile === true) return true;
+    if (isHostileStance(npc)) return true;
+    return opts.combatType === 'Lethal';
+};
+
+/**
+ * Pillar 1: apply the level-gap injury to `npc` if the rule says so.
+ * Returns the (possibly new) npc record plus a Vietnamese system message.
+ * Never throws - every call site wraps it anyway, this is belt and braces.
+ */
+const maybeApplyGapInjury = (npc, playerLevel, opts = {}) => {
+    try {
+        if (!npc) return { npc, message: null, applied: false };
+        if (!isHostileForGapInjury(npc, opts)) return { npc, message: null, applied: false };
+        const already = isGapInjured(npc) || hasGapInjuryStatus(npc);
+        if (!shouldApplyGapInjury({
+            npcLevel: Number(npc.level) || 1,
+            playerLevel: Number(playerLevel) || 1,
+            hostile: true,
+            alreadyInjured: already,
+            provoked: opts.provoked === true,
+            knobs: OBJECTIVITY_KNOBS,
+            gapMax: HOSTILE_INITIATIVE_LEVEL_GAP_MAX,
+        })) return { npc, message: null, applied: false };
+
+        const injured = applyGapInjury(npc, playerLevel, {
+            turn: Number(opts.turn) || 0,
+            recomputeStatsForLevel: recomputeNpcStatsForLevel,
+            gapMax: HOSTILE_INITIATIVE_LEVEL_GAP_MAX,
+        });
+        if (injured === npc) return { npc, message: null, applied: false };
+        console.log('[objectivity] gap injury applied:', npc.Name, '->', injured.level,
+            '(true', injured.gapInjury && injured.gapInjury.trueLevel, ')');
+        return { npc: injured, message: gapInjuryAppliedMessage(npc.Name), applied: true };
+    } catch (gapError) {
+        console.warn('[objectivity] maybeApplyGapInjury:', gapError);
+        return { npc, message: null, applied: false };
+    }
+};
+
+/**
+ * Pillar 1: does this item count as an explicit recovery event for the
+ * level-gap injury? Deliberately narrow - a random food buff must not silently
+ * hand a level-90 enemy its true power back mid-scene.
+ * Structured effects win; the Vietnamese keyword list is the fallback for the
+ * (common) case where the AI wrote a pill with prose only.
+ */
+const GAP_INJURY_HEALING_ITEM_TYPES = ['Đan dược', 'Thực phẩm', 'Đa năng', 'Dị thường'];
+const GAP_INJURY_HEALING_KEYWORDS = [
+    'hồi phục', 'hoi phuc', 'chữa trị', 'chua tri', 'trị thương', 'tri thuong',
+    'liệu thương', 'lieu thuong', 'tái tạo', 'tai tao', 'cải tử', 'cai tu',
+    'hoàn hồn', 'hoan hon', 'tục mệnh', 'tuc menh', 'giải độc', 'giai doc',
+    'khôi phục', 'khoi phuc', 'hồi xuân', 'hoi xuan', 'sinh cơ', 'sinh co',
+];
+const isHealingItemForGapInjury = (item) => {
+    if (!item) return false;
+    const type = String(item.Type || item.type || '');
+    if (GAP_INJURY_HEALING_ITEM_TYPES.indexOf(type) === -1) return false;
+    const effects = String(item.effectsString || item.effects || '');
+    if (/heal|dispel|remove_status|cleanse/i.test(effects)) return true;
+    const prose = (String(item.Name || '') + ' ' + String(item.description || '')).toLowerCase();
+    return GAP_INJURY_HEALING_KEYWORDS.some(k => prose.indexOf(k) > -1);
+};
+
+/**
+ * Pillar 1: the suffix shown to the AI for a gap-injured NPC. NEVER a number -
+ * the model must know the shown realm is suppressed, and must NOT know by how
+ * much, or it would narrate the true level straight back at the player.
+ */
+const gapInjuryPromptSuffix = (npc) => (isGapInjured(npc) ? ' [' + GAP_INJURY_PROMPT_HINT + ']' : '');
+
+/** Pillar 1: lift the injury, restoring the exact pre-injury level and stats. */
+const maybeRecoverGapInjury = (npc) => {
+    try {
+        if (!npc || (!isGapInjured(npc) && !hasGapInjuryStatus(npc))) {
+            return { npc, message: null, recovered: false };
+        }
+        const healed = recoverGapInjury(npc, { recomputeStatsForLevel: recomputeNpcStatsForLevel });
+        if (healed === npc) return { npc, message: null, recovered: false };
+        console.log('[objectivity] gap injury recovered:', npc.Name, '->', healed.level);
+        return { npc: healed, message: gapInjuryRecoveredMessage(npc.Name), recovered: true };
+    } catch (gapError) {
+        console.warn('[objectivity] maybeRecoverGapInjury:', gapError);
+        return { npc, message: null, recovered: false };
+    }
 };
 
 const updateOrCreateInArray = (array, newItem, keyField = 'Name') => {
@@ -17962,136 +18692,153 @@ const isModelOnCooldown = (model) => (overloadedModelUntil.get(model) || 0) > Da
 let stickyPreferredModel = null;
 
 // Hàm fetch lõi nay đã được bọc qua hệ thống xếp hàng
-const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2, retryDelay = 1000) => {
+/**
+ * The single outbound Gemini call site (gdd-01 C.2 R1 / plan.md P4).
+ *
+ * The shipped call sites keep this exact signature; the body now delegates to
+ * `src-web/systems/ai/requestAi.ts`, which owns the model ladder (monotonic
+ * `tried`), the 503 breaker, F1 backoff, `safetySettings: BLOCK_NONE` and - new
+ * in P4b - a real AbortController with the plan.md C-10 budgets (60s logical /
+ * 45s per request, read from `AI_KNOBS`).
+ *
+ * `callSite` (6th argument, optional) classifies the caller so plan.md C-9 can
+ * exempt background work from the per-turn AI budget and from the BUSY guard.
+ * Only API-2 narration passes 'narration'; everything else defaults to a
+ * background call, which is the safe default for a legacy call site.
+ *
+ * DEVIATION, documented: every request is sent with `call_type: 'narration_call'`
+ * regardless of `callSite`, because that is the AI layer's "return the raw text
+ * unparsed" mode. Using 'suggestion_call' would run the strict 4-element JSON
+ * suggestion parser over responses that are free prose or app-specific JSON
+ * schemas. The budget / BUSY semantics plan.md C-9 actually cares about ride on
+ * the independent `background` flag, not on `call_type`.
+ *
+ * `globalApiQueue` still sits in FRONT of the call, so its spacing delay stays
+ * outside `t_elapsed` (plan.md C-10).
+ */
+const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2, retryDelay = 1000, callSite = 'generic', budgetOverrides = null) => {
+    const urlMatch = (apiUrl || '').match(/\/models\/([^:?]+):generateContent(?:\?key=(.*))?$/);
+    const requestedModel = urlMatch ? urlMatch[1] : null;
+    const apiKeyFromUrl = urlMatch && urlMatch[2] ? urlMatch[2] : '';
 
-    // Đóng gói logic fetch vào một hàm closure
-    const executeFetch = async () => {
-        const urlMatch = apiUrl.match(/\/models\/([^:]+):generateContent\?key=(.*)$/);
-        const requestedModel = urlMatch?.[1];
-        const apiKey = urlMatch?.[2];
-        let modelsToTry;
-        if (requestedModel && apiKey !== undefined && GEMINI_TEXT_MODEL_FALLBACKS.includes(requestedModel)) {
-            // Ưu tiên model vừa chạy thành công gần nhất (nếu còn hợp lệ và không đang cooldown),
-            // chỉ rơi về requestedModel mặc định khi chưa có/không còn model ưu tiên nào.
-            const preferredModel = (stickyPreferredModel && GEMINI_TEXT_MODEL_FALLBACKS.includes(stickyPreferredModel) && !isModelOnCooldown(stickyPreferredModel))
-                ? stickyPreferredModel
-                : requestedModel;
-            const fullLadder = [preferredModel, ...GEMINI_TEXT_MODEL_FALLBACKS.filter(m => m !== preferredModel)];
-            const healthyLadder = fullLadder.filter(m => !isModelOnCooldown(m));
-            // Nếu tất cả model đều đang cooldown (Google sập diện rộng) thì đành thử lại toàn bộ thang.
-            modelsToTry = healthyLadder.length > 0 ? healthyLadder : fullLadder;
-            if (healthyLadder.length < fullLadder.length) {
-                console.log(`[Cầu dao 503] Tạm bỏ qua model đang quá tải: ${fullLadder.filter(m => isModelOnCooldown(m)).join(', ')}. Gọi thẳng: ${modelsToTry[0]}`);
-            }
-        } else {
-            modelsToTry = [null]; // apiUrl không khớp mẫu model dự phòng -> chỉ gọi đúng apiUrl gốc, không fallback
-        }
+    if (!requestedModel) {
+        // A URL this wrapper cannot classify (a non-generateContent endpoint) is a
+        // caller bug rather than a runtime error - fail loudly instead of silently
+        // opening a second, unmanaged HTTP path (gdd-01 C.2 R1).
+        throw new Error('fetchWithRetries: URL không phải endpoint generateContent hợp lệ.');
+    }
 
-        let lastError = null;
+    // The requested model always leads the ladder; the shipped fallback list
+    // follows it (App.tsx behaviour before P4b). A model outside the list gets a
+    // one-entry ladder, exactly like the old `modelsToTry = [null]` branch.
+    const inFallbackList = GEMINI_TEXT_MODEL_FALLBACKS.includes(requestedModel);
+    const modelLadder = inFallbackList
+        ? [requestedModel, ...GEMINI_TEXT_MODEL_FALLBACKS.filter(m => m !== requestedModel)]
+        : [requestedModel];
 
-        for (const model of modelsToTry) {
-            const modelUrl = model ? `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}` : apiUrl;
-
-            for (let attempt = 0; attempt <= maxRetries; attempt++) {
-                try {
-                    const response = await fetch(modelUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload),
-                    });
-
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        if (response.status === 429) {
-                            const quotaError = new Error(`Hệ thống AI đã hết lượt sử dụng miễn phí trong thời gian này (Lỗi 429 - Quá giới hạn quota). Vui lòng đợi ít phút rồi thử lại, hoặc vào "Thiết Lập API Key" ở màn hình chính để dùng API Key Gemini miễn phí của riêng ngươi và tiếp tục ngay lập tức.`);
-                            quotaError.isQuotaError = true;
-                            quotaError.isModelUnavailable = true;
-                            throw quotaError;
-                        }
-                        if (response.status === 401) {
-                            const authError = new Error(`Lỗi Xác Thực (401): API Key không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra lại trong "Thiết Lập API Key".`);
-                            authError.isAuthError = true;
-                            throw authError;
-                        }
-                        if (response.status === 403 || response.status === 404) {
-                            const unavailableError = new Error(`Model "${model || requestedModel}" không khả dụng (HTTP ${response.status}): ${errorText}`);
-                            unavailableError.isModelUnavailable = true;
-                            throw unavailableError;
-                        }
-                        if (response.status === 503) {
-                            const overloadedError = new Error(`Server AI của Google đang quá tải tạm thời (Lỗi 503). Đây không phải lỗi từ game, hệ thống sẽ tự thử lại sau ít giây. Nếu vẫn thất bại, vui lòng thử lại sau vài phút.`);
-                            overloadedError.isOverloadedError = true;
-                            throw overloadedError;
-                        }
-                        throw new Error(`API trả về lỗi HTTP ${response.status}: ${errorText}`);
-                    }
-
-                    const responseText = await response.text();
-                    if (!responseText) {
-                        throw new Error("Phản hồi từ API rỗng.");
-                    }
-
-                    const result = JSON.parse(responseText);
-                    const blockReason = result.promptFeedback?.blockReason;
-                    if (blockReason) {
-                        throw new Error(`AI Safety Filter: ${blockReason}`);
-                    }
-
-                    const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (!jsonText || jsonText.trim() === '') {
-                        throw new Error("Nội dung text trong phản hồi của AI rỗng.");
-                    }
-
-                    const finishReason = result.candidates?.[0]?.finishReason;
-                    if (finishReason === 'MAX_TOKENS') {
-                        console.error('AI response bị cắt do vượt MAX_TOKENS. Raw text nhận được trước khi cắt:', jsonText);
-                        throw new Error("Phản hồi của AI bị cắt cụt do vượt quá giới hạn token (MAX_TOKENS) trước khi hoàn thành JSON. Hãy thử rút gọn yêu cầu Chỉ số/Hiệu ứng hoặc thử lại.");
-                    }
-
-                    if (model) {
-                        overloadedModelUntil.delete(model);
-                        stickyPreferredModel = model; // Ghim model vừa thành công làm ưu tiên cho lần gọi sau.
-                    }
-                    return jsonText;
-
-                } catch (error) {
-                    if (error.isAuthError) throw error;
-                    lastError = error;
-                    console.warn(`[${model || requestedModel}] Lần gọi API thứ ${attempt + 1} thất bại:`, error.message);
-
-                    // Hết quota/không có quyền/không tồn tại -> bỏ qua retry, chuyển sang model dự phòng tiếp theo ngay
-                    if (error.isModelUnavailable) break;
-
-                    // Server quá tải (503): chỉ thử lại đúng 1 lần với khoảng chờ ngắn. Nếu vẫn 503,
-                    // đánh dấu cầu dao để các lần gọi sau trong phiên bỏ qua model này, rồi chuyển ngay
-                    // sang model dự phòng — thay vì đốt 5-10 giây chờ trên một model đang hỏng.
-                    if (error.isOverloadedError) {
-                        if (attempt >= Math.min(1, maxRetries)) {
-                            markModelOverloaded(model);
-                            break;
-                        }
-                        if (onRetry) onRetry(attempt + 1, maxRetries);
-                        await new Promise(resolve => setTimeout(resolve, 2000));
-                        continue;
-                    }
-
-                    if (attempt < maxRetries) {
-                        if (onRetry) onRetry(attempt + 1, maxRetries);
-                        await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt + 1)));
-                    }
-                }
-            }
-        }
-        if (lastError.isQuotaError) {
-            throw lastError;
-        }
-        if (lastError.isOverloadedError) {
-            throw lastError;
-        }
-        throw new Error(`AI không phản hồi hợp lệ sau khi thử tất cả các model. Lỗi cuối cùng: ${lastError.message}`);
+    const background = turnGlue.chooseBackgroundFlag(callSite);
+    // Code review C-3: `requestAi` REQUIRES credentials. Deriving them by
+    // regex-parsing the `?key=` we just wrote into the URL produced NO
+    // credentials at all in `defaultGemini` mode; they now come from the app's
+    // real state, with the URL key kept only as the legacy fallback.
+    const credentials = turnGlue.buildAiCredentials({
+        apiMode,
+        apiKey,
+        apiKeyFromUrl,
+        defaultKey: PLATFORM_DEFAULT_GEMINI_KEY,
+    });
+    const config = {
+        ...DEFAULT_AI_CONFIG,
+        model_ladder: modelLadder,
+        // Preserve each call site's own retry appetite (`maxRetries` counts EXTRA
+        // attempts, the module counts total attempts).
+        max_same_model_attempts_transient: Math.max(1, (Number(maxRetries) || 0) + 1),
+        transient_retry_base_seconds: Math.max(0.05, (Number(retryDelay) || 1000) / 1000),
     };
 
-    // Ném task vào hàng chờ và trả về Promise, nó sẽ tự động resolve khi chạy xong
+    const executeFetch = async () => {
+        const result = await requestAi(
+            {
+                call_type: 'narration_call',
+                payload: { lockedResultSummary: '(App.tsx dung prompt rieng)' },
+                background,
+                // The app builds its own payloads (system instructions, response
+                // schemas, tool config). They pass through untouched except for the
+                // system-wide BLOCK_NONE safety block (gdd-01 C.2 R7), which App.tsx
+                // never set on any of its payloads before P4b.
+                bodyOverride: {
+                    ...payload,
+                    safetySettings: (payload && payload.safetySettings) || SAFETY_SETTINGS_BLOCK_NONE,
+                },
+                // Code review C-4: only set for a narration turn API-1 tagged
+                // 'dai' (3000+ words); everything else keeps the config budget.
+                ...(budgetOverrides ? { overrides: budgetOverrides } : {}),
+            },
+            {
+                fetchImpl: async (url, init) => {
+                    const res = await fetch(url, {
+                        method: init.method,
+                        headers: init.headers,
+                        body: init.body,
+                        signal: init.signal,
+                    });
+                    return {
+                        status: res.status,
+                        json: () => res.json(),
+                        headers: { get: (name) => res.headers.get(name) },
+                    };
+                },
+                clock: () => Date.now(),
+                sleep: (ms) => new Promise(resolve => setTimeout(resolve, ms)),
+                abortFactory: () => new AbortController(),
+                session: aiSessionState,
+                config,
+                credentials,
+                onEvent: (event) => {
+                    if (event.type === 'retrying_network' && onRetry) onRetry(1, maxRetries);
+                },
+            },
+        );
+
+        if (result.ok) return result.text;
+
+        // The four canonical labels of gdd-01 C.7, mapped back onto the error
+        // flags the legacy call sites already branch on.
+        const label = result.label;
+        if (label === 'quota_429') {
+            const quotaError = new Error('Hệ thống AI đã hết lượt sử dụng miễn phí trong thời gian này (Lỗi 429 - Quá giới hạn quota). Vui lòng đợi ít phút rồi thử lại, hoặc vào "Thiết Lập API Key" ở màn hình chính để dùng API Key Gemini miễn phí của riêng ngươi và tiếp tục ngay lập tức.');
+            quotaError.isQuotaError = true;
+            quotaError.isModelUnavailable = true;
+            throw quotaError;
+        }
+        if (label === 'config_error' || label === 'not_configured') {
+            const authError = new Error('Lỗi Xác Thực: API Key không hợp lệ, đã hết hạn hoặc chưa được cấu hình. Vui lòng kiểm tra lại trong "Thiết Lập API Key".');
+            authError.isAuthError = true;
+            throw authError;
+        }
+        if (label === 'timeout') {
+            const timeoutError = new Error(`AI không phản hồi trong ${AI_KNOBS.ai_call_timeout_seconds} giây nên yêu cầu đã bị hủy. Hãy thử lại, hoặc rút ngắn hành động vừa nhập.`);
+            timeoutError.isOverloadedError = true;
+            throw timeoutError;
+        }
+        if (label === 'safety_blocked') {
+            throw new Error(`AI Safety Filter: ${result.detail || 'nội dung bị chặn'}`);
+        }
+        if (label === 'truncated') {
+            throw new Error('Phản hồi của AI bị cắt cụt do vượt quá giới hạn token (MAX_TOKENS) trước khi hoàn thành. Hãy thử rút gọn yêu cầu rồi thử lại.');
+        }
+        if (label === 'BUSY') {
+            const busyError = new Error('Thiên Đạo đang diễn hóa một lượt khác. Vui lòng đợi lượt hiện tại kết thúc rồi thử lại.');
+            busyError.isBusyError = true;
+            throw busyError;
+        }
+        const lastError = new Error(`AI không phản hồi hợp lệ sau khi thử tất cả các model (${label}${result.detail ? ': ' + result.detail : ''}).`);
+        lastError.isOverloadedError = label === 'no_models_left';
+        throw lastError;
+    };
+
+    // Ném task vào hàng chờ và trả về Promise, nó sẽ tự động resolve khi chạy xong.
+    // Hàng đợi nằm NGOÀI ngân sách thời gian của một logical call (plan.md C-10).
     return globalApiQueue.enqueue(executeFetch);
 };
 
@@ -20038,6 +20785,729 @@ const [knowledge, setknowledge] = useState({
        images: { base: null, idle: null, smile: null, sad: null, angry: null, laugh: null, raw: null }
    }
 });
+
+// ===========================================================================
+// P3b / P4b - systems wiring (plan.md D/P3 + D/P4)
+// ---------------------------------------------------------------------------
+// The App keeps its own turn spine (`processPlayerAction`); the Turn Manager is
+// used in MANUAL mode: the App calls `beginManualTurn()` / `commitManualTurn()`
+// / `failManualTurn()` around the existing pipeline instead of handing the whole
+// turn to `submitAction()`. That is a documented deviation from gdd-01 A.4 -
+// rewriting `processPlayerAction` into `submitAction` was judged too high a
+// regression risk for this phase (plan.md risk R1). The phase ORDER the GDD
+// cares about is preserved: snapshot -> resolve -> narrate -> World Memory
+// append -> checkpoint -> commit.
+// ===========================================================================
+
+/** Live mirror of the undoable React state; refreshed on every render (gdd-01 A.9). */
+const liveUndoableStateRef = useRef({});
+liveUndoableStateRef.current = { knowledge, storyHistory, storySummaries, currentTurn, gameSettings, choices, currentStory, gameMode, adventureTurnCount, activeTrade };
+
+const worldMemoryRef = useRef(null);
+const turnManagerRef = useRef(null);
+const slotRecordRef = useRef(null);
+const currentGameIdRef = useRef(null);
+currentGameIdRef.current = currentGameId;
+/** Mirrors `turnManager.undo_available` into React so the button can re-render. */
+const [canUndoTurn, setCanUndoTurn] = useState(false);
+/** Vietnamese banner shown when a turn could not be made durable (plan.md C-2 reduced). */
+const [persistenceWarning, setPersistenceWarning] = useState(null);
+
+// === P6b UI state (plan.md P6 reduced) ======================================
+// gdd-06 A2 #1: at most ONE banner is visible; the rest queue FIFO and a write
+// failure preempts an open quota warning. The queue itself is the pure module;
+// React only mirrors its `visible` slot into state so it can re-render.
+const bannerQueueRef = useRef(createBannerQueue());
+const [visibleBanner, setVisibleBanner] = useState(null);
+const quotaBannerRaisedRef = useRef(false);
+
+/** gdd-06 C2 #1: device-level, default OFF, persisted outside every save. */
+const [hackModeEnabled, setHackModeEnabled] = useState(() =>
+    uiGlue.readHackModeFlag(typeof window !== 'undefined' ? window.localStorage : null)
+);
+
+const pushBanner = useCallback((banner) => {
+    if (!banner) return;
+    bannerQueueRef.current.push(banner);
+    setVisibleBanner(bannerQueueRef.current.visible);
+}, []);
+
+const dismissBanner = useCallback(() => {
+    bannerQueueRef.current.dismiss();
+    setVisibleBanner(bannerQueueRef.current.visible);
+    quotaBannerRaisedRef.current = bannerQueueRef.current.snapshot().queue.some(b => b.kind === 'QUOTA_WARNING')
+        || bannerQueueRef.current.visible?.kind === 'QUOTA_WARNING';
+}, []);
+
+const toggleHackMode = useCallback(() => {
+    setHackModeEnabled(prev => {
+        const next = !prev;
+        uiGlue.writeHackModeFlag(typeof window !== 'undefined' ? window.localStorage : null, next);
+        return next;
+    });
+}, []);
+
+const [isUndoingTurn, setIsUndoingTurn] = useState(false);
+
+const getWorldMemory = useCallback(() => {
+    if (!worldMemoryRef.current) worldMemoryRef.current = new WorldMemory();
+    return worldMemoryRef.current;
+}, []);
+
+/**
+ * The undoable view of App-owned React state.
+ *
+ * `currentStory` is NOT one of the six enumerated fields of `undoAppState.ts`,
+ * so it is rebuilt from the restored `storyHistory` instead of being snapshotted
+ * (it is a derived display value, not independent state).
+ */
+const makeAppUndoable = useCallback(() => makeAppStateUndoable({
+    get: () => ({
+        knowledge: liveUndoableStateRef.current.knowledge,
+        storyHistory: liveUndoableStateRef.current.storyHistory,
+        storySummaries: liveUndoableStateRef.current.storySummaries,
+        currentTurn: liveUndoableStateRef.current.currentTurn,
+        gameSettings: liveUndoableStateRef.current.gameSettings,
+        choices: liveUndoableStateRef.current.choices,
+        // Code review C-5: a turn can flip any of these three through a command
+        // tag ([ENTER_TRADE_MODE], [START_COMBAT], an adventure-skill tick), so
+        // leaving them out of the snapshot left ghost state behind after Undo.
+        gameMode: liveUndoableStateRef.current.gameMode,
+        activeTrade: liveUndoableStateRef.current.activeTrade,
+        adventureTurnCount: liveUndoableStateRef.current.adventureTurnCount,
+    }),
+    set: (next) => {
+        setknowledge(next.knowledge);
+        setStoryHistory(next.storyHistory || []);
+        setStorySummaries(next.storySummaries || []);
+        setCurrentTurn(next.currentTurn || 0);
+        // MERGE, never assign: gameSettings is snapshotted as a PROJECTION
+        // (undoAppState.TURN_RELEVANT_SETTINGS_KEYS), so assigning it would wipe
+        // every key outside that projection - the whole world-creation payload.
+        setGameSettings(prev => ({ ...prev, ...(next.gameSettings || {}) }));
+        setChoices(next.choices || []);
+        if (next.gameMode !== undefined) setGameMode(next.gameMode);
+        if (next.activeTrade !== undefined) setActiveTrade(next.activeTrade);
+        if (next.adventureTurnCount !== undefined) setAdventureTurnCount(next.adventureTurnCount || 0);
+        const lastStory = (next.storyHistory || []).filter(h => h && h.type === 'story').pop();
+        setCurrentStory(lastStory ? lastStory.content : '');
+    },
+    onWarning: (message) => console.warn('[systems] undo snapshot:', message),
+}), []);
+
+/**
+ * Registration ORDER is the snapshot index order and must never change
+ * mid-session (gdd-01 A.3): app state first, World Memory second.
+ */
+const getTurnManager = useCallback(() => {
+    if (!turnManagerRef.current) {
+        try {
+            const tm = createTurnManager({ slotId: currentGameIdRef.current || 'slot_default' });
+            tm.registry.register(makeAppUndoable(), 'app_state');
+            tm.registry.register(getWorldMemory(), 'world_memory');
+            tm.begin();
+            turnManagerRef.current = tm;
+        } catch (tmError) {
+            console.error('[systems] Khong khoi tao duoc Turn Manager:', tmError);
+            return null;
+        }
+    }
+    return turnManagerRef.current;
+}, [getWorldMemory, makeAppUndoable]);
+
+const syncUndoAvailability = useCallback(() => {
+    try {
+        const tm = turnManagerRef.current;
+        setCanUndoTurn(!!tm && tm.undo_available);
+    } catch (undoError) {
+        console.warn('[systems] undo_available:', undoError);
+        setCanUndoTurn(false);
+    }
+}, []);
+
+/** The bundle every checkpoint writes (gdd-05 B3, blob-per-system). */
+const buildSystemsBundle = useCallback((worldTime) => {
+    const live = liveUndoableStateRef.current;
+    let worldMemoryJson = null;
+    try {
+        worldMemoryJson = getWorldMemory().toJSON();
+    } catch (wmError) {
+        console.error('[systems] Khong serialize duoc World Memory:', wmError);
+    }
+    // Code review C-9: without this the Turn Manager restarts at turn_id 0 on
+    // every reload, and death_turn_ids is forgotten - a death turn became
+    // undoable again after a refresh (gdd-01 CR#9).
+    let turnManagerJson = null;
+    try {
+        turnManagerJson = turnManagerRef.current ? turnManagerRef.current.toPersistable() : null;
+    } catch (tmError) {
+        console.error('[systems] Khong serialize duoc Turn Manager:', tmError);
+    }
+    return turnGlue.buildSaveBundle({
+        knowledge: live.knowledge,
+        storyHistory: live.storyHistory,
+        storySummaries: live.storySummaries,
+        gameSettings: live.gameSettings,
+        currentTurn: live.currentTurn,
+        choices: live.choices,
+        gameMode: live.gameMode,
+        adventureTurnCount: live.adventureTurnCount,
+        gameId: currentGameIdRef.current,
+        worldMemory: worldMemoryJson,
+        turnManager: turnManagerJson,
+    }, {
+        slot_id: currentGameIdRef.current || 'slot_default',
+        world_time: worldTime,
+        saved_at: Date.now(),
+        hack_mode_used_this_slot: !!(slotRecordRef.current && slotRecordRef.current.hack_mode_used_this_slot),
+    });
+}, [getWorldMemory]);
+
+/**
+ * plan.md P6b: the P4b `persistenceWarning` string is promoted into the banner
+ * tier so it renders at the top of the screen on every screen, instead of being
+ * buried above the choice grid.
+ */
+useEffect(() => {
+    const banner = uiGlue.persistenceBanner(persistenceWarning);
+    if (banner) pushBanner(banner);
+}, [persistenceWarning, pushBanner]);
+
+/**
+ * gdd-05 B4 Formula #3 + B5: after every durable checkpoint, measure the ORIGIN
+ * quota and raise ONE warning banner at >= 0.85 utilisation, then prune old
+ * checkpoints. Both run OFF the critical path - a failure here never touches the
+ * turn. The banner is raised at most once per session until it is dismissed.
+ */
+const CHECKPOINT_KEEP_COUNT = 2; // no registry knob exists for this; see plan.md P3 (reduced)
+
+const runIdleMaintenance = useCallback(async (slotId) => {
+    try {
+        const measured = await estimateOriginQuota();
+        if (!quotaBannerRaisedRef.current) {
+            const banner = uiGlue.quotaBanner({ usage: measured.usage, quota: measured.quota });
+            if (banner) {
+                quotaBannerRaisedRef.current = true;
+                pushBanner(banner);
+            }
+        }
+    } catch (quotaError) {
+        console.warn('[systems] Khong do duoc han muc luu tru:', quotaError);
+    }
+    try {
+        const backend = getSystemsBackend();
+        if (backend) await pruneCheckpoints(backend, slotId, CHECKPOINT_KEEP_COUNT);
+    } catch (pruneError) {
+        console.warn('[systems] pruneCheckpoints:', pruneError);
+    }
+}, [pushBanner]);
+
+/**
+ * gdd-05 R1 checkpoint. Returns `{durability_confirmed}`; NEVER throws, so a
+ * storage failure degrades to a banner instead of losing the turn (plan.md C-2
+ * reduced variant: the UI is not rolled back).
+ */
+const runSystemsCheckpoint = useCallback(async (reason, turnRecord, worldTime) => {
+    const backend = getSystemsBackend();
+    if (!backend) return { durability_confirmed: false, error: { code: 'UNSUPPORTED' } };
+    const slotId = currentGameIdRef.current || 'slot_default';
+    try {
+        if (!slotRecordRef.current || slotRecordRef.current.slot_id !== slotId) {
+            const live = liveUndoableStateRef.current;
+            const player = ((live.knowledge && live.knowledge.characters) || []).find(c => c && c.isPlayer);
+            slotRecordRef.current = createSlotRecord({
+                slot_id: slotId,
+                character_name: (player && player.Name) || 'Vô Danh',
+                now: Date.now(),
+                world_time: (live.knowledge && live.knowledge.time) || null,
+            });
+        }
+        const bundle = buildSystemsBundle(worldTime);
+        const result = await saveCheckpoint(backend, slotId, bundle, reason, {
+            slotRecord: slotRecordRef.current,
+            turnRecord: turnRecord || null,
+            clock: () => Date.now(),
+        });
+        if (result.slotRecord) slotRecordRef.current = result.slotRecord;
+        if (result.budget_violation) {
+            console.warn('[systems] Autosave vuot ngan sach do tre:', result.duration_ms, 'ms');
+        }
+        if (!result.durability_confirmed) {
+            console.error('[systems] Checkpoint that bai:', result.error);
+        } else {
+            // Fire-and-forget: quota probe + checkpoint pruning while idle.
+            Promise.resolve().then(() => runIdleMaintenance(slotId));
+        }
+        return result;
+    } catch (checkpointError) {
+        console.error('[systems] Checkpoint nem loi ngoai du kien:', checkpointError);
+        return { durability_confirmed: false, error: { code: 'WRITE_FAILED_INTERNAL' } };
+    }
+}, [buildSystemsBundle, runIdleMaintenance]);
+
+/**
+ * gdd-06 C4 "Apply / validate / rollback flow" (PART C, Core Rules #6a-#6d).
+ *
+ * Every Save press in the customization panel goes through ONE controller so
+ * the order is guaranteed: validate -> lock -> durable write-through checkpoint
+ * -> apply in memory -> invalidate the pending Undo snapshot -> raise
+ * `hack_mode_used_this_slot` -> log -> unlock. Nothing is applied when the
+ * write fails, and the in-flight lock is what dims all three Save buttons.
+ *
+ * The zone-specific validator and the in-memory apply are handed over per press
+ * through `pendingCustomizeOpRef`, because the controller's deps are fixed at
+ * construction while the drafts change on every keystroke.
+ */
+const pendingCustomizeOpRef = useRef(null);
+
+const customizeCommitController = useMemo(() => createCommitController({
+    validate: () => {
+        const op = pendingCustomizeOpRef.current;
+        return op ? op.validate() : { ok: true, errors: [], warnings: [] };
+    },
+    applyInMemory: () => {
+        const op = pendingCustomizeOpRef.current;
+        if (op) op.apply();
+    },
+    writeCheckpoint: async (payload) => {
+        const result = await runSystemsCheckpoint('hack_write', null, payload.world_time);
+        return {
+            ok: !!result.durability_confirmed,
+            error: result.error ? String(result.error.code || result.error) : undefined,
+        };
+    },
+    // gdd-06 C2 #6b / AC-34: only called when a snapshot is actually pending.
+    hasPendingSnapshot: () => !!(turnManagerRef.current && turnManagerRef.current.undo_available),
+    // The P4b glue already does invalidate + hack flag + button state in one go.
+    invalidatePendingSnapshot: () => noteCustomizationWrite(),
+    setHackModeUsed: () => {
+        if (slotRecordRef.current) slotRecordRef.current.hack_mode_used_this_slot = true;
+    },
+    emitLog: (entry) => console.log('[systems] hack_write:', entry.zone, entry.type, 'seq', entry.hack_seq),
+    clock: () => Date.now(),
+    worldTime: () => liveUndoableStateRef.current.currentTurn || 0,
+}), [runSystemsCheckpoint]);
+
+const runCustomizeCommit = useCallback(async (op) => {
+    pendingCustomizeOpRef.current = { validate: op.validate, apply: op.apply };
+    try {
+        return await customizeCommitController.commit({
+            zone: op.zone,
+            type: op.type,
+            values: op.values,
+            ...(op.entry_ids ? { entry_ids: op.entry_ids } : {}),
+        });
+    } finally {
+        pendingCustomizeOpRef.current = null;
+    }
+}, [customizeCommitController]);
+
+/** Zone 1 - the atomic progress triple (D.2/D.2b). */
+const commitCustomizeProgress = useCallback(async (draft) => {
+    const player = (knowledge.characters || []).find(c => c.isPlayer);
+    const ctx = {
+        old_level: (player && player.level) || 1,
+        old_current_exp: (player && player.exp) || 0,
+        old_state: (player && player.progressionState) || PROGRESSION_STATE_NORMAL,
+    };
+    let write = null;
+    return await runCustomizeCommit({
+        zone: 'progress',
+        type: 'progress',
+        values: draft,
+        validate: () => {
+            const result = validateProgressZone(draft, ctx);
+            write = result.write;
+            return result;
+        },
+        apply: () => {
+            if (write) handleCustomizeLevel(write.level, write.current_exp, write.state);
+        },
+    });
+}, [knowledge, runCustomizeCommit]);
+
+/** Zone 2 - the 12 base stats, all-or-nothing (D.3). */
+const commitCustomizeBaseStats = useCallback(async (appDraft) => {
+    const player = (knowledge.characters || []).find(c => c.isPlayer);
+    const gddDraft = uiGlue.baseStatDraftToGdd(appDraft, uiGlue.gddBaseStatsFromApp(player));
+    return await runCustomizeCommit({
+        zone: 'base_stats',
+        type: 'base_stats',
+        values: gddDraft,
+        validate: () => isValidBaseStatSet(gddDraft),
+        apply: () => handleCustomizeBaseStats(uiGlue.gddStatsToAppBaseFields(gddDraft)),
+    });
+}, [knowledge, runCustomizeCommit]);
+
+/** Zone 3a - a custom item. The App's items are not recovery items by default,
+ *  so D.4's mandatory `efficacy` gate is only applied when the draft says so. */
+const commitCustomizeItem = useCallback(async (itemDraft) => {
+    const existing = {
+        item: (knowledge.items || []).map(it => String(it.Name || it.name || '')),
+        skill: [],
+        thuc: [],
+    };
+    const name = String(itemDraft.name || '').trim();
+    return await runCustomizeCommit({
+        zone: 'entries',
+        type: 'create_item',
+        values: itemDraft,
+        entry_ids: [name],
+        validate: () => isValidItemSubmit(
+            { item_id: name, is_recovery_item: false },
+            existing
+        ),
+        apply: () => handleCustomizeCreateItem(itemDraft),
+    });
+}, [knowledge, runCustomizeCommit]);
+
+/** Zone 3b - a custom skill. DEVIATION (documented): the App generates a
+ *  skill's `thuc` list from the AI AFTER the submit, so the D.4 cardinality gate
+ *  is satisfied with one provisional thuc id rather than blocking a feature the
+ *  players already use. Id collisions are still hard-blocked. */
+const commitCustomizeSkill = useCallback(async (skillDraft) => {
+    const player = (knowledge.characters || []).find(c => c.isPlayer);
+    const existing = {
+        item: [],
+        skill: (player?.learnedSkills || []).map(sk => String(sk.Name || sk.name || '')),
+        thuc: [],
+    };
+    const name = String(skillDraft.name || '').trim();
+    return await runCustomizeCommit({
+        zone: 'entries',
+        type: 'create_skill',
+        values: skillDraft,
+        entry_ids: [name],
+        validate: () => isValidSkillSubmit(
+            { skill_id: name, thuc_ids: [name + ' · Thức 1'], known_skill_count: existing.skill.length },
+            existing
+        ),
+        apply: () => handleCustomizeCreateSkill(skillDraft),
+    });
+}, [knowledge, runCustomizeCommit]);
+
+
+/**
+ * gdd-01 A.4 `undo()`. The Turn Manager restores every registered system
+ * (React state through the undoable setters, then World Memory), then a
+ * `post_undo` checkpoint makes the rollback itself durable.
+ */
+const handleUndoTurn = useCallback(async () => {
+    const tm = turnManagerRef.current;
+    if (!tm || !tm.undo_available || isUndoingTurn) return;
+    setIsUndoingTurn(true);
+    try {
+        // Code review C-5: an API-3 / summariser call scheduled by the turn being
+        // undone may still be in flight. Let it settle FIRST (allSettled - a
+        // rejected background call must not block the rollback), then bump the
+        // generation so anything that lands later is dropped instead of applied.
+        if (activeCriticalPromisesRef.current.length > 0) {
+            await Promise.allSettled(activeCriticalPromisesRef.current);
+        }
+        const result = await tm.undo({
+            resolveMechanics: () => null,
+            narrate: async () => ({ ok: false, label: 'unused' }),
+            appendMemory: () => {},
+            markMemoryUndone: () => {
+                try { getWorldMemory().undoLast(); } catch (wmError) { console.error('[systems] undoLast:', wmError); }
+            },
+            checkpoint: async (ctx) => {
+                const r = await runSystemsCheckpoint('post_undo', null, ctx.world_time);
+                return { durability_confirmed: !!r.durability_confirmed, error_code: r.error && r.error.code };
+            },
+            clock: () => Date.now(),
+            slotId: currentGameIdRef.current || 'slot_default',
+            log: (entry) => console.log('[systems] undo:', entry.label, entry.turn_id),
+        });
+        if (result && result.ok) {
+            undoGenerationRef.current += 1;
+            try { contractSessionLog.markUndone(result.turn_id); } catch (logError) { console.warn('[systems]', logError); }
+            setStoryHistory(prev => [...prev, { id: crypto.randomUUID(), type: 'system', content: '**[Hệ thống]** Đã hoàn tác lượt vừa rồi.', transient: true }]);
+        } else if (result) {
+            setModalMessage({ show: true, title: 'Không Thể Hoàn Tác', content: result.label === 'death_turn'
+                ? 'Lượt kết thúc bằng cái chết không thể hoàn tác.'
+                : 'Không thể hoàn tác lượt này (dữ liệu đã được ghi hoặc đã có lượt mới).', type: 'info' });
+        }
+    } catch (undoError) {
+        console.error('[systems] Hoan tac that bai:', undoError);
+    } finally {
+        setIsUndoingTurn(false);
+        syncUndoAvailability();
+    }
+}, [getWorldMemory, isUndoingTurn, runSystemsCheckpoint, syncUndoAvailability]);
+
+/**
+ * gdd-04 A4: the fact-store context block that rides ALONGSIDE the AI summaries
+ * (plan.md C-8). Returns '' on any failure so the prompt is never blocked.
+ */
+/** Set by `processPlayerAction` while a manually driven turn is in flight. */
+const pendingTurnRef = useRef(null);
+/** Live mirror of `isProcessingAction` for the C-1 self-heal check. */
+const isProcessingActionRef = useRef(false);
+/**
+ * Bumped on every confirmed Undo (code review C-5). Background work captures it
+ * at schedule time and drops its result if the value moved while it was in
+ * flight - otherwise an API-3 / summariser response re-injects state the
+ * rollback just removed.
+ */
+const undoGenerationRef = useRef(0);
+
+const buildWorldMemoryBlock = useCallback((knowledgeForTurn) => {
+    try {
+        const entities = turnGlue.entitiesInScopeFromKnowledge(knowledgeForTurn);
+        if (entities.length === 0) return '';
+        const built = getWorldMemory().buildContext(entities, { hardTokenBudget: AI_KNOBS.ai_context_hard_token_budget });
+        return turnGlue.buildWorldMemoryPromptBlock(turnGlue.renderWorldMemoryContext(built));
+    } catch (wmError) {
+        console.error('[systems] Khong dung duoc khoi ky uc the gioi:', wmError);
+        return '';
+    }
+}, [getWorldMemory]);
+
+/**
+ * Phases 4-6 of gdd-01 A.4 for a manually driven turn: leak check -> World
+ * Memory append -> durability gate -> commit. Deferred to a macrotask so it
+ * never runs inside a React state updater.
+ */
+const finalizeSystemsTurn = useCallback((knowledgeAfterUpdates, storyText) => {
+    const tm = turnManagerRef.current;
+    const pending = pendingTurnRef.current;
+    if (!tm || !pending) return; // not a player turn (AI turn, init call, godmode)
+    pendingTurnRef.current = null;
+    setTimeout(async () => {
+        try {
+            const turnId = tm.turn_id;
+            const worldTime = tm.world_time + 1;
+            const locked = turnGlue.assembleLockedResultFromKnowledge(knowledgeAfterUpdates, {
+                turn_id: turnId,
+                world_time: worldTime,
+            });
+            const record = turnGlue.buildTurnRecordFromTurn({
+                slot_id: currentGameIdRef.current || 'slot_default',
+                turn_id: turnId,
+                world_time: worldTime,
+                action_text: pending.action,
+                narration: storyText,
+                locked_result: locked,
+                choices: liveUndoableStateRef.current.choices,
+                created_at: Date.now(),
+            });
+
+            // gdd-01 B.4 F1 - post-hoc leak detection. Never blocks the turn.
+            try {
+                const leak = leakCheckAndRecord(record, contractSessionLog, AI_KNOBS.leak_detection_enabled);
+                if (leak.violations.length > 0) {
+                    console.warn('[systems] Ro ri so lieu trong van ke (contract):', leak.violations);
+                }
+            } catch (leakError) {
+                console.error('[systems] leakCheck:', leakError);
+            }
+
+            // gdd-04 A4 - World Memory append (full log + rule-extracted facts).
+            try {
+                getWorldMemory().asWriter().append(record, locked);
+            } catch (memoryError) {
+                console.error('[systems] World Memory append:', memoryError);
+            }
+
+            // gdd-05 R1 - the durability gate.
+            const result = await runSystemsCheckpoint('turn_confirm', record, worldTime);
+            tm.commitManualTurn(!!result.durability_confirmed, {
+                is_death_turn: locked.is_death_turn,
+                suggestions: turnGlue.suggestionsFromChoices(liveUndoableStateRef.current.choices),
+            });
+            // plan.md C-2 (reduced): a failed write warns but never rolls the UI back.
+            setPersistenceWarning(result.durability_confirmed
+                ? null
+                : 'Chưa lưu được lượt này — kiểm tra dung lượng trình duyệt.');
+        } catch (finalizeError) {
+            console.error('[systems] Khong hoan tat duoc luot:', finalizeError);
+            try { tm.failManualTurn(); } catch (tmError) { console.error('[systems]', tmError); }
+        } finally {
+            syncUndoAvailability();
+        }
+    }, 0);
+}, [getWorldMemory, runSystemsCheckpoint, syncUndoAvailability]);
+
+/**
+ * Rebuilds the systems for a freshly opened slot (gdd-05 R3 load path).
+ *
+ * Order: IndexedDB slot bundle first (the source of truth, plan.md C-2); a
+ * legacy save with no bundle falls back to rebuilding World Memory from the
+ * App's own `storyHistory`. Snapshots are in-memory only, so Undo is correctly
+ * unavailable immediately after a load.
+ */
+const hydrateSystemsForSlot = useCallback(async (gameData) => {
+    const slotId = (gameData && gameData.id) || currentGameIdRef.current || 'slot_default';
+    turnManagerRef.current = null;
+    worldMemoryRef.current = null;
+    slotRecordRef.current = null;
+    let persistedTurnManager = null;
+    try {
+        const backend = getSystemsBackend();
+        if (backend) {
+            const loaded = await loadSlot(backend, slotId, { acquireLock: true });
+            if (loaded.ok && loaded.bundle) {
+                worldMemoryRef.current = worldMemoryFromBundle(loaded.bundle);
+                slotRecordRef.current = loaded.slotRecord || null;
+                persistedTurnManager = loaded.bundle.turnManager || null;
+            } else if (loaded.error) {
+                console.warn('[systems] Khong doc duoc slot moi (dung duong cu):', loaded.error.code);
+            }
+        }
+    } catch (loadError) {
+        console.error('[systems] loadSlot:', loadError);
+    }
+    if (!worldMemoryRef.current) {
+        try {
+            worldMemoryRef.current = worldMemoryFromAppHistory((gameData && gameData.storyHistory) || [], {
+                slot_id: slotId,
+                schema_version: CURRENT_SCHEMA_VERSION,
+                clock: () => Date.now(),
+                dropTransient: true,
+            });
+        } catch (importError) {
+            console.error('[systems] Khong nhap duoc ky uc tu lich su cu:', importError);
+        }
+    }
+    setCanUndoTurn(false);
+    setPersistenceWarning(null);
+    const tm = getTurnManager();
+    // Code review C-9: continue the slot's turn_id / world_time / death_turn_ids
+    // instead of restarting at 0. Volatile fields (snapshots, a pending locked
+    // result) are deliberately NOT restored, so Undo stays unavailable here.
+    if (tm && persistedTurnManager) {
+        try { tm.rehydrate(persistedTurnManager); }
+        catch (rehydrateError) { console.error('[systems] rehydrate Turn Manager:', rehydrateError); }
+    }
+}, [getTurnManager]);
+
+/** Reads the whole append-only log out of World Memory (may be empty). */
+const readTurnRecords = useCallback(() => {
+    try {
+        return getWorldMemory().toJSON().full_log || [];
+    } catch (readError) {
+        console.error('[systems] Khong doc duoc nhat ky luot:', readError);
+        return [];
+    }
+}, [getWorldMemory]);
+
+/** Downloads a text/JSON payload without touching the existing export helpers. */
+const downloadSystemsFile = (filename, text, mime) => {
+    try {
+        const blob = new Blob([text], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        URL.revokeObjectURL(url);
+    } catch (downloadError) {
+        console.error('[systems] Khong tai duoc tep:', downloadError);
+    }
+};
+
+/** gdd-05 B8 "Chép lại quyển sổ": narration only, plain text, no numbers. */
+const handleExportKeepsake = useCallback(() => {
+    const records = readTurnRecords();
+    if (records.length === 0) {
+        setModalMessage({ show: true, title: 'Chưa Có Gì Để Xuất', content: 'Quyển sổ chưa ghi được lượt nào kể từ khi mở phiên này.', type: 'info' });
+        return;
+    }
+    const player = ((liveUndoableStateRef.current.knowledge || {}).characters || []).find(c => c && c.isPlayer);
+    const text = exportKeepsake(records, { title: (player && player.Name) || 'Hồi Ký' });
+    downloadSystemsFile('ky-vat.txt', text, 'text/plain;charset=utf-8');
+}, [readTurnRecords]);
+
+/** gdd-05 B8 QA export: exactly the 5 keys, JSON. */
+const handleExportQaLog = useCallback(() => {
+    const records = readTurnRecords();
+    downloadSystemsFile('nhat-ky-qa.json', exportQaLogJson(records), 'application/json');
+}, [readTurnRecords]);
+
+/** gdd-01 B.5 F2/F3: the contract session log (leak stats + attribution). */
+const handleExportContractLog = useCallback(() => {
+    try {
+        const payload = {
+            stats: contractSessionLog.stats(),
+            per_field: contractSessionLog.perField(),
+            gate: contractSessionLog.gate(),
+            entries: contractSessionLog.all().slice(-CONTRACT_LOG_EXPORT_LIMIT),
+        };
+        downloadSystemsFile('nhat-ky-khe-uoc.json', JSON.stringify(payload, null, 2), 'application/json');
+    } catch (logError) {
+        console.error('[systems] Khong xuat duoc nhat ky khe uoc:', logError);
+    }
+}, []);
+
+/**
+ * An AI/user failure abandons the turn: no record, no checkpoint, no Undo.
+ *
+ * `force` also runs when no turn is pending: that is the self-heal path for a
+ * Turn Manager left `input_locked` by an earlier turn that returned early
+ * (code review C-1).
+ */
+const abortSystemsTurn = useCallback((options = {}) => {
+    if (!pendingTurnRef.current && !options.force) return;
+    pendingTurnRef.current = null;
+    try { turnManagerRef.current && turnManagerRef.current.failManualTurn(); }
+    catch (tmError) { console.error('[systems] failManualTurn:', tmError); }
+    syncUndoAvailability();
+}, [syncUndoAvailability]);
+
+/**
+ * gdd-01 A.4 phase 1 for a manually driven turn: snapshot + open the turn.
+ *
+ * Code review C-1: this used to sit near the TOP of `processPlayerAction`, so
+ * every early return between there and the narration call (a missing trader, an
+ * unconfigured API key, a rejected action) left the Turn Manager locked FOREVER
+ * - and a locked Turn Manager silently stops every later turn from reaching
+ * World Memory and the durability gate. It is now opened immediately before the
+ * only `await` it guards, and the caller closes it in a `finally`.
+ *
+ * Returns true when a turn is open (freshly begun OR already open - the combat
+ * resolution path deliberately reuses one).
+ */
+const beginSystemsTurn = useCallback((actionText) => {
+    try {
+        const tm = getTurnManager();
+        if (!tm) return false;
+        if (turnGlue.shouldSelfHealTurnManager({
+            inputLocked: tm.input_locked,
+            isProcessingAction: isProcessingActionRef.current,
+        })) {
+            console.warn('[systems] TM self-heal');
+            abortSystemsTurn({ force: true });
+        }
+        if (pendingTurnRef.current) return true; // tolerated: already open
+        const begun = tm.beginManualTurn();
+        if (!begun) {
+            console.warn('[systems] Turn Manager dang ban - khong mo duoc luot moi.');
+            return false;
+        }
+        pendingTurnRef.current = { action: actionText, turn_id: begun.turn_id, handed_off: false };
+        setCanUndoTurn(false);
+        setPersistenceWarning(null);
+        return true;
+    } catch (turnError) {
+        console.error('[systems] beginManualTurn:', turnError);
+        return false;
+    }
+}, [abortSystemsTurn, getTurnManager]);
+
+/**
+ * Closes a manually driven turn that never reached `finalizeSystemsTurn`.
+ *
+ * `processAndUpdateState` stamps `handed_off` SYNCHRONOUSLY before queueing the
+ * React update, because `finalizeSystemsTurn` itself only runs once React
+ * executes the `setknowledge` updater - which is after this `finally`.
+ */
+const settleSystemsTurnAfterCall = useCallback(() => {
+    const pending = pendingTurnRef.current;
+    if (pending && !pending.handed_off) abortSystemsTurn();
+}, [abortSystemsTurn]);
 const mainPlayer = knowledge.characters.find(c => c.isPlayer === true);
 
 const defaultPlayerObject = {
@@ -20109,7 +21579,8 @@ useLayoutEffect(() => {
         }
     }
 }, [storyHistory]);
-const [isProcessingAction, setIsProcessingAction] = useState(false); 
+const [isProcessingAction, setIsProcessingAction] = useState(false);
+isProcessingActionRef.current = isProcessingAction; 
 const [isCheckingMemory, setIsCheckingMemory] = useState(false);
 const [combatants, setCombatants] = useState([]); 
 const [combatTurnOrder, setCombatTurnOrder] = useState([]); // Mảng ID theo thứ tự lượt đi
@@ -20649,6 +22120,13 @@ const handleConfirmGithubSaveSlot = async (slotNumber) => {
     setModalMessage({ show: true, title: 'Đang Lưu Lên GitHub...', content: 'Đang đóng gói và tải dữ liệu lên kho lưu trữ. Vui lòng không đóng trình duyệt...', type: 'info' });
 
     try {
+        // plan.md C-2: GitHub is a best-effort MIRROR. The local checkpoint is
+        // written first, with the reason that never gates a turn.
+        try {
+            await runSystemsCheckpoint('manual_backup', null, currentTurn);
+        } catch (mirrorError) {
+            console.error('[systems] manual_backup checkpoint:', mirrorError);
+        }
         const saveDataObject = await buildGithubSaveDataObject();
         const slotPath = `${GITHUB_SAVES_DIR}/slot_${slotNumber}.json`;
 
@@ -21962,6 +23440,10 @@ const addInitialTrait = () => {
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${inputApiKey}`;
 
     try {
+      // DOCUMENTED EXCEPTION to gdd-01 C.2 R1: the API-key probe needs the raw HTTP
+      // status and the raw Google error body for translateGeminiApiError, which the
+      // wrapper deliberately abstracts away. It is not a game call - no turn, no
+      // narration, no model fallback, no locked result.
       const executeTestFetch = async () => {
         const response = await fetch(apiUrl, {
           method: 'POST',
@@ -22004,7 +23486,7 @@ const fetchGenericGeminiText = async (promptText) => {
     try {
         // THAY ĐỔI CỐT LÕI NẰM Ở ĐÂY
         // Hàm fetchWithRetries đã trích xuất sẵn phần text, chúng ta chỉ cần nhận và trả về nó.
-        const narrativeText = await fetchWithRetries(apiUrl, payload); 
+        const narrativeText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'generic'); 
         return narrativeText ? narrativeText.trim() : null;
 
     } catch (error) {
@@ -22253,7 +23735,7 @@ ${itemIdea.requiredUsageCondition ? `// - Mô tả Điều kiện sử dụng mo
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
 
     try {
-        const jsonText = await fetchWithRetries(apiUrl, payload);
+        const jsonText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'creation_drain');
 
         try {
             let cleanJsonText = jsonText;
@@ -22516,7 +23998,7 @@ ${skillIdea.requiredEffects ? `// - Mô tả Hiệu ứng mong muốn: "${skillI
     try {
         let jsonText;
         try {
-            jsonText = await fetchWithRetries(apiUrl, payload);
+            jsonText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'creation_drain');
         } catch (fetchError) {
             fetchError.prompt = prompt; 
             throw fetchError;
@@ -22560,15 +24042,25 @@ ${skillIdea.requiredEffects ? `// - Mô tả Hiệu ứng mong muốn: "${skillI
                 maxExp: calculateMaxSkillExpForRarity(skillIdea.rarity),
             };
         } else { 
+             // gdd-02 PART B Rule #3: moi "thuc" (mot active_action) phai co id DUY NHAT
+             // TOAN CUC, vi Combat dua vao do de thuc thi luat "khong lap lai thuc trong
+             // mot tran". Id duoc sinh tat dinh tu `<skill_id>:<index>` (makeThucId).
+             const adventureSkillId = crypto.randomUUID();
+             const activeActionsWithThucIds = Array.isArray(details.active_actions)
+                ? details.active_actions.map((action, index) => ({
+                    ...action,
+                    thuc_id: action?.thuc_id || makeThucId(adventureSkillId, index),
+                }))
+                : null;
              return {
-                id: crypto.randomUUID(),
+                id: adventureSkillId,
                 sourceIdeaId: skillIdea.id,
                 skillType: 'adventure',
                 Name: details.Name,
                 description: details.description,
                 Rarity: details.Rarity,
                 passive_effects: details.passive_effects || null,
-                active_actions: details.active_actions || null,
+                active_actions: activeActionsWithThucIds,
                 exp: 0,
                 maxExp: calculateMaxSkillExpForRarity(details.Rarity),
             };
@@ -22836,6 +24328,36 @@ const calculateLevelFromRealmString = (realmString, realmList) => {
     const calculatedLevel = (realmIndex * 10) + finalTier;
     return Math.max(1, calculatedLevel); // Đảm bảo cấp độ luôn >= 1
 };
+// gdd-02 D.6/D.7 `process_character_turn` for one App character record.
+// The pure logic lives in src-web/systems/exp/resolveTurnExp.ts; this wrapper only
+// translates between the App's character shape and the module's ProgressionRecord,
+// and mutates `character` in place (it is already a deep clone inside applyUpdates).
+// Order is mandatory: breakthrough FIRST (gdd-02 EC-2/AC-33), so this turn's EXP is
+// measured against exp_threshold(level + 1), then the four deterministic sources.
+const resolveProgressionTurnForCharacter = (character, turnView, expDeps) => {
+    if (!character.progressionState) character.progressionState = PROGRESSION_STATE_NORMAL;
+    const record = {
+        char_id: character.id,
+        level: character.level || 1,
+        exp: character.exp || 0,
+        state: character.progressionState,
+        exp_multiplier: character.expMultiplier,
+        tam_phap_type: character.tamPhapType || null,
+        isPlayer: character.isPlayer === true,
+    };
+
+    const breakthrough = tryExecuteBreakthrough(record, turnView, expDeps);
+    if (breakthrough.executed) {
+        character.level = breakthrough.record.level;
+        character.exp = breakthrough.record.exp;
+        character.progressionState = breakthrough.record.state;
+        character.maxExp = calculateMaxExpForLevel(character.level);
+    }
+
+    const breakdown = computeTurnExp(breakthrough.record, turnView, expDeps);
+    return { gain: breakdown.final_gain, breakthrough: breakthrough.executed, breakdown };
+};
+
 const handleLevelUp = (character, realmList) => {
     // Luôn làm việc trên một bản sao sâu để đảm bảo không thay đổi state gốc một cách bất ngờ
     let workingChar = JSON.parse(JSON.stringify(character));
@@ -22848,10 +24370,35 @@ const handleLevelUp = (character, realmList) => {
     }
 
     // BƯỚC 1: VÒNG LẶP XỬ LÝ LÊN CẤP
-    while (workingChar.exp >= workingChar.maxExp && workingChar.maxExp > 0) {
-        workingChar.exp -= workingChar.maxExp;
-        workingChar.level += 1;
-        workingChar.maxExp = calculateMaxExpForLevel(workingChar.level);
+    // gdd-02 D.7 `apply_exp_gain` + Core Rule #5 "cong Cho Dot Pha":
+    // o moi cap boi so cua 10, EXP bi CHAN cung tai dung 100% nguong (khong danh
+    // du, phan du bi huy) va nhan vat chuyen sang trang thai "Cho Dot Pha". Chi
+    // `try_execute_breakthrough` moi dua nhan vat qua cong nay.
+    if (!workingChar.progressionState) workingChar.progressionState = PROGRESSION_STATE_NORMAL;
+    // Code review C-6: only a PROGRESSION SUBJECT (the player, or a companion
+    // currently in the party) is gated by "Cho Dot Pha". Plain NPCs never run
+    // `try_execute_breakthrough`, so gating them froze them at every 10th level
+    // forever. They keep the pre-gate cascade instead - chosen over running a
+    // breakthrough attempt for every EXP-gaining character, which would put an
+    // RNG roll on dozens of off-screen NPCs per turn.
+    const isProgressionSubject = !!(workingChar.isPlayer || (workingChar.isCompanion && workingChar.inParty !== false));
+    let enteredBreakthroughGate = false;
+    while (workingChar.maxExp > 0) {
+        if (isProgressionSubject && workingChar.level % 10 === 0) {
+            if (workingChar.exp >= workingChar.maxExp) {
+                workingChar.exp = workingChar.maxExp;
+                if (workingChar.progressionState !== PROGRESSION_STATE_WAITING) enteredBreakthroughGate = true;
+                workingChar.progressionState = PROGRESSION_STATE_WAITING;
+            }
+            break; // gdd-02 Rule 5: never cascade past the decade gate.
+        }
+        if (workingChar.exp >= workingChar.maxExp) {
+            workingChar.exp -= workingChar.maxExp;
+            workingChar.level += 1;
+            workingChar.maxExp = calculateMaxExpForLevel(workingChar.level);
+            continue;
+        }
+        break;
     }
     
     // BƯỚC 2: XỬ LÝ PHẦN THƯỞNG VÀ CÁC SỰ KIỆN SAU KHI LÊN CẤP
@@ -22879,6 +24426,13 @@ const handleLevelUp = (character, realmList) => {
         if (newRealmInfo.realmName !== oldRealmInfo.realmName) {
             levelUpMessages.push(`**Đột phá!** Cảnh giới mới: **${newRealmInfo.realmName} Tầng ${newRealmInfo.realmTier}**. Ngươi nhận thêm điểm tiềm năng!`);
         }
+    }
+
+    // gdd-02 Core Rule #12: buoc vao Cho Dot Pha BAT BUOC phai co it nhat mot tin
+    // hieu dinh tinh cho nguoi choi - va tin hieu do khong duoc tiet lo dieu kien.
+    if (enteredBreakthroughGate) {
+        const gateRealmInfo = getRealmInfoFromLevel(workingChar.level, realmList);
+        levelUpMessages.push(`**${workingChar.Name}** đã tu vi viên mãn ở **${gateRealmInfo.realmName} Tầng ${gateRealmInfo.realmTier}** — kinh nghiệm không thể tích thêm nữa. Trạng thái: **Chờ Đột Phá**.`);
     }
 
     // BƯỚC 3: TRẢ VỀ KẾT QUẢ CUỐI CÙNG
@@ -23185,7 +24739,7 @@ NHIỆM VỤ CỦA AI: Ngươi là một Giám Định Sư nhiệm vụ bậc th
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
 
     try {
-        const jsonText = await fetchWithRetries(apiUrl, payload);
+        const jsonText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'creation_drain');
         try {
             return JSON.parse(jsonText);
         } catch (e) {
@@ -23227,6 +24781,8 @@ const parseGeminiResponseAndUpdateState = async (text, knowledgeToUse, setActive
         longTermStatusesToAdd: [],
         healParticipants: null, 
         itemsToUse: [],
+        // Pillar 1 (game-concept.md 243-255): [RECOVER_INJURY: Name="..."]
+        recoverInjuryFor: [],
     };
 
     const tagWithDataRegex = /\[([A-Z_]+):\s*([^\]]+)\]/g;
@@ -23261,6 +24817,30 @@ const parseGeminiResponseAndUpdateState = async (text, knowledgeToUse, setActive
     });
     let narrativeBlock = narrativeLines.join('\n').trim();
 
+    // plan.md C-1 (hybrid): world-content tags survive, mechanical-result tags are
+    // stripped or redacted BEFORE anything can apply them. The numbers they used to
+    // carry are owned by the deterministic modules (exp/, affinity/, death/).
+    const playerIdsForContract = ((knowledgeToUse && knowledgeToUse.characters) || [])
+        .filter(c => c && c.isPlayer)
+        .reduce((acc, c) => acc.concat([c.id, c.Name]), [])
+        .filter(Boolean);
+    // Code review C-8: `dev` mode THROWS on a mechanical tag; the old catch
+    // swallowed that and applied the RAW block - failing wide open, exactly the
+    // opposite of C-1. `sanitizeCommandBlockForApply` degrades closed instead:
+    // the violation error's own sanitised block, then a prod re-run, then empty.
+    const sanitized = turnGlue.sanitizeCommandBlockForApply(commandBlock, {
+        mode: (import.meta.env && import.meta.env.DEV) ? 'dev' : 'prod',
+        playerIds: playerIdsForContract,
+    });
+    if (sanitized.degraded !== 'none') {
+        console.error('[systems] sanitizeCommandBlock degraded (' + sanitized.degraded + '):', sanitized.error);
+    }
+    if (sanitized.stripped.length > 0 && import.meta.env && import.meta.env.DEV) {
+        console.warn('[systems] The co che bi chan (C-1):',
+            sanitized.stripped.map(s => s.tag + ' -> ' + s.reason));
+    }
+    commandBlock = sanitized.kept;
+
     let match;
     while ((match = tagWithDataRegex.exec(commandBlock)) !== null) {
         const tagName = match[1];
@@ -23287,6 +24867,13 @@ const parseGeminiResponseAndUpdateState = async (text, knowledgeToUse, setActive
                 case 'REMOVE_WORLD_ITEM': 
                     if (!updates.worldItemsToRemove) updates.worldItemsToRemove = []; 
                     updates.worldItemsToRemove.push(parsedData);  
+                    break;
+                // Pillar 1 (game-concept.md 243-255): explicit narrative recovery of
+                // the level-gap injury. Carries no number - the true level and the
+                // pre-injury stats come from the snapshot the engine itself took.
+                case 'RECOVER_INJURY':
+                    if (!updates.recoverInjuryFor) updates.recoverInjuryFor = [];
+                    updates.recoverInjuryFor.push(parsedData);
                     break;
                 case 'LORE_LOCATION': if (!updates.locations) updates.locations = []; updates.locations.push(parsedData); break;
                 case 'LOCATION_STATE_UPDATE': if (!updates.locationStateUpdates) updates.locationStateUpdates = []; updates.locationStateUpdates.push(parsedData); break;
@@ -23634,6 +25221,41 @@ const handlePendingModeChange = (changeRequest, currentKnowledge) => {
             setCustomActionInput('');
             
             // Tạo một prompt đặc biệt yêu cầu AI mô tả trận chiến bắt đầu
+            // === Pillar 1 HOOK 2b (game-concept.md 243-255) ======================
+            // Narrative combat has no CombatLoop, but the same rule must hold: a
+            // hostile more than HOSTILE_INITIATIVE_LEVEL_GAP_MAX levels up enters
+            // the scene already wounded, so the AI arbitrates against the REDUCED
+            // level it sees in the prompt.
+            try {
+                const ncPlayer = (currentKnowledge.characters || []).find(c => c && c.isPlayer);
+                const ncPlayerLevel = Number(ncPlayer && ncPlayer.level) || 1;
+                const ncMessages = [];
+                (currentKnowledge.narrativeCombatState?.combatants || []).forEach(id => {
+                    const idx = (currentKnowledge.characters || []).findIndex(c => c && c.id === id);
+                    if (idx === -1) return;
+                    const result = maybeApplyGapInjury(currentKnowledge.characters[idx], ncPlayerLevel, {
+                        turn: adventureTurnCount,
+                        combatType: 'Lethal',
+                    });
+                    if (!result.applied) return;
+                    currentKnowledge.characters[idx] = result.npc;
+                    if (result.message) ncMessages.push(result.message);
+                    setknowledge(prev => {
+                        const next = { ...prev, characters: (prev.characters || []).slice() };
+                        const k = next.characters.findIndex(c => c && c.id === id);
+                        if (k > -1) next.characters[k] = result.npc;
+                        return next;
+                    });
+                });
+                if (ncMessages.length > 0) {
+                    setStoryHistory(prev => [...prev, ...ncMessages.map(msg => ({
+                        id: crypto.randomUUID(), type: 'system', content: '**[Hệ thống]** ' + msg, transient: true,
+                    }))]);
+                }
+            } catch (gapNarrativeError) {
+                console.warn('[objectivity] hook narrativeCombatStart:', gapNarrativeError);
+            }
+
             const combatantsInvolved = (currentKnowledge.narrativeCombatState?.combatants || [])
                 .map(id => currentKnowledge.characters.find(c => c.id === id)?.Name)
                 .filter(Boolean);
@@ -23739,6 +25361,43 @@ const handlePendingModeChange = (changeRequest, currentKnowledge) => {
                 return;
             }
             
+            // === Pillar 1 HOOK 2 (game-concept.md 243-255) =======================
+            // Applied BEFORE the CombatLoop is constructed, so combat reads the
+            // REDUCED level and the recomputed stats. The persistent NPC record is
+            // updated too (the injury must survive the battle and stay recoverable);
+            // the combat clone below is taken from the already-injured template.
+            const gapInjuryMessages = [];
+            finalTargetsFiltered.forEach((target, i) => {
+                try {
+                    // The gap is measured against the PLAYER, not whoever happens to
+                    // lead the party array (a companion may be listed first).
+                    const playerForGap = playerParty_Objects.find(c => c && c.isPlayer) || playerParty_Objects[0];
+                    const pLevel = Number(playerForGap && playerForGap.level) || 1;
+                    const result = maybeApplyGapInjury(target, pLevel, {
+                        turn: adventureTurnCount,
+                        combatType: changeRequest.combatType,
+                    });
+                    if (!result.applied) return;
+                    finalTargetsFiltered[i] = result.npc;
+                    if (result.message) gapInjuryMessages.push(result.message);
+                    const worldIdx = currentKnowledge.characters.findIndex(c => c && c.id === target.id);
+                    if (worldIdx > -1) currentKnowledge.characters[worldIdx] = result.npc;
+                    setknowledge(prev => {
+                        const next = { ...prev, characters: (prev.characters || []).slice() };
+                        const k = next.characters.findIndex(c => c && c.id === target.id);
+                        if (k > -1) next.characters[k] = result.npc;
+                        return next;
+                    });
+                } catch (gapCombatError) {
+                    console.warn('[objectivity] hook startCombat:', gapCombatError);
+                }
+            });
+            if (gapInjuryMessages.length > 0) {
+                setStoryHistory(prev => [...prev, ...gapInjuryMessages.map(msg => ({
+                    id: crypto.randomUUID(), type: 'system', content: '**[Hệ thống]** ' + msg, transient: true,
+                }))]);
+            }
+
             const enemiesToFight_Objects = finalTargetsFiltered.map(template => ({
                 ...JSON.parse(JSON.stringify(template)),
                 id: crypto.randomUUID() 
@@ -24930,6 +26589,9 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
 
         } catch (error) {
             console.error('Lỗi trong callGeminiAPI (Khởi tạo/Kịch bản đơn):', error);
+            // Symmetric with the hybrid catch below (code review C-1): a failed
+            // call must release the Turn Manager, or every later turn is locked out.
+            abortSystemsTurn();
             setModalMessage({ show: true, title: 'Lỗi Giao Tiếp AI', content: error.message, type: 'error' });
             if (options.isAITurn && activeCombatLoop) setTimeout(() => activeCombatLoop.nextTurn(), 1500);
             return null;
@@ -24962,6 +26624,9 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
                 : '   LƯU Ý: Người chơi ĐANG TẮT tùy chọn sự kiện bất ngờ. TUYỆT ĐỐI KHÔNG có kịch bản nào chứa SỰ KIỆN/biến cố mới lạ bên ngoài chen ngang, cắt ngang, hay làm gián đoạn hành động đã mô tả. Mọi kịch bản đều phải là các biến thể phản ứng/kết quả TRỰC TIẾP của chính hành động đó (khác nhau ở mức độ thành công, thái độ, cảm xúc,...). NGOẠI LỆ DUY NHẤT: được phép nhắc đến việc một NPC khác xuất hiện/có mặt gần đó như chi tiết nền cuối kịch bản, nhưng NPC đó KHÔNG được có bất kỳ hành động, lời thoại hay tương tác nào trong lượt này — chỉ đơn thuần được nêu tên là đang xuất hiện, không hơn.'}
             2. KIỂM SOÁT HÀNH VI: Áp dụng triệt để "NGUYÊN TẮC TÔN TRỌNG NGƯỜI CHƠI". Chỉ phản hồi lại ĐÚNG VỚI HÀNH ĐỘNG HIỆN TẠI. Tuyệt đối không giả định hoặc bịa thêm hành động, suy nghĩ tiếp theo của người chơi. BẤT KỂ kịch bản nào (kể cả kịch bản bị chen ngang), 'summary' PHẢI thể hiện rõ chính hành động người chơi mô tả đã thực sự xảy ra như thế nào TRƯỚC KHI thêm bất kỳ diễn biến/nhân vật/sự kiện nào khác — tuyệt đối cấm việc summary nhảy thẳng sang tình tiết khác mà bỏ qua hành động gốc.
 
+            3. THẾ GIỚI KHÁCH QUAN (PILLAR 1 - BẮT BUỘC, ƯU TIÊN CAO): thế giới KHÔNG xoay quanh nhân vật chính.
+${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
+
             ĐỐI VỚI MỖI KỊCH BẢN, YÊU CẦU CUNG CẤP:
             1. 'probability': Tỷ lệ phần trăm xảy ra kịch bản này (0-100). Phải đánh giá dựa trên tình tiết hiện tại, đặc biệt là tính cách nhân vật. (Hành động phi logic thì tỷ lệ thành công phải cực thấp).
             2. 'summary': Vài câu thể hiện nội dung kịch bản, chủ yếu nói về phản ứng của sự vật, sự việc phản ứng với lựa chọn của người chơi. Ghi nhớ: Đừng bịa ra người chơi làm gì thêm trong câu này. BẮT BUỘC: câu đầu tiên (hoặc các câu đầu) phải thể hiện chính hành động người chơi vừa mô tả đang/đã xảy ra — kể cả khi kịch bản có yếu tố chen ngang, phải viết rõ hành động gốc trước rồi mới đến sự chen ngang, TUYỆT ĐỐI không mở đầu summary bằng một sự việc/nhân vật không liên quan rồi mới nhắc hoặc bỏ hẳn hành động gốc.
@@ -24992,6 +26657,7 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
                  + [QUEST_OBJECTIVE_COMPLETED: questTitle="...", objectiveId="...", quantity=X] (Cập nhật tiến độ nhiệm vụ).
                  + [QUEST_UPDATED: title="...", status="completed/failed"] (Kết thúc nhiệm vụ).
                  + [RELATIONSHIP_CHANGED: NPC="...", Standing="...", Reason="...", AffinityChange="+X" hoặc "-X"] (BẮT BUỘC dùng mỗi khi hành động của người chơi làm biến động thái độ/hảo cảm của một NPC dành cho họ — kể cả các cuộc trò chuyện, cử chỉ thân mật, giúp đỡ hay xúc phạm nhẹ, không chỉ giới hạn ở sự kiện lớn. Nếu 'summary' của kịch bản có nhắc đến việc hảo cảm/thiện cảm/tình cảm tăng hoặc giảm, PHẢI xuất thẻ này tương ứng, TUYỆT ĐỐI không được chỉ mô tả suông mà bỏ quên thẻ lệnh).
+                 + [RECOVER_INJURY: Name="Tên nhân vật"] (Giải trừ trạng thái "Trọng Thương (Cảnh Giới Suy Giảm)" — cựu thương đè nén cảnh giới — cho một nhân vật ĐANG mang trạng thái đó, trả họ về tu vi thật. RÀNG BUỘC TUYỆT ĐỐI: CHỈ được xuất thẻ này khi chính 'summary' của kịch bản có một SỰ KIỆN CHỮA TRỊ TƯỜNG MINH: uống linh đan/thần dược đúng công dụng, gặp kỳ ngộ lớn (suối linh, tiên duyên, bảo vật), hoặc được một danh y/cao nhân ra tay chữa trị. TUYỆT ĐỐI KHÔNG xuất thẻ này chỉ vì thời gian trôi qua, chỉ vì nhân vật nghỉ ngơi/tự tu, hay vì cốt truyện cần họ mạnh lên.)
                - TUYỆT ĐỐI KHÔNG tự chế ra các cấu trúc thẻ lệnh không nằm trong danh sách trên.
 
             YÊU CẦU ĐẦU RA: Chỉ trả về duy nhất một chuỗi JSON sạch đại diện cho mảng gồm chính xác 6 đối tượng. Tuyệt đối không bao bọc kết quả trong ký tự markdown như \`\`\`json ... \`\`\`. Không giải thích thêm.
@@ -25006,9 +26672,14 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
                     summary: { type: "STRING" },
                     classification_tags: { type: "ARRAY", items: { type: "STRING" } },
                     relevant_entities: { type: "ARRAY", items: { type: "STRING" } },
-                    commands: { type: "STRING" }
+                    commands: { type: "STRING" },
+                    // Pillar 1 (game-concept.md 243-255): API-1 self-scores whether the
+                    // scenario is a win for the protagonist. `overreachCap` uses it to
+                    // hold the total weight of "success" scenarios down when the target
+                    // is a tier or more above the player.
+                    outcome_for_player: { type: "STRING", enum: ["success", "partial", "failure"] }
                 },
-                required: ["probability", "summary", "classification_tags", "relevant_entities", "commands"]
+                required: ["probability", "summary", "classification_tags", "relevant_entities", "commands", "outcome_for_player"]
             }
         };
 
@@ -25017,7 +26688,8 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
             generationConfig: { response_mime_type: "application/json", response_schema: logicSchema }
         };
 
-        const logicResponseText = await fetchWithRetries(apiUrl, logicPayload, null, 2, 1500);
+        // API-1 is a logic roll, not the turn's narration: background under C-9.
+        const logicResponseText = await fetchWithRetries(apiUrl, logicPayload, null, 2, 1500, 'logic');
         
         console.log("=========================================");
         console.log("🧠 [API 1 - LOGIC ENGINE] PHẢN HỒI NHẬN VỀ (RAW):");
@@ -25045,6 +26717,45 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
             throw new Error("AI phân tích logic thất bại. Vui lòng thử lại.");
         }
         
+        // === Pillar 1 (c) OVERREACH SUCCESS CAP - game-concept.md 243-255 =====
+        // Prompt directives are advisory; this is the mechanical floor under them.
+        // When the strongest relevant NPC is a tier or more above the player, the
+        // TOTAL weight of `success` scenarios is capped and the excess moves to
+        // `failure`/`partial`. Runs BETWEEN the API-1 parse and the dice roll, so
+        // the roll itself is untouched.
+        // An injured NPC counts at its EFFECTIVE (reduced) level - being wounded is
+        // supposed to make it beatable.
+        try {
+            const capPlayer = knowledgeToUse.characters.find(c => c.isPlayer);
+            const capPlayerLevel = Number(capPlayer && capPlayer.level) || 1;
+            const seenNames = new Set();
+            const targetLevels = [];
+            scenarios.forEach(sc => {
+                (sc && sc.relevant_entities ? sc.relevant_entities : []).forEach(entityName => {
+                    if (!entityName || seenNames.has(entityName)) return;
+                    seenNames.add(entityName);
+                    const info = findLoreEntity(entityName, knowledgeToUse, capPlayer);
+                    if (!info || info.type !== 'NPC' || !info.data) return;
+                    if (info.data.isPlayer || info.data.isCompanion) return;
+                    const lvl = Number(info.data.level);
+                    if (Number.isFinite(lvl) && lvl > 0) targetLevels.push(lvl);
+                });
+            });
+            const capResult = capOverreach(scenarios, {
+                playerLevel: capPlayerLevel,
+                targetLevels,
+                knobs: OBJECTIVITY_KNOBS,
+            });
+            if (capResult.capped.applied) {
+                console.log('[objectivity] overreach cap applied:', capResult.capped);
+                scenarios = capResult.scenarios;
+            } else if (capResult.capped.tierGap >= 1) {
+                console.log('[objectivity] overreach cap checked, no change:', capResult.capped.notes);
+            }
+        } catch (capError) {
+            console.warn('[objectivity] overreach cap:', capError);
+        }
+
         const chosenScenario = rollDiceAndChooseScenario(scenarios);
         if (!chosenScenario) throw new Error("Không thể chọn kịch bản.");
 
@@ -25131,7 +26842,7 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
                     })
                     .map(npc => {
                         const profile = npc.isAppraised ? `Vai trò: ${npc.Role}. Thái độ: ${npc.Stance}. Tính cách: ${npc.Personality}. Ngoại hình: ${npc.Appearance}. Quá khứ: ${npc.Backstory}` : `Ghi chú: ${npc.description}`;
-                        return `${npc.Name} (Cấp ${npc.level} - ${profile})`;
+                        return `${npc.Name} (Cấp ${npc.level} - ${profile})${gapInjuryPromptSuffix(npc)}`;
                     })
                     .join('\n      - ') || "Không có ai khác ở quanh đây";
 
@@ -25199,7 +26910,12 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
             contents: [{ role: "user", parts: [{ text: narrativePrompt }] }]
         };
 
-        const narrativeText = await fetchWithRetries(apiUrl, narrativePayload, null, 2, 1500);
+        // API-2 IS the turn's `narration_call` - the only critical-path AI call
+        // of the turn (gdd-01 C.4 F2 / plan.md C-9).
+        try { turnManagerRef.current && turnManagerRef.current.markCall('narration_call'); }
+        catch (callError) { console.warn('[systems] markCall:', callError); }
+        const narrativeText = await fetchWithRetries(apiUrl, narrativePayload, null, 2, 1500, 'narration',
+            turnGlue.narrationBudgetOverrides(tagsLower));
 
         console.log("=========================================");
         console.log("📖 [API 2 - NARRATIVE ENGINE] PHẢN HỒI NHẬN VỀ (RAW):");
@@ -25248,6 +26964,7 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
 
     } catch (error) {
         console.error('Lỗi trong quy trình 2 bước Hybrid:', error);
+        abortSystemsTurn();
         setModalMessage({ show: true, title: 'Lỗi Giao Tiếp AI', content: error.message, type: 'error' });
         return null;
     } finally {
@@ -25636,6 +27353,11 @@ ${getModeInstruction()}
 
     const narrative = `
 ${supernaturalSealRules}
+// --- QUY TẮC THẾ GIỚI KHÁCH QUAN (PILLAR 1 - BẮT BUỘC, ÁP DỤNG CHO MỌI LƯỢT KỂ) ---
+// Nguồn: design/gdd/game-concept.md, trụ cột 1 "Thế Giới Khách Quan".
+// Thế giới có logic riêng và KHÔNG uốn cong quanh nhân vật chính.
+${PILLAR1_DIRECTIVES_NARRATION.map(x => '//    * ' + x).join('\n')}
+
 // QUY TẮC TƯỜNG THUẬT & TRÌNH BÀY
 
 // 0. VĂN PHONG & TỪ NGỮ (PHỤ THUỘC THỂ LOẠI THẾ GIỚI — xem "Chủ đề & Thể loại" ở mục A.5 bối cảnh):
@@ -26849,8 +28571,13 @@ const handleEquipItem = useCallback((itemToEquip, slot, characterId) => {
             }
         }
 
-        // 3. Trang bị vật phẩm mới vào ô (Không đổi)
-        characterToUpdate.equippedItems[slot] = itemToEquip;
+        // 3. Trang bị vật phẩm mới vào ô
+        // gdd-02 PART B Rule #9: `was_ever_equipped` la co ghi-mot-lan, VINH VIEN,
+        // ngu nghia qua khu hoan thanh (khac voi "dang deo o slot nao"). Character
+        // Customization Mode dung no lam cong chan xoa vat pham.
+        const equippedInstance = { ...itemToEquip };
+        markEverEquipped(equippedInstance);
+        characterToUpdate.equippedItems[slot] = equippedInstance;
         
         // 4. THAY ĐỔI CỐT LÕI NẰM Ở ĐÂY
         // Thay vì .split(','), chúng ta coi toàn bộ chuỗi Effect là một hiệu ứng duy nhất
@@ -27657,6 +29384,12 @@ const finalizeCombatEnd = async (outcome, data, finalSharedCooldowns) => {
         });
 
         setknowledge(knowledgeAfterSandbox);
+        // Code review C-2: no AI call on the training-dummy path, so checkpoint
+        // the EXP it just granted directly once React has flushed.
+        setTimeout(() => {
+            const tm = turnManagerRef.current;
+            runSystemsCheckpoint('turn_confirm', null, tm ? tm.world_time : (liveUndoableStateRef.current.currentTurn || 0));
+        }, 0);
         return;
     }
 
@@ -27784,8 +29517,42 @@ const finalizeCombatEnd = async (outcome, data, finalSharedCooldowns) => {
             : buildDefeatLethalPrompt(playerPartyFormatted, enemyPartyFormatted, gameSettings, combatBlowByBlowFormatted);
     }
 
+    // plan.md P1 hook: Combat itself is OUT OF SCOPE and is not modified. This is a
+    // read-only wrapper - it projects the combat result onto the GDD hand-off shape
+    // (`battle_active` / `outcome.winner_id` / `.loser_id` / `in_combat`) through the
+    // P0 adapter and parks it on `knowledge.lastCombatHandoff`. The EXP reconciliation
+    // inside `applyUpdates` consumes it exactly once and clears it.
+    try {
+        const combatHandoff = toCombatHandoff({ outcome, data, combatType }, knowledgeAfterCombat);
+        // Attach to the local copy: `callGeminiAPI` hands `knowledgeAfterCombat` to
+        // `processAndUpdateState`, which (code review C-7) now MERGES it over the
+        // live state, so the same-turn EXP reconciliation consumes it there. The
+        // `setknowledge` write stays as the fallback for a failed AI call.
+        knowledgeAfterCombat.lastCombatHandoff = combatHandoff;
+        setknowledge(prev => ({ ...prev, lastCombatHandoff: combatHandoff }));
+    } catch (handoffError) {
+        console.error('[combatAdapter] Khong dung duoc combat hand-off:', handoffError);
+    }
+
+    // Code review C-2: combat resolution mutates EXP, affinity, deaths and loot,
+    // but ran entirely OUTSIDE a Turn Manager turn - so none of it reached the
+    // World Memory append or a durability checkpoint. Combat logic itself is
+    // untouched (plan.md P1: read-only wrapper); only the turn bookkeeping is
+    // added around the narration call it already makes.
     if (prompt) {
-        await callGeminiAPI(prompt, false, { inCombat: false }, knowledgeAfterCombat);
+        beginSystemsTurn('Ket qua tran dau: ' + outcome);
+        try {
+            await callGeminiAPI(prompt, false, { inCombat: false }, knowledgeAfterCombat);
+        } finally {
+            settleSystemsTurnAfterCall();
+        }
+    } else {
+        // No AI call on this path: checkpoint the settled post-battle state
+        // directly, once React has flushed the writes above.
+        setTimeout(() => {
+            const tm = turnManagerRef.current;
+            runSystemsCheckpoint('turn_confirm', null, tm ? tm.world_time : (liveUndoableStateRef.current.currentTurn || 0));
+        }, 0);
     }
 };
 
@@ -27995,6 +29762,8 @@ ${postCombatRules}
 const processPlayerAction = async (actionText, actionType, flavorText = '') => {
     const trimmedAction = (actionText || '').trim();
     if (!trimmedAction || isProcessingAction) return;
+    // gdd-03 Branch B: remember the player's own words for this turn.
+    lastPlayerActionRef.current = trimmedAction;
     setPvpTurnTimeLeft(null);
 
     if (activeCriticalPromisesRef.current.length > 0) {
@@ -28179,6 +29948,10 @@ const processPlayerAction = async (actionText, actionType, flavorText = '') => {
             }        
             
 
+            // gdd-01 A.4 phase 1 (snapshot + open the turn) is NOT done here any
+            // more: several branches below still return early (no trader, no API
+            // key), and each of those left the Turn Manager locked forever.
+            // `beginSystemsTurn` now runs immediately before the narration call.
             setIsProcessingAction(true);
             setChoices([]);
             setCustomActionInput('');
@@ -28454,7 +30227,7 @@ ${questDetails}
                 })
                 .map(npc => {
                     const profile = npc.isAppraised ? `Vai trò: ${npc.Role}. Thái độ: ${npc.Stance}. Tính cách: ${npc.Personality}. Ngoại hình: ${npc.Appearance}. Quá khứ: ${npc.Backstory}` : `Ghi chú: ${npc.description}`;
-                    return `${npc.Name} (Cấp ${npc.level} - ${profile})${getCharacterStatusesString(npc)}${getCharacterTitleTag(npc)}`;
+                    return `${npc.Name} (Cấp ${npc.level} - ${profile})${gapInjuryPromptSuffix(npc)}${getCharacterStatusesString(npc)}${getCharacterTitleTag(npc)}`;
                 })
                 .join('\n      - ') || "Không có ai khác ở quanh đây";
             
@@ -28654,6 +30427,9 @@ ${relevantObjectives.join('\n')}
 --- NHẮC LẠI BẮT BUỘC (ĐỌC NGAY TRƯỚC KHI VIẾT — ƯU TIÊN CAO HƠN LỊCH SỬ Ở TRÊN) ---
 Người chơi ĐANG TẮT tùy chọn sự kiện bất ngờ. Toàn bộ tường thuật lượt này CHỈ được xoay quanh DUY NHẤT hành động đã mô tả ở mục A.1: "${trimmedAction}". Dù lịch sử phía trên có gợi mở nhân vật/xung đột nào, KHÔNG được để bất kỳ NPC nào (kể cả NPC đã từng xuất hiện trước đó) chen vào lượt này với lời thoại, hành động, cử chỉ hay phản ứng riêng nếu NPC đó không phải là đối tượng chính của hành động A.1. Nếu cần nhắc tới một NPC khác, chỉ được nêu tên xuất hiện/có mặt ở câu cuối cùng của đoạn tường thuật, sau đó DỪNG LẠI — không cho NPC đó nói hay làm gì.
 ` : '';
+            // plan.md C-8: the rule-extracted fact store rides ALONGSIDE the AI
+            // summaries above, wrapped in the contract delimiters (gdd-01 B AC-33).
+            const worldMemoryBlock = buildWorldMemoryBlock(knowledge);
             const finalRequestBlock = `
 --- E. YÊU CẦU ĐẦU RA CHO LƯỢT NÀY ---
 1.  **PHÂN TÍCH:** Đọc kỹ Bối cảnh (A), thực hiện Yêu cầu Ưu tiên (B) nếu có, và **đặc biệt chú ý đến Danh mục thực thể (F)**.
@@ -28676,6 +30452,7 @@ ${noNewEventReinforcementBlock}
                 .map(h => formatHistoryItemForPrompt(h, 'xml_nguoi'))
                 .join('\n')}
 
+                ${worldMemoryBlock}
                 ${contextBlock}
                 ${combatContextBlock}
                 ${priorityInstructionBlock}
@@ -28688,7 +30465,14 @@ ${noNewEventReinforcementBlock}
                 `;
 
         }
-        await callGeminiAPI(promptToSendToAI, false, {}, knowledge, trimmedAction);
+        // gdd-01 A.4 phase 1: snapshot BEFORE the narration call, close it in the
+        // `finally` so no early return or throw can strand the Turn Manager.
+        beginSystemsTurn(trimmedAction);
+        try {
+            await callGeminiAPI(promptToSendToAI, false, {}, knowledge, trimmedAction);
+        } finally {
+            settleSystemsTurnAfterCall();
+        }
     }, 0);
 };
 
@@ -29279,6 +31063,10 @@ const questCheckSchema = {
 
 const runAPI3StateMonitor = async (currentStoryText, currentKnowledge, retries = 3, delay = 3000) => {
     if (gameMode !== 'EXPLORATION') return;
+    // Code review C-5: stamp the turn generation at SCHEDULE time. If the player
+    // undoes the turn while this call is in flight, the result belongs to a turn
+    // that no longer exists and must be dropped, not applied.
+    const scheduledGeneration = undoGenerationRef.current;
     const effectiveApiKey = apiMode === 'userKey' ? apiKey : "";
     const stateHistoryData = currentKnowledge.stateHistory || [];
 
@@ -29394,28 +31182,28 @@ QUY TẮC PHÁN QUYẾT:
 
     for (let i = 0; i < retries; i++) {
         try {
-            const executeMonitorFetch = async () => {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-
-                return await response.json();
-            };
-            const resJson = await globalApiQueue.enqueue(executeMonitorFetch);
-            const text = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
+            // gdd-01 C.2 R1: this used to be a second, unmanaged HTTP path. It now
+            // goes through the one wrapper as a BACKGROUND call, so it obeys the model
+            // ladder, the 503 breaker and the AbortController budget while staying
+            // exempt from the per-turn AI budget (plan.md C-9).
+            const text = await fetchWithRetries(apiUrl, payload, null, 1, 1500, 'state_monitor');
             
             console.log("=========================================");
             console.log("👁️ [API 3 - STATE MONITOR] PHẢN HỒI NHẬN VỀ (RAW):");
             console.log(text);
             console.log("=========================================");
 
+            if (turnGlue.isStaleGeneration(scheduledGeneration, undoGenerationRef.current)) {
+                console.warn('[systems] Bo qua ket qua API 3 cua luot da bi hoan tac.');
+                return;
+            }
             if (text && text.trim() !== '') {
                 console.log("⚡ [API 3 ngầm] Khởi chạy cập nhật thực tại thành công:", text);
                 const { story, choices: newChoices, updates, commandBlock } = await parseGeminiResponseAndUpdateState(text, currentKnowledge);
+                if (turnGlue.isStaleGeneration(scheduledGeneration, undoGenerationRef.current)) {
+                    console.warn('[systems] Bo qua ket qua API 3 cua luot da bi hoan tac.');
+                    return;
+                }
                 processAndUpdateState(updates, commandBlock, currentKnowledge, story);
                 
                 return;
@@ -29898,6 +31686,9 @@ const handleHtabChat = async (userText) => {
                 const tagName = match[1];
                 const dataString = match[2];
                 
+                // C-1 note: this HTAB path deliberately bypasses `sanitizeCommandBlock`.
+                // HTAB affinity is a separate 0..100 system, not the NPC affinity the
+                // contract owns, so it is out of C-1 scope.
                 if (tagName === 'AFFINITY_CHANGED') {
                     const parsedAffinity = parseKeyValueString(dataString);
                     const delta = parseInt(parsedAffinity.value, 10);
@@ -30827,6 +32618,9 @@ const HandbookModal = ({ show, onClose }) => {
 };
 
 const runSummarizationInBackground = async (turnsToSummarize, existingSummaries, startTurn, endTurn) => {
+    // Code review C-5: same generation guard as the API-3 monitor - a summary
+    // computed for a turn the player has since undone must not be written back.
+    const scheduledGeneration = undoGenerationRef.current;
     const formatTurnsForPrompt = (turns) => {
         return turns.map((turn) => {
             return `Lượt ${turn.turnNum}: ${formatHistoryItemForPrompt(turn, 'text_thuong')}`;
@@ -30896,6 +32690,10 @@ ${summariesToMeta.map(s => `[Giai đoạn lượt ${s.startTurn || '?'} - ${s.en
         }
     }
 
+    if (turnGlue.isStaleGeneration(scheduledGeneration, undoGenerationRef.current)) {
+        console.warn('[systems] Bo qua ban tom tat cua luot da bi hoan tac.');
+        return;
+    }
     setStorySummaries(workingSummaries);
 
     const summarizedIds = new Set(turnsToSummarize.map(t => t.id));
@@ -30995,6 +32793,49 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
     
     const directStatChanges = {}; 
 
+    // === gdd-03 (plan.md P2) per-turn buffers ================================
+    // The AI tags no longer WRITE affinity or death; they are classified into
+    // events here and resolved once, deterministically, in the reconciliation
+    // block at the end of this function (order: death -> affinity -> EXP).
+    const pendingSocialEvents = [];
+    // Pillar 1 (game-concept.md 243-255): system messages emitted when a level-gap
+    // injury is applied or healed this turn. Declared here (not near `p2Messages`,
+    // which is declared much further down) so the NPC-creation hook can reach it.
+    const objectivityMessages = [];
+    let playerNarrativeDeathTriggered = false;
+    const playerForTurn = (newKnowledge.characters || []).find(c => c && c.isPlayer);
+    const playerIdForTurn = playerForTurn ? playerForTurn.id : null;
+    // gdd-03 CR#3a / AC-03: every affinity read of this turn uses the value as of
+    // the START of the turn, snapshotted before any delta is applied.
+    const affinityAtTurnStart = {};
+    (newKnowledge.characters || []).forEach(c => {
+        if (c && c.id) affinityAtTurnStart[c.id] = typeof c.affinity === 'number' ? c.affinity : 0;
+    });
+    const affinityAtTurnStartOf = (id) => (typeof affinityAtTurnStart[id] === 'number' ? affinityAtTurnStart[id] : 0);
+    const npcIdByName = (name) => {
+        if (!name) return null;
+        const target = String(name).trim().toLowerCase();
+        const found = (newKnowledge.characters || []).find(c =>
+            c && !c.isPlayer && String(c.Name || c.name || '').trim().toLowerCase() === target);
+        return found ? found.id : null;
+    };
+    const isTrackedNpcId = (id) => (newKnowledge.characters || []).some(c => c && c.id === id && !c.isPlayer);
+    const nameOfCharId = (id) => {
+        const found = (newKnowledge.characters || []).find(c => c && c.id === id);
+        return found ? (found.Name || found.name || id) : id;
+    };
+    // `entities_in_scope` is owned by Situation Gen (phase P5, dropped from the
+    // shortened roadmap). Stand-in: living non-player characters sharing the
+    // player's location, plus the party. Deterministic and stable within a turn.
+    const entitiesInScopeForTurn = (() => {
+        const locationId = playerForTurn ? playerForTurn.current_location_id : null;
+        return (newKnowledge.characters || [])
+            .filter(c => c && c.id && !c.isPlayer && !c.isPermanentlyDead)
+            .filter(c => c.inParty === true || (locationId && c.current_location_id === locationId))
+            .map(c => c.id);
+    })();
+    const witnessesExcluding = (excludedId) => entitiesInScopeForTurn.filter(id => id !== excludedId);
+
     const normalizeNameProperty = (obj) => {
         if (!obj) return obj;
         const nameValue = obj.Name || obj.name || obj.title;
@@ -31018,8 +32859,17 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
             
             if (charIndex > -1) {
                 const character = newKnowledge.characters[charIndex];
+                // plan.md C-1: `level` cua NGUOI CHOI thuoc so huu cua he EXP tat dinh
+                // (src-web/systems/exp/), AI khong duoc ghi thang. Duong tuy chinh hop le
+                // duy nhat la CustomizationModal -> handleCustomizeLevel, khong di qua day.
+                const allowPlayerLevelWrite = newKnowledge.hackMode?.allowAiLevelWrite === true;
+                if (character.isPlayer && !allowPlayerLevelWrite) {
+                    console.warn(`[SET_LEVEL] Tu choi the AI ghi cap do cho nguoi choi (value=${value}). Cap do nguoi choi do he EXP quyet dinh - xem plan.md C-1.`);
+                    return;
+                }
                 character.level = value;
                 character.exp = 0;
+                character.progressionState = PROGRESSION_STATE_NORMAL;
                 
                 const totalAp = calculateTotalAP(value);
                 const spentAp = Object.values(character.allocatedPoints || {}).reduce((s, p) => s + p, 0);
@@ -31093,7 +32943,12 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
             if (charIndex > -1) {
                 const character = newKnowledge.characters[charIndex];
                 if (character.isPlayer) {
-                    setTimeout(() => setShowGameOverModal(true), 500);
+                    // gdd-03 2.2 + plan.md C-1: the tag is only a TRIGGER now. The
+                    // death_roll in `resolveDeathConsequence` decides whether the
+                    // player actually dies; the soul stub / GameOverModal path
+                    // below is applied by the reconciliation block if it says yes.
+                    playerNarrativeDeathTriggered = true;
+                    return;
                 }
                 const soulObject = {
                     id: character.id, Name: character.Name, description: character.description,
@@ -31102,6 +32957,21 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                 };
                 newKnowledge.characters[charIndex] = soulObject;
                 justDiedIds.add(character.id);
+                // gdd-03 D.1 `kill_witnessed`: -25 per witness, the victim itself is
+                // excluded (it is dead and has no affinity left to move). Zero
+                // witnesses is the "perfect crime" and writes no field at all.
+                if (playerIdForTurn) {
+                    pendingSocialEvents.push(
+                        classifyKillWitnessed(character.id, witnessesExcluding(character.id), playerIdForTurn));
+                }
+                // Death & Consequence owns `alive` / `death_flag` for EVERY character.
+                const deathStateForKill = ensureDeathState(newKnowledge.deathState);
+                newKnowledge.deathState = withDeathCharState(deathStateForKill, character.id, {
+                    ...getDeathCharState(deathStateForKill, character.id),
+                    alive: false,
+                    death_flag: true,
+                    pending_fate: null,
+                });
             }
         }
     });
@@ -31142,6 +33012,24 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                 return;
             }
             
+            // === Pillar 1 RECOVERY PATH (i) - game-concept.md 243-255 ==========
+            // A healing/cleansing pill used ON a gap-injured character lifts the
+            // old wound: the status is dropped here and the reconciliation sweep
+            // at the end of this function restores the true level and the exact
+            // pre-injury stats from the snapshot.
+            try {
+                if (isGapInjured(character) || hasGapInjuryStatus(character)) {
+                    if (isHealingItemForGapInjury(itemToUse)) {
+                        character.longTermStatuses = (character.longTermStatuses || []).filter(st =>
+                            !(st && ((st.status_id || st.id) === GAP_INJURY_STATUS_ID || st.name === GAP_INJURY_STATUS_NAME)));
+                        console.log('[objectivity] healing item cleared gap injury status:',
+                            character.Name, '<-', itemToUse.Name);
+                    }
+                }
+            } catch (gapItemError) {
+                console.warn('[objectivity] hook useItemRecovery:', gapItemError);
+            }
+
             switch (itemToUse.Type) {
                 case 'Thực phẩm':
                 case 'Đan dược': {
@@ -31201,6 +33089,13 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
         const revivedCharName = reviveData.Name || reviveData.name;
         if (revivedCharName) {
             const charIndex = newKnowledge.characters.findIndex(c => c && (c.Name || c.name) === revivedCharName);
+            // plan.md C-1 + gdd-03 CR#5: only Death & Consequence (and the shipped
+            // handleRespawn, decision C-7) may bring the PLAYER back. An AI tag
+            // trying to do it is logged and dropped, never applied.
+            if (charIndex > -1 && playerIdForTurn && newKnowledge.characters[charIndex].id === playerIdForTurn) {
+                console.warn('[CHARACTER_REVIVE] Tu choi the AI hoi sinh nguoi choi - chi handleRespawn duoc phep (plan.md C-1/C-7).');
+                return;
+            }
             if (charIndex > -1 && newKnowledge.characters[charIndex].isPermanentlyDead) {
                 const soul = newKnowledge.characters[charIndex];
                 
@@ -31333,11 +33228,29 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                         npcToUpdate = autoAllocateNpcAp(npcToUpdate); 
                         console.log(`NPC mới "${npcToUpdate.Name}" nhận được ${bonusAp} AP thưởng.`);
                     }
+                    // === Pillar 1 HOOK 1 (game-concept.md 243-255) ==============
+                    // [WORLD_NPC]/[CREATE_NPC] with a hostile stance more than
+                    // HOSTILE_INITIATIVE_LEVEL_GAP_MAX levels above the player is
+                    // born already carrying an old wound: effective level capped,
+                    // true level preserved, recoverable. Uses the player's CURRENT
+                    // level at creation time.
+                    try {
+                        const pLevelForGap = Number(currentPlayer && currentPlayer.level) || 1;
+                        const gapResult = maybeApplyGapInjury(npcToUpdate, pLevelForGap, { turn: currentTurn });
+                        if (gapResult.applied) {
+                            npcToUpdate = gapResult.npc;
+                            if (gapResult.message) objectivityMessages.push(gapResult.message);
+                        }
+                    } catch (gapHookError) {
+                        console.warn('[objectivity] hook createNpc:', gapHookError);
+                    }
+
                     if (existingNpcIndex > -1) {
                         newKnowledge.characters[existingNpcIndex] = npcToUpdate;
                     } else {
                         newKnowledge.characters.push(npcToUpdate);
                     }
+                    logBaseStatCompleteness(npcToUpdate, 'CREATE_NPC');
                 };
 
     const isNameInLoreTag = (tagName, entityName) => {
@@ -31873,20 +33786,47 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
     }
     
     (updates.relationships || []).forEach(rel => {
+        // Văn bản quan hệ (Standing/Reason) vẫn do AI viết và vẫn được lưu như cũ.
         updateOrCreateInArray(newKnowledge.relationships, rel, 'NPC');
-        // Đồng bộ "AffinityChange" (nếu AI có gửi) vào đúng chỉ số affinity của nhân vật NPC tương ứng.
-        const affinityDeltaRaw = rel.AffinityChange ?? rel.affinityChange;
-        const affinityDelta = parseInt(affinityDeltaRaw, 10);
-        if (!isNaN(affinityDelta)) {
-            const npcIndex = newKnowledge.characters.findIndex(c => c && c.Name === rel.NPC);
-            if (npcIndex > -1) {
-                const currentAffinity = newKnowledge.characters[npcIndex].affinity ?? 0;
-                // Hảo cảm đã chạm mốc tuyệt đối (+100/-100) thì khóa vĩnh viễn, không cho thay đổi thêm.
-                if (currentAffinity !== 100 && currentAffinity !== -100) {
-                    newKnowledge.characters[npcIndex].affinity = Math.max(-100, Math.min(100, currentAffinity + affinityDelta));
+        // === Pillar 1 HOOK 3a (game-concept.md 243-255) ======================
+        // A `Standing` that flips the NPC to hostile is a stance flip: an NPC who
+        // was harmless at +40 levels is now an opponent, so the gap rule applies.
+        // The band-based half of this hook runs in the reconciliation sweep at the
+        // end of this function, after affinity has actually been written.
+        try {
+            const relName = rel && (rel.NPC || rel.npc || rel.Name || rel.name);
+            if (relName && isHostileStance(rel.Standing || rel.standing)) {
+                const idx = newKnowledge.characters.findIndex(c => c && c.Name === relName);
+                const pLevel = Number(playerForTurn && playerForTurn.level) || 1;
+                if (idx > -1) {
+                    // `forceHostile`: the flip lives in the AI's Standing text, not
+                    // in `character.Stance` - do NOT overwrite the stored stance here.
+                    const gapResult = maybeApplyGapInjury(
+                        newKnowledge.characters[idx],
+                        pLevel,
+                        { turn: currentTurn, provoked: true, forceHostile: true },
+                    );
+                    if (gapResult.applied) {
+                        newKnowledge.characters[idx] = gapResult.npc;
+                        if (gapResult.message) objectivityMessages.push(gapResult.message);
+                    }
                 }
             }
+        } catch (gapHookError) {
+            console.warn('[objectivity] hook relationshipStance:', gapHookError);
         }
+        // gdd-03 CR#2 + plan.md C-1: CON SỐ hảo cảm KHÔNG còn do AI quyết định.
+        // Thẻ chỉ được phân loại thành một sự kiện xã hội theo bảng D.1; độ lớn
+        // luôn tra từ bảng đó, dấu (+/-) của AI chỉ dùng làm phương án dự phòng
+        // khi không khớp từ khóa nào. `resolve_turn_affinity` ở khối đối soát
+        // cuối hàm này mới là nơi duy nhất ghi `character.affinity`.
+        if (!playerIdForTurn) return;
+        const socialEvent = classifyRelationshipTag(rel, {
+            actor: playerIdForTurn,
+            npcIdByName,
+            witnesses: entitiesInScopeForTurn,
+        });
+        if (socialEvent) pendingSocialEvents.push(socialEvent);
     });
     (updates.affinityChanged || []).forEach(change => {
         const delta = parseInt(change.value, 10);
@@ -31993,7 +33933,17 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                         const breakthroughRatio = Math.pow(finalEpScore / 100, 2) * 0.5;
                         const expBreakthrough = maxExp * breakthroughRatio;
                         
-                        const totalInstantExp = Math.floor(expBasic + expGrowth + expBreakthrough);
+                        // plan.md C-1: `[ENCOUNTER_REWARD]` la EXP do AI CHAM diem, nen no bi HA CAP -
+                        // khong con la nguon EXP duy nhat va khong con vo han. Phan dong gop cua no
+                        // trong 1 luot bi chan tai FREE_EVENT_EXP_CAP_FRACTION * exp_threshold(level),
+                        // roi van di qua `apply_exp_gain` (handleLevelUp) nen cong "Cho Dot Pha" ap dung
+                        // cho no y het 4 nguon tat dinh.
+                        const rawInstantExp = Math.floor(expBasic + expGrowth + expBreakthrough);
+                        const freeEventCeiling = Math.floor(maxExp * (EXP_KNOBS.FREE_EVENT_EXP_CAP_FRACTION || 0));
+                        const totalInstantExp = freeEventCeiling > 0 ? Math.min(rawInstantExp, freeEventCeiling) : rawInstantExp;
+                        if (totalInstantExp < rawInstantExp) {
+                            console.warn(`[EXP cap] ENCOUNTER_REWARD cho "${character.Name}" bi chan: ${rawInstantExp} -> ${totalInstantExp} (tran ${(EXP_KNOBS.FREE_EVENT_EXP_CAP_FRACTION * 100).toFixed(0)}% nguong cap ${character.level}).`);
+                        }
 
                         if (totalInstantExp > 0) {
                             if (!directStatChanges[character.id]) directStatChanges[character.id] = {};
@@ -32132,11 +34082,347 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
         setTimeout(() => setAdventureTurnCount(prev => prev + 1), 0);
     }
 
+    // === gdd-03 - Death & Consequence, then NPC Affinity (plan.md P2 hook point) ==
+    // MANDATORY ORDER (gdd-03 2.2 CR#2): combat hand-off -> death -> affinity ->
+    // EXP. Death runs first so a `kill_witnessed` it produces is available to the
+    // same turn's affinity pass; EXP runs last so it sees the crippled flag.
+    const p2CombatHandoff = newKnowledge.lastCombatHandoff || null;
+    // gdd-01 A.3 `locked_result`: the mechanical outcome of THIS turn, collected
+    // as the P1/P2 blocks below compute it. World Memory extracts facts from it,
+    // the leak detector checks the narration against it, and the turn record
+    // stores it (plan.md P4b). It is parked on `knowledge` because `applyUpdates`
+    // is a reducer - it cannot return a second value.
+    const lockedAccum = turnGlue.createLockedAccumulator(currentTurn, currentTurn);
+    turnGlue.recordCombatView(lockedAccum, p2CombatHandoff);
+    const p2Messages = [];
+    let deathStateForTurn = ensureDeathState(newKnowledge.deathState);
+    let playerDiedThisTurn = false;
+    let isDeathTurn = false;
+
+    const findCharIndexById = (id) => newKnowledge.characters.findIndex(c => c && c.id === id);
+
+    // plan.md C-11: "crippled" is expressed through the existing long-term status
+    // infrastructure (stat penalty via parseStatsBonus) - CombatLoop is untouched.
+    const applyCrippledStatus = (character) => {
+        if (!character) return false;
+        if (!character.longTermStatuses) character.longTermStatuses = [];
+        const already = character.longTermStatuses.some(st =>
+            st && ((st.status_id || st.id) === CRIPPLED_STATUS_ID || st.name === CRIPPLED_STATUS_NAME));
+        if (already) return false;
+        const template = LONG_TERM_STATUS_TEMPLATES[CRIPPLED_STATUS_ID];
+        character.longTermStatuses.push({
+            id: crypto.randomUUID(),
+            status_id: CRIPPLED_STATUS_ID,
+            name: template.name,
+            type: template.type,
+            description: template.description,
+            source: 'Hau qua bai tran',
+            stats: template.stats,
+        });
+        return true;
+    };
+
+    if (playerIdForTurn) {
+        const deathDeps = {
+            turn: currentTurn,
+            playerId: playerIdForTurn,
+            affinityOf: affinityAtTurnStartOf,
+            isTrackedNpc: isTrackedNpcId,
+            entitiesInScope: entitiesInScopeForTurn,
+            nameOf: nameOfCharId,
+            npcTagOf: () => null,
+            rng: Math.random,
+            knobs: DEATH_KNOBS,
+        };
+
+        const applyDeathResolution = (resolution) => {
+            if (!resolution || !resolution.resolved) return;
+            deathStateForTurn = resolution.state;
+            if (resolution.messages.length > 0) p2Messages.push(...resolution.messages);
+            if (resolution.social_events.length > 0) pendingSocialEvents.push(...resolution.social_events);
+            if (resolution.is_death_turn) isDeathTurn = true;
+            if (resolution.player_died) playerDiedThisTurn = true;
+            if (resolution.crippled_applied) {
+                const idx = findCharIndexById(playerIdForTurn);
+                if (idx > -1) applyCrippledStatus(newKnowledge.characters[idx]);
+            }
+        };
+
+        // (1) A Pending Fate window opened by a previous win resolves at the next
+        //     turn confirmation. Sparing is the DEFAULT (gdd-03 CR#4/AC-11); an
+        //     execution needs either an explicit player intent or the NPC actually
+        //     dying this turn.
+        Object.keys(deathStateForTurn).forEach(charId => {
+            const fate = deathStateForTurn[charId] && deathStateForTurn[charId].pending_fate;
+            if (!fate) return;
+            if (currentTurn <= fate.opened_turn) return;
+            const intent = justDiedIds.has(fate.npc_id)
+                ? 'execute'
+                : classifyFateIntent(lastPlayerActionRef.current);
+            const fateResolution = resolvePendingFate({
+                fate,
+                intent,
+                turn: currentTurn,
+                playerId: playerIdForTurn,
+                nameOf: nameOfCharId,
+                npcTagOf: () => null,
+                knobs: DEATH_KNOBS,
+                state: deathStateForTurn,
+            });
+            deathStateForTurn = fateResolution.state;
+            if (fateResolution.messages.length > 0) p2Messages.push(...fateResolution.messages);
+            // The kill event may duplicate the one the [CHARACTER_DEATH] branch
+            // already produced for the same victim; keep exactly one.
+            fateResolution.social_events.forEach(evt => {
+                const duplicate = pendingSocialEvents.some(existing =>
+                    existing.type === evt.type && existing.target === evt.target);
+                if (!duplicate) pendingSocialEvents.push(evt);
+            });
+            if (fateResolution.crippled_applied) {
+                const idx = findCharIndexById(fate.npc_id);
+                if (idx > -1) applyCrippledStatus(newKnowledge.characters[idx]);
+            }
+        });
+
+        // (2) Branch A / Branch B from the combat hand-off. A friendly spar, a
+        //     `no_outcome`, or a battle still running all resolve to nothing.
+        if (p2CombatHandoff) {
+            try {
+                applyDeathResolution(resolveDeathConsequence({
+                    ...deathDeps,
+                    handoff: p2CombatHandoff,
+                    state: deathStateForTurn,
+                }));
+            } catch (deathError) {
+                console.error('[Death] Khong giai quyet duoc hau qua tran dau:', deathError);
+            }
+        }
+
+        // (3) The AI [CHARACTER_DEATH] tag aimed at the player: a trigger, not a
+        //     verdict (plan.md C-1, module assumption A1).
+        if (playerNarrativeDeathTriggered && !playerDiedThisTurn) {
+            try {
+                applyDeathResolution(resolveDeathConsequence({
+                    ...deathDeps,
+                    narrativeDeathTrigger: true,
+                    state: deathStateForTurn,
+                }));
+            } catch (deathError) {
+                console.error('[Death] Khong giai quyet duoc cai chet do AI kich hoat:', deathError);
+            }
+        }
+
+        // (4) The player really died: the SHIPPED path takes over unchanged (soul
+        //     stub + GameOverModal + handleRespawn). plan.md C-7 keeps
+        //     resurrection, so no slot is locked and no run ends here.
+        if (playerDiedThisTurn) {
+            const idx = findCharIndexById(playerIdForTurn);
+            if (idx > -1 && !newKnowledge.characters[idx].isPermanentlyDead) {
+                const character = newKnowledge.characters[idx];
+                newKnowledge.characters[idx] = {
+                    id: character.id, Name: character.Name, description: character.description,
+                    Personality: character.Personality, levelAtDeath: character.level,
+                    isPermanentlyDead: true, isPlayer: false, isCompanion: false
+                };
+                justDiedIds.add(character.id);
+            }
+            setTimeout(() => setShowGameOverModal(true), 500);
+        }
+        newKnowledge.deathState = deathStateForTurn;
+        newKnowledge.isDeathTurn = isDeathTurn;
+        // `death_flag_<char_id>` for every character that died this turn; only the
+        // PLAYER's death sets `is_death_turn` (gdd-01 CR#9 - it is what locks Undo).
+        justDiedIds.forEach(diedId => {
+            turnGlue.recordDeathFlag(lockedAccum, diedId, diedId === playerIdForTurn);
+        });
+        lockedAccum.is_death_turn = isDeathTurn === true;
+    }
+
+    // --- NPC Affinity (gdd-03 D.6) ------------------------------------------
+    // Combat itself also produces a classified event (`combat_win_vs_npc` /
+    // `combat_loss_vs_npc`); it is built here rather than inside combat code so
+    // that CombatLoop stays out of scope.
+    if (playerIdForTurn && p2CombatHandoff) {
+        try {
+            pendingSocialEvents.push(...classifyFromCombatHandoff(p2CombatHandoff, {
+                actor: playerIdForTurn,
+                playerId: playerIdForTurn,
+                npcIdByName: (name) => (isTrackedNpcId(name) ? name : npcIdByName(name)),
+                witnesses: entitiesInScopeForTurn,
+            }));
+        } catch (combatEventError) {
+            console.error('[Affinity] Khong phan loai duoc su kien tu tran dau:', combatEventError);
+        }
+    }
+
+    if (playerIdForTurn && pendingSocialEvents.length > 0 && !playerDiedThisTurn) {
+        try {
+            const affinityResult = resolveTurnAffinity({
+                turn: currentTurn,
+                events: pendingSocialEvents,
+                knobs: AFFINITY_KNOBS,
+                state: ensureAffinityState(newKnowledge.affinityState),
+                affinityOf: affinityAtTurnStartOf,
+                aliveOf: (id) => !justDiedIds.has(id) && getDeathCharState(deathStateForTurn, id).alive !== false,
+                isTrackedNpc: isTrackedNpcId,
+                nameOf: nameOfCharId,
+                songTuActiveNpcIds: getSongTuActiveNpcIds(newKnowledge),
+            });
+            newKnowledge.affinityState = affinityResult.state;
+            affinityResult.changes.forEach(change => {
+                const idx = findCharIndexById(change.npc_id);
+                if (idx < 0) return;
+                // The module already clamped to [-100, +100]; this is the single
+                // write path for character.affinity (gdd-03 CR#1/CR#9).
+                newKnowledge.characters[idx].affinity = change.after;
+                turnGlue.recordAffinityDelta(lockedAccum, change.npc_id, change.after - change.before);
+                // Direction only - the prompt never sees the number (gdd-03 1.3).
+                newKnowledge.characters[idx].affinityDirection =
+                    change.after > change.before ? 'đang ấm lên' : 'đang lạnh đi';
+                const crossing = bandCrossingMessage(nameOfCharId(change.npc_id), change.before, change.after);
+                if (crossing) p2Messages.push(crossing);
+            });
+        } catch (affinityError) {
+            console.error('[Affinity] Khong tinh duoc hao cam luot nay:', affinityError);
+        }
+    }
+
+    // === Pillar 1 RECONCILIATION SWEEP (game-concept.md 243-255) =============
+    // Single place where the level-gap injury is reconciled with the world state,
+    // so EVERY status-clear path (RECOVER_INJURY, a healing pill, an API-3
+    // status write, a CHARACTER_UPDATE `longtermstatuses:-...`) restores the true
+    // level through exactly one code path.
+    //
+    // Order matters:
+    //   1. `[RECOVER_INJURY]` strips the status (the tag itself carries no number);
+    //   2. every NPC whose record says "injured" but whose status is gone is healed
+    //      - true level and the exact pre-injury base stats come from the snapshot;
+    //   3. hostility that emerged from the AFFINITY BAND this turn (hook 3b) is
+    //      caught, unless the NPC was healed at some point (see below).
+    //
+    // ASSUMPTION (documented): once healed, an NPC is NOT re-injured by a later
+    // band flip. The wound is a one-time piece of backstory, not a rubber band; a
+    // healed grandmaster is genuinely out of the player's league, which is exactly
+    // what Pillar 1 asks for. A fresh hostile encounter/creation may still injure a
+    // DIFFERENT NPC, and the prompt directives keep such a grandmaster from hunting
+    // the player unprovoked.
+    try {
+        const swpPlayer = (newKnowledge.characters || []).find(c => c && c.isPlayer);
+        const swpPlayerLevel = Number(swpPlayer && swpPlayer.level) || 1;
+
+        (updates.recoverInjuryFor || []).forEach(entry => {
+            const rname = entry && (entry.Name || entry.name || entry.target || entry.NPC);
+            if (!rname) return;
+            const idx = (newKnowledge.characters || []).findIndex(c => c && c.Name === rname);
+            if (idx === -1) {
+                console.warn('[objectivity] RECOVER_INJURY: khong tim thay nhan vat', rname);
+                return;
+            }
+            const ch = newKnowledge.characters[idx];
+            if (!isGapInjured(ch) && !hasGapInjuryStatus(ch)) {
+                console.warn('[objectivity] RECOVER_INJURY bi bo qua - nhan vat khong trong thuong:', rname);
+                return;
+            }
+            ch.longTermStatuses = (ch.longTermStatuses || []).filter(st =>
+                !(st && ((st.status_id || st.id) === GAP_INJURY_STATUS_ID || st.name === GAP_INJURY_STATUS_NAME)));
+        });
+
+        (newKnowledge.characters || []).forEach((ch, idx) => {
+            if (!ch || ch.isPlayer) return;
+            if (isGapInjured(ch) && !hasGapInjuryStatus(ch)) {
+                const healed = maybeRecoverGapInjury(ch);
+                if (healed.recovered) {
+                    healed.npc.gapInjuryHealed = true;
+                    newKnowledge.characters[idx] = healed.npc;
+                    if (healed.message) objectivityMessages.push(healed.message);
+                }
+            }
+        });
+
+        (newKnowledge.characters || []).forEach((ch, idx) => {
+            if (!ch || ch.isPlayer || ch.isCompanion || ch.isPermanentlyDead) return;
+            if (ch.gapInjuryHealed === true) return;
+            const band = typeof ch.affinity === 'number' ? attitudeBand(ch.affinity) : null;
+            if (!band || !isHostileStance(band)) return;
+            const applied = maybeApplyGapInjury(ch, swpPlayerLevel, { turn: currentTurn, forceHostile: true });
+            if (applied.applied) {
+                newKnowledge.characters[idx] = applied.npc;
+                if (applied.message) objectivityMessages.push(applied.message);
+            }
+        });
+    } catch (sweepError) {
+        console.warn('[objectivity] reconciliation sweep:', sweepError);
+    }
+
+    if (objectivityMessages.length > 0) {
+        setTimeout(() => {
+            const entries = objectivityMessages.map(msg => ({
+                id: crypto.randomUUID(), type: 'system', content: '**[Hệ thống]** ' + msg, transient: true,
+            }));
+            setStoryHistory(prevHistory => [...prevHistory, ...entries]);
+        }, 100);
+    }
+
+    if (p2Messages.length > 0) {
+        setTimeout(() => {
+            const entries = p2Messages.map(msg => ({ id: crypto.randomUUID(), type: 'system', content: '**[He thong]** ' + msg, transient: true }));
+            setStoryHistory(prevHistory => [...prevHistory, ...entries]);
+        }, 100);
+    }
+
+    // === gdd-02 D.6/D.7 - deterministic per-turn EXP (plan.md P1 hook point) ======
+    // Runs at most ONCE per `currentTurn`, for the player and every companion in the
+    // party. The combat side is read through the P0 adapter hand-off published by
+    // `finalizeCombatEnd`; with no hand-off the turn is an ordinary out-of-combat turn
+    // and only the passive / Song Tu sources can tick (gdd-02 Core Rule #2 gate A1).
+    if (!newKnowledge.progression) newKnowledge.progression = { recentMeaningfulActions: [] };
+    const combatHandoffForTurn = p2CombatHandoff;
+    // Once per turn - EXCEPT that a freshly published combat hand-off is always
+    // resolved (combat actions do not advance `currentTurn`, so the post-battle
+    // reconciliation may share a turn id with the pre-battle one; with a hand-off
+    // present the turn view is `in_combat`, so passive/Song Tu cannot double-tick).
+    const shouldResolveTurnExp = newKnowledge.progression.lastExpResolvedTurn !== currentTurn || !!combatHandoffForTurn;
+    const expTurnView = combatHandoffForTurn
+        ? turnViewFromHandoff(combatHandoffForTurn, false)
+        : idleTurnView(false);
+    const expDeps = {
+        knobs: EXP_KNOBS,
+        expThreshold: calculateMaxExpForLevel,
+        songTuActiveNpcIds: getSongTuActiveNpcIds(newKnowledge),
+        // gdd-02 EC-1: an opponent with no Character Card tier is a data bug, so the
+        // lookup returns `undefined` and the module raises EXP_ERROR_OPPONENT_TIER_UNDEFINED
+        // instead of silently defaulting to 0.
+        opponentTier: (charId) => {
+            const opponent = (newKnowledge.characters || []).find(c => c.id === charId);
+            return opponent && Number.isFinite(opponent.level) ? tierFromLevel(opponent.level) : undefined;
+        },
+        // gdd-02 Core Rule #6's owner (Setting & Canon) is dropped from the shortened
+        // roadmap (plan.md P5), so the predicate stays permissive but injectable.
+        breakthroughRequirementMet: () => true,
+        // gdd-02 Rule 9; plan.md C-11 expresses "phe dan dien" as a long-term status.
+        // gdd-02 Rule 9 / gdd-03 CR#6: EXP is blocked while the character is
+        // crippled. Both representations are accepted - the authoritative flag in
+        // `knowledge.deathState` (phase P2) and the long-term status that carries
+        // the stat penalty (plan.md C-11) - so an old save keeps working.
+        deathAndConsequenceBlocked: (self) => {
+            const flagged = getDeathCharState(newKnowledge.deathState, self.char_id).death_and_consequence_blocked === true;
+            if (flagged) return true;
+            const c = (newKnowledge.characters || []).find(x => x.id === self.char_id);
+            return Array.isArray(c?.longTermStatuses)
+                && c.longTermStatuses.some(st => typeof st?.name === 'string' && st.name.includes(CRIPPLED_STATUS_NAME));
+        },
+    };
+    const progressionMessages = [];
+    if (shouldResolveTurnExp) newKnowledge.progression.lastExpResolvedTurn = currentTurn;
+
     newKnowledge.characters.forEach((char, index) => {
         if (!char.isPermanentlyDead) {
             let finalChar = newKnowledge.characters[index];
             const changesForThisChar = directStatChanges[finalChar.id];
             let expGained = 0;
+
+            // Old saves carry no `progressionState`; a missing value IS the default.
+            if (!finalChar.progressionState) finalChar.progressionState = PROGRESSION_STATE_NORMAL;
 
             if (changesForThisChar) {
                 for (const key in changesForThisChar) {
@@ -32151,7 +34437,24 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                 }
             }
             
+            const isProgressionSubject = finalChar.isPlayer === true
+                || (finalChar.isCompanion === true && finalChar.inParty === true);
+            if (shouldResolveTurnExp && isProgressionSubject) {
+                try {
+                    const progression = resolveProgressionTurnForCharacter(finalChar, expTurnView, expDeps);
+                    expGained += progression.gain;
+                    if (progression.breakthrough) {
+                        turnGlue.recordBreakthroughFlag(lockedAccum, finalChar.id);
+                        const btRealm = getRealmInfoFromLevel(finalChar.level, newKnowledge.realmProgressionList);
+                        progressionMessages.push(`**Đột phá thành công!** **${finalChar.Name}** đã bước vào **${btRealm.realmName} Tầng ${btRealm.realmTier}**.`);
+                    }
+                } catch (expError) {
+                    console.error(`[EXP] Khong tinh duoc EXP luot nay cho "${finalChar.Name}":`, expError);
+                }
+            }
+
             if (expGained > 0) {
+                turnGlue.recordExpDelta(lockedAccum, finalChar.id, expGained);
                 finalChar.exp = (finalChar.exp || 0) + expGained;
                 const { updatedChar, levelUpMessages, newLoreQuest } = handleLevelUp(finalChar, newKnowledge.realmProgressionList);
                 finalChar = updatedChar;
@@ -32184,6 +34487,16 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
             newKnowledge.characters[index] = calculateFinalStats(finalChar, newKnowledge.characters);
         }
     });
+
+    // The hand-off is single-use: consumed here and cleared, so a later turn cannot
+    // award combat EXP a second time for a battle that already resolved.
+    if (shouldResolveTurnExp && combatHandoffForTurn) delete newKnowledge.lastCombatHandoff;
+    if (progressionMessages.length > 0) {
+        setTimeout(() => {
+            const entries = progressionMessages.map(msg => ({ id: crypto.randomUUID(), type: 'system', content: `**[Hệ thống]** ${msg}`, transient: true }));
+            setStoryHistory(prevHistory => [...prevHistory, ...entries]);
+        }, 100);
+    }
 
     if (updates.activateAdventureSkill && Array.isArray(updates.activateAdventureSkill)) {
         updates.activateAdventureSkill.forEach(activation => {
@@ -32261,6 +34574,9 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
             }
         });
     }
+    // Published for `processAndUpdateState` to read back (single writer: this
+    // reducer). Overwritten every turn - it is the CURRENT turn's lock, not a log.
+    newKnowledge[turnGlue.LOCKED_ACCUM_KEY] = lockedAccum;
     return newKnowledge;
 };
 
@@ -32277,9 +34593,23 @@ const runQuestCheckAPI = async (currentKnowledge) => {
     registerCriticalPromise(runAPI3StateMonitor(rawStoryText, currentKnowledge));
 };
 
+/**
+ * @param knowledgeOverride the knowledge object the AI call was BUILT from.
+ *        Code review C-7: it used to be accepted and then ignored, which is why
+ *        `finalizeCombatEnd` had to mirror its combat hand-off through a second
+ *        `setknowledge`. It is now MERGED OVER the live state (never used as a
+ *        bare replacement) so a field the override does not carry - anything a
+ *        concurrent background update wrote - is preserved.
+ */
 const processAndUpdateState = (updates, commandBlock, knowledgeOverride = null, storyText = "") => {
+    // Code review C-1: mark the pending turn as handed over to
+    // `finalizeSystemsTurn` NOW. The `setknowledge` updater below (which calls
+    // it) only runs when React flushes, i.e. after the caller's `finally`.
+    if (pendingTurnRef.current) pendingTurnRef.current.handed_off = true;
     setknowledge(prevKnowledge => {
-        const baseKnowledge = prevKnowledge;
+        const baseKnowledge = knowledgeOverride
+            ? { ...prevKnowledge, ...knowledgeOverride }
+            : prevKnowledge;
         
         const currentSnapshot = {
             time: { ...baseKnowledge.time },
@@ -32340,17 +34670,44 @@ const processAndUpdateState = (updates, commandBlock, knowledgeOverride = null, 
             }, 100);
         }
         
+        // P4b: World Memory append + durability gate + Turn Confirmed. Deferred
+        // inside, so this call is safe from within a React state updater.
+        finalizeSystemsTurn(knowledgeAfterUpdates, storyText);
+
         return knowledgeAfterUpdates;
     });
 };
 
 const handleRespawn = () => {
+    // plan.md C-7 keeps resurrection. gdd-01 CR#11 parks the Turn Manager in
+    // `idle` after a death turn, so re-open it here - otherwise no later turn
+    // would ever reach World Memory or the durability gate again. The death turn
+    // itself stays permanently un-undoable (its id is in `death_turn_ids`).
+    try {
+        if (turnManagerRef.current) turnManagerRef.current.begin();
+        setCanUndoTurn(false);
+    } catch (respawnError) { console.error('[systems] respawn begin:', respawnError); }
     setknowledge(prevKnowledge => {
         // Tạo một bản sao sâu để làm việc
         const newKnowledge = JSON.parse(JSON.stringify(prevKnowledge));
-        
+
         // Tìm vị trí của người chơi trong mảng characters
         const playerIndex = newKnowledge.characters.findIndex(c => c.isPlayer);
+
+        // plan.md C-7: resurrection is KEPT. Death & Consequence owns `alive` /
+        // `death_flag`, so the one sanctioned revival path has to clear them here;
+        // the crippled flag is a SEPARATE consequence and deliberately survives.
+        if (playerIndex > -1) {
+            const respawnId = newKnowledge.characters[playerIndex].id;
+            const deathState = ensureDeathState(newKnowledge.deathState);
+            newKnowledge.deathState = withDeathCharState(deathState, respawnId, {
+                ...getDeathCharState(deathState, respawnId),
+                alive: true,
+                death_flag: false,
+                pending_fate: null,
+            });
+            newKnowledge.isDeathTurn = false;
+        }
 
         if (playerIndex > -1) {
             let player = newKnowledge.characters[playerIndex];
@@ -32384,6 +34741,70 @@ const handleRespawn = () => {
     // --- BƯỚC 5: ĐÓNG CỬA SỔ GAME OVER ---
     // Lưu ý: handleCombatEnd đã được gọi trước đó và đặt gameMode về EXPLORATION.
     setShowGameOverModal(false);
+};
+
+/**
+ * gdd-03 D.3 `recovery_attempt` (plan.md P2). The odds, the cooldown and the
+ * "cost is always paid" rule live in src-web/systems/death/recovery.ts; this
+ * wrapper only injects the RNG, applies the returned flags and removes the
+ * "Phế Đan Điền" long-term status on success (the only path that clears it).
+ */
+const handleRecoveryAttempt = (characterId, method = 'tu_tu', itemEfficacy = undefined) => {
+    const deathState = ensureDeathState(knowledge.deathState);
+    const charState = getDeathCharState(deathState, characterId);
+    const character = (knowledge.characters || []).find(c => c && c.id === characterId);
+    const hasCrippledStatus = Array.isArray(character?.longTermStatuses)
+        && character.longTermStatuses.some(st => st && ((st.status_id || st.id) === CRIPPLED_STATUS_ID || st.name === CRIPPLED_STATUS_NAME));
+
+    const result = attemptRecovery({
+        method,
+        blocked: charState.death_and_consequence_blocked === true || hasCrippledStatus,
+        currentTurn,
+        lastSelfAttemptTurn: charState.recovery_progress.last_self_attempt_turn,
+        itemEfficacy,
+        rng: Math.random,
+        knobs: DEATH_KNOBS,
+    });
+
+    if (!result.accepted) {
+        const reasons = {
+            not_crippled: 'Ngươi không mang thương tật cần chữa trị.',
+            invalid_method: 'Phương pháp hồi phục không hợp lệ.',
+            self_cooldown: `Chưa đủ ${DEATH_KNOBS.RECOVERY_SELF_COOLDOWN_TURNS} lượt tĩnh dưỡng kể từ lần tự tu trước.`,
+            missing_item_efficacy: 'Linh dược này không có dược lực rõ ràng.',
+        };
+        setModalMessage({ show: true, title: 'Không thể hồi phục', content: reasons[result.rejected_reason] || 'Không thể thực hiện.', type: 'error' });
+        return result;
+    }
+
+    setknowledge(prev => {
+        const next = JSON.parse(JSON.stringify(prev));
+        const state = ensureDeathState(next.deathState);
+        const before = getDeathCharState(state, characterId);
+        next.deathState = withDeathCharState(state, characterId, {
+            ...before,
+            death_and_consequence_blocked: result.blocked_after,
+            recovery_progress: {
+                last_self_attempt_turn: result.last_self_attempt_turn,
+                attempts: (before.recovery_progress.attempts || 0) + 1,
+            },
+        });
+        if (result.success) {
+            const idx = next.characters.findIndex(c => c && c.id === characterId);
+            if (idx > -1 && Array.isArray(next.characters[idx].longTermStatuses)) {
+                next.characters[idx].longTermStatuses = next.characters[idx].longTermStatuses.filter(
+                    st => !(st && ((st.status_id || st.id) === CRIPPLED_STATUS_ID || st.name === CRIPPLED_STATUS_NAME)));
+                next.characters[idx] = calculateFinalStats(next.characters[idx], next.characters, { preserveHp: true });
+            }
+        }
+        return next;
+    });
+
+    const message = result.success
+        ? CRIPPLED_RECOVERED_MESSAGE
+        : `Một lần ${RECOVERY_METHOD_LABELS[method] || method} thất bại — thương thế vẫn còn đó.`;
+    setStoryHistory(prev => [...prev, { id: crypto.randomUUID(), type: 'system', content: `**[Hệ thống]** ${message}`, transient: true }]);
+    return result;
 };
 
 const handleSlotSelection = async (slotNumber) => {
@@ -32673,6 +35094,11 @@ const handleAutosave = useCallback(async () => {
         effectiveGameId = newId;
     }
 
+    // P3b (plan.md C-2): the DURABLE, turn-gating checkpoint is written every
+    // confirmed turn by `finalizeSystemsTurn` through `saveCheckpoint` into the
+    // `vdl_saves` store. This legacy every-5-turns `autosave_<gameId>` write is
+    // KEPT as a secondary mirror so existing saves and the Load Game list keep
+    // working unchanged; it is no longer the source of truth.
     const autosaveDocId = `autosave_${effectiveGameId}`;
     setAutosaveStatus('saving');
     try {
@@ -32771,6 +35197,14 @@ useEffect(() => {
   };
 
 const performStateCleanup = () => {
+    // P3b: a new run is a NEW slot - drop the previous slot's World Memory,
+    // Turn Manager and slot record so nothing leaks across runs (gdd-05 R3).
+    worldMemoryRef.current = null;
+    turnManagerRef.current = null;
+    slotRecordRef.current = null;
+    pendingTurnRef.current = null;
+    setCanUndoTurn(false);
+    setPersistenceWarning(null);
     setCurrentGameId(null);
     setCurrentStory('');
     setChoices([]);
@@ -33452,7 +35886,16 @@ const formatEntityForPrompt = (entityInfo) => {
     else if (data.Backstory) details += `: "${data.Backstory}"`;
 
     if (type === 'NPC') {
-        details += ` (Cấp ${data.level || 1}, Thái độ: ${data.Stance || 'Trung lập'}, Tính cách: ${data.Personality || 'Bình thường'}`;
+        // gdd-03 1.3 / AC-37b: the AI receives the attitude BAND plus a direction
+        // of change, never the raw affinity integer and never the delta.
+        const attitudeLine = typeof data.affinity === 'number'
+            ? `${attitudeBand(data.affinity)}${data.affinityDirection ? ', ' + data.affinityDirection : ''}`
+            : null;
+        details += ` (Cấp ${data.level || 1}, Thái độ: ${data.Stance || 'Trung lập'}`;
+        // Pillar 1: say the realm is suppressed, never say by how much.
+        if (isGapInjured(data)) details += `, Thương thế: ${GAP_INJURY_PROMPT_HINT}`;
+        if (attitudeLine) details += `, Hảo cảm với ngươi: ${attitudeLine}`;
+        details += `, Tính cách: ${data.Personality || 'Bình thường'}`;
         if (data.Role) details += `, Thân phận: ${data.Role}`;
         details += `)`;
     } else if (type === 'Địa điểm') {
@@ -33922,6 +36365,17 @@ const formatStoryText = useCallback((text) => {
 
                     {currentScreen === 'gameplay' && (
                             <GameplayScreen
+                                onExportKeepsake={handleExportKeepsake}
+                                onExportQaLog={handleExportQaLog}
+                                onExportContractLog={handleExportContractLog}
+                                canUndoTurn={canUndoTurn}
+                                onUndoTurn={handleUndoTurn}
+                                isUndoingTurn={isUndoingTurn}
+                                persistenceWarning={persistenceWarning}
+                                visibleBanner={visibleBanner}
+                                onDismissBanner={dismissBanner}
+                                hackModeEnabled={hackModeEnabled}
+                                onToggleHackMode={toggleHackMode}
                                 allowUnexpectedEvent={allowUnexpectedEvent}
                                 setAllowUnexpectedEvent={setAllowUnexpectedEvent}
                                 setGameSettings={setGameSettings}
@@ -34191,6 +36645,8 @@ const formatStoryText = useCallback((text) => {
             handleUserUploadNpcAvatar={handleUserUploadNpcAvatar}
             handleUserUploadPlayerAvatar={handleUserUploadPlayerAvatar}
             handleTrackQuest={handleTrackQuest}
+            handleRecoveryAttempt={handleRecoveryAttempt}
+            currentTurn={currentTurn}
             handleDebugUpdateCharacter={handleDebugUpdateCharacter}
             setModalMessage={setModalMessage}
             handleUpdateCharacterImages={handleUpdateCharacterImages}
@@ -34465,10 +36921,10 @@ const formatStoryText = useCallback((text) => {
                     show={showCustomizationModal}
                     onClose={() => setShowCustomizationModal(false)}
                     playerCharacter={playerCharacter}
-                    onApplyLevel={handleCustomizeLevel}
-                    onApplyStats={handleCustomizeBaseStats}
-                    onCreateItem={handleCustomizeCreateItem}
-                    onCreateSkill={handleCustomizeCreateSkill}
+                    onApplyLevel={commitCustomizeProgress}
+                    onApplyStats={commitCustomizeBaseStats}
+                    onCreateItem={commitCustomizeItem}
+                    onCreateSkill={commitCustomizeSkill}
                     onOpenSkillCreation={() => { setShowCustomizationModal(false); setShowSkillManagementModal(true); }}
                     gameSettings={gameSettings}
                     onUpdateDefaultCombatBackground={handleUpdateDefaultCombatBackground}
