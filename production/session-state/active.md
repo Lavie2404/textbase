@@ -25,6 +25,8 @@ Commit 1 lần mỗi giai đoạn khi test + build xanh, không push.
 
 - [x] Pillar 1 bổ sung (21-08, user chốt a+b+c): chỉ thị khách quan trong API-1/API-2; luật TRỌNG THƯƠNG theo chênh cấp >20 (cấp hiệu lực = player+20, cấp thật giữ trong `gapInjury.trueLevel`, hồi phục qua linh đan/kỳ ngộ/`[RECOVER_INJURY]`, không tự hồi theo thời gian); trần xác suất vượt tầm (`outcome_for_player` + `capOverreach`). Module `src-web/systems/objectivity/`, 113 test.
 
+- [x] Pillar 1 siết thêm (21-08): chỉ thị "Khen phải có căn cứ và đúng tầm" — NPC hảo cảm cao chỉ được khen việc cụ thể, mức khen tỷ lệ chênh lệch thực lực; bộ chỉ thị API-2 = 6 mục (`d6069bc`).
+
 **Trạng thái**: HOÀN TẤT lộ trình rút gọn + Pillar 1 — 12 commit, 1231 unit test xanh, build xanh.
 **Còn treo (không chặn, ghi từ báo cáo agent)**: Story Log S4 phân trang UI; live-window
 eviction; delete-batch UI của Customization (`validateDeleteBatch` chưa dùng); khối ⑤
