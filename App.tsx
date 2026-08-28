@@ -5624,12 +5624,52 @@ const writePreferredTextModel = (model) => {
     }
 };
 
+// Preferred PLATFORM key slot (device-level, localStorage; player report 2026-08-28: the
+// key that ends up "sticky" per-session is not synced across devices, so a phone starting
+// a fresh session re-rolls from key #1 even while a desktop session already landed on a
+// healthier key). Only meaningful in apiMode='defaultGemini' - a personal key always stays
+// primary regardless of this setting. '' = automatic order (main key first).
+const PREFERRED_KEY_SLOT_STORAGE_KEY = 'vdl.preferredKeySlot';
+const KEY_SLOT_PATTERN = /^[0-9]+$/;
+const readPreferredKeySlot = () => {
+    try {
+        if (typeof window === 'undefined' || !window.localStorage) return '';
+        const stored = window.localStorage.getItem(PREFERRED_KEY_SLOT_STORAGE_KEY) || '';
+        return KEY_SLOT_PATTERN.test(stored) ? stored : '';
+    } catch {
+        return '';
+    }
+};
+const writePreferredKeySlot = (slot) => {
+    try {
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        if (slot) window.localStorage.setItem(PREFERRED_KEY_SLOT_STORAGE_KEY, slot);
+        else window.localStorage.removeItem(PREFERRED_KEY_SLOT_STORAGE_KEY);
+    } catch {
+        /* localStorage may be unavailable (private mode) - the in-memory value still applies */
+    }
+};
+/**
+ * The platform's own key pool (main + spares, empties dropped), reordered so `slot`
+ * (a string index into that pool) leads - the rest keeps its order so a 429 on the
+ * chosen key still rolls over to the others automatically (fetchWithRetries/requestAi
+ * unchanged). `slot` of '', '0', or out of range is a no-op (already the default order).
+ */
+const orderPlatformKeysByPreferredSlot = (slot) => {
+    const pool = [PLATFORM_DEFAULT_GEMINI_KEY, ...PLATFORM_FALLBACK_GEMINI_KEYS].filter(k => String(k || '').trim());
+    const idx = Number(slot);
+    if (!Number.isInteger(idx) || idx <= 0 || idx >= pool.length) return pool;
+    return [pool[idx], ...pool.filter((_, i) => i !== idx)];
+};
+
 const ApiSetupModal = ({
     inputApiKey, setInputApiKey, apiKeyStatus, saveApiKey, testApiKey,
     isLoading, setShowApiModal, setApiKeyStatus, apiMode, setApiMode,
-    setModalMessage, preferredTextModel = '', setPreferredTextModel = () => {}
+    setModalMessage, preferredTextModel = '', setPreferredTextModel = () => {},
+    preferredKeySlot = '', setPreferredKeySlot = () => {}
 }) => {
     const ladderModels = DEFAULT_AI_CONFIG.model_ladder;
+    const platformKeyPool = orderPlatformKeysByPreferredSlot('');
     const preferredIsCustom = !!preferredTextModel && !ladderModels.includes(preferredTextModel);
     const [customModelInput, setCustomModelInput] = useState(preferredIsCustom ? preferredTextModel : '');
     const customModelValid = customModelInput.trim() === '' || MODEL_NAME_PATTERN.test(customModelInput.trim());
@@ -5746,6 +5786,37 @@ const ApiSetupModal = ({
                 Đang ưu tiên: <span className="text-amber-300 font-mono">{preferredTextModel || '(tự động)'}</span>. Nút "Kiểm Tra" phía trên sẽ thử đúng model này.
             </p>
         </fieldset>
+
+        {platformKeyPool.length > 1 && (
+        <fieldset className="border border-gray-600 p-4 rounded-lg mb-2">
+            <legend className="text-lg font-semibold text-emerald-300 px-2">Key AI Ưu Tiên</legend>
+            <p className="text-xs text-gray-400 mb-3">
+                Key nền tảng được chọn sẽ được thử <b>đầu tiên</b>. Nếu key đó hết quota (lỗi 429), hệ thống vẫn tự
+                xoay sang các key còn lại. Chỉ áp dụng khi đang dùng "Gemini AI Mặc Định" - không ảnh hưởng nếu
+                ngươi đã nhập API Key riêng.
+            </p>
+            <select
+                value={apiMode === 'userKey' ? '' : preferredKeySlot}
+                onChange={(e) => setPreferredKeySlot(e.target.value)}
+                disabled={apiMode === 'userKey'}
+                className={`w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-emerald-400 focus:border-emerald-400 ${apiMode === 'userKey' ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+                <option value="">Tự động (Key chính → Dự phòng 1 → Dự phòng 2…)</option>
+                {platformKeyPool.map((_, i) => (
+                    <option key={i} value={String(i)}>{i === 0 ? 'Key chính' : `Key dự phòng ${i}`}</option>
+                ))}
+            </select>
+            {apiMode === 'userKey' ? (
+                <p className="text-xs text-gray-500 mt-2">Đang dùng API Key riêng của ngươi - mục này không áp dụng.</p>
+            ) : (
+                <p className="text-xs text-gray-500 mt-2">
+                    Đang ưu tiên: <span className="text-emerald-300 font-mono">
+                        {preferredKeySlot && Number(preferredKeySlot) > 0 ? `Key dự phòng ${preferredKeySlot}` : 'Key chính (tự động)'}
+                    </span>.
+                </p>
+            )}
+        </fieldset>
+        )}
 
         <button
             onClick={handleAttemptClose}
@@ -18959,12 +19030,20 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
     // regex-parsing the `?key=` we just wrote into the URL produced NO
     // credentials at all in `defaultGemini` mode; they now come from the app's
     // real state, with the URL key kept only as the legacy fallback.
+    // Player-chosen platform key slot (Thiết Lập Nguồn AI - "Key AI Ưu Tiên"): only
+    // reorders the PLATFORM pool, and only when a personal key is not in play - a
+    // personal key stays primary regardless (buildAiCredentials ignores `defaultKey`
+    // in that mode), and re-slicing the pool would otherwise silently drop one
+    // platform key from its spare list for no reason in that mode.
+    const orderedPlatformKeys = apiMode !== 'userKey' && preferredKeySlot
+        ? orderPlatformKeysByPreferredSlot(preferredKeySlot)
+        : [PLATFORM_DEFAULT_GEMINI_KEY, ...PLATFORM_FALLBACK_GEMINI_KEYS];
     const credentials = turnGlue.buildAiCredentials({
         apiMode,
         apiKey,
         apiKeyFromUrl,
-        defaultKey: PLATFORM_DEFAULT_GEMINI_KEY,
-        fallbackKeys: PLATFORM_FALLBACK_GEMINI_KEYS,
+        defaultKey: orderedPlatformKeys[0] || '',
+        fallbackKeys: orderedPlatformKeys.slice(1),
     });
     const config = {
         ...DEFAULT_AI_CONFIG,
@@ -20002,6 +20081,18 @@ const [impromptuInput, setImpromptuInput] = useState('');
       // and lift any 503 cooldown on the model the player explicitly asked for.
       aiSessionState.preferred_model = next || null;
       if (next) delete aiSessionState.cooldown_until[next];
+  }, []);
+  // Player-chosen PLATFORM key slot that leads the pool when apiMode='defaultGemini'
+  // (see PREFERRED_KEY_SLOT_STORAGE_KEY). No effect while a personal key is active.
+  const [preferredKeySlot, setPreferredKeySlotState] = useState(() => readPreferredKeySlot());
+  const setPreferredKeySlot = useCallback((slot) => {
+      const next = (slot || '').trim();
+      setPreferredKeySlotState(next);
+      writePreferredKeySlot(next);
+      // Take effect on the very next call: lift any quota cooldown on the key the
+      // player explicitly asked to use first (mirrors setPreferredTextModel above).
+      const pool = orderPlatformKeysByPreferredSlot(next);
+      if (pool.length > 0) delete aiSessionState.key_cooldown_until[pool[0]];
   }, []);
   const [apiKeyStatus, setApiKeyStatus] = useState({
     status: 'Đang dùng Gemini AI Mặc Định',
@@ -36656,7 +36747,7 @@ const formatStoryText = useCallback((text) => {
                                 aiSourceSummary={
                                     (apiMode === 'userKey'
                                         ? `Key riêng ${apiKey ? '…' + String(apiKey).slice(-4) : '(chưa có)'}`
-                                        : 'Gemini mặc định')
+                                        : `Gemini mặc định${preferredKeySlot && Number(preferredKeySlot) > 0 ? ` (key dự phòng ${preferredKeySlot})` : ''}`)
                                     + ` · model: ${preferredTextModel || 'tự động'}`
                                 }
                                 canUndoTurn={canUndoTurn}
@@ -36884,6 +36975,8 @@ const formatStoryText = useCallback((text) => {
               playerCharacter={playerCharacter}
               preferredTextModel={preferredTextModel}
               setPreferredTextModel={setPreferredTextModel}
+              preferredKeySlot={preferredKeySlot}
+              setPreferredKeySlot={setPreferredKeySlot}
             />
         )}
 
