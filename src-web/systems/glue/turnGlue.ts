@@ -512,12 +512,20 @@ export interface AppCredentialInputs {
   apiKeyFromUrl?: string;
   /** A platform / free-tier key the build ships with, if any. */
   defaultKey?: string;
+  /**
+   * Spare keys from `VITE_GEMINI_API_KEY_FALLBACKS` (project decision
+   * 2026-08-28: main key + two spares). Attached in BOTH modes, so a player
+   * on their own key still rolls over to the spares when it hits 429.
+   */
+  fallbackKeys?: readonly string[];
 }
 
 export interface AiCredentialsLike {
   apiMode: 'userKey' | 'default';
   userKey?: string;
   defaultKey?: string;
+  /** Present only when at least one spare key exists (see `AiCredentials`). */
+  fallbackKeys?: string[];
 }
 
 /**
@@ -530,29 +538,43 @@ export interface AiCredentialsLike {
  * - a non-empty URL key in default mode is still honoured (same legacy reason);
  * - otherwise the credentials are returned EMPTY on purpose, so `requestAi`
  *   fails fast with `config_error` instead of burning the whole model ladder on
- *   requests that cannot possibly authenticate.
+ *   requests that cannot possibly authenticate;
+ * - the spare keys (`fallbackKeys`) ride along in every mode, minus the primary
+ *   key itself, and are omitted entirely when there are none - so the shape
+ *   stays byte-identical to the pre-pool contract for a build without spares.
  */
 export function buildAiCredentials(
   input: AppCredentialInputs | null | undefined,
 ): AiCredentialsLike {
   const src = input || {};
   const fromUrl = String(src.apiKeyFromUrl || '').trim();
-  if (src.apiMode === 'userKey') {
-    const userKey = String(src.apiKey || '').trim() || fromUrl;
-    return { apiMode: 'userKey', userKey };
+  const base = ((): AiCredentialsLike => {
+    if (src.apiMode === 'userKey') {
+      const userKey = String(src.apiKey || '').trim() || fromUrl;
+      return { apiMode: 'userKey', userKey };
+    }
+    const defaultKey = String(src.defaultKey || '').trim();
+    if (defaultKey) return { apiMode: 'default', defaultKey };
+    if (fromUrl) return { apiMode: 'userKey', userKey: fromUrl };
+    return { apiMode: 'default', defaultKey: '' };
+  })();
+  const primary = base.apiMode === 'userKey' ? base.userKey : base.defaultKey;
+  const fallbackKeys: string[] = [];
+  for (const raw of src.fallbackKeys || []) {
+    const k = String(raw || '').trim();
+    if (k && k !== primary && !fallbackKeys.includes(k)) fallbackKeys.push(k);
   }
-  const defaultKey = String(src.defaultKey || '').trim();
-  if (defaultKey) return { apiMode: 'default', defaultKey };
-  if (fromUrl) return { apiMode: 'userKey', userKey: fromUrl };
-  return { apiMode: 'default', defaultKey: '' };
+  return fallbackKeys.length > 0 ? { ...base, fallbackKeys } : base;
 }
 
 /** True when the credentials can authenticate a request at all. */
 export function credentialsAreUsable(creds: AiCredentialsLike | null | undefined): boolean {
   if (!creds) return false;
-  return creds.apiMode === 'userKey'
-    ? String(creds.userKey || '').trim() !== ''
-    : String(creds.defaultKey || '').trim() !== '';
+  const primaryUsable =
+    creds.apiMode === 'userKey'
+      ? String(creds.userKey || '').trim() !== ''
+      : String(creds.defaultKey || '').trim() !== '';
+  return primaryUsable || (creds.fallbackKeys || []).some((k) => String(k || '').trim() !== '');
 }
 
 // ---------------------------------------------------------------------------

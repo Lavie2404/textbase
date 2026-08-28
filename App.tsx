@@ -72,7 +72,7 @@ import { makeAppStateUndoable } from './src-web/systems/turn/undoAppState';
 // (code review C-8), which owns the fail-closed degradation ladder.
 import { createSessionLeakLog, leakCheckAndRecord } from './src-web/systems/contract/leakDetector';
 import { createAiSessionState, requestAi } from './src-web/systems/ai/requestAi';
-import { DEFAULT_AI_CONFIG, SAFETY_SETTINGS_BLOCK_NONE } from './src-web/systems/ai/config';
+import { DEFAULT_AI_CONFIG, SAFETY_SETTINGS_BLOCK_NONE, parseKeyList } from './src-web/systems/ai/config';
 import { AI_KNOBS, PERSISTENCE_KNOBS } from './src-web/systems/registry';
 import * as turnGlue from './src-web/systems/glue/turnGlue';
 
@@ -14206,6 +14206,65 @@ const clearAllIndexedDB = async () => {
     }
 };
 
+/**
+ * Per-key quota breaker for the IMAGE endpoints, which bypass `requestAi` (they
+ * need the raw `Response` for `inlineData`). Mirrors `AiSessionState.key_cooldown_until`:
+ * wall-clock ms until a key that answered 429 is worth trying again. In-memory only.
+ */
+const imageKeyCooldownUntil = {};
+
+/**
+ * Sends one Gemini IMAGE request with the same key rollover `requestAi` gives text
+ * calls: the effective key first, then `PLATFORM_FALLBACK_GEMINI_KEYS` in order,
+ * moving on when a key answers 429 (quota) or a 400/401 that blames the key.
+ * Keys still inside their 429 breaker are skipped while another key is healthy.
+ * Any other response (200, 5xx, a malformed-request 400) is returned as-is so
+ * each call site keeps its own parsing and `translateGeminiApiError` handling.
+ *
+ * @param {(key: string) => string} urlForKey builds the endpoint URL for a key
+ * @param {RequestInit} init fetch options (method/headers/body)
+ * @param {string} primaryKey the call site's `effectiveApiKey` (may be empty)
+ */
+const fetchGeminiWithKeyFallback = async (urlForKey, init, primaryKey) => {
+    const pool = [];
+    for (const raw of [primaryKey, ...PLATFORM_FALLBACK_GEMINI_KEYS]) {
+        const k = String(raw || '').trim();
+        if (k && !pool.includes(k)) pool.push(k);
+    }
+    if (pool.length === 0) return fetch(urlForKey(String(primaryKey || '')), init);
+
+    const now = Date.now();
+    const healthy = pool.filter(k => (imageKeyCooldownUntil[k] || 0) <= now);
+    const order = healthy.length > 0
+        ? healthy
+        : [pool.reduce((a, b) => ((imageKeyCooldownUntil[a] || 0) <= (imageKeyCooldownUntil[b] || 0) ? a : b))];
+
+    let response = null;
+    for (let i = 0; i < order.length; i++) {
+        const k = order[i];
+        response = await fetch(urlForKey(k), init);
+        if (response.ok || i === order.length - 1) return response;
+        if (response.status === 429) {
+            const retryAfter = Number(response.headers.get('retry-after'));
+            const waitSec = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : AI_KNOBS.key_quota_cooldown_seconds;
+            imageKeyCooldownUntil[k] = Date.now() + waitSec * 1000;
+            console.warn(`[Gemini/ảnh] Key #${pool.indexOf(k) + 1} hết quota (429), chuyển sang key dự phòng tiếp theo.`);
+            continue;
+        }
+        if (response.status === 400 || response.status === 401) {
+            let body = '';
+            try { body = await response.clone().text(); } catch (_) { /* body unreadable */ }
+            if (/api[ _-]?key/i.test(body)) {
+                imageKeyCooldownUntil[k] = Number.POSITIVE_INFINITY;
+                console.warn(`[Gemini/ảnh] Key #${pool.indexOf(k) + 1} bị từ chối (HTTP ${response.status}), chuyển sang key dự phòng tiếp theo.`);
+                continue;
+            }
+        }
+        return response;
+    }
+    return response;
+};
+
 const generateSystemIdlePose = async (baseImageUrl, effectiveApiKey) => {
     try {
         const response = await fetch(`https://wsrv.nl/?url=${encodeURIComponent(baseImageUrl)}&output=png`);
@@ -14237,9 +14296,9 @@ const generateSystemIdlePose = async (baseImageUrl, effectiveApiKey) => {
             img.src = base64Data;
         });
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-image-preview:generateContent?key=${effectiveApiKey}`;
-        
-        const prompt = `Redraw this anime character EXACTLY facing forward. 
+        const urlForKey = (k) => `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-image-preview:generateContent?key=${k}`;
+
+        const prompt = `Redraw this anime character EXACTLY facing forward.
         POSE INSTRUCTION: She is facing forward, framed from the waist up (waist-up portrait showing her entire upper body). She is leaning forward slightly, resting her chin on her hands.
 
         CRITICAL 3D POP-OUT EFFECT:
@@ -14263,7 +14322,7 @@ const generateSystemIdlePose = async (baseImageUrl, effectiveApiKey) => {
         };
 
         const executeFetch = async () => {
-            const geminiResponse = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const geminiResponse = await fetchGeminiWithKeyFallback(urlForKey, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }, effectiveApiKey);
             const res = await geminiResponse.json();
             const finalB64 = res.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
 
@@ -14397,7 +14456,7 @@ class ApiQueueManager {
 const globalApiQueue = new ApiQueueManager();
 
 const generateSystemAssistantPose = async (poseDesc, baseImageBase64, effectiveApiKey) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${effectiveApiKey}`;
+    const urlForKey = (k) => `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${k}`;
     const prompt = `Redraw this character with the expression, emotion, and dynamic pose: ${poseDesc}. 
     Maintain the exact same character features (such as hair color, eye color, clothing style, and facial features) as the reference image, but allow changing the head tilt, body posture, and hand gestures to vividly match the described emotion.
     CRITICAL COLOR RULES (CHROMA KEY):
@@ -14415,11 +14474,11 @@ const generateSystemAssistantPose = async (poseDesc, baseImageBase64, effectiveA
     };
 
     const executePoseFetch = async () => {
-        const response = await fetch(url, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify(payload) 
-        });
+        const response = await fetchGeminiWithKeyFallback(urlForKey, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }, effectiveApiKey);
 
         if (!response.ok) {
             const errText = await response.text();
@@ -14430,7 +14489,7 @@ const generateSystemAssistantPose = async (poseDesc, baseImageBase64, effectiveA
 
         const res = await response.json();
         const b64 = res.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-        
+
         if (b64) {
             const processed = await processSystemAssistantSprite(`data:image/png;base64,${b64}`);
             return processed;
@@ -14585,19 +14644,19 @@ const buildAvatarPrompt = (character, gameSettings) => {
 const generateSingleImage = async (promptText, effectiveApiKey) => {
     console.log("Đang gọi API Gemini 3.1 Flash cho NHÂN VẬT với prompt:", promptText); 
     
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${effectiveApiKey}`;
+    const urlForKey = (k) => `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${k}`;
     const payload = {
         contents: [{ role: "user", parts: [{ text: `Generate an image: ${promptText}` }] }],
         generationConfig: { responseModalities: ["IMAGE"] }
     };
-    
+
     // BỌC VÀO HÀNG CHỜ ĐỂ TRÁNH LỖI 429
     const executeImageFetch = async () => {
-        const response = await fetch(apiUrl, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify(payload) 
-        });
+        const response = await fetchGeminiWithKeyFallback(urlForKey, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }, effectiveApiKey);
         
         if (!response.ok) {
             const errText = await response.text();
@@ -16964,6 +17023,16 @@ const GITHUB_SAVE_REPO = import.meta.env.VITE_GITHUB_REPO || 'Lavie2404/textbase
  * existing Vietnamese auth error below.
  */
 const PLATFORM_DEFAULT_GEMINI_KEY = (import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) || '';
+/**
+ * Spare Gemini keys (project decision 2026-08-28: main key + two spares). Read
+ * from `VITE_GEMINI_API_KEY_FALLBACKS` in the gitignored `.env.local` (or the CI
+ * secret of the same name), comma-separated - NEVER a literal in source
+ * (technical-preferences.md "Forbidden Patterns"). Every Gemini call tries the
+ * active key first and rolls over to these, in order, when a key answers 429
+ * (quota) or is rejected as invalid; text calls do it inside `requestAi`, image
+ * calls through `fetchGeminiWithKeyFallback` below.
+ */
+const PLATFORM_FALLBACK_GEMINI_KEYS = parseKeyList(import.meta.env && import.meta.env.VITE_GEMINI_API_KEY_FALLBACKS);
 const GITHUB_SAVE_TOKEN = import.meta.env.VITE_GITHUB_TOKEN || '';
 const GITHUB_SAVES_DIR = 'saves';
 const GITHUB_SAVE_SLOT_COUNT = 5;
@@ -18895,6 +18964,7 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
         apiKey,
         apiKeyFromUrl,
         defaultKey: PLATFORM_DEFAULT_GEMINI_KEY,
+        fallbackKeys: PLATFORM_FALLBACK_GEMINI_KEYS,
     });
     const config = {
         ...DEFAULT_AI_CONFIG,
@@ -18945,6 +19015,9 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
                 credentials,
                 onEvent: (event) => {
                     if (event.type === 'retrying_network' && onRetry) onRetry(1, maxRetries);
+                    if (event.type === 'key_switch') {
+                        console.warn(`[Gemini] Key hiện tại hết quota hoặc bị từ chối, chuyển sang key #${(event.key_index ?? 0) + 1} trong nhóm dự phòng.`);
+                    }
                 },
             },
         );
@@ -22905,10 +22978,16 @@ useEffect(() => {
           setApiKeyStatus({ status: 'Đã kết nối (.env)', message: 'Đang dùng Gemini API Key từ file .env.local (free tier).', color: 'text-green-500' });
         } else {
           setApiMode('defaultGemini');
-          setApiKeyStatus({
-            status: 'Đang dùng Gemini AI Mặc Định',
-            color: 'text-sky-400'
-          });
+          setApiKeyStatus(PLATFORM_FALLBACK_GEMINI_KEYS.length > 0
+            ? {
+                status: 'Đang dùng key dự phòng',
+                message: `Không có key chính trong .env.local; đang dùng ${PLATFORM_FALLBACK_GEMINI_KEYS.length} key dự phòng (VITE_GEMINI_API_KEY_FALLBACKS).`,
+                color: 'text-sky-400'
+              }
+            : {
+                status: 'Đang dùng Gemini AI Mặc Định',
+                color: 'text-sky-400'
+              });
         }
         
       } else {
@@ -25843,7 +25922,7 @@ const processSprite = (base64Str, normalizedBaseMass = null, isSkill = false) =>
 
 
 const generateSpecificPose = async (poseDesc, baseImageBase64, baseMass, effectiveApiKey, isSkill = false) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${effectiveApiKey}`;
+    const urlForKey = (k) => `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${k}`;
     const prompt = `Generate an image: Redraw the character EXACTLY FACING RIGHT in pose: ${poseDesc}. 2D hand-drawn turn-based RPG game asset. Crisp flat art style. EXTREMELY IMPORTANT: ONLY ONE single character centered in the frame. DO NOT draw multiple characters. DO NOT draw duplicate characters side-by-side. NO sprite sheets, NO comparisons. PURE SOLID #FFFFFF WHITE BACKGROUND ONLY. DO NOT USE BLACK OR DARK BACKGROUNDS. CLEAR DAYLIGHT LIGHTING. NO SCENERY. NO 3D RENDER. CRITICAL INSTRUCTION: Maintain exact same body proportions and character design as the reference image.`;
     
     const payload = { 
@@ -25855,11 +25934,11 @@ const generateSpecificPose = async (poseDesc, baseImageBase64, baseMass, effecti
     };
     
     const executePoseFetch = async () => {
-        const response = await fetch(url, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify(payload) 
-        });
+        const response = await fetchGeminiWithKeyFallback(urlForKey, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }, effectiveApiKey);
 
         if (!response.ok) {
             const errText = await response.text();

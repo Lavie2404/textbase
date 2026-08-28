@@ -27,6 +27,8 @@ Commit 1 lần mỗi giai đoạn khi test + build xanh, không push.
 
 - [x] Pillar 1 siết thêm (21-08): chỉ thị "Khen phải có căn cứ và đúng tầm" — NPC hảo cảm cao chỉ được khen việc cụ thể, mức khen tỷ lệ chênh lệch thực lực; bộ chỉ thị API-2 = 6 mục (`d6069bc`).
 
+- [x] Nhóm API key dự phòng (28-08, user chốt: 1 key chính + 2 key dự phòng, "cái nào hết quota thì đổi sang cái còn quota"). Key dự phòng đọc từ `VITE_GEMINI_API_KEY_FALLBACKS` (phẩy-cách) trong `.env.local` (gitignore) — KHÔNG hardcode. Text: `requestAi` giữ pool `[key chính, ...dự phòng]`, 429 → mở cầu dao key (`retry-after` hoặc knob `key_quota_cooldown_seconds`=60s, session-only trong `AiSessionState.key_cooldown_until`) rồi đưa NGUYÊN request sang key kế (ladder model làm mới, cooldown 503 vẫn giữ); 400/401 "API key not valid" cũng đổi key (key hỏng bị treo cả phiên); 400 sai payload thì KHÔNG đổi. Lượt gọi sau bắt đầu ở key còn quota; cả pool đang cooling → chỉ dò 1 request. Ảnh (4 site fetch thẳng) đi qua `fetchGeminiWithKeyFallback` cùng luật. Sự kiện `key_switch` + `log.key_index` (không bao giờ log giá trị key). 24 test mới `tests/unit/ai-llm/ai_request_key_fallback_test.ts`, 1369 test xanh, build xanh. **Còn treo**: secret `VITE_GEMINI_API_KEY_FALLBACKS` trên GitHub (Settings → Secrets → Actions) chưa tạo — workflow đã đọc, user phải tự thêm.
+
 **Trạng thái**: HOÀN TẤT lộ trình rút gọn + Pillar 1 — 12 commit, 1231 unit test xanh, build xanh.
 **Còn treo (không chặn, ghi từ báo cáo agent)**: Story Log S4 phân trang UI; live-window
 eviction; delete-batch UI của Customization (`validateDeleteBatch` chưa dùng); khối ⑤

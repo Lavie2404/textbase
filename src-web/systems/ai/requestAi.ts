@@ -28,6 +28,7 @@ import type { Suggestion } from '../types';
 import {
   DEFAULT_AI_CONFIG,
   resolveApiKey,
+  resolveApiKeys,
   resolveCallBudget,
   type AiCredentials,
   type AiLlmTuningConfig,
@@ -112,13 +113,20 @@ export interface AiLogEntry {
   elapsed_ms: number;
   detail?: string;
   background: boolean;
+  /**
+   * Position of the key that produced this outcome in the credential pool
+   * (0 = main key, 1.. = spares). The key VALUE is never logged.
+   */
+  key_index?: number;
 }
 
 export interface AiEvent {
-  type: 'retrying_network' | 'model_switch' | 'request_start';
+  type: 'retrying_network' | 'model_switch' | 'request_start' | 'key_switch';
   model: string;
   elapsed_ms: number;
   error_class?: ErrorClass;
+  /** `key_switch` only: pool index of the key the call is switching TO. */
+  key_index?: number;
 }
 
 /**
@@ -128,6 +136,12 @@ export interface AiEvent {
 export interface AiSessionState {
   in_flight: boolean;
   cooldown_until: Record<string, number>;
+  /**
+   * Per-KEY quota breaker (project decision 2026-08-28, API-key fallback pool):
+   * wall-clock seconds until a key that answered 429 is worth trying again.
+   * Keyed by the key string itself; in-memory only, never persisted or logged.
+   */
+  key_cooldown_until: Record<string, number>;
   /** Sticky preferred model - ported from `App.tsx:17962`. */
   preferred_model: string | null;
   log: AiLogEntry[];
@@ -135,7 +149,14 @@ export interface AiSessionState {
 }
 
 export function createAiSessionState(): AiSessionState {
-  return { in_flight: false, cooldown_until: {}, preferred_model: null, log: [], state: 'idle' };
+  return {
+    in_flight: false,
+    cooldown_until: {},
+    key_cooldown_until: {},
+    preferred_model: null,
+    log: [],
+    state: 'idle',
+  };
 }
 
 export interface AiDeps {
@@ -272,6 +293,58 @@ export function applyStickyPreference(
 }
 
 // ---------------------------------------------------------------------------
+// Key pool (project decision 2026-08-28: main key + spares, rotate on quota)
+// ---------------------------------------------------------------------------
+
+export interface PoolKey {
+  key: string;
+  /** Position in the credential pool: 0 = main key, 1.. = spares. */
+  index: number;
+}
+
+/**
+ * The keys one logical call may use, in the order it will try them: every key
+ * whose quota breaker has expired, in pool order. When EVERY key is cooling
+ * down, only the one that expires soonest is tried (a single probe, not a
+ * three-request burst per turn while the whole pool is exhausted).
+ *
+ * Deliberately NOT the model ladder's "degenerate to the full list" rule: a
+ * 429 is a verdict on the key, and re-asking three exhausted keys every turn
+ * only spends the RPM that would let the first one recover.
+ */
+export function healthyKeys(
+  keys: readonly string[],
+  cooldownUntil: Record<string, number>,
+  nowSec: number,
+): PoolKey[] {
+  const all = keys.map((key, index) => ({ key, index }));
+  const healthy = all.filter((k) => (cooldownUntil[k.key] ?? 0) <= nowSec);
+  if (healthy.length > 0) return healthy;
+  if (all.length === 0) return [];
+  let soonest = all[0];
+  for (const k of all) {
+    if ((cooldownUntil[k.key] ?? 0) < (cooldownUntil[soonest.key] ?? 0)) soonest = k;
+  }
+  return [soonest];
+}
+
+/**
+ * True when a 400/401 body says the KEY is the problem (as opposed to a
+ * malformed request, which no other key would fix). Matches Gemini's own
+ * wording: "API key not valid", `API_KEY_INVALID`, "API key expired".
+ */
+export function looksLikeKeyRejection(detail: string | undefined): boolean {
+  return /api[ _-]?key/i.test(detail ?? '');
+}
+
+/** Breaker length for a 429: the API's `retry-after` when sane, else the knob. */
+export function quotaCooldownSeconds(retryAfter: number | undefined, cfg: AiLlmTuningConfig): number {
+  return typeof retryAfter === 'number' && Number.isFinite(retryAfter) && retryAfter > 0
+    ? retryAfter
+    : cfg.key_quota_cooldown_seconds;
+}
+
+// ---------------------------------------------------------------------------
 // F4 - logical call accounting (invariant)
 // ---------------------------------------------------------------------------
 
@@ -373,6 +446,8 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
   const budget = resolveCallBudget(cfg, req.call_type, req.overrides);
   const t_start = deps.clock();
   let attempts = 0;
+  /** Pool index of the key in use when the call finished (for the log only). */
+  let keyIndex: number | undefined;
 
   /**
    * Diagnostics must never change control flow. A throwing `onEvent` (setState
@@ -401,6 +476,7 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
       elapsed_ms: result.elapsed_ms,
       detail: result.ok ? undefined : asFail.detail,
       background,
+      ...(keyIndex === undefined ? {} : { key_index: keyIndex }),
     });
     if (!background) {
       session.in_flight = false;
@@ -448,13 +524,13 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
   /** The whole ladder walk. Every exit path goes through `fail` / `finish`. */
   const run = async (): Promise<AiResult> => {
     // Zero-request failure modes, in the order the pseudocode lists them.
-    const key = resolveApiKey(deps.credentials);
-    if (key === null) {
+    const pool = resolveApiKeys(deps.credentials);
+    if (pool.length === 0) {
       // No usable key: fail BEFORE the ladder - one logical attempt, zero HTTP
       // requests, zero cooldown writes. Walking five models with no key only
       // multiplies one 400 into five and blinds the whole ladder for 90s each.
       if (!deps.credentials) return fail('config_error', 'no credentials provided');
-      return deps.credentials.apiMode === 'userKey'
+      return deps.credentials.apiMode === 'userKey' && resolveApiKey(deps.credentials) === null
         ? fail('not_configured', 'apiMode=userKey with an empty key')
         : fail('config_error', 'no project key configured');
     }
@@ -462,9 +538,16 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
       return fail('config_error', 'model_ladder is empty');
     }
 
-    const tried = new Set<string>();
     const elapsedSec = () => (deps.clock() - t_start) / 1000;
     const nowSec = () => deps.clock() / 1000;
+
+    // Key pool: the healthy keys in pool order, fixed for this logical call.
+    // `keyPos` only ever advances (a key that just answered 429 is not retried
+    // within the same call), so the walk is bounded by |pool| x |ladder|.
+    const keyOrder = healthyKeys(pool, session.key_cooldown_until, nowSec());
+    let keyPos = 0;
+    let key = keyOrder[0].key;
+    keyIndex = keyOrder[0].index;
 
     const ladderNow = () =>
       applyStickyPreference(
@@ -472,12 +555,35 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
         session.preferred_model,
       );
 
+    /**
+     * `tried` is MONOTONIC per key (AC-31). It is replaced - not reset - when
+     * the call moves to the next key: the models were not "tried" with that
+     * key, and a 429 is a verdict on the key, not on the model. Model
+     * cooldowns (503) live in the session and still apply through `ladderNow`.
+     */
+    let tried = new Set<string>();
     let model = nextModel(ladderNow(), tried);
     let parseRetryUsed = false;
     /** Last non-200 body / transport message, threaded into the final detail. */
     let lastDetail: string | undefined;
     /** True when the most recent attempt returned 200 with an EMPTY candidate. */
     let lastWasEmptyText = false;
+
+    /** Advances to the next key of the pool; false when there is none left. */
+    const switchKey = (): boolean => {
+      if (keyPos + 1 >= keyOrder.length) return false;
+      keyPos += 1;
+      key = keyOrder[keyPos].key;
+      keyIndex = keyOrder[keyPos].index;
+      tried = new Set<string>();
+      emit({
+        type: 'key_switch',
+        model: model ?? '',
+        elapsed_ms: deps.clock() - t_start,
+        key_index: keyIndex,
+      });
+      return true;
+    };
 
     while (model !== null) {
       tried.add(model);
@@ -558,7 +664,13 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
             lastWasEmptyText = true;
             lastDetail = 'empty candidate text';
           } else if (status === 429) {
-            // Quota: no retry, forward any suggested wait (R5).
+            // Quota is a verdict on the KEY: open its breaker, then hand the
+            // same request to the next key of the pool (fresh `tried`, so the
+            // model that just answered 429 is retried with the new key). Only
+            // when the pool is exhausted is it the caller's quota_429 - with
+            // the last suggested wait forwarded (R5). No same-key retry, ever.
+            session.key_cooldown_until[key] = nowSec() + quotaCooldownSeconds(outcome.retryAfter, cfg);
+            if (switchKey()) break;
             return fail('quota_429', joinDetail('HTTP 429', outcome.detail), outcome.retryAfter);
           } else if (status === 403 || status === 404) {
             // Ported from App.tsx: this model is unusable for THIS key - skip it
@@ -573,6 +685,14 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
             // ladder multiplies it by the ladder length, and a cooldown write
             // would blind a HEALTHY model for 90s. Return immediately, carrying
             // the API's own message so App's `translateGeminiApiError` sees it.
+            //
+            // ONE exception: a 400/401 whose body blames the KEY ("API key not
+            // valid") is a verdict on that key alone, so a spare - if any - gets
+            // the same request. The rejected key is parked for the session.
+            if ((status === 400 || status === 401) && looksLikeKeyRejection(outcome.detail)) {
+              session.key_cooldown_until[key] = Number.POSITIVE_INFINITY;
+              if (switchKey()) break;
+            }
             return fail('config_error', joinDetail('HTTP ' + status, outcome.detail));
           }
         }

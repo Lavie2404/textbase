@@ -106,6 +106,12 @@ export interface AiLlmTuningConfig {
   max_same_model_attempts_transient: number;
   /** How long an overloaded model is skipped - the 90s breaker of App.tsx:17949. */
   model_cooldown_seconds: number;
+  /**
+   * How long a key that answered 429 is skipped in favour of the other keys of
+   * the pool when the response carries no `retry-after` (project decision
+   * 2026-08-28, API-key fallback pool). Session-only, never persisted.
+   */
+  key_quota_cooldown_seconds: number;
   /** Endpoint base; injected so tests never touch a real host. */
   endpoint_base: string;
   safety_settings: readonly SafetySetting[];
@@ -128,6 +134,7 @@ export const DEFAULT_AI_CONFIG: AiLlmTuningConfig = {
   max_same_model_attempts_overloaded: AI_KNOBS.max_same_model_attempts_overloaded,
   max_same_model_attempts_transient: AI_KNOBS.max_same_model_attempts_transient,
   model_cooldown_seconds: AI_KNOBS.model_cooldown_seconds,
+  key_quota_cooldown_seconds: AI_KNOBS.key_quota_cooldown_seconds,
   endpoint_base: GEMINI_ENDPOINT_BASE,
   safety_settings: SAFETY_SETTINGS_BLOCK_NONE,
   budget_by_call_type: DEFAULT_CALL_BUDGETS,
@@ -209,6 +216,9 @@ export function validateAiConfig(cfg: AiLlmTuningConfig): ConfigProblem[] {
   if (cfg.model_cooldown_seconds <= 0) {
     problems.push({ knob: 'model_cooldown_seconds', message: 'must be > 0' });
   }
+  if (!(cfg.key_quota_cooldown_seconds > 0)) {
+    problems.push({ knob: 'key_quota_cooldown_seconds', message: 'must be > 0' });
+  }
   for (const [callType, budget] of Object.entries(cfg.budget_by_call_type ?? {})) {
     if (budget.request_timeout_default >= budget.ai_call_timeout_seconds) {
       problems.push({
@@ -245,9 +255,18 @@ export interface AiCredentials {
   userKey?: string;
   /** Project default key, quota-limited. */
   defaultKey?: string;
+  /**
+   * Ordered spare keys (project decision 2026-08-28: one main key + two
+   * spares). `requestAi` walks them in order once the active key answers 429
+   * (quota) or is rejected as invalid. Sourced from the build's
+   * `VITE_GEMINI_API_KEY_FALLBACKS` (gitignored `.env.local` / CI secret),
+   * never from a literal in source (technical-preferences.md "Forbidden
+   * Patterns").
+   */
+  fallbackKeys?: readonly string[];
 }
 
-/** Resolves the key for a mode, or `null` when the mode is unusable. */
+/** Resolves the PRIMARY key for a mode, or `null` when the mode is unusable. */
 export function resolveApiKey(creds: AiCredentials | undefined): string | null {
   if (!creds) return null;
   if (creds.apiMode === 'userKey') {
@@ -256,4 +275,40 @@ export function resolveApiKey(creds: AiCredentials | undefined): string | null {
   }
   const k = (creds.defaultKey ?? '').trim();
   return k.length > 0 ? k : null;
+}
+
+/**
+ * Parses the `VITE_GEMINI_API_KEY_FALLBACKS` value: keys separated by commas,
+ * semicolons, or whitespace (a `.env` line or a CI secret pasted one-per-line).
+ * Trimmed, empties dropped, duplicates removed, order preserved.
+ */
+export function parseKeyList(raw: unknown): string[] {
+  if (typeof raw !== 'string') return [];
+  const out: string[] = [];
+  for (const piece of raw.split(/[,;\s]+/)) {
+    const k = piece.trim();
+    if (k.length > 0 && !out.includes(k)) out.push(k);
+  }
+  return out;
+}
+
+/**
+ * The ordered key pool for one logical call: the mode's primary key first (when
+ * it resolves), then every spare, deduplicated. Index 0 is "the main key" in
+ * user-facing terms; an empty array means the credentials are unusable.
+ *
+ * A mode whose primary key is empty but whose pool has spares is deliberately
+ * USABLE: the spares exist precisely so a quota-limited or missing main key
+ * does not stop the game.
+ */
+export function resolveApiKeys(creds: AiCredentials | undefined): string[] {
+  if (!creds) return [];
+  const out: string[] = [];
+  const push = (k: string | undefined): void => {
+    const t = (k ?? '').trim();
+    if (t.length > 0 && !out.includes(t)) out.push(t);
+  };
+  push(resolveApiKey(creds) ?? undefined);
+  for (const k of creds.fallbackKeys ?? []) push(k);
+  return out;
 }

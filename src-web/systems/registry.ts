@@ -107,6 +107,12 @@ export const AI_KNOBS = {
   max_same_model_attempts_transient: 2,
   /** gdd-01 C.5: matches the existing 90s breaker in App.tsx (:17949). */
   model_cooldown_seconds: 90,
+  /**
+   * Project decision 2026-08-28 (API-key fallback pool): how long a key that
+   * answered 429 (quota) is skipped in favour of the other keys when the
+   * response carries no `retry-after` header. Session-only, never persisted.
+   */
+  key_quota_cooldown_seconds: 60,
   /** gdd-01 C.5 / gdd-04 A5: consumed by the World Memory runtime clamp. */
   ai_context_hard_token_budget: 8000,
   /** gdd-01 B.5: leak detector stays on during MVP hypothesis validation. */
