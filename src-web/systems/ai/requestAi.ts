@@ -686,6 +686,17 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
             // when the pool is exhausted is it the caller's quota_429 - with
             // the last suggested wait forwarded (R5). No same-key retry, ever.
             session.key_cooldown_until[key] = nowSec() + quotaCooldownSeconds(outcome.retryAfter, cfg);
+            // Project decision 2026-08-28: field evidence (Google's own 429 body names
+            // the MODEL, e.g. "limit: 20, model: gemini-3.5-flash") showed the sticky
+            // preference (App.tsx:17962, "last model that worked leads next time") kept
+            // re-nominating a model THAT JUST PROVED quota-exhausted as attempt #1 of
+            // every later call - across all three keys in the pool. This does not open
+            // a model cooldown (deliberately unlike 503 - `test_429_opens_the_key_breaker_
+            // for_the_knob_length_when_no_retry_after` still asserts "the model was not
+            // at fault"): it only stops the stickiness from forcing the SAME narrow-quota
+            // model back to the front of later calls, so the ladder's normal order gets a
+            // chance to reach a model with separate quota instead of parking on this one.
+            if (session.preferred_model === model) session.preferred_model = null;
             if (switchKey('quota_429', outcome.detail)) break;
             return fail('quota_429', joinDetail('HTTP 429', outcome.detail), outcome.retryAfter);
           } else if (status === 403 || status === 404) {

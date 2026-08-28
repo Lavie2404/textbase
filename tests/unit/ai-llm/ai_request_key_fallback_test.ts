@@ -213,6 +213,55 @@ describe('K3 - the pool is walked once, in order, and never re-asks a key', () =
     const r = await requestAi(narration, h.deps);
     expect((r as { detail: string }).detail).toContain('quota');
   });
+
+  // Regression (2026-08-28 player report): a model that just proved quota-exhausted on
+  // EVERY key stayed the sticky `preferred_model`, so every later call kept re-nominating
+  // the same narrow per-model bucket first instead of letting the ladder reach a model
+  // with separate quota (this is why 3 keys ran out faster than the old single-key build
+  // ever did - see the console evidence in the bug report: repeated 429s all naming the
+  // same "model: gemini-3.5-flash"). No model cooldown is opened here (429 stays "not the
+  // model's fault" per `test_429_opens_the_key_breaker_for_the_knob_length_when_no_retry_after`
+  // above) - only the stickiness is cleared.
+  it('test_pool_exhaustion_on_429_clears_a_sticky_preference_pointing_at_the_exhausted_model', async () => {
+    const h = makeHarness(
+      byKey({
+        [MAIN]: { status: 429, errorBody: QUOTA_BODY },
+        [SPARE_1]: { status: 429, errorBody: QUOTA_BODY },
+        [SPARE_2]: { status: 429, errorBody: QUOTA_BODY },
+      }),
+      LADDER,
+      { credentials: POOL },
+    );
+    h.deps.session.preferred_model = 'A';
+
+    const r = await requestAi(narration, h.deps);
+
+    expect(r).toMatchObject({ ok: false, label: 'quota_429' });
+    expect(h.deps.session.preferred_model).toBeNull();
+  });
+
+  it('test_pool_exhaustion_on_429_leaves_an_UNRELATED_sticky_preference_untouched', async () => {
+    const h = makeHarness(
+      byKey({
+        [MAIN]: { status: 429, errorBody: QUOTA_BODY },
+        [SPARE_1]: { status: 429, errorBody: QUOTA_BODY },
+        [SPARE_2]: { status: 429, errorBody: QUOTA_BODY },
+      }),
+      LADDER,
+      { credentials: POOL },
+    );
+    // B is the sticky preference but is COOLING (a 503 earlier this session), so this
+    // call's healthy ladder excludes it and leads with A instead - A is the one that
+    // 429-exhausts. B was never shown to be at fault and must survive untouched.
+    h.deps.session.preferred_model = 'B';
+    h.deps.session.cooldown_until['B'] = h.clock.now() / 1000 + 999;
+
+    const r = await requestAi(narration, h.deps);
+
+    expect(r).toMatchObject({ ok: false, label: 'quota_429' });
+    expect(h.calls.map((c) => c.model)).toEqual(['A', 'A', 'A']);
+    expect(h.deps.session.preferred_model).toBe('B');
+  });
 });
 
 // ---------------------------------------------------------------------------
