@@ -5600,11 +5600,39 @@ const UpdateLogModal = ({ show, onClose, changelog }) => {
 };
 
 
+// Preferred text model (device-level, localStorage). When set, it LEADS the fallback
+// ladder in fetchWithRetries so the player can route around an overloaded preview
+// model (503 storms) without a code change. Empty string = automatic ladder order.
+const PREFERRED_TEXT_MODEL_STORAGE_KEY = 'vdl.preferredTextModel';
+const MODEL_NAME_PATTERN = /^[a-z0-9][a-z0-9.\-]*$/i;
+const readPreferredTextModel = () => {
+    try {
+        if (typeof window === 'undefined' || !window.localStorage) return '';
+        const stored = window.localStorage.getItem(PREFERRED_TEXT_MODEL_STORAGE_KEY) || '';
+        return MODEL_NAME_PATTERN.test(stored) ? stored : '';
+    } catch {
+        return '';
+    }
+};
+const writePreferredTextModel = (model) => {
+    try {
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        if (model) window.localStorage.setItem(PREFERRED_TEXT_MODEL_STORAGE_KEY, model);
+        else window.localStorage.removeItem(PREFERRED_TEXT_MODEL_STORAGE_KEY);
+    } catch {
+        /* localStorage may be unavailable (private mode) - the in-memory value still applies */
+    }
+};
+
 const ApiSetupModal = ({
     inputApiKey, setInputApiKey, apiKeyStatus, saveApiKey, testApiKey,
     isLoading, setShowApiModal, setApiKeyStatus, apiMode, setApiMode,
-    setModalMessage
+    setModalMessage, preferredTextModel = '', setPreferredTextModel = () => {}
 }) => {
+    const ladderModels = DEFAULT_AI_CONFIG.model_ladder;
+    const preferredIsCustom = !!preferredTextModel && !ladderModels.includes(preferredTextModel);
+    const [customModelInput, setCustomModelInput] = useState(preferredIsCustom ? preferredTextModel : '');
+    const customModelValid = customModelInput.trim() === '' || MODEL_NAME_PATTERN.test(customModelInput.trim());
     const handleUseDefaultGemini = () => {
         setApiMode('defaultGemini');
         setInputApiKey('');
@@ -5670,6 +5698,53 @@ const ApiSetupModal = ({
                     </>
                 )}
             </div>
+        </fieldset>
+
+        <fieldset className="border border-gray-600 p-4 rounded-lg mb-2">
+            <legend className="text-lg font-semibold text-amber-300 px-2">Model AI Ưu Tiên</legend>
+            <p className="text-xs text-gray-400 mb-3">
+                Model được chọn sẽ được thử <b>đầu tiên</b>. Nếu nó báo quá tải (lỗi 503), hệ thống vẫn tự chuyển sang các model còn lại.
+                Khi <i>gemini-3-flash-preview</i> sập, hãy chọn <i>gemini-2.5-flash</i> để chơi tiếp ngay.
+            </p>
+            <select
+                value={preferredIsCustom ? '__custom__' : preferredTextModel}
+                onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === '__custom__') return; // giữ ô nhập tay bên dưới làm nguồn
+                    setCustomModelInput('');
+                    setPreferredTextModel(v);
+                }}
+                className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-amber-400 focus:border-amber-400 mb-2"
+            >
+                <option value="">Tự động (thang mặc định: {ladderModels[0]} → …)</option>
+                {ladderModels.map(m => (
+                    <option key={m} value={m}>{m}</option>
+                ))}
+                {preferredIsCustom && <option value="__custom__">{preferredTextModel} (tùy chỉnh)</option>}
+            </select>
+            <div className="flex space-x-2">
+                <input
+                    type="text"
+                    value={customModelInput}
+                    onChange={(e) => setCustomModelInput(e.target.value)}
+                    placeholder="Hoặc gõ tên model khác, VD: gemini-2.5-pro"
+                    className={`flex-1 p-2.5 bg-gray-700 border rounded-lg text-white text-sm focus:ring-amber-400 focus:border-amber-400 ${customModelValid ? 'border-gray-600' : 'border-red-500'}`}
+                />
+                <button
+                    onClick={() => {
+                        const v = customModelInput.trim();
+                        if (!v || !MODEL_NAME_PATTERN.test(v)) return;
+                        setPreferredTextModel(v);
+                    }}
+                    disabled={!customModelInput.trim() || !customModelValid}
+                    className="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-3 rounded-lg disabled:bg-gray-500 text-sm"
+                >
+                    Dùng model này
+                </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+                Đang ưu tiên: <span className="text-amber-300 font-mono">{preferredTextModel || '(tự động)'}</span>. Nút "Kiểm Tra" phía trên sẽ thử đúng model này.
+            </p>
         </fieldset>
 
         <button
@@ -18774,9 +18849,15 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
     // follows it (App.tsx behaviour before P4b). A model outside the list gets a
     // one-entry ladder, exactly like the old `modelsToTry = [null]` branch.
     const inFallbackList = GEMINI_TEXT_MODEL_FALLBACKS.includes(requestedModel);
-    const modelLadder = inFallbackList
+    const baseLadder = inFallbackList
         ? [requestedModel, ...GEMINI_TEXT_MODEL_FALLBACKS.filter(m => m !== requestedModel)]
         : [requestedModel];
+    // The player's preferred model (Thiết Lập Nguồn AI) always leads the ladder; the
+    // rest keeps its order so a 503 on the preferred model still falls through.
+    const preferred = (preferredTextModel || '').trim();
+    const modelLadder = preferred
+        ? [preferred, ...baseLadder.filter(m => m !== preferred)]
+        : baseLadder;
 
     const background = turnGlue.chooseBackgroundFlag(callSite);
     // Code review C-3: `requestAi` REQUIRES credentials. Deriving them by
@@ -19797,6 +19878,17 @@ const [impromptuInput, setImpromptuInput] = useState('');
   const [characterInfoInitialTab, setCharacterInfoInitialTab] = useState('character');
   const [apiKey, setApiKey] = useState('');
   const [apiMode, setApiMode] = useState('defaultGemini');
+  // Player-chosen model that leads the fallback ladder (see PREFERRED_TEXT_MODEL_STORAGE_KEY).
+  const [preferredTextModel, setPreferredTextModelState] = useState(() => readPreferredTextModel());
+  const setPreferredTextModel = useCallback((model) => {
+      const next = (model || '').trim();
+      setPreferredTextModelState(next);
+      writePreferredTextModel(next);
+      // Take effect on the very next call: drop the sticky "last model that worked"
+      // and lift any 503 cooldown on the model the player explicitly asked for.
+      aiSessionState.preferred_model = next || null;
+      if (next) delete aiSessionState.cooldown_until[next];
+  }, []);
   const [apiKeyStatus, setApiKeyStatus] = useState({
     status: 'Đang dùng Gemini AI Mặc Định',
     message: 'Không cần API Key. Nội dung sẽ được tạo bởi AI của nền tảng.',
@@ -23496,7 +23588,10 @@ const addInitialTrait = () => {
     const payload = {
       contents: [{ role: "user", parts: [{ text: "Xin chào! Đây là một bài kiểm tra kết nối." }] }],
     };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${inputApiKey}`;
+    // Probe the model the player actually chose (or the ladder head) so "Kiểm Tra"
+    // reflects the model the game will really use first.
+    const probeModel = (preferredTextModel || '').trim() || GEMINI_TEXT_MODEL_FALLBACKS[0];
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${probeModel}:generateContent?key=${inputApiKey}`;
 
     try {
       // DOCUMENTED EXCEPTION to gdd-01 C.2 R1: the API-key probe needs the raw HTTP
@@ -36659,7 +36754,9 @@ const formatStoryText = useCallback((text) => {
               apiMode={apiMode}
               setApiMode={setApiMode}
               setModalMessage={setModalMessage}
-              playerCharacter={playerCharacter} 
+              playerCharacter={playerCharacter}
+              preferredTextModel={preferredTextModel}
+              setPreferredTextModel={setPreferredTextModel}
             />
         )}
 
