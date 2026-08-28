@@ -1,8 +1,8 @@
 {
   "id": "4f9d4d67-3bc3-4512-8d9f-7c11ab4a0f5d",
-  "currentTurn": 17,
+  "currentTurn": 23,
   "saveVersion": "2.8",
-  "timestamp": "2026-08-28T09:57:10.952Z",
+  "timestamp": "2026-08-28T11:30:48.983Z",
   "gameSettings": {
     "storyTitle": "Tam Quốc Diệt Ma Truyền Kỳ",
     "theme": "Tên: Tam Quốc Diệt Ma Truyền Kỳ | Thể loại: Tiên Hiệp Lịch Sử | Thẻ: Tam Quốc, Đạo Pháp, Trừ Ma, Thường Sơn, Nam Hoa Lão Tiên",
@@ -123,10 +123,10 @@
     "time": {
       "year": 0,
       "month": 1,
-      "day": 8,
-      "hour": 9
+      "day": 9,
+      "hour": 6
     },
-    "weather": "Trời sáng sớm u ám, lạnh lẽo, sương mù xen lẫn hắc khí ma đạo dày đặc",
+    "weather": "Sương mù dày đặc vùng ngoại vi",
     "narrativeCombatState": {
       "isActive": false,
       "combatants": []
@@ -162,6 +162,34 @@
         "description": "Một địa điểm vừa được khám phá.",
         "category": "Khu Vực",
         "tier": 3
+      },
+      {
+        "id": "01e3354f-b784-40bd-a075-f8b47dfa6ddc",
+        "Name": "Hậu viện Hạ Hầu phủ",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      },
+      {
+        "id": "c43ee3c0-f464-4d3b-b3a7-1f2f74e2c594",
+        "Name": "Hành lang Tiền viện Hạ Hầu phủ",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      },
+      {
+        "id": "d50a76ad-de22-4fab-b755-570a593720e0",
+        "Name": "Quán trà hoang ngoại vi Trác Quận",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      },
+      {
+        "id": "91c6d5d1-82ab-4974-99e5-cc59fc4361dd",
+        "Name": "Đường quan lộ hướng vào thành Trác Quận",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
       }
     ],
     "items": [],
@@ -170,12 +198,54 @@
       {
         "id": "99964536-fbd3-4f2a-afb8-187cb812fe8c",
         "NPC": "Hạ Hầu Khinh Y",
-        "Standing": "Quý mến",
-        "Reason": "Thích thú với thái độ phóng khoáng, không gò bó."
+        "Standing": "Tin tưởng",
+        "Reason": "Ngươi dùng đạo pháp hỗ trợ che chở linh thú của nàng"
       }
     ],
-    "quests": [],
-    "trackedQuestId": null,
+    "quests": [
+      {
+        "id": "8c8183bd-fbdb-408d-adc4-120609a67fac",
+        "title": "Chăm sóc con của Bạch Hổ Sơn Linh",
+        "loreId": "quest_care_tiger_cub",
+        "category": "phó thác",
+        "completion_condition": "auto_complete",
+        "questGiver": "Bạch Hổ Sơn Linh",
+        "objectives": [
+          {
+            "id": "rescue_baby_tiger",
+            "text": "Giải cứu Tiểu Bạch Hổ đang cùng Hạ Hầu Khinh Y bị vây hãm tại hậu viện.",
+            "type": "action",
+            "targetName": "Tiểu Bạch Hổ",
+            "requiredCount": 1,
+            "currentCount": 2,
+            "completed": true
+          },
+          {
+            "id": "purify_corruption",
+            "text": "Sử dụng chân nguyên của Thái Bình Yếu Thuật để thanh tẩy tà khí ma hóa trên người Tiểu Bạch Hổ.",
+            "type": "action",
+            "targetName": "Thanh tẩy tà khí",
+            "requiredCount": 1,
+            "currentCount": 1,
+            "completed": true
+          },
+          {
+            "id": "reach_tiger_cave",
+            "text": "Di chuyển đến sơn động bí ẩn theo tọa độ thần thức để bảo vệ an toàn cho hổ con.",
+            "type": "goto",
+            "targetName": "Sơn động Bạch Hổ",
+            "requiredCount": 1,
+            "currentCount": 0,
+            "completed": false
+          }
+        ],
+        "rewardsDescription": "Tiểu Bạch Hổ được thanh tẩy thành công và ký kết Linh Thú Khế Ước đồng hành với Diệp Thần; nhận được một viên Hổ Đan chứa đựng tàn dư phong lực của Sơn Linh giúp đột phá tu vi.",
+        "failureDescription": "Tiểu Bạch Hổ bị tà khí ma hóa hoàn toàn thành Ma thú dữ tợn và phải bị tiêu diệt; Diệp Thần chịu phạt phản phệ đạo tâm cực nặng, giảm mạnh tốc độ tu luyện chân nguyên trong thời gian dài.",
+        "deadline_hours": 24,
+        "status": "active"
+      }
+    ],
+    "trackedQuestId": "8c8183bd-fbdb-408d-adc4-120609a67fac",
     "realmProgressionList": [
       "Giai Đoạn 1",
       "Giai Đoạn 2",
@@ -199,7 +269,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 1.6000000000000003,
+        "exp": 2.1000000000000005,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": 0,
@@ -209,7 +279,7 @@
           "def": 0,
           "spd": 0
         },
-        "current_location_id": "e97a78f8-6781-49ff-a0ce-61d1a78f3e81",
+        "current_location_id": "91c6d5d1-82ab-4974-99e5-cc59fc4361dd",
         "baseHp": 2000,
         "baseAtk": 200,
         "baseDef": 100,
@@ -277,12 +347,7 @@
           "adventure_3": null
         },
         "potionCooldown": 0,
-        "longTermStatuses": [
-          {
-            "status_id": "PHAN_PHE",
-            "id": "f1b6cd21-e7ad-4787-bff7-d4152f2bf7ba"
-          }
-        ],
+        "longTermStatuses": [],
         "combatStatuses": [],
         "inventory": [],
         "pendingSkillsToLearn": [],
@@ -450,7 +515,7 @@
           "Dị thường": null
         },
         "isCompanion": false,
-        "affinity": 30,
+        "affinity": 33,
         "Name": "Hạ Hầu Khinh Y",
         "description": "",
         "Stance": "Tò mò và có thiện cảm với người thừa kế của Nam Hoa Lão Tiên.",
@@ -462,6 +527,84 @@
         "Backstory": "Là ái nữ của Hạ Hầu Kiệt, nàng không cam lòng sống trong lầu son gác tía khi thiên hạ đại loạn. Chứng kiến yêu ma hoành hành, Hạ Hầu Khinh Y đã tầm sư học đạo, rèn luyện kiếm pháp với mong muốn dẹp loạn trừ ma. Nàng đang trên đường tìm kiếm linh vật trấn giữ long mạch thì tình cờ gặp gỡ Diệp Thần.",
         "Personality": "Chính trực, thông minh, có lòng trắc ẩn sâu sắc nhưng cũng rất quyết đoán và có phần bướng bỉnh khi theo đuổi lý tưởng của mình.",
         "isAppraised": true,
+        "skills": [],
+        "affinityDirection": "đang ấm lên"
+      },
+      {
+        "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 2,
+          "atk": 1,
+          "def": 1,
+          "spd": 1
+        },
+        "current_location_id": "01e3354f-b784-40bd-a075-f8b47dfa6ddc",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 600,
+        "maxhp": 600,
+        "atk": 30,
+        "def": 20,
+        "spd": 40,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Triệu Vân",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Giai Đoạn 1",
+        "incomingHealing": 1,
+        "maxExp": 100,
         "skills": []
       }
     ],
@@ -472,15 +615,15 @@
     "requestNpcDesign": null,
     "progression": {
       "recentMeaningfulActions": [],
-      "lastExpResolvedTurn": 16
+      "lastExpResolvedTurn": 22
     },
     "loreQuests": [],
     "pendingCreations": [],
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 16,
-      "world_time": 16,
+      "turn_id": 22,
+      "world_time": 22,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -499,24 +642,28 @@
           "year": 0,
           "month": 1,
           "day": 8,
-          "hour": 7
+          "hour": 13
         },
-        "location_id": "e97a78f8-6781-49ff-a0ce-61d1a78f3e81",
-        "weather": "Trời sáng sớm u ám, sương mù xen lẫn hắc khí ma đạo dày đặc",
+        "location_id": "d50a76ad-de22-4fab-b755-570a593720e0",
+        "weather": "Trời lộng gió, phảng phất hắc khí oán niệm mỏng manh",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 1.4000000000000001,
+            "exp": 1.9000000000000006,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
             "inventory": [],
             "longTermStatuses": [
               {
-                "status_id": "KIET_SUC",
-                "id": "8dca6759-8336-4d17-9f32-33a2c88a37de"
+                "status_id": "PHAN_PHE",
+                "id": "f1b6cd21-e7ad-4787-bff7-d4152f2bf7ba"
+              },
+              {
+                "status_id": "PHAN_PHE_CHAN_KHI",
+                "id": "8c9e5563-d62c-4916-a914-8debba01ef3a"
               }
             ]
           },
@@ -541,25 +688,71 @@
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
+          },
+          {
+            "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
+            "Name": "Triệu Vân",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
           }
         ],
-        "quests": []
+        "quests": [
+          {
+            "id": "8c8183bd-fbdb-408d-adc4-120609a67fac",
+            "title": "Chăm sóc con của Bạch Hổ Sơn Linh",
+            "status": "active",
+            "objectives": [
+              {
+                "id": "rescue_baby_tiger",
+                "text": "Giải cứu Tiểu Bạch Hổ đang cùng Hạ Hầu Khinh Y bị vây hãm tại hậu viện.",
+                "type": "action",
+                "targetName": "Tiểu Bạch Hổ",
+                "requiredCount": 1,
+                "currentCount": 2,
+                "completed": true
+              },
+              {
+                "id": "purify_corruption",
+                "text": "Sử dụng chân nguyên của Thái Bình Yếu Thuật để thanh tẩy tà khí ma hóa trên người Tiểu Bạch Hổ.",
+                "type": "action",
+                "targetName": "Thanh tẩy tà khí",
+                "requiredCount": 1,
+                "currentCount": 0,
+                "completed": false
+              },
+              {
+                "id": "reach_tiger_cave",
+                "text": "Di chuyển đến sơn động bí ẩn theo tọa độ thần thức để bảo vệ an toàn cho hổ con.",
+                "type": "goto",
+                "targetName": "Sơn động Bạch Hổ",
+                "requiredCount": 1,
+                "currentCount": 0,
+                "completed": false
+              }
+            ]
+          }
+        ]
       },
       {
         "time": {
           "year": 0,
           "month": 1,
           "day": 8,
-          "hour": 9
+          "hour": 18
         },
-        "location_id": "e97a78f8-6781-49ff-a0ce-61d1a78f3e81",
-        "weather": "Trời sáng sớm u ám, lạnh lẽo, sương mù xen lẫn hắc khí ma đạo dày đặc",
+        "location_id": "d50a76ad-de22-4fab-b755-570a593720e0",
+        "weather": "Gió chiều lồng lộng kèm theo hắc khí oán niệm mỏng manh",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 1.5000000000000002,
+            "exp": 2.0000000000000004,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
@@ -587,15 +780,74 @@
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
+          },
+          {
+            "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
+            "Name": "Triệu Vân",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
           }
         ],
-        "quests": []
+        "quests": [
+          {
+            "id": "8c8183bd-fbdb-408d-adc4-120609a67fac",
+            "title": "Chăm sóc con của Bạch Hổ Sơn Linh",
+            "status": "active",
+            "objectives": [
+              {
+                "id": "rescue_baby_tiger",
+                "text": "Giải cứu Tiểu Bạch Hổ đang cùng Hạ Hầu Khinh Y bị vây hãm tại hậu viện.",
+                "type": "action",
+                "targetName": "Tiểu Bạch Hổ",
+                "requiredCount": 1,
+                "currentCount": 2,
+                "completed": true
+              },
+              {
+                "id": "purify_corruption",
+                "text": "Sử dụng chân nguyên của Thái Bình Yếu Thuật để thanh tẩy tà khí ma hóa trên người Tiểu Bạch Hổ.",
+                "type": "action",
+                "targetName": "Thanh tẩy tà khí",
+                "requiredCount": 1,
+                "currentCount": 1,
+                "completed": true
+              },
+              {
+                "id": "reach_tiger_cave",
+                "text": "Di chuyển đến sơn động bí ẩn theo tọa độ thần thức để bảo vệ an toàn cho hổ con.",
+                "type": "goto",
+                "targetName": "Sơn động Bạch Hổ",
+                "requiredCount": 1,
+                "currentCount": 0,
+                "completed": false
+              }
+            ]
+          }
+        ]
       }
     ],
     "crisisOmenTriggered": false,
     "crisisQuestAssigned": false,
     "crisisResolved": false,
     "customRules": [],
+    "activeBreakthroughQuests": [],
+    "affinityState": {
+      "version": 1,
+      "streaks": {
+        "bd85e45e-f13c-41d2-a278-10ed93722c18": {
+          "small_help": {
+            "last_event_turn": 18,
+            "streak": 1
+          }
+        }
+      },
+      "links": {}
+    },
     "systemAssistant": {
       "isActive": false,
       "dialogue": "",
@@ -1358,13 +1610,409 @@
           "content": "Nhìn gương mặt tái nhợt của *Diệp Thần* và vết máu nơi khóe môi hắn, cùng cái lắc đầu đầy bất lực của người bạn, trái tim *Triệu Vân* bỗng chốc chìm xuống đáy vực sâu. Kế hoạch tìm kiếm thất bại ngay từ bước đầu tiên, trong khi sương độc ma đạo đang ngày một dâng cao nguy hiểm dồn dập, vây hãm họ vào bước đường cùng bên cạnh bia đá lạnh ngắt. Cả ba sinh mệnh — một đạo sĩ kiệt lực, một chiến tướng chật vật và một linh thú thống khổ — đang bị cô lập hoàn toàn giữa địa ngục trần gian này."
         }
       ]
+    },
+    {
+      "id": "7ac7941f-a0ed-49ff-a6e5-cec1eb07ba4d",
+      "type": "user_custom_action",
+      "content": "Đang lúc nguy cấp thì Sơn linh ra hiệu cho ngươi. Ngươi nhìn nó sắc mặt trầm xuống nói: 'Không được. Làm như thế ngươi sẽ chết'. Triệu Tử Long không hiểu quay sang hỏi ngươi. Ngươi đáp: 'Sơn linh muốn ta sử dụng bí pháp hợp thể. Trong khoảng thời gian ngắn nó sẽ phụ thể lên người để chiến đấu. Sức mạnh, tinh thần, khí huyết tăng mạnh. Nhưng hợp thể càng lâu thì tổn thương càng lớn với Sơn linh. Nhìn tình hình hiện nay thì sau khi phá vây Sơn linh chắc chắn sẽ chết'. Sơn linh kiên định nhìn ngươi. Ngươi thở dài nói: 'Được rồi, ngươi để lại 1 tia thần thức. Sau khi ngươi chết, ta sẽ tìm cách giúp ngươi để lại huyết mạch' Sơn linh lắc đầu ra hiệu không cần, sau đó dùng thần thức truyền cho ngươi 1 vị trí sơn động. Ngươi lập tức hiểu ra Sơn linh muốn ngươi chăm sóc con của nó. Ngươi khẽ gật đầu nói: 'Ngươi hợp thể với hắn rồi dọn dẹp ở đây đi. Ta đi tìm Kinh Y'. Sơn linh gật đầu thi pháp. 1 lúc sau Sơn linh biến thành 1 bộ Ngân giáp, mũ giáp có hình đầu hổ mặc lên người Triệu Tử Long"
+    },
+    {
+      "id": "d42b5365-4dec-4bd8-a6bb-a554b7c64387",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Giữa vòng vây trùng điệp đầy rẫy tử khí tanh nồng và những bóng đen lết bết của đám Hoạt Thi bủa vây, *Bạch Hổ Sơn Linh* bỗng chốc phát ra một luồng linh quang chói mắt xua tan đi một phần sương độc ma đạo xung quanh nó. Thân hình khổng lồ cao hơn một trượng của hổ thần run rẩy nhẹ, thế nhưng đôi mắt hoàng kim oai nghiêm của nó không hề có nửa điểm khiếp nhược, ngược lại rực lên một ý chí quyết liệt đến tột cùng. Nó hướng về phía ngươi gầm nhẹ một tiếng trầm đục, luồng thần thức cường đại mang theo một thông điệp bi tráng lập tức truyền thẳng vào trong thức hải của ngươi. Nó muốn hiến tế sinh mệnh, sử dụng bí pháp cổ xưa để phụ thể lên người của *Triệu Vân*, mượn chiến lực vô song của vị danh tướng tương lai này để quét sạch yêu ma, bất chấp việc bản thân phải gánh chịu tổn thương chí mạng dẫn đến tiêu vong hoàn toàn.\nNgươi nhìn vào đôi mắt hoàng kim kiên định của linh thú hộ sơn, sắc mặt trầm xuống, lòng dâng lên một nỗi đau xót vô ngần. Ngươi lập tức lớn tiếng ngăn cản:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Không được! Làm như thế ngươi sẽ chết! Bản nguyên linh thể của ngươi một khi đã tiêu tán thì vạn kiếp bất phục, không thể luân hồi được nữa!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vân* đang tả xung hữu đột giữa đám xác sống, nghe thấy tiếng quát của ngươi liền giật mình quay lại. Hắn vung thương gạt phăng hai cánh tay thối rữa đang vươn ra từ màn sương độc, lớn tiếng hỏi dồn dập:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Diệp huynh! Có chuyện gì vậy? Sơn linh rốt cuộc muốn làm gì mà huynh lại phản đối dữ dội đến thế?!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi cắn răng gạt đi vết máu nhạt nơi khóe môi do phản phệ ban nãy, lớn tiếng giải thích cho hắn hiểu:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Triệu huynh! Sơn linh muốn ta sử dụng bí pháp hợp thể tối cao của *Thái Bình Yếu Thuật*! Trong khoảng thời gian ngắn, nó sẽ phụ thể lên người ngươi để chiến đấu. Sức mạnh, tinh thần, khí huyết của ngươi sẽ tăng mạnh lên gấp bội, đủ để quét sạch vạn ma. Nhưng hợp thể càng lâu, tổn thương đối với Sơn linh càng lớn. Nhìn tình hình sương độc ma đạo đậm đặc và hung hãn hiện nay, sau khi phá vây thành công, Sơn linh chắc chắn sẽ cạn kiệt linh lực mà chết!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vân* nghe xong bàng hoàng chấn động, trường thương bạc trong tay khẽ khựng lại một nhịp. Hắn nhìn sang con hổ trắng khổng lồ đang không ngừng rên rỉ vì sương độc gặm nhấm nhưng ánh mắt vẫn tràn đầy sự kiên định oai hùng. Hổ thần khẽ bước tới, cúi thấp cái đầu kiêu hãnh xuống trước mặt ngươi, tiếp tục dùng thần thức truyền đi một lời khẩn cầu cuối cùng. Nó không muốn nhìn ngọn núi *Thường Sơn* mà nó đã bảo hộ ngàn năm qua bị ma khí phương bắc nuốt chửng, nó thà chết một cách oanh liệt còn hơn sống lay lắt trong cảnh đất trời đảo điên. \nNgươi nhắm mắt lại, thở dài đau xót, lồng ngực phập phồng dữ dội trước sự lựa chọn tàn khốc này. Biết không thể lay chuyển được ý chí của vị hộ sơn thần thú, ngươi đành phải gật đầu chấp nhận lời khẩn cầu bi tráng của nó."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Được rồi... Ta chấp nhận lời khẩn cầu của ngươi. Hãy để lại một tia thần thức mỏng manh trong thức hải của ta. Sau khi ngươi chết, ta thề bằng cả danh dự của truyền nhân *Nam Hoa Lão Tiên* rằng sẽ tìm mọi cách giúp ngươi để lại huyết mạch, không để dòng giống Bạch Hổ linh thú bị tuyệt diệt!"
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe lời hứa hẹn chân thành của ngươi, *Bạch Hổ Sơn Linh* khẽ gật đầu tỏ vẻ vô cùng cảm kích. Nó khẽ lắc đầu ra hiệu không cần ngươi phải tiêu hao chân nguyên quý giá để phong ấn thần thức của nó lúc này, mà thay vào đó, một luồng ánh sáng dịu nhẹ bỗng chốc từ trán nó bay ra, trực tiếp khắc sâu vào sâu trong tâm trí ngươi một tọa độ sơn động vô cùng bí ẩn nằm sâu trong thung lũng hiểm trở của núi rừng. \nNgươi lập tức hiểu ra ý định của nó — nơi đó chính là hang động nuôi con của nó, một chú hổ con vẫn chưa hề biết đến sự tàn khốc của thế giới bên ngoài. Ngươi khẽ gật đầu, dòng nước mắt dâng lên nơi khóe mắt được ngươi kiên cường gạt đi, thay vào đó là một ý chí sắt đá:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ta hiểu rồi. Ta hứa với ngươi sẽ tìm được và chăm sóc đứa con của ngươi thật tốt, nuôi dạy nó trở thành một vị hộ sơn thần thú dũng mãnh tiếp theo của vùng đất này. Giờ thì... ngươi hãy hợp thể với hắn rồi dọn dẹp sạch sẽ đám xác sống ô hợp ở đây đi! Ta sẽ lập tức tiến vào hậu viện để tìm kiếm Khinh Y!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngay khi lời nói của ngươi vừa dứt, một tiếng gầm vang dội đất trời bùng phát từ cổ họng của *Bạch Hổ Sơn Linh*. Tiếng gầm mang theo một uy lực tâm linh tối cao, khiến toàn bộ hai mươi tên Hoạt Thi xung quanh ngã rạp xuống đất vì kinh hãi. Thân hình đồ sộ của hổ thần bỗng chốc hóa thành một luồng ánh sáng màu bạc rực rỡ và thần thánh, cuồn cuộn bay lượn giữa không trung rồi lao thẳng vào cơ thể của *Triệu Vân*.\n\"Bùm!\"\nMột tiếng nổ vang dội tựa sấm truyền rạch ngang bầu trời u ám. Linh quang màu bạc bùng lên rực rỡ như một vầng mặt trời nhỏ giữa màn sương độc xám xịt. Khi luồng sáng dần ngưng tụ, *Triệu Vân* bước ra với một diện mạo hoàn toàn mới, vô cùng uy nghiêm và oai dũng. Hắn lúc này đang khoác trên mình một bộ *Ngân Giáp* hổ đầu rực rỡ, chiếc mũ giáp mang hình đầu hổ gầm uy dũng, giáp vai là hình móng vuốt sắc bén, toàn thân tỏa ra làn khí bạc bén ngót dâng trào như sóng triều. Thần uy bộc phát mãnh liệt, *Triệu Vân* hét lớn một tiếng, tiếng hét vang dội như tiếng sấm nổ giữa trời quang, quét sạch toàn bộ độc sương ma đạo xung quanh hắn chỉ trong một tích tắc.\nCảm nhận nguồn sức mạnh khổng lồ vạn dặm cuồn cuộn chảy trong huyết quản, *Triệu Vân* lập tức múa tít cây trường thương bạc, lao thẳng vào giữa đội hình đám xác sống. Mỗi đường thương đâm ra như rồng bay phượng múa, cuốn phăng hàng loạt Hoạt Thi thành những mảnh vụn đen kịt. Thần tốc và uy lực của hắn lúc này đã đạt tới một cảnh giới mà người phàm không thể tưởng tượng nổi.\nThấy tình hình phía sau đã được kiểm soát hoàn toàn bởi thần uy của *Triệu Vân*, ngươi không dám trễ nải nửa nhịp thở. Ngươi vội vã quay người, lướt qua ngã ba đường để tiến vào lối hậu viện của phủ đệ nhằm tìm kiếm *Hạ Hầu Khinh Y*. Thế nhưng, ngay khi ngươi vừa vận chuyển chân khí để gia tốc bước chân, một cơn đau buốt thắt bỗng nhiên nhói lên từ sâu trong đan điền, khiến hơi thở của ngươi lập tức trở nên dồn dập và nghẹn ứ nơi cổ họng. Luồng chân nguyên tinh thuần lưu chuyển trong kinh mạch bỗng chốc trở nên hỗn loạn, liên tục va đập vào các thành mạch — đây chính là hậu quả tàn khốc của việc bị đạo thuật *Truy Hồn Tầm Linh Pháp* phản phệ trước đó khi ngươi cố gắng đột phá bức tường oán khí phương bắc quá mức đậm đặc. \nĐan điền còn chưa hoàn toàn phục hồi sau phản phệ, nay lại phải chịu áp lực di chuyển gấp gáp khiến tốc độ của ngươi bị giảm sút đáng kể. Ngươi chỉ có thể dựa lưng vào những bờ tường gạch vỡ, vừa chạy vừa cố gắng nín thở điều hòa lại luồng chân khí đang bạo tẩu trong cơ thể, bắp chân mỏi nhừ và nhức nhối sau mỗi bước đi gượng gạo.\nVượt qua những lối đi quanh co sũng nước mưa và đầy rẫy những mảnh vỡ của gạch ngói, ngươi cuối cùng cũng đặt chân vào khu vực *Hậu viện Hạ Hầu Phủ*. Cảnh tượng nơi đây u ám và tịch mịch đến đáng sợ. Toàn bộ khu vực hậu viện rộng lớn vốn là nơi lầu son gác tía, hòn non bộ, hồ sen thanh nhã của phủ quận chúa, giờ đây đã bị bao phủ bởi một lớp sương mù xám xịt của tử khí ma đạo. Những rặng liễu rủ xuống rũ rượi, những dải lụa trang trí màu hồng rách nát bay phấp phới trong gió sớm lạnh buốt tựa như những dải băng tang của một thời đại đại loạn. Mùi hoại tử nồng nặc phảng phất trong không khí khô hanh khiến lồng ngực ngươi liên tục thắt chặt lại đầy khó chịu.\nNgươi nén chịu cơn đau âm ỉ nơi đan điền, gượng bước tiến sâu vào bên trong hậu viện. Bỗng nhiên, từ phía sau tiểu lâu rêu phong loang lổ, có tiếng kim loại va chạm \"keng keng\" gấp gáp vang lên, kèm theo đó là tiếng quát thanh tao nhưng vô cùng kiên định và có phần bướng bỉnh của một thiếu nữ quen thuộc."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Lũ nghiệt chướng tà ma kia! Ta đường đường là đệ tử tục gia của phái *Thanh Thành*, kiếm pháp trong tay ta hôm nay sẽ tiễn các ngươi về nơi chín suối!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi lập tức nép mình sau một bức tường hoa nứt nẻ, âm thầm quan sát qua khe hở của những viên gạch vỡ. Trước mắt ngươi, giữa khoảng sân gạch sũng nước mưa của tiểu lâu, *Hạ Hầu Khinh Y* đang cầm một thanh bảo kiếm sáng loáng, lưỡi kiếm tuôn ra những luồng kiếm khí màu phấn hồng nhàn nhạt đầy duyên dáng nhưng cũng vô cùng sắc bén. Bộ y phục bằng lụa mỏng màu phấn hồng tao nhã của nàng lúc này đã lấm lem đầy bùn đất và những vệt máu đen ngòm của đám xác sống. Nàng đang cùng hai tỳ nữ dũng cảm dốc sức đẩy lùi ba tên Hoạt Thi lính tuần của phủ đang điên cuồng vây công.\nĐiều khiến ngươi chú ý nhất chính là một bóng dáng khổng lồ khác đang chắn ngay trước mặt nàng để che chở cho nàng dốc sức chiến đấu. Đó là một con Bạch Hổ khổng lồ, nhưng kích thước của nó nhỏ hơn *Bạch Hổ Sơn Linh* một chút, và trên bộ lông trắng muốt của nó đã xuất hiện những mảng xám xịt quỷ dị của tà khí xâm nhập — đây chính là con của hổ thần mà Sơn linh đã gửi gắm cho ngươi! Hóa ra, dọc đường trở về phủ, *Hạ Hầu Khinh Y* đã nghe theo lời tiên tri thần bí của ngươi trong miếu cổ, chủ động dâng tặng túi thịt khô loại tốt nhất cho con Bạch Hổ này. Con linh thú nhỏ dẫu đang bị ma hóa nhẹ bởi hắc khí phương bắc, nhưng sau khi nhận được thiện ý và thức ăn của nàng, linh tính của nó đã trỗi dậy, quyết định đi theo bảo vệ nàng trở về phủ đệ và giúp nàng chống chọi lại đám gia nhân biến thành quái vật cho đến tận giây phút này.\nThế nhưng lúc này, con Bạch Hổ nhỏ đang tỏ ra vô cùng mệt mỏi, hơi thở của nó hổn hển, khói đen nhạt bốc ra từ những vết thương trên lưng do bị móng vuốt của đám Hoạt Thi cào xé. Lực lượng của nó đang suy giảm nhanh chóng dưới sự gặm nhấm của tử khí xung quanh. Ba tên Hoạt Thi lính tuần với đôi mắt xám đục dường như nhận ra sự kiệt sức của linh thú, chúng gầm rú điên cuồng, đồng loạt vung những thanh rựa rỉ sét lao vào tấn công tổng lực.\nKhông thể đứng nhìn người bạn mới kết giao và đứa con của Sơn linh gặp nguy hiểm, ngươi nén chặt cơn đau thắt nơi đan điền, vận chuyển chút chân nguyên mỏng manh mới khôi phục được khoảng hai phần, vung tay lên bắn ra một luồng gió mạnh mẽ từ *Linh Phong Thuật* để làm chệch hướng đòn tấn công của tên Hoạt Thi đi đầu, đồng thời bước ra khỏi góc tường hoa nứt nẻ.\nKhi nhìn thấy bóng dáng đạo bào xám xịt của ngươi xuất hiện giữa màn sương mù, đôi mắt trong veo như nước hồ thu của *Hạ Hầu Khinh Y* bỗng chốc rực lên một tia sáng hy vọng và kinh ngạc tột độ. Nàng khẽ gạt phăng một đường kiếm chém đứt lìa cánh tay của tên xác sống trước mặt, lùi sát về phía ngươi, giọng nói thanh tao vang lên đầy dồn dập xót xa:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Diệp Thần! Thực sự là ngươi sao?! Lời ngươi tiên tri trong miếu cổ ban đêm... hoàn toàn là sự thật! Khi ta vừa dẫn hộ vệ trở về đến phủ đệ thì đại nạn tàn khốc đã ập xuống... Rất nhiều gia nhân và lính tuần bỗng chốc biến thành những quái vật thối rữa không hồn, điên cuồng cắn xé người sống. Cha ta... phụ thân ta cũng đã mất tích không rõ tung tích khi đang dốc sức trấn áp bọn chúng ở sảnh chính... May mắn dọc đường ta nghe theo lời khuyên của ngươi, không hề chọc giận con Bạch Hổ này mà để lại thịt tươi cho nó, nó liền đi theo bảo hộ ta vượt qua muôn trùng vây khốn để lui về hậu viện này!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi nhìn gương mặt lấm lem bùn đất nhưng vẫn không giấu nổi vẻ kiêu sa, bướng bỉnh của nàng, khẽ mỉm cười trấn an dù lồng ngực ngươi vẫn đang râm ran những cơn đau nhói do phản phệ chân khí:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y, ta đã nói rồi, vận mệnh của nàng từ nay về sau đã gắn liền với ta. Đừng sợ, có ta ở đây, đám xác sống này không thể làm hại được nàng dẫu ta hiện tại cũng đang gặp chút rắc rối với đan điền của mình."
+        },
+        {
+          "type": "narrative",
+          "content": "Nhìn sang con Bạch Hổ nhỏ đang mệt mỏi nằm rạp bên chân Khinh Y, đôi mắt hoàng kim của nó nhìn ngươi đầy cảnh giác nhưng cũng mang vài phần cầu cứu, ngươi thầm nghĩ đến lời hứa bi tráng với *Bạch Hổ Sơn Linh* ở ngã ba đường phía ngoài. Con thú nhỏ này chính là huyết mạch cuối cùng của linh thần trấn giữ long mạch *Thường Sơn*, ngươi bằng mọi giá phải bảo vệ nó chu toàn để không phụ lòng tin của vị hổ thần đã hy sinh oai hùng kia.\nSương mù xám xịt xung quanh hậu viện lại bắt đầu cuồn cuộn dâng cao, mùi tử khí nồng nặc từ hướng chính môn dội về ngày một dữ dội hơn, báo hiệu đám xác sống đông đảo bên ngoài có lẽ đã phát hiện ra hành tung của hai người và đang rục rịch kéo về hướng hậu viện cô lập này. Tình thế lúc này vô cùng khẩn cấp khi đan điền của ngươi mới chỉ khôi phục được một phần nhỏ chân nguyên, còn thể lực của Khinh Y và Bạch Hổ nhỏ đều đã chạm ngưỡng giới hạn. Ngươi cần phải đưa ra quyết định nhanh chóng để tự cứu mình và bảo vệ những sinh mệnh xung quanh trước khi địa ngục trần gian này hoàn toàn nuốt chửng lấy tất cả."
+        }
+      ]
+    },
+    {
+      "id": "d5999c35-5323-4c6e-b346-85623b7f3be7",
+      "type": "user_custom_action",
+      "content": "Nơi này không nên ở lâu. Cận vệ của nàng chỉ còn mỗi Tiểu Thúy thôi sao? Chúng ta nhanh chóng tập hợp với Triệu Vân rồi rời khỏi đây thôi. Khinh Y gật đầu đồng ý dẫn theo Tiểu Thúy đi theo ngươi rời khỏi hậu viện"
+    },
+    {
+      "id": "84dcb70c-4206-410b-ba7a-71d19b1e112d",
+      "type": "story",
+      "content": [
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y, nơi này không thể nán lại lâu. Cận vệ bên cạnh nàng hiện tại chỉ còn lại mình Tiểu Thúy thôi sao? Chúng ta phải nhanh chóng thu xếp, tập hợp với Triệu Vân rồi lập tức rút khỏi đây thôi!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* khẽ cắn môi, đôi mắt phượng nhìn lướt qua gian phòng ngổn ngang đầy mảnh vỡ gạch ngói, rồi gật đầu một cách dứt khoát."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Được, ta nghe theo ngươi! Tiểu Thúy, mau ôm lấy chú hổ con, chúng ta đi thôi!"
+        },
+        {
+          "type": "narrative",
+          "content": "Thế nhưng, chú tiểu *Bạch Hổ* đang chịu ảnh hưởng của ma khí phương bắc lại tỏ ra quá mức yếu ớt. Bộ lông trắng muốt của nó run rẩy dưới làn sương độc, bốn chân mềm nhũn không thể tự chạy nhanh. *Tiểu Thúy* — nàng tỳ nữ nhỏ nhắn — gương mặt tái nhợt vì sợ hãi, đành phải cúi xuống dốc sức ôm ghì lấy thân hình nặng trịch của linh thú nhỏ vào lòng.\nSức nặng của chú tiểu *Bạch Hổ* cùng với màn sương độc dày đặc, tanh nồng như mật đặc vây hãm bốn bề khiến bước chân của cả ba người trở nên vô cùng chật vật trong các lối đi nhỏ hẹp, quanh co của *Hậu viện Hạ Hầu phủ*. Tử khí ma đạo từ các góc tường loang lổ rêu phong không ngừng rỉ ra, len lỏi vào buồng phổi khiến lồng ngực họ thắt chặt. Nhận thấy tình thế nguy cấp, ngươi không dám trễ nải. Ngươi thầm vận chuyển chân nguyên tinh thuần trong đan điền, tay bắt quyết thi triển *Linh Phong Thuật* ở mức tối thiểu để tránh gây ra tiếng động quá lớn thu hút yêu ma. Một luồng thanh khí dịu nhẹ bùng lên, hóa thành những luồng phong kình nhu hòa bao bọc xung quanh nhóm người, không ngừng xua bớt uế khí và sương độc mở ra một con đường quang đãng, dẫn dắt cả ba an toàn tiến ra khu vực hành lang kết nối với tiền viện.\nDưới sự che chở của luồng phong kình ấm áp từ đạo pháp của ngươi, chú tiểu *Bạch Hổ* khẽ rên rỉ một tiếng nhỏ rồi rúc đầu sâu vào lồng ngực ấm áp của *Tiểu Thúy*, nhịp thở dần trở nên ổn định hơn dưới áp lực của tử khí. Chứng kiến cảnh tượng thiếu niên đạo sĩ dùng thần thông kỳ diệu để bảo bọc cho con linh thú nhỏ của mình, trái tim *Hạ Hầu Khinh Y* bỗng dâng lên một luồng ấm áp khó tả. Ánh mắt nàng nhìn ngươi không còn nửa điểm nghi ngờ hay e ngại của một tiểu thư khuê các đối với người lạ, mà hoàn toàn chuyển thành sự tin tưởng sâu sắc và lòng cảm kích vô hạn. \nKhi cả nhóm vừa đặt chân đến khu vực hành lang rộng lớn kết nối giữa tiền viện và hậu viện, một luồng ngân quang rực rỡ bỗng chốc xé toác màn sương mù xám xịt phía trước. Tại khoảng sân tiền viện ngổn ngang những đống tro tàn đen kịt của đám xác sống, bóng dáng dũng mãnh của *Triệu Vân* sừng sững hiện ra dưới ánh ban mai u ám. Bộ *Ngân Giáp* mang hình hổ đầu vĩ đại của hắn vẫn tỏa ra những luồng linh quang rực rỡ, mỗi bước đi của hắn đều mang theo khí phách uy nghiêm của hổ thần trấn núi, khiến tà khí xung quanh tự động dạt ra xa. Thấy nhóm của ngươi xuất hiện, vị thiếu niên anh hùng lập tức thu hồi trường thương bạc, sải bước dài tiến lại gần, gương mặt tuấn tú lộ rõ vẻ nhẹ nhõm."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Diệp huynh! Khinh Y! Cuối cùng hai người cũng thoát ra được rồi. Đám xác sống ở khu vực tiền viện đã bị ta và sức mạnh của Sơn linh quét sạch, nhưng tà khí phương bắc ngoài kia vẫn đang không ngừng tụ hội. Chúng ta không thể dừng chân ở đây quá lâu!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* nhìn bộ giáp đầu hổ oai dũng trên người *Triệu Vân*, rồi lại nhìn sang ngươi với vẻ kinh ngạc tột độ, nhưng nàng nhanh chóng lấy lại sự bình tĩnh của một đệ tử tục gia phái *Thanh Thành*. Nàng vuốt lại vạt áo lụa phấn hồng đã lấm lem cát bụi, giọng nói mang theo sự lo âu hướng về phía tiền môn của phủ đệ:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Phụ thân ta vẫn chưa rõ tung tích, nhưng chúng ta hiện tại lực lượng quá mỏng manh, chú tiểu *Bạch Hổ* này lại đang bị ma khí gặm nhấm nghiêm trọng, nếu không sớm chữa trị, nó sẽ không thể qua khỏi. *Diệp Thần*, chúng ta nên làm gì tiếp theo đây?"
+        },
+        {
+          "type": "narrative",
+          "content": "Mùi tử khí tanh nồng ngoài phủ vẫn phảng phất đưa lại theo những cơn gió lạnh buốt, báo hiệu một đợt tấn công mới của đám Hoạt Thi có thể bùng nổ bất cứ lúc nào nếu họ tiếp tục nán lại khu vực giao lộ này. Cả ba người cùng chú linh thú nhỏ đều đang đứng trước những lựa chọn sinh tử để bảo toàn mạng sống và tìm kiếm con đường sinh lộ giữa thời đại đại loạn đầy rẫy yêu ma."
+        }
+      ]
+    },
+    {
+      "id": "bad3f55a-e9f0-45a6-98cd-4810da58c7b6",
+      "type": "user_custom_action",
+      "content": "'Thì ra nàng đã mang con của Sơn linh theo. Vậy thì đỡ mất công chúng ta đi tìm nó. Mấy ngày hôm nay đạo hạnh của ta có tiến triển, đã có thể mang mọi người rời khỏi đây rồi. Cho ta mượn thanh kiếm của muội dùng 1 lát.' Dứt lời ngươi bấm quyết đọc niệm khẩu ngữ, Thanh Thủy kiếm trên tay Khinh Y bay ra khỏi vỏ sau đó cấp tốc biến lớn. Ngươi nhảy lên kiếm rồi gọi: 'Khinh Y, mọi người mau lên đây. Ta dùng Ngự kiếm quyết đưa mọi người đi'. Khinh Y không do dự nhảy lên kiếm, 2 tay ôm chặt lấy eo ngươi, Tiểu Thúy cũng theo đó nhảy lên bám vào eo Khinh Y. Triệu Vân là người đứng cuối cùng phía sau Tiểu Thúy. 1 đoàn 4 người ngự kiếm rời khỏi Chân Định. Sau khi rời khỏi Chân Định, ngươi điều khiển phi kiếm đáp xuống Trác Quận. tùy tiện tìm 1 quán trà để nghe ngóng tin tức"
+    },
+    {
+      "id": "603d3c36-85f5-48a2-b252-ca67969b3a04",
+      "type": "story",
+      "content": [
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Thì ra nàng đã mang con của Sơn linh theo. Vậy thì đỡ mất công chúng ta đi tìm nó. Mấy ngày hôm nay đạo hạnh của ta có tiến triển, đã có thể mang mọi người rời khỏi đây rồi. Cho ta mượn thanh kiếm của muội dùng một lát."
+        },
+        {
+          "type": "narrative",
+          "content": "Dứt lời, ngươi lập tức ngưng tụ dòng chân nguyên mỏng manh còn sót lại trong đan điền, ngón tay trỏ và ngón giữa chụm lại thành kiếm quyết, khẽ vạch một đường vòng cung mềm mại giữa hư không. Thanh *Thanh Thủy kiếm* cổ kính đang giắt bên hông của *Hạ Hầu Khinh Y* như cảm ứng được linh lực tiên gia kêu gọi, bỗng chốc rung lên bần bật. Một tiếng \"keng\" thanh giòn vang lên xé rách bầu không khí u ám, thân kiếm tự động tuốt ra khỏi vỏ, hóa thành một luồng thanh quang lấp lánh bay lơ lửng ngay trước mặt ngươi.\nNgươi hít một hơi thật sâu, miệng lẩm nhẩm đọc niệm khẩu quyết ngự kiếm phi hành của *Thái Bình Yếu Thuật*. Ngón tay chỉ thẳng vào thanh kiếm, luồng chân khí tinh thuần rực rỡ từ đầu ngón tay ngươi bắn ra, bao bọc lấy lưỡi kiếm. \n\"Vù... Vù...\"\nDưới sự chứng kiến đầy kinh ngạc của *Triệu Vân* và hai tỳ nữ, thanh *Thanh Thủy kiếm* cấp tốc biến lớn, từ một thanh bảo kiếm mảnh mai chỉ trong chớp mắt đã rộng ra hơn hai thước, dài tới hơn một trượng, lơ lửng cách mặt đất nửa thước, tỏa ra luồng kiếm phong nhu hòa xua tan đi sương độc xung quanh. Ngươi nhẹ nhàng nhún người nhảy lên mũi kiếm, tà đạo bào xám xịt bay phấp phới, khí chất thoát tục vô song. Ngươi quay đầu lại, hướng về phía ba người họ khẽ gọi lớn:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y, mọi người mau lên đây! Ta dùng Ngự kiếm quyết đưa mọi người đi khỏi nơi quỷ quái này!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* không một chút do dự, nàng gật mạnh đầu rồi bước chân nhẹ nhàng nhảy lên phi kiếm, đứng ngay sát phía sau ngươi. Hai bàn tay thon thả, mềm mại của nàng không kiềm chế được sự run rẩy nhẹ trước thần thông phi phàm này, liền vươn ra ôm chặt lấy eo ngươi. Hơi ấm từ cơ thể nàng dính chút hương hoa bách hợp thanh nhã lập tức truyền qua lớp đạo bào thô sơ, khiến lòng ngươi khẽ dấy lên một luồng rung động ấm áp, ngọt ngào giữa cảnh đại loạn. Nàng tỳ nữ *Tiểu Thúy* dốc sức ôm ghì lấy chú tiểu *Bạch Hổ* đang thoi thóp trong lòng cũng luống cuống nhảy lên, hai tay bám chặt lấy eo của *Hạ Hầu Khinh Y*. *Triệu Vân* là người đứng cuối cùng phía sau bảo bọc cho tất cả, hắn cắm mạnh cây trường thương bạc xuống mặt kiếm để giữ thăng bằng, thần sắc vô cùng kiên định dũng mãnh."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đứng cho vững! Đi!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi quát khẽ một tiếng, kiếm quyết biến đổi chỉ thẳng lên trời. Thanh *Thanh Thủy kiếm* rít lên một tiếng lẫm liệt, hóa thành một dải thanh quang rực rỡ xé toác màn sương mù độc hại đang bao vây *Hành lang Tiền viện Hạ Hầu phủ*, đưa cả đoàn bốn người bay vút lên chín tầng mây, bỏ lại sau lưng vùng đất *Chân Định* đang ngập tràn tà khí ma đạo xám xịt của giặc *Hoàng Cân*.\nChuyến bay ngự kiếm kéo dài liên tục suốt bốn giờ đồng hồ giữa tầng không lộng gió. Gió lạnh thốc mạnh vào mặt, nhưng luồng phong kình hộ thể phát ra từ chân khí của ngươi đã tạo thành một lá chắn vô hình bao bọc lấy cả bốn người và chú hổ con. Thế nhưng, cái giá phải trả cho việc gánh vác trọng lượng của bốn người cùng một linh thú phi hành vượt ngàn dặm đường là vô cùng tàn khốc đối với tu vi thô sơ của ngươi lúc này. \nMỗi một khắc trôi qua, nguồn chân nguyên trong đan điền của ngươi lại hao hụt đi một phần lớn, tựa như dòng nước lũ cuồn cuộn chảy qua đê vỡ. Kinh mạch dọc khắp cơ thể bắt đầu bỏng rát, đau nhức nhối như có hàng ngàn mũi kim châm. Mồ hôi lạnh vã ra như tắm, thấm đẫm vạt đạo bào xám xịt. *Hạ Hầu Khinh Y* đứng ngay phía sau, cảm nhận được sự run rẩy kịch liệt của tấm lưng ngươi và nhịp thở dồn dập, đứt quãng đầy đau đớn, nàng càng ôm chặt eo ngươi hơn, giọng nói thanh tao mang theo sự xót xa, lo lắng tột độ ghé sát tai ngươi thì thầm:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Diệp Thần huynh... huynh cố lên! Nếu mệt quá thì chúng ta đáp xuống đi, xin huynh đừng vì bảo vệ bọn ta mà hủy hoại đi căn cơ tu luyện của mình!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi cắn chặt răng đến rướm máu, cố giữ cho thần trí không bị ngất đi trước cơn đau thắt của đan điền đang dần khô kiệt. Kiếp trước, ngươi là một cựu gián điệp có ý chí sắt đá, kiếp này khoác lên mình thiên mệnh cứu thế, ngươi tuyệt đối không cho phép bản thân gục ngã khi chưa đưa được những người tin tưởng mình đến nơi an toàn.\nKhi dải đất U Châu trù phú dần hiện ra dưới chân núi, ranh giới của huyện *Trác Quận* sầm uất lọt vào tầm mắt, ngươi dùng chút tàn lực cuối cùng điều khiển phi kiếm từ từ đáp xuống một khoảng đất trống hoang vắng, nằm ngay cạnh một ngôi quán trà nhỏ xập xệ bên lề đường quan lộ dẫn vào thành. \nNgay khi mũi kiếm vừa chạm đất, thanh *Thanh Thủy kiếm* lập tức thu nhỏ lại thành kích thước ban đầu, rơi loang loảng xuống bãi cỏ ẩm ướt. Đan điền của ngươi lúc này hoàn toàn khô kiệt, không còn một tia chân nguyên nào hoạt động, kinh mạch bỏng rát tựa như một lòng sông mùa hạn hán bị thiêu rụi. Thân hình ngươi loạng choạng, tầm mắt tối sầm lại, vô lực ngã nhào về phía trước."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Diệp Thần huynh!"
+        },
+        {
+          "type": "narrative",
+          "content": "Một tiếng kêu thảng thốt đầy lo âu vang lên. *Hạ Hầu Khinh Y* nhanh như cắt lướt tới, hai cánh tay mềm mại của nàng kịp thời dang ra đỡ lấy thân hình đang lảo đảo của ngươi. Nàng ôm trọn lấy đầu và vai ngươi vào lòng, để ngươi tựa sát vào lồng ngực ấm áp của mình. Nàng ân cần đỡ ngươi ngồi tựa lưng vào một gốc cây liễu già bên vệ đường, bàn tay thon dài run run lấy khăn lụa hồng khẽ lau đi những giọt mồ hôi lạnh đang rịn ra đầy trán và vết máu rỉ ra nơi khóe môi ngươi. Đôi mắt trong veo của nàng đỏ hoe, chứa đựng sự rung động, lòng cảm kích và xót thương vô hạn trước sự hy sinh quên mình của ngươi để bảo vệ nàng và mọi người thoát khỏi quỷ môn quan.\nTrong lúc *Hạ Hầu Khinh Y* đang toàn tâm toàn ý chăm sóc cho ngươi, *Triệu Vân* sững sờ nhìn cảnh tượng hoang tàn xung quanh. Nhận ra tình trạng kiệt lực của ngươi và sự yếu ớt của chú tiểu *Bạch Hổ*, hắn lập tức cầm chặt cây trường thương bạc, thần sắc cảnh giác tiến nhanh vào bên trong ngôi quán trà hoang vắng để nghe ngóng tình hình đất trời xung quanh, đồng thời tìm một chỗ nghỉ chân an toàn cho cả đoàn.\nThời gian chậm rãi trôi qua dưới bóng râm của rặng liễu rủ bên lề đường huyện *Trác Quận*. Nhờ có luồng nội gia công phu dịu nhẹ mà *Hạ Hầu Khinh Y* không ngừng truyền vào qua các huyệt đạo ở lưng, kết hợp với công pháp tự phục hồi kỳ diệu của *Thái Bình Yếu Thuật*, đan điền khô héo của ngươi bắt đầu tích tụ lại được một lượng chân khí mỏng manh, xoa dịu đi cơn đau nhức khắp cơ thể. Hơi thở của ngươi dần trở nên sâu dài và ổn định hơn.\nKhi ngươi hé mở đôi mắt, gương mặt lo lắng cận kề của *Hạ Hầu Khinh Y* lập tức hiện ra. Thấy ngươi tỉnh lại, đôi mắt nàng khẽ sáng lên một tia vui mừng khôn tả, vội vàng đỡ ngươi uống một hớp nước mát từ bình tông da thú mà tỳ nữ vừa chuẩn bị."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Diệp Thần huynh, huynh thấy trong người thế nào rồi? Đã đỡ đau hơn chút nào chưa? Làm ta lo lắng đến phát khóc..."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi nhìn nàng dâu tương lai với vẻ mặt đầy ân cần, khẽ mỉm cười xua đi sự lo lắng của nàng, giọng nói dù còn chút yếu ớt nhưng đã lấy lại được vẻ ôn hòa, tiêu sái:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y muội đừng lo, ta chỉ là tiêu hao quá nhiều tinh lực để ngự kiếm thôi, phục hồi một chút là sẽ ổn. Chú tiểu *Bạch Hổ* thế nào rồi?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* khẽ quay đầu nhìn sang bên cạnh. Chú hổ con lúc này đang nằm im lìm trong lòng *Tiểu Thúy*, hơi thở tuy còn yếu nhưng nhờ đã thoát khỏi vùng sương độc dày đặc của *Chân Định*, sắc mặt của nó đã bớt đi vẻ xám xịt của tà khí gặm nhấm, linh quang hoàng kim mờ nhạt bắt đầu hồi phục trên bộ lông trắng muốt."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Nhờ có thần thông của huynh xua bớt ma khí, chú tiểu *Bạch Hổ* đã qua khỏi cơn nguy kịch rồi. Nhưng linh lực của nó vẫn còn rất yếu, cần tìm một nơi yên tĩnh và an toàn để tĩnh dưỡng lâu dài."
+        },
+        {
+          "type": "narrative",
+          "content": "Đúng lúc này, *Triệu Vân* từ bên trong quán trà sải bước nhanh trở ra. Thần sắc hắn vô cùng nghiêm nghị, hắn cắm mạnh cây trường thương xuống đất, rảo bước tới bên cạnh hai người, cúi người hành lễ rồi trầm giọng báo cáo những tin tức mà hắn vừa nghe ngóng được từ đám lữ khách hành hương bên trong quán:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Diệp huynh, Khinh Y, tình hình bên ngoài quả thật vô cùng hỗn loạn. Ta vừa dò hỏi đám người lánh nạn trong quán trà, bọn họ nói khắp vùng U Châu này đang lan truyền tin đồn về việc giặc *Hoàng Cân* do ba anh em nhà họ Trương lãnh đạo sắp sửa khởi binh tạo phản quy mô lớn. Đặc biệt, ngay tại huyện *Trác Quận* này, gần đây xuất hiện ba vị hào kiệt dũng mãnh, một người tên *Lưu Bị* tự *Huyền Đức*, một người tên *Quan Vũ* tự *Vân Trường*, và một người tên *Trương Phi* tự *Dực Đức*. Bọn họ đang kêu gọi hương dũng, chuẩn bị kết nghĩa vườn đào để chiêu binh mãi mã, thảo phạt giặc dữ bảo vệ bách tính lầm than."
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe những cái tên huyền thoại ấy vang lên từ miệng của *Triệu Vân*, trái tim ngươi bỗng chốc đập rộn ràng. Vận mệnh lịch sử thời Tam Quốc đang bắt đầu xoay chuyển ngay trước mắt ngươi. Việc ngự kiếm đưa mọi người rời khỏi vùng đất dữ *Chân Định* không chỉ giúp bảo toàn tính mạng cho họ, mà vô tình đã đưa ngươi và *Triệu Tử Long* đến đúng điểm khởi đầu của một thời đại đại loạn anh hùng tranh bá.\nTuy nhiên, với thể trạng hiện tại mới chỉ hồi phục được khoảng hai phần chân nguyên, ngươi biết mình không thể hành động vội vã. Ngôi quán trà dột nát này tuy tạm thời yên tĩnh, nhưng thiên khí xung quanh vẫn lờ mờ phảng phất những dải hắc khí mỏng manh của oán oán khí chiến tranh đang tụ tập về hướng Trác Quận. \nNgươi khẽ vịn vào thân cây liễu chậm rãi đứng dậy, vạt đạo bào xám nhẹ nhàng rủ xuống. *Hạ Hầu Khinh Y* vội vàng đứng bên cạnh đỡ lấy cánh tay ngươi để giữ thăng bằng. Ánh mắt ngươi sắc lạnh nhìn về phía con đường quan lộ sầm uất dẫn vào thành Trác Quận ở phía xa, trong đầu bắt đầu vạch ra những bước đi tiếp theo cho hành trình trừ ma cứu thế của mình."
+        }
+      ]
+    },
+    {
+      "id": "d8ea29b4-785a-4842-8279-f1285ec7f6a6",
+      "type": "user_custom_action",
+      "content": "'Mọi người tạm thời bình tĩnh. Dù khởi nghĩa Hoàng Cân đã phát động cũng cần 1 khoảng thời gian nữa mới lan tới đây. Chúng ta tạm thời cứ nghỉ lại tại đây trước. Đưa bạch hổ để ta kiểm tra.'  Sau khi kiểm tra 1 lượt thương thế của Bạch Hổ, ngươi nói: 'Không có vấn đề gì đáng ngại. Từ nay ta sẽ gọi ngươi là Tiểu Bạch nhé. Mẹ ngươi đã nhờ ta chăm sóc, ngươi có nguyện ý theo ta không. Nếu không ta sẽ tìm 1 nơi linh khí dồi dào để ngươi tới đó'"
+    },
+    {
+      "id": "6c4ba1d9-26ad-4ca7-a265-068e48b19c7f",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "[WORLD_NPC: id=\\\nGió chiều từ phương bắc thối về lồng lộng, cuốn theo những chiếc lá vàng rụng rơi lả tả trên nền đất cát ẩm ướt của *Quán trà hoang ngoại vi Trác Quận*. Không gian u ám tĩnh mịch, thỉnh thoảng lại phảng phất những dải hắc khí oán niệm mỏng manh, tựa như điềm báo về một cơn bão táp chiến loạn sắp sửa quét qua vùng đất này. Bên trong gian quán trà đơn sơ dựng bằng tre nứa xập xệ, *Diệp Thần* khẽ điều hòa một luồng chân nguyên tinh thuần vừa mới khôi phục hoàn toàn rực rỡ trong đan điền, khiến toàn thân hắn toát ra một tầng linh quang nhàn nhạt ấm áp. Nhìn gương mặt vẫn còn vương nét lo âu, mỏi mệt của những người đồng hành sau chuyến ngự kiếm phi hành đầy bão táp, hắn khẽ mỉm cười, giọng nói trầm ổn, tự tin vang lên đầy sức thuyết phục:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Mọi người tạm thời bình tĩnh. Dù khởi nghĩa Hoàng Cân đã phát động cũng cần một khoảng thời gian nữa mới lan tới đây. Chúng ta tạm thời cứ nghỉ lại tại đây trước. Đưa bạch hổ để ta kiểm tra."
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe lời khuyên bảo đầy điềm tĩnh của người thiếu niên đạo sĩ, *Hạ Hầu Khinh Y* và *Triệu Vân* đều khẽ thở phào nhẹ nhõm, mọi sự căng thẳng, nôn nóng trong lòng bỗng chốc tan biến đi phần nào. Nàng tỳ nữ *Tiểu Thúy* khẽ khom người, hai tay run rẩy nhưng vô cùng cẩn trọng dâng chú tiểu *Bạch Hổ* vẫn còn đang nhắm nghiền hai mắt lên trước mặt hắn. *Diệp Thần* đón lấy thân hình mềm mại, nhỏ nhắn của chú linh thú nhỏ vào lòng, chầm chậm truyền một dòng chân khí tiên gia ấm áp, tinh khiết vào khắp kỳ kinh bát mạch của nó. Hắn tỉ mỉ lật xem từng thớ da thịt bị ma khí gặm nhấm, cảm nhận luồng sát khí đen nhạt đêm qua nay đã hoàn toàn bị thanh tẩy dưới ánh nắng ban trưa ấm áp. Sau một lúc khảo sát kỹ lưỡng, hắn ngước mắt lên nhìn mọi người, ôn hòa nói:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Không có vấn đề gì đáng ngại. Từ nay ta sẽ gọi ngươi là Tiểu Bạch nhé. Mẹ ngươi đã nhờ ta chăm sóc, ngươi có nguyện ý theo ta không? Nếu không, ta sẽ tìm một nơi linh khí dồi dào để ngươi tới đó."
+        },
+        {
+          "type": "narrative",
+          "content": "Lời nói của hắn vừa dứt, một hiện tượng kỳ diệu bỗng chốc xảy ra khiến không gian bên trong quán trà hoang dã như ngưng đọng lại. Chú hổ con vốn đang nằm im lìm bỗng khẽ cựa quậy, đôi mắt to tròn rực sắc hoàng kim hoàng gia chầm chậm mở ra. Nó nhìn *Diệp Thần* bằng một ánh mắt vô cùng thông tuệ, dường như hoàn toàn hiểu được thứ ngôn ngữ tiên gia mà hắn vừa thốt ra. Nó khẽ kêu lên một tiếng nhỏ nhẹ ríu rít, rồi chủ động rướn cái đầu nhỏ nhắn, phủ đầy lông tơ trắng muốt cọ cọ vào lòng bàn tay ấm áp của hắn như một sự quy phục và đồng ý tuyệt đối. Chứng kiến cảnh tượng thần kỳ và đầy tính nhân văn ấy, *Hạ Hầu Khinh Y* và *Triệu Vân* đứng bên cạnh không khỏi ngẩn ngơ. Trái tim chính trực, giàu lòng trắc ẩn của nàng quận chúa họ Hạ Hầu khẽ lỗi nhịp, trong mắt nàng lấp lánh những tia sáng cảm phục, kính ngưỡng sâu sắc trước sự nhân từ và điềm tĩnh vô song của gã đạo sĩ trẻ tuổi này. *Triệu Vân* cũng khẽ vuốt cằm, thầm thán phục bản lĩnh thấu hiểu vạn vật của người bạn mới kết giao.\nBên ngoài hiên quán, tiếng xào xạc của những bụi cỏ gai hoang dã cọ vào nhau dưới sức gió tạo nên những thanh âm u uất. *Quán trà hoang ngoại vi Trác Quận* lúc này vô cùng vắng vẻ, chỉ có bóng dáng của một lão chủ quán già nua đang lúi húi dọn dẹp những chén sành sứt mẻ trong góc tối, thi thoảng lại lén đưa mắt nhìn về phía nhóm người xa lạ với vẻ e dè, sợ sệt. Lão đã sống cả đời ở vùng biên thùy này, thừa hiểu rằng những kẻ mang theo đao kiếm hay khoác trên mình đạo bào dị thường vào thời buổi này đều không phải là những kẻ tầm thường mà một người phàm phu tục tử có thể tùy tiện trêu chọc. \n*Diệp Thần* nhẹ nhàng đặt chú hổ con *Tiểu Bạch* nằm cuộn tròn bên cạnh vạt đạo bào xám của mình, bàn tay hắn vẫn đều đặn vuốt ve lớp lông tơ mềm mại của nó. Luồng chân nguyên tinh thuần lưu chuyển trong cơ thể hắn sau chuyến bay dài đã hoàn toàn quy nguyên về đan điền, dồi dào và ấm áp hơn trước. Hắn cảm nhận rõ rệt rằng, mỗi khi hắn sử dụng đạo thuật cứu người hay trừ ma, sự liên kết giữa hắn và cuộn thiên thư *Thái Bình Yếu Thuật* lại càng thêm phần khăng khít, tinh tiến.\n*Hạ Hầu Khinh Y* chậm rãi tiến lại gần, tà áo lụa phấn hồng khẽ lay động, mang theo một làn hương thanh nhã dịu nhẹ của hoa bách hợp làm loãng đi mùi khói bụi dọc đường. Nàng tự tay rót một chén trà nóng từ chiếc ấm đất thô sơ đặt trên bàn gỗ, nhẹ nhàng dâng đến trước mặt ngươi. Đôi mắt phượng của nàng nhìn ngươi đầy ân cần và dịu dàng, giọng nói thanh tao như tiếng khánh ngọc vang lên:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Diệp Thần huynh, xin huynh hãy dùng chút trà nóng để nhuận sắc. Dọc đường ngự kiếm phi hành, huynh đã vì bọn ta mà hao tổn quá nhiều tinh lực, nếu không có sự chở che của huynh, có lẽ bọn ta đã sớm bỏ mạng dưới vuốt sắc của đám yêu ma phương bắc kia rồi."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi nhận lấy chén trà sành từ đôi bàn tay mềm mại của nàng, cảm nhận hơi ấm lan tỏa qua lòng bàn tay, khẽ mỉm cười đáp lễ:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y muội quá khách khí rồi. Chúng ta đã kết nghĩa bằng hữu trong miếu cổ, bảo vệ muội và mọi người cũng chính là bổn phận của ta. Huống hồ, nếu không có sự dũng cảm của muội dâng tặng thịt tươi cho Tiểu Bạch dọc đường, chúng ta cũng khó lòng có được sự trợ giúp của linh thú trấn núi."
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe câu trả lời đầy phóng khoáng và tinh tế của ngươi, đôi má trắng ngần như tuyết của *Hạ Hầu Khinh Y* khẽ ửng lên một vệt hồng nhạt đầy e thẹn. Nàng khẽ nghiêng đầu nhìn chú hổ con đang ngủ say sưa bên chân ngươi, tấm lòng trắc ẩn sâu sắc trong nàng bỗng chốc dâng trào. Nàng ngồi xuống chiếc ghế băng đối diện, đôi tay chống cằm, chăm chú quan sát từng cử động nhỏ của ngươi với một sự tò mò và rung động thầm kín. Một quận chúa vốn quen sống trong lầu son gác tía, nay lại chấp nhận đồng hành cùng một gã đạo sĩ hoang dã, chịu đựng gió sương chiến loạn, tất cả chỉ vì nàng đã tìm thấy ở ngươi một điểm tựa vô cùng vững chãi và một lý tưởng trừ ma vệ đạo cao cả mà nàng hằng tìm kiếm.\nCùng lúc đó, *Triệu Vân* đứng bên cạnh hiên quán, tay vẫn nắm chặt cây trường thương bạc lấp lánh ngân quang. Khí thế của vị danh tướng tương lai lúc này đã hoàn toàn trầm ổn trở lại sau khi hợp thể với *Bạch Hổ Sơn Linh*. Dù bộ giáp đầu hổ thần thánh đã thu hồi vào trong cơ thể, nhưng sâu trong thần thức của hắn vẫn lưu lại một tầng hộ thể tinh thuần của linh thú, khiến khí phách của hắn thêm phần uy nghiêm, lẫm liệt. Hắn bước vào trong quán, cúi người hành lễ với ngươi rồi trầm giọng thảo luận về thế cục:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Diệp huynh, ta vừa quan sát dải thiên tượng ở phía đông bắc của thành *Trác Quận*. Tuy ban ngày ánh nắng có phần xua tan đi tà khí, nhưng ta vẫn cảm nhận được một luồng sát khí vô cùng nặng nề đang âm ỉ tụ hội về hướng này. Những tin đồn về giặc *Hoàng Cân* sắp sửa nổi loạn có lẽ không phải là giả. Chúng ta hiện tại đang ở ngoại vi, nếu muốn tiến vào trong thành nghe ngóng thêm chi tiết, e rằng phải chuẩn bị thật chu đáo."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi nhấp một ngụm trà đắng, vị thanh ngọt đọng lại nơi cổ họng giúp tinh thần thêm phần minh mẫn. Với tư duy nhạy bén của một cựu gián điệp kiếp trước, ngươi lập tức phân tích và đưa ra nhận định:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Triệu huynh nói rất phải. Sát khí tích tụ từ chiến loạn chính là nguồn thức ăn tốt nhất cho lũ yêu ma và tà thuật của *Thái Bình Đạo*. Ba anh em nhà họ Trương chắc chắn đang dùng oán khí của vạn dân lầm than để nuôi dưỡng dã tâm của mình. Tuy nhiên, Trác Quận lúc này vẫn còn nằm dưới sự kiểm soát của quân triều đình, giặc Hoàng Cân chưa thể lập tức đánh chiếm nơi đây. Điều chúng ta cần nhất bây giờ là tìm cách tiếp cận với ba vị hào kiệt *Lưu Bị*, *Quan Vũ*, và *Trương Phi* mà huynh vừa nhắc tới ban nãy."
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vân* nghe vậy liền gật đầu đồng tình, ánh mắt dũng mãnh rực sáng lên một tia hy vọng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Diệp huynh anh minh. Ta cũng nghe nói ba người họ đều là những bậc nghĩa sĩ có chí lớn, võ nghệ siêu quần và tấm lòng trung nghĩa sắt đá. Nếu chúng ta có thể kết giao và đồng hành cùng họ thảo phạt giặc dữ, đó chắc chắn sẽ là một đại cơ duyên để trừ ma vệ đạo, cứu giúp bách tính."
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* đứng bên cạnh nghe cuộc đối thoại đầy chí khí của hai người, lòng nàng cũng rạo rực một niềm kiêu hãnh của một đệ tử phái *Thanh Thành*. Nàng nắm chặt chuôi thanh *Thanh Thủy kiếm* đã được thu hồi vào vỏ, dứt khoát nói:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Ta cũng muốn đi cùng các huynh! Phụ thân ta hiện tại vẫn chưa rõ tung tích ở *Chân Định*, ta không thể ngồi yên một chỗ chờ đợi. Kiếm pháp của phái Thanh Thành tuy chưa đạt đến cảnh giới tiên gia thượng thừa như đạo thuật của Diệp Thần huynh, nhưng cũng đủ để giúp hai người diệt trừ lũ xác sống ô hợp kia!"
+        },
+        {
+          "type": "narrative",
+          "content": "Nhìn vẻ mặt bướng bỉnh nhưng vô cùng quyết đoán của nàng tiểu thư họ Hạ Hầu, ngươi không khỏi bật cười nhẹ. Sự quan tâm đặc biệt và tinh thần trượng nghĩa của nàng khiến ngươi cảm thấy vô cùng ấm áp giữa thời buổi loạn thế này. Ngươi khẽ gật đầu, đồng ý để nàng đồng hành.\nLúc này, gió chiều ngoài lộ quan lộ bỗng nhiên thổi mạnh hơn, kéo theo những làn sương mù xám xịt nhạt từ phía rừng thông rậm rạp sườn núi tràn xuống. Mùi ẩm ướt của đất sũng nước sau cơn giông bão vẫn còn vương vấn, báo hiệu màn đêm sắp sửa buông xuống và mang theo những hiểm họa khôn lường của bóng tối ma đạo. Chú hổ con *Tiểu Bạch* khẽ cựa mình, rúc sâu vào vạt áo bào xám của ngươi để tìm kiếm hơi ấm, phát ra những tiếng gầm gừ nhỏ nhẹ đầy ỷ lại.\nNgươi đứng dậy, vạt đạo bào xám rách rưới khẽ bay theo gió. Với sự khôi phục hoàn toàn của chân nguyên dồi dào trong đan điền, ngươi đã sẵn sàng đưa ra quyết định tiếp theo cho cuộc hành trình vĩ đại của mình và những người đồng hành dũng cảm dưới chân núi *Thường Sơn*."
+        }
+      ]
+    },
+    {
+      "id": "7607211b-74ec-4f47-8e84-e905705e8eb2",
+      "type": "user_custom_action",
+      "content": "'Không biết Triệu huynh còn nhớ vấn đề đã hỏi ta lúc ở miếu sơn thần không? Lưu Bị chính là minh chủ mà huynh tìm kiếm. Tuy nhiên bây giờ vẫn chưa phải lúc. Người mà huynh cần phò tá bây giờ là Công Tôn Toản. Huynh hãy lên đường sớm đi. Thực ra huynh và Khinh Y vốn có 1 đoạn nhân duyên. Nhưng kết quả lại là cả 2 không đến được với nhau, Khinh Y sẽ chết. Ta ở đây là để cứu Khinh Y nhưng nhân quả của huynh và Khinh Y cũng đã tận. Không nên cưỡng cầu. Đây là tốt cho cả huynh và muội ấy. Ngày mai huynh hãy lên đường tìm Công Tôn Toản đi. Ta sẽ đưa Khinh Y đi giải sát họa'"
+    },
+    {
+      "id": "91205508-4ad4-4536-92da-1b848f41a022",
+      "type": "user_custom_action",
+      "content": "'Không biết Triệu huynh còn nhớ vấn đề đã hỏi ta lúc ở miếu sơn thần không? Lưu Bị chính là minh chủ mà huynh tìm kiếm. Tuy nhiên bây giờ vẫn chưa phải lúc. Người mà huynh cần phò tá bây giờ là Công Tôn Toản. Huynh hãy lên đường sớm đi. Thực ra huynh và Khinh Y vốn có 1 đoạn nhân duyên. Nhưng kết quả lại là cả 2 không đến được với nhau, Khinh Y sẽ chết. Ta ở đây là để cứu Khinh Y nhưng nhân quả của huynh và Khinh Y cũng đã tận. Không nên cưỡng cầu. Đây là tốt cho cả huynh và muội ấy. Ngày mai huynh hãy lên đường tìm Công Tôn Toản đi. Ta sẽ đưa Khinh Y đi giải sát họa'"
+    },
+    {
+      "id": "e39debf2-9bb4-4e0b-8d0b-0aaadd3798b6",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Trong gian *Quán trà hoang ngoại vi Trác Quận* cũ nát, ánh hoàng hôn đỏ quạch như máu loãng rỉ ra từ chân trời phía Tây, hắt những bóng dài ma quái qua những khe liếp nứa xiêu vẹo. Gió chiều rít gào qua những rặng liễu rủ, mang theo hơi lạnh thấu xương và cả cái mùi vị nồng đục, tanh tao của oán khí phương Bắc đang ngày một đậm đặc. Giữa bầu không khí ngột ngạt và đầy áp lực ấy, *Diệp Thần* ngồi tĩnh tọa trên chiếc ghế băng dài sứt mẻ, tay khẽ vuốt ve bộ lông mềm mại của chú hổ con *Tiểu Bạch* đang nằm cuộn tròn trong lòng. Đôi mắt hắn, lúc này thâm trầm và sâu thẳm như chứa đựng cả dòng chảy của thiên niên kỷ, chậm rãi ngước lên nhìn thẳng vào hai người bạn đồng hành đang chìm trong sự hoang mang. Một bầu không khí im lặng đến đáng sợ bao trùm, chỉ còn tiếng ấm trà đất nung sôi sùng sục trên bếp than hồng tàn lụi. *Diệp Thần* hít một hơi thật sâu, luồng chân nguyên tinh thuần lưu chuyển trong cơ thể hắn bỗng chốc rung động, thanh âm cất lên mang theo sự lạnh lẽo nhưng cũng đầy trắc ẩn của kẻ nắm giữ thiên cơ:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Không biết Triệu huynh còn nhớ vấn đề đã hỏi ta lúc ở miếu sơn thần không? Lưu Bị chính là minh chủ mà huynh tìm kiếm. Tuy nhiên bây giờ vẫn chưa phải lúc. Người mà huynh cần phò tá bây giờ là Công Tôn Toản. Huynh hãy lên đường sớm đi."
+        },
+        {
+          "type": "narrative",
+          "content": "Lời nói của hắn vừa dứt, *Triệu Vân* bỗng chốc chấn động mạnh, cây trường thương bạc dựng bên cạnh khẽ rung lên bần bật như cảm ứng được tâm tình hỗn loạn của chủ nhân. *Diệp Thần* không dừng lại, hắn nhìn sang *Hạ Hầu Khinh Y* – nàng lúc này đang đứng tựa vào cột quán trà, gương mặt thanh tú dưới ánh hoàng hôn tà mị hiện rõ vẻ lo âu khôn tả. Hắn khẽ thở dài, thanh âm trở nên trầm mặc hơn:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Thực ra huynh và Khinh Y vốn có một đoạn nhân duyên. Nhưng kết quả lại là cả hai không đến được với nhau, Khinh Y sẽ chết. Ta ở đây là để cứu Khinh Y nhưng nhân quả của huynh và Khinh Y cũng đã tận. Không nên cưỡng cầu. Đây là tốt cho cả huynh và muội ấy. Ngày mai huynh hãy lên đường tìm Công Tôn Toản đi. Ta sẽ đưa Khinh Y đi giải sát họa."
+        },
+        {
+          "type": "narrative",
+          "content": "Toàn bộ gian quán trà bỗng chốc rơi vào một sự trầm mặc chết chóc. Chỉ có tiếng gió rít qua mái rạ mục nát như tiếng khóc than của quỷ thần. *Triệu Vân* đứng chôn chân tại chỗ, đôi bàn tay dũng mãnh vốn có thể quét ngang muôn quân nay lại run rẩy kịch liệt. Hắn nhìn miếng ngọc bội hình rồng trong ngực – thứ tín vật vừa mới hôm qua còn ấm áp, nay lại lạnh buốt như băng giá. Lời tiên tri của *Diệp Thần* không chỉ là một lời cảnh báo, mà nó giống như một thanh kiếm sắc lẹm chém đứt sợi tơ duyên mỏng manh mà hắn hằng ấp ủ. Hắn nghĩ về những trận chiến đã qua, về lôi đình thần thánh của *Diệp Thần* và cả sự hy sinh bi tráng của *Bạch Hổ Sơn Linh*. Một kẻ có thể sai khiến thiên địa lôi đình, lại có thể gọi được linh thú trấn núi, lời của người đó sao có thể là lời nói suông? \nTrong khi đó, *Hạ Hầu Khinh Y* cảm thấy toàn thân lạnh toát, hơi thở trở nên dồn dập, đứt quãng. \"Khinh Y sẽ chết\" – bốn chữ ấy như bùa chú của tử thần dội thẳng vào thức hải của nàng. Nàng nhìn xuống đôi bàn tay mình, đôi bàn tay đã từng nhuốm máu của đám *Hoạt Thi* ở phủ đệ, rồi lại nhìn sang *Diệp Thần*. Một nỗi sợ hãi nguyên thủy dâng trào trong lòng nàng, nhưng ngay sau đó, khi nhìn thấy sự điềm tĩnh tuyệt đối và ánh mắt kiên định của thiếu niên đạo sĩ, nàng lại cảm thấy một sự tin tưởng mãnh liệt đến kỳ lạ. Nàng biết, nếu trên đời này có ai có thể nghịch thiên cải mệnh, cứu nàng khỏi lưỡi hái tử thần, thì kẻ đó chỉ có thể là người đang ngồi trước mặt đây.\nKhoảng không gian nhỏ hẹp của quán trà hoang vắng bỗng chốc trở nên chật chội bởi những suy nghĩ cuồn cuộn của ba con người giữa thời đại loạn lạc. Ánh đèn dầu leo lét trên bàn khẽ chập chờn trước một luồng gió lạnh từ ngoài hiên thốc vào, mang theo mùi của đất ẩm và sự u uất của tử khí phương Bắc. Đêm Trác Quận bắt đầu buông xuống, kéo theo những bóng đen ma quái bao phủ lấy con đường quan lộ sầm uất phía xa.\nSự thật tàn khốc mà *Diệp Thần* vừa phơi bày không khác gì một gáo nước lạnh tạt thẳng vào những mơ mộng của tuổi trẻ. *Triệu Vân* – vị anh hùng tương lai của đất *Thường Sơn* – lần đầu tiên trong đời cảm thấy sự bất lực trước vòng xoáy của nhân quả. Hắn lặng lẽ bước ra hiên quán, đứng dưới rặng liễu rủ, nhìn về phía những vì sao mờ nhạt đang dần hiện ra trên bầu trời đêm u ám. Trong đầu hắn hiện ra hình ảnh của *Công Tôn Toản* và cả cái tên *Lưu Bị* mà *Diệp Thần* đã nhắc đến. Vận mệnh của một chiến thần dường như đã được vạch sẵn, và cái giá phải trả chính là sự chia ly đầy đau đớn với người con gái mà hắn dành trọn tình cảm. Hắn đứng đó suốt một canh giờ, bóng hình cô độc dưới ánh trăng khuyết tà mị như hòa vào màn sương mù xám xịt của núi rừng.\nBên trong quán, *Hạ Hầu Khinh Y* vẫn chưa hết bàng hoàng. Nàng tiến lại gần *Diệp Thần*, tà áo phấn hồng khẽ lay động, giọng nói run rẩy nhưng vẫn cố giữ lấy sự thanh tao của một quận chúa:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Diệp Thần huynh... huynh nói ta sẽ chết sao? Cái chết đó... là do thiên mệnh định đoạt, hay là do tà ma phương Bắc gây ra?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* vuốt ve chú hổ con đang ngủ say, khẽ thở dài một tiếng trầm mặc. Hắn nhìn nàng, trong ánh mắt không có sự thương hại, mà chỉ có một ý chí sắt đá muốn thay đổi kịch bản nghiệt ngã của lịch sử:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y, thiên mệnh vốn là thứ có thể xoay chuyển nếu người nắm giữ sức mạnh dám đứng ra gánh vác. Ta đã hứa với Sơn linh sẽ chăm sóc Tiểu Bạch, cũng đã hứa sẽ đưa muội thoát khỏi sát họa. Nhân duyên của muội và Triệu huynh tuy tận, nhưng sinh mạng của muội từ nay nằm trong tay ta. Đừng sợ, đêm nay muội hãy nghỉ ngơi cho tốt, sáng sớm mai khi Triệu huynh khởi hành, chúng ta cũng sẽ bắt đầu hành trình của mình."
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe những lời cam kết đầy sức nặng của ngươi, *Hạ Hầu Khinh Y* khẽ gật đầu, sự sợ hãi trong mắt nàng dần nhường chỗ cho một sự lệ thuộc và tin tưởng tuyệt đối. Nàng ngồi xuống bên cạnh ngươi, hai tay ôm lấy đầu gối, nhìn ngọn đèn dầu đang lụi tàn dần. Nàng cảm thấy một sự rung động sâu sắc nơi đáy lòng; vị đạo sĩ này không chỉ cứu mạng nàng, mà còn đang gánh vác cả vận mệnh của nàng trên vai mình.\nThời gian chậm rãi trôi qua, đêm Trác Quận trở nên yên tĩnh một cách quỷ dị. Mười hai giờ đồng hồ tiếp theo là sự chuẩn bị lặng lẽ của mỗi người. *Triệu Vân* sau khi đứng một mình dưới hiên quán đã quay vào, hắn không nói lời nào, chỉ lặng lẽ lau chùi cây trường thương bạc của mình cho đến khi nó sáng loáng dưới ánh trăng. Mỗi đường vải lướt trên thân thương đều mang theo sự quyết tâm và chấp nhận. Hắn đã chấp nhận lời tiên tri, chấp nhận rời khỏi *Khinh Y* để đi tìm con đường của một minh chủ, vì hắn hiểu rằng, chỉ có sự lớn mạnh của bản thân mới là cách tốt nhất để trả ơn cho sự cứu mạng của *Diệp Thần*.\nSáng sớm hôm sau, khi những tia nắng đầu tiên chưa kịp xuyên qua màn sương mù dày đặc của vùng ngoại vi Trác Quận, tiếng chim kêu lanh lảnh đã phá tan bầu không khí tịch mịch. *Triệu Vân* đã chuẩn bị xong xuôi hành trang đơn giản. Hắn đứng trước cửa quán trà, bộ chiến bào xám tuy đã cũ nhưng khí phách hiên ngang của hắn lại mạnh mẽ hơn bao giờ hết. Hắn nhìn *Diệp Thần* và *Hạ Hầu Khinh Y* một lần cuối, ánh mắt chứa đựng hàng ngàn lời muốn nói nhưng tất cả đều kết tinh thành một cái chắp tay hành lễ đầy kính trọng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Diệp huynh, ơn tái sinh và lời chỉ giáo của huynh, *Triệu Vân* xin tạc dạ ghi lòng. Ta sẽ lên đường tìm *Công Tôn Toản* ngay bây giờ. *Khinh Y*... xin phó thác cho huynh chăm sóc. Mong huynh bảo trọng, mong chúng ta có ngày tái ngộ trên chiến trường thảo phạt giặc dữ!"
+        },
+        {
+          "type": "narrative",
+          "content": "Dứt lời, *Triệu Vân* dứt khoát quay lưng, sải bước dài hướng về phía con đường quan lộ dẫn vào phía Bắc. Bóng dáng hắn nhanh chóng nhạt dần rồi tan biến vào màn sương mù buổi sớm, để lại một khoảng trống vắng lặng nơi quán trà hoang.\n*Hạ Hầu Khinh Y* đứng nhìn theo bóng dáng người thương cũ cho đến khi không còn thấy gì nữa. Nàng khẽ gạt một giọt lệ nơi khóe mắt, rồi quay lại nhìn ngươi. Lúc này, trên người nàng không còn vẻ yếu đuối của một tiểu thư khuê các, mà là sự kiên nghị của một người đã chấp nhận đối mặt với sát họa để cầu sinh."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Diệp Thần huynh, Triệu huynh đã đi rồi. Chúng ta bây giờ sẽ làm gì? Sát họa mà huynh nhắc tới... bao giờ nó sẽ đến?"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi đứng dậy, vạt đạo bào xám rách rưới lay động trong gió sớm. Chú hổ con *Tiểu Bạch* cũng tỉnh dậy, nó vươn vai rồi nhảy phắt lên vai ngươi, đôi mắt hoàng kim rực sáng oai nghiêm. Ngươi cảm nhận rõ rệt sự dao động của địa khí xung quanh quán trà; oán khí từ phía thành *Trác Quận* đang ngày một đậm đặc hơn, báo hiệu rằng sự kiện kết nghĩa vườn đào và cuộc khởi nghĩa của giặc *Hoàng Cân* đã ở rất gần."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y, sát họa vốn không phải là một thời điểm cố định, nó là sự tích tụ của uế khí quanh nàng do vận mệnh bị xáo trộn. Bây giờ, chúng ta sẽ vào thành *Trác Quận*. Ta cần mua một số dược liệu và giấy bùa thượng hạng để chuẩn bị một trận pháp hộ mệnh cho nàng. Hơn nữa, ta cũng muốn chứng kiến những người anh hùng của thời đại này xuất thế."
+        },
+        {
+          "type": "narrative",
+          "content": "Lúc này, quán trà đã bắt đầu có vài lữ khách hành hương đi ngang qua. Họ bàn tán xôn xao về việc thái thú *Lưu Yên* đang dán cáo thị chiêu binh khắp nơi. Mùi trà thơm nồng từ trong quán bốc ra, nhưng nó không che giấu được cái mùi hôi hám, ẩm ướt của tử khí đang bám theo dấu chân của những kẻ chạy nạn từ phương Bắc tràn xuống.\nNgươi dẫn theo *Hạ Hầu Khinh Y* và chú hổ con bước ra khỏi quán trà hoang. Mỗi bước chân của ngươi trên mặt đất sũng nước mưa đều để lại một dấu ấn linh lực mờ nhạt, tựa như đang phác họa lại bản đồ của vận mệnh. Thành *Trác Quận* sầm uất nhưng đầy rẫy hiểm họa đang hiện ra phía trước."
+        }
+      ]
     }
   ],
   "choices": [
-    "Ngươi cố nén cơn đau phản phệ, gượng dậy thi triển Linh Phong Thuật để tạo ra một trận cuồng phong lớn thổi tạt độc sương đi, giải vây tạm thời cho Triệu Vân và Sơn Linh. {Tỷ lệ thành công: 55%, Hậu quả/Phần thưởng: Thổi bay sương độc giúp đồng đội hồi phục tầm nhìn, nhưng cơ thể ngươi sẽ bị tiêu hao kiệt quệ chân nguyên nghiêm trọng hơn}",
-    "Ngươi hô lớn bảo Triệu Vân và Sơn Linh lùi lại phòng thủ, chấp nhận mạo hiểm dồn chút chân nguyên tàn dư thi triển Dẫn Lôi thuật trực tiếp vào tâm đám Hoạt Thi để dùng lôi hỏa thanh tẩy độc sương tà ác. {Tỷ lệ thành công: 45%, Hậu quả/Phần thưởng: Lôi hỏa khắc chế tà độc giúp tiêu diệt nhanh đám xác sống, nhưng có nguy cơ bị phản phệ nặng nề hơn khiến ngươi ngất đi}",
-    "Ngươi đề xuất cùng Triệu Vân và Sơn Linh lập tức rút lui khỏi phạm vi ngã ba đường, di chuyển nhanh về phía con đường bên phải (hậu viên rậm rạp) để tạm thời tránh né độc sương dâng cao. {Tỷ lệ thành công: 70%, Hậu quả/Phần thưởng: Bảo toàn được lực lượng và thoát khỏi vòng vây của sương độc, nhưng sẽ mất dấu vết của đám Hoạt Thi và khiến hành trình tìm kiếm Khinh Y bị trì hoãn}",
-    "Ngươi mượn linh tính thần thánh của Bạch Hổ Sơn Linh bằng cách dán một lá phù linh quang lên trán nó, kích phát hào quang hộ thể của linh thú để tạo ra một lá chắn tạm thời bảo vệ cả ba phá vây. {Tỷ lệ thành công: 50%, Hậu quả/Phần thưởng: Tạo ra lá chắn linh quang đẩy lùi độc sương và bảo vệ đồng đội an toàn, nhưng linh thú sẽ bị tiêu hao linh lực nặng nề và trở nên suy yếu trong trận chiến tiếp theo}"
+    "Vào thành Trác Quận tìm đến khu chợ dược liệu để mua nguyên liệu chế tạo bùa chú hộ thân cho Khinh Y. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Tăng cường phòng thủ linh hồn cho Khinh Y, đồng thời nghe ngóng được vị trí chính xác của Lưu Bị}",
+    "Dẫn Khinh Y đến nơi treo cáo thị chiêu binh để quan sát khí vận của các anh hùng đang tụ hội. {Tỷ lệ thành công: 70%, Hậu quả/Phần thưởng: Nhận biết được chân mệnh thiên tử và các tướng lĩnh mạnh mẽ, mở ra cơ hội can thiệp vào lịch sử}",
+    "Tìm một nơi yên tĩnh trong thành để truyền dạy cho Khinh Y một vài khẩu quyết cơ bản của Thái Bình Yêu Thuật nhằm tự vệ. {Tỷ lệ thành công: 60%, Hậu quả/Phần thưởng: Khinh Y bắt đầu có linh lực sơ khai, giảm bớt sát họa đang đeo bám nàng}",
+    "Đi thẳng đến quán rượu sầm uất nhất Trác Quận để tìm hiểu về các thế lực tà ma đang trà trộn trong thành. {Tỷ lệ thành công: 50%, Hậu quả/Phần thưởng: Phát hiện ra mật thám của Thái Bình Đạo, nhưng có nguy cơ bị chúng phát hiện và tấn công sớm}"
   ],
   "gameMode": "EXPLORATION",
   "activeTrade": {
@@ -1377,5 +2025,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 16
+  "adventureTurnCount": 22
 }
