@@ -136,8 +136,12 @@ describe('K2 - a 429 on the active key hands the same request to the next key', 
       ['A', MAIN],
       ['A', SPARE_1],
     ]);
+    // key_switch_reason/detail (2026-08-28): Google's own message rides along on the
+    // switch event so a caller's console can show WHY a key was dropped instead of
+    // discarding it, same as the K3 `test_quota_429_detail_still_carries_the_api_message`
+    // case below for the final-failure path.
     expect(events.filter((e) => e.type === 'key_switch')).toEqual([
-      { type: 'key_switch', model: 'A', elapsed_ms: 0, key_index: 1 },
+      { type: 'key_switch', model: 'A', elapsed_ms: 0, key_index: 1, key_switch_reason: 'quota_429', detail: QUOTA_BODY },
     ]);
     expect(h.deps.session.log.at(-1)).toMatchObject({ label: 'success', key_index: 1 });
   });

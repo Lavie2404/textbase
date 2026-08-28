@@ -127,6 +127,14 @@ export interface AiEvent {
   error_class?: ErrorClass;
   /** `key_switch` only: pool index of the key the call is switching TO. */
   key_index?: number;
+  /**
+   * `key_switch` only: why the PREVIOUS key was dropped, and Google's own
+   * error message for it (never the key value itself). Diagnostic-only —
+   * added 2026-08-28 so a 429 that survives key rollover is not silently
+   * discarded before it ever reaches a console the player can read.
+   */
+  key_switch_reason?: 'quota_429' | 'key_rejected';
+  detail?: string;
 }
 
 /**
@@ -569,8 +577,14 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
     /** True when the most recent attempt returned 200 with an EMPTY candidate. */
     let lastWasEmptyText = false;
 
-    /** Advances to the next key of the pool; false when there is none left. */
-    const switchKey = (): boolean => {
+    /**
+     * Advances to the next key of the pool; false when there is none left.
+     * `reason`/`detail` (Google's own error message for the key just dropped)
+     * ride along on the emitted event purely for diagnostics - `requestAi`
+     * itself never logs anything (DI purity), so without this the caller has
+     * no way to see WHY a key was dropped when the pool still has a spare.
+     */
+    const switchKey = (reason?: 'quota_429' | 'key_rejected', detail?: string): boolean => {
       if (keyPos + 1 >= keyOrder.length) return false;
       keyPos += 1;
       key = keyOrder[keyPos].key;
@@ -581,6 +595,8 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
         model: model ?? '',
         elapsed_ms: deps.clock() - t_start,
         key_index: keyIndex,
+        key_switch_reason: reason,
+        detail,
       });
       return true;
     };
@@ -670,7 +686,7 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
             // when the pool is exhausted is it the caller's quota_429 - with
             // the last suggested wait forwarded (R5). No same-key retry, ever.
             session.key_cooldown_until[key] = nowSec() + quotaCooldownSeconds(outcome.retryAfter, cfg);
-            if (switchKey()) break;
+            if (switchKey('quota_429', outcome.detail)) break;
             return fail('quota_429', joinDetail('HTTP 429', outcome.detail), outcome.retryAfter);
           } else if (status === 403 || status === 404) {
             // Ported from App.tsx: this model is unusable for THIS key - skip it
@@ -691,7 +707,7 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
             // the same request. The rejected key is parked for the session.
             if ((status === 400 || status === 401) && looksLikeKeyRejection(outcome.detail)) {
               session.key_cooldown_until[key] = Number.POSITIVE_INFINITY;
-              if (switchKey()) break;
+              if (switchKey('key_rejected', outcome.detail)) break;
             }
             return fail('config_error', joinDetail('HTTP ' + status, outcome.detail));
           }

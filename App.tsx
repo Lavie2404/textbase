@@ -19016,11 +19016,22 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
                 onEvent: (event) => {
                     if (event.type === 'retrying_network' && onRetry) onRetry(1, maxRetries);
                     if (event.type === 'key_switch') {
-                        console.warn(`[Gemini] Key hiện tại hết quota hoặc bị từ chối, chuyển sang key #${(event.key_index ?? 0) + 1} trong nhóm dự phòng.`);
+                        // Diagnostic (2026-08-28): Google's own error message for the key just
+                        // dropped, previously discarded on a successful rollover. Without this,
+                        // "hết quota dù đã có key dự phòng" is unanswerable from the console —
+                        // this line is the only place that shows WHICH quota (per-minute vs
+                        // per-day) actually tripped.
+                        const reasonLabel = event.key_switch_reason === 'key_rejected' ? 'bị từ chối' : 'hết quota';
+                        console.warn(`[Gemini] Key hiện tại ${reasonLabel}, chuyển sang key #${(event.key_index ?? 0) + 1} trong nhóm dự phòng. Google trả về: ${event.detail || '(không có nội dung lỗi)'}`);
                     }
                 },
             },
         );
+
+        // Diagnostic (2026-08-28): one line per LOGICAL AI call (not per HTTP attempt),
+        // with a running session total, so "1 lượt tốn mấy lệnh gọi?" is answerable by
+        // reading the console during play instead of guessed at from code.
+        console.log(`[Gemini] Lệnh gọi #${aiSessionState.log.length} — loại=${callSite} nền=${background ? 'có' : 'không'} kết quả=${result.ok ? `OK (model=${result.model}, attempts=${result.attempts})` : `${result.label} (attempts=${result.attempts})`}`);
 
         if (result.ok) return result.text;
 
@@ -19028,7 +19039,11 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
         // flags the legacy call sites already branch on.
         const label = result.label;
         if (label === 'quota_429') {
-            const quotaError = new Error('Hệ thống AI đã hết lượt sử dụng miễn phí trong thời gian này (Lỗi 429 - Quá giới hạn quota). Vui lòng đợi ít phút rồi thử lại, hoặc vào "Thiết Lập API Key" ở màn hình chính để dùng API Key Gemini miễn phí của riêng ngươi và tiếp tục ngay lập tức.');
+            // Diagnostic (2026-08-28): Google's own message appended (not replacing the
+            // Vietnamese explanation) — it names the exact quota metric (per-minute vs
+            // per-day) instead of forcing a guess every time this fires.
+            const googleDetail = result.detail ? `\n\n[Chi tiết từ Google]: ${result.detail}` : '';
+            const quotaError = new Error('Hệ thống AI đã hết lượt sử dụng miễn phí trong thời gian này (Lỗi 429 - Quá giới hạn quota). Vui lòng đợi ít phút rồi thử lại, hoặc vào "Thiết Lập API Key" ở màn hình chính để dùng API Key Gemini miễn phí của riêng ngươi và tiếp tục ngay lập tức.' + googleDetail);
             quotaError.isQuotaError = true;
             quotaError.isModelUnavailable = true;
             throw quotaError;
