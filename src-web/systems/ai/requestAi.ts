@@ -194,7 +194,7 @@ export interface AiRequest {
   /**
    * Per-call timeout budget override (plan.md C-10 deviation #2). Highest
    * precedence, above `config.budget_by_call_type`. Use it for the "dai"
-   * narration length mode, which asks for ~3000 words and legitimately needs
+   * narration length mode, which asks for ~1500 words and legitimately needs
    * more than the default `narration_call` pair.
    */
   overrides?: CallBudgetOverrides;

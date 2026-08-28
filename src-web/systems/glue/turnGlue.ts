@@ -581,13 +581,15 @@ export function credentialsAreUsable(creds: AiCredentialsLike | null | undefined
 // 9. Narration budget overrides (code review C-4, plan.md C-10 deviation #2)
 // ---------------------------------------------------------------------------
 
-/** API-1's classification tag that asks API-2 for a 3000+ word narration. */
+/** API-1's classification tag that asks API-2 for a 1500+ word narration. */
 export const LONG_NARRATION_TAG = 'dai';
 
 /**
  * Budget for a `'dai'` turn. The default `narration_call` pair (150s/120s) is
- * sized for a normal-length turn; a 3000-word answer routinely outlives it, and
- * the abort reads to the player as "AI khong phan hoi".
+ * sized for a normal-length turn; a 1500-word answer can still outlive it, and
+ * the abort reads to the player as "AI khong phan hoi". (Target lowered from
+ * 3000 to 1500 words 2026-08-28 per user - 3000 read as too long; the extra
+ * timeout headroom below is kept as-is, it only ever helps.)
  */
 export const LONG_NARRATION_BUDGET = Object.freeze({
   ai_call_timeout_seconds: 240,

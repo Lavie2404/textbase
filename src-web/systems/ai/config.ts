@@ -62,7 +62,7 @@ export const SAFETY_SETTINGS_BLOCK_NONE: readonly SafetySetting[] = [
  *
  * plan.md C-10 DEVIATION #2 (per-call-type budgets): the original C-10 raised a
  * SINGLE uniform pair to 60/45. That is right for short JSON calls but kills a
- * "dai" (~3000 word) narration mid-stream, so the budget became a function of
+ * "dai" (~1500 word) narration mid-stream, so the budget became a function of
  * `call_type` instead of a constant. Documented as a deviation because C-10 as
  * written names one pair for the whole layer.
  */

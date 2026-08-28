@@ -19069,7 +19069,7 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
                     safetySettings: (payload && payload.safetySettings) || SAFETY_SETTINGS_BLOCK_NONE,
                 },
                 // Code review C-4: only set for a narration turn API-1 tagged
-                // 'dai' (3000+ words); everything else keeps the config budget.
+                // 'dai' (1500+ words); everything else keeps the config budget.
                 ...(budgetOverrides ? { overrides: budgetOverrides } : {}),
             },
             {
@@ -27149,7 +27149,7 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
         const tagsLower = chosenScenario.classification_tags.map(t => t.toLowerCase());
 
         const tagInstructions = {
-            'dai': 'Viết cực kỳ dài và chi tiết (trên 3000 từ). Đi sâu vào tả cảnh, bố cục thế giới, diễn biến tâm lý, biểu cảm, âm mưu phức tạp hoặc tình tiết sắc. Tận dụng tối đa từ vựng phong phú.',
+            'dai': 'Viết dài và chi tiết (trên 1500 từ). Đi sâu vào tả cảnh, bố cục thế giới, diễn biến tâm lý, biểu cảm, âm mưu phức tạp hoặc tình tiết sắc. Tận dụng tối đa từ vựng phong phú.',
             'mieuta': 'Tập trung miêu tả cảnh vật, môi trường, và bầu không khí xung quanh.',
             'doithoai': 'Tập trung vào lời thoại qua lại giữa các nhân vật (Luôn nhớ dùng thẻ <dialogue>).',
             'hanhdong': 'Sử dụng câu văn ngắn, nhịp điệu dồn dập, tập trung miêu tả tốc độ và uy lực của đòn đánh.',

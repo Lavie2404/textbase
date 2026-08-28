@@ -87,7 +87,7 @@ export const AI_KNOBS = {
   request_timeout_default: 45,
   /**
    * gdd-01 C.5 / plan.md C-10 DEVIATION #2 (per-call-type budgets).
-   * A `narration_call` in "dai" length mode asks for ~3000 words; measured
+   * A `narration_call` in "dai" length mode asks for ~1500 words; measured
    * round-trips run past the uniform 60s budget and the call was being killed
    * mid-stream, so narration gets its own 150s logical / 120s per-request pair
    * while short JSON/background calls keep 60/45. `narration_request_timeout_default`
