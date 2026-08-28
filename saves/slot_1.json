@@ -1,8 +1,8 @@
 {
   "id": "4f9d4d67-3bc3-4512-8d9f-7c11ab4a0f5d",
-  "currentTurn": 27,
+  "currentTurn": 33,
   "saveVersion": "2.8",
-  "timestamp": "2026-08-28T15:51:11.038Z",
+  "timestamp": "2026-08-28T17:41:30.360Z",
   "gameSettings": {
     "storyTitle": "Tam Quốc Diệt Ma Truyền Kỳ",
     "theme": "Tên: Tam Quốc Diệt Ma Truyền Kỳ | Thể loại: Tiên Hiệp Lịch Sử | Thẻ: Tam Quốc, Đạo Pháp, Trừ Ma, Thường Sơn, Nam Hoa Lão Tiên",
@@ -204,6 +204,13 @@
         "description": "Một địa điểm vừa được khám phá.",
         "category": "Khu Vực",
         "tier": 3
+      },
+      {
+        "id": "2150c464-033b-4cab-9a2a-4cc70cbc0420",
+        "Name": "Quán trà ngoại vi Trác Quận",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
       }
     ],
     "items": [],
@@ -212,8 +219,8 @@
       {
         "id": "99964536-fbd3-4f2a-afb8-187cb812fe8c",
         "NPC": "Hạ Hầu Khinh Y",
-        "Standing": "Tin tưởng",
-        "Reason": "Ngươi dùng đạo pháp hỗ trợ che chở linh thú của nàng"
+        "Standing": "Thân thiết",
+        "Reason": "Nàng cảm thấy bất an và chỉ tin tưởng dựa dẫm vào ngươi."
       }
     ],
     "quests": [
@@ -283,7 +290,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 22.5,
+        "exp": 22.6,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": 0,
@@ -293,7 +300,7 @@
           "def": 0,
           "spd": 0
         },
-        "current_location_id": "18d4e731-65c6-409e-80e4-dab744fece4f",
+        "current_location_id": "2150c464-033b-4cab-9a2a-4cc70cbc0420",
         "baseHp": 2000,
         "baseAtk": 200,
         "baseDef": 100,
@@ -638,15 +645,15 @@
           "turn": 26
         }
       ],
-      "lastExpResolvedTurn": 26
+      "lastExpResolvedTurn": 27
     },
     "loreQuests": [],
     "pendingCreations": [],
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 26,
-      "world_time": 26,
+      "turn_id": 27,
+      "world_time": 27,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -656,7 +663,7 @@
         "loser_id": null
       },
       "fields": {
-        "exp_delta_player": 10.1
+        "exp_delta_player": 0.1
       }
     },
     "stateHistory": [
@@ -667,14 +674,14 @@
           "day": 9,
           "hour": 12
         },
-        "location_id": "87582903-e052-4e09-923f-55cd3728e398",
+        "location_id": "18d4e731-65c6-409e-80e4-dab744fece4f",
         "weather": "Nắng ban trưa gay gắt",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 12.3,
+            "exp": 12.4,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
@@ -766,7 +773,7 @@
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 12.4,
+            "exp": 22.5,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
@@ -2179,14 +2186,79 @@
           "content": "*Diệp Thần* nhận lấy thanh kiếm, cảm nhận được hơi lạnh và luồng sức nặng vừa phải truyền từ chuôi kiếm vào lòng bàn tay. Hắn khẽ vung kiếm trong không trung, một tiếng \"vù\" sắc ngọt vang lên, phá vỡ bầu không khí ngột ngạt của tiệm rèn. Hắn gật đầu hài lòng, sau đó quay sang nhìn bộ y phục vải thô màu nâu sẫm, cảm thấy vô cùng ưng ý. Với thế cục hiện tại tại thành *Trác Quận*, việc từ bỏ bộ đạo bào xám nổi bật để hòa nhập vào đám đông là một bước đi cực kỳ khôn ngoan.\nHắn trao trả số bạc vụn nhặt được từ đám *Hành Thi* đêm qua cho lão thợ rèn, rồi nhanh chóng thay bộ y phục thường dân vào góc khuất. Khi bước ra, khí chất thoát tục của hắn đã được che giấu dưới vẻ ngoài của một lữ khách bình thường. *Tiểu Bạch* trong lồng ngực hắn khẽ cựa quậy, dường như cũng cảm thấy thoải mái hơn trong bộ y phục mới của chủ nhân. \nRời khỏi *Thiết Phong Các*, *Diệp Thần* bước ra ngoài phố lớn. Trời đã quá trưa, dòng người qua lại trên phố xá *Trác Quận* vẫn tấp nập, nhưng ai nấy đều mang vẻ mặt lo âu, hớt hải. Tiếng bàn tán về giặc *Hoàng Cân* và ba vị hào kiệt ở vườn đào phía sau huyện càng lúc càng lớn. Ngươi nhận thấy, sự hiện diện của mình lúc này cần phải cẩn trọng hơn, bởi lũ lính canh trong thành vẫn đang ráo riết tuần tra khắp nơi sau vụ cát bụi mù mịt ban nãy. Hắn cần tìm một nơi an toàn để hội ngộ với *Hạ Hầu Khinh Y* đang chờ đợi, và quan trọng hơn, phải theo sát bước chân của ba vị minh chủ tương lai để không bỏ lỡ đại cơ duyên.\nGiữa lúc đó, một nhóm binh lính tuần tra đột ngột rẽ từ phía quảng trường vào con phố này, ánh mắt chúng đảo liên tục như đang tìm kiếm điều gì đó khả nghi. Ngươi nép mình vào bóng râm của một căn nhà gỗ, tay khẽ đặt lên chuôi trường kiếm, tâm thần tập trung tối đa để cảm nhận sự xáo động của linh khí xung quanh. Nếu lũ này phát hiện ra sự hiện diện của một người mang theo linh thú và vũ khí bén nhọn như ngươi, rắc rối chắc chắn sẽ không nhỏ."
         }
       ]
+    },
+    {
+      "id": "5af98f79-9d0b-4a56-981a-e2cb68a93fc9",
+      "type": "user_custom_action",
+      "content": "Tìm 1 con hẻm vắng sử dụng ngự kiếm thuật để quay lại trà quán hội ngộ với Khinh Y"
+    },
+    {
+      "id": "e90d249b-aff1-487b-a3fb-cee055867a86",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Giữa con hẻm nhỏ hẹp và u tối nằm sâu trong lòng thành *Trác Quận*, nơi những bức tường gạch xám phủ đầy rêu phong che khuất đi ánh nắng gay gắt của buổi ban trưa, *Diệp Thần* đứng lặng trong bóng tối, hơi thở hắn vẫn còn chút dồn dập sau màn thoát thân ngoạn mục khỏi đám lính canh quảng trường. Hắn khẽ đưa tay vuốt dọc theo sống kiếm của thanh trường kiếm mới mua tại *Thiết Phong Các*, cảm nhận cái lạnh buốt của thép tinh luyện thấm vào da thịt. Bộ y phục vải thô màu nâu sẫm trên người tuy đơn giản nhưng lại mang đến cho hắn một sự tự do, linh hoạt mà bộ đạo bào xám xịt trước đó không thể có được. Hắn nhắm mắt, tập trung thần thức, cảm nhận luồng chân nguyên trong đan điền đã bắt đầu lắng dịu và vận hành theo quỹ đạo của *Thái Bình Yếu Thuật*.\nHắn khẽ quát một tiếng nhỏ, kiếm quyết chỉ thẳng xuống mặt đất. Thanh trường kiếm bỗng chốc rung lên bần bật, hóa thành một dải ngân quang lơ lửng cách mặt đất nửa thước. *Diệp Thần* nhanh nhẹn nhảy lên mũi kiếm, thân hình hắn như hòa làm một với luồng linh khí thanh khiết. Một tiếng \"vù\" xé gió cực nhẹ vang lên, dải ngân quang ấy xé toác màn sương mù mỏng manh của con hẻm, đưa hắn bay vút lên cao, lướt qua những mái nhà san sát của thành thị sầm uất rồi hướng thẳng về phía ngoại vi.\nChỉ trong vài nhịp thở, bóng dáng sừng sững của thành *Trác Quận* đã lùi lại phía sau. *Diệp Thần* điều khiển phi kiếm đáp xuống một bãi cỏ lau sũng nước mưa ngay sát cạnh ngôi *Quán trà ngoại vi Trác Quận*. Ngay khi gót chân hắn vừa chạm đất, thanh kiếm lập tức thu nhỏ lại, bay gọn vào bao kiếm dắt bên hông. Hắn vừa bước vào hiên quán, chưa kịp cất lời thì chú hổ con *Tiểu Bạch* đang cuộn tròn trong lồng ngực áo hắn bỗng nhiên chồm dậy. Bộ lông trắng muốt của nó dựng đứng lên, đôi mắt hoàng kim rực sáng oai nghiêm, nó phát ra những tiếng gầm gừ nhẹ nhưng đầy cảnh giác, cái đầu nhỏ liên tục xoay về hướng cổng thành nội với vẻ bồn chồn khó tả.\nTừ bên trong quán trà, một bóng hồng lướt nhanh ra ngoài. *Hạ Hầu Khinh Y* với gương mặt vẫn còn vương nét lo âu, vừa nhìn thấy bóng dáng của ngươi trong bộ y phục mới, nàng không nén nổi sự xúc động mà lao tới, đôi bàn tay thon thả, mềm mại của nàng vội vàng nắm lấy tay ngươi, hỏi han dồn dập với giọng nói run rẩy:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Phu quân! Chàng cuối cùng cũng về rồi... Sao chàng đi lâu thế? Ta và *Tiểu Thúy* ở đây lo lắng đến phát điên. Chàng nhìn xem, *Tiểu Bạch* từ lúc chàng đi cứ bồn chồn không yên, dường như nó cảm nhận được điều gì đó rất đáng sợ từ phía thành nội. Chàng có gặp chuyện gì trắc trở ngoài phố không?"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi cảm nhận được hơi ấm và sự run rẩy từ đôi bàn tay nàng, lòng bỗng chốc dịu lại. Ngươi khẽ siết nhẹ tay nàng, đưa tay vuốt ve cái đầu nhỏ của *Tiểu Bạch* để trấn an nó, rồi dẫn nàng cùng ngồi xuống chiếc bàn gỗ trà sần sùi ở góc quán."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y đừng lo, ta chỉ là gặp chút rắc rối nhỏ với đám lính tuần tra nên phải đổi bộ y phục này cho tiện hành động. Thành *Trác Quận* lúc này quả thực không còn thái bình như chúng ta tưởng."
+        },
+        {
+          "type": "narrative",
+          "content": "Dù miệng nói những lời trấn an, nhưng chính *Diệp Thần* lúc này cũng đang cảm thấy một sự đè nén nặng nề trong lồng ngực. Ngay cả khi đã thay đổi y phục và rời xa trung tâm quảng trường, giác quan của một người tu đạo vẫn báo động dữ dội. Ngồi giữa quán trà đơn sơ, ngươi cảm nhận rõ rệt rằng luồng ma đạo từ phương Bắc — thứ tử khí đỏ tía quỷ dị của *Thái Bình Đạo* — không hề dừng lại ở biên giới. Nó đang âm thầm, lặng lẽ như những xúc tu của một loài thủy quái khổng lồ, khuếch tán sức ảnh hưởng vào tận sâu trong từng ngóc ngách, từng viên gạch, hơi thở của thành *Trác Quận*. Sự sầm uất của phố xá chỉ là một lớp vỏ bọc mỏng manh che đậy cho một sự thối rữa tâm linh đang diễn ra bên trong. Những dải oán khí mờ nhạt mà ngươi nhìn thấy trên mái nhà dân lúc nãy không phải là ảo giác; đó là điềm báo của một đại nạn diệt vong.\nNắng trưa gay gắt đổ xuống mái rạ của quán trà, nhưng cái nóng ấy không sao xua tan được cái lạnh lẽo rờn rợn đang len lỏi trong xương tủy của những người ngồi đây. *Hạ Hầu Khinh Y* nhìn vào đôi mắt trầm mặc của ngươi, nàng khẽ rùng mình, hai tay ôm lấy vai, dường như cũng cảm nhận được sự ngột ngạt bất thường của không gian. Chú hổ con *Tiểu Bạch* đã bớt gầm gừ, nhưng nó vẫn thu mình lại dưới chân bàn, đôi tai nhọn hoắt liên tục vểnh lên nghe ngóng những âm thanh vô hình từ phía xa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Phu quân... Chàng có cảm thấy không? Không khí ở đây... dường như đang dần trở nên tanh nồng mùi máu. Giống hệt như cái đêm ở *Chân Định* trước khi đám xác sống xuất hiện. Chẳng lẽ... thành *Trác Quận* cũng sắp biến thành địa ngục sao?"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi nhấp một ngụm trà nóng, vị đắng chát thấm vào cổ họng nhưng không sao làm giảm đi sự lo âu. Với tư duy của một kẻ biết trước lịch sử, ngươi hiểu rằng khởi nghĩa *Hoàng Cân* sắp bùng nổ, nhưng sự thật ở thế giới này tàn khốc hơn nhiều. Đây không chỉ là một cuộc nổi dậy chính trị, mà là một cuộc xâm lăng của ma đạo. Ba anh em nhà họ Trương đang dùng tà thuật để biến hàng vạn dân lành thành những con rối không hồn."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Nàng nói đúng, luồng khí tức này rất không bình thường. Nó không phải là sát khí của binh đao, mà là oán niệm của tử thi. Có vẻ như *Trương Giác* đã bố trí những mầm mống ma đạo bên trong thành từ lâu. Những gì ta thấy ở quảng trường lúc nãy — sự xuất hiện của ba vị hào kiệt họ Lưu, Quan, Trương — có lẽ chính là một sự cân bằng của thiên đạo, nhưng tà khí hiện tại vẫn đang chiếm ưu thế tuyệt đối."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi im lặng quan sát xung quanh quán trà. Lão chủ quán già nua lúc này đang run rẩy lau chùi một chiếc chén sành, đôi mắt lão đờ đẫn, thỉnh thoảng lại lẩm bẩm những lời vô nghĩa. Nhìn kỹ dưới gầm bàn của lão, ngươi thấy một vệt đen sẫm đang từ từ lan ra trên nền đất ẩm — tử khí đã bắt đầu xâm nhập vào ngay cả những người dân thường ở ngoại vi này. Thành *Trác Quận* giờ đây giống như một thùng thuốc súng đầy oán khí, chỉ cần một mồi lửa nhỏ là sẽ bùng cháy dữ dội.\nSự lo lắng của *Hạ Hầu Khinh Y* ngày càng lớn, nàng xích lại gần ngươi hơn, tìm kiếm một sự bảo bọc. *Diệp Thần* biết mình không thể cứ ngồi yên chờ đợi. Việc cứu nàng khỏi họa sát thân gắn liền với việc phải đối đầu trực diện với nguồn gốc của luồng ma đạo này. Hắn cần một kế hoạch cụ thể để vừa bảo vệ những người xung quanh, vừa có thể lợi dụng sức mạnh của ba vị hào kiệt vườn đào để xoay chuyển cục diện.\nThanh trường kiếm mới bên hông khẽ rung nhẹ, như thể cảm nhận được tâm tình của chủ nhân. Ngươi nhận ra rằng, dù đã có vũ khí và y phục mới, nhưng để thực sự chiến đấu trong trận đại chiến sắp tới, ngươi cần phải tinh tiến tu vi của mình lên một tầm cao mới. Quyển *Địa* trong *Thái Bình Yếu Thuật* còn rất nhiều trận pháp hộ mệnh và trừ ma mà ngươi chưa kịp nghiên cứu kỹ.\nNgoài quan lộ, dòng người chạy nạn vẫn không ngừng đổ về hướng thành, mang theo những câu chuyện kinh hoàng về những ngôi làng bị xóa sổ chỉ sau một đêm bởi những \"người mặc áo vàng mắt đỏ\". Những làn khói đen mờ nhạt từ hướng rừng thông sườn núi phía xa bắt đầu bốc lên, che khuất một phần mặt trời ban trưa, khiến ánh sáng trở nên xám xịt, quỷ dị."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y, muội hãy cùng *Tiểu Thúy* thu dọn hành lý ngay đi. Chúng ta không thể nghỉ lại quán trà này lâu hơn nữa. Luồng tử khí kia đang tụ hội về đây. Ta cần tìm một nơi linh khí dồi dào hơn trong thành, hoặc ít nhất là gần khu vực vườn đào phía sau huyện để lập một trận pháp bảo vệ."
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* gật đầu lia lịa, nàng vội vàng quay vào trong gọi tỳ nữ. Ngươi đứng dậy, vươn vai một cái, cảm nhận toàn bộ chân khí trong đan điền đã sẵn sàng cho một cuộc chiến cam go. Chú hổ con *Tiểu Bạch* nhảy phắt lên vai ngươi, đứng uy nghiêm như một vị thần hộ vệ nhỏ bé. Ánh mắt ngươi sắc lạnh nhìn về phía cổng thành *Trác Quận*, nơi màn sương mù ma đạo đang dần dày đặc hơn.\nGiữa lúc đó, từ phía con đường mòn dẫn vào thung lũng, có tiếng gầm rú của gió xoáy và tiếng than khóc thê lương vọng lại. Một toán \"Hành Thi\" lang thang, dường như bị thu hút bởi sinh khí của quán trà, đang từ từ hiện ra từ sau rặng liễu rủ. Chúng mặc những bộ y phục rách nát, da thịt đen sạm vì thối rữa, nhưng đôi mắt lại rực lên một sắc đỏ tà mị.\nTình thế lúc này vô cùng khẩn cấp. Ngươi cần phải đưa ra quyết định để bảo vệ nhóm của mình và đồng thời tìm cách tiếp cận với nhóm của *Lưu Bị* trước khi ma đạo hoàn toàn nuốt chửng thành phố này."
+        }
+      ]
+    },
+    {
+      "id": "62612315-4e7d-47a0-b7d0-5f60cf064c62",
+      "type": "user_custom_action",
+      "content": "Đi vội quá quên không hỏi ông chủ thanh kiếm này tên là gì rồi. Thôi thì tạm gọi ngươi là Bất Vãn nhé. Hôm nay ta sẽ dùng đám Hành Thi này để khai kiếm"
+    },
+    {
+      "id": "77337578-b3f1-4d3c-bfc8-ffeada1ab38c",
+      "type": "user_custom_action",
+      "content": "Đi vội quá quên không hỏi ông chủ thanh kiếm này tên là gì rồi. Thôi thì tạm gọi ngươi là Bất Vãn nhé. Hôm nay ta sẽ dùng đám Hành Thi này để khai kiếm"
     }
   ],
-  "choices": [
-    "Ngay lập tức hòa mình vào dòng người, lặng lẽ rời khỏi khu vực này để tránh chạm trán với đội lính tuần tra {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Giữ vững được sự bí mật và đảm bảo an toàn cho nhóm}",
-    "Tiếp cận và nghe ngóng những cuộc hội thoại của toán lính tuần tra để tìm hiểu thông tin về các chốt kiểm soát trong thành {Tỷ lệ thành công: 60%, Hậu quả/Phần thưởng: Thu thập được lộ trình tuần tra nhưng tăng nguy cơ bị lộ thân phận}",
-    "Tìm một quán trà gần đó và chờ đợi cho đến khi toán lính đi qua, đồng thời tận dụng thời gian để quan sát kỹ hơn khí vận của những người xung quanh {Tỷ lệ thành công: 80%, Hậu quả/Phần thưởng: Có thêm thời gian hồi phục chân khí nhưng lỡ mất cơ hội di chuyển thuận lợi}",
-    "Chủ động bước thẳng ra trước mặt nhóm lính và giả vờ là một người buôn bán thông thường để đánh lạc hướng họ {Tỷ lệ thành công: 40%, Hậu quả/Phần thưởng: Nếu thành công sẽ xóa tan sự nghi ngờ, nếu thất bại sẽ dẫn đến một cuộc chiến không cần thiết trong nội thành}"
-  ],
+  "choices": [],
   "gameMode": "EXPLORATION",
   "activeTrade": {
     "trader": null,
@@ -2198,5 +2270,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 26
+  "adventureTurnCount": 32
 }
