@@ -8414,7 +8414,8 @@ const SettingsMenu = ({
     onDebugAwakenHtab, gameMode,
     onExportKeepsake, onExportQaLog, onExportContractLog,
     textScale, onTextScaleChange,
-    hackModeEnabled, onToggleHackMode, onOpenCustomize, customizeVisibility = 'hidden'
+    hackModeEnabled, onToggleHackMode, onOpenCustomize, customizeVisibility = 'hidden',
+    onOpenApiSetup = null, aiSourceSummary = ''
 }) => {
 
     // plan.md C-3: the 4 group labels are DATA (src-web/systems/ui/settingsGroups.ts),
@@ -8632,6 +8633,28 @@ const SettingsMenu = ({
                         </div>
                     </div>
                     <h3 className="text-xs font-bold text-[#e8d3a1] uppercase tracking-[0.25em] border-l-2 border-[#cda45e] pl-2 mt-2">{groupLabel('ai_data')}</h3>
+                    <div>
+                        <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Nguồn AI (API Key & Model)</h4>
+                        {/* settingsGroups.ts items `api_mode` / `api_key`: in-game entry point to
+                            the same ApiSetupModal used on the home screen, so a player who hits
+                            quota (429) or an overloaded model (503) mid-session can switch key
+                            or preferred model without leaving the game. */}
+                        <div className="bg-[#101a10] border border-[#cda45e]/30 p-3 space-y-2">
+                            {aiSourceSummary && (
+                                <p className="text-[10px] text-[#8ba888] tracking-wider leading-relaxed">
+                                    Đang dùng: <span className="text-[#e8d3a1] font-mono">{aiSourceSummary}</span>
+                                </p>
+                            )}
+                            <MenuItem
+                                icon={<WrenchIcon />}
+                                label="Đổi API Key / Model AI"
+                                onClick={onOpenApiSetup || (() => {})}
+                                disabled={!onOpenApiSetup}
+                                colorClass="text-[#cda45e]"
+                                subtext="Hết quota (429) hoặc model quá tải (503)? Đổi key khác hoặc chọn model ưu tiên tại đây."
+                            />
+                        </div>
+                    </div>
                     <div>
                         <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Lưu trữ tiến trình</h4>
                         <div className="grid grid-cols-3 gap-2">
@@ -9776,6 +9799,7 @@ const GameplayScreen = ({
     choices, handleChoice, formatStoryText, customActionInput, setCustomActionInput,
     canUndoTurn, onUndoTurn, isUndoingTurn, persistenceWarning,
     visibleBanner, onDismissBanner, hackModeEnabled, onToggleHackMode,
+    onOpenApiSetup, aiSourceSummary,
     onExportKeepsake, onExportQaLog, onExportContractLog, 
     handleCustomAction, setShowCharacterInfoModal, bgmUrl, bgmVolume, isPlayingBgm, onBgmUrlChange, onBgmVolumeChange, onToggleBgm,
     isProcessingAction, handleGenerateSuggestedActions, isGeneratingSuggestedActions,  
@@ -10728,6 +10752,8 @@ const renderDefaultActions = () => {
                     onExportKeepsake={onExportKeepsake}
                     onExportQaLog={onExportQaLog}
                     onExportContractLog={onExportContractLog}
+                    onOpenApiSetup={() => { setShowSettingsMenu(false); if (onOpenApiSetup) onOpenApiSetup(); }}
+                    aiSourceSummary={aiSourceSummary}
                     gameMode={gameMode}
                     textScale={gameSettings.textScale || 100} 
                     onTextScaleChange={(newScale) => setGameSettings(prev => ({ ...prev, textScale: newScale }))}
@@ -36532,6 +36558,13 @@ const formatStoryText = useCallback((text) => {
                                 onExportKeepsake={handleExportKeepsake}
                                 onExportQaLog={handleExportQaLog}
                                 onExportContractLog={handleExportContractLog}
+                                onOpenApiSetup={() => setShowApiModal(true)}
+                                aiSourceSummary={
+                                    (apiMode === 'userKey'
+                                        ? `Key riêng ${apiKey ? '…' + String(apiKey).slice(-4) : '(chưa có)'}`
+                                        : 'Gemini mặc định')
+                                    + ` · model: ${preferredTextModel || 'tự động'}`
+                                }
                                 canUndoTurn={canUndoTurn}
                                 onUndoTurn={handleUndoTurn}
                                 isUndoingTurn={isUndoingTurn}
