@@ -2305,6 +2305,18 @@ ${jsonStructureGuide}
 const COMBAT_BASIC_SKILL_SLOTS = ['combat_basic_1', 'combat_basic_2', 'combat_basic_3', 'combat_basic_4', 'combat_basic_5', 'combat_basic_6', 'combat_basic_7', 'combat_basic_8'];
 const HON_KY_ORDINAL_WORDS = ['Nhất', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy', 'Tám', 'Chín'];
 
+// Đấu La Đại Lục world toggle (gameSettings.isDouLuoWorld). Martial souls (Võ Hồn) and the
+// "Hồn kỹ" / "Võ Hồn Chân Thân" skill vocabulary only exist in that world; every other world
+// uses a plain active/passive split. Both vocabularies map onto the same internal
+// skillType/skillCategory pair (see SKILL_CATEGORY_CHOICE_MAP).
+const DOULUO_SKILL_CATEGORY_CHOICES = ['Hồn kỹ', 'Võ Hồn Chân Thân', 'Kỹ năng Bị động phiêu lưu'];
+const GENERIC_SKILL_CATEGORY_CHOICES = ['Chủ động', 'Bị động'];
+const getSkillCategoryChoices = (gameSettings) =>
+    (gameSettings && gameSettings.isDouLuoWorld) ? DOULUO_SKILL_CATEGORY_CHOICES : GENERIC_SKILL_CATEGORY_CHOICES;
+// Choices that denote an active combat skill and therefore expose the cooldown field.
+const SKILL_CHOICES_WITH_COOLDOWN = new Set(['Hồn kỹ', 'Võ Hồn Chân Thân', 'Chủ động']);
+const skillChoiceHasCooldown = (choice) => SKILL_CHOICES_WITH_COOLDOWN.has(String(choice || '').trim());
+
 const INITIAL_STATS = {
     id: 'player',
     isPlayer: true,
@@ -5873,6 +5885,23 @@ const GameSetupScreen = ({
                             </div>
                         </div>
                     </label>
+                    <label htmlFor="douluo-toggle" className="relative cursor-pointer group flex-1">
+                        <input
+                            type="checkbox" id="douluo-toggle" name="isDouLuoWorld" className="sr-only"
+                            checked={gameSettings.isDouLuoWorld} onChange={handleInputChange}
+                        />
+                        <div className={`flex items-center p-5 bg-[#101a10] border transition-all duration-300 shadow-inner group-hover:bg-[#162216] h-full ${gameSettings.isDouLuoWorld ? 'border-[#cda45e]/80 shadow-[0_0_15px_rgba(205,164,94,0.1)]' : 'border-[#cda45e]/30'}`}>
+                            <div className={`relative w-12 h-6 rounded-sm border transition-colors shrink-0 mr-4 ${gameSettings.isDouLuoWorld ? 'bg-[#cda45e]/20 border-[#cda45e]' : 'bg-[#0a0f0a] border-[#4a6b4a]'}`}>
+                                <div className={`absolute top-1 w-4 h-4 rounded-sm transition-all duration-300 shadow-md ${gameSettings.isDouLuoWorld ? 'left-1 translate-x-6 bg-[#cda45e]' : 'left-1 translate-x-0 bg-[#8ba888]'}`}></div>
+                            </div>
+                            <div className="text-left">
+                                <span className={`font-bold font-ngoc-an text-lg tracking-wider transition-colors ${gameSettings.isDouLuoWorld ? 'text-[#cda45e]' : 'text-[#8ba888]'}`}>
+                                    Thế Giới Đấu La
+                                </span>
+                                <p className="text-xs text-[#8ba888] font-sans mt-1">Bối cảnh Đấu La Đại Lục: mở Võ Hồn, Hồn Kỹ và Võ Hồn Chân Thân. Tắt thì kỹ năng chỉ chia Chủ động / Bị động.</p>
+                            </div>
+                        </div>
+                    </label>
                 </div>
             </div>
         </div>
@@ -6167,6 +6196,7 @@ const GameSetupScreen = ({
                  </div>
             </FormRow>
 
+             {gameSettings.isDouLuoWorld && (
              <FormRow label="Võ Hồn khởi đầu (Tối thiểu 1, Tối đa 3)">
                 <div className="space-y-4">
                     {gameSettings.initialMartialSouls.slice(0, 3).map((soul) => (
@@ -6206,6 +6236,7 @@ const GameSetupScreen = ({
                     )}
                 </div>
             </FormRow>
+             )}
 
              <FormRow label="Thiên phú khởi đầu (Tối thiểu 2)">
                 <div className="space-y-4">
@@ -6241,12 +6272,12 @@ const GameSetupScreen = ({
                                             <label className="block text-xs font-semibold text-[#8ba888] mb-1.5 uppercase tracking-wider">Loại kỹ năng</label>
                                             <select value={trait.skillCategoryChoice || ''} onChange={(e) => handleInitialTraitChange(trait.id, 'skillCategoryChoice', e.target.value)} className="w-full p-2.5 bg-[#0a0f0a] border border-[#cda45e]/30 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none appearance-none">
                                                 <option value="" className="bg-[#101a10]">Để AI quyết định</option>
-                                                {['Hồn kỹ', 'Võ Hồn Chân Thân', 'Kỹ năng Bị động phiêu lưu'].map(t => (
+                                                {getSkillCategoryChoices(gameSettings).map(t => (
                                                     <option key={t} value={t} className="bg-[#101a10]">{t}</option>
                                                 ))}
                                             </select>
                                         </div>
-                                        {(trait.skillCategoryChoice === 'Hồn kỹ' || trait.skillCategoryChoice === 'Võ Hồn Chân Thân') && (
+                                        {skillChoiceHasCooldown(trait.skillCategoryChoice) && (
                                             <div className="sm:col-span-1">
                                                 <label className="block text-xs font-semibold text-[#8ba888] mb-1.5 uppercase tracking-wider">Thời gian CD (lượt)</label>
                                                 <input type="number" min="0" value={trait.cooldown || ''} onChange={(e) => handleInitialTraitChange(trait.id, 'cooldown', e.target.value)} placeholder="Để trống cho AI quyết định" className="w-full p-2.5 bg-[#0a0f0a] border border-[#cda45e]/30 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none"/>
@@ -8894,12 +8925,12 @@ const CustomizationModal = ({
                             <label className="block text-xs font-semibold text-[#8ba888] mb-1">Loại kỹ năng</label>
                             <select value={skillDraft.skillCategoryChoice} onChange={(e) => updateSkillDraft('skillCategoryChoice', e.target.value)} className="w-full p-2.5 bg-[#0a0f0a] border border-[#cda45e]/30 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none appearance-none">
                                 <option value="" className="bg-[#101a10]">Để AI quyết định</option>
-                                {['Hồn kỹ', 'Võ Hồn Chân Thân', 'Kỹ năng Bị động phiêu lưu'].map(t => (
+                                {getSkillCategoryChoices(gameSettings).map(t => (
                                     <option key={t} value={t} className="bg-[#101a10]">{t}</option>
                                 ))}
                             </select>
                         </div>
-                        {(skillDraft.skillCategoryChoice === 'Hồn kỹ' || skillDraft.skillCategoryChoice === 'Võ Hồn Chân Thân') && (
+                        {skillChoiceHasCooldown(skillDraft.skillCategoryChoice) && (
                             <div className="sm:col-span-1">
                                 <label className="block text-xs font-semibold text-[#8ba888] mb-1">Thời gian CD (lượt)</label>
                                 <input type="number" min="0" value={skillDraft.cooldown} onChange={(e) => updateSkillDraft('cooldown', e.target.value)} placeholder="Để trống cho AI quyết định" className="w-full p-2.5 bg-[#0a0f0a] border border-[#cda45e]/30 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none" />
@@ -12283,11 +12314,11 @@ const SkillManagementModal = ({ show, onClose, knowledge, handleEquipSkill, hand
                                 <h4 className="text-[11px] font-bold text-[#8b1515] uppercase tracking-widest mb-4 flex items-center gap-2"><SwordIcon className="w-4 h-4"/> Tuyệt Kỹ Chiến Đấu</h4>
                                 <div className="grid grid-cols-1 gap-4">
                                     {COMBAT_BASIC_SKILL_SLOTS.slice(0, 6).map((slotKey, index) => (
-                                        <EquipSlot key={slotKey} slotKey={slotKey} skill={equippedSkills[slotKey]} label={`Hồn Kỹ Thứ ${HON_KY_ORDINAL_WORDS[index]}`} />
+                                        <EquipSlot key={slotKey} slotKey={slotKey} skill={equippedSkills[slotKey]} label={gameSettings?.isDouLuoWorld ? `Hồn Kỹ Thứ ${HON_KY_ORDINAL_WORDS[index]}` : `Kỹ Năng Chủ Động ${index + 1}`} />
                                     ))}
-                                    <EquipSlot slotKey="combat_ultimate" skill={equippedSkills.combat_ultimate} label="Võ Hồn Chân Thân" />
+                                    <EquipSlot slotKey="combat_ultimate" skill={equippedSkills.combat_ultimate} label={gameSettings?.isDouLuoWorld ? 'Võ Hồn Chân Thân' : 'Tuyệt Kỹ'} />
                                     {COMBAT_BASIC_SKILL_SLOTS.slice(6).map((slotKey, index) => (
-                                        <EquipSlot key={slotKey} slotKey={slotKey} skill={equippedSkills[slotKey]} label={`Hồn Kỹ Thứ ${HON_KY_ORDINAL_WORDS[index + 7]}`} />
+                                        <EquipSlot key={slotKey} slotKey={slotKey} skill={equippedSkills[slotKey]} label={gameSettings?.isDouLuoWorld ? `Hồn Kỹ Thứ ${HON_KY_ORDINAL_WORDS[index + 7]}` : `Kỹ Năng Chủ Động ${index + 7}`} />
                                     ))}
                                 </div>
                             </div>
@@ -16678,6 +16709,7 @@ const INITIAL_GAME_SETTINGS = {
     fanFicEntryMethod: 'Xuyên không',
     customFanFicEntryMethod: '',
     skipCrisis: false,
+    isDouLuoWorld: false, // Bật thế giới Đấu La Đại Lục: mở Võ Hồn + bộ thuật ngữ Hồn kỹ / Võ Hồn Chân Thân
     initialMartialSouls: [{
         id: crypto.randomUUID(),
         name: '',
@@ -17914,8 +17946,14 @@ const loadGameAndResetHistory = async (gameData) => {
         if (activeGameData.knowledge?.locations) activeGameData.knowledge.locations = activeGameData.knowledge.locations.map(normalizeNameProperty);
         if (activeGameData.knowledge?.items) activeGameData.knowledge.items = activeGameData.knowledge.items.map(normalizeNameProperty);
 
-        const loadedSettings = { ...INITIAL_GAME_SETTINGS, ...(activeGameData.gameSettings || activeGameData.settings || {}) };
+        const rawSavedSettings = activeGameData.gameSettings || activeGameData.settings || {};
+        const loadedSettings = { ...INITIAL_GAME_SETTINGS, ...rawSavedSettings };
         const loadedPlayer = activeGameData.knowledge?.characters?.find(c => c.isPlayer || c.id === 'player' || c.id === 'player_fallback') || activeGameData.knowledge?.characters?.[0] || {};
+        // Saves written before the Đấu La toggle existed: infer it from whether the player
+        // actually has a named martial soul, so old Đấu La runs keep their Hồn kỹ vocabulary.
+        if (rawSavedSettings.isDouLuoWorld === undefined) {
+            loadedSettings.isDouLuoWorld = (loadedPlayer.MartialSouls || []).some(s => s && String(s.name || '').trim());
+        }
         const mergedPlayer = {
             ...INITIAL_STATS,
             ...loadedPlayer,
@@ -18475,9 +18513,13 @@ const fetchNpcDetailsFromAI = async (npcBasicInfo, gameSettings, effectiveApiKey
 };
 // Ánh xạ lựa chọn "Loại kỹ năng" (người chơi tự chọn trong form Thiên phú khởi đầu) sang skillType/skillCategory thật của hệ thống.
 const SKILL_CATEGORY_CHOICE_MAP = {
+    // Đấu La Đại Lục vocabulary (gameSettings.isDouLuoWorld = true)
     'Hồn kỹ': { skillType: 'combat', skillCategory: 'basic' },
     'Võ Hồn Chân Thân': { skillType: 'combat', skillCategory: 'ultimate' },
     'Kỹ năng Bị động phiêu lưu': { skillType: 'adventure', skillCategory: 'passive' },
+    // Generic vocabulary (any other world) — same internal categories, no ultimate tier
+    'Chủ động': { skillType: 'combat', skillCategory: 'basic' },
+    'Bị động': { skillType: 'adventure', skillCategory: 'passive' },
 };
 
 const fetchInitialSkillDetails = async (skillIdea, effectiveApiKey, storyHistory) => {
@@ -19927,8 +19969,10 @@ const handleGenerateImpromptuCharacter = async () => {
 
         CHECKLIST (BẮT BUỘC THỰC HIỆN):
         1.  Tạo "name", "gender", "personality", "role", "appearance", "backstory", "goal".
-        2.  Tạo một MẢNG tên là "initialMartialSouls" chứa từ 1 đến 3 VÕ HỒN khởi đầu (thông tin nền về bản chất/hình dạng linh hồn của nhân vật, KHÔNG phải kỹ năng).
-            *   Với MỖI Võ Hồn, PHẢI có 2 thuộc tính: "name" (tên hấp dẫn) và "description" (mô tả ngắn gọn 1-2 câu).
+        ${gameSettings.isDouLuoWorld
+            ? `2.  Tạo một MẢNG tên là "initialMartialSouls" chứa từ 1 đến 3 VÕ HỒN khởi đầu (thông tin nền về bản chất/hình dạng linh hồn của nhân vật, KHÔNG phải kỹ năng).
+            *   Với MỖI Võ Hồn, PHẢI có 2 thuộc tính: "name" (tên hấp dẫn) và "description" (mô tả ngắn gọn 1-2 câu).`
+            : `2.  Thế giới này KHÔNG có Võ Hồn — KHÔNG tạo "initialMartialSouls".`}
         3.  Tạo một MẢNG tên là "initialTraits" chứa từ 2 ĐẶC ĐIỂM KHỞI ĐẦU.
         4.  Với MỖI đặc điểm trong mảng đó, PHẢI có 3 thuộc tính:
             *   "category": Quyết định xem nó là "Kỹ năng" hay "Vật phẩm".
@@ -19976,6 +20020,11 @@ const handleGenerateImpromptuCharacter = async () => {
         },
         required: ["name", "gender", "personality", "role", "appearance", "backstory", "goal", "initialMartialSouls", "initialTraits"]
     };
+    if (!gameSettings.isDouLuoWorld) {
+        // No martial souls outside Đấu La Đại Lục — don't force the model to invent any.
+        delete schema.properties.initialMartialSouls;
+        schema.required = schema.required.filter(k => k !== 'initialMartialSouls');
+    }
 
     const payload = {
         contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -20002,12 +20051,14 @@ const handleGenerateImpromptuCharacter = async () => {
                 characterBackstory: data.backstory,
                 useCharacterGoal: true,
                 characterGoal: data.goal,
-                initialMartialSouls: (data.initialMartialSouls || []).slice(0, 3).map(soul => ({
-                    id: crypto.randomUUID(),
-                    name: soul.name,
-                    rarity: '',
-                    description: soul.description || '',
-                })),
+                initialMartialSouls: prev.isDouLuoWorld
+                    ? (data.initialMartialSouls || []).slice(0, 3).map(soul => ({
+                        id: crypto.randomUUID(),
+                        name: soul.name,
+                        rarity: '',
+                        description: soul.description || '',
+                    }))
+                    : prev.initialMartialSouls,
                 initialTraits: (data.initialTraits || []).map(trait => ({
                     ...trait,
                     id: crypto.randomUUID(),
@@ -23211,6 +23262,14 @@ const handleInputChange = useCallback((e) => {
         }
         if (name === "useCharacterGoal" && !checked) {
             newSettings.characterGoal = '';
+        }
+        // Switching the Đấu La toggle swaps the skill-type vocabulary: drop any trait choice
+        // that no longer exists in the new list (falls back to "Để AI quyết định").
+        if (name === "isDouLuoWorld") {
+            const allowed = checked ? DOULUO_SKILL_CATEGORY_CHOICES : GENERIC_SKILL_CATEGORY_CHOICES;
+            newSettings.initialTraits = (prev.initialTraits || []).map(t =>
+                allowed.includes(t.skillCategoryChoice) ? t : { ...t, skillCategoryChoice: '' }
+            );
         }
         // Ở chế độ Đồng Nhân, "Danh Xưng / Tên" (characterName) và "Tên Nhân Vật Hóa Thân/Của Bạn" (fanFicCharacter)
         // đều đại diện cho cùng một cái tên — đồng bộ 2 chiều để người chơi không cần gõ trùng lặp,
@@ -27946,7 +28005,9 @@ BỐI CẢNH (THÔNG TIN NGƯỜI DÙNG ĐÃ CUNG CẤP):
 - Giới tính: "${gameSettings.characterGender}"
 - Tính cách: "${finalPersonality}"
 - Mục tiêu: "${gameSettings.characterGoal || '[Chưa có]'}"
-- Võ Hồn đã có (${gameSettings.initialMartialSouls.length}/1 tối thiểu): ${gameSettings.initialMartialSouls.map(s => `- ${s.name}`).join('\n') || "Chưa có."}
+${gameSettings.isDouLuoWorld
+    ? `- Võ Hồn đã có (${gameSettings.initialMartialSouls.length}/1 tối thiểu): ${gameSettings.initialMartialSouls.map(s => `- ${s.name}`).join('\n') || "Chưa có."}`
+    : `- Thế giới này KHÔNG có Võ Hồn.`}
 - Thiên phú đã có (${gameSettings.initialTraits.length}/2): ${gameSettings.initialTraits.map(t => `- ${t.name}`).join('\n') || "Chưa có."}
 - Thực thể đã có (${gameSettings.initialWorldElements.length}/3): ${gameSettings.initialWorldElements.map(el => `- (${el.type}) ${el.name}`).join('\n') || "Chưa có."}
 `;
@@ -27974,9 +28035,9 @@ BỐI CẢNH (THÔNG TIN NGƯỜI DÙNG ĐÃ CUNG CẤP):
         if (!gameSettings.characterRole) { missionPrompt += "- Thân phận (characterRole)\n"; outputSchemaProperties.characterRole = { type: "STRING" }; requiredFields.push("characterRole"); }
         if (!gameSettings.characterGoal) { missionPrompt += "- Mục tiêu (characterGoal)\n"; outputSchemaProperties.characterGoal = { type: "STRING" }; requiredFields.push("characterGoal"); }
         
-        // --- LOGIC CHO VÕ HỒN ---
+        // --- LOGIC CHO VÕ HỒN (chỉ khi thế giới Đấu La Đại Lục) ---
         const filledMartialSouls = gameSettings.initialMartialSouls.filter(s => s.name.trim() !== '');
-        const martialSoulsNeeded = 1 - filledMartialSouls.length;
+        const martialSoulsNeeded = gameSettings.isDouLuoWorld ? 1 - filledMartialSouls.length : 0;
         if (martialSoulsNeeded > 0) {
             missionPrompt += `- Tạo chính xác ${martialSoulsNeeded} Võ Hồn khởi đầu (initialMartialSouls).\n`;
             outputSchemaProperties.initialMartialSouls = { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, description: { type: "STRING" } }, required: ["name", "description"] } };
@@ -28086,7 +28147,10 @@ const initializeGame = async (forceStart = false) => {
         if (!finalSettings.currencyName?.trim()) finalSettings.currencyName = "Linh thạch";
         
         finalSettings.initialMartialSouls = (finalSettings.initialMartialSouls || []).filter(s => s.name?.trim());
-        if (finalSettings.initialMartialSouls.length === 0) {
+        if (!finalSettings.isDouLuoWorld) {
+            // Martial souls only exist in Đấu La Đại Lục.
+            finalSettings.initialMartialSouls = [];
+        } else if (finalSettings.initialMartialSouls.length === 0) {
             finalSettings.initialMartialSouls = [
                 { id: crypto.randomUUID(), name: "Vô Danh Chi Hồn", rarity: '', description: "Một Võ Hồn còn mơ hồ, bản chất thật sự vẫn chưa hiển lộ." }
             ];
@@ -28340,7 +28404,9 @@ const initializeGame = async (forceStart = false) => {
             Role: finalSettings.characterRole,
             Appearance: finalSettings.characterAppearance,
             Backstory: finalSettings.characterBackstory,
-            MartialSouls: finalSettings.initialMartialSouls.map(s => ({ name: s.name, rarity: s.rarity || '', description: s.description })),
+            MartialSouls: finalSettings.isDouLuoWorld
+                ? (finalSettings.initialMartialSouls || []).filter(s => s.name?.trim()).map(s => ({ name: s.name, rarity: s.rarity || '', description: s.description }))
+                : [],
             Personality: finalPersonality,
             isAppraised: true,
             description: "", 
@@ -28356,9 +28422,14 @@ const initializeGame = async (forceStart = false) => {
             .map(el => `- (ID: ${el.id}) - Loại: ${el.type}, Tên: ${el.name}, Mô tả: ${el.description}`)
             .join('\n');
 
-        const initialMartialSoulsString = (finalSettings.initialMartialSouls || [])
+        const initialMartialSoulsString = (finalSettings.isDouLuoWorld ? (finalSettings.initialMartialSouls || []) : [])
+            .filter(s => s.name?.trim())
             .map(s => `- ${s.name}${s.rarity ? ` (Phẩm chất: ${s.rarity})` : ''}: ${s.description}`)
             .join('\n');
+        // Only mention martial souls to the narrator when the world actually has them.
+        const martialSoulsPromptBlock = finalSettings.isDouLuoWorld
+            ? `- Võ Hồn của nhân vật (thông tin nền, hãy tham chiếu khi miêu tả nhân vật, KHÔNG tự sinh kỹ năng/chỉ số từ đây):\n${initialMartialSoulsString || "Không có."}`
+            : '';
 
         if (finalSettings.isFanFictionMode) {
             initialPrompt = `
@@ -28367,8 +28438,7 @@ VAI TRÒ: Bạn là một Đấng kể chuyện bậc thầy, đang sáng tác m
 - Tác phẩm gốc: "${finalSettings.fanFicOriginalWork}"
 - Nhân vật người chơi: "${finalSettings.fanFicCharacter}" (Kiểu: ${finalSettings.fanFicCharacterType})
 - Mô tả/Tiểu sử nhân vật: "${finalSettings.characterBackstory || 'Theo đúng nguyên tác.'}"
-- Võ Hồn của nhân vật (thông tin nền, hãy tham chiếu khi miêu tả nhân vật, KHÔNG tự sinh kỹ năng/chỉ số từ đây):
-${initialMartialSoulsString || "Không có."}
+${martialSoulsPromptBlock}
 
 --- CHECKLIST KHỞI TẠO ĐỒNG NHÂN (BẮT BUỘC THỰC HIỆN TUẦN TỰ) ---
 1.  **Thiết Lập Hệ Thống Cảnh Giới dựa vào bối cảnh, miêu tả để cân nhắc cho phù hợp, ví dụ fantasy rồng và pháp thuật thì không thể là luyện khí trúc cơ như tu tiên.
@@ -28399,8 +28469,7 @@ THÔNG TIN NỀN (Hệ thống đã cung cấp, ngươi phải tuân thủ):
 *   Bối cảnh game chi tiết: ${finalSettings.setting}
 *   (Tham khảo) Các thực thể LORE đã tồn tại trong thế giới (dạng {id, type, name, description}):
 ${initialWorldElementsString || "Không có thực thể đặc biệt nào được chỉ định."}
-*   Võ Hồn của nhân vật chính (thông tin nền, hãy tham chiếu khi miêu tả nhân vật, KHÔNG tự sinh kỹ năng/chỉ số từ đây):
-${initialMartialSoulsString || "Không có."}
+${martialSoulsPromptBlock ? martialSoulsPromptBlock.replace(/^- /, '*   ') : ''}
 
 --- CHECKLIST KHỞI TẠO (BẮT BUỘC THỰC HIỆN TUẦN TỰ) ---
 1.  **Thiết Lập Hệ Thống Cảnh Giới dựa vào bối cảnh, miêu tả để cân nhắc cho phù hợp, ví dụ fantasy rồng và pháp thuật thì không thể là luyện khí trúc cơ như tu tiên.
