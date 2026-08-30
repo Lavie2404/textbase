@@ -1,8 +1,8 @@
 {
   "id": "4f9d4d67-3bc3-4512-8d9f-7c11ab4a0f5d",
-  "currentTurn": 33,
+  "currentTurn": 36,
   "saveVersion": "2.8",
-  "timestamp": "2026-08-28T17:41:30.360Z",
+  "timestamp": "2026-08-30T18:03:33.305Z",
   "gameSettings": {
     "storyTitle": "Tam Quốc Diệt Ma Truyền Kỳ",
     "theme": "Tên: Tam Quốc Diệt Ma Truyền Kỳ | Thể loại: Tiên Hiệp Lịch Sử | Thẻ: Tam Quốc, Đạo Pháp, Trừ Ma, Thường Sơn, Nam Hoa Lão Tiên",
@@ -124,9 +124,9 @@
       "year": 0,
       "month": 1,
       "day": 9,
-      "hour": 12
+      "hour": 18
     },
-    "weather": "Nắng ban trưa gay gắt",
+    "weather": "Nắng chiều tà u ám",
     "narrativeCombatState": {
       "isActive": false,
       "combatants": []
@@ -211,6 +211,20 @@
         "description": "Một địa điểm vừa được khám phá.",
         "category": "Khu Vực",
         "tier": 3
+      },
+      {
+        "id": "accf659e-609b-48ec-882a-80f7a2d5a0eb",
+        "Name": "Nội thành Trác Quận",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      },
+      {
+        "id": "622abaeb-03d7-49a8-825f-d4b6dc4bf403",
+        "Name": "Quán trọ Trác Quận",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
       }
     ],
     "items": [],
@@ -290,7 +304,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 22.6,
+        "exp": 22.800000000000004,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": 0,
@@ -300,7 +314,7 @@
           "def": 0,
           "spd": 0
         },
-        "current_location_id": "2150c464-033b-4cab-9a2a-4cc70cbc0420",
+        "current_location_id": "622abaeb-03d7-49a8-825f-d4b6dc4bf403",
         "baseHp": 2000,
         "baseAtk": 200,
         "baseDef": 100,
@@ -368,7 +382,12 @@
           "adventure_3": null
         },
         "potionCooldown": 0,
-        "longTermStatuses": [],
+        "longTermStatuses": [
+          {
+            "status_id": "KIET_LUC",
+            "id": "ce7d4e9a-0c83-4952-84ab-68f7fea9f418"
+          }
+        ],
         "combatStatuses": [],
         "inventory": [],
         "pendingSkillsToLearn": [],
@@ -627,6 +646,158 @@
         "incomingHealing": 1,
         "maxExp": 100,
         "skills": []
+      },
+      {
+        "id": "62c26dd7-d1bf-419e-8d03-75db7b24bbc1",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 4,
+          "atk": 1,
+          "def": 1,
+          "spd": 1
+        },
+        "current_location_id": "2150c464-033b-4cab-9a2a-4cc70cbc0420",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 1000,
+        "maxhp": 1000,
+        "atk": 30,
+        "def": 20,
+        "spd": 40,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Sĩ quan lính canh",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Giai Đoạn 1",
+        "incomingHealing": 1,
+        "maxExp": 100
+      },
+      {
+        "id": "e1a058f1-8ef1-4f4a-8b6b-36de2be32d57",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 4,
+          "atk": 1,
+          "def": 1,
+          "spd": 1
+        },
+        "current_location_id": "2150c464-033b-4cab-9a2a-4cc70cbc0420",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 1000,
+        "maxhp": 1000,
+        "atk": 30,
+        "def": 20,
+        "spd": 40,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Lão chủ tiệm thuốc",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Giai Đoạn 1",
+        "incomingHealing": 1,
+        "maxExp": 100
       }
     ],
     "sharedCooldowns": {
@@ -645,15 +816,15 @@
           "turn": 26
         }
       ],
-      "lastExpResolvedTurn": 27
+      "lastExpResolvedTurn": 34
     },
     "loreQuests": [],
     "pendingCreations": [],
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 27,
-      "world_time": 27,
+      "turn_id": 34,
+      "world_time": 34,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -674,14 +845,14 @@
           "day": 9,
           "hour": 12
         },
-        "location_id": "18d4e731-65c6-409e-80e4-dab744fece4f",
+        "location_id": "2150c464-033b-4cab-9a2a-4cc70cbc0420",
         "weather": "Nắng ban trưa gay gắt",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 12.4,
+            "exp": 22.700000000000003,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
@@ -717,6 +888,28 @@
             "exp": 0,
             "hp": 600,
             "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "62c26dd7-d1bf-419e-8d03-75db7b24bbc1",
+            "Name": "Sĩ quan lính canh",
+            "level": 1,
+            "exp": 0,
+            "hp": 1000,
+            "maxhp": 1000,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "e1a058f1-8ef1-4f4a-8b6b-36de2be32d57",
+            "Name": "Lão chủ tiệm thuốc",
+            "level": 1,
+            "exp": 0,
+            "hp": 1000,
+            "maxhp": 1000,
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
@@ -764,16 +957,16 @@
           "year": 0,
           "month": 1,
           "day": 9,
-          "hour": 12
+          "hour": 15
         },
-        "location_id": "18d4e731-65c6-409e-80e4-dab744fece4f",
-        "weather": "Nắng ban trưa gay gắt",
+        "location_id": "accf659e-609b-48ec-882a-80f7a2d5a0eb",
+        "weather": "Trời tối sầm do hắc khí ma đạo",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 22.5,
+            "exp": 22.700000000000003,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
@@ -809,6 +1002,28 @@
             "exp": 0,
             "hp": 600,
             "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "62c26dd7-d1bf-419e-8d03-75db7b24bbc1",
+            "Name": "Sĩ quan lính canh",
+            "level": 1,
+            "exp": 0,
+            "hp": 1000,
+            "maxhp": 1000,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "e1a058f1-8ef1-4f4a-8b6b-36de2be32d57",
+            "Name": "Lão chủ tiệm thuốc",
+            "level": 1,
+            "exp": 0,
+            "hp": 1000,
+            "maxhp": 1000,
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
@@ -2248,14 +2463,147 @@
       ]
     },
     {
-      "id": "62612315-4e7d-47a0-b7d0-5f60cf064c62",
+      "id": "27e12126-7ba3-436c-90b9-ace86c16c869",
       "type": "user_custom_action",
       "content": "Đi vội quá quên không hỏi ông chủ thanh kiếm này tên là gì rồi. Thôi thì tạm gọi ngươi là Bất Vãn nhé. Hôm nay ta sẽ dùng đám Hành Thi này để khai kiếm"
     },
     {
-      "id": "77337578-b3f1-4d3c-bfc8-ffeada1ab38c",
+      "id": "6a2a49cb-a533-4e8a-9fb2-36fe0d6845c3",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Gió chiều tại ngoại vi thành *Trác Quận* thốc mạnh, mang theo mùi nồng nặc của rỉ sắt và thịt thối rữa từ phía những bóng đen dật dờ đang lê lết tới gần. *Diệp Thần* đứng hiên ngang trước quán trà xập xệ, đôi mắt sắc lạnh như kiếm phong quan sát lũ *Hành Thi* đang gầm gừ, đôi tay chúng vươn ra với những móng vuốt đen ngòm, sẵn sàng xé xác bất cứ sinh linh nào. Hắn không hề tỏ ra nao núng, bàn tay thon dài khẽ chạm vào chuôi kiếm mới vừa nhận được từ tiệm rèn — một thanh thép tinh luyện mang sắc xanh lạnh lẽo như mặt hồ mùa thu. Hắn khẽ rút kiếm, một tiếng ngân trong trẻo vang lên xé toác bầu không khí u ám, hắn nhìn vào lưỡi kiếm sáng loáng phản chiếu ánh nắng ban trưa, trầm giọng nói."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đi vội quá quên không hỏi ông chủ thanh kiếm này tên là gì rồi. Thôi thì tạm gọi ngươi là *Bất Vãn* nhé. Hôm nay ta sẽ dùng đám *Hành Thi* này để khai kiếm!"
+        },
+        {
+          "type": "narrative",
+          "content": "Dứt lời, *Diệp Thần* nắm chặt chuôi kiếm *Bất Vãn*, luồng chân nguyên tinh thuần trong đan điền rúng động, cuồn cuộn đổ dồn vào cánh tay rồi truyền thẳng vào thân kiếm. Thanh trường kiếm bỗng chốc phát ra những tiếng rung hân hoan, một tầng linh quang màu xanh nhạt bọc lấy lưỡi thép, tỏa ra uy áp của tiên gia. Ngay khi tên *Hành Thi* đi đầu vung thanh rựa rỉ sét định bổ xuống, *Diệp Thần* bước một bước dài đầy tiêu sái, cổ tay xoay chuyển, một đường kiếm khí hình bán nguyệt rực rỡ thoát ra từ mũi kiếm, quét ngang qua không trung với tốc độ kinh hồn.\n\"Phập! Phập! Phập!\"\nToàn bộ đám *Hành Thi* đang tiến tới trong vòng ba trượng bỗng chốc khựng lại. Một đường chỉ đỏ mảnh mai xuất hiện ngang hông chúng, rồi ngay sau đó, thi thể của hàng chục xác sống bị chém làm đôi, đổ rạp xuống mặt đất sũng nước. Kiếm mới rèn vô cùng sắc bén, cộng hưởng với linh lực tinh thuần của hắn tạo nên một đòn khai kiếm hoàn mỹ, không một chút dư thừa. Những làn khói đen nhạt của tử khí bốc lên từ các mảnh thi thể rồi tan biến trước luồng chính khí mạnh mẽ của thanh *Bất Vãn*. Mối đe dọa quanh quán trà bị dẹp bỏ hoàn toàn, trả lại sự yên tĩnh ngắn ngủi cho vùng ngoại vi thành thị. \n*Diệp Thần* khẽ phất kiếm, vệt máu đen thối rữa trên lưỡi thép bị hất văng xuống đất, mặt kiếm lại trở nên sáng bóng không tỳ vết. Đúng lúc này, từ phía con đường mòn dẫn vào hậu viện quán trà, *Hạ Hầu Khinh Y*, *Tiểu Thúy* và chú hổ con *Tiểu Bạch* xuất hiện ở cuối trận chiến. *Khinh Y* nhìn cảnh tượng ngổn ngang của đám xác sống bị tiêu diệt gọn gẽ, rồi nhìn sang bóng lưng hiên ngang của ngươi cùng thanh bảo kiếm lấp lánh, đôi mắt nàng rực lên sự kinh ngạc xen lẫn thán phục sâu sắc.\nÁnh nắng ban trưa tại *Trác Quận* lúc này mang một sắc thái vô cùng quỷ dị, không rực rỡ vàng óng mà lại mang một màu vàng xỉn, xám xịt do bị những làn sương mù ma đạo phương Bắc che lấp. Gió vẫn thổi rít qua mái rạ của quán trà, mang theo những tiếng kêu gào thê lương mơ hồ từ phía nội thành vọng lại. *Diệp Thần* thu kiếm vào vỏ, tiếng \"cạch\" khô khốc vang lên giữa không gian u tịch. Hắn quay người lại, đối diện với những người đồng hành đang tiến tới. Bộ y phục vải thô màu nâu sẫm hắn vừa thay khiến hắn trông giống như một vị kiếm khách phong trần, nhưng khí độ tiên phong đạo cốt ẩn sau ánh mắt sắc sảo ấy là thứ không gì có thể che giấu được."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Phu quân... đòn kiếm vừa rồi của huynh quả thực là thần sầu quỷ khốc. Thanh kiếm này... *Bất Vãn*... nó dường như sinh ra là để dành cho huynh vậy."
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* bước lại gần, bàn tay nàng khẽ đặt lên cánh tay ngươi, đôi mắt phượng chứa chan niềm tin và sự ỷ lại. Nàng cảm nhận được luồng chân khí vẫn còn đang sục sôi trên cơ thể ngươi sau đòn tấn công uy mãnh. *Tiểu Thúy* ôm chặt chú hổ con *Tiểu Bạch*, gương mặt tỳ nữ vẫn còn chút tái nhợt vì lo sợ trước lũ xác sống, nhưng khi thấy mọi mối đe dọa đã được quét sạch, nàng mới dám thở phào nhẹ nhõm. Chú hổ con *Tiểu Bạch* thì dường như phấn khích hơn hẳn, nó nhảy khỏi vòng tay của *Tiểu Thúy*, lao đến quấn quýt dưới chân ngươi, đôi mắt hoàng kim rực sáng, phát ra những tiếng gầm gừ nhỏ như muốn chúc mừng chủ nhân vừa tậu được binh khí tốt.\nNgươi nhìn về hướng thành *Trác Quận*, nơi những cột hắc khí ma đạo vẫn đang âm thầm tụ hội phía trên các mái nhà dân. Sự xuất hiện của đám *Hành Thi* ngay tại ngoại vi quán trà cho thấy tà thuật của *Thái Bình Đạo* đã thâm nhập sâu hơn dự tính. Thành trì này giống như một miếng mồi ngon đang bị lũ sói đói bao vây."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Kiếm tốt, nhưng thế cục thì không tốt chút nào. Đám xác sống này chỉ là những kẻ lang thang, nhưng chúng xuất hiện ở đây chứng tỏ phòng tuyến của thành *Trác Quận* đã bắt đầu rạn nứt. Chúng ta không thể nán lại đây lâu, sương độc ma đạo sẽ sớm bao phủ khu vực này khi mặt trời lặn."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* dắt thanh *Bất Vãn* vào bên hông, cảm nhận sức nặng rắn rỏi và tin cậy của nó. Với đan điền đã khôi phục hoàn toàn, hắn biết mình cần phải dẫn dắt mọi người tiến vào sâu hơn trong thành, tìm kiếm nơi linh khí dồi dào để lập trận pháp bảo vệ cho *Khinh Y*. Hắn nhớ lại cảnh tượng ba vị hào kiệt họ Lưu, Quan, Trương ở quảng trường lúc nãy — khí vận của họ tuy mạnh nhưng vẫn đang bị ma đạo phương Bắc dòm ngó. Một kế hoạch bắt đầu hình thành trong đầu vị truyền nhân của *Nam Hoa Lão Tiên*.\nHắn dẫn đầu đoàn người bước ra khỏi quán trà, hướng về phía cổng nội thành. Dọc đường đi, dân tị nạn càng lúc càng đông, tiếng than khóc ai oán hòa cùng tiếng gầm rú của gió núi tạo nên một bản nhạc tang thương của thời đại đại loạn. Ngươi nhận thấy trên một số xác chết bên vệ đường bắt đầu mọc ra những bào tử nấm màu tím đen quỷ dị — mầm mống của sự ma hóa. Những ký tự vàng trong *Thái Bình Yếu Thuật* lại một lần nữa xoay chuyển trong thức hải của ngươi, cảnh báo về một sự bùng phát dịch bệnh ma đạo quy mô lớn sắp xảy ra.\nKhi tiến gần đến cổng thành, ngươi thấy một toán binh lính đang vất vả ngăn cản đám đông điên cuồng muốn tràn vào bên trong. Một tên sĩ quan cầm roi da quất liên tiếp vào những người dân tội nghiệp, quát tháo những lời thô tục. Sát khí bùng lên từ sự tàn bạo của đám lính canh này vô tình lại trở thành dưỡng chất cho luồng hắc khí trên bầu trời."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Sĩ quan lính canh",
+          "content": "Cút hết đi! Lệnh của Thái thú đã ban, không có giấy thông hành thì đừng hòng vào thành! Kẻ nào dám gây loạn, giết không tha!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* nhìn cảnh tượng bất công ấy, bàn tay nàng nắm chặt lấy chuôi *Thanh Thủy kiếm*, ánh mắt rực lửa chính nghĩa. Nàng quay sang nhìn ngươi, như muốn xin một ý kiến. Ngươi chỉ khẽ lắc đầu, ra hiệu cho nàng giữ bình tĩnh. Ở thế giới này, lòng tốt mù quáng đôi khi sẽ dẫn đến họa sát thân cho cả nhóm. Ngươi cần dùng trí tuệ và đạo pháp để giải quyết vấn đề một cách êm đẹp nhất.\nNgươi âm thầm vận chuyển *Linh Phong Thuật*, điều khiển những luồng gió mỏng manh mang theo mùi hương của bùa chú thanh tẩy. Luồng gió ấy nhẹ nhàng lướt qua đám đông, làm dịu đi sự hung hãn và sợ hãi, khiến không khí bớt phần căng thẳng. Ngươi dẫn Khinh Y và mọi người nép vào một góc khuất, quan sát kỹ lưỡng hệ thống canh phòng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y, nàng hãy dùng ngọc bội của mình để tiếp cận tên sĩ quan kia. Danh tiếng của phủ *Hạ Hầu* dẫu ở phương xa nhưng vẫn có sức nặng với binh lính địa phương. Ta sẽ dùng đạo pháp che mắt những kẻ xung quanh để chúng ta lọt vào mà không gây chú ý."
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* gật đầu, nàng hiểu rằng đây là cách an toàn nhất lúc này. Nàng tiến lên phía trước, thần thái trang nghiêm và quý phái của một quận chúa bộc phát, khiến tên sĩ quan đang hùng hổ cũng phải khựng lại. Trong khi đó, ngươi đứng phía sau, tay bắt quyết, miệng niệm chú. Một dải sương mù trắng nhạt bỗng dưng bốc lên từ mặt đất, bao phủ lấy nhóm của ngươi, khiến những kẻ đứng cách đó vài bước cũng chỉ thấy những hình bóng mờ ảo, không thể xác định rõ là ai.\nViệc vượt qua cổng thành diễn ra thuận lợi dưới sự kết hợp giữa quyền thế của *Khinh Y* và đạo thuật của ngươi. Sau khi vào bên trong, cảnh tượng thành nội *Trác Quận* còn khiến ngươi bất ngờ hơn. Khắp nơi đều là những đạo sĩ mặc áo vàng, tay cầm gậy tre, đang điên cuồng tuyên truyền về \"Thái Bình Thiên Quốc\". Bách tính vây quanh họ như những tín đồ cuồng nhiệt, đôi mắt ai nấy đều mang một sắc thái đờ đẫn, u mê.\nNgươi tìm đến một tiệm thuốc lớn nhất thành, mục tiêu là mua thêm *Chu Sa* và *Linh Chi* để rèn luyện bùa chú hộ thân cấp cao. Chủ tiệm thuốc là một lão nhân mắt mù một bên, nhưng thính giác vô cùng nhạy bén. Lão chỉ cần ngửi mùi hương trên người ngươi liền biết đây không phải người thường."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Lão chủ tiệm thuốc",
+          "content": "Khách nhân... trên người ngài có mùi của thiên lôi rực rỡ, nhưng lại vương chút oán niệm của tử thi. Thời buổi này, người có chính khí như ngài không còn nhiều đâu. Mời vào trong đàm đạo."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi bước vào gian phòng phía sau tiệm thuốc, mùi dược liệu nồng nàn tạm thời xua tan đi tử khí ngoài phố. Lão nhân lấy ra một hộp gỗ sưa, bên trong đựng một khối *Chu Sa* đỏ tươi như máu và hai củ *U linh chi* đen bóng. Đây là những vật phẩm quý giá có thể giúp gia tăng sức mạnh cho các đạo thuật trừ ma.\nTrong lúc ngươi đang trao đổi với lão nhân, một tiếng nổ lớn bỗng vang lên từ phía vườn đào sau huyện. Mặt đất rung chuyển kịch liệt, khói đen bốc lên ngùn ngụt che khuất cả bầu trời. *Diệp Thần* giật mình, linh giác của hắn báo động dữ dội. Đó không phải là tiếng nổ của thuốc súng, mà là một trận pháp ma đạo cực mạnh vừa bị kích hoạt. Khí vận của ba vị hào kiệt họ Lưu, Quan, Trương ở khu vực đó đang bị đe dọa nghiêm trọng bởi một thực thể tà ác vừa mới xuất thế."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Nhanh lên! Ma đạo đã phát động tấn công vào khí mạch của thành rồi! Khinh Y, nàng ở lại đây bảo vệ Tiểu Bạch, ta phải đến vườn đào ngay lập tức!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* lo lắng định can ngăn nhưng nhìn thấy sự kiên định trong mắt ngươi, nàng đành nén lòng gật đầu. Ngươi cầm lấy hộp dược liệu, thanh *Bất Vãn* bên hông khẽ rung động như muốn cùng chủ nhân xông trận. Ngươi lướt nhanh ra khỏi tiệm thuốc, bóng dáng thường dân áo nâu hòa vào dòng người hỗn loạn, hướng thẳng về phía nơi khởi nguồn của luồng ma khí đen kịch.\nBên ngoài, trời bỗng chốc tối sầm lại dù mới chỉ là buổi chiều. Những tiếng gào khóc của bách tính vang vọng khắp thành trì, và trong bóng tối, những bóng đen của lũ *Hành Thi* lại bắt đầu trồi lên từ dưới những rãnh nước của thành thị. Cuộc chiến tại thành *Trác Quận* đã chính thức bước vào giai đoạn tàn khốc nhất."
+        }
+      ]
+    },
+    {
+      "id": "4a0a1e67-a40d-4573-a527-f03ed2abd891",
       "type": "user_custom_action",
-      "content": "Đi vội quá quên không hỏi ông chủ thanh kiếm này tên là gì rồi. Thôi thì tạm gọi ngươi là Bất Vãn nhé. Hôm nay ta sẽ dùng đám Hành Thi này để khai kiếm"
+      "content": "Ngươi bấm ngón tay xem xem kết quả trận chiến. Kết quả là không cần ngươi ra tay 3 người Lưu - Quan - Trương phối hợp với thành vệ quân hoàn toàn có thể đẩy lui đám Hành Thi này. Ngươi thấy tác dụng của mình không lớn liền dứt khoát không ra tay. Chỉ tạo 1 kết giới bảo vệ rồi dặn dò Khinh Y không được ra khỏi phòng trọ. Còn ngươi thì tranh thủ ngồi tu luyện"
+    },
+    {
+      "id": "a8676f9a-58fe-4810-84b4-548f3b94ff77",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Gió bão bên ngoài thành *Trác Quận* gầm rú điên cuồng, kéo theo những dải hắc khí ma đạo đỏ ngầu xé rách vòm trời chiều xám xịt. Bên trong căn phòng trọ nhỏ hẹp tồi tàn, *Diệp Thần* đứng lặng bên cửa sổ gỗ nứt nẻ, đôi mắt sắc lạnh như kiếm phong quan sát luồng tử khí nồng nặc đang bốc lên dữ dội từ hướng vườn đào phía sau huyện. Bàn tay thon dài của hắn khẽ nâng lên, năm ngón tay bấm liên tục theo pháp quyết bói toán huyền bí được khắc ghi trong thiên thư *Thái Bình Yếu Thuật*. Hắn đang bấm ngón tay tính toán xem kết quả trận chiến vừa mới bùng nổ giữa ba vị hào kiệt *Lưu Bị*, *Quan Vũ*, *Trương Phi* phối hợp cùng thành vệ quân chống lại đám *Hành Thi* ma đạo hung hãn.\nTrong thức hải của hắn, những sợi tơ linh giác mỏng manh nhanh chóng thu thập thông tin từ chiến trường xa xôi dội về. Hắn nhìn thấy khí vận rực rỡ mang hào quang chính nghĩa vô song của ba vị anh hùng đang chiếm lấy thế thượng phong tuyệt đối, dũng mãnh càn quét và đẩy lui mọi đợt tấn công của đám xác sống ô hợp kia mà không gặp mấy trở ngại. Nhận thấy tình thế bên ngoài đã hoàn toàn an bài, và tác dụng của một kẻ vừa hao tổn chân nguyên như mình khi dấn thân vào trận chiến hỗn loạn ấy là không lớn, *Diệp Thần* dứt khoát đưa ra quyết định không lãng phí sức lực vô ích. Hắn quay người lại, đối diện với *Hạ Hầu Khinh Y* đang đứng lo âu ôm chặt chú hổ con *Tiểu Bạch* bên cạnh tỳ nữ *Tiểu Thúy*, cất giọng trầm ổn dặn dò:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y, bên ngoài có Lưu - Quan - Trương phối hợp cùng thành vệ quân dẹp loạn, bọn họ đã chiếm thế thượng phong tuyệt đối. Ta thấy tác dụng của mình lúc này không lớn nên dứt khoát không ra tay lãng phí sức lực. Ta sẽ dựng một màn kết giới bảo vệ căn phòng trọ này, nàng và Tiểu Thúy tuyệt đối không được bước ra ngoài nửa bước. Ta tranh thủ lúc này ngồi nhập định tu luyện để khôi phục và ổn định lại chân nguyên."
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* nghe lời dặn dò của hắn, đôi mắt phượng vốn đang hoang mang bỗng chốc rực lên một niềm tin tưởng mãnh liệt. Nàng khẽ gật đầu, bước lùi lại sát góc giường gỗ, dịu dàng đáp lời:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Thiếp nghe lời phu quân. Chàng hãy chuyên tâm tu luyện, thiếp và Tiểu Thúy sẽ tự bảo vệ mình, quyết không làm chàng phải bận lòng phân tâm."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* khẽ mỉm cười trấn an nàng. Không chút chậm trễ, hắn vung tay bấm khẩu quyết, dùng đầu ngón tay ngưng tụ luồng chân nguyên tinh thuần màu vàng nhạt, vẽ nhanh bốn đường phù văn huyền diệu lên bốn góc tường phòng trọ. Hắn khẽ quát một tiếng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Địa Khí Quy Nguyên, Huyền Môn Kết Giới, lập!"
+        },
+        {
+          "type": "narrative",
+          "content": "Một tiếng oanh trầm đục dội thẳng vào tâm linh, một màng kết giới mỏng manh nhưng kiên cố, tỏa ra ánh linh quang vàng nhạt ấm áp, lập tức bao bọc lấy toàn bộ căn phòng trọ, cô lập hoàn toàn hơi thở và tiếng động bên trong với thế giới hỗn loạn đầy rẫy tử khí ngoài kia. Lập xong kết giới bảo vệ, *Diệp Thần* dứt khoát ngồi xếp bằng trên nền đất ẩm ướt, nhắm nghiền hai mắt, ôm cuộn thiên thư *Thái Bình Yếu Thuật* trước ngực, bắt đầu đi vào trạng thái tĩnh tọa nhập định sâu để tranh thủ tu luyện.\nChân khí vốn dĩ mỏng manh của *Diệp Thần* sau chuyến bay dài và lần khai kiếm ban nãy nay được đưa vào quỹ đạo tuần hoàn của quyển *Địa*. Từng hạt ánh sáng vàng nhạt li ti từ quyển thiên thư không ngừng thẩm thấu qua da thịt hắn, lướt qua kỳ kinh bát mạch, xoa dịu đi những thớ cơ đang rã rời. Thế nhưng, thế giới bên ngoài căn phòng trọ lại không chịu để hắn yên ổn.\nTrận chiến ngoài kia chấn động cực kỳ dữ dội. Sức mạnh càn quét từ thanh đại đao của *Quan Vũ* và ngọn xà mâu của *Trương Phi* khi va chạm với các thực thể tà ma tạo ra những đợt sóng xung kích vật lý và linh lực vô hình lan tỏa khắp thành *Trác Quận*. Những đợt rung chấn liên tiếp dội thẳng vào vách tường mỏng manh của phòng trọ, khiến màng kết giới huyền môn phải liên tục tự động căng mình chống đỡ. Sự chống cự thụ động ấy đòi hỏi đan điền của *Diệp Thần* phải không ngừng tuôn ra chân nguyên để duy trì sự ổn định cho kết giới, tiêu hao năng lượng của hắn nhiều hơn dự kiến rất nhiều.\nMỗi lần có một tiếng nổ lớn dội lại từ hướng vườn đào, lồng ngực *Diệp Thần* lại khẽ thắt chặt, mồ hôi lạnh rịn ra trên trán rồi chảy dài xuống thái dương. Hắn phải nghiến chặt răng, dùng ý chí sắt đá của một cựu đặc công kiếp trước để đè nén cơn đau thắt nơi kinh mạch, kiên trì dẫn dắt dòng chân khí quy nguyên. Sự mệt mỏi dần tích tụ, thể lực sút giảm nghiêm trọng, nhưng thần thức của hắn lại trong quá trình rèn giũa dưới áp lực cực hạn ấy mà trở nên nhạy bén vô cùng. Hắn có thể cảm nhận thấy từng hạt sương muối đang ngưng tụ trên mái ngói, tiếng gầm gừ nghẹn khuất cuối cùng của những tên xác sống bị thiêu rụi ngoài phố, và hơi thở ấm áp dồn dập đầy lo lắng của *Hạ Hầu Khinh Y* đang ngồi cách đó không xa.\nSau ba giờ đồng hồ trôi qua đầy gian nan, trận chiến kinh thiên ngoài kia cuối cùng cũng dần lắng xuống. Những đám mây đen hình đầu lâu tản mác đi phần lớn, để lộ ra dải nắng chiều tà u ám, đỏ quạch như máu loãng chiếu rọi qua khe cửa gỗ. *Diệp Thần* chầm chậm mở mắt ra, thu hồi màng kết giới đang dần tiêu biến. Toàn thân hắn rã rời, bắp chân nhức nhối và đan điền có phần trống rỗng, thể hiện rõ rệt sự kiệt lực của tu vi sơ khai.\nThấy phu quân thức tỉnh, *Hạ Hầu Khinh Y* lập tức vứt bỏ vẻ e thẹn, nàng vội vàng nhào tới bên cạnh hắn. Đôi bàn tay thon thả mềm mại nâng chiếc khăn lụa lấm lem khẽ lau đi mồ hôi lạnh trên trán hắn, ánh mắt phượng đẫm nước nhìn hắn đầy xót xa:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Phu quân, chàng chịu khổ rồi... Trận chiến ban nãy chấn động dữ dội quá, thiếp nhìn thấy màng kết giới liên tục run rẩy, biết chàng phải hao tổn bao nhiêu tinh lực để bảo vệ cho thiếp và mọi người. Sắc mặt chàng tái nhợt thế này, thiếp đau lòng lắm..."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* khẽ nắm lấy bàn tay mềm mại đang run rẩy của nàng, cảm nhận hơi ấm thanh nhã của nàng dâu mới kết duyên giúp hắn xua đi cái lạnh buốt của đan điền trống rỗng. Hắn mỉm cười nhẹ nhàng, giọng nói tuy còn chút yếu ớt nhưng đầy vẻ ôn hòa, tiêu sái:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y đừng lo, ta chỉ là tiêu hao chút chân nguyên để duy trì trận pháp bảo hộ thôi, điều dưỡng một chút là sẽ ổn. Chú tiểu Bạch Hổ có ngoan không?"
+        },
+        {
+          "type": "narrative",
+          "content": "Nàng tỳ nữ *Tiểu Thúy* vội vàng bế chú hổ con *Tiểu Bạch* tới gần. Chú linh thú nhỏ lúc này đã hồi phục thần trí hoàn toàn nhờ luồng phong kình ấm áp ban nãy, nó mở to đôi mắt hoàng kim rực sáng, khẽ cọ cái đầu nhỏ đầy lông tơ trắng muốt vào gối hắn, phát ra những tiếng kêu ríu rít đầy ỷ lại và biết ơn. Ngươi khẽ vuốt ve nó, cảm nhận sự liên kết tâm linh thần thánh giữa truyền nhân và linh thú trấn núi ngày càng sâu sắc.\nNgươi quyết định dẫn theo *Hạ Hầu Khinh Y* bước xuống tầng dưới của quán trọ để tìm một góc vắng sưởi ấm bên bếp lửa tàn và nghe ngóng tin tức tiếp theo từ lão chưởng quầy. Lão chưởng quầy đang lúi húi lau dọn những mảnh vỡ dưới sàn gỗ với gương mặt vẫn còn vương nét kinh hoàng sau trận bão táp xác sống ban nãy. Nhìn thấy gã thiếu niên thường dân áo nâu dắt theo một mỹ nhân tuyệt thế bước xuống, lão vội vàng khom người chào đón với vẻ sợ sệt.\nHắn ngồi xuống chiếc bàn gỗ sần sùi ở góc quán, tự tay rót một chén nước ấm cho *Hạ Hầu Khinh Y*, rồi trầm ngâm quan sát bầu trời ngoài cửa sổ. Trận chiến tuy tạm thời kết thúc, *Lưu Bị*, *Quan Vũ*, *Trương Phi* đã lập nên đại công đẩy lui đám *Hành Thi*, nhưng oán khí phương Bắc vẫn đang không ngừng rục rịch cuộn trào sâu bên trong lòng đất thành *Trác Quận*. Họa sát thân của *Hạ Hầu Khinh Y* dẫu đã được phong ấn tạm thời bởi mệnh cách của hắn, nhưng tà khí xung quanh vẫn chực chờ bùng phát. Hắn cần phải chuẩn bị chu đáo hơn cho những diễn biến tàn khốc sắp tới của cuộc khởi nghĩa *Hoàng Cân* vĩ đại."
+        }
+      ]
+    },
+    {
+      "id": "6a0c8214-cea3-4ad3-8bb8-1429a21d2f74",
+      "type": "user_custom_action",
+      "content": "Đêm đã khuya, đã đến lúc nàng hầu hạ ta trên giường rồi Khinh Y. Khinh Y đỏ mặt gật đầu sau đó cởi bỏ quần áo nằm lên giường. Ngươi cũng nhanh chóng cởi bỏ quần áo của mình lao tới vuốt ve bầu ngực trắng ngần của nàng. Tham lam hôn lấy đôi môi đỏ mọng. Chiếc lưỡi không an phận tấn công dồn dập trong miệng Khinh Y. Đôi tay vuốt ve bầu ngực sau đó dần dần mò xuống vùng cấm bên dưới. Ngươi đưa ngón tay vào khuấy động bên trong lồn nàng khiến nàng rên rỉ. Sau khi lồn nàng ướt đẫm dâm thủy ngươi mới đưa con cu của mình vào. Lần đầu của Khinh Y nên nàng khẽ rên vì đau và chảy máu. Nhưng được 2 nhấp thì Khinh Y rên vì sướng. Đôi chân kẹp chặt hông ngươi không cho ngươi rút ra. Ngươi nhấp liên tục cả mấy canh giờ khiến Khinh Y xin tha mấy lần. Sau khi cả 2 lên đỉnh cả chục lần ngươi mới chịu dừng lại. Mặc dù dừng lại nhưng ngươi không hề rút cu ra khỏi lồn nàng mà cứ cắm trong đó rồi ôm nàng ngủ. Trong lúc ngủ chỉ 1 vài cử động nhỏ cũng khiến cu ngươi cạ vào thành lồn khiến cả 2 sung sướng trong cơn mê. Dù đã ngủ nhưng phản ứng sinh lý vẫn hoạt động khiến cả 2 vừa ngủ vừa lên đỉnh. Trong lồn của Khinh Y tràn ngập tinh dịch nóng hổi của ngươi."
     }
   ],
   "choices": [],
@@ -2270,5 +2618,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 32
+  "adventureTurnCount": 35
 }
