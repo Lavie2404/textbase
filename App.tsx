@@ -18624,17 +18624,10 @@ const updateOrCreateInArray = (array, newItem, keyField = 'Name') => {
     return newCharacter;
 };
 
-const fetchInitialItemDetails = async (itemIdeaWithRarity, effectiveApiKey) => {
-    // (Prompt và schema không đổi)
-    const prompt = `
-        Bạn là một chuyên gia giám định vật phẩm game cực kỳ logic và tuân thủ quy tắc. Dựa vào thông tin dưới đây, hãy trả về một đối tượng JSON.
-
-        --- THÔNG TIN VẬT PHẨM ĐẦU VÀO ---
-        - Tên: "${itemIdeaWithRarity.name}"
-        - Mô tả gốc: "${itemIdeaWithRarity.description}"
-        - Phẩm chất ĐÃ ĐƯỢC ẤN ĐỊNH: "${itemIdeaWithRarity.rarity}"
-
-        --- CHECKLIST NHIỆM VỤ (BẮT BUỘC THỰC HIỆN TUẦN TỰ) ---
+// Bộ luật giám định LOẠI vật phẩm dùng CHUNG cho lệnh đơn lẻ và lệnh gộp
+// (quota mitigation C, 2026-08-31) — sửa một nơi, cả hai đường giám định cùng đổi.
+const ITEM_CLASSIFY_RULES_TEXT = `
+        --- CHECKLIST NHIỆM VỤ (BẮT BUỘC THỰC HIỆN TUẦN TỰ CHO TỪNG VẬT PHẨM) ---
 
         **NHIỆM VỤ 1:    Ngươi phải kiểm tra ý tưởng vật phẩm theo đúng thứ tự các câu hỏi dưới đây. Ngay khi tìm thấy một quy tắc ĐÚNG, hãy chọn 'category' tương ứng và dừng lại.
         1. Chức năng có phải là LƯU TRỮ, CHỨA ĐỰNG không?
@@ -18677,12 +18670,23 @@ const fetchInitialItemDetails = async (itemIdeaWithRarity, effectiveApiKey) => {
 
         --- DANH SÁCH 'category' HỢP LỆ ---
         [${ITEM_TYPES.join(', ')}]
-        
+`;
+
+const ITEM_CLASSIFY_SCHEMA = { type: "OBJECT", properties: { category: { type: "STRING", enum: ITEM_TYPES }, description: { type: "STRING" } }, required: ["category", "description"] };
+
+const fetchInitialItemDetails = async (itemIdeaWithRarity, effectiveApiKey) => {
+    const prompt = `
+        Bạn là một chuyên gia giám định vật phẩm game cực kỳ logic và tuân thủ quy tắc. Dựa vào thông tin dưới đây, hãy trả về một đối tượng JSON.
+
+        --- THÔNG TIN VẬT PHẨM ĐẦU VÀO ---
+        - Tên: "${itemIdeaWithRarity.name}"
+        - Mô tả gốc: "${itemIdeaWithRarity.description}"
+        - Phẩm chất ĐÃ ĐƯỢC ẤN ĐỊNH: "${itemIdeaWithRarity.rarity}"
+${ITEM_CLASSIFY_RULES_TEXT}
         --- YÊU CẦU ĐẦU RA ---
         CHỈ trả về một đối tượng JSON duy nhất chứa 2 thuộc tính: 'category' và 'description'.
     `;
-    const schema = { type: "OBJECT", properties: { category: { type: "STRING", enum: ITEM_TYPES }, description: { type: "STRING" } }, required: ["category", "description"], };
-    const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { response_mime_type: "application/json", response_schema: schema } };
+    const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { response_mime_type: "application/json", response_schema: ITEM_CLASSIFY_SCHEMA } };
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
 
     try {
@@ -18690,6 +18694,40 @@ const fetchInitialItemDetails = async (itemIdeaWithRarity, effectiveApiKey) => {
         return JSON.parse(jsonText);
     } catch (error) {
         console.error(`Lỗi trong fetchInitialItemDetails sau khi thử lại nhiều lần cho '${itemIdeaWithRarity.name}':`, error);
+        return null;
+    }
+};
+
+// Quota mitigation C (2026-08-31): giám định LOẠI cho nhiều vật phẩm trong MỘT lệnh AI.
+// Trả về mảng cùng độ dài với đầu vào (phần tử thứ i ứng với vật phẩm thứ i), hoặc null
+// khi lỗi/thiếu phần tử — nơi gọi sẽ quay về đường giám định từng-vật-phẩm như cũ.
+const fetchInitialItemDetailsBatch = async (itemIdeas, effectiveApiKey) => {
+    if (!Array.isArray(itemIdeas) || itemIdeas.length < 2) return null;
+    const itemLines = itemIdeas
+        .map((it, i) => `        - VẬT PHẨM #${i + 1}: { Tên: "${it.name}", Mô tả gốc: "${it.description}", Phẩm chất ĐÃ ẤN ĐỊNH: "${it.rarity}" }`)
+        .join('\n');
+    const prompt = `
+        Bạn là một chuyên gia giám định vật phẩm game cực kỳ logic và tuân thủ quy tắc. Dưới đây là ${itemIdeas.length} vật phẩm cần giám định loại TRONG CÙNG MỘT LẦN.
+
+        --- DANH SÁCH VẬT PHẨM ĐẦU VÀO ---
+${itemLines}
+${ITEM_CLASSIFY_RULES_TEXT}
+        --- YÊU CẦU ĐẦU RA ---
+        CHỈ trả về MỘT MẢNG JSON gồm ĐÚNG ${itemIdeas.length} phần tử: phần tử thứ i là kết quả giám định của VẬT PHẨM #i, mỗi phần tử chứa 2 thuộc tính 'category' và 'description'.
+    `;
+    const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { response_mime_type: "application/json", response_schema: { type: "ARRAY", items: ITEM_CLASSIFY_SCHEMA } } };
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+
+    try {
+        const jsonText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'creation_drain');
+        const arr = JSON.parse(jsonText);
+        if (!Array.isArray(arr) || arr.length !== itemIdeas.length) {
+            console.warn(`[Giám định gộp] AI trả về ${Array.isArray(arr) ? arr.length : 'không phải mảng'} phần tử thay vì ${itemIdeas.length} — quay về giám định loại từng vật phẩm.`);
+            return null;
+        }
+        return arr;
+    } catch (error) {
+        console.warn(`[Giám định gộp] Lỗi giám định loại ${itemIdeas.length} vật phẩm trong một lệnh — quay về từng vật phẩm:`, error.message);
         return null;
     }
 };
@@ -23182,6 +23220,91 @@ useEffect(() => {
                 ...prev,
                 pendingCreations: []
             }));
+
+            // ---- Quota mitigation A+C (2026-08-31): tiền xử lý GỘP lệnh cho vật phẩm ----
+            // A: thẻ [ITEM_IDEA_GAINED] nay mang sẵn category hợp lệ → khỏi tốn lệnh AI đoán loại.
+            // C: nhiều vật phẩm cùng chờ → gộp bước đoán loại vào 1 lệnh chung, và gộp bước sinh
+            //    chi tiết theo từng nhóm cùng loại vào 1 lệnh/nhóm. Mọi thất bại gộp đều rơi về
+            //    đường giám định từng-vật-phẩm cũ bên dưới (hành vi không bao giờ kém hơn trước).
+            const preliminaryByRequest = new Map();
+            const budgetByRequest = new Map();
+            const detailsByRequest = new Map();
+            try {
+                const effectiveApiKeyForBatch = apiMode === 'userKey' ? apiKey : "";
+                const itemRequests = requestsToProcess.filter(r => r.type === 'item');
+                const rarityOf = (idea) => idea.rarity || getFinalRarityByLevel(playerCharacter?.level || 1, idea.type);
+
+                const needClassify = [];
+                for (const r of itemRequests) {
+                    const idea = r.payload.itemIdea;
+                    const userEquipmentType = (idea.equipmentType || '').trim();
+                    const tagCategory = (idea.category || '').trim();
+                    if (userEquipmentType) {
+                        preliminaryByRequest.set(r, { category: userEquipmentType, description: idea.description });
+                    } else if (ITEM_TYPES.includes(tagCategory)) {
+                        // A: người kể đã chọn loại ngay trong thẻ (có toàn bộ ngữ cảnh truyện).
+                        preliminaryByRequest.set(r, { category: tagCategory, description: idea.description });
+                    } else {
+                        needClassify.push(r);
+                    }
+                }
+                if (needClassify.length >= 2) {
+                    const batchInput = needClassify.map(r => ({ ...r.payload.itemIdea, rarity: rarityOf(r.payload.itemIdea) }));
+                    const classified = await fetchInitialItemDetailsBatch(batchInput, effectiveApiKeyForBatch);
+                    if (classified) {
+                        needClassify.forEach((r, i) => {
+                            if (classified[i] && classified[i].category) preliminaryByRequest.set(r, classified[i]);
+                        });
+                    }
+                }
+
+                // Gộp bước sinh chi tiết theo nhóm CÙNG LOẠI (chỉ nhóm ≥2). Vật phẩm có yêu cầu
+                // riêng của người chơi (requiredStats/requiredEffects/exactValues/điều kiện dùng)
+                // giữ đường đơn lẻ để không pha loãng các chỉ thị "ưu tiên tối thượng" của chúng.
+                const detailGroups = new Map();
+                for (const r of itemRequests) {
+                    const idea = r.payload.itemIdea;
+                    const preliminary = preliminaryByRequest.get(r);
+                    if (!preliminary || !preliminary.category) continue;
+                    if (idea.requiredStats || idea.requiredEffects || idea.exactValues || idea.requiredUsageCondition) continue;
+                    if (!detailGroups.has(preliminary.category)) detailGroups.set(preliminary.category, []);
+                    detailGroups.get(preliminary.category).push(r);
+                }
+                await Promise.all([...detailGroups.values()].filter(g => g.length >= 2).map(async (group) => {
+                    const statBearingCategories = ['Vũ khí', 'Vũ khí phụ', 'Thân', 'Đầu', 'Chân', 'Phụ kiện', 'Dị thường'];
+                    const detailedIdeas = group.map(r => {
+                        const idea = r.payload.itemIdea;
+                        const preliminary = preliminaryByRequest.get(r);
+                        const finalRarity = rarityOf(idea);
+                        const budget = calculateBalancingBudget({ category: preliminary.category, rarity: finalRarity }, playerCharacter, gameSettings.difficulty);
+                        budgetByRequest.set(r, budget);
+                        return {
+                            name: idea.name,
+                            description: preliminary.description,
+                            category: preliminary.category,
+                            rarity: finalRarity,
+                            value: budget,
+                            requiredStats: (finalRarity === 'Thần Thoại' && statBearingCategories.includes(preliminary.category))
+                                ? 'ATK, % ATK, HP, % HP, DEF, % DEF, SPD, % SPD, % Life steal'
+                                : null,
+                            requiredEffects: null,
+                        };
+                    });
+                    const results = await fetchItemDetailsBatchFromAI(detailedIdeas, effectiveApiKeyForBatch);
+                    if (results) {
+                        group.forEach((r, i) => { if (results[i]) detailsByRequest.set(r, results[i]); });
+                    } else {
+                        // Lô hỏng → đường đơn lẻ bên dưới tự tính lại ngân sách và gọi lại từng món.
+                        group.forEach(r => budgetByRequest.delete(r));
+                    }
+                }));
+            } catch (prePassError) {
+                console.warn('[Giám định gộp] Tiền xử lý gộp gặp lỗi — toàn bộ quay về giám định từng vật phẩm:', prePassError);
+                preliminaryByRequest.clear();
+                budgetByRequest.clear();
+                detailsByRequest.clear();
+            }
+
             await Promise.all(requestsToProcess.map(async (requestToProcess) => {
                 try {
                     const effectiveApiKey = apiMode === 'userKey' ? apiKey : "";
@@ -23192,17 +23315,25 @@ useEffect(() => {
                             let finalRarity = itemIdea.rarity || getFinalRarityByLevel(playerCharacter?.level || 1, itemIdea.type);
                             const itemIdeaWithRarity = { ...itemIdea, rarity: finalRarity };
 
-                            // Nếu người chơi tự chọn "Loại Trang bị" (form Tạo Vật Phẩm/Thiên phú khởi đầu), bỏ qua bước AI đoán loại và dùng thẳng lựa chọn đó.
+                            // Thứ tự xác định loại: (1) kết quả tiền xử lý gộp; (2) người chơi tự chọn
+                            // "Loại Trang bị"; (3) category hợp lệ do người kể ghi sẵn trong thẻ (A);
+                            // (4) đường cũ — một lệnh AI đoán loại riêng cho vật phẩm này.
                             const userEquipmentType = (itemIdea.equipmentType || '').trim();
-                            const preliminaryDetails = userEquipmentType
-                                ? { category: userEquipmentType, description: itemIdea.description }
-                                : await fetchInitialItemDetails(itemIdeaWithRarity, effectiveApiKey);
+                            const tagCategory = (itemIdea.category || '').trim();
+                            const preliminaryDetails = preliminaryByRequest.get(requestToProcess)
+                                || (userEquipmentType
+                                    ? { category: userEquipmentType, description: itemIdea.description }
+                                    : (ITEM_TYPES.includes(tagCategory)
+                                        ? { category: tagCategory, description: itemIdea.description }
+                                        : await fetchInitialItemDetails(itemIdeaWithRarity, effectiveApiKey)));
                             if (!preliminaryDetails || !preliminaryDetails.category) {
                                 throw new Error(`AI không thể xác định loại của vật phẩm.`);
                             }
 
                             const budgetDetails = { category: preliminaryDetails.category, rarity: finalRarity };
-                            const balancingBudget = calculateBalancingBudget(budgetDetails, playerCharacter, gameSettings.difficulty);
+                            // Vật phẩm đã giám định gộp phải giữ ĐÚNG ngân sách đã nằm trong prompt của lô.
+                            const balancingBudget = budgetByRequest.get(requestToProcess)
+                                ?? calculateBalancingBudget(budgetDetails, playerCharacter, gameSettings.difficulty);
 
                             setknowledge(prev => {
                                 const newKnowledge = JSON.parse(JSON.stringify(prev));
@@ -23229,7 +23360,9 @@ useEffect(() => {
                                 requiredStats: requiredStatsForAI,
                                 requiredEffects: itemIdea.requiredEffects || null,
                             };
-                            const itemFromAI = await fetchItemDetailsFromAI(detailedIdeaForAI, effectiveApiKey);
+                            // Ưu tiên kết quả của lệnh giám định GỘP; thiếu thì đi đường đơn lẻ như cũ.
+                            const itemFromAI = detailsByRequest.get(requestToProcess)
+                                || await fetchItemDetailsFromAI(detailedIdeaForAI, effectiveApiKey);
                             if (!itemFromAI) {
                                 throw new Error(`AI không thể tạo chi tiết cho vật phẩm.`);
                             }
@@ -23917,18 +24050,12 @@ const fetchGenericGeminiText = async (promptText) => {
 
 // Giám định chi tiết //
 
-const fetchItemDetailsFromAI = async (itemIdea, effectiveApiKey) => {
-    if (!itemIdea || !itemIdea.name || !itemIdea.category || !itemIdea.rarity) {
-        console.error("fetchItemDetailsFromAI được gọi với itemIdea không hợp lệ.");
-        return null;
-    }
-    if (apiMode === 'userKey' && !effectiveApiKey) {
-        setModalMessage({ show: true, title: 'Lỗi API Key', content: 'Vui lòng cấu hình API Key.', type: 'error' });
-        return null;
-    }
-
+// Quota mitigation A/C (2026-08-31): phần dựng prompt + schema theo loại được tách ra
+// khỏi fetchItemDetailsFromAI để lệnh giám định GỘP (fetchItemDetailsBatchFromAI) dùng
+// chung đúng một bộ luật với lệnh giám định đơn lẻ. Trả về null khi loại không có bộ luật.
+const buildItemDetailPromptAndSchema = (itemIdea) => {
     let prompt = '';
-    let schema = {}; 
+    let schema = {};
 
     const itemType = itemIdea.category;
     switch (itemType) {
@@ -24147,9 +24274,52 @@ ${itemIdea.requiredUsageCondition ? `// - Mô tả Điều kiện sử dụng mo
 `;
     }
 
+    return { prompt, schema };
+};
+
+// Hậu xử lý tất định dùng chung cho lệnh đơn lẻ và lệnh gộp: các thuộc tính nhận dạng
+// (Name/Type/Rarity/mô tả) luôn lấy từ hệ thống, không tin bản AI trả về.
+const finalizeItemDetailsFromAI = (aiResult, itemIdea) => {
+    const equippableTypes = ['Vũ khí', 'Vũ khí phụ', 'Thân', 'Đầu', 'Chân', 'Phụ kiện', 'Dị thường', 'Trữ vật', 'Phương tiện'];
+    const isEquippable = equippableTypes.map(t => t.toLowerCase()).includes((itemIdea.category || '').toLowerCase());
+
+    const finalProperties = {
+        Name: itemIdea.name,
+        description: itemIdea.description,
+        Type: itemIdea.category,
+        Rarity: itemIdea.rarity,
+        Consumable: !isEquippable,
+        Equippable: isEquippable,
+        Weight: aiResult.Weight ?? (itemIdea.category === 'Thực phẩm' ? 1 : 0.2),
+    };
+
+    return { ...aiResult, ...finalProperties };
+};
+
+const stripJsonCodeFence = (jsonText) => {
+    let clean = String(jsonText || '').trim();
+    if (clean.startsWith("```json")) {
+        clean = clean.substring(7, clean.length - 3).trim();
+    }
+    return clean;
+};
+
+const fetchItemDetailsFromAI = async (itemIdea, effectiveApiKey) => {
+    if (!itemIdea || !itemIdea.name || !itemIdea.category || !itemIdea.rarity) {
+        console.error("fetchItemDetailsFromAI được gọi với itemIdea không hợp lệ.");
+        return null;
+    }
+    if (apiMode === 'userKey' && !effectiveApiKey) {
+        setModalMessage({ show: true, title: 'Lỗi API Key', content: 'Vui lòng cấu hình API Key.', type: 'error' });
+        return null;
+    }
+
+    const built = buildItemDetailPromptAndSchema(itemIdea);
+    if (!built) return null;
+
     const payload = {
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { response_mime_type: "application/json", response_schema: schema }
+        contents: [{ role: "user", parts: [{ text: built.prompt }] }],
+        generationConfig: { response_mime_type: "application/json", response_schema: built.schema }
     };
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
 
@@ -24157,27 +24327,8 @@ ${itemIdea.requiredUsageCondition ? `// - Mô tả Điều kiện sử dụng mo
         const jsonText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'creation_drain');
 
         try {
-            let cleanJsonText = jsonText;
-            if (cleanJsonText.startsWith("```json")) {
-                cleanJsonText = cleanJsonText.substring(7, cleanJsonText.length - 3).trim();
-            }
-            const aiResult = JSON.parse(cleanJsonText);
-            
-            const equippableTypes = ['Vũ khí', 'Vũ khí phụ', 'Thân', 'Đầu', 'Chân', 'Phụ kiện', 'Dị thường', 'Trữ vật', 'Phương tiện'];
-            const isEquippable = equippableTypes.map(t => t.toLowerCase()).includes(itemType.toLowerCase());
-
-            const finalProperties = {
-                Name: itemIdea.name,
-                description: itemIdea.description,
-                Type: itemIdea.category,
-                Rarity: itemIdea.rarity,
-                Consumable: !isEquippable,
-                Equippable: isEquippable,
-                Weight: aiResult.Weight ?? (itemType === 'Thực phẩm' ? 1 : 0.2),
-            };
-            
-            return { ...aiResult, ...finalProperties };
-
+            const aiResult = JSON.parse(stripJsonCodeFence(jsonText));
+            return finalizeItemDetailsFromAI(aiResult, itemIdea);
         } catch (e) {
             console.error(`Lỗi phân tích JSON cho "${itemIdea.name}". Phản hồi thô từ AI:`, jsonText);
             throw new Error("AI trả về một chuỗi không phải là JSON hợp lệ.");
@@ -24185,12 +24336,52 @@ ${itemIdea.requiredUsageCondition ? `// - Mô tả Điều kiện sử dụng mo
 
     } catch (error) {
         console.error(`Lỗi cuối cùng trong quá trình giám định chi tiết "${itemIdea.name}":`, error);
-        setModalMessage({ 
-            show: true, 
-            title: "Lỗi Giám Định Chi Tiết", 
-            content: `Hệ thống không thể tạo chi tiết cho "${itemIdea.name}".\n\nLý do: ${error.message}`, 
-            type: 'error' 
+        setModalMessage({
+            show: true,
+            title: "Lỗi Giám Định Chi Tiết",
+            content: `Hệ thống không thể tạo chi tiết cho "${itemIdea.name}".\n\nLý do: ${error.message}`,
+            type: 'error'
         });
+        return null;
+    }
+};
+
+// Quota mitigation C (2026-08-31): sinh chi tiết cho NHIỀU vật phẩm CÙNG LOẠI trong MỘT
+// lệnh AI. Prompt = bộ luật đầy đủ của từng vật phẩm (mỗi vật phẩm mang NGÂN SÁCH riêng đã
+// tính tất định) + chỉ thị ghi đè đầu ra thành MẢNG; schema ARRAY ép đúng cấu trúc. Trả về
+// null khi lỗi/thiếu phần tử — nơi gọi quay về đường giám định từng-vật-phẩm như cũ, nên
+// hành vi không bao giờ kém hơn trước.
+const fetchItemDetailsBatchFromAI = async (itemIdeas, effectiveApiKey) => {
+    if (!Array.isArray(itemIdeas) || itemIdeas.length < 2) return null;
+    if (apiMode === 'userKey' && !effectiveApiKey) return null;
+
+    const builtList = itemIdeas.map(idea => buildItemDetailPromptAndSchema(idea));
+    if (builtList.some(b => !b)) return null;
+
+    const prompt = builtList
+        .map((b, i) => `\n// ================== VẬT PHẨM #${i + 1}: "${itemIdeas[i].name}" ==================\n${b.prompt}`)
+        .join('\n')
+        + `\n\n// --- GHI ĐÈ YÊU CẦU ĐẦU RA (ƯU TIÊN TUYỆT ĐỐI) ---\n`
+        + `// Ở trên có ${itemIdeas.length} vật phẩm, mỗi vật phẩm kèm bộ quy tắc và NGÂN SÁCH RIÊNG của nó.\n`
+        + `// Trả về MỘT MẢNG JSON gồm ĐÚNG ${itemIdeas.length} phần tử: phần tử thứ i là kết quả giám định của VẬT PHẨM #i theo đúng bộ quy tắc + ngân sách riêng của vật phẩm đó.\n`
+        + `// Mọi câu "trả về MỘT đối tượng JSON" trong từng bộ quy tắc ở trên chỉ áp dụng cho phần tử tương ứng, KHÔNG áp dụng cho toàn bộ phản hồi.`;
+
+    const payload = {
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { response_mime_type: "application/json", response_schema: { type: "ARRAY", items: builtList[0].schema } }
+    };
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+
+    try {
+        const jsonText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'creation_drain');
+        const arr = JSON.parse(stripJsonCodeFence(jsonText));
+        if (!Array.isArray(arr) || arr.length !== itemIdeas.length) {
+            console.warn(`[Giám định gộp] AI trả về ${Array.isArray(arr) ? arr.length : 'không phải mảng'} phần tử thay vì ${itemIdeas.length} — quay về giám định chi tiết từng vật phẩm.`);
+            return null;
+        }
+        return arr.map((aiResult, i) => finalizeItemDetailsFromAI(aiResult, itemIdeas[i]));
+    } catch (error) {
+        console.warn(`[Giám định gộp] Lỗi sinh chi tiết ${itemIdeas.length} vật phẩm trong một lệnh — quay về từng vật phẩm:`, error.message);
         return null;
     }
 };
@@ -26594,7 +26785,7 @@ const handleHtabDonate = (expAmount, currencyCost, itemIdToDonate) => {
     // Ép API 3 (Giám sát Thực tại) quét ngay lập tức để tick hoàn thành nhiệm vụ
     setTimeout(() => {
         setknowledge(latestK => {
-            runAPI3StateMonitor(actionDescForAI, latestK);
+            runAPI3StateMonitor(actionDescForAI, latestK, 3, 3000, true);
             return latestK;
         });
     }, 500);
@@ -27062,7 +27253,7 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
             5. 'commands': CHUỖI CHỨA CÁC THẺ LỆNH HỆ THỐNG [TAG:...] cần thiết để thay đổi thông số game. Nếu không có thay đổi cơ chế, để chuỗi rỗng "".
                - QUY TẮC THẺ LỆNH: Chỉ được phép sử dụng các thẻ lệnh hợp lệ sau đây:
                  + [CHARACTER_UPDATE: Name="...", Stats="..."] (Chỉ dùng cập nhật tiền tệ, trạng thái đồng hành hoặc tiêu hao vật phẩm).
-                 + [ITEM_IDEA_GAINED: name="...", description="...", rarity="...", quantity=X] (Thêm vật phẩm vào túi).
+                 + [ITEM_IDEA_GAINED: name="...", description="...", category="...", rarity="...", quantity=X] (Thêm vật phẩm vào túi; category BẮT BUỘC chọn từ danh sách loại hợp lệ — xem mục QUẢN LÝ SỞ HỮU).
                  + [WORLD_ITEM: id="...", name="...", description="...", quantity=X] (Rơi đồ dã ngoại dập tắt sau chiến đấu).
                  + [WORLD_NPC: id="...", name="...", description="...", level=X, stance="...", loreId="..."] (Tạo nhân vật xuất hiện trước mặt; thuộc tính loreId CHỈ điền khi hiện thực hóa NPC từ danh sách tin đồn).
                  + [WORLD_LOCATION: id="...", name="...", category="...", tier=X, loreId="..."] (Kiến tạo địa điểm vật lý mới; loreId CHỈ điền khi hiện thực hóa địa điểm từ danh sách tin đồn).
@@ -27692,9 +27883,14 @@ ${customRulesBlock}
 
 // --- II. QUẢN LÝ SỞ HỮU & VẬT PHẨM THẾ GIỚI ---
 // A. THU NHẬN SỞ HỮU ([ITEM_IDEA_GAINED])
-//    * KHI NÀO KÍCH HOẠT: Khi nhân vật chính nhặt đồ từ trên kệ, mở rương, lấy tài sản, thu hoạch thảo dược, được NPC trao tặng, hoặc mua bán trực tiếp thành công vào hành trang. 
+//    * KHI NÀO KÍCH HOẠT: Khi nhân vật chính nhặt đồ từ trên kệ, mở rương, lấy tài sản, thu hoạch thảo dược, được NPC trao tặng, hoặc mua bán trực tiếp thành công vào hành trang.
 //    * Ý NGHĨA: Biểu thị quyền sở hữu, sử dụng và định đoạt hoàn toàn đối với vật phẩm đó của tổ đội nhân vật chính.
-//    * VÍ DỤ: [ITEM_IDEA_GAINED: name="Linh Tâm Thảo", description="Cỏ linh dược phát ra ánh huỳnh quang dịu nhẹ.", quantity=2, rarity="Tốt"]
+//    * BẮT BUỘC KÈM category="...": chọn ĐÚNG MỘT loại từ danh sách: Vũ khí, Thân, Đầu, Chân, Phụ kiện, Thực phẩm, Đan dược, Tín vật, Tạp vật, Nguyên liệu, Trữ vật, Dị thường, Phương tiện, Sách kỹ năng, Đa năng.
+//      Xét TUẦN TỰ, khớp quy tắc nào trước thì chọn loại đó và dừng: (1) chứa đựng/tăng sức chứa hành trang → "Trữ vật"; (2) cưỡi/điều khiển để di chuyển → "Phương tiện";
+//      (3) dùng để học năng lực mới vĩnh viễn → "Sách kỹ năng"; (4) gắn/cấy/cộng sinh lên cơ thể → "Dị thường"; (5) mặc/cầm để tăng chỉ số → "Vũ khí"/"Thân"/"Đầu"/"Chân"/"Phụ kiện";
+//      (6) thức ăn → "Thực phẩm"; đan/thuốc tự dùng lên bản thân → "Đan dược"; mìn/bùa/phi tiêu dùng lên địch hoặc đồng minh → "Đa năng";
+//      (7) vật cốt truyện/nhiệm vụ → "Tín vật"; nguyên liệu chế tạo → "Nguyên liệu"; không rõ công dụng → "Tạp vật".
+//    * VÍ DỤ: [ITEM_IDEA_GAINED: name="Linh Tâm Thảo", description="Cỏ linh dược phát ra ánh huỳnh quang dịu nhẹ.", category="Nguyên liệu", quantity=2, rarity="Tốt"]
 //    * CHỐNG CẤP PHÁT TRÙNG: vật phẩm ĐÃ nằm trong hành trang của tổ đội (xem danh sách hành trang trong bối cảnh)
 //      thì TUYỆT ĐỐI KHÔNG phát lại thẻ này để "tạo lại" nó ở lượt sau — kể cả khi diễn biến nhắc tới nó.
 //      Chỉ phát thẻ khi cốt truyện thực sự trao THÊM bản mới (nhặt thêm, được tặng thêm, luyện chế thêm);
@@ -31513,8 +31709,28 @@ const questCheckSchema = {
     required: ["objectiveUpdates", "statusTransitions"]
 };
 
-const runAPI3StateMonitor = async (currentStoryText, currentKnowledge, retries = 3, delay = 3000) => {
+// Quota mitigation B (2026-08-31): API 3 là lệnh gọi nền duy nhất chạy MỌI lượt, nên nó
+// là đòn bẩy quota lớn nhất (trần free-tier 20 req/phút/key). Đếm lượt để chạy CÁCH LƯỢT
+// ở các lượt "yên bình"; lượt bị bỏ qua được lượt kế tiếp đối soát bù (prompt của API 3
+// vốn so T-2/T-1 với truyện lượt T nên không mất dữ liệu, chỉ trễ 1 lượt).
+const api3TurnParityRef = useRef(0);
+
+const runAPI3StateMonitor = async (currentStoryText, currentKnowledge, retries = 3, delay = 3000, force = false) => {
     if (gameMode !== 'EXPLORATION') return;
+    if (!force) {
+        const playerForGate = currentKnowledge.characters.find(c => c.isPlayer);
+        // Đang mang trạng thái bất lợi thì KHÔNG được bỏ lượt quét nào — API 3 là nơi duy nhất
+        // nhận diện "đã được chữa trị" trong lời kể để giải trừ trạng thái.
+        const hasTrackedDebuffs = (playerForGate?.longTermStatuses || []).some(s => {
+            const sType = (s.type || s.status_type || 'neutral').toLowerCase();
+            return sType.includes('debuff') || sType.includes('injury');
+        });
+        api3TurnParityRef.current += 1;
+        if (!hasTrackedDebuffs && api3TurnParityRef.current % 2 !== 0) {
+            console.log('[API 3 ngầm] Lượt yên bình — bỏ qua quét đối soát (chạy cách lượt để tiết kiệm quota).');
+            return;
+        }
+    }
     // Code review C-5: stamp the turn generation at SCHEDULE time. If the player
     // undoes the turn while this call is in flight, the result belongs to a turn
     // that no longer exists and must be dropped, not applied.
@@ -35069,7 +35285,8 @@ const runQuestCheckAPI = async (currentKnowledge) => {
             rawStoryText = lastStory.content.map(seg => seg.content || "").join("\n");
         }
     }
-    registerCriticalPromise(runAPI3StateMonitor(rawStoryText, currentKnowledge));
+    // force=true: lời kể vừa phát [QUEST_CHECK] nên lượt quét này KHÔNG được rơi vào nhịp bỏ-cách-lượt.
+    registerCriticalPromise(runAPI3StateMonitor(rawStoryText, currentKnowledge, 3, 3000, true));
 };
 
 /**
