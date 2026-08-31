@@ -1,8 +1,8 @@
 {
   "id": "4f9d4d67-3bc3-4512-8d9f-7c11ab4a0f5d",
-  "currentTurn": 70,
+  "currentTurn": 71,
   "saveVersion": "2.8",
-  "timestamp": "2026-08-31T10:01:33.721Z",
+  "timestamp": "2026-08-31T10:49:41.132Z",
   "gameSettings": {
     "storyTitle": "Tam Quốc Diệt Ma Truyền Kỳ",
     "theme": "Tên: Tam Quốc Diệt Ma Truyền Kỳ | Thể loại: Tiên Hiệp Lịch Sử | Thẻ: Tam Quốc, Đạo Pháp, Trừ Ma, Thường Sơn, Nam Hoa Lão Tiên",
@@ -124,7 +124,7 @@
       "year": 0,
       "month": 1,
       "day": 20,
-      "hour": 9
+      "hour": 21
     },
     "weather": "Nắng sớm ban mai, không gian thanh tịnh",
     "narrativeCombatState": {
@@ -360,7 +360,7 @@
         "id": "f4e68da1-f06e-4567-8542-688a43781d62",
         "NPC": "Thái Văn Cơ",
         "Standing": "Yêu thích",
-        "Reason": "Ngươi cứu nàng khỏi vận mệnh bi thảm và thể hiện cầm nghệ thần thánh."
+        "Reason": "Giao hòa mệnh cách, hứa hẹn tìm lại Điêu Thuyền cho nàng"
       }
     ],
     "quests": [
@@ -436,7 +436,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 36.00000000000005,
+        "exp": 36.10000000000005,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": -100,
@@ -1375,7 +1375,7 @@
         "isPlayer": false,
         "loreId": "lore_npc_thai_van_co",
         "level": 1,
-        "exp": 0.30000000000000004,
+        "exp": 0.4,
         "progressionState": "Tu Luyện Thường",
         "ap": -25,
         "currency": 0,
@@ -1811,15 +1811,15 @@
           "turn": 43
         }
       ],
-      "lastExpResolvedTurn": 69
+      "lastExpResolvedTurn": 70
     },
     "loreQuests": [],
     "pendingCreations": [],
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 69,
-      "world_time": 69,
+      "turn_id": 70,
+      "world_time": 70,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -1834,206 +1834,6 @@
       }
     },
     "stateHistory": [
-      {
-        "time": {
-          "year": 0,
-          "month": 1,
-          "day": 20,
-          "hour": 9
-        },
-        "location_id": "3c24b0ff-0280-4cad-93b9-ecbd525bc092",
-        "weather": "Nắng sớm ban mai, không gian thanh tịnh",
-        "characters": [
-          {
-            "id": "player",
-            "Name": "Diệp Thần",
-            "level": 1,
-            "exp": 35.80000000000005,
-            "hp": 2000,
-            "maxhp": 2000,
-            "currency": -100,
-            "inventory": [
-              {
-                "Name": "Quả trứng màu xanh lục",
-                "quantity": 1
-              },
-              {
-                "Name": "Linh Thú Khế Ước (Tiểu Bạch)",
-                "quantity": 1
-              }
-            ],
-            "longTermStatuses": []
-          },
-          {
-            "id": "b6de4eac-cd6e-43d9-b2ce-264c553ce5f7",
-            "Name": "Nam Hoa Lão Tiên",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "bd85e45e-f13c-41d2-a278-10ed93722c18",
-            "Name": "Hạ Hầu Khinh Y",
-            "level": 15,
-            "exp": 0,
-            "hp": 5880,
-            "maxhp": 5880,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
-            "Name": "Triệu Vân",
-            "level": 85,
-            "exp": 0,
-            "hp": 89680,
-            "maxhp": 89680,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "62c26dd7-d1bf-419e-8d03-75db7b24bbc1",
-            "Name": "Sĩ quan lính canh",
-            "level": 1,
-            "exp": 0,
-            "hp": 1000,
-            "maxhp": 1000,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "e1a058f1-8ef1-4f4a-8b6b-36de2be32d57",
-            "Name": "Lão chủ tiệm thuốc",
-            "level": 1,
-            "exp": 0,
-            "hp": 1000,
-            "maxhp": 1000,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "c985e31b-1ea3-4270-b35c-4035988055c1",
-            "Name": "Công Tôn Bảo Nguyệt",
-            "level": 25,
-            "exp": 0,
-            "hp": 12280,
-            "maxhp": 12280,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "d7b85753-38ce-4c1b-b173-affc6e0aa0b0",
-            "Name": "Triệu Sâm",
-            "level": 8,
-            "exp": 0,
-            "hp": 3140,
-            "maxhp": 3140,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "551b87f0-89ab-4ede-b692-507031afc7d8",
-            "Name": "Triệu Vũ",
-            "level": 5,
-            "exp": 0,
-            "hp": 1680,
-            "maxhp": 1680,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "thai_van_co_01",
-            "Name": "Thái Văn Cơ",
-            "level": 1,
-            "exp": 0.1,
-            "hp": 2000,
-            "maxhp": 2000,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "5ae0f01b-79f3-4b1e-8f65-fcea477ef33b",
-            "Name": "Vân Nhi",
-            "level": 5,
-            "exp": 0,
-            "hp": 2280,
-            "maxhp": 2280,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "dd49c00f-7387-4e80-a861-ec1789e866ea",
-            "Name": "Công tử bột",
-            "level": 1,
-            "exp": 0,
-            "hp": 800,
-            "maxhp": 800,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "lore_npc_thai_ung",
-            "Name": "Thái Ung",
-            "level": 35,
-            "exp": 0,
-            "hp": 20280,
-            "maxhp": 20280,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          }
-        ],
-        "quests": [
-          {
-            "id": "96338829-e702-42cd-89b2-479d06cce22e",
-            "title": "Giải kiếp cho Công Tôn Bảo Nguyệt",
-            "status": "completed",
-            "objectives": [
-              {
-                "id": "persuade_baonguyet",
-                "text": "Thuyết phục Công Tôn Bảo Nguyệt để lại thư từ biệt và rời khỏi phủ Công Tôn.",
-                "type": "talk",
-                "targetName": "Công Tôn Bảo Nguyệt",
-                "requiredCount": 1,
-                "currentCount": 1,
-                "completed": true
-              },
-              {
-                "id": "escape_tracquan",
-                "text": "Đưa Công Tôn Bảo Nguyệt thoát khỏi sự bao vây của sương mù ma đạo tại Trác Quận.",
-                "type": "goto",
-                "targetName": "Ngoại vi Trác Quận",
-                "requiredCount": 1,
-                "currentCount": 1,
-                "completed": true
-              },
-              {
-                "id": "defeat_lurking_evil",
-                "text": "Tiêu diệt các linh thể ma đạo đang bám theo để hoàn tất việc giải sát họa.",
-                "type": "kill",
-                "targetName": "Linh Thể Ma Đạo",
-                "requiredCount": 3,
-                "currentCount": 3,
-                "completed": true
-              }
-            ]
-          }
-        ]
-      },
       {
         "time": {
           "year": 0,
@@ -2157,6 +1957,206 @@
             "Name": "Thái Văn Cơ",
             "level": 1,
             "exp": 0.2,
+            "hp": 2000,
+            "maxhp": 2000,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "5ae0f01b-79f3-4b1e-8f65-fcea477ef33b",
+            "Name": "Vân Nhi",
+            "level": 5,
+            "exp": 0,
+            "hp": 2280,
+            "maxhp": 2280,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "dd49c00f-7387-4e80-a861-ec1789e866ea",
+            "Name": "Công tử bột",
+            "level": 1,
+            "exp": 0,
+            "hp": 800,
+            "maxhp": 800,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "lore_npc_thai_ung",
+            "Name": "Thái Ung",
+            "level": 35,
+            "exp": 0,
+            "hp": 20280,
+            "maxhp": 20280,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          }
+        ],
+        "quests": [
+          {
+            "id": "96338829-e702-42cd-89b2-479d06cce22e",
+            "title": "Giải kiếp cho Công Tôn Bảo Nguyệt",
+            "status": "completed",
+            "objectives": [
+              {
+                "id": "persuade_baonguyet",
+                "text": "Thuyết phục Công Tôn Bảo Nguyệt để lại thư từ biệt và rời khỏi phủ Công Tôn.",
+                "type": "talk",
+                "targetName": "Công Tôn Bảo Nguyệt",
+                "requiredCount": 1,
+                "currentCount": 1,
+                "completed": true
+              },
+              {
+                "id": "escape_tracquan",
+                "text": "Đưa Công Tôn Bảo Nguyệt thoát khỏi sự bao vây của sương mù ma đạo tại Trác Quận.",
+                "type": "goto",
+                "targetName": "Ngoại vi Trác Quận",
+                "requiredCount": 1,
+                "currentCount": 1,
+                "completed": true
+              },
+              {
+                "id": "defeat_lurking_evil",
+                "text": "Tiêu diệt các linh thể ma đạo đang bám theo để hoàn tất việc giải sát họa.",
+                "type": "kill",
+                "targetName": "Linh Thể Ma Đạo",
+                "requiredCount": 3,
+                "currentCount": 3,
+                "completed": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "time": {
+          "year": 0,
+          "month": 1,
+          "day": 20,
+          "hour": 9
+        },
+        "location_id": "3c24b0ff-0280-4cad-93b9-ecbd525bc092",
+        "weather": "Nắng sớm ban mai, không gian thanh tịnh",
+        "characters": [
+          {
+            "id": "player",
+            "Name": "Diệp Thần",
+            "level": 1,
+            "exp": 36.00000000000005,
+            "hp": 2000,
+            "maxhp": 2000,
+            "currency": -100,
+            "inventory": [
+              {
+                "Name": "Quả trứng màu xanh lục",
+                "quantity": 1
+              },
+              {
+                "Name": "Linh Thú Khế Ước (Tiểu Bạch)",
+                "quantity": 1
+              }
+            ],
+            "longTermStatuses": []
+          },
+          {
+            "id": "b6de4eac-cd6e-43d9-b2ce-264c553ce5f7",
+            "Name": "Nam Hoa Lão Tiên",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "bd85e45e-f13c-41d2-a278-10ed93722c18",
+            "Name": "Hạ Hầu Khinh Y",
+            "level": 15,
+            "exp": 0,
+            "hp": 5880,
+            "maxhp": 5880,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
+            "Name": "Triệu Vân",
+            "level": 85,
+            "exp": 0,
+            "hp": 89680,
+            "maxhp": 89680,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "62c26dd7-d1bf-419e-8d03-75db7b24bbc1",
+            "Name": "Sĩ quan lính canh",
+            "level": 1,
+            "exp": 0,
+            "hp": 1000,
+            "maxhp": 1000,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "e1a058f1-8ef1-4f4a-8b6b-36de2be32d57",
+            "Name": "Lão chủ tiệm thuốc",
+            "level": 1,
+            "exp": 0,
+            "hp": 1000,
+            "maxhp": 1000,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "c985e31b-1ea3-4270-b35c-4035988055c1",
+            "Name": "Công Tôn Bảo Nguyệt",
+            "level": 25,
+            "exp": 0,
+            "hp": 12280,
+            "maxhp": 12280,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "d7b85753-38ce-4c1b-b173-affc6e0aa0b0",
+            "Name": "Triệu Sâm",
+            "level": 8,
+            "exp": 0,
+            "hp": 3140,
+            "maxhp": 3140,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "551b87f0-89ab-4ede-b692-507031afc7d8",
+            "Name": "Triệu Vũ",
+            "level": 5,
+            "exp": 0,
+            "hp": 1680,
+            "maxhp": 1680,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "world_npc_thai_diem_01",
+            "Name": "Thái Văn Cơ",
+            "level": 1,
+            "exp": 0.30000000000000004,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
@@ -5804,13 +5804,145 @@
           "content": "\"Chát!\" Tiếng roi ngựa vang lên đanh gọn. Cỗ xe ngựa đơn sơ lăn bánh nghiến rầm rập trên đường đá xanh, nhanh chóng rời khỏi khu phố quan lại, hướng thẳng ra phía cổng thành phía Bắc *Lạc Dương*. Dưới sự hộ tống của vị mãnh tướng giáp bạc và luồng uy áp tiên gia nhàn nhạt tỏa ra từ *Diệp Thần*, đám lính canh cổng thành dẫu thấy khác thường nhưng cũng không một ai dám bước ra ngăn cản. \nKhi cỗ xe vượt qua khỏi cổng thành hùng vĩ, bóng dáng kinh thành *Lạc Dương* dần thu nhỏ lại phía sau lưng. Bầu trời phía trên vương triều đang suy tàn bắt đầu phủ dầy những đám mây xám u ám của thời đại loạn lạc, nhưng bên trong cỗ xe ngựa, ánh nắng ban mai ấm áp đang chiếu rọi lên gương mặt rạng rỡ của những người đồng hành. *Diệp Thần* ngồi tĩnh tọa ở đầu xe, cảm nhận luồng chân nguyên dồi dào trong đan điền đang lưu chuyển êm đềm, sẵn sàng cho những thử thách mới trên con đường chinh phục vương quyền và diệt trừ ma đạo."
         }
       ]
+    },
+    {
+      "id": "2d604428-4dad-43d2-9d4b-ddbba42feb6c",
+      "type": "user_custom_action",
+      "content": "Đi được 1 quãng, Văn Cơ chợt nhớ ra tỷ muội tốt của mình là Điêu Thuyền vẫn ở Lạc Dương bèn nói lại cho ngươi. Hy vọng ngươi mang theo nàng cùng đi. Ngươi nghe Văn Cơ nhắc đến Điêu Thuyền thì lập tức nhớ ra vị đại mỹ nhân này cũng đang ở Lạc Dương. Ngươi bèn ra lệnh cho đoàn xe quay lại Thái phủ. Sắp xếp cho mọi người ở lại Thái phủ 1 thời gian để tìm cách tiếp cận Điêu Thuyền. Đêm đó, ngươi tới phòng của Văn Cơ 'tâm sự' cả đêm"
+    },
+    {
+      "id": "d20ee6ba-07a9-47c5-acac-d851ed0106cf",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Cỗ xe ngựa đơn sơ lướt nhanh trên con đường đất đỏ ngoại vi kinh thành *Lạc Dương*, bánh xe gỗ nghiến rầm rập xua tan bầu không khí tĩnh mịch của buổi sớm mai. Những rặng liễu rủ ven đường khẽ lay động trong làn gió sớm mát rượi, mang theo hương thơm thanh khiết của cỏ cây sương sớm. Bên trong toa xe rộng rãi, bầu không khí vốn đang ấm áp và yên bình bỗng chốc bị phá vỡ bởi một tiếng thở dài khe khẽ, đầy ưu tư của *Thái Văn Cơ*. Nàng khẽ vén bức rèm lụa mỏng, đôi mắt phượng trong veo như nước hồ thu nhìn đăm đăm về phía những bức tường thành sừng sững của kinh đô đang dần lùi lại phía sau. Gương mặt thanh tú phảng phất nỗi buồn lãng mạn của nàng bỗng chốc lộ ra vẻ do dự, đôi bàn tay thon dài vô thức siết chặt lấy vạt áo lụa màu thiên thanh thướt tha.\nNàng quay sang nhìn *Diệp Thần* đang tĩnh tọa nhắm mắt ở giữa toa xe, ngập ngừng một lát rồi khẽ nhích lại gần, bàn tay mềm mại run rẩy đặt lên đầu gối hắn. Giọng nói thanh tao, nhỏ nhẹ như tiếng khánh ngọc của nàng vang lên, chứa chan sự khẩn cầu:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Văn Cơ",
+          "content": "Tướng công... thiếp có một chuyện tâm sự, không biết có nên nói ra lúc này hay không. Khiến chàng phải bận lòng, thiếp thực sự vô cùng áy náy..."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* chầm chậm mở mắt, luồng chân nguyên tinh thuần màu vàng nhạt thu hồi vào đan điền. Hắn nhìn vào khuôn mặt kiều diễm đang ngập tràn lo âu của nàng dâu mới, khẽ đưa tay nắm lấy bàn tay nhỏ nhắn của nàng, ôn tồn đáp:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Vân Cơ có chuyện gì cứ nói, giữa ta và nàng đã là phu thê giao hòa mệnh cách, có gì phải e dè?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Thái Văn Cơ* khẽ cắn môi, những giọt nước mắt u buồn khẽ lăn dài trên gò má trắng ngần. Nàng rúc đầu vào lồng ngực săn chắc của hắn, nghẹn ngào nói:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Văn Cơ",
+          "content": "Tướng công, vừa rồi đi được một quãng, lòng thiếp bỗng thắt lại khi nghĩ đến một người. Ở trong kinh thành *Lạc Dương* kia, thiếp vẫn còn một người tỷ muội vô cùng thân thiết, tình sâu nghĩa nặng như tay chân, tên là *Điêu Thuyền*. Nàng ấy vốn là nghĩa nữ trong phủ của Tư đồ *Vương Doãn*. Giờ đây kinh kỳ sắp sửa đại loạn, quân tào lộng hành, một nữ tử yếu ớt như nàng ấy làm sao có thể tự bảo toàn thân xác? Thiếp... thiếp cầu xin tướng công thương xót, quay xe lại đón nàng ấy cùng đi với chúng ta được không chàng? Thiếp không thể trơ mắt nhìn nàng ấy rơi vào hố lửa..."
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe đến cái tên *Điêu Thuyền*, trong đầu *Diệp Thần* bỗng chốc rúng động như có một luồng lôi điện lướt qua. Là một kẻ xuyên không nắm giữ toàn bộ kịch bản lịch sử Tam Quốc, hắn làm sao có thể không biết đến danh xưng của đệ nhất mỹ nhân này? Nàng chính là một trong tứ đại mỹ nhân cổ đại, người mang khí vận cực kỳ khủng khiếp, là mắt xích vĩ đại có thể xoay chuyển cả vương triều *Đông Hán*. Nếu có thể thu phục được nàng, không chỉ hậu cung của hắn thêm một đóa kỳ hoa dị thảo tuyệt sắc, mà khí vận thiên mệnh của hắn chắc chắn sẽ tăng tiến đến mức không tưởng. Hắn lập tức siết chặt eo thon của *Thái Văn Cơ*, đưa tay lau đi những giọt nước mắt trên mặt nàng, giọng nói đầy vẻ kiên định, dứt khoát:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Vân Cơ đừng khóc nữa. Người tỷ muội của nàng cũng chính là người nhà của ta. Ta làm sao có thể bỏ mặc nàng ấy giữa chốn kinh kỳ đầy rẫy hiểm họa kia? *Triệu Vân*, *Triệu Sâm*, lập tức cho đoàn xe quay trở về *Thái Phủ* lánh tạm!"
+        },
+        {
+          "type": "narrative",
+          "content": "Từ phía đầu xe ngựa, tiếng roi da vang lên đanh gọn hòa cùng tiếng hí vang trời của hai con tuấn mã đã được cường hóa bởi linh lực. *Triệu Vân* mặc giáp bạc sáng ngời, vung thương dứt khoát điều khiển cỗ xe ngựa khổng lồ rẽ một đường vòng cung hoàn mỹ trên quan lộ, hướng thẳng về phía cổng thành *Lạc Dương* vừa mới rời đi chưa lâu."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Tử Long tuân lệnh! Sẽ đưa công tử và các chủ mẫu trở lại an toàn!"
+        },
+        {
+          "type": "narrative",
+          "content": "Cỗ xe ngựa lao đi vun vút dưới sự bảo hộ của màn sương gió vô hình từ *Linh Phong thuật*. Chỉ trong vòng nửa canh giờ, đoàn người đã âm thầm tiến vào nội đô kinh thành, rẽ vào con phố vắng vẻ dẫn đến dinh thự cũ của họ Thái. *Thái Phủ* lúc này vô cùng vắng lặng, gia nhân đã được giải tán từ hôm trước, các phòng ốc vẫn còn nguyên vẹn nhưng phủ đầy một lớp bụi mỏng thanh tịnh. Đây chính là nơi ẩn náu lý tưởng và quen thuộc nhất để cả đoàn tạm thời trú chân, lên kế hoạch thâm nhập sâu vào chốn kinh kỳ để tiếp cận và giải cứu *Điêu Thuyền* khỏi phủ Tư đồ.\nSau khi sắp xếp cho *Triệu Vân*, *Triệu Sâm* canh gác các lối ra vào nghiêm ngặt, và an bài cho *Hạ Hầu Khinh Y*, *Công Tôn Bảo Nguyệt*, cùng *Vân Nhi* nghỉ ngơi ở các sảnh bên, *Diệp Thần* dẫn theo *Thái Văn Cơ* bước vào căn phòng khuê các cũ của nàng ở hậu viện.\nMàn đêm nhanh chóng buông xuống, bao phủ kinh thành *Lạc Dương* trong một sự tịch mịch đầy đe dọa. Bên ngoài cửa sổ chạm trổ của căn phòng, ánh trăng bạc mờ ảo chiếu rọi qua những kẽ lá tùng cổ thụ, hắt lên vách tường loang lổ những bóng hình quấn quýt đầy ám muội. Tiếng côn trùng rả rích đêm thu càng làm tăng thêm vẻ yên tĩnh, riêng tư của chốn khuê phòng. Ánh nến đỏ leo lét trên bàn trang điểm khẽ lay động, tỏa ra mùi hương sáp ong ngọt ngào quyện cùng làn hương bách hợp thanh khiết tỏa ra từ cơ thể của nàng tài nữ danh tiếng.\n*Diệp Thần* đứng bên cạnh mép giường gỗ sưa, vạt đạo bào màu nâu sẫm đã được trút bỏ hoàn toàn, lộ ra một cơ thể tráng kiện, hoàn mỹ vô song của một kẻ tu đạo chân nguyên tràn đầy. Lồng ngực rộng lớn, săn chắc cùng những múi cơ cuồn cuộn sức mạnh nam tính hừng hực tỏa ra hơi nóng nóng bỏng. Hắn cúi đầu, đôi mắt thâm trầm như chứa đựng cả tinh hà khóa chặt lấy thiếu nữ đang ngồi khép nép trên tấm đệm gấm ấm áp trước mặt. Hắn khẽ nhếch môi, bước tới gần, cất giọng trầm thấp dạt dào dục vọng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Vân Cơ, đêm nay ta sẽ giúp nàng hóa giải hoàn toàn những lo âu trong lòng. Hãy để ta yêu thương nàng thật sâu..."
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe lời nói đầy gợi tình của phu quân, gương mặt kiều diễm của *Thái Văn Cơ* bỗng chốc đỏ bừng lên như rặng mây hoàng hôn. Trái tim nàng đập liên hồi như trống trận, lồng ngực phập phồng dữ dội dưới lớp y phục lụa mỏng màu thiên thanh tao nhã. Nàng cảm nhận được sức mạnh nam tính áp đảo đang bao vây lấy mình, lòng bỗng chốc tràn ngập sự quy phục và yêu thương tuyệt đối dành cho người đàn ông đã cứu rỗi cuộc đời và gia tộc mình. Nàng khẽ cắn môi, ngước đôi mắt phượng đẫm lệ nhưng rực sáng tình yêu lên nhìn hắn, nhỏ nhẹ đáp:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Văn Cơ",
+          "content": "Tướng công... thiếp nguyện cả đời này hầu hạ bên cạnh chàng... Xin chàng hãy thương xót thiếp..."
+        },
+        {
+          "type": "narrative",
+          "content": "Dứt lời, đôi bàn tay thon thả, mềm mại của nàng run run đưa lên cổ áo, chậm rãi cởi bỏ từng chiếc nút thắt trên bộ lụa thanh. Từng lớp y phục rủ xuống đất, để lộ ra trước mắt *Diệp Thần* một kiệt tác hoàn mỹ nhất của tạo hóa. Làn da của *Thái Văn Cơ* trắng ngần, mịn màng như tuyết đầu mùa, tỏa ra một làn hương bách hợp thanh nhã, ngào ngạt. Bầu ngực ngọc ngà căng tròn, trắng muốt nhô cao đầy đặn, hai đầu núm vú hồng hào se lại trước cái lạnh mơn trớn của gió đêm. Vòng eo thon thả không một chút mỡ thừa dẫn xuống cặp đùi thon dài, mượt mà và ẩn hiện giữa khe đùi là vùng cấm lồn non mịn màng, hồng hào chưa từng có dấu vết khai phá của bất kỳ nam nhân nào.\n*Diệp Thần* gầm nhẹ một tiếng đầy dâm lãng như dã thú ngửi thấy mùi con mồi ngon, hắn nhanh chóng trút bỏ chiếc quần lót cuối cùng, để lộ ra con cu khổng lồ, gân guộc, dài tới hơn chín tấc đang dựng đứng ngạo nghễ, đầu khấc đỏ hồng hừng hực bốc lên hơi nóng dục vọng. Hắn lao tới giường, đè nghiến thân thể mềm mại của *Thái Văn Cơ* xuống đệm gấm ấm áp. Hắn tham lam ngậm lấy đôi môi đỏ mọng, căng mọng của nàng tài nữ. Chiếc lưỡi không an phận của hắn điên cuồng tách hàm răng ngọc của nàng ra, tấn công dồn dập, càn quét khắp khoang miệng ấm áp, mút mát lấy chiếc lưỡi nhỏ nhắn của nàng khiến nàng chỉ biết ú ớ phát ra những tiếng rên rỉ đầy ngọt ngào.\nĐồng thời, đôi bàn tay gân guộc của hắn không ngừng vuốt ve, bóp nắn hai bầu ngực trắng ngần mềm mại kia, khiến chúng biến dạng qua từng kẽ ngón tay. Hắn thô bạo ve vuốt, miết chặt đầu vú hồng hào của nàng làm nàng run rẩy kịch liệt. Bàn tay to lớn của hắn chầm chậm mò xuống bên dưới, luồn vào giữa khe đùi thon dài của nàng, trực tiếp chạm vào vùng âm hộ hồng hào mịn màng. Ngón tay thon dài của hắn khẽ tách hai cánh bướm non nớt ra, tìm đến hột le nhạy cảm mơn trớn, rồi đột ngột đưa ngón tay vào khuấy động sâu bên trong lồn nàng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Văn Cơ",
+          "content": "Ưm... á... tướng công... nhẹ... nhẹ một chút... thiếp đau..."
+        },
+        {
+          "type": "narrative",
+          "content": "*Thái Văn Cơ* rên rỉ dâm đãng, cơ thể uốn éo liên tục dưới thân hắn. Ngón tay của hắn liên tục ra vào, khuấy động dịch thủy dâm dục chảy tràn ra ướt đẫm cả một mảng đệm giường. Khi cảm nhận cửa mình của nàng đã hoàn toàn sũng ướt dâm thủy ấm nóng, *Diệp Thần* liền tách rộng hai chân nàng ra, áp sát quy đầu khổng lồ của con cu vào ngay cửa lồn chật hẹp, đỏ hồng của nàng. Hắn dùng lực hông dứt khoát dập mạnh một cái, đem con cặc to dài ngập lút cán vào sâu tận tử cung của nàng dâu mới.\n\"Áaaa!\"\nMột tiếng khóc thét thảng thốt đầy đau đớn vang lên xé rách màn đêm tịch mịch của phòng khuê. Vì là lần đầu tiên của *Thái Văn Cơ*, cửa mình của nàng chật hẹp đến mức dường như muốn bóp nghẹt lấy con cu của hắn. Màng trinh mỏng manh bị xé toạc, vài giọt máu trinh đỏ tươi rỉ ra ngoài cửa mình, hòa cùng dâm thủy lấp lánh dưới ánh nến. Nàng đau đớn đến mức nước mắt rưng rưng, hai tay cào cấu mạnh vào tấm lưng săn chắc của hắn tạo thành những vệt đỏ dài.\nThế nhưng, chỉ sau hai nhấp đầy mạnh mẽ và thô bạo đầu tiên của hắn, khoái cảm kinh hoàng từ việc da thịt ma sát kịch liệt bỗng chốc bùng phát, hoàn toàn đánh tan cơn đau đớn ban đầu. Luồng chân nguyên tinh thuần từ cơ thể *Diệp Thần* truyền qua con cu nóng hổi, trực tiếp rót vào tử cung ấm áp của nàng, kích thích mạnh mẽ các dây thần kinh nhạy cảm nhất. *Thái Văn Cơ* bỗng chốc rên lên một tiếng dâm lãng đầy sướng rên, đôi mắt nàng đờ đẫn vì khoái lạc tột cùng. Hai chiếc đùi thon dài của nàng chủ động co lên, kẹp chặt lấy hông của hắn, không cho hắn rút ra ngoài nửa phân.\n*Diệp Thần* như được tiếp thêm sức mạnh, hắn bắt đầu nhấp liên tục với tốc độ kinh hoàng. Tiếng thịt va chạm \"bạch bạch bạch\" đầy kích thích vang dội khắp căn phòng kín đáo. Con cu gân guộc liên tục đâm lút cán vào sâu trong lồn nàng, đầu khấc nóng hổi không ngừng cọ sát vào thành âm đạo nhạy cảm, khiến nàng sướng phát điên, đầu óc trống rỗng. Giao hoan kịch liệt kéo dài suốt mấy canh giờ liền giữa đêm khuya thanh vắng. *Thái Văn Cơ* sung sướng đến mức liên tục xin tha, giọng nói khàn đặc đầy dâm đãng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Văn Cơ",
+          "content": "Tướng công... thiếp xin chàng... nhẹ lại... á... thiếp bắn... bắn mất... á á!"
+        },
+        {
+          "type": "narrative",
+          "content": "Mặc kệ lời xin tha đầy gợi dục của nàng dâu mới, *Diệp Thần* vẫn điên cuồng dập liên hoàn mạnh mẽ. Sau khi cả hai cùng nhau lên đỉnh liên tục cả chục lần, dâm thủy và tinh dịch nóng hổi trộn lẫn bắn đầy ra ngoài cửa lồn non mịn màng, hắn mới chịu dừng lại nhịp hông dữ dội. Thế nhưng, dù đã kết thúc trận mây mưa đầy khốc liệt, hắn vẫn quyết định không hề rút con cu của mình ra khỏi lồn nàng dâu mới. Đầu khấc khổng lồ vẫn cắm chặt, ngự trị sâu bên trong tử cung ấm áp, ẩm ướt của nàng, trong khi hắn nhẹ nhàng ôm trọn thân hình mềm mại, mỏi nhừ của nàng vào lòng rồi cùng nhau chìm vào giấc ngủ sâu.\nTrong lúc ngủ say, trạng thái gắn kết thể xác vẫn được duy trì một cách hoàn mỹ. Chỉ một vài cử động nhỏ vô thức khi xoay người của cả hai cũng khiến con cu gân guộc của hắn cạ sát nhẹ nhàng vào thành lồn ấm nóng của nàng dâu mới, tạo nên những luồng kích thích sinh lý âm ỉ đầy sung sướng ngay trong cơn mê mệt. Dù tinh thần đã chìm sâu vào giấc mộng, phản ứng sinh lý nhạy cảm của hai cơ thể trẻ trung vẫn hoạt động không ngừng. Những cú cọ sát vô thức ấy khiến cả hai vừa ngủ vừa khẽ rên rỉ râm ran, cơ thể giật nảy nhẹ khi cùng nhau lên đỉnh ngay trong giấc mơ đầy dâm lãng. Suốt cả đêm dài trôi qua, bên trong lồn non ấm áp của *Thái Văn Cơ* tràn ngập những luồng tinh dịch nóng hổi, tinh khiết của *Diệp Thần* dâng trào ra ngoài, hoạt động như một dấu ấn tối cao gắn kết hoàn toàn mệnh cách của hai người làm một, giúp tình cảm giữa hắn và nàng ngày càng thêm sâu đậm, khăng khít khôn cùng.\nSáng sớm hôm sau, khi những tia nắng đầu ngày rực rỡ xuyên qua cửa sổ gỗ sồi, chiếu rọi lên tấm đệm giường loang lổ những vết máu trinh đỏ tươi và dịch thủy dâm lãng dính dầy dầy, cả hai thức dậy trong sự thỏa mãn tột cùng và gắn bó sâu sắc hơn bao giờ hết. *Thái Văn Cơ* khẽ mở mắt, gương mặt nàng hồng hào, tràn đầy sinh khí của một người đàn bà vừa được khai phá hoàn mỹ. Nàng nhìn thấy con cu của phu quân vẫn còn cắm chặt bên trong lồn mình, bèn đỏ mặt ngượng ngùng rúc đầu sâu vào lồng ngực săn chắc của hắn, hai tay ôm chặt lấy eo hắn đầy ỷ lại.\nNgươi nhẹ nhàng vuốt ve mái tóc đen mượt mà của nàng, cảm nhận luồng chân nguyên tinh thuần trong đan điền lúc này không những không suy giảm sau đêm mặn nồng, mà trái lại còn dồi dào, tinh khiết hơn trước nhờ vào sự phản hồi âm dương giao hòa từ mệnh cách của nàng dâu mới. Luồng hắc khí ma đạo phương Bắc bám trên người nàng dâu bấy lâu nay đã hoàn toàn bị thanh tẩy sạch sẽ, thay thế bằng một tầng hào quang bảo hộ màu vàng nhạt ấm áp của tiên gia."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Nàng dậy rồi sao, Vân Cơ? Đêm qua nàng hầu hạ ta rất tốt, mệnh cách của nàng từ nay về sau đã hoàn toàn dung hợp với ta, ta hứa nhất định sẽ tìm lại *Điêu Thuyền* cho nàng dẫu phải lật tung cả kinh thành này lên."
+        },
+        {
+          "type": "narrative",
+          "content": "*Thái Văn Cơ* nghe vậy khẽ ngước mắt lên nhìn ngươi, trong đôi mắt phượng lấp lánh niềm hạnh phúc vô hạn và sự kính ngưỡng sâu sắc dành cho người đàn ông của đời mình. Nàng khẽ hôn nhẹ lên ngực ngươi, giọng nói thanh tao đầy ngọt ngào vang lên:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Văn Cơ",
+          "content": "Tất cả đều nhờ ơn tướng công thương xót... Có lời hứa này của chàng, thiếp dẫu có phải trải qua muôn vàn phong ba bão táp cũng cam lòng. Từ nay về sau, thân xác và linh hồn này đều thuộc về chàng..."
+        },
+        {
+          "type": "narrative",
+          "content": "Cảm nhận tình cảm bộc phát mạnh mẽ của nàng dâu mới kết duyên (mức độ hảo cảm đã tăng vọt lên mức \"Yêu thích\" hoàn toàn), ngươi khẽ mỉm cười tiêu sái rồi nhẹ nhàng rút con cu đã bắt đầu rục rịch cương cứng trở lại ra khỏi cửa mình ấm áp của nàng. Một tiếng \"pực\" nhỏ vang lên đầy gợi dục, kéo theo một dòng tinh dịch trắng đục chảy tràn ra ngoài khe đùi thon dài của nàng dâu mới. *Thái Văn Cơ* khẽ khom người rên khẽ một tiếng đầy nhạy cảm trước sự trống rỗng đột ngột bên trong cửa lồn.\nNgươi bước xuống giường, nhanh chóng mặc vào bộ y phục thường dân vải thô màu nâu sẫm để chuẩn bị cho hành trình tiếp theo. Lúc này, từ phía cửa phòng bên ngoài bỗng vang lên tiếng gõ cửa nhẹ nhàng của *Triệu Vân*:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Khởi bẩm công tử, thuộc hạ đã chuẩn bị xong trà nước ở sảnh ngoài. Ngoài ra, thuộc hạ vừa nhận được tin tức tình báo quan trọng về động thái của phủ Tư đồ *Vương Doãn* và quân tuần tra của kinh thành. Kính mời công tử ra ngoài định đoạt."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi khẽ gật đầu, vỗ nhẹ vai *Thái Văn Cơ* rồi rảo bước ra sảnh lớn của *Thái Phủ*. Tại đây, *Thái Ung*, *Hạ Hầu Khinh Y*, *Công Tôn Bảo Nguyệt* và *Vân Nhi* đều đã có mặt, gương mặt ai nấy đều lộ vẻ nghiêm túc. Chú hổ con *Tiểu Bạch* và rồng nhỏ *Tiểu Thanh* đang nằm phục dưới chân bàn cũng khẽ ngẩng đầu nhìn ngươi đầy trung thành."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Khởi bẩm công tử, đêm qua quân tuần tra của kinh thành phát hiện ra thi thể của *Vệ Trọng Đạo* tại phủ đệ cũ. Hiện tại toàn bộ quan quân đang ráo riết truy lùng đạo sĩ lạ mặt. Hơn nữa, thám tử báo lại rằng Tư đồ *Vương Doãn* đang canh phòng phủ đệ cực kỳ cẩn mật, dường như có liên quan đến việc *Đổng Trác* sắp tiến kinh. Việc tiếp cận *Điêu Thuyền* lúc này cần phải vô cùng cẩn trọng."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* ngồi xuống ghế chủ tọa, tay gõ nhẹ lên mặt bàn gỗ, trầm ngâm suy tính. Với thực lực và đạo pháp hiện tại, việc thâm nhập vào dinh thự của *Vương Doãn* không phải là chuyện bất khả thi, nhưng làm sao để đưa được *Điêu Thuyền* ra ngoài một cách êm đẹp mới là điều cốt yếu. Ánh mắt hắn lướt qua ba vị thê tử xinh đẹp và vị túc nho *Thái Ung*, một kế hoạch bắt đầu hình thành trong đầu vị truyền nhân tiên gia."
+        }
+      ]
     }
   ],
   "choices": [
-    "Tiêu diệt triệt để mối lo ngại bằng cách bảo *Triệu Vân* quay lại ám sát đám công tử bột ở *Lạc Dương* trước khi tiến xa hơn. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Loại bỏ nguy cơ bị trả thù tại kinh kỳ, nhưng khiến hành trình rời đi bị chậm trễ.}",
-    "Đánh xe thẳng tiến về hướng Bắc để đưa *Thái Ung* và gia quyến trở về vùng tĩnh mịch *Thường Sơn* an dưỡng. {Tỷ lệ thành công: 95%, Hậu quả/Phần thưởng: Hành trình an toàn, giúp các thê tử khôi phục hoàn toàn thể lực và củng cố tu vi.}",
-    "Rẽ sang hướng Tây tiến về phía *Hàm Cốc Quan* để dò xét động thái tiền quân của *Đổng Trác* đang rục rịch tiến kinh. {Tỷ lệ thành công: 70%, Hậu quả/Phần thưởng: Nắm bắt trước tình hình đại cục thiên hạ, nhưng có nguy cơ chạm trán ma đạo vương gia sớm.}",
-    "Cho xe dừng lại tại một ngôi miếu cổ ven đường để *Diệp Thần* truyền dạy tâm pháp âm luật trừ ma cơ bản cho *Thái Văn Cơ*. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Gia tăng sự gắn kết tâm linh và giúp Thái Văn Cơ thức tỉnh khả năng hỗ trợ chiến đấu bằng cổ cầm.}"
+    "Sử dụng Linh Phong thuật và bùa che mắt để cùng Triệu Vân thâm nhập phủ Tư đồ ngay trong đêm nay, trực tiếp tìm kiếm phòng của Điêu Thuyền để đưa nàng đi. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Đột kích thành công phủ Tư đồ, trực tiếp tiếp cận Điêu Thuyền nhưng dễ bị phát hiện bởi các hộ vệ tinh nhuệ}",
+    "Để Thái Văn Cơ viết một bức thư mật, nhờ Công Tôn Bảo Nguyệt cải trang thành sứ giả của U Châu mang thư tới bái phỏng Vương Doãn để dò la tin tức của Điêu Thuyền. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Tiếp cận Điêu Thuyền bằng con đường ngoại giao an toàn, thu thập được thông tin bố phòng của phủ Tư đồ}",
+    "Để Thái Ung đích thân dẫn theo Diệp Thần (cải trang làm đệ tử) tới bái phỏng Vương Doãn thảo luận về việc Đổng Trác tiến kinh, từ đó tìm cơ hội để Diệp Thần tách ra tìm kiếm Điêu Thuyền. {Tỷ lệ thành công: 80%, Hậu quả/Phần thưởng: Vương Doãn không nghi ngờ Thái Ung, tạo cơ hội hoàn hảo để thâm nhập sâu vào hậu viện của phủ Tư đồ}",
+    "Cho Triệu Vân dẫn theo một toán nghĩa binh giả vờ gây ra một vụ náo loạn nhỏ ở cổng chính phủ Tư đồ để thu hút lính canh, trong khi Diệp Thần và Thái Văn Cơ thâm nhập từ cổng sau đón Điêu Thuyền. {Tỷ lệ thành công: 75%, Hậu quả/Phần thưởng: Điều hổ ly sơn thành công nhưng dễ gây ra xung đột đẫm máu làm kinh động toàn bộ quan quân Lạc Dương}"
   ],
   "gameMode": "EXPLORATION",
   "activeTrade": {
@@ -5831,5 +5963,5 @@
       "endTurn": 20
     }
   ],
-  "adventureTurnCount": 69
+  "adventureTurnCount": 70
 }
