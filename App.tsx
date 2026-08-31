@@ -23262,7 +23262,15 @@ useEffect(() => {
                                     const player = newKnowledge.characters.find(c => c.isPlayer);
                                     if (player) {
                                         if (!player.inventory) player.inventory = [];
-                                        if (!player.inventory.some(i => i.id === finalItem.id)) {
+                                        // Lưới an toàn chống trùng: nếu một món cùng tên đã vào túi trong lúc
+                                        // yêu cầu này đang giám định (2 yêu cầu cùng tên chạy song song), cộng
+                                        // số lượng vào món có sẵn thay vì thêm bản sao với mô tả/chỉ số khác.
+                                        const sameNameInInventory = player.inventory.find(
+                                            i => ((i.Name || i.name || '')).trim().toLowerCase() === ((finalItem.Name || '')).trim().toLowerCase()
+                                        );
+                                        if (sameNameInInventory) {
+                                            sameNameInInventory.quantity = (sameNameInInventory.quantity || 1) + (finalItem.quantity || 1);
+                                        } else if (!player.inventory.some(i => i.id === finalItem.id)) {
                                             player.inventory.push(finalItem);
                                         }
                                     }
@@ -27687,6 +27695,10 @@ ${customRulesBlock}
 //    * KHI NÀO KÍCH HOẠT: Khi nhân vật chính nhặt đồ từ trên kệ, mở rương, lấy tài sản, thu hoạch thảo dược, được NPC trao tặng, hoặc mua bán trực tiếp thành công vào hành trang. 
 //    * Ý NGHĨA: Biểu thị quyền sở hữu, sử dụng và định đoạt hoàn toàn đối với vật phẩm đó của tổ đội nhân vật chính.
 //    * VÍ DỤ: [ITEM_IDEA_GAINED: name="Linh Tâm Thảo", description="Cỏ linh dược phát ra ánh huỳnh quang dịu nhẹ.", quantity=2, rarity="Tốt"]
+//    * CHỐNG CẤP PHÁT TRÙNG: vật phẩm ĐÃ nằm trong hành trang của tổ đội (xem danh sách hành trang trong bối cảnh)
+//      thì TUYỆT ĐỐI KHÔNG phát lại thẻ này để "tạo lại" nó ở lượt sau — kể cả khi diễn biến nhắc tới nó.
+//      Chỉ phát thẻ khi cốt truyện thực sự trao THÊM bản mới (nhặt thêm, được tặng thêm, luyện chế thêm);
+//      khi đó dùng đúng tên cũ, hệ thống sẽ tự cộng số lượng vào món có sẵn.
 
 // B. VẬT PHẨM THẾ GIỚI ([WORLD_ITEM] & [REMOVE_WORLD_ITEM])
 //    * KHI NÀO KÍCH HOẠT: Vật phẩm có tồn tại trên bản đồ nhưng KHÔNG thuộc sở hữu của Nhân vật chính và các đồng hành (ví dụ: bộ giáp sắt bám bụi treo trên tường tiệm rèn, thanh đao đặt trên bàn của NPC, rương báu đang khóa trong mật thất, quả linh quả đang treo trên cành cây dã ngoại...).
@@ -34433,9 +34445,36 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
     
     (updates.itemIdeaGained || []).forEach(idea => {
         if (idea.name) {
+            const normalizedName = idea.name.trim().toLowerCase();
+            const quantityGained = parseInt(idea.quantity, 10) || 1;
+
+            // Chống cấp phát trùng: AI hay phát lại [ITEM_IDEA_GAINED] cho vật phẩm đã tạo ở
+            // lượt trước (cùng tên, mô tả bịa mới) → không chạy lại dây chuyền giám định,
+            // chỉ cộng số lượng vào món có sẵn trong túi người chơi.
+            const playerForItemGain = newKnowledge.characters.find(c => c.isPlayer);
+            const ownedSameName = (playerForItemGain?.inventory || []).find(
+                i => ((i.Name || i.name || '')).trim().toLowerCase() === normalizedName
+            );
+            if (ownedSameName) {
+                ownedSameName.quantity = (ownedSameName.quantity || 1) + quantityGained;
+                console.warn(`[Chống trùng] "${idea.name}" đã có trong hành trang. Cộng số lượng +${quantityGained} thay vì giám định lại.`);
+                return;
+            }
+
+            // Cùng tên đang chờ giám định (AI phát trùng thẻ trong cùng lượt): gộp số lượng.
+            const pendingSameName = newKnowledge.pendingCreations.find(
+                p => p.type === 'item' && !p.payload.destination
+                    && ((p.payload.itemIdea?.name || '')).trim().toLowerCase() === normalizedName
+            );
+            if (pendingSameName) {
+                pendingSameName.payload.itemIdea.quantity =
+                    (parseInt(pendingSameName.payload.itemIdea.quantity, 10) || 1) + quantityGained;
+                return;
+            }
+
             newKnowledge.pendingCreations.push({
                 type: 'item',
-                payload: { itemIdea: { ...idea, quantity: parseInt(idea.quantity, 10) || 1, id: crypto.randomUUID() } }
+                payload: { itemIdea: { ...idea, quantity: quantityGained, id: crypto.randomUUID() } }
             });
         }
     });
