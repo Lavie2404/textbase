@@ -72,7 +72,7 @@ import { makeAppStateUndoable } from './src-web/systems/turn/undoAppState';
 // (code review C-8), which owns the fail-closed degradation ladder.
 import { createSessionLeakLog, leakCheckAndRecord } from './src-web/systems/contract/leakDetector';
 import { createAiSessionState, requestAi } from './src-web/systems/ai/requestAi';
-import { DEFAULT_AI_CONFIG, SAFETY_SETTINGS_BLOCK_NONE, parseKeyList } from './src-web/systems/ai/config';
+import { DEFAULT_AI_CONFIG, SAFETY_SETTINGS_BLOCK_NONE, parseKeyList, resolveCallBudget } from './src-web/systems/ai/config';
 import { AI_KNOBS, PERSISTENCE_KNOBS } from './src-web/systems/registry';
 import * as turnGlue from './src-web/systems/glue/turnGlue';
 
@@ -19133,7 +19133,12 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
             throw authError;
         }
         if (label === 'timeout') {
-            const timeoutError = new Error(`AI không phản hồi trong ${AI_KNOBS.ai_call_timeout_seconds} giây nên yêu cầu đã bị hủy. Hãy thử lại, hoặc rút ngắn hành động vừa nhập.`);
+            // The budget that ACTUALLY governed this call (per-call-type pair +
+            // per-call overrides), not the uniform 60s knob — the old hardcoded
+            // number misreported a 150s narration abort as "60 giây" and sent
+            // debugging down the wrong path (incident 2026-08-31).
+            const usedBudget = resolveCallBudget(config, 'narration_call', budgetOverrides || {});
+            const timeoutError = new Error(`AI không phản hồi trong ${usedBudget.ai_call_timeout_seconds} giây nên yêu cầu đã bị hủy. Hãy thử lại, hoặc rút ngắn hành động vừa nhập.`);
             timeoutError.isOverloadedError = true;
             throw timeoutError;
         }
@@ -26977,13 +26982,14 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
             VAI TRÒ CỦA NGƯƠI LÚC NÀY LÀ MỘT CỖ MÁY TÍNH TOÁN LOGIC.
             NGƯƠI KHÔNG PHẢI LÀ TIỂU THUYẾT GIA. BỎ QUA MỌI YÊU CẦU VIẾT VĂN TƯỜNG THUẬT.
 
-            KIỂM TRA ƯU TIÊN TUYỆT ĐỐI TRƯỚC KHI LÀM BẤT KỲ VIỆC GÌ KHÁC: Đọc kỹ hành động của người chơi ở trên. Nếu nó chứa nguyên văn cụm <Bắt đầu trận đấu giao hữu> hoặc <Bắt đầu trận đấu sinh tử>, đây là MỆNH LỆNH HỆ THỐNG BẮT BUỘC (không phải một hành động có thể thành/bại như bình thường) — TẤT CẢ 6 kịch bản (không có ngoại lệ, không có kịch bản né tránh/thất bại) đều PHẢI có 'probability' rất cao (90-100) và trường 'commands' của MỖI kịch bản PHẢI chứa đúng thẻ:
+            KIỂM TRA ƯU TIÊN TUYỆT ĐỐI TRƯỚC KHI LÀM BẤT KỲ VIỆC GÌ KHÁC: Đọc kỹ hành động của người chơi ở trên. Nếu nó chứa nguyên văn cụm <Bắt đầu trận đấu giao hữu> hoặc <Bắt đầu trận đấu sinh tử>, đây là MỆNH LỆNH HỆ THỐNG BẮT BUỘC (không phải một hành động có thể thành/bại như bình thường) — kịch bản DUY NHẤT ngươi chốt (không được là kịch bản né tránh/thất bại) PHẢI có 'probability' rất cao (90-100) và trường 'commands' PHẢI chứa đúng thẻ:
               + <Bắt đầu trận đấu giao hữu> -> [START_COMBAT: Targets="Tên đối thủ", Type="Sparring"]
               + <Bắt đầu trận đấu sinh tử> -> [START_COMBAT: Targets="Tên đối thủ", Type="Lethal"]
-            "Tên đối thủ" là NPC đối lập/đang đối thoại/đang hiện diện phù hợp nhất với diễn biến ngay trước đó. Cụm <...> chỉ là tín hiệu điều khiển nội bộ — không liên quan đến 'summary' (không cần và không được nhắc lại nguyên văn nó trong 'summary'). Các kịch bản chỉ được phép khác nhau ở CÁCH diễn biến dẫn tới trận đấu, KHÔNG được có kịch bản nào bỏ qua việc xuất thẻ [START_COMBAT] này.
+            "Tên đối thủ" là NPC đối lập/đang đối thoại/đang hiện diện phù hợp nhất với diễn biến ngay trước đó. Cụm <...> chỉ là tín hiệu điều khiển nội bộ — không liên quan đến 'summary' (không cần và không được nhắc lại nguyên văn nó trong 'summary'). TUYỆT ĐỐI KHÔNG được bỏ qua việc xuất thẻ [START_COMBAT] này.
 
             NHIỆM VỤ:
-            1. Phân tích hành động của người chơi, đối chiếu với bối cảnh, chỉ số, tính cách đối tượng để suy tính ra ÍT NHẤT 6 kịch bản có thể xảy ra, các kịch bản phải đa chiều, đa dạng (tích cực có, tiêu cực có, đồng thuận có, phản kháng có${allowUnexpectedEvent ? ', bị chen ngang bởi người/sự việc bên ngoài,...' : ',...'}).
+            1. Phân tích hành động của người chơi, đối chiếu với bối cảnh, chỉ số, tính cách đối tượng để cân nhắc TRONG ĐẦU các khả năng có thể xảy ra (tích cực có, tiêu cực có, đồng thuận có, phản kháng có${allowUnexpectedEvent ? ', bị chen ngang bởi người/sự việc bên ngoài,...' : ',...'}), rồi TỰ CHỐT DUY NHẤT 1 KỊCH BẢN HỢP LÝ NHẤT làm kết quả cuối cùng của lượt này — không liệt kê các khả năng còn lại ra đầu ra.
+               NGUYÊN TẮC CHỐT KỊCH BẢN (BẮT BUỘC, KHÁCH QUAN): kết quả được chốt phải phản ánh đúng tương quan thực lực, tính cách nhân vật và bối cảnh — TUYỆT ĐỐI KHÔNG mặc định chọn kết quả có lợi cho người chơi. Hành động phi logic hoặc vượt tầm (đối tượng mạnh hơn hẳn) thì kịch bản được chốt PHẢI là thất bại hoặc thành công dang dở kèm cái giá tương xứng; hành động hợp lý, đúng sở trường thì mới được chốt thành công.
             ${allowUnexpectedEvent
                 ? '   LƯU Ý VỀ KỊCH BẢN "BỊ CHEN NGANG": Kịch bản chen ngang KHÔNG được phép bỏ qua hay thay thế hành động người chơi vừa mô tả. Bắt buộc: hành động của người chơi (lời nói, cử chỉ, di chuyển...) phải được thực hiện/xảy ra TRƯỚC hoặc ĐANG diễn ra, và sự chen ngang chỉ xen vào giữa hoặc ngay sau đó như một diễn biến tiếp nối — không phải để né tránh, xóa bỏ, hay làm lu mờ hành động gốc.'
                 : '   LƯU Ý: Người chơi ĐANG TẮT tùy chọn sự kiện bất ngờ. TUYỆT ĐỐI KHÔNG có kịch bản nào chứa SỰ KIỆN/biến cố mới lạ bên ngoài chen ngang, cắt ngang, hay làm gián đoạn hành động đã mô tả. Mọi kịch bản đều phải là các biến thể phản ứng/kết quả TRỰC TIẾP của chính hành động đó (khác nhau ở mức độ thành công, thái độ, cảm xúc,...). NGOẠI LỆ DUY NHẤT: được phép nhắc đến việc một NPC khác xuất hiện/có mặt gần đó như chi tiết nền cuối kịch bản, nhưng NPC đó KHÔNG được có bất kỳ hành động, lời thoại hay tương tác nào trong lượt này — chỉ đơn thuần được nêu tên là đang xuất hiện, không hơn.'}
@@ -26992,10 +26998,10 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
             3. THẾ GIỚI KHÁCH QUAN (PILLAR 1 - BẮT BUỘC, ƯU TIÊN CAO): thế giới KHÔNG xoay quanh nhân vật chính.
 ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
 
-            ĐỐI VỚI MỖI KỊCH BẢN, YÊU CẦU CUNG CẤP:
-            1. 'probability': Tỷ lệ phần trăm xảy ra kịch bản này (0-100). Phải đánh giá dựa trên tình tiết hiện tại, đặc biệt là tính cách nhân vật. (Hành động phi logic thì tỷ lệ thành công phải cực thấp).
+            ĐỐI VỚI KỊCH BẢN ĐÃ CHỐT, YÊU CẦU CUNG CẤP:
+            1. 'probability': Tỷ lệ phần trăm (0-100) ngươi tự đánh giá kịch bản này xảy ra trong thực tế. Phải đánh giá trung thực dựa trên tình tiết hiện tại, đặc biệt là tính cách nhân vật. (Hành động phi logic thì kết quả chốt phải nghiêng về thất bại).
             2. 'summary': Vài câu thể hiện nội dung kịch bản, chủ yếu nói về phản ứng của sự vật, sự việc phản ứng với lựa chọn của người chơi. Ghi nhớ: Đừng bịa ra người chơi làm gì thêm trong câu này. BẮT BUỘC: câu đầu tiên (hoặc các câu đầu) phải thể hiện chính hành động người chơi vừa mô tả đang/đã xảy ra — kể cả khi kịch bản có yếu tố chen ngang, phải viết rõ hành động gốc trước rồi mới đến sự chen ngang, TUYỆT ĐỐI không mở đầu summary bằng một sự việc/nhân vật không liên quan rồi mới nhắc hoặc bỏ hẳn hành động gốc.
-               - LƯU Ý KHI HÀNH ĐỘNG NGƯỜI CHƠI TỰ VIẾT SẴN THÀNH MỘT ĐOẠN TƯỜNG THUẬT DÀI (nhiều câu, nhiều diễn biến/khoảnh khắc nối tiếp nhau, không chỉ một ý định ngắn gọn): TUYỆT ĐỐI KHÔNG được nén/tóm gọn toàn bộ chuỗi diễn biến đó thành một câu kết quả cuối cùng rồi coi như phần còn lại đã "kể xong" — 'summary' PHẢI liệt kê/giữ lại đầy đủ TỪNG diễn biến chính người chơi đã mô tả theo đúng trình tự (không bỏ sót đoạn giữa), vì đây chính là nguyên liệu để API 2 viết thành văn xuôi đầy đủ, không phải bối cảnh nền đã xong xuôi.
+               - LƯU Ý KHI HÀNH ĐỘNG NGƯỜI CHƠI TỰ VIẾT SẴN THÀNH MỘT ĐOẠN TƯỜNG THUẬT DÀI (nhiều câu, nhiều diễn biến/khoảnh khắc nối tiếp nhau, không chỉ một ý định ngắn gọn): KHÔNG chép lại nguyên văn toàn bộ đoạn đó vào 'summary'. Chỉ cần mở đầu 'summary' bằng MỘT CÂU NGẮN xác nhận toàn bộ chuỗi diễn biến người chơi mô tả đã thực sự diễn ra đúng trình tự (ví dụ: "Toàn bộ chuỗi hành động người chơi mô tả diễn ra trọn vẹn đúng trình tự."), rồi dành phần còn lại của 'summary' cho KẾT QUẢ và PHẢN ỨNG của thế giới/NPC. API 2 luôn nhận được NGUYÊN VĂN hành động gốc của người chơi ở một trường riêng nên 'summary' không cần lặp lại nội dung đó — nhưng TUYỆT ĐỐI không được mâu thuẫn, thay thế hay bỏ qua bất kỳ diễn biến nào người chơi đã mô tả.
             3. 'classification_tags': Mảng các nhãn để định hướng API 2.
                - BẮT BUỘC chọn chính xác 1 nhãn độ dài:
                  + 'dai' (Tả cảnh, thế giới, tình tiết sắc, tâm lý sâu sắc, đối thoại 2 hoặc nhiều người).
@@ -27025,7 +27031,7 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
                  + [RECOVER_INJURY: Name="Tên nhân vật"] (Giải trừ trạng thái "Trọng Thương (Cảnh Giới Suy Giảm)" — cựu thương đè nén cảnh giới — cho một nhân vật ĐANG mang trạng thái đó, trả họ về tu vi thật. RÀNG BUỘC TUYỆT ĐỐI: CHỈ được xuất thẻ này khi chính 'summary' của kịch bản có một SỰ KIỆN CHỮA TRỊ TƯỜNG MINH: uống linh đan/thần dược đúng công dụng, gặp kỳ ngộ lớn (suối linh, tiên duyên, bảo vật), hoặc được một danh y/cao nhân ra tay chữa trị. TUYỆT ĐỐI KHÔNG xuất thẻ này chỉ vì thời gian trôi qua, chỉ vì nhân vật nghỉ ngơi/tự tu, hay vì cốt truyện cần họ mạnh lên.)
                - TUYỆT ĐỐI KHÔNG tự chế ra các cấu trúc thẻ lệnh không nằm trong danh sách trên.
 
-            YÊU CẦU ĐẦU RA: Chỉ trả về duy nhất một chuỗi JSON sạch đại diện cho mảng gồm chính xác 6 đối tượng. Tuyệt đối không bao bọc kết quả trong ký tự markdown như \`\`\`json ... \`\`\`. Không giải thích thêm.
+            YÊU CẦU ĐẦU RA: Chỉ trả về duy nhất một chuỗi JSON sạch đại diện cho mảng gồm CHÍNH XÁC 1 đối tượng (kịch bản đã chốt). Tuyệt đối không bao bọc kết quả trong ký tự markdown như \`\`\`json ... \`\`\`. Không giải thích thêm.
         `;
 
         const logicSchema = {
@@ -27050,11 +27056,23 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
 
         const logicPayload = {
             contents: [{ role: "user", parts: [{ text: logicPrompt }] }],
-            generationConfig: { response_mime_type: "application/json", response_schema: logicSchema }
+            generationConfig: {
+                response_mime_type: "application/json",
+                response_schema: logicSchema,
+                // API-1 is schema-constrained bookkeeping, not prose; letting the
+                // model "think" first was measured (2026-08-31) to push a logic
+                // call past the 120s per-request abort. thinkingBudget: 0 was
+                // probed OK (HTTP 200) on every live model of the ladder.
+                thinkingConfig: { thinkingBudget: 0 }
+            }
         };
 
         // API-1 is a logic roll, not the turn's narration: background under C-9.
-        const logicResponseText = await fetchWithRetries(apiUrl, logicPayload, null, 2, 1500, 'logic');
+        // A long free-text action inflates the input (and the model's reading
+        // time) enough to threaten the default budget, so it gets the same
+        // extended pair the 'dai' narration mode uses.
+        const logicResponseText = await fetchWithRetries(apiUrl, logicPayload, null, 2, 1500, 'logic',
+            turnGlue.logicBudgetOverrides(userActionForHistory));
         
         console.log("=========================================");
         console.log("🧠 [API 1 - LOGIC ENGINE] PHẢN HỒI NHẬN VỀ (RAW):");
@@ -27065,9 +27083,13 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
         try {
             scenarios = JSON.parse(logicResponseText);
             if (!Array.isArray(scenarios) || scenarios.length === 0) throw new Error("Format lỗi");
-            
+            // Single-scenario mode (2026-08-31, user decision): API-1 commits to
+            // ONE outcome itself — no dice roll. If the model still returns
+            // several, only the first is honoured so randomness cannot sneak back.
+            if (scenarios.length > 1) scenarios = [scenarios[0]];
+
             console.log("\n");
-            console.log("🎲 [API 1 - TƯ DUY LOGIC] CÁC KỊCH BẢN ĐỂ GIEO XÚC XẮC:");
+            console.log("🎲 [API 1 - TƯ DUY LOGIC] KỊCH BẢN ĐÃ CHỐT:");
             scenarios.forEach((s, index) => {
                 console.log(`🔹 KỊCH BẢN ${index + 1} (Tỉ lệ: ${s.probability}%)`);
                 console.log(`   - Tóm tắt: ${s.summary}`);

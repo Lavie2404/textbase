@@ -19,11 +19,13 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  LONG_ACTION_CHAR_THRESHOLD,
   LONG_NARRATION_BUDGET,
   buildAiCredentials,
   buildSaveBundle,
   credentialsAreUsable,
   isStaleGeneration,
+  logicBudgetOverrides,
   narrationBudgetOverrides,
   sanitizeCommandBlockForApply,
   shouldSelfHealTurnManager,
@@ -111,6 +113,44 @@ describe('turnGlue - narration budget overrides (code review C-4)', () => {
 
   it('test_non_string_tags_never_trigger_the_long_budget', () => {
     expect(narrationBudgetOverrides([null, 7, { dai: true }])).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Logic (API-1) budget for long free-text actions (timeout incident 2026-08-31)
+// ---------------------------------------------------------------------------
+
+describe('turnGlue - logic budget overrides (long free-text action)', () => {
+  it('test_long_action_gets_the_extended_budget', () => {
+    // Arrange: a player action just past the threshold.
+    const longAction = 'a'.repeat(LONG_ACTION_CHAR_THRESHOLD);
+    // Act + Assert: same pair as the 'dai' narration mode.
+    expect(logicBudgetOverrides(longAction)).toEqual({ ...LONG_NARRATION_BUDGET });
+  });
+
+  it('test_short_action_keeps_the_config_budget', () => {
+    expect(logicBudgetOverrides('Ta rút kiếm.')).toBeUndefined();
+    expect(logicBudgetOverrides('a'.repeat(LONG_ACTION_CHAR_THRESHOLD - 1))).toBeUndefined();
+  });
+
+  it('test_whitespace_padding_does_not_count_toward_the_threshold', () => {
+    const padded = ' '.repeat(LONG_ACTION_CHAR_THRESHOLD) + 'ngắn';
+    expect(logicBudgetOverrides(padded)).toBeUndefined();
+  });
+
+  it('test_non_string_input_never_triggers_the_override', () => {
+    expect(logicBudgetOverrides(null)).toBeUndefined();
+    expect(logicBudgetOverrides(undefined)).toBeUndefined();
+    expect(logicBudgetOverrides(42)).toBeUndefined();
+  });
+
+  it('test_the_override_is_a_copy_so_a_caller_cannot_mutate_the_constant', () => {
+    const first = logicBudgetOverrides('a'.repeat(LONG_ACTION_CHAR_THRESHOLD));
+    expect(first).not.toBe(LONG_NARRATION_BUDGET as unknown);
+    if (first) first.ai_call_timeout_seconds = 1;
+    expect(
+      logicBudgetOverrides('a'.repeat(LONG_ACTION_CHAR_THRESHOLD))?.ai_call_timeout_seconds,
+    ).toBe(240);
   });
 });
 

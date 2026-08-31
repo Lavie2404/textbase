@@ -610,6 +610,27 @@ export function narrationBudgetOverrides(
   return wantsLong ? { ...LONG_NARRATION_BUDGET } : undefined;
 }
 
+/**
+ * Free-text player action length (chars) beyond which API-1 (the logic call)
+ * gets the extended budget. Sized from the 2026-08-31 timeout incident: a
+ * multi-beat narrated action around this length pushed the logic round-trip
+ * past the default per-request abort.
+ */
+export const LONG_ACTION_CHAR_THRESHOLD = 600;
+
+/**
+ * Returns `AiRequest.overrides` for one API-1 logic call, or `undefined` to
+ * let the config's own budget apply. Reuses `LONG_NARRATION_BUDGET`: the cost
+ * driver is the same (a long player-authored action inflating the exchange),
+ * and one pair of knobs is easier to reason about than two.
+ */
+export function logicBudgetOverrides(
+  actionText: unknown,
+): { ai_call_timeout_seconds: number; request_timeout_default: number } | undefined {
+  const text = typeof actionText === 'string' ? actionText : '';
+  return text.trim().length >= LONG_ACTION_CHAR_THRESHOLD ? { ...LONG_NARRATION_BUDGET } : undefined;
+}
+
 // ---------------------------------------------------------------------------
 // 10. Undo generation guard (code review C-5)
 // ---------------------------------------------------------------------------
