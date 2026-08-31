@@ -1,8 +1,8 @@
 {
   "id": "4f9d4d67-3bc3-4512-8d9f-7c11ab4a0f5d",
-  "currentTurn": 37,
+  "currentTurn": 40,
   "saveVersion": "2.8",
-  "timestamp": "2026-08-31T02:18:47.100Z",
+  "timestamp": "2026-08-31T02:56:43.232Z",
   "gameSettings": {
     "storyTitle": "Tam Quốc Diệt Ma Truyền Kỳ",
     "theme": "Tên: Tam Quốc Diệt Ma Truyền Kỳ | Thể loại: Tiên Hiệp Lịch Sử | Thẻ: Tam Quốc, Đạo Pháp, Trừ Ma, Thường Sơn, Nam Hoa Lão Tiên",
@@ -124,9 +124,9 @@
       "year": 0,
       "month": 1,
       "day": 10,
-      "hour": 7
+      "hour": 18
     },
-    "weather": "Nắng ban mai ấm áp",
+    "weather": "Sương mù dày đặc và tà khí ma hóa",
     "narrativeCombatState": {
       "isActive": false,
       "combatants": []
@@ -225,6 +225,20 @@
         "description": "Một địa điểm vừa được khám phá.",
         "category": "Khu Vực",
         "tier": 3
+      },
+      {
+        "id": "9afc8200-596f-4ccd-8354-ce5d95d1e130",
+        "Name": "Khu chợ thành Trác Quận",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      },
+      {
+        "id": "1b86f08e-9043-49cb-aac7-5e63d3b49578",
+        "Name": "Dòng Sông Ngoại Vi Trác Quận",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
       }
     ],
     "items": [],
@@ -304,7 +318,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 22.900000000000006,
+        "exp": 23.10000000000001,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": 0,
@@ -314,7 +328,7 @@
           "def": 0,
           "spd": 0
         },
-        "current_location_id": "622abaeb-03d7-49a8-825f-d4b6dc4bf403",
+        "current_location_id": "1b86f08e-9043-49cb-aac7-5e63d3b49578",
         "baseHp": 2000,
         "baseAtk": 200,
         "baseDef": 100,
@@ -382,12 +396,7 @@
           "adventure_3": null
         },
         "potionCooldown": 0,
-        "longTermStatuses": [
-          {
-            "status_id": "KIET_LUC",
-            "id": "ce7d4e9a-0c83-4952-84ab-68f7fea9f418"
-          }
-        ],
+        "longTermStatuses": [],
         "combatStatuses": [],
         "inventory": [],
         "pendingSkillsToLearn": [],
@@ -818,15 +827,15 @@
           "turn": 26
         }
       ],
-      "lastExpResolvedTurn": 36
+      "lastExpResolvedTurn": 38
     },
     "loreQuests": [],
     "pendingCreations": [],
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 36,
-      "world_time": 36,
+      "turn_id": 38,
+      "world_time": 38,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -844,22 +853,27 @@
         "time": {
           "year": 0,
           "month": 1,
-          "day": 9,
-          "hour": 15
+          "day": 10,
+          "hour": 7
         },
-        "location_id": "accf659e-609b-48ec-882a-80f7a2d5a0eb",
-        "weather": "Trời tối sầm do hắc khí ma đạo",
+        "location_id": "622abaeb-03d7-49a8-825f-d4b6dc4bf403",
+        "weather": "Nắng ban mai ấm áp",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 22.700000000000003,
+            "exp": 22.900000000000006,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
             "inventory": [],
-            "longTermStatuses": []
+            "longTermStatuses": [
+              {
+                "status_id": "KIET_LUC",
+                "id": "ce7d4e9a-0c83-4952-84ab-68f7fea9f418"
+              }
+            ]
           },
           {
             "id": "b6de4eac-cd6e-43d9-b2ce-264c553ce5f7",
@@ -958,27 +972,22 @@
         "time": {
           "year": 0,
           "month": 1,
-          "day": 9,
-          "hour": 18
+          "day": 10,
+          "hour": 7
         },
-        "location_id": "622abaeb-03d7-49a8-825f-d4b6dc4bf403",
-        "weather": "Nắng chiều tà u ám",
+        "location_id": "9afc8200-596f-4ccd-8354-ce5d95d1e130",
+        "weather": "Nắng ban mai ấm áp",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 22.800000000000004,
+            "exp": 23.000000000000007,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
             "inventory": [],
-            "longTermStatuses": [
-              {
-                "status_id": "KIET_LUC",
-                "id": "ce7d4e9a-0c83-4952-84ab-68f7fea9f418"
-              }
-            ]
+            "longTermStatuses": []
           },
           {
             "id": "b6de4eac-cd6e-43d9-b2ce-264c553ce5f7",
@@ -2689,14 +2698,144 @@
           "content": "Sau khi thu xếp xong xuôi y phục chỉnh tề cho cả hai, ngươi dẫn theo *Hạ Hầu Khinh Y* bước xuống tầng dưới của quán trọ để dùng bữa sáng và sưởi ấm bên bếp lửa tàn. Không gian bên trong phòng khách của *Quán trọ Trác Quận* lúc này đã bớt đi vẻ tịch mịch chết chóc của đêm qua, nhưng bầu không khí vẫn vô cùng căng thẳng. Lão chưởng quầy già nua đang lúi húp dọn dẹp những mảnh vỡ sành sứ dưới sàn gỗ, thỉnh thoảng lại lén nhìn ra cửa sổ lớn hướng về phía quảng trường chính thành thị với vẻ sợ sệt khôn tả.\nTừ những cuộc bàn tán xôn xao của vài vị khách lữ hành đang vội vã dùng bữa sáng bên lề đường quan lộ gần đó, ngươi nghe thấy những tin tức vô cùng chấn động về thế cục đất trời. Trận chiến đêm qua tại khu vực vườn đào phía sau huyện đã kết thúc hoàn toàn. Ba vị nghĩa sĩ *Lưu Bị*, *Quan Vũ* và *Trương Phi* phối hợp cùng thành vệ quân dũng mãnh đã lập nên đại công, hoàn toàn đẩy lui đợt tấn công quy mô lớn của đám *Hành Thi* ma đạo hung hãn bảo vệ an toàn cho bách tính nhân dân. Sự kiện kết nghĩa vườn đào huyền thoại dường như đang diễn ra xôn xao trong ngày hôm nay, kéo theo một lượng lớn hương dũng và nghĩa sĩ khắp vùng U Châu đổ về đây để chiêu binh mãi mã, chuẩn bị cho cuộc thảo phạt tổng lực chống lại quân phiến loạn *Hoàng Cân* do ba anh em nhà họ Trương dẫn đầu đang áp sát biên giới phía Bắc.\nNgươi nhấp một ngụm cháo nóng, cảm nhận nguồn chân nguyên dồi dào rực rỡ đang luân chuyển tinh thuần trong đan điền. Với sức mạnh của thanh trường kiếm *Bất Vãn* dắt bên hông cùng sự đồng hành của nàng dâu mới kết duyên và chú linh thú nhỏ *Tiểu Bạch*, ngươi biết rằng hành trình thực sự để trừ ma vệ đạo, thay đổi kịch bản lịch sử đầy rẫy chông gai chỉ mới thực sự bắt đầu ngay tại vùng đất *Trác Quận* sầm uất nhưng u ám này."
         }
       ]
+    },
+    {
+      "id": "7d699752-2ba3-48a1-acd6-168945d7aba2",
+      "type": "user_custom_action",
+      "content": "'Tiểu Thúy, từ nay về sau gọi ta là công tử. Chuyện chăm sóc tiểu thư và cả Tiểu Bạch đều giao cho em đấy. Làm tốt ta sẽ không bạc đãi em đâu'"
+    },
+    {
+      "id": "369f18f6-924c-4120-9b4c-e40e27ed8263",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Nắng ban mai ấm áp mỏng manh như tơ lụa từ phía chân trời xa xăm của thành *Trác Quận* chầm chậm xuyên qua những kẽ hở của mái ngói vỡ, rọi xuống sàn gỗ sần sùi của ngôi *Quán trọ Trác Quận*. Không khí buổi sớm bảy giờ thanh khiết đến lạ kỳ, mùi đất ẩm sau cơn mưa bão đêm qua dần nhường chỗ cho hương thơm dịu nhẹ của những đóa hoa dại nở muộn bên hiên cửa. *Diệp Thần* đứng hiên ngang giữa căn phòng, tà áo lụa nâu sẫm mới tinh khôi khẽ bay theo gió sớm, khí chất tiêu sái và uy nghiêm của một vị truyền nhân tiên gia bộc phát mạnh mẽ sau đêm giao hòa mệnh cách đầy mặn nồng. Hắn khẽ vuốt lại đai lưng, đôi mắt thâm trầm sắc lạnh nhìn về phía nàng tỳ nữ *Tiểu Thúy* đang khép nép đứng chờ mệnh lệnh, rồi cất giọng trầm ổn, xác lập vị thế chủ tử tối cao:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tiểu Thúy, từ nay về sau gọi ta là công tử. Chuyện chăm sóc tiểu thư và cả *Tiểu Bạch* đều giao cho em đấy. Làm tốt ta sẽ không bạc đãi em đâu."
+        },
+        {
+          "type": "narrative",
+          "content": "Lời dặn dò vừa dứt, một luồng uy áp nhàn nhạt từ chân nguyên tinh thuần của *Diệp Thần* vô tình lan tỏa, khiến không gian bên trong căn phòng trở nên trang nghiêm tột độ. *Tiểu Thúy* nghe thấy cách xưng hô mới, trong lòng không khỏi dâng lên một nỗi kính nể sâu sắc. Nàng vốn đi theo tiểu thư từ lâu, đã quen với sự kiêu sa của chốn quyền quý, nhưng chưa từng thấy vị nam tử nào mang lại cho nàng cảm giác an tâm và uy phục tuyệt đối như người thiếu niên đạo sĩ này. Nàng vội vàng cúi thấp đầu, đôi bàn tay đan vào nhau cung kính nhận mệnh:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tiểu Thúy",
+          "content": "Tiểu nữ tuân lệnh công tử. Từ nay về sau, tiểu nữ nhất định sẽ dốc hết tâm sức chăm sóc tiểu thư và *Tiểu Bạch* thật chu đáo, quyết không để công tử phải bận lòng."
+        },
+        {
+          "type": "narrative",
+          "content": "Trong khi đó, ở phía giường gỗ sồi vẫn còn vương chút dư vị nồng nàn của đêm qua, *Hạ Hầu Khinh Y* khẽ ngồi dậy, tấm chăn mỏng lụa hồng che hờ lấy bờ vai trắng ngần như tuyết. Nghe thấy những lời dặn dò chu đáo và phong thái lãnh đạo đầy quyết đoán của phu quân, đôi mắt phượng của nàng lấp lánh niềm hạnh phúc và tin tưởng vô hạn. Nàng cảm nhận rõ rệt sợi dây liên kết mệnh cách giữa hai người đang rung động nhịp nhàng, mang lại cho nàng một cảm giác bình yên chưa từng có giữa thời đại loạn lạc này. Nàng nhìn *Diệp Thần* bằng ánh mắt dịu dàng, trìu mến, thầm cảm ơn trời đất đã đưa nàng gặp được người đàn ông định mệnh này.\nSáng sớm tại thành *Trác Quận* lúc này dần trở nên náo nhiệt hơn. Tiếng vó ngựa dồn dập trên đường quan lộ, tiếng rao hàng của các tiểu thương và cả tiếng lạch cạch của xe ngựa tạo nên một bản nhạc sôi động của cuộc sống đời thường. Thế nhưng, đằng sau sự sầm uất ấy, *Diệp Thần* vẫn cảm nhận được những luồng hắc khí ma đạo mỏng manh đang âm thầm khuếch tán từ hướng Bắc, tựa như những xúc tu của một loài quỷ dữ đang chực chờ nuốt chửng sự bình yên này. Sau đêm giao hoan, đan điền của hắn không những không mệt mỏi mà trái lại còn cuồn cuộn chân khí, mệnh cách của hắn và *Hạ Hầu Khinh Y* đã hoàn toàn hòa quyện, tạo thành một lá chắn vô hình bảo vệ cho cả hai khỏi những tà niệm u ám.\nHắn tiến lại gần mép giường, đưa tay vuốt ve mái tóc đen mượt mà của nàng dâu mới, rồi nhìn xuống chú hổ con *Tiểu Bạch* đang nằm cuộn tròn dưới chân giường. Chú linh thú nhỏ lúc này đã hoàn toàn hồi phục sinh khí, bộ lông trắng muốt lấp lánh linh quang hoàng kim mờ nhạt dưới nắng sớm. Nó khẽ gầm nhẹ một tiếng đầy ỷ lại, dụi đầu vào ống quần vải thô của hắn như muốn chúc mừng một ngày mới đầy hy vọng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y, nàng hãy cứ ở lại trong quán nghỉ ngơi thêm một chút cùng *Tiểu Thúy*. Ta cần ra ngoài dạo một vòng quanh thành để nghe ngóng kỹ hơn về việc kết nghĩa vườn đào và sự chuẩn bị của quan quân triều đình. Thành *Trác Quận* này tuy có chính khí của ba vị hào kiệt che chở, nhưng tà thuật của *Thái Bình Đạo* vẫn lẩn khuất khắp nơi, không thể lơ là."
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* khẽ gật đầu, nàng biết mình lúc này cần giữ sức để không trở thành gánh nặng cho phu quân. Nàng nắm lấy tay ngươi, giọng nói ngọt ngào như mật rót vào tai:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Phu quân hãy cứ yên tâm đi sớm về sớm. Thần thiếp và *Tiểu Bạch* sẽ đợi chàng ở đây. Chàng phải cẩn thận với đám lính tuần tra và cả những kẻ mặc áo vàng kỳ quái ngoài kia nhé."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* gật đầu, cầm lấy thanh trường kiếm *Bất Vãn* mới tậu hôm qua dắt vào bên hông. Hắn bước ra khỏi phòng trọ, bóng dáng thường dân áo nâu của hắn nhanh chóng hòa vào dòng người hối hả trên phố lớn. Sự chuyển đổi từ một gã đạo sĩ hoang dã thành một vị công tử phong trần, đầy uy quyền diễn ra vô cùng tự nhiên. Hắn nhận thấy việc xác lập vị thế chủ tử trong nhóm là bước đi cần thiết để xây dựng một thế lực nhỏ của riêng mình giữa thời đại đại loạn anh hùng tranh bá này.\nĐi trên phố, ngươi bắt gặp nhiều toán nghĩa binh đang luyện tập võ nghệ, tiếng hò reo vang dội cả một góc thành. Phía quảng trường trung tâm, bảng cáo thị của thái thú *Lưu Yên* vẫn đang thu hút rất nhiều hào kiệt tìm đến bái phỏng. Ngươi ghé vào một tiệm trà đông đúc ngay gần cổng thành nội, chọn một góc vắng để quan sát và lắng nghe. Những thông tin về giặc *Hoàng Cân* đang áp sát biên giới phía Bắc và việc ba người họ Lưu - Quan - Trương chuẩn bị chính thức khởi binh đã trở thành đề tài nóng hổi nhất."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Lữ khách 1",
+          "content": "Các ngươi nghe nói gì chưa? Ba vị tráng sĩ ở vườn đào nhà họ Trương đã chính thức mổ trâu giết ngựa, tế cáo trời đất để kết làm huynh đệ rồi đó! Nghe nói khí thế của bọn họ lẫm liệt vô cùng, ma quỷ không dám lại gần!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Lữ khách 2",
+          "content": "Đúng vậy! Thành vệ quân hôm qua nếu không có sự giúp sức của họ thì e rằng đã bị đám người mắt đỏ kia xé xác rồi. Thời buổi này, chỉ có đi theo những người như vậy mới mong giữ được mạng thôi."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi nhấp một ngụm trà đắng, trong lòng thầm tính toán. Việc *Triệu Vân* đã lên đường tìm *Công Tôn Toản* là một sự khởi đầu đúng đắn cho sự nghiệp của hắn, còn ngươi hiện tại, việc quan trọng nhất là phải nhanh chóng gia tăng thực lực và củng cố vị thế của mình tại *Trác Quận*. Thanh *Bất Vãn* bên hông khẽ rung động nhè nhẹ, như thể nó cũng đang nôn nóng muốn được cùng chủ nhân tham gia vào những trận chiến chính nghĩa sắp tới. \nNắng sáng rực rỡ chiếu rọi lên các mái nhà cổ kính, xua tan đi phần nào sương mù u ám của đêm qua. Thành *Trác Quận* đang sục sôi sức sống của những người anh hùng sắp sửa ghi danh vào sử sách. Ngươi nhận thấy, mình không chỉ là kẻ đứng ngoài quan sát lịch sử, mà đang trực tiếp nhào nặn nên một trang sử mới, nơi đạo pháp và sức mạnh nhân đức sẽ cùng tồn tại để quét sạch bóng tối ma đạo phương Bắc.\nSau khi nghe ngóng đủ tin tức, ngươi rời khỏi quán trà, hướng về phía khu chợ sầm uất để tìm mua thêm một số vật phẩm cần thiết cho việc tu luyện và chuẩn bị trang bị tốt hơn cho *Khinh Y* cùng tỳ nữ. Việc chuẩn bị chu đáo trước mỗi biến cố chính là bản năng sinh tồn đã ăn vào máu thịt của ngươi từ kiếp trước. Cuộc hành trình mới của công tử *Diệp Thần* tại thành *Trác Quận* chính thức bắt đầu dưới ánh bình minh ấm áp."
+        }
+      ]
+    },
+    {
+      "id": "aa49fdeb-3c4a-4137-806e-8db05d1a75c0",
+      "type": "user_custom_action",
+      "content": "Ngoài tin tức về việc đẩy lui Hành Thi hôm qua, ngươi còn nghe ngóng được ngoại vi Trác Quận có 1 con sông lớn. Nước sông rất xiết và thỉnh thoảng còn truyền đến tiếng gầm vang trời khiến nhiều đoàn thương nhân đi qua đều sợ hãi gấp rút lên đường. Còn có lời đồn từng có người trông thấy hư ảnh rồng bay trên bầu trời phía trên dòng sông. Người đó khiếp sợ ngất ngay tại chỗ. Lúc tỉnh dậy thì đã được 1 thương đội mang vào thành"
+    },
+    {
+      "id": "12e398c0-a725-41e8-9ebf-237199c1eff4",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ánh nắng ban trưa rực rỡ đổ xuống những mái ngói rêu phong của thành *Trác Quận*, nhưng không khí bên trong ngôi quán trà gỗ sồi nằm ngay sát cổng thành nội lại mang một vẻ trầm mặc, u uất kỳ lạ. *Diệp Thần* ngồi tĩnh tọa bên cạnh khung cửa sổ hẹp, vạt áo vải thô màu nâu sẫm khẽ bay theo gió sớm, thanh trường kiếm *Bất Vãn* gác nhẹ bên cạnh bàn gỗ. Trong lòng hắn, chú hổ con *Tiểu Bạch* đang lim dim ngủ, thỉnh thoảng lại khẽ cựa mình khi nghe thấy những tiếng ồn ào từ phố thị. Ngay đối diện, *Hạ Hầu Khinh Y* trong bộ y phục lụa hồng đã được chỉnh tề, đôi mắt phượng trong veo như nước hồ thu đang dõi theo từng cử động của phu quân với vẻ ân cần, ỷ lại. Đúng lúc này, tiếng xì xào bàn tán từ bàn của một nhóm thương nhân mặc áo gấm, gương mặt vẫn còn vương nét kinh hoàng, bỗng chốc dội thẳng vào tai hắn."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thương nhân béo",
+          "content": "Các vị có nghe thấy gì chưa? Phía ngoại vi *Trác Quận* có một dòng sông lớn xưa nay vẫn là đường giao thương huyết mạch, vậy mà mấy ngày qua nước bỗng chảy xiết hung dữ, sóng cuộn cao như muốn nuốt chửng thuyền bè! Kinh khủng nhất là thỉnh thoảng từ dưới lòng sông lại truyền đến những tiếng gầm vang trời xé rách mây mù, khiến bao nhiêu đoàn thương nhân đều khiếp sợ không dám đi qua, phải gấp rút lên đường lánh nạn vào thành!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thương nhân gầy",
+          "content": "Đúng vậy! Ta còn nghe kể có người tận mắt thấy hư ảnh một con rồng khổng lồ bay lượn trên bầu trời phía trên dòng sông đó, vảy rồng lấp lánh giữa màn sương đen quỷ dị. Kẻ đó khiếp sợ đến mức ngất ngay tại chỗ, lúc tỉnh dậy mới thấy mình được một thương đội đưa vào thành này. Lời đồn về 'chân long xuất thế' hay 'ma long giáng họa' đang làm náo loạn cả vùng ngoại ô rồi!"
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe đến đây, *Diệp Thần* khẽ đặt chén trà sành xuống bàn, một tiếng \"cạch\" khô khốc vang lên. Ánh mắt hắn bỗng chốc trở nên sắc lạnh, luồng chân nguyên tinh thuần trong đan điền bỗng chốc rục rịch chuyển động theo một tần số kỳ lạ, như thể đang có sự cộng hưởng với một luồng linh khí mạnh mẽ ở phương xa. Hắn quay sang nhìn *Hạ Hầu Khinh Y*, thấy nàng cũng đang nín thở lắng nghe, bàn tay thon thả vô thức nắm chặt lấy chuôi kiếm *Thanh Thủy*."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y, nghe thấy gì không? Tiếng gầm của rồng và hư ảnh long thần... Đây không đơn thuần là lời đồn của kẻ phàm phu. Sát khí phương Bắc đang tụ hội, nhưng linh khí ở dòng sông kia lại có dấu hiệu của thiên địa linh vật. Ta quyết định sẽ di chuyển đến khu vực dòng sông này ngay lập tức để điều tra thực hư về lời đồn chân long xuất thế kia. Nếu đó là linh mạch bị ma hóa, chúng ta phải kịp thời trấn áp."
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* không chút do dự, nàng đứng dậy, vạt áo lụa phấn hồng lay động, khí chất của một đệ tử phái *Thanh Thành* bộc phát đầy quyết đoán."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Phu quân nói đúng, điềm báo này quá mức kỳ dị. Nếu thực sự có chân long xuất thế giữa thời đại loạn lạc này, đó chắc chắn là một đại cơ duyên hoặc là một tai ương khôn lường. Thiếp nguyện cùng chàng đi một chuyến!"
+        },
+        {
+          "type": "narrative",
+          "content": "Dứt lời, *Diệp Thần* dẫn theo *Hạ Hầu Khinh Y*, nàng tỳ nữ *Tiểu Thúy* và chú hổ con *Tiểu Bạch* rời khỏi quán trà. Hắn không chọn đi đường chính môn để tránh sự chú ý của quân triều đình, mà dẫn mọi người băng qua những con ngõ nhỏ lắt léo, nhanh chóng ra khỏi cổng thành *Trác Quận*. \nCuộc hành trình tiến về phía ngoại vi diễn ra dưới bầu trời xám xịt của buổi chiều tà. Càng đi xa khỏi thành trì sầm uất, không khí càng trở nên lạnh lẽo và ẩm ướt. Con đường quan lộ dẫn đến dòng sông vốn đông đúc nay lại vắng lặng như tờ, chỉ có tiếng gió rít qua rặng thông già nghe như tiếng khóc than của oan hồn vất vưởng. Sau hơn hai canh giờ di chuyển miệt mài, trước mắt cả nhóm hiện ra một cảnh tượng vô cùng hùng vĩ nhưng cũng không kém phần rùng rợn. \nĐó chính là *Dòng Sông Ngoại Vi Trác Quận*. \nDòng sông rộng lớn, nước đen ngòm như mực, chảy cuồn cuộn xiết dữ dội, tạo thành những vòng xoáy khổng lồ có thể nuốt chửng cả những con thuyền lớn nhất. Sóng nước đập vào các vách đá ven bờ rầm rầm, tung bọt trắng xóa giữa màn sương mù dày đặc che khuất cả tầm nhìn. Ngay phía trên mặt sông, những luồng khí lạnh buốt bốc lên, kết lại thành những hình thù quái dị lẩn khuất giữa mây mù.\n\"Gào...!\"\nĐột nhiên, một tiếng gầm trầm đục, mang theo uy áp tâm linh mạnh mẽ dội thẳng vào tai họ từ phía thượng nguồn. Mặt đất dưới chân họ rung chuyển nhẹ, và trong một khoảnh khắc ngắn ngủi khi gió thổi tan màn sương, *Diệp Thần* và *Khinh Y* dường như nhìn thấy một hư ảnh dài hàng chục trượng, mang hình dáng một con rồng uốn lượn, lướt nhanh qua bầu trời phía trên mặt nước rồi biến mất vào trong màn khói đen.\n*Tiểu Bạch* trong lòng *Tiểu Thúy* bỗng nhiên xù lông, đôi mắt hoàng kim rực sáng oai nghiêm, nó phát ra những tiếng gầm gừ đầy cảnh giác. Ngay cả *Hạ Hầu Khinh Y* cũng phải lùi lại một bước, tay nắm chặt chuôi kiếm, gương mặt tái nhợt vì áp lực vô hình từ tiếng gầm kia."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Phu quân... Tiếng gầm này... nó không giống tiếng của thú dữ thông thường. Nó mang theo một loại cổ xưa và thần thánh, nhưng lại ẩn chứa một sự u uất, phẫn nộ tột cùng. Chàng có cảm nhận được không?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* đứng bên mép vực cao nhìn xuống dòng nước xiêu vẹo, thanh trường kiếm *Bất Vãn* bên hông rung lên bần bật như muốn thoát vỏ ra ngoài. Hắn vận dụng linh giác từ *Thái Bình Yếu Thuật*, đôi mắt rực lên tia sáng xanh nhạt, nhìn thấu qua lớp sương mù dày đặc."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đúng vậy, đây chính là linh khí của một vịnh long mạch đang bị ô nhiễm bởi tử khí phương Bắc. Con rồng mà người ta thấy không phải là chân long bằng xương bằng thịt, mà là 'Long khí' của vùng đất này đang bị ma hóa, cố gắng vùng vẫy để thoát khỏi sự xiềng xích của tà thuật. Nếu chúng ta không tìm ra nguồn gốc của luồng oán khí đang đầu độc dòng sông này, không lâu nữa, cả vùng *Trác Quận* sẽ bị lũ lụt và dịch bệnh ma đạo nhấn chìm."
+        },
+        {
+          "type": "narrative",
+          "content": "Sương mù quanh dòng sông bắt đầu dày đặc hơn, che khuất hoàn toàn ánh hoàng hôn yếu ớt, biến không gian trở nên tối tăm, mờ mịt. Mùi hoại tử tanh nồng từ dưới lòng sông bốc lên ngày một đậm đặc, xen lẫn với mùi lưu huỳnh khét lẹt — đặc trưng của tà thuật *Hoàng Cân*. *Diệp Thần* biết rằng, họ không chỉ đến đây để điều tra, mà đã vô tình bước chân vào một trận pháp quy mô lớn của ma đạo đang âm thầm bố trí tại đây.\nGió thổi mạnh hơn, đẩy những làn sương xám xịt bao vây lấy cả nhóm. Từ phía sau những tảng đá lớn ven bờ sông, lờ mờ hiện ra những bóng người dật dờ, khoác trên mình những bộ y phục rách nát mang sắc vàng tàn tạ của *Thái Bình Đạo*. Đôi mắt chúng không phải màu đỏ của *Hành Thi*, mà là màu xanh tía quỷ dị — chúng là những \"Thủy Thi\", những kẻ đã chết đuối dưới dòng sông này và bị tà thuật điều khiển.\nTrận chiến tại dòng sông linh mạch bắt đầu nóng lên khi những tiếng gầm gừ của đám xác sống hòa cùng tiếng nước chảy xiết hung dữ. *Diệp Thần* đứng chắn trước mặt *Hạ Hầu Khinh Y*, tay đặt lên chuôi kiếm *Bất Vãn*, sẵn sàng đối mặt với bí ẩn nằm sâu dưới lòng nước đen ngòm kia."
+        }
+      ]
+    },
+    {
+      "id": "338e3544-a5b1-45ef-a4d6-b8388279e577",
+      "type": "user_custom_action",
+      "content": "Ngươi rút ra 1 xấp bùa, sau khi đọc chú ngữ liền tung xấp bùa lên. Những lá bùa tách ra bay về nhiều phương vị khác nha tạo thành Cửu Cung Bát Quái trận. 2 đại trận kết hợp thanh lọc ma khí của long mạch. 1 khắc sau, hư ảnh Kim Long bay lượn từ dưới lòng sông bay thẳng cửu tiêu. Hư ảnh nhìn xuống gật đầu như cảm tạ ngươi rồi 1 quả trứng màu xanh lục từ từ bay tới trước mặt ngươi. Ngươi biết đây là thiên địa ở đây đang tặng quà cảm ơn ngươi nên ngươi thu lấy rồi chắp tay cảm tạ hướng hư ảnh Kim Long. Sau đó ngươi mang Khinh Y, Tiểu Thúy và Tiểu Bạch quay lại Thường Sơn. Bởi vì ngươi biết ở đây có Bách Điểu Triều Phụng thương -  1 thanh binh khí không tệ. Ngồi trên xe ngựa, ngươi dùng linh lực truyền vào quả trứng. 1 khắc sau quả trứng nứt ra, bên trong là 1 con tiểu Thanh Long đáng yêu mở to đôi mắt nhìn ngươi sau đó bay tới bay lui bên cạnh ngươi. Ngươi nghĩ nghĩ rồi đặt tên cho nó là Tiểu Thanh. Tiểu Thanh bộ dạng vui mừng cọ cọ cái đầu nhỏ vào cánh tay ngươi sau đó bay tới chui vào lòng Khinh Y. Có thể nhìn ra nó rất thích ở cạnh nàng"
     }
   ],
-  "choices": [
-    "Đưa Hạ Hầu Khinh Y đi dạo quanh các cửa hàng sầm uất trong thành Trác Quận để mua sắm thêm một số trang phục, phấn son mới và tận hưởng không gian ngọt ngào của cặp đôi mới cưới. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Gia tăng đáng kể tình cảm vợ chồng, giúp tinh thần của Khinh Y thêm phần phấn chấn sau đại nạn}",
-    "Cùng Khinh Y tiến thẳng đến khu vực vườn đào phía sau huyện để chứng kiến tận mắt lễ kết nghĩa huynh đệ của ba vị anh hùng Lưu - Quan - Trương và tìm kiếm cơ hội kết giao lâu dài. {Tỷ lệ thành công: 75%, Hậu quả/Phần thưởng: Tiếp cận thành công với thế lực chính nghĩa lớn nhất vùng, mở ra hướng đi mới cho hành trình thảo phạt giặc dữ}",
-    "Ở lại ngay trong phòng trọ tiếp tục cùng Khinh Y tu luyện bí pháp âm dương song tu để củng cố vững chắc mệnh cách mới hình thành và đột phá cảnh giới chân nguyên của bản thân. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Gia tăng đáng kể tu vi đạo pháp của bản thân, đồng thời nâng cao khả năng hộ thân của Khinh Y lên tầm cao mới}",
-    "Dẫn theo chú hổ con Tiểu Bạch ra khu vực bãi cỏ hoang dã ngoại vi thành Trác Quận để huấn luyện khả năng thực chiến, rèn luyện linh lực cho nó thích nghi với môi trường mới. {Tỷ lệ thành công: 80%, Hậu quả/Phần thưởng: Tiểu Bạch hồi phục linh lực nhanh chóng, khai mở một số kỹ năng chiến đấu cơ bản của linh thú hộ sơn}"
-  ],
+  "choices": [],
   "gameMode": "EXPLORATION",
   "activeTrade": {
     "trader": null,
@@ -2708,5 +2847,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 36
+  "adventureTurnCount": 39
 }
