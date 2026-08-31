@@ -104,6 +104,61 @@ game càng "vô hình" ở khoản này càng đúng chức năng.
 7. **Không có "chế độ thử nghiệm" ngoại lệ**: Không tồn tại flag/config
    nào cho phép tạm thời tắt enforcement, kể cả trong prototype/dev build.
    Cần test nhanh thì dùng mock kết quả khóa sẵn, không bỏ qua bước khóa.
+8. **Khoanh vùng tường thuật theo đúng phạm vi người chơi tự mô tả — cấm tự ý
+   phát triển thêm tình tiết** (bổ sung 2026-09-01, theo quyết định chủ dự án):
+   Khi lượt chơi là một hành động TỰ DO do người chơi tự viết ra (tường thuật
+   và/hoặc lời thoại do chính người chơi soạn — kể cả lời thoại người chơi tự
+   đặt vào miệng một NPC cụ thể, qua bộ soạn thảo phân đoạn nơi mỗi đoạn được
+   gắn nhãn rõ là tường thuật, lời Nhân vật chính, hay lời của một NPC cụ thể),
+   AI khi thực hiện `narration_call` cho lượt đó CHỈ được LÀM GIÀU văn
+   phong/hình ảnh/cảm giác cho ĐÚNG tập hợp các đoạn người chơi đã cung cấp —
+   giữ nguyên chủ thể, thứ tự và ranh giới của từng đoạn. Cụ thể, AI KHÔNG
+   được:
+   - Viết tiếp bất kỳ diễn biến, tình tiết, hay hành động nào SAU điểm nội
+     dung người chơi mô tả kết thúc.
+   - Tự thêm phản ứng, lời thoại, hay cử động mới của bất kỳ NPC nào mà người
+     chơi KHÔNG hề đưa vào danh sách đoạn của lượt đó — kể cả một NPC đang có
+     mặt ngay trong cảnh.
+   - Tự thêm một đoạn tường thuật "chốt lượt" mang tính tổng kết hoặc dẫn dắt
+     sang tình huống mới, nếu người chơi không hề viết đoạn đó.
+
+   **Ngoại lệ duy nhất — đoạn thoại NPC không kèm mô tả**: nếu một đoạn người
+   chơi cung cấp chỉ là nguyên văn câu thoại của một NPC (không mô tả gì
+   thêm), AI ĐƯỢC PHÉP thêm tối thiểu một khung cử chỉ/giọng điệu/nét mặt
+   TRỰC TIẾP đi kèm ĐÚNG lúc câu đó được nói ra (VD: giọng run rẩy, cúi đầu,
+   siết chặt tay) — đây là phần "trình bày" (delivery framing) tất yếu khi
+   văn xuôi hoá một câu thoại, không phải một tình tiết mới. AI KHÔNG được
+   thêm bất kỳ hành động/phản ứng nào XẢY RA SAU câu thoại đó (VD: NPC quay
+   đi, rơi nước mắt, bước ra khỏi phòng) nếu người chơi không viết tiếp đoạn
+   nào khác.
+
+   Rule này CHỈ áp dụng cho phần văn xuôi tường thuật của `narration_call`;
+   KHÔNG áp dụng cho `suggestion_call` (không đổi — xem Edge Case "Phạm vi áp
+   dụng"), và KHÔNG cấm việc phát các thẻ lệnh hệ thống bắt buộc đi kèm
+   `locked_result` (VD `[WORLD_ITEM]`, `[TIME_PASSED]`) — đó là lớp
+   bookkeeping cơ học, không phải "tình tiết truyện" theo nghĩa của rule này.
+
+   * VÍ DỤ SAI: Người chơi chỉ viết 1 đoạn tường thuật "Ta bước tới, đặt tay
+   lên vai nàng." AI viết: "Ngươi bước tới, đặt tay lên vai nàng. Nàng giật
+   mình quay lại, đôi mắt đỏ hoe: <dialogue speaker="NPC">Sao ngươi lại...?
+   </dialogue> Ngươi khẽ mỉm cười, kéo nàng vào lòng." — hai câu sau là phản
+   ứng/tình tiết hoàn toàn do AI tự bịa, người chơi không hề viết.
+   * VÍ DỤ ĐÚNG: AI chỉ được viết: "Ngươi bước tới, những bước chân khẽ khàng
+   như sợ làm vỡ khoảnh khắc tĩnh lặng, rồi đặt tay lên bờ vai gầy guộc của
+   nàng." — làm giàu hình ảnh/cảm giác cho ĐÚNG 1 hành động đó, dừng lại
+   đúng ở đó.
+
+   **Phối hợp với Core Rule #1/#2 (không đổi)**: nếu lượt tự do này ĐỒNG THỜI
+   kích hoạt một hệ Feature cơ học (VD Combat resolve ngay trong lượt đó) và
+   do đó có `locked_result`, việc AI phải phản ánh trung thực `locked_result`
+   (Core Rule #1/#2) KHÔNG bị Rule #8 hạn chế — đó không phải "AI tự bịa
+   thêm", mà là nghĩa vụ đã có sẵn từ trước. Nói cách khác, phạm vi hợp lệ
+   của `narration_text` cho một lượt tự do = (các đoạn người chơi mô tả, đã
+   làm giàu văn phong) HỢP VỚI (`locked_result` bắt buộc phải phản ánh, nếu
+   có) — AI không được viết bất kỳ nội dung nào NGOÀI hợp của hai tập này.
+   Core Rule #4 (cấm lộ số liệu thô) áp dụng không đổi cho toàn bộ
+   `narration_text`, bất kể câu chữ đó bắt nguồn từ đoạn của người chơi hay
+   từ việc phản ánh `locked_result`.
 
 ### States and Transitions
 
@@ -275,6 +330,26 @@ lại hướng dẫn "cấm số liệu thô" hơn prompt của NPC Affinity.
   (`suggestion_call`) không tường thuật một kết quả đã khóa nào — nó mô
   tả tình huống MỞ, chưa có kết quả — nên không thuộc phạm vi kiểm tra
   leak-detection này.
+- **Hành động rất ngắn của người chơi** (VD: "Ta gật đầu"): AI vẫn phải văn
+  xuôi hoá đủ đoạn đó, nhưng KHÔNG được lấy lý do "ngắn quá" để bổ sung thêm
+  một sự kiện/nhân vật mới cho "đủ dài". Được phép thêm tính từ, nhịp điệu,
+  cảm giác cho đúng 1 hành động đã cho (enrich hình ảnh) — không được thêm
+  SỰ KIỆN mới. Một narration_text dài hơn nhiều so với input người chơi vẫn
+  HỢP LỆ, miễn là không có sự kiện hay nhân vật nào mới xuất hiện trong đó.
+- **Nhiều đoạn xen kẽ (tường thuật + lời thoại nhiều NPC trong cùng 1
+  lượt)**: AI PHẢI tường thuật hoá ĐỦ tất cả các đoạn người chơi cung cấp,
+  đúng thứ tự, không được bỏ sót hay gộp tắt bất kỳ đoạn nào — kể cả đoạn
+  ngắn hoặc có vẻ ít quan trọng. Bỏ sót một đoạn bị coi là vi phạm Rule #8 ở
+  mức tương đương với việc thêm một đoạn thừa, vì cả hai đều làm sai lệch
+  ĐÚNG NHỮNG GÌ người chơi đã chủ động viết ra cho lượt đó.
+- **Vi phạm Rule #8 mà không lộ số liệu thô** (AI thêm tình tiết/phản ứng
+  NPC mới nhưng không hề nêu con số nào): Formula 1 (regex số liệu) KHÔNG
+  bắt được loại vi phạm này — cùng lớp giới hạn đã ghi nhận ở Edge Case "Nếu
+  AI mâu thuẫn NGỮ NGHĨA với locked_result" phía trên (không có cơ chế tự
+  động ở tầng GDD này vì mọi cách tự động hóa đều cần thêm 1 lệnh gọi AI
+  "chấm điểm", vi phạm invariant `calls_per_turn ≤ 3`). Phát hiện chỉ qua QA
+  thủ công đối chiếu `player_authored_segments` của lượt đó với
+  `narration_text` trả về — xem AC-17.
 
 ## Dependencies
 
@@ -368,6 +443,35 @@ rất hẹp, đúng như kỳ vọng.)*
   (không phải 3), `leak_matches` chạy trên hợp cả 3 field set.
 - **AC-16** (undo loại khỏi T): THEN lượt undo không tính vào T, nhưng
   `leak_flag` log vẫn giữ cho debug.
+
+**Core Rule 8 — Giới hạn tường thuật theo phạm vi tự mô tả (bổ sung
+2026-09-01)**
+- **AC-17** (R8, không thêm tình tiết/thoại NPC lạ): GIVEN người chơi cung
+  cấp N đoạn (`player_authored_segments`) cho 1 lượt tự do, WHEN
+  `narration_call` trả về `narration_text`, THEN không có thẻ
+  `<dialogue speaker="X">` nào xuất hiện với X là một NPC không nằm trong
+  danh sách N đoạn đó, VÀ không có đoạn tường thuật nào mô tả một sự
+  kiện/hành động không tương ứng với bất kỳ đoạn nào trong N — kiểm bằng QA
+  đối chiếu thủ công (không tự động hoá đầy đủ được, cùng giới hạn đã ghi ở
+  AC-14).
+- **AC-18** (R8, phủ đủ đoạn): GIVEN N đoạn người chơi cung cấp, WHEN
+  `narration_text` trả về, THEN cả N đoạn đều được phản ánh trong đó —
+  không đoạn nào bị bỏ sót hoàn toàn — QA đối chiếu thủ công.
+- **AC-19** (R8, ranh giới enrichment cho thoại-không-mô-tả): GIVEN 1 đoạn
+  chỉ gồm nguyên văn thoại của 1 NPC không kèm mô tả, WHEN AI tường thuật,
+  THEN chỉ được thêm khung cử chỉ/giọng điệu ĐI KÈM lúc câu đó được nói,
+  KHÔNG có hành động/phản ứng nào của NPC đó XẢY RA SAU câu thoại trong
+  cùng đoạn — QA đối chiếu thủ công theo tiêu chí "đi kèm lúc nói" vs "sau
+  khi nói".
+- **AC-20** (R8, không cắt/không độn cho input ngắn): GIVEN input ngắn (VD:
+  "Ta gật đầu"), WHEN AI tường thuật, THEN `narration_text` không chứa bất
+  kỳ sự kiện hay nhân vật mới nào ngoài hành động đã cho, dù được phép mô
+  tả giàu hình ảnh hơn — QA đối chiếu thủ công.
+- **AC-21** (R8 ∩ R1/R2, hợp với locked_result): GIVEN lượt tự do có kèm
+  `locked_result` từ 1 hệ Feature kích hoạt cùng lượt, WHEN AI tường thuật,
+  THEN `narration_text` = (đủ N đoạn người chơi, đã làm giàu văn phong) HỢP
+  VỚI (phản ánh đúng `locked_result`, theo AC-02/AC-04 hiện có) — không có
+  nội dung nào ngoài hợp của hai tập này — QA đối chiếu thủ công.
 
 ## Open Questions
 

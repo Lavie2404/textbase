@@ -391,6 +391,14 @@ export const UI_KNOBS = {
   profile_text_max_length: 280,
   /** gdd-06 B5: integers for raw stats, 1 decimal for percentage stats. */
   stat_display_precision: 0,
+  /**
+   * core-ui-screen-navigation.md D.7 (2026-09-01 addendum): fuzzy-match
+   * threshold for the structured action composer's NPC speaker picker.
+   * Range 0.5-0.9. Below this, `resolve_speaker` never auto-picks a
+   * `known_npc` - misattributing a speaker has direct NPC Affinity
+   * consequences, so the UX contract is deliberately conservative.
+   */
+  npc_fuzzy_match_threshold: 0.72,
 } as const;
 
 /** gdd-06 A5: visual placeholder alphas - single source, never re-literalled. */

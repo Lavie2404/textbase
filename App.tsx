@@ -89,6 +89,13 @@ import { FONT_SIZE_LABELS, FONT_SIZE_SETTINGS, applyPreset, applyAdvancedSlider,
 import { isWriteActionAllowed, undoButtonState } from './src-web/systems/ui/writeActionAllowed';
 import { createBannerQueue } from './src-web/systems/ui/bannerQueue';
 import { TOUCH_TARGET_MIN } from './src-web/systems/ui/touchTarget';
+import {
+    composerPayloadSubmitAllowed,
+    fuzzyScore,
+    resetSpeakerOnTypeChange,
+    resolveSpeaker,
+    serializeComposerPayload,
+} from './src-web/systems/ui/composerPayload';
 import { customizeButtonVisibility, validateProgressZone, isValidBaseStatSet, isValidSkillSubmit, isValidItemSubmit } from './src-web/systems/customize/validators';
 
 // === Pillar 1 - "The Gioi Khach Quan" (design/gdd/game-concept.md 38-100, 243-255)
@@ -9864,10 +9871,268 @@ const getUniqueCombatantNames = (combatants) => {
 };
 
 
+// Core UI / Screen Navigation - Core Rule #3c, D.7 (2026-09-01 addendum):
+// "Composer hành động có cấu trúc", replacing the old freeform single-line
+// box. Fully self-contained (owns its own `segments`/draft state) so it
+// naturally survives S2 <-> S4 (Story Log) navigation without any extra
+// wiring (AC-82) - it just never unmounts, same as every other part of
+// GameplayScreen that stays resident for the whole play session.
+//
+// `handleSubmit` folds any in-flight draft into `segments` but does NOT wipe
+// them - that keeps AC-80 (Core Rule #9: preserve the full payload through an
+// AI timeout/error) trivially true, since nothing here ever races the AI
+// call's outcome. Clearing on an actual CONFIRMED turn is a separate concern,
+// handled by the `resetSignal` prop below: App owns the one place that truly
+// knows the difference between "submitted" and "confirmed"
+// (`finalizeSystemsTurn`, gdd-01 A.4 phases 4-6) and bumps a counter there,
+// never on the timeout/error path. `ActionComposer` just watches it.
+const emptyComposerDraft = () => ({
+    type: 'narration',
+    text: '',
+    speakerRaw: '',
+    speaker: { kind: 'player' },
+});
+
+const ActionComposer = ({ knownNpcPool, playerName, disabled, writeCtx, resetSignal, onSubmit }) => {
+    const [segments, setSegments] = useState([]);
+    const [draft, setDraft] = useState(emptyComposerDraft());
+
+    // Core Rule #9 / AC-80 vs. project owner decision (2026-09-02): clear ONLY
+    // on a real confirmed turn, never on submit itself (a timeout/error must
+    // still show the exact payload that was sent). Guarding on `resetSignal >
+    // 0` skips the redundant no-op reset on initial mount (signal starts at 0
+    // and `segments`/`draft` are already empty then).
+    useEffect(() => {
+        if (resetSignal > 0) {
+            setSegments([]);
+            setDraft(emptyComposerDraft());
+        }
+    }, [resetSignal]);
+
+    // UI Requirements "Ngoại lệ tiện dụng": an un-committed draft is folded in
+    // as the final segment at submit time (and used here to compute whether
+    // Gửi should be enabled at all) so the player never has to remember to
+    // tap "+ Thêm đoạn" before submitting a single-segment action.
+    const commitDraftIfNonEmpty = (baseSegments, d) => {
+        if (d.text.trim() === '') return baseSegments;
+        const seg = d.type === 'narration'
+            ? { type: 'narration', text: d.text }
+            : { type: 'dialogue', text: d.text, speaker: d.speaker };
+        return [...baseSegments, seg];
+    };
+
+    const effectivePayload = commitDraftIfNonEmpty(segments, draft);
+    const submitAllowed = composerPayloadSubmitAllowed(effectivePayload, writeCtx);
+
+    const handleTypeChange = (newType) => {
+        // AC-81: text is kept, speaker resets to player.
+        setDraft(d => resetSpeakerOnTypeChange(d, newType));
+    };
+
+    const handleSpeakerRawChange = (raw) => {
+        setDraft(d => ({ ...d, speakerRaw: raw }));
+    };
+
+    // D.7 resolve_speaker: runs when the player leaves the search box, NOT
+    // deferred to submit time. Only the unambiguous `known_npc` case
+    // auto-commits; `ambiguous`/`new_npc` leave the raw text as-is so the
+    // live suggestion list below stays open for a manual pick or "Dùng tên
+    // mới" (AC-76: >=2 fuzzy candidates must never silently auto-resolve).
+    const handleSpeakerBlur = () => {
+        const raw = draft.speakerRaw.trim();
+        if (raw === '') return;
+        const resolution = resolveSpeaker(raw, knownNpcPool);
+        if (resolution.kind === 'known_npc') {
+            setDraft(d => ({ ...d, speaker: resolution, speakerRaw: resolution.display_name }));
+        }
+    };
+
+    const handlePickCandidate = (candidate) => {
+        setDraft(d => ({
+            ...d,
+            speaker: { kind: 'known_npc', char_id: candidate.char_id, display_name: candidate.display_name },
+            speakerRaw: candidate.display_name,
+        }));
+    };
+
+    const handleUseNewName = () => {
+        const trimmed = draft.speakerRaw.trim();
+        if (trimmed === '') return;
+        setDraft(d => ({ ...d, speaker: { kind: 'new_npc', proposed_name: trimmed } }));
+    };
+
+    const handleAddSegment = () => {
+        if (draft.text.trim() === '') return;
+        setSegments(prev => commitDraftIfNonEmpty(prev, draft));
+        setDraft(emptyComposerDraft());
+    };
+
+    const handleDeleteSegment = (index) => {
+        // Any segment, not just the last one; relative order of the rest is
+        // preserved (Edge Cases "Xóa 1 đoạn giữa danh sách").
+        setSegments(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleSubmit = () => {
+        const finalPayload = commitDraftIfNonEmpty(segments, draft);
+        if (!composerPayloadSubmitAllowed(finalPayload, writeCtx)) return;
+        onSubmit(serializeComposerPayload(finalPayload, playerName || 'Ngươi'));
+        // Fold the draft into the committed list rather than clearing anything
+        // - see the file-level comment above for why nothing here is wiped.
+        setSegments(finalPayload);
+        setDraft(emptyComposerDraft());
+    };
+
+    const segmentLabel = (seg) => {
+        if (seg.type === 'narration') return 'Tường thuật';
+        const who = seg.speaker.kind === 'player' ? (playerName || 'Ngươi')
+            : seg.speaker.kind === 'known_npc' ? seg.speaker.display_name
+            : seg.speaker.proposed_name;
+        return `${who} nói`;
+    };
+
+    const speakerRawTrimmed = draft.speakerRaw.trim();
+    const showSpeakerSuggestions = draft.type === 'dialogue' && draft.speaker.kind !== 'known_npc' && speakerRawTrimmed !== '';
+    const liveSuggestions = showSpeakerSuggestions
+        ? knownNpcPool.filter(e => fuzzyScore(e.display_name, speakerRawTrimmed) >= 0.3).slice(0, 6)
+        : [];
+
+    return (
+        <div className="flex flex-col gap-2 p-2 bg-[#0a0f0a]/30 border border-[#cda45e]/30">
+            {segments.length > 0 && (
+                <div className="flex flex-col gap-1 max-h-40 overflow-y-auto pr-1">
+                    {segments.map((seg, i) => (
+                        <div key={i} className="flex items-start gap-2 bg-[#0a0f0a]/60 border border-[#cda45e]/20 px-2 py-1.5">
+                            <div className="flex-grow min-w-0">
+                                <span className="text-[11px] font-light text-[#8ba888] block">{segmentLabel(seg)}</span>
+                                <span className="text-sm text-[#e8d3a1] break-words whitespace-pre-wrap">{seg.text}</span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handleDeleteSegment(i)}
+                                disabled={disabled}
+                                style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                className="flex-shrink-0 text-[#cda45e]/70 hover:text-[#cda45e] disabled:opacity-40 disabled:cursor-not-allowed"
+                                title="Xóa đoạn này"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <div className="flex flex-col gap-1.5">
+                <div className="flex gap-1.5">
+                    <button
+                        type="button"
+                        onClick={() => handleTypeChange('narration')}
+                        disabled={disabled}
+                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                        className={`flex-1 text-xs font-bold tracking-wide border px-2 disabled:opacity-40 disabled:cursor-not-allowed ${draft.type === 'narration' ? 'bg-[#cda45e]/20 border-[#cda45e] text-[#e8d3a1]' : 'bg-transparent border-[#cda45e]/40 text-[#8ba888]'}`}
+                    >
+                        Tường thuật
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleTypeChange('dialogue')}
+                        disabled={disabled}
+                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                        className={`flex-1 text-xs font-bold tracking-wide border px-2 disabled:opacity-40 disabled:cursor-not-allowed ${draft.type === 'dialogue' ? 'bg-[#cda45e]/20 border-[#cda45e] text-[#e8d3a1]' : 'bg-transparent border-[#cda45e]/40 text-[#8ba888]'}`}
+                    >
+                        Đối thoại
+                    </button>
+                </div>
+
+                {draft.type === 'dialogue' && (
+                    <div className="flex flex-col gap-1">
+                        <div className="flex gap-1.5">
+                            <button
+                                type="button"
+                                onClick={() => setDraft(d => ({ ...d, speaker: { kind: 'player' }, speakerRaw: '' }))}
+                                disabled={disabled}
+                                style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                className={`text-xs border px-2 disabled:opacity-40 disabled:cursor-not-allowed ${draft.speaker.kind === 'player' ? 'bg-[#cda45e]/20 border-[#cda45e] text-[#e8d3a1]' : 'bg-transparent border-[#cda45e]/40 text-[#8ba888]'}`}
+                            >
+                                Nhân vật chính
+                            </button>
+                            <input
+                                type="text"
+                                value={draft.speakerRaw}
+                                onChange={(e) => handleSpeakerRawChange(e.target.value)}
+                                onBlur={(e) => handleSpeakerBlur(e.target.value)}
+                                disabled={disabled}
+                                placeholder="Tìm/gõ tên NPC..."
+                                className="flex-grow p-2 bg-[#0a0f0a]/60 border border-[#cda45e]/40 text-[#e8d3a1] text-xs outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                            />
+                        </div>
+                        {showSpeakerSuggestions && (
+                            <div className="flex flex-col gap-0.5 bg-[#0a0f0a]/80 border border-[#cda45e]/20 max-h-32 overflow-y-auto">
+                                {liveSuggestions.map(c => (
+                                    <button
+                                        type="button"
+                                        key={c.char_id}
+                                        onClick={() => handlePickCandidate(c)}
+                                        disabled={disabled}
+                                        className="text-left text-xs text-[#e8d3a1] px-2 py-1.5 hover:bg-[#cda45e]/10 disabled:opacity-40"
+                                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                    >
+                                        {c.display_name}
+                                    </button>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={handleUseNewName}
+                                    disabled={disabled}
+                                    className="text-left text-xs text-[#8ba888] italic px-2 py-1.5 hover:bg-[#cda45e]/10 disabled:opacity-40"
+                                    style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                >
+                                    Dùng tên mới: "{speakerRawTrimmed}"
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                <div className="flex gap-2">
+                    <textarea
+                        value={draft.text}
+                        onChange={(e) => setDraft(d => ({ ...d, text: e.target.value }))}
+                        rows={2}
+                        placeholder="Miêu tả hành động tùy ý..."
+                        disabled={disabled}
+                        className="flex-grow p-3 bg-[#0a0f0a]/60 border border-[#cda45e]/40 text-[#e8d3a1] focus:border-[#cda45e] outline-none text-sm placeholder-[#8ba888] disabled:opacity-50 disabled:cursor-not-allowed resize-y break-words whitespace-pre-wrap"
+                    />
+                    <button
+                        type="button"
+                        onClick={handleAddSegment}
+                        disabled={disabled || draft.text.trim() === ''}
+                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                        className="bg-transparent border border-[#cda45e]/60 hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-3 px-4 text-xs uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed self-start whitespace-nowrap"
+                    >
+                        + Thêm đoạn
+                    </button>
+                </div>
+            </div>
+
+            <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!submitAllowed}
+                style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                className="bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-3 px-6 shadow-[inset_0_0_10px_rgba(205,164,94,0.1)] uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed self-end"
+            >
+                Thực Hiện
+            </button>
+        </div>
+    );
+};
+
+
 // COMPONENT 3: THAY THẾ TOÀN BỘ GAMEPLAYSCREEN
-const GameplayScreen = ({ 
+const GameplayScreen = ({
     gameMode, goHome, gameSettings, restartGame, storyHistory, setGameSettings, setStoryHistory, isLoading, currentStory, handleActionRequest,
-    choices, handleChoice, formatStoryText, customActionInput, setCustomActionInput,
+    choices, handleChoice, formatStoryText, customActionInput, setCustomActionInput, composerResetSignal,
     canUndoTurn, onUndoTurn, isUndoingTurn, persistenceWarning,
     visibleBanner, onDismissBanner, hackModeEnabled, onToggleHackMode,
     onOpenApiSetup, aiSourceSummary,
@@ -9916,6 +10181,21 @@ const GameplayScreen = ({
     // gdd-06 A5: dimmed, not hidden - the controls stay in place so the layout
     // never jumps while a turn resolves.
     const writeControlOpacity = canSubmitWriteAction ? 1 : 0.38;
+    // Core UI D.7 "known NPC" source for the composer's speaker picker.
+    // APPROXIMATION, not the literal `card_exists ∧ alive` predicate the GDD
+    // specifies - Character Card & Identity (#14) has no `list_known_npc_names`
+    // implementation yet in this codebase (only a `card_exists`-shaped
+    // per-entity flag would be needed, and even that isn't wired to a "has this
+    // NPC actually been introduced to the player" concept here). Every
+    // non-player, non-permanently-dead entry of `knowledge.characters` is used
+    // instead. Flagged to the project owner in the implementation report -
+    // replace with the real `list_known_npc_names` once #14 ships it.
+    const composerKnownNpcPool = useMemo(
+        () => (knowledge.characters || [])
+            .filter(c => !c.isPlayer && !c.isPermanentlyDead)
+            .map(c => ({ char_id: c.id, display_name: c.Name })),
+        [knowledge.characters]
+    );
     // gdd-06 A2 #6 / AC-07: "hidden" and "dimmed" are two DIFFERENT mechanisms.
     const undoState = undoButtonState(!!canUndoTurn, writeCtx);
     // gdd-06 C2 #2 (plan.md C-7: this project has no death-turn lock-out screen,
@@ -10395,27 +10675,47 @@ const renderDefaultActions = () => {
 
                     )}
 
-                    <div className="flex gap-2">
-                        <textarea
-                           id="customActionInput"
-                           value={customActionInput}
-                           onChange={(e) => setCustomActionInput(e.target.value)}
-                           placeholder={knowledge.systemAssistant?.isActive ? "Trò chuyện với Hệ thống tối cao..." : (gameSettings.difficulty === 'Ác Mộng' ? "Chế độ Ác Mộng: Khóa nhập hành động tự do!" : "Miêu tả hành động tùy ý...")}
-                           rows={2}
-                           className="flex-grow p-3 bg-[#0a0f0a]/60 border border-[#cda45e]/40 text-[#e8d3a1] focus:border-[#cda45e] outline-none text-sm placeholder-[#8ba888] disabled:opacity-50 disabled:cursor-not-allowed resize-y break-words whitespace-pre-wrap"
-                           onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && canSubmitWriteAction && gameSettings.difficulty !== 'Ác Mộng') { e.preventDefault(); handleCustomAction(customActionInput); } }}
-                           style={{ opacity: writeControlOpacity }}
-                           disabled={!canSubmitWriteAction || gameSettings.difficulty === 'Ác Mộng'}
+                    {knowledge.systemAssistant?.isActive ? (
+                        // HTAB inline chat: UNCHANGED freeform box (Core Rule #3c only
+                        // replaces the action-entry box - the project owner's 2026-09-01
+                        // decision explicitly kept HTAB chat exactly as it was, including
+                        // its pre-existing 'Ác Mộng' lock, which this branch preserves
+                        // byte-for-byte).
+                        <div className="flex gap-2">
+                            <textarea
+                               id="customActionInput"
+                               value={customActionInput}
+                               onChange={(e) => setCustomActionInput(e.target.value)}
+                               placeholder="Trò chuyện với Hệ thống tối cao..."
+                               rows={2}
+                               className="flex-grow p-3 bg-[#0a0f0a]/60 border border-[#cda45e]/40 text-[#e8d3a1] focus:border-[#cda45e] outline-none text-sm placeholder-[#8ba888] disabled:opacity-50 disabled:cursor-not-allowed resize-y break-words whitespace-pre-wrap"
+                               onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && canSubmitWriteAction && gameSettings.difficulty !== 'Ác Mộng') { e.preventDefault(); handleCustomAction(customActionInput); } }}
+                               style={{ opacity: writeControlOpacity }}
+                               disabled={!canSubmitWriteAction || gameSettings.difficulty === 'Ác Mộng'}
+                            />
+                            <button
+                               onClick={() => handleCustomAction(customActionInput)}
+                               style={{ opacity: writeControlOpacity, minHeight: TOUCH_TARGET_MIN + 'px' }}
+                               disabled={!canSubmitWriteAction || gameSettings.difficulty === 'Ác Mộng'}
+                               className="bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-3 px-6 shadow-[inset_0_0_10px_rgba(205,164,94,0.1)] uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed self-start"
+                            >
+                                Thực Hiện
+                            </button>
+                        </div>
+                    ) : (
+                        // Core UI Rule #3c / D.7: structured action composer, replacing the
+                        // old freeform box for real gameplay actions. Per project owner
+                        // decision (2026-09-01), the 'Ác Mộng' difficulty lock does NOT
+                        // apply here anymore - only `canSubmitWriteAction` (D.1) gates it.
+                        <ActionComposer
+                            knownNpcPool={composerKnownNpcPool}
+                            playerName={playerCharacter?.Name}
+                            disabled={!canSubmitWriteAction}
+                            writeCtx={writeCtx}
+                            resetSignal={composerResetSignal}
+                            onSubmit={(serializedAction) => processPlayerAction(serializedAction, 'user_custom_action')}
                         />
-                        <button
-                           onClick={() => handleCustomAction(customActionInput)}
-                           style={{ opacity: writeControlOpacity, minHeight: TOUCH_TARGET_MIN + 'px' }}
-                           disabled={!canSubmitWriteAction || gameSettings.difficulty === 'Ác Mộng'}
-                           className="bg-transparent border border-[#cda45e] hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-3 px-6 shadow-[inset_0_0_10px_rgba(205,164,94,0.1)] uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed self-start"
-                        >
-                            Thực Hiện
-                        </button>
-                    </div>
+                    )}
                     <label className="flex items-center gap-2 mt-2 text-xs text-[#8ba888] cursor-pointer select-none w-fit">
                         <input
                            type="checkbox"
@@ -21674,6 +21974,16 @@ const handleUndoTurn = useCallback(async () => {
  * gdd-04 A4: the fact-store context block that rides ALONGSIDE the AI summaries
  * (plan.md C-8). Returns '' on any failure so the prompt is never blocked.
  */
+/**
+ * Core UI D.7 / Core Rule #9 (2026-09-01): bumped exactly once per REAL
+ * confirmed manual turn (see `finalizeSystemsTurn` below) - never on a
+ * timeout/error, since that path never reaches `finalizeSystemsTurn` at all
+ * (it is only invoked from the success branch of a manually driven turn).
+ * `ActionComposer` watches this via a prop to know when to clear its
+ * `segments`/draft - the one signal that distinguishes "the turn actually
+ * confirmed" from "the AI call merely returned/errored".
+ */
+const [composerResetSignal, setComposerResetSignal] = useState(0);
 /** Set by `processPlayerAction` while a manually driven turn is in flight. */
 const pendingTurnRef = useRef(null);
 /** Live mirror of `isProcessingAction` for the C-1 self-heal check. */
@@ -21708,6 +22018,12 @@ const finalizeSystemsTurn = useCallback((knowledgeAfterUpdates, storyText) => {
     const pending = pendingTurnRef.current;
     if (!tm || !pending) return; // not a player turn (AI turn, init call, godmode)
     pendingTurnRef.current = null;
+    // Core UI D.7 / Core Rule #9: this line only ever runs once a manually
+    // driven turn's narration has genuinely succeeded and is being handed off
+    // (see the `handed_off = true` stamp at its one call site) - never on a
+    // timeout/error, which instead lets `settleSystemsTurnAfterCall` abort the
+    // still-pending turn without ever reaching this function.
+    setComposerResetSignal(prev => prev + 1);
     setTimeout(async () => {
         try {
             const turnId = tm.turn_id;
@@ -28065,6 +28381,17 @@ ${PILLAR1_DIRECTIVES_NARRATION.map(x => '//    * ' + x).join('\n')}
 //    - VÍ DỤ SAI (nhầm giới tính): Một NPC NỮ nói "Ai là phu quân tương lai của ngươi chứ!" khi đang phủ nhận việc TRỞ THÀNH vợ của Nhân vật chính — "phu quân" (chồng) không thể dùng để chỉ một người sẽ đóng vai vợ. Câu đúng phải dùng từ chỉ VỢ, ví dụ: "Ai là thê tử tương lai của ngươi chứ!" hoặc "Ai thèm làm phu nhân tương lai của ngươi!".
 //    - Nếu Nhân vật chính là NỮ và NPC là NAM, phải đảo ngược lại toàn bộ cặp xưng hô cho đúng (Nhân vật chính là vợ dùng "thiếp"/"nàng dâu", NPC là chồng dùng "chàng"/"phu quân").
 
+// 2.6b. QUY TẮC XƯNG HÔ GIỮA HAI NPC VỚI NHAU (KHÔNG LIÊN QUAN NHÂN VẬT CHÍNH — BẮT BUỘC):
+//    - Mục 2.5/2.6 ở trên chỉ chi phối xưng hô GIỮA nhân vật chính và NPC. Khi HAI NPC nói chuyện với NHAU (nhân vật chính không phải người đang được xưng hô), NGUYÊN TẮC PHẢN CHIẾU không áp dụng — phải tự xác định cặp xưng hô đúng theo VAI VẾ QUAN HỆ và GIỚI TÍNH THẬT của cả hai NPC đó, không được mặc định "thiếp/chàng" hay bất kỳ cặp nào chưa được xác lập.
+//    - Nếu NPC A gọi NPC B bằng một xưng hô mang tính VAI VẾ (huynh, tỷ, muội, đệ, sư huynh, sư tỷ, sư đệ, sư muội...), A BẮT BUỘC tự xưng đúng vai đối xứng với vai đó, không được tự xưng lệch sang cặp khác:
+//      * A gọi B là "muội" (em gái) → A tự xưng "tỷ" (nếu A là nữ) hoặc "huynh" (nếu A là nam), TUYỆT ĐỐI KHÔNG tự xưng "thiếp".
+//      * A gọi B là "đệ" (em trai) → A tự xưng "tỷ" (nữ) hoặc "huynh" (nam).
+//      * A gọi B là "tỷ"/"huynh" (bậc trên) → A tự xưng "muội" (nữ) hoặc "đệ" (nam).
+//    - Cặp "thiếp – chàng" CHỈ được dùng giữa hai NPC khi họ là VỢ CHỒNG/TÌNH NHÂN đã được xác lập rõ trong danh sách nhân vật hoặc diễn biến — TUYỆT ĐỐI KHÔNG dùng "thiếp"/"chàng" cho quan hệ huynh muội, tỷ muội, bạn bè, đồng môn hay bất kỳ quan hệ nào khác, kể cả khi hai NPC đó thân thiết hay xúc động.
+//    - VÍ DỤ SAI: NPC nữ A vừa gọi NPC nữ B là "muội muội" (xác lập vai chị-em), nhưng ngay câu sau A lại tự xưng "Thiếp... thiếp cứ sợ không bao giờ được gặp lại muội nữa!" — "thiếp" là đại từ chỉ dùng khi nói với chồng/người yêu nam, không thể xuất hiện giữa hai người phụ nữ xưng tỷ muội.
+//    - VÍ DỤ ĐÚNG: <dialogue speaker="Thái Văn Cơ">Tú Nhi muội muội! Trời ơi, muội thực sự đã bình an rồi! Tỷ... tỷ cứ sợ không bao giờ được gặp lại muội nữa!</dialogue>
+//    - TỰ KIỂM TRA: trước khi hoàn tất, với MỌI đoạn hội thoại NPC-với-NPC, xác định quan hệ + giới tính thật của cả hai, rồi rà lại xem đại từ tự xưng có đối xứng đúng với cách họ vừa gọi nhau không.
+
 // 2.7. QUY TẮC NHẬN THỨC CỦA NPC "NGƯỜI LẠ" (BẮT BUỘC — CHỐNG BIẾT TRƯỚC):
 //    - Nếu độ hảo cảm (affinity) của một NPC dành cho nhân vật chính đang ở mức 0 hoặc gần 0 ("Người lạ", chưa từng tương tác/gặp mặt trước lượt này), NPC đó TUYỆT ĐỐI KHÔNG được thể hiện đã biết tính cách, thói quen, biệt danh, hay quá khứ của nhân vật chính (ví dụ: gọi nhân vật chính là "tên lười biếng", "gã háo sắc",...) — trừ khi thông tin đó là danh tiếng đã lan truyền công khai trong thế giới (có thể nêu rõ trong bối cảnh) hoặc đã được giới thiệu/thể hiện ngay trong lượt chơi hiện tại hoặc các lượt trước đó mà NPC này có mặt.
 //    - Với NPC mới gặp lần đầu, chỉ được dùng các từ ngữ trung tính để chỉ nhân vật chính (VD: "tên kia", "ngươi", "gã này") dựa trên những gì họ VỪA quan sát được trong lượt này, không suy đoán tính cách sâu xa.
@@ -28112,6 +28439,18 @@ ${PILLAR1_DIRECTIVES_NARRATION.map(x => '//    * ' + x).join('\n')}
 //    - Trong giai đoạn này, nhân vật chính CŨNG CHƯA sở hữu bất kỳ dạng năng lượng tu luyện/siêu nhiên nào trong cơ thể (chân nguyên, chân khí, linh lực, nội lực, năng lực dị thường...). TUYỆT ĐỐI KHÔNG viết đoạn văn hay lựa chọn hành động nào miêu tả nhân vật chính chủ động vận hành, điều khiển, hay dò xét/cảm nhận nguồn năng lượng đó trong chính mình — kể cả để "kiểm tra xem có phản ứng gì không". Quy tắc này áp dụng cho cả phần văn tường thuật lẫn 4 lựa chọn hành động cuối phản hồi.
 //    - Mọi thông tin về thế giới siêu nhiên trong giai đoạn này CHỈ được phép xuất hiện gián tiếp, đúng kênh mà bối cảnh đã quy định (VD: tin tức thời sự, chương trình truyền hình, lời đồn đãi bán tín bán nghi), KHÔNG BAO GIỜ qua trải nghiệm trực tiếp của nhân vật chính hay người xung quanh.
 //    - Quy tắc này chỉ áp dụng khi bối cảnh thế giới thực sự thiết lập tiền đề trên; nếu không có tiền đề này thì bỏ qua.
+
+// 2.12. QUY TẮC KHOANH VÙNG TƯỜNG THUẬT THEO ĐÚNG PHẠM VI NGƯỜI CHƠI TỰ MÔ TẢ (BẮT BUỘC — CHỈ ÁP DỤNG CHO LƯỢT TỰ DO CÓ COMPOSER):
+//    - Nếu "Hành Động Của Nhân Vật Chính" ở mục A.1 gồm NHIỀU đoạn có nhãn rõ ràng (Tường thuật / Lời Nhân vật chính / Lời một NPC cụ thể), ngươi CHỈ được LÀM GIÀU văn phong/hình ảnh/cảm giác cho ĐÚNG TẬP HỢP các đoạn đó — giữ nguyên chủ thể, thứ tự và ranh giới của từng đoạn. Ngươi TUYỆT ĐỐI KHÔNG được:
+//      (a) Viết tiếp bất kỳ diễn biến, tình tiết, hay hành động nào SAU điểm nội dung đoạn cuối cùng kết thúc.
+//      (b) Tự thêm phản ứng, lời thoại, hay cử động mới của bất kỳ NPC nào KHÔNG nằm trong danh sách đoạn của lượt này — kể cả một NPC đang có mặt ngay trong cảnh.
+//      (c) Tự thêm một đoạn tường thuật "chốt lượt" mang tính tổng kết hoặc dẫn dắt sang tình huống mới, nếu người chơi không hề viết đoạn đó.
+//    - PHẢI tường thuật hoá ĐỦ TẤT CẢ các đoạn đã cho, đúng thứ tự, không được bỏ sót hay gộp tắt bất kỳ đoạn nào — kể cả đoạn ngắn hoặc có vẻ ít quan trọng. Bỏ sót một đoạn bị coi là lỗi ngang với việc thêm một đoạn thừa.
+//    - NGOẠI LỆ DUY NHẤT — đoạn thoại NPC không kèm mô tả: nếu một đoạn chỉ là nguyên văn câu thoại của 1 NPC (không mô tả gì thêm), ngươi ĐƯỢC PHÉP thêm tối thiểu một khung cử chỉ/giọng điệu/nét mặt TRỰC TIẾP đi kèm ĐÚNG LÚC câu đó được nói ra (VD: giọng run rẩy, cúi đầu, siết chặt tay) — đây là phần "trình bày" tất yếu khi văn xuôi hoá một câu thoại, không phải một tình tiết mới. TUYỆT ĐỐI KHÔNG thêm bất kỳ hành động/phản ứng nào XẢY RA SAU câu thoại đó (VD: NPC quay đi, rơi nước mắt, bước ra khỏi phòng) nếu người chơi không viết tiếp đoạn nào khác.
+//    - Nếu lượt này ĐỒNG THỜI có kết quả cơ học đã khóa từ hệ khác (Combat/EXP/Hảo cảm...), ngươi VẪN PHẢI phản ánh trung thực kết quả đó (không bị mục này hạn chế) — phạm vi hợp lệ của văn tường thuật lượt này = (các đoạn người chơi đã cho, đã làm giàu văn phong) HỢP VỚI (kết quả cơ học đã khóa, nếu có) — không viết bất kỳ nội dung nào ngoài hợp của hai tập này.
+//    - VÍ DỤ SAI: Người chơi chỉ viết 1 đoạn tường thuật "Ta bước tới, đặt tay lên vai nàng." Ngươi viết: "Ngươi bước tới, đặt tay lên vai nàng. Nàng giật mình quay lại, đôi mắt đỏ hoe: <dialogue speaker="NPC">Sao ngươi lại...?</dialogue> Ngươi khẽ mỉm cười, kéo nàng vào lòng." — hai câu sau là phản ứng/tình tiết hoàn toàn tự bịa, người chơi không hề viết.
+//    - VÍ DỤ ĐÚNG: Ngươi chỉ được viết: "Ngươi bước tới, những bước chân khẽ khàng như sợ làm vỡ khoảnh khắc tĩnh lặng, rồi đặt tay lên bờ vai gầy guộc của nàng." — làm giàu hình ảnh/cảm giác cho ĐÚNG 1 hành động đó, dừng lại đúng ở đó.
+//    - Quy tắc này CHỈ áp dụng khi lượt hiện tại là hành động TỰ DO do người chơi tự soạn qua composer (KHÔNG áp dụng cho lượt chọn thẳng 1 trong 4 gợi ý có sẵn — lượt đó không có "phạm vi tự mô tả" để khoanh vùng).
 
 // 3. QUY TẮC CHỐNG LIỆT KÊ TRONG VĂN BẢN (ANTI-REDUNDANCY):
 //    - Trong phần văn tường thuật, TUYỆT ĐỐI KHÔNG viết danh sách dạng số (1., 2., 3.). Hãy diễn đạt tình huống mở ra các hướng đi một cách tự nhiên.
@@ -32491,17 +32830,15 @@ const handleHtabChat = async (userText) => {
     }
 };
 
+// Core UI Rule #3c (2026-09-01): the structured composer replaced the freeform
+// box for real gameplay actions - this function's remaining job is ONLY the
+// HTAB inline-chat branch (the composer never calls it; see `ActionComposer`'s
+// `onSubmit`, wired straight to `processPlayerAction`). The `/online`,
+// `/godmode` and `/debug` dev/QA command branches that used to live here were
+// REMOVED per project owner decision (2026-09-01) - composer has no slash-command
+// escape hatch, and no replacement entry point was requested for this task.
 const handleCustomAction = (actionText) => {
     const trimmedAction = actionText.trim();
-    if (trimmedAction.toLowerCase() === '/online') {
-        if (isPvPReady) {
-            onOpenPvP(); 
-        } else {
-            setShowFirebaseModal(true); 
-        }
-        setCustomActionInput(""); 
-        return; 
-    }
 
     if (knowledge.systemAssistant?.isActive) {
         handleHtabChat(trimmedAction);
@@ -32511,165 +32848,6 @@ const handleCustomAction = (actionText) => {
 
     if (isProcessingAction) return;
 
-    const isGodmode = trimmedAction.startsWith('/godmode');
-    const isDebug = trimmedAction.startsWith('/debug');
-
-    if (isGodmode || isDebug) {
-        if (gameSettings.difficulty !== 'Dễ') {
-            setModalMessage({
-                show: true,
-                title: "Mệnh Lệnh Bị Chặn",
-                content: `Hệ thống từ chối thực thi mật lệnh [${isGodmode ? '/godmode' : '/debug'}] ở cấp độ hiện tại.\n\nTính năng này bị vô hiệu hóa ở độ khó Thường, Khó và Ác Mộng. Chỉ cho phép sử dụng ở độ khó "Dễ".`,
-                type: "error"
-            });
-            setCustomActionInput("");
-            return;
-        }
-    }
-
-    if (trimmedAction.startsWith('/godmode')) {
-        const commandContent = trimmedAction.substring(8).trim();
-        const addRuleRegex = /\[ADD_RULE:\s*content="([^"]+)"\]/i;
-        const timePassedRegex = /\[TIME_PASSED:\s*([^\]]+)\]/i;
-        
-        const addRuleMatch = commandContent.match(addRuleRegex);
-        const timePassedMatch = commandContent.match(timePassedRegex);
-
-        if (addRuleMatch && addRuleMatch[1]) {
-            const newRule = addRuleMatch[1];
-            setknowledge(prev => {
-                const newKnowledge = JSON.parse(JSON.stringify(prev));
-                if (!newKnowledge.customRules) {
-                    newKnowledge.customRules = [];
-                }
-                newKnowledge.customRules.push(newRule);
-                return newKnowledge;
-            });
-            setModalMessage({ show: true, title: 'Godmode: Đã Thêm Quy Tắc', content: `Quy tắc mới đã được thêm vào thế giới:\n\n"${newRule}"`, type: 'success' });
-            setCustomActionInput('');
-            return;
-        } else if (timePassedMatch && timePassedMatch[1]) {
-            const timeData = parseKeyValueString(timePassedMatch[1]);
-            const { updatedKnowledge, failedQuests, expiredBuffs } = applyTimeUpdate(knowledge, timeData);
-            
-            setknowledge(updatedKnowledge);
-            
-            let messages = [`**[Hệ thống]** Thời gian đã trôi qua.`];
-            if (failedQuests.length > 0) {
-                messages.push(`Các nhiệm vụ đã thất bại do hết hạn: ${failedQuests.join(', ')}.`);
-            }
-            if (expiredBuffs.length > 0) {
-                expiredBuffs.forEach(buff => messages.push(`Hiệu ứng "${buff.buffName}" trên ${buff.characterName} đã kết thúc.`));
-            }
-            setStoryHistory(prev => [...prev, { id: crypto.randomUUID(), type: 'system', content: messages.join('\n') }]);
-            setModalMessage({ show: true, title: "Godmode: Tua Thời Gian", content: "Thời gian của thế giới đã được thay đổi.", type: 'success' });
-            setCustomActionInput('');
-            return;
-        }
-        
-        const godCommand = trimmedAction.substring(8).trim(); 
-        const processGodmodeCommand = async () => {
-            setModalMessage({ show: true, title: 'Godmode Kích Hoạt', content: `Đang gửi mệnh lệnh tối cao đến AI: "${godCommand}"`, type: 'info' });
-            const compilerPrompt = `
-                **CHẾ ĐỘ BIÊN DỊCH GODMODE**
-                VAI TRÒ: Ngươi là một hệ thống thông dịch, nhận mệnh lệnh bằng ngôn ngữ tự nhiên và chuyển đổi nó thành các thẻ lệnh hệ thống.
-                MỆNH LỆNH TỪ NGƯỜI DÙNG: "${godCommand}"
-                NHIỆM VỤ:
-                1.  Phân tích kỹ mệnh lệnh.
-                2.  Tạo ra các thẻ lệnh hệ thống phù hợp từ "BỘ LUẬT TỐI THƯỢNG" để thực thi mệnh lệnh đó.
-                3.  **HƯỚNG DẪN DÙNG THẺ (CỰC KỲ QUAN TRỌNG):**
-                    - Để tạo VẬT PHẨM: Dùng thẻ [ITEM_IDEA_GAINED: name="...", description="...", rarity="..."]
-                    - Để tạo KỸ NĂNG: Dùng thẻ [SKILL_IDEA_GAINED: name="...", description="...", target="Ngươi", rarity="..."]
-                    *(Về Phẩm chất: Nếu người dùng không chỉ định, PHẢI chọn ngẫu nhiên 1 trong: Thường, Tốt, Hiếm, Cực Phẩm, Siêu Phẩm, Huyền Thoại).*
-                    - Để tạo NHÂN VẬT/QUÁI VẬT: Dùng thẻ [WORLD_NPC: name="...", description="...", level=X, stance="Thân thiện/Thù địch/Trung lập", Personality="...", Gender="Nam/Nữ/Khác", sizeCategory=Y] 
-                    *(Lưu ý: sizeCategory từ 1 đến 5 đại diện cho: 1=dáng người nhỏ nhắn, 2=dáng người trung bình, 3=dáng cao ráo, 4=dáng to cao vạm vỡ, 5=khổng lồ).*
-                    - Để tạo ĐỊA ĐIỂM: Dùng thẻ [WORLD_LOCATION: name="...", description="...", category="...", tier=X, parentLocationId="..."] 
-                    - Để thay đổi CẤP ĐỘ nhân vật hoặc người chơi lập tức: Dùng thẻ [SET_LEVEL: target="Tên nhân vật hoặc Ngươi", value=X]
-                    - Để thay đổi TIỀN (Ngân Lượng) hoặc chỉ số của ngươi/NPC lập tức: Dùng thẻ [CHARACTER_UPDATE: Name="Ngươi" hoặc "Tên NPC", Stats="currency:+10000" hoặc "hp:+100" hoặc "atk:+5"]. QUAN TRỌNG: Bắt buộc dùng thuộc tính viết hoa 'Name' và đặt giá trị tương ứng là 'Ngươi' hoặc tên chính xác của NPC để thay đổi chỉ số, tuyệt đối không dùng thuộc tính 'target'.
-                    - Để GÁN BUFF / DEBUFF (Trạng thái) cho bản thân hoặc NPC: Dùng thẻ [APPLY_LONG_TERM_STATUS: target="Ngươi" hoặc "Tên NPC", name="Tên hiệu ứng", type="buff" hoặc "debuff", description="Mô tả hiệu ứng", duration_hours=240, stats="atk_percent:50,def_percent:-20"] (duration_hours là thời gian tồn tại, stats là chỉ số buff/debuff).
-                    - Để XÓA BUFF / DEBUFF: Dùng thẻ [CHARACTER_UPDATE: Name="Ngươi" hoặc "Tên NPC", Stats="longtermstatuses:-'Tên Hiệu Ứng'"]
-${(gameSettings.enableParasiticSystem || knowledge.htab?.isAwakened) ? `                    - Để THỨC TỈNH/GỌI DẬY Hệ thống ăn bám ngay lập tức: Dùng thẻ [HTAB_AWAKEN: name="Hệ Thống"]
-                    - Để cập nhật CHỈ SỐ/NĂNG LƯỢNG/EXP/HẢO CẢM của Hệ thống (htab): Dùng thẻ [HTAB_UPDATE: Stats="currentEnergy:+50,currentExp:+100,affinity:+10"] hoặc Stats="level:3"` : `                    - TUYỆT ĐỐI KHÔNG dùng các thẻ liên quan đến "Hệ thống ăn bám" ([HTAB_AWAKEN], [HTAB_UPDATE]): thế giới này KHÔNG có Hệ thống ăn bám.`}
-                4.  Sau khi tạo xong tất cả các thẻ lệnh cần thiết, hãy viết một đoạn văn tường thuật ngắn gọn (2-3 câu) mô tả kết quả của mệnh lệnh.
-                5.  **QUY TẮC BẢO VỆ CHIẾN ĐẤU (TỐI QUAN TRỌNG):** Nếu mệnh lệnh của người dùng là "tạo quái vật", "đánh nhau", "chiến đấu"... Ngươi chỉ xuất thẻ [WORLD_NPC] và [START_COMBAT: Targets="Tên quái vật vừa tạo"]. **TUYỆT ĐỐI KHÔNG** đính kèm thẻ tạo vật phẩm hay kỹ năng trong cùng lượt này. Đánh nhau xong mới tính tiếp!
-                6.  Cuối cùng, tạo ra 4 lựa chọn hành động mới để câu chuyện tiếp tục.
-                
-                **VÍ DỤ:**
-                - Mệnh lệnh: "cho ta buff sức mạnh gấp đôi trong 10 ngày"
-                - Phản hồi đúng:
-                [APPLY_LONG_TERM_STATUS: target="Ngươi", name="Thần Lực", type="buff", description="Sức mạnh tăng vọt.", duration_hours=240, stats="atk_percent:100"]
-                (Đoạn văn tường thuật và 4 lựa chọn)
-                ${coreRules}
-            `;
-            await callGeminiAPI(compilerPrompt, false, {}, undefined, `Lệnh Godmode: ${godCommand}`);
-            setCustomActionInput('');
-        };
-
-        processGodmodeCommand();
-
-        return;
-    }
-
-    if (trimmedAction.startsWith('/debug')) {
-        const parts = trimmedAction.split(' ');
-        const subCommand = (parts[1] || '').toLowerCase();
-        const args = parts.slice(2);
-        let commandIsValid = false;
-
-        setknowledge(prevKnowledge => {
-            const newKnowledge = JSON.parse(JSON.stringify(prevKnowledge));
-            const playerIndex = newKnowledge.characters.findIndex(c => c.isPlayer);
-            if (playerIndex === -1) return prevKnowledge;
-            
-            let player = newKnowledge.characters[playerIndex];
-
-            if (subCommand === 'setlevel' && args.length > 0) {
-                const targetLevel = parseInt(args[0], 10);
-                if (!isNaN(targetLevel) && targetLevel > 0) {
-                    player.level = targetLevel;
-                    player.exp = 0; 
-                    
-                    const totalAp = calculateTotalAP(targetLevel);
-                    const spentAp = Object.values(player.allocatedPoints || {}).reduce((sum, points) => sum + points, 0);
-                    player.ap = totalAp - spentAp;                    
-                    newKnowledge.characters[playerIndex] = calculateFinalStats(player, newKnowledge.characters);
-
-                    commandIsValid = true;
-                    setModalMessage({ show: true, title: 'Lệnh Debug', content: `Đã đặt cấp độ thành ${targetLevel}. Số AP hiện tại: ${player.ap}. Chỉ số gốc không đổi.`, type: 'success' });
-                }
-            } else if (subCommand === 'addexp' && args.length > 0) {
-                const expToAdd = parseInt(args[0], 10);
-                if (!isNaN(expToAdd)) {
-                    player.exp = (player.exp || 0) + expToAdd;
-                    const { updatedChar, levelUpMessages } = handleLevelUp(player, newKnowledge.realmProgressionList);
-                    newKnowledge.characters[playerIndex] = updatedChar;
-                     if (levelUpMessages.length > 0) {
-                        setTimeout(() => {
-                           const entries = levelUpMessages.map(msg => ({ id: crypto.randomUUID(), type: 'system', content: `**[Hệ thống]** ${msg}`, transient: true }));
-                           setStoryHistory(prevHistory => [...prevHistory, ...entries]);
-                        }, 100);
-                     }
-                    commandIsValid = true;
-                    setModalMessage({ show: true, title: 'Lệnh Debug', content: `Đã cộng ${expToAdd} EXP.`, type: 'success' });
-                }
-            } else if (subCommand === 'die') {
-                player.hp = 0;
-                newKnowledge.characters[playerIndex] = calculateFinalStats(player, newKnowledge.characters, { preserveHp: true });
-                commandIsValid = true;
-                setModalMessage({ show: true, title: 'Lệnh Debug', content: 'Ký chủ đã tự sát thành công! HP hiện tại là 0. Hãy nhập một hành động bất kỳ ở khung chat để kích hoạt cơ chế thức tỉnh Hệ Thống.', type: 'success' });
-            }
-            
-            return newKnowledge;
-        });
-
-        if (commandIsValid) {
-            setCustomActionInput('');
-        } else {
-            setModalMessage({ show: true, title: 'Lệnh Debug Sai', content: `Lệnh debug không hợp lệ. Lệnh có sẵn: setlevel <số>, addexp <số>, suicide`, type: 'error' });
-        }
-        setIsProcessingAction(false);
-        return; 
-    }
     processPlayerAction(trimmedAction, 'user_custom_action');
 };
 
@@ -37133,6 +37311,7 @@ const formatStoryText = useCallback((text) => {
                                 customActionInput={customActionInput}
                                 setCustomActionInput={setCustomActionInput}
                                 handleCustomAction={handleCustomAction}
+                                composerResetSignal={composerResetSignal}
                                 setShowCharacterInfoModal={setShowCharacterInfoModal}
                                 isProcessingAction={isProcessingAction}
                                 setIsProcessingAction={setIsProcessingAction}
