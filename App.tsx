@@ -13558,7 +13558,190 @@ const QuickReferenceModal = ({ show, onClose, knowledge, onSelectForChat, player
             cancelText: "Hủy"
         });
     };
-    
+
+    // FIX (focus-loss bug): LocationNode được ổn định bằng useCallback với
+    // deps rỗng nên định danh hàm KHÔNG BAO GIỜ đổi qua các lần render, dù
+    // gõ phím liên tục vào ô đang sửa. Trước đây hàm này được định nghĩa lại
+    // từ đầu mỗi lần renderLocationsTab() chạy (tức mỗi lần gõ 1 ký tự) ->
+    // React thấy component "khác loại" ở cùng vị trí -> unmount DOM cũ (ô
+    // input đang focus) rồi mount DOM mới -> mất focus liên tục. Vì deps
+    // rỗng, hàm bị "đóng băng" tại lần tạo đầu tiên nên KHÔNG được phép đọc
+    // dữ liệu sống qua closure - mọi thứ (editingLocation, expandedIds,
+    // knowledge, các callback...) phải truyền vào qua props tại nơi gọi.
+    const LocationNode = useCallback(({
+        node, isSearching, editingLocation, setEditingLocation,
+        expandedIds, toggleExpand, knowledge, openQuickLoreModal,
+        onSelectForChat, confirmLocationDeletion, handleEditLocationSave,
+    }) => {
+        const locName = getDisplayName(node) || "Vô Danh";
+        const isEditing = editingLocation?.id === node.id;
+        const isExpanded = !!expandedIds[node.id];
+
+        const paddingLeft = node.tier > 1 ? `${(node.tier - 1) * 1.5}rem` : '0';
+        const tierNames = { 1: 'Lục địa/Đại dương', 2: 'Quốc gia/Lãnh thổ', 3: 'Khu vực/Thành phố', 4: 'Nơi chốn cụ thể' };
+
+        if (isEditing) {
+            // Lọc danh sách cha: Cha phải cấp cao hơn (tier nhỏ hơn) và KHÔNG ĐƯỢC CHỌN CHÍNH NÓ LÀM CHA
+            const availableParentsForEdit = (knowledge?.locations || []).filter(loc => {
+                const locTier = loc.tier || 1;
+                return locTier < editingLocation.tier && loc.id !== editingLocation.id;
+            });
+
+            return (
+                <div className="bg-[#0a0f0a] p-4 border border-[#cda45e] shadow-[inset_0_0_15px_rgba(205,164,94,0.1)] animate-fade-in mb-2" style={{ marginLeft: paddingLeft }}>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-1.5">Tên Địa Điểm</label>
+                            <input
+                                type="text" value={editingLocation.name} onChange={(e) => setEditingLocation(p => ({...p, name: e.target.value}))}
+                                className="w-full p-2.5 bg-[#162216] border border-[#cda45e]/40 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none"
+                            />
+                        </div>
+
+                        {/* THÊM MỚI: Form chọn Tier và Parent cho chế độ Edit */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-1.5">Cấp bậc</label>
+                                <select
+                                    value={editingLocation.tier}
+                                    onChange={(e) => setEditingLocation(p => ({...p, tier: parseInt(e.target.value, 10), parentLocationId: ''}))}
+                                    className="w-full p-2.5 bg-[#162216] border border-[#cda45e]/40 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none appearance-none"
+                                >
+                                    <option value={1} className="bg-[#101a10]">Loại 1 (Lục địa)</option>
+                                    <option value={2} className="bg-[#101a10]">Loại 2 (Quốc gia)</option>
+                                    <option value={3} className="bg-[#101a10]">Loại 3 (Thành phố/Khu vực)</option>
+                                    <option value={4} className="bg-[#101a10]">Loại 4 (Điểm cụ thể)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-1.5">Nằm trong (Địa điểm mẹ)</label>
+                                <select
+                                    value={editingLocation.parentLocationId || ''}
+                                    onChange={(e) => setEditingLocation(p => ({...p, parentLocationId: e.target.value}))}
+                                    disabled={editingLocation.tier === 1}
+                                    className="w-full p-2.5 bg-[#162216] border border-[#cda45e]/40 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none appearance-none disabled:opacity-50"
+                                >
+                                    <option value="" className="bg-[#101a10] text-gray-500">-- Chọn địa điểm mẹ --</option>
+                                    {availableParentsForEdit.map(loc => (
+                                        <option key={loc.id} value={loc.id} className="bg-[#101a10] text-[#e8d3a1]">
+                                            {getDisplayName(loc)} (Cấp {loc.tier || 1})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-1.5">Mô tả</label>
+                            <textarea
+                                rows="2" value={editingLocation.description} onChange={(e) => setEditingLocation(p => ({...p, description: e.target.value}))}
+                                className="w-full p-2.5 bg-[#162216] border border-[#cda45e]/40 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex gap-3 mt-4 justify-end pt-3 border-t border-[#cda45e]/20">
+                        <button onClick={() => setEditingLocation(null)} className="px-5 py-2 bg-transparent border border-[#8ba888]/40 hover:border-[#8ba888] text-[#8ba888] text-xs font-bold uppercase tracking-widest transition-colors">Hủy</button>
+                        <button onClick={() => handleEditLocationSave()} className="px-5 py-2 bg-[#1b2a1b] border border-[#cda45e] hover:bg-[#cda45e]/20 text-[#cda45e] text-xs font-bold uppercase tracking-widest transition-colors">Lưu</button>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="mb-2">
+                <div
+                    className="bg-[#0a0f0a] p-3 border border-[#cda45e]/30 hover:border-[#cda45e]/80 cursor-pointer transition-colors relative"
+                    style={{ marginLeft: paddingLeft }}
+                    onClick={() => toggleExpand(node.id)}
+                >
+                    {node.tier > 1 && !isSearching && (
+                        <div className="absolute top-1/2 -left-[1.5rem] w-[1.5rem] border-t border-dashed border-[#cda45e]/30"></div>
+                    )}
+                    {node.tier > 1 && !isSearching && (
+                        <div className="absolute -top-4 -left-[1.5rem] h-[calc(50%+1rem)] border-l border-dashed border-[#cda45e]/30"></div>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            {node.children && node.children.length > 0 && !isSearching ? (
+                                <span className="text-[#cda45e] text-lg font-mono w-4">{isExpanded ? '-' : '+'}</span>
+                            ) : (
+                                <span className="w-4"></span>
+                            )}
+                            <p className="font-bold text-base text-[#e8d3a1] tracking-wider" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
+                                {locName}
+                            </p>
+                        </div>
+                        <div className="text-right flex-shrink-0 ml-2">
+                            <p className="text-[#8ba888] font-bold text-[9px] uppercase tracking-widest">
+                                {tierNames[node.tier] || `Cấp ${node.tier}`}
+                            </p>
+                            <p className="text-[#cda45e] text-[9px] uppercase tracking-widest">{node.category || 'Địa điểm'}</p>
+                        </div>
+                    </div>
+
+                    {isExpanded && (
+                        <div className="mt-3 pt-3 border-t border-dashed border-[#cda45e]/30 animate-fade-in cursor-auto" onClick={e => e.stopPropagation()}>
+                            <p className="text-sm text-[#a3b8a3] italic leading-relaxed">"{node.description || node.Description || 'Chưa có thông tin.'}"</p>
+
+                            <div className="flex justify-between items-center mt-4 pt-3 border-t border-[#cda45e]/10">
+                                <div className="flex items-center gap-2">
+                                    <button onClick={(e) => {
+                                        e.stopPropagation();
+                                        // NẠP DỮ LIỆU ĐỂ EDIT (Thêm tier và parent)
+                                        setEditingLocation({
+                                            id: node.id,
+                                            name: node.Name,
+                                            description: node.description,
+                                            tier: node.tier || 1,
+                                            parentLocationId: node.parentLocationId || ''
+                                        });
+                                    }} className="p-1.5 border border-[#8ba888]/40 hover:border-[#cda45e] hover:bg-[#cda45e]/10 text-[#8ba888] hover:text-[#cda45e] transition-colors rounded-sm" title="Sửa & Di chuyển">
+                                        <PencilIcon className="w-4 h-4"/>
+                                    </button>
+                                    <button onClick={(e) => { e.stopPropagation(); confirmLocationDeletion(node); }} className="p-1.5 border border-[#8b1515]/40 hover:border-[#ff4d4d] hover:bg-[#8b1515]/20 text-[#8b1515] hover:text-[#ff4d4d] transition-colors rounded-sm" title="Xóa">
+                                        <TrashIcon className="w-4 h-4"/>
+                                    </button>
+                                </div>
+                                <div className="flex gap-3">
+                                     <button onClick={(e) => { e.stopPropagation(); openQuickLoreModal('locations', locName); }} className="text-[11px] font-bold uppercase tracking-widest text-[#a3b8a3] hover:text-[#e8d3a1] transition-colors">
+                                         Xem thông tin
+                                     </button>
+                                     <button onClick={(e) => { e.stopPropagation(); onSelectForChat(locName); }} className="text-[11px] font-bold uppercase tracking-widest text-[#cda45e] hover:text-[#e8d3a1] transition-colors">
+                                         Thêm vào ô chat »
+                                     </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {isExpanded && node.children && node.children.length > 0 && !isSearching && (
+                    <div className="relative">
+                        <div className="absolute top-0 bottom-6 border-l border-dashed border-[#cda45e]/30" style={{ left: `calc(${paddingLeft} + 0.5rem)` }}></div>
+                        {node.children.map(child => (
+                            <LocationNode
+                                key={child.id}
+                                node={child}
+                                isSearching={isSearching}
+                                editingLocation={editingLocation}
+                                setEditingLocation={setEditingLocation}
+                                expandedIds={expandedIds}
+                                toggleExpand={toggleExpand}
+                                knowledge={knowledge}
+                                openQuickLoreModal={openQuickLoreModal}
+                                onSelectForChat={onSelectForChat}
+                                confirmLocationDeletion={confirmLocationDeletion}
+                                handleEditLocationSave={handleEditLocationSave}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    }, []);
+
     const CollapsibleSection = ({ title, children, isEmpty, emptyText }) => (
         <div className="mb-5 bg-[#101a10] p-4 border border-[#cda45e]/20 shadow-inner">
             <h4 className="text-sm font-bold text-[#cda45e] mb-3 uppercase tracking-widest border-b border-[#cda45e]/20 pb-2">{title}</h4>
@@ -13858,164 +14041,26 @@ const QuickReferenceModal = ({ show, onClose, knowledge, onSelectForChat, player
             displayLocations = locationTree;
         }
 
-        const LocationNode = ({ node }) => {
-            const locName = getDisplayName(node) || "Vô Danh";
-            const isEditing = editingLocation?.id === node.id;
-            const isExpanded = !!expandedIds[node.id];
-
-            const paddingLeft = node.tier > 1 ? `${(node.tier - 1) * 1.5}rem` : '0';
-            const tierNames = { 1: 'Lục địa/Đại dương', 2: 'Quốc gia/Lãnh thổ', 3: 'Khu vực/Thành phố', 4: 'Nơi chốn cụ thể' };
-
-            if (isEditing) {
-                // Lọc danh sách cha: Cha phải cấp cao hơn (tier nhỏ hơn) và KHÔNG ĐƯỢC CHỌN CHÍNH NÓ LÀM CHA
-                const availableParentsForEdit = (knowledge?.locations || []).filter(loc => {
-                    const locTier = loc.tier || 1;
-                    return locTier < editingLocation.tier && loc.id !== editingLocation.id;
-                });
-
-                return (
-                    <div className="bg-[#0a0f0a] p-4 border border-[#cda45e] shadow-[inset_0_0_15px_rgba(205,164,94,0.1)] animate-fade-in mb-2" style={{ marginLeft: paddingLeft }}>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-1.5">Tên Địa Điểm</label>
-                                <input 
-                                    type="text" value={editingLocation.name} onChange={(e) => setEditingLocation(p => ({...p, name: e.target.value}))}
-                                    className="w-full p-2.5 bg-[#162216] border border-[#cda45e]/40 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none"
-                                />
-                            </div>
-                            
-                            {/* THÊM MỚI: Form chọn Tier và Parent cho chế độ Edit */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-1.5">Cấp bậc</label>
-                                    <select 
-                                        value={editingLocation.tier}
-                                        onChange={(e) => setEditingLocation(p => ({...p, tier: parseInt(e.target.value, 10), parentLocationId: ''}))}
-                                        className="w-full p-2.5 bg-[#162216] border border-[#cda45e]/40 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none appearance-none"
-                                    >
-                                        <option value={1} className="bg-[#101a10]">Loại 1 (Lục địa)</option>
-                                        <option value={2} className="bg-[#101a10]">Loại 2 (Quốc gia)</option>
-                                        <option value={3} className="bg-[#101a10]">Loại 3 (Thành phố/Khu vực)</option>
-                                        <option value={4} className="bg-[#101a10]">Loại 4 (Điểm cụ thể)</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-1.5">Nằm trong (Địa điểm mẹ)</label>
-                                    <select 
-                                        value={editingLocation.parentLocationId || ''}
-                                        onChange={(e) => setEditingLocation(p => ({...p, parentLocationId: e.target.value}))}
-                                        disabled={editingLocation.tier === 1}
-                                        className="w-full p-2.5 bg-[#162216] border border-[#cda45e]/40 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none appearance-none disabled:opacity-50"
-                                    >
-                                        <option value="" className="bg-[#101a10] text-gray-500">-- Chọn địa điểm mẹ --</option>
-                                        {availableParentsForEdit.map(loc => (
-                                            <option key={loc.id} value={loc.id} className="bg-[#101a10] text-[#e8d3a1]">
-                                                {getDisplayName(loc)} (Cấp {loc.tier || 1})
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-1.5">Mô tả</label>
-                                <textarea
-                                    rows="2" value={editingLocation.description} onChange={(e) => setEditingLocation(p => ({...p, description: e.target.value}))}
-                                    className="w-full p-2.5 bg-[#162216] border border-[#cda45e]/40 text-[#e8d3a1] text-sm focus:border-[#cda45e] outline-none"
-                                />
-                            </div>
-                        </div>
-                        <div className="flex gap-3 mt-4 justify-end pt-3 border-t border-[#cda45e]/20">
-                            <button onClick={() => setEditingLocation(null)} className="px-5 py-2 bg-transparent border border-[#8ba888]/40 hover:border-[#8ba888] text-[#8ba888] text-xs font-bold uppercase tracking-widest transition-colors">Hủy</button>
-                            <button onClick={() => handleEditLocationSave()} className="px-5 py-2 bg-[#1b2a1b] border border-[#cda45e] hover:bg-[#cda45e]/20 text-[#cda45e] text-xs font-bold uppercase tracking-widest transition-colors">Lưu</button>
-                        </div>
-                    </div>
-                );
-            }
-
-            return (
-                <div className="mb-2">
-                    <div 
-                        className="bg-[#0a0f0a] p-3 border border-[#cda45e]/30 hover:border-[#cda45e]/80 cursor-pointer transition-colors relative"
-                        style={{ marginLeft: paddingLeft }}
-                        onClick={() => toggleExpand(node.id)}
-                    >
-                        {node.tier > 1 && !isSearching && (
-                            <div className="absolute top-1/2 -left-[1.5rem] w-[1.5rem] border-t border-dashed border-[#cda45e]/30"></div>
-                        )}
-                        {node.tier > 1 && !isSearching && (
-                            <div className="absolute -top-4 -left-[1.5rem] h-[calc(50%+1rem)] border-l border-dashed border-[#cda45e]/30"></div>
-                        )}
-
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                {node.children && node.children.length > 0 && !isSearching ? (
-                                    <span className="text-[#cda45e] text-lg font-mono w-4">{isExpanded ? '-' : '+'}</span>
-                                ) : (
-                                    <span className="w-4"></span>
-                                )}
-                                <p className="font-bold text-base text-[#e8d3a1] tracking-wider" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
-                                    {locName}
-                                </p>
-                            </div>
-                            <div className="text-right flex-shrink-0 ml-2">
-                                <p className="text-[#8ba888] font-bold text-[9px] uppercase tracking-widest">
-                                    {tierNames[node.tier] || `Cấp ${node.tier}`}
-                                </p>
-                                <p className="text-[#cda45e] text-[9px] uppercase tracking-widest">{node.category || 'Địa điểm'}</p>
-                            </div>
-                        </div>
-
-                        {isExpanded && (
-                            <div className="mt-3 pt-3 border-t border-dashed border-[#cda45e]/30 animate-fade-in cursor-auto" onClick={e => e.stopPropagation()}>
-                                <p className="text-sm text-[#a3b8a3] italic leading-relaxed">"{node.description || node.Description || 'Chưa có thông tin.'}"</p>
-                                
-                                <div className="flex justify-between items-center mt-4 pt-3 border-t border-[#cda45e]/10">
-                                    <div className="flex items-center gap-2">
-                                        <button onClick={(e) => { 
-                                            e.stopPropagation(); 
-                                            // NẠP DỮ LIỆU ĐỂ EDIT (Thêm tier và parent)
-                                            setEditingLocation({
-                                                id: node.id, 
-                                                name: node.Name, 
-                                                description: node.description,
-                                                tier: node.tier || 1,
-                                                parentLocationId: node.parentLocationId || ''
-                                            }); 
-                                        }} className="p-1.5 border border-[#8ba888]/40 hover:border-[#cda45e] hover:bg-[#cda45e]/10 text-[#8ba888] hover:text-[#cda45e] transition-colors rounded-sm" title="Sửa & Di chuyển">
-                                            <PencilIcon className="w-4 h-4"/>
-                                        </button>
-                                        <button onClick={(e) => { e.stopPropagation(); confirmLocationDeletion(node); }} className="p-1.5 border border-[#8b1515]/40 hover:border-[#ff4d4d] hover:bg-[#8b1515]/20 text-[#8b1515] hover:text-[#ff4d4d] transition-colors rounded-sm" title="Xóa">
-                                            <TrashIcon className="w-4 h-4"/>
-                                        </button>
-                                    </div>
-                                    <div className="flex gap-3">
-                                         <button onClick={(e) => { e.stopPropagation(); openQuickLoreModal('locations', locName); }} className="text-[11px] font-bold uppercase tracking-widest text-[#a3b8a3] hover:text-[#e8d3a1] transition-colors">
-                                             Xem thông tin
-                                         </button>
-                                         <button onClick={(e) => { e.stopPropagation(); onSelectForChat(locName); }} className="text-[11px] font-bold uppercase tracking-widest text-[#cda45e] hover:text-[#e8d3a1] transition-colors">
-                                             Thêm vào ô chat »
-                                         </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                    
-                    {isExpanded && node.children && node.children.length > 0 && !isSearching && (
-                        <div className="relative">
-                            <div className="absolute top-0 bottom-6 border-l border-dashed border-[#cda45e]/30" style={{ left: `calc(${paddingLeft} + 0.5rem)` }}></div>
-                            {node.children.map(child => <LocationNode key={child.id} node={child} />)}
-                        </div>
-                    )}
-                </div>
-            );
-        };
+        // LocationNode giờ được định nghĩa 1 lần duy nhất bên ngoài (useCallback
+        // deps rỗng, xem phía trên confirmLocationDeletion) - ở đây chỉ còn dựng
+        // cây và gọi nó với đầy đủ props "sống".
         return (
             <div className="space-y-1 pb-4">
                 {displayLocations.length > 0 ? displayLocations.map(loc => (
-                    <LocationNode key={loc.id} node={loc} />
+                    <LocationNode
+                        key={loc.id}
+                        node={loc}
+                        isSearching={isSearching}
+                        editingLocation={editingLocation}
+                        setEditingLocation={setEditingLocation}
+                        expandedIds={expandedIds}
+                        toggleExpand={toggleExpand}
+                        knowledge={knowledge}
+                        openQuickLoreModal={openQuickLoreModal}
+                        onSelectForChat={onSelectForChat}
+                        confirmLocationDeletion={confirmLocationDeletion}
+                        handleEditLocationSave={handleEditLocationSave}
+                    />
                 )) : (
                     <p className="text-[#8ba888] italic text-center py-6 text-sm tracking-wider">Không tìm thấy địa điểm nào.</p>
                 )}
