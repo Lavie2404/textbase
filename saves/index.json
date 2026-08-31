@@ -18,13 +18,6 @@
       "difficulty": "Thường",
       "currentTurn": 14
     },
-    {
-      "gameId": "e2bc94fe-9ca9-4098-8211-2a4e612d53de",
-      "timestamp": "2026-08-16T05:16:39.699Z",
-      "characterName": "Diệp Thần",
-      "storyTitle": "Đấu La Đại Lục",
-      "difficulty": "Thường",
-      "currentTurn": 16
-    }
+    null
   ]
 }
