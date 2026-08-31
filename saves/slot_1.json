@@ -1,8 +1,8 @@
 {
   "id": "4f9d4d67-3bc3-4512-8d9f-7c11ab4a0f5d",
-  "currentTurn": 65,
+  "currentTurn": 68,
   "saveVersion": "2.8",
-  "timestamp": "2026-08-31T09:25:28.700Z",
+  "timestamp": "2026-08-31T09:49:33.046Z",
   "gameSettings": {
     "storyTitle": "Tam Quốc Diệt Ma Truyền Kỳ",
     "theme": "Tên: Tam Quốc Diệt Ma Truyền Kỳ | Thể loại: Tiên Hiệp Lịch Sử | Thẻ: Tam Quốc, Đạo Pháp, Trừ Ma, Thường Sơn, Nam Hoa Lão Tiên",
@@ -123,22 +123,16 @@
     "time": {
       "year": 0,
       "month": 1,
-      "day": 18,
-      "hour": 23
+      "day": 20,
+      "hour": 9
     },
-    "weather": "Sáng sớm nắng nhẹ",
+    "weather": "Nắng sớm ban mai, không gian thanh tịnh",
     "narrativeCombatState": {
       "isActive": false,
       "combatants": []
     },
     "loreLocations": [],
-    "loreNpcs": [
-      {
-        "id": "lore_npc_thai_ung",
-        "description": "Một đại danh sĩ, túc nho cuối thời Đông Hán, cha của Thái Văn Cơ.",
-        "Name": "Thái Ung"
-      }
-    ],
+    "loreNpcs": [],
     "loreItems": [],
     "locations": [
       {
@@ -324,7 +318,7 @@
         "id": "99964536-fbd3-4f2a-afb8-187cb812fe8c",
         "NPC": "Hạ Hầu Khinh Y",
         "Standing": "Yêu thích",
-        "Reason": "Được tướng công chiều chuộng mua sắm tại kinh thành"
+        "Reason": "Được tướng công đưa đi dạo phố và tặng trang sức quý giá"
       },
       {
         "id": "8d840cb4-8841-42d8-8f96-f701e153f309",
@@ -347,14 +341,26 @@
       {
         "id": "57082976-bf7a-402d-a77f-010f4aed9fcf",
         "NPC": "Thái Ung",
-        "Standing": "Chấn động",
-        "Reason": "Ngươi tiết lộ thiên cơ về vận mệnh con gái lão và tương lai triều đình."
+        "Standing": "Kính nể",
+        "Reason": "Ngươi đã tiêu diệt ma vật giả dạng và chỉ ra thiên cơ bảo vệ con gái lão."
       },
       {
         "id": "e9f98925-5f70-4606-9e15-2e48ed344562",
         "NPC": "Công Tôn Bảo Nguyệt",
-        "Standing": "Kính nể",
-        "Reason": "Sự bá đạo và chu đáo của phu quân"
+        "Standing": "Yêu thích",
+        "Reason": "Được tướng công chiều chuộng mua sắm tại Lạc Dương"
+      },
+      {
+        "id": "389340fc-9e2e-41ac-8a79-a58d3ce11fb0",
+        "NPC": "Vân Nhi",
+        "Standing": "Yêu thích",
+        "Reason": "Sự quan tâm và quà tặng từ tướng công giữa chốn kinh kỳ"
+      },
+      {
+        "id": "f4e68da1-f06e-4567-8542-688a43781d62",
+        "NPC": "Thái Văn Cơ",
+        "Standing": "Yêu thích",
+        "Reason": "Ngươi cứu nàng khỏi vận mệnh bi thảm và thể hiện cầm nghệ thần thánh."
       }
     ],
     "quests": [
@@ -430,7 +436,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 35.50000000000004,
+        "exp": 35.80000000000005,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": -100,
@@ -440,7 +446,7 @@
           "def": 0,
           "spd": 0
         },
-        "current_location_id": "7b1ca93a-163e-4c52-b463-befbb8c9fdac",
+        "current_location_id": "3c24b0ff-0280-4cad-93b9-ecbd525bc092",
         "baseHp": 2000,
         "baseAtk": 200,
         "baseDef": 100,
@@ -864,7 +870,7 @@
           "Dị thường": null
         },
         "isCompanion": false,
-        "affinity": 33,
+        "affinity": 38,
         "Name": "Hạ Hầu Khinh Y",
         "description": "",
         "Stance": "Tò mò và có thiện cảm với người thừa kế của Nam Hoa Lão Tiên.",
@@ -1369,7 +1375,7 @@
         "isPlayer": false,
         "loreId": "lore_npc_thai_van_co",
         "level": 1,
-        "exp": 0,
+        "exp": 0.1,
         "progressionState": "Tu Luyện Thường",
         "ap": -25,
         "currency": 0,
@@ -1394,6 +1400,183 @@
         "atk": 90,
         "def": 80,
         "spd": 100,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": {
+            "id": "80cda656-3272-456b-82cb-50c8494e4793",
+            "skillType": "combat",
+            "Name": "Cầm Tâm Phạn Âm",
+            "description": "Thái Văn Cơ gảy lên những giai điệu cổ xưa, tạo ra sóng âm thanh huyền ảo gây choáng kẻ địch trong phạm vi rộng và giảm sức mạnh tấn công của chúng trong 3 giây.",
+            "technicaldescription": "Gây 150% sát thương dựa trên ATK lên toàn bộ kẻ địch, gây choáng trong 1 lượt và giảm 40% ATK của mục tiêu trong 3 lượt.",
+            "Stats": "atk_percent:150,debuff_atk_reduction:40",
+            "Rarity": "Hiếm",
+            "cooldown": 0,
+            "effects": [
+              {
+                "action": {
+                  "type": "damage",
+                  "target": {
+                    "type": "all_enemies"
+                  },
+                  "visual_effects": {
+                    "vfxType": "sonic_wave",
+                    "moveType": "stay",
+                    "color": "#e6e6fa",
+                    "vfxCount": 1
+                  }
+                },
+                "conditions": null
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "all_enemies"
+                  },
+                  "visual_effects": {
+                    "vfxType": "aura_down",
+                    "moveType": "stay",
+                    "color": "#9370db",
+                    "vfxCount": 3
+                  }
+                }
+              }
+            ],
+            "skillCategory": "basic",
+            "currentCooldown": 0,
+            "exp": 0,
+            "maxExp": 2000
+          },
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": true,
+        "affinity": 30,
+        "Name": "Thái Văn Cơ",
+        "description": "Thiếu nữ tài hoa, con gái Thái Ung, mang vẻ đẹp u buồn thâm trầm.",
+        "Stance": "Cảm kích sau khi được nhân vật chính cứu giúp trong một vụ tập kích của ma vật, hiện đang tin tưởng và mong muốn tìm hiểu về đạo pháp của Diệp Thần.",
+        "Personality": "Ôn nhu, điềm tĩnh, trọng tình nghĩa nhưng nội tâm kiên cường, giàu lòng trắc ẩn với chúng sinh.",
+        "Gender": "Nữ",
+        "sizeCategory": 2,
+        "incomingHealing": 1,
+        "maxExp": 100,
+        "Role": "Đại gia khuê tú, truyền nhân văn chương, người nắm giữ bí tịch thất lạc về âm luật trừ ma",
+        "Appearance": "Dáng người thanh tao, y phục màu thiên thanh thướt tha, mái tóc đen dài cài trâm ngọc. Gương mặt thanh tú phảng phất nỗi u buồn của thời loạn, ánh mắt sáng như sao ẩn chứa khí chất thoát tục.",
+        "Backstory": "Là con gái của danh sĩ Thái Ung, từ nhỏ đã tinh thông cầm kỳ thi họa. Sau khi cha bị lưu đày và qua đời, nàng lưu lạc giữa loạn thế. Tương truyền, tiếng đàn của nàng có khả năng trấn áp oán khí, vô tình thu hút sự chú ý của các thế lực tà ác.",
+        "isAppraised": true,
+        "realm": "Giai Đoạn 1",
+        "skills": [
+          {
+            "id": "80cda656-3272-456b-82cb-50c8494e4793",
+            "skillType": "combat",
+            "Name": "Cầm Tâm Phạn Âm",
+            "description": "Thái Văn Cơ gảy lên những giai điệu cổ xưa, tạo ra sóng âm thanh huyền ảo gây choáng kẻ địch trong phạm vi rộng và giảm sức mạnh tấn công của chúng trong 3 giây.",
+            "technicaldescription": "Gây 150% sát thương dựa trên ATK lên toàn bộ kẻ địch, gây choáng trong 1 lượt và giảm 40% ATK của mục tiêu trong 3 lượt.",
+            "Stats": "atk_percent:150,debuff_atk_reduction:40",
+            "Rarity": "Hiếm",
+            "cooldown": 0,
+            "effects": [
+              {
+                "action": {
+                  "type": "damage",
+                  "target": {
+                    "type": "all_enemies"
+                  },
+                  "visual_effects": {
+                    "vfxType": "sonic_wave",
+                    "moveType": "stay",
+                    "color": "#e6e6fa",
+                    "vfxCount": 1
+                  }
+                },
+                "conditions": null
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "all_enemies"
+                  },
+                  "visual_effects": {
+                    "vfxType": "aura_down",
+                    "moveType": "stay",
+                    "color": "#9370db",
+                    "vfxCount": 3
+                  }
+                }
+              }
+            ],
+            "skillCategory": "basic",
+            "currentCooldown": 0,
+            "exp": 0,
+            "maxExp": 2000
+          }
+        ],
+        "stance": "Trung lập",
+        "inParty": true,
+        "isCompanionSetupDone": true
+      },
+      {
+        "id": "5ae0f01b-79f3-4b1e-8f65-fcea477ef33b",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 5,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 10,
+          "atk": 8,
+          "def": 8,
+          "spd": 8
+        },
+        "current_location_id": "3c24b0ff-0280-4cad-93b9-ecbd525bc092",
+        "baseHp": 280,
+        "baseAtk": 28,
+        "baseDef": 14,
+        "baseSpd": 34,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 2280,
+        "maxhp": 2280,
+        "atk": 108,
+        "def": 94,
+        "spd": 114,
         "cr": 15,
         "cdmg": 200,
         "dmgAmp": 100,
@@ -1432,25 +1615,23 @@
           "Dị thường": null
         },
         "isCompanion": false,
-        "affinity": 30,
-        "Name": "Thái Văn Cơ",
-        "description": "Thiếu nữ tài hoa, con gái Thái Ung, mang vẻ đẹp u buồn thâm trầm.",
-        "Stance": "Cảm kích sau khi được nhân vật chính cứu giúp trong một vụ tập kích của ma vật, hiện đang tin tưởng và mong muốn tìm hiểu về đạo pháp của Diệp Thần.",
-        "Personality": "Ôn nhu, điềm tĩnh, trọng tình nghĩa nhưng nội tâm kiên cường, giàu lòng trắc ẩn với chúng sinh.",
-        "Gender": "Nữ",
-        "sizeCategory": 2,
-        "incomingHealing": 1,
-        "maxExp": 100,
-        "Role": "Đại gia khuê tú, truyền nhân văn chương, người nắm giữ bí tịch thất lạc về âm luật trừ ma",
-        "Appearance": "Dáng người thanh tao, y phục màu thiên thanh thướt tha, mái tóc đen dài cài trâm ngọc. Gương mặt thanh tú phảng phất nỗi u buồn của thời loạn, ánh mắt sáng như sao ẩn chứa khí chất thoát tục.",
-        "Backstory": "Là con gái của danh sĩ Thái Ung, từ nhỏ đã tinh thông cầm kỳ thi họa. Sau khi cha bị lưu đày và qua đời, nàng lưu lạc giữa loạn thế. Tương truyền, tiếng đàn của nàng có khả năng trấn áp oán khí, vô tình thu hút sự chú ý của các thế lực tà ác.",
-        "isAppraised": true,
+        "affinity": 5,
+        "Name": "Vân Nhi",
+        "description": "",
+        "Stance": "Luôn tin tưởng, quan tâm và sẵn sàng hy sinh để che chở cho nhân vật chính trong giai đoạn đầu yếu ớt.",
         "realm": "Giai Đoạn 1",
+        "incomingHealing": 1,
+        "maxExp": 1118,
         "skills": [],
-        "stance": "Trung lập"
+        "affinityDirection": "đang ấm lên",
+        "Role": "Đệ tử ngoại môn của Nam Hoa phái, thanh mai trúc mã của Diệp Thần tại vùng núi Thường Sơn",
+        "Appearance": "Dáng người nhỏ nhắn, thanh tú trong bộ đạo phục màu thiên thanh thêu họa tiết mây trắng đơn sơ. Đôi mắt long lanh như sương sớm, chứa đựng vẻ u buồn nhưng kiên định. Mái tóc đen dài được cài gọn bằng một chiếc trâm gỗ, toát lên khí chất thanh khiết, thoát tục giữa cảnh lầm than của thời đại.",
+        "Backstory": "Vân Nhi vốn là trẻ mồ côi được Nam Hoa Lão Tiên mang về núi Thường Sơn. Nàng cùng Diệp Thần lớn lên, cùng học tập đạo pháp và chăm sóc lẫn nhau. Sau khi Diệp Thần bị đánh lén và trải qua biến cố 'hồi sinh', nàng là người đầu tiên nhận ra sự khác lạ trong linh hồn của hắn nhưng vẫn âm thầm giữ kín bí mật này để bảo vệ hắn khỏi sự nghi kỵ của sư môn và sự truy sát của lũ gián điệp yêu ma.",
+        "Personality": "Dịu dàng, chu đáo, có nội tâm mạnh mẽ và cực kỳ trung thành. Nàng luôn đặt sự an nguy của người khác lên trên bản thân, đặc biệt là đối với Diệp Thần.",
+        "isAppraised": true
       },
       {
-        "id": "5ae0f01b-79f3-4b1e-8f65-fcea477ef33b",
+        "id": "dd49c00f-7387-4e80-a861-ec1789e866ea",
         "isPlayer": false,
         "loreId": null,
         "level": 1,
@@ -1464,7 +1645,7 @@
           "def": 2,
           "spd": 2
         },
-        "current_location_id": "3c24b0ff-0280-4cad-93b9-ecbd525bc092",
+        "current_location_id": "7b1ca93a-163e-4c52-b463-befbb8c9fdac",
         "baseHp": 200,
         "baseAtk": 20,
         "baseDef": 10,
@@ -1518,12 +1699,93 @@
         },
         "isCompanion": false,
         "affinity": 0,
-        "Name": "Vân Nhi",
+        "Name": "Công tử bột",
         "description": "Một nhân vật xuất hiện trong câu chuyện.",
         "Stance": "Trung lập",
         "realm": "Giai Đoạn 1",
         "incomingHealing": 1,
         "maxExp": 100
+      },
+      {
+        "id": "lore_npc_thai_ung",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 35,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 97,
+          "atk": 94,
+          "def": 94,
+          "spd": 94
+        },
+        "current_location_id": "7b1ca93a-163e-4c52-b463-befbb8c9fdac",
+        "baseHp": 880,
+        "baseAtk": 88,
+        "baseDef": 44,
+        "baseSpd": 64,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 20280,
+        "maxhp": 20280,
+        "atk": 1028,
+        "def": 984,
+        "spd": 1004,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 30,
+        "description": "",
+        "Name": "Thái Ung",
+        "realm": "Giai Đoạn 4",
+        "incomingHealing": 1,
+        "maxExp": 120759,
+        "Role": "Đại danh sĩ triều đình, Bậc thầy Cổ Cầm và Phong Ấn Thư Pháp",
+        "Appearance": "Một lão giả có khí chất nho nhã, thanh cao với mái tóc và chòm râu dài bạc trắng được chải chuốt gọn gàng. Ông mặc bộ trường bào màu xanh thiên thanh thêu những đường chỉ bạc ẩn hiện hình bát quái. Đôi mắt tinh anh, chứa đựng sự thông tuệ của một người đã đọc hết kinh thư thiên hạ. Trên lưng ông luôn đeo cây đàn Tiêu Vĩ nổi tiếng, tỏa ra một tầng hào quang bảo vệ dịu nhẹ và thanh tẩy oán khí xung quanh.",
+        "Backstory": "Từng là đại thần trong triều đình nhưng vì tính cách cương trực nên bị gian thần hãm hại và phải sống lưu vong. Trong những năm tháng đó, Thái Ung không chỉ nghiên cứu học thuật mà còn phát hiện ra sức mạnh của âm nhạc và thư pháp trong việc trấn áp yêu ma do oán khí tạo thành. Ông đã bí mật biên soạn 'Hán Thư Trừ Ma Lục' và đang tìm kiếm một người có tâm tính thuần khiết và chân truyền đạo gia để truyền thụ những bí thuật này nhằm cứu vãn đại cục.",
+        "Personality": "Điềm đạm, uy nghiêm, luôn giữ lễ nghĩa của một bậc túc nho. Ông rất trân trọng nhân tài, có lòng trắc ẩn sâu sắc với bách tính và căm ghét sự hỗn loạn do tà ma cũng như tham quan gây ra.",
+        "Stance": "Coi trọng xuất thân từ phái Nam Hoa của Diệp Thần, sẵn sàng chỉ dẫn và cung cấp các thông tin mật về yêu ma trong triều đình cho nhân vật chính.",
+        "isAppraised": true
       }
     ],
     "sharedCooldowns": {
@@ -1546,15 +1808,15 @@
           "turn": 43
         }
       ],
-      "lastExpResolvedTurn": 64
+      "lastExpResolvedTurn": 67
     },
     "loreQuests": [],
     "pendingCreations": [],
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 64,
-      "world_time": 64,
+      "turn_id": 67,
+      "world_time": 67,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -1564,7 +1826,8 @@
         "loser_id": null
       },
       "fields": {
-        "exp_delta_player": 0.1
+        "exp_delta_player": 0.1,
+        "exp_delta_thai_van_co_01": 0.1
       }
     },
     "stateHistory": [
@@ -1572,221 +1835,20 @@
         "time": {
           "year": 0,
           "month": 1,
-          "day": 17,
-          "hour": 21
+          "day": 19,
+          "hour": 11
         },
-        "location_id": "3c24b0ff-0280-4cad-93b9-ecbd525bc092",
-        "weather": "Nắng sớm ban mai, mây xám kéo về từ phương xa",
+        "location_id": "7b1ca93a-163e-4c52-b463-befbb8c9fdac",
+        "weather": "Sáng sớm nắng nhẹ",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 35.30000000000004,
+            "exp": 35.600000000000044,
             "hp": 2000,
             "maxhp": 2000,
-            "currency": 0,
-            "inventory": [
-              {
-                "Name": "Quả trứng màu xanh lục",
-                "quantity": 1
-              },
-              {
-                "Name": "Linh Thú Khế Ước (Tiểu Bạch)",
-                "quantity": 1
-              }
-            ],
-            "longTermStatuses": []
-          },
-          {
-            "id": "b6de4eac-cd6e-43d9-b2ce-264c553ce5f7",
-            "Name": "Nam Hoa Lão Tiên",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "bd85e45e-f13c-41d2-a278-10ed93722c18",
-            "Name": "Hạ Hầu Khinh Y",
-            "level": 15,
-            "exp": 0,
-            "hp": 5880,
-            "maxhp": 5880,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
-            "Name": "Triệu Vân",
-            "level": 85,
-            "exp": 0,
-            "hp": 89680,
-            "maxhp": 89680,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "62c26dd7-d1bf-419e-8d03-75db7b24bbc1",
-            "Name": "Sĩ quan lính canh",
-            "level": 1,
-            "exp": 0,
-            "hp": 1000,
-            "maxhp": 1000,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "e1a058f1-8ef1-4f4a-8b6b-36de2be32d57",
-            "Name": "Lão chủ tiệm thuốc",
-            "level": 1,
-            "exp": 0,
-            "hp": 1000,
-            "maxhp": 1000,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "c985e31b-1ea3-4270-b35c-4035988055c1",
-            "Name": "Công Tôn Bảo Nguyệt",
-            "level": 25,
-            "exp": 0,
-            "hp": 12280,
-            "maxhp": 12280,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "d7b85753-38ce-4c1b-b173-affc6e0aa0b0",
-            "Name": "Triệu Sâm",
-            "level": 8,
-            "exp": 0,
-            "hp": 3140,
-            "maxhp": 3140,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "551b87f0-89ab-4ede-b692-507031afc7d8",
-            "Name": "Triệu Vũ",
-            "level": 5,
-            "exp": 0,
-            "hp": 1680,
-            "maxhp": 1680,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "d6799360-4022-4890-9896-7ddc7cdae278",
-            "Name": "Thái Văn Cơ",
-            "level": 5,
-            "exp": 0,
-            "hp": 2080,
-            "maxhp": 2080,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          }
-        ],
-        "quests": [
-          {
-            "id": "8c8183bd-fbdb-408d-adc4-120609a67fac",
-            "title": "Chăm sóc con của Bạch Hổ Sơn Linh",
-            "status": "completed",
-            "objectives": [
-              {
-                "id": "rescue_baby_tiger",
-                "text": "Giải cứu Tiểu Bạch Hổ đang cùng Hạ Hầu Khinh Y bị vây hãm tại hậu viện.",
-                "type": "action",
-                "targetName": "Tiểu Bạch Hổ",
-                "requiredCount": 1,
-                "currentCount": 2,
-                "completed": true
-              },
-              {
-                "id": "purify_corruption",
-                "text": "Sử dụng chân nguyên của Thái Bình Yếu Thuật để thanh tẩy tà khí ma hóa trên người Tiểu Bạch Hổ.",
-                "type": "action",
-                "targetName": "Thanh tẩy tà khí",
-                "requiredCount": 1,
-                "currentCount": 1,
-                "completed": true
-              },
-              {
-                "id": "reach_tiger_cave",
-                "text": "Di chuyển đến sơn động bí ẩn theo tọa độ thần thức để bảo vệ an toàn cho hổ con.",
-                "type": "goto",
-                "targetName": "Sơn động Bạch Hổ",
-                "requiredCount": 1,
-                "currentCount": 2,
-                "completed": true
-              }
-            ]
-          },
-          {
-            "id": "96338829-e702-42cd-89b2-479d06cce22e",
-            "title": "Giải kiếp cho Công Tôn Bảo Nguyệt",
-            "status": "completed",
-            "objectives": [
-              {
-                "id": "persuade_baonguyet",
-                "text": "Thuyết phục Công Tôn Bảo Nguyệt để lại thư từ biệt và rời khỏi phủ Công Tôn.",
-                "type": "talk",
-                "targetName": "Công Tôn Bảo Nguyệt",
-                "requiredCount": 1,
-                "currentCount": 1,
-                "completed": true
-              },
-              {
-                "id": "escape_tracquan",
-                "text": "Đưa Công Tôn Bảo Nguyệt thoát khỏi sự bao vây của sương mù ma đạo tại Trác Quận.",
-                "type": "goto",
-                "targetName": "Ngoại vi Trác Quận",
-                "requiredCount": 1,
-                "currentCount": 1,
-                "completed": true
-              },
-              {
-                "id": "defeat_lurking_evil",
-                "text": "Tiêu diệt các linh thể ma đạo đang bám theo để hoàn tất việc giải sát họa.",
-                "type": "kill",
-                "targetName": "Linh Thể Ma Đạo",
-                "requiredCount": 3,
-                "currentCount": 3,
-                "completed": true
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "time": {
-          "year": 0,
-          "month": 1,
-          "day": 18,
-          "hour": 9
-        },
-        "location_id": "3c24b0ff-0280-4cad-93b9-ecbd525bc092",
-        "weather": "Nắng sớm ban mai, mây xám kéo về từ phương xa",
-        "characters": [
-          {
-            "id": "player",
-            "Name": "Diệp Thần",
-            "level": 1,
-            "exp": 35.40000000000004,
-            "hp": 2000,
-            "maxhp": 2000,
-            "currency": -100,
+            "currency": -600,
             "inventory": [
               {
                 "Name": "Quả trứng màu xanh lục",
@@ -1901,6 +1963,17 @@
           {
             "id": "5ae0f01b-79f3-4b1e-8f65-fcea477ef33b",
             "Name": "Vân Nhi",
+            "level": 5,
+            "exp": 0,
+            "hp": 2280,
+            "maxhp": 2280,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "dd49c00f-7387-4e80-a861-ec1789e866ea",
+            "Name": "Công tử bột",
             "level": 1,
             "exp": 0,
             "hp": 800,
@@ -1908,43 +1981,220 @@
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
+          },
+          {
+            "id": "lore_npc_thai_ung",
+            "Name": "Thái Ung",
+            "level": 35,
+            "exp": 0,
+            "hp": 20280,
+            "maxhp": 20280,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
           }
         ],
         "quests": [
           {
-            "id": "8c8183bd-fbdb-408d-adc4-120609a67fac",
-            "title": "Chăm sóc con của Bạch Hổ Sơn Linh",
+            "id": "96338829-e702-42cd-89b2-479d06cce22e",
+            "title": "Giải kiếp cho Công Tôn Bảo Nguyệt",
             "status": "completed",
             "objectives": [
               {
-                "id": "rescue_baby_tiger",
-                "text": "Giải cứu Tiểu Bạch Hổ đang cùng Hạ Hầu Khinh Y bị vây hãm tại hậu viện.",
-                "type": "action",
-                "targetName": "Tiểu Bạch Hổ",
-                "requiredCount": 1,
-                "currentCount": 2,
-                "completed": true
-              },
-              {
-                "id": "purify_corruption",
-                "text": "Sử dụng chân nguyên của Thái Bình Yếu Thuật để thanh tẩy tà khí ma hóa trên người Tiểu Bạch Hổ.",
-                "type": "action",
-                "targetName": "Thanh tẩy tà khí",
+                "id": "persuade_baonguyet",
+                "text": "Thuyết phục Công Tôn Bảo Nguyệt để lại thư từ biệt và rời khỏi phủ Công Tôn.",
+                "type": "talk",
+                "targetName": "Công Tôn Bảo Nguyệt",
                 "requiredCount": 1,
                 "currentCount": 1,
                 "completed": true
               },
               {
-                "id": "reach_tiger_cave",
-                "text": "Di chuyển đến sơn động bí ẩn theo tọa độ thần thức để bảo vệ an toàn cho hổ con.",
+                "id": "escape_tracquan",
+                "text": "Đưa Công Tôn Bảo Nguyệt thoát khỏi sự bao vây của sương mù ma đạo tại Trác Quận.",
                 "type": "goto",
-                "targetName": "Sơn động Bạch Hổ",
+                "targetName": "Ngoại vi Trác Quận",
                 "requiredCount": 1,
-                "currentCount": 2,
+                "currentCount": 1,
+                "completed": true
+              },
+              {
+                "id": "defeat_lurking_evil",
+                "text": "Tiêu diệt các linh thể ma đạo đang bám theo để hoàn tất việc giải sát họa.",
+                "type": "kill",
+                "targetName": "Linh Thể Ma Đạo",
+                "requiredCount": 3,
+                "currentCount": 3,
                 "completed": true
               }
             ]
+          }
+        ]
+      },
+      {
+        "time": {
+          "year": 0,
+          "month": 1,
+          "day": 20,
+          "hour": 7
+        },
+        "location_id": "3c24b0ff-0280-4cad-93b9-ecbd525bc092",
+        "weather": "Nắng sớm ban mai, không gian thanh tịnh",
+        "characters": [
+          {
+            "id": "player",
+            "Name": "Diệp Thần",
+            "level": 1,
+            "exp": 35.700000000000045,
+            "hp": 2000,
+            "maxhp": 2000,
+            "currency": -600,
+            "inventory": [
+              {
+                "Name": "Quả trứng màu xanh lục",
+                "quantity": 1
+              },
+              {
+                "Name": "Linh Thú Khế Ước (Tiểu Bạch)",
+                "quantity": 1
+              }
+            ],
+            "longTermStatuses": []
           },
+          {
+            "id": "b6de4eac-cd6e-43d9-b2ce-264c553ce5f7",
+            "Name": "Nam Hoa Lão Tiên",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "bd85e45e-f13c-41d2-a278-10ed93722c18",
+            "Name": "Hạ Hầu Khinh Y",
+            "level": 15,
+            "exp": 0,
+            "hp": 5880,
+            "maxhp": 5880,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
+            "Name": "Triệu Vân",
+            "level": 85,
+            "exp": 0,
+            "hp": 89680,
+            "maxhp": 89680,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "62c26dd7-d1bf-419e-8d03-75db7b24bbc1",
+            "Name": "Sĩ quan lính canh",
+            "level": 1,
+            "exp": 0,
+            "hp": 1000,
+            "maxhp": 1000,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "e1a058f1-8ef1-4f4a-8b6b-36de2be32d57",
+            "Name": "Lão chủ tiệm thuốc",
+            "level": 1,
+            "exp": 0,
+            "hp": 1000,
+            "maxhp": 1000,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "c985e31b-1ea3-4270-b35c-4035988055c1",
+            "Name": "Công Tôn Bảo Nguyệt",
+            "level": 25,
+            "exp": 0,
+            "hp": 12280,
+            "maxhp": 12280,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "d7b85753-38ce-4c1b-b173-affc6e0aa0b0",
+            "Name": "Triệu Sâm",
+            "level": 8,
+            "exp": 0,
+            "hp": 3140,
+            "maxhp": 3140,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "551b87f0-89ab-4ede-b692-507031afc7d8",
+            "Name": "Triệu Vũ",
+            "level": 5,
+            "exp": 0,
+            "hp": 1680,
+            "maxhp": 1680,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "thai_van_co_01",
+            "Name": "Thái Văn Cơ",
+            "level": 1,
+            "exp": 0,
+            "hp": 2000,
+            "maxhp": 2000,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "5ae0f01b-79f3-4b1e-8f65-fcea477ef33b",
+            "Name": "Vân Nhi",
+            "level": 5,
+            "exp": 0,
+            "hp": 2280,
+            "maxhp": 2280,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "dd49c00f-7387-4e80-a861-ec1789e866ea",
+            "Name": "Công tử bột",
+            "level": 1,
+            "exp": 0,
+            "hp": 800,
+            "maxhp": 800,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "lore_npc_thai_ung",
+            "Name": "Thái Ung",
+            "level": 35,
+            "exp": 0,
+            "hp": 20280,
+            "maxhp": 20280,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          }
+        ],
+        "quests": [
           {
             "id": "96338829-e702-42cd-89b2-479d06cce22e",
             "title": "Giải kiếp cho Công Tôn Bảo Nguyệt",
@@ -1994,6 +2244,10 @@
           "small_help": {
             "last_event_turn": 18,
             "streak": 1
+          },
+          "gift": {
+            "last_event_turn": 65,
+            "streak": 1
           }
         },
         "d7b85753-38ce-4c1b-b173-affc6e0aa0b0": {
@@ -2005,6 +2259,12 @@
         "a0c6daba-8625-4645-8bea-e6b369fbc453": {
           "save_life": {
             "last_event_turn": 60,
+            "streak": 1
+          }
+        },
+        "5ae0f01b-79f3-4b1e-8f65-fcea477ef33b": {
+          "gift": {
+            "last_event_turn": 65,
             "streak": 1
           }
         }
@@ -5160,16 +5420,292 @@
       ]
     },
     {
-      "id": "203864b5-a525-4248-b5bb-ee22c78e63e0",
+      "id": "6b4b4ee4-ee5c-4c37-985d-542be7d055f8",
       "type": "user_custom_action",
       "content": "'Ta là đệ tử của Nam Hoa Lão Tiên, sứ mệnh của ta là cứu vớt những đóa hoa yểu mệnh thời loạn thế này. 3 vị phu nhân của ta đều là như vậy. Vận mệnh của Thái Diễm cũng không khác họ. Nếu không được ta trợ giúp, sau khi Vệ Trọng qua đời, nàng sẽ bị Hung Nô bắt, sau khi bị đám Hung Nô giày vò, may mắn được cứu thoát khi Hung Nô diệt vong. Ngài thử nghĩ xem lúc này nàng ấy sẽ nghĩ sao? Hơn nữa ngài được Đổng Trác đề bạt, muốn tận trung tận nghĩa với hắn. Nhưng Đổng Trác là người thế nào ngài hiểu rõ hơn ta. Hoàng Cân diệt, hắn sẽ tự phong làm Thái sư ép Thiên Tử lệnh chư hầu. Chính là Quốc tặc tương lai. Ngài muốn tận trung với hắn ta không xen vào nhưng Thái Diễm không đáng phải chịu vận mệnh như vậy. Ngài hãy cân nhắc cho tốt. Sáng mai ta sẽ lại đến bái phỏng. Hy vọng lúc đó ngài có thể cho ta 1 câu trả lời thỏa mãn' Nói xong ngươi chắp tay cáo từ rồi đưa gia quyến rời khỏi Thái phủ để Thái Ung trầm ngâm trong đống thông tin vừa rồi. Ngươi đưa các nàng đi dạo quanh Lạc Dương, mua những bộ y phục, những món trang sức mà các nàng thích. Sau đó 4 người quay lại xe ngựa rồi kêu đám người Tử Long đánh xe tới Tửu Lâu sang trọng nhất thuê phòng nghỉ lại 1 đêm. Ngươi với Khinh Y, Bảo Nguyệt, Triệu Vũ 1 phòng, Tử Long, Triệu Sâm 1 phòng, Tiểu Thúy, Tiểu Bạch và Tiểu Thanh 1 phòng. Trong lúc dùng bữa, có mấy tên công tử ăn chơi kéo tới muốn 'làm quen' với 3 người Khinh Y. Triệu Vân lập tức đứng dậy đánh cho mỗi tên 1 trận. Bọn chúng kêu la báo gia môn với hy vọng sẽ dọa được nhưng không có tác dụng. Ngươi bảo Triệu Vân cắt đi công cụ hành sự của cả bọn để chúng không gây họa được cho dân chúng nữa"
+    },
+    {
+      "id": "d11180c2-b14c-4ea8-bb6e-8f3a1122091e",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Trong bầu không khí thanh nhã của *Thái Phủ*, mùi hương trầm thoang thoảng quyện cùng vị trà đắng thanh khiết bỗng chốc bị xé toạc bởi một luồng khí tức trầm mặc phát ra từ *Diệp Thần*. Hắn đặt chén trà xuống bàn gỗ sưa, đôi mắt thâm trầm như chứa đựng cả vạn năm lịch sử nhìn thẳng vào *Thái Ung*, người đang mang trong mình nỗi lo âu về thời cuộc. Giọng nói của hắn vang lên, bình thản nhưng mang theo sức nặng của thiên mệnh:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ta là đệ tử của *Nam Hoa Lão Tiên*, sứ mệnh của ta là cứu vớt những đóa hoa yểu mệnh thời loạn thế này. Ba vị phu nhân của ta đều là như vậy, và vận mệnh của *Thái Diễm* cũng không khác họ. Nếu không được ta trợ giúp, sau khi *Vệ Trọng Đạo* qua đời, nàng sẽ bị quân *Hung Nô* bắt đi trong loạn lạc. Sau khi bị đám rợ hồ đó giày vò nhục nhã suốt mười hai năm, nàng mới may mắn được cứu thoát khi *Hung Nô* diệt vong. Ngài thử nghĩ xem, một tài nữ thanh cao như nàng lúc đó sẽ nghĩ gì? Sống không bằng chết!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Thái Ung* sững sờ, đôi mắt lão co rút lại, hơi thở trở nên dồn dập. *Diệp Thần* không dừng lại, hắn tiếp tục giáng thêm một đòn chí mạng vào tâm lý của vị túc nho:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Hơn nữa, ngài được *Đổng Trác* đề bạt và muốn tận trung tận nghĩa với hắn. Nhưng *Đổng Trác* là người thế nào, ngài hiểu rõ hơn ta. Khi giặc *Hoàng Cân* bị diệt, hắn sẽ tự phong làm Thái sư, ép Thiên tử lệnh chư hầu, chính là quốc tặc tương lai! Ngài muốn tận trung với hắn, ta không xen vào, nhưng *Thái Diễm* không đáng phải chịu vận mệnh tàn khốc theo sự sụp đổ của một kẻ như vậy. Ngài hãy cân nhắc cho tốt. Sáng mai ta sẽ lại đến bái phỏng, hy vọng lúc đó ngài có thể cho ta một câu trả lời thỏa mãn."
+        },
+        {
+          "type": "narrative",
+          "content": "\"Xoảng!\"\nChiếc chén sứ quý giá trên tay *Thái Ung* rơi xuống sàn, nước trà bắn tung tóe lên vạt áo gấm của lão. Bàn tay lão run rẩy kịch liệt, gương mặt già nua xám xịt lại vì kinh hoàng. Lão không thể nói nên lời, chỉ biết chìm vào im lặng suy tư khi *Diệp Thần* chắp tay cáo từ đầy tiêu sái. \nHắn dẫn theo ba vị thê tử — *Hạ Hầu Khinh Y*, *Công Tôn Bảo Nguyệt* và *Vân Nhi* — bước ra khỏi *Thái Phủ*. Bóng đêm *Lạc Dương* dần buông xuống, nhưng sự xa hoa của kinh kỳ vẫn rực rỡ với hàng vạn đèn lồng treo cao dọc các con phố. Để xua tan bầu không khí nặng nề, *Diệp Thần* đưa các nàng đi dạo quanh các cửa hàng sầm uất nhất. Hắn không tiếc tay chi ra hơn năm trăm lượng bạc để mua sắm những bộ y phục lụa là thượng hạng, những món trang sức ngọc phỉ thúy và trâm cài bằng vàng ròng tinh xảo nhất cho ba nàng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Tướng công, chàng tiêu pha quá nhiều rồi... nhưng món trâm này thật sự rất đẹp."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Công Tôn Bảo Nguyệt",
+          "content": "Đúng vậy, ở vùng biên thùy *U Châu*, thiếp chưa từng thấy loại ngọc nào trong trẻo như thế này. Đa tạ tướng công!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Vân Nhi",
+          "content": "Thiếp... thiếp chỉ cần được đi bên cạnh phu quân là đủ rồi."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* mỉm cười, ánh mắt chan chứa tình cảm khi nhìn ba đóa hoa tuyệt sắc đang rạng rỡ niềm vui. Sau một buổi tối dạo chơi, cả đoàn quay lại xe ngựa. Hắn ra lệnh cho *Triệu Vân* và *Triệu Sâm* đánh xe tới *Tửu Lầu Thiên Hiệp* — nơi được mệnh danh là sang trọng nhất kinh thành *Lạc Dương* để nghỉ lại. Tại đây, hắn hào phóng thuê ba căn phòng hạng nhất: hắn cùng *Khinh Y*, *Bảo Nguyệt* và *Vân Nhi* ở chung một gian đại phòng rộng lớn; *Triệu Vân* và *Triệu Sâm* ở một phòng; còn *Tiểu Thúy* cùng hai linh thú *Tiểu Bạch*, *Tiểu Thanh* ở gian còn lại.\nTrong lúc dùng bữa tối tại sảnh lớn của tửu lâu, ánh đèn dầu lung linh chiếu rọi lên nhan sắc nghiêng nước nghiêng thành của ba nàng thê tử, ngay lập tức thu hút sự chú ý của đám công tử bột, con cháu quan lại trong thành đang say sưa chè chén. Một tên công tử mặc áo lụa sặc sỡ, tay cầm quạt giấy, loạng choạng bước tới bàn của họ với nụ cười dâm đãng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Công tử bột",
+          "content": "Ồ... không ngờ ở chốn này lại có ba vị mỹ nhân thoát tục đến vậy. Vị huynh đài đây chắc không phiền nếu để các nàng qua bàn chúng ta \"làm quen\" chút đỉnh chứ? Ta là con trai của Thị lang bộ Lễ, không bạc đãi các nàng đâu!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* vẫn thản nhiên nhấp rượu, không thèm liếc nhìn lấy một cái. Hắn khẽ gật đầu ra hiệu. Ngay lập tức, một bóng dáng bạc lấp lánh vụt đứng dậy. *Triệu Vân* với gương mặt lạnh lùng như băng, không nói một lời, vung tay tung ra một loạt đòn đánh nhanh như chớp giật.\n\"Bốp! Bát! Rắc!\"\nTiếng xương gãy và tiếng hét thảm thiết vang dội khắp sảnh tửu lâu. Đám hộ vệ của tên công tử chưa kịp rút kiếm đã bị *Triệu Vân* đánh cho tan tác, nằm la liệt trên sàn nhà. Tên công tử bột bị *Triệu Vân* bóp cổ nhấc bổng lên, mặt mũi sưng húp, miệng lảm nhảm đe dọa về gia môn của mình nhưng chỉ nhận lại ánh mắt khinh bỉ từ vị hổ tướng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tử Long, mấy hạng rác rưởi này chỉ biết dùng cái giống đó để gây họa cho dân chúng. Ta không muốn thấy chúng tiếp tục làm nhơ bẩn kinh kỳ này nữa. Cắt đi!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vân* nhận lệnh, ánh mắt lóe lên tia nhìn lạnh lẽo. Hắn rút đoản đao dắt bên hông, hành động dứt khoát và tàn nhẫn đến cực điểm. Tiếng thét xé lòng của tên công tử và đám bằng hữu vang lên khi \"công cụ hành sự\" của chúng bị phế bỏ ngay tại chỗ. Máu tươi nhuộm đỏ một mảng sàn gỗ sầm uất. Đám khách khứa xung quanh kinh hãi tột độ, không ai dám ho một tiếng trước uy thế của vị công tử bí ẩn có hộ vệ giáp bạc lạnh lùng. Danh tiếng về một vị \"Thần bí đạo sĩ\" vừa mới đặt chân tới *Lạc Dương* bắt đầu lan truyền với tốc độ chóng mặt trong giới thượng lưu.\nSau khi giải quyết xong đám ruồi nhặng, cả đoàn trở về phòng. Không gian bên trong đại phòng vô cùng xa hoa với đệm gấm giường ngà, mùi hương long diên hương lan tỏa. Ngọn lửa dục vọng trong lòng *Diệp Thần* bắt đầu bùng cháy sau một ngày dài căng thẳng. Hắn nhìn ba vị thê tử tuyệt sắc của mình, mỗi người một vẻ đang đứng e thẹn dưới ánh nến mờ ảo."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đêm nay... ba nàng hãy cùng ta tu luyện âm dương giao hòa. Sau trận chiến ban nãy, chân nguyên của ta cần được bổ sung bằng tình yêu của các nàng."
+        },
+        {
+          "type": "narrative",
+          "content": "*Khinh Y*, *Bảo Nguyệt* và *Vân Nhi* đều đỏ mặt gật đầu. Dưới sự dẫn dắt của *Diệp Thần*, cả ba nàng đều trút bỏ xiêm y, để lộ những thân thể ngọc ngà, hoàn mỹ dưới ánh trăng lọt qua khe cửa. Những bầu ngực trắng ngần, căng tròn phập phồng theo nhịp thở gấp gáp. *Diệp Thần* lao vào cuộc hoan lạc cuồng nhiệt, hắn không ngừng vuốt ve làn da mịn màng như lụa, hôn ngấu nghiến những đôi môi ngọt ngào.\nHắn đè nghiến *Vân Nhi* xuống đệm gấm, con cu gân guộc, khổng lồ đã dựng đứng ngạo nghễ, trực tiếp đâm lút cán vào sâu trong tử cung nàng. *Vân Nhi* rên rỉ dâm đãng, hai chân kẹp chặt lấy hông hắn. Trong khi đó, tay hắn vẫn không ngừng bóp nắn vú của *Khinh Y* và để *Bảo Nguyệt* ngậm lấy đầu khấc nóng hổi mà mút mát. Những tiếng rên rỉ, tiếng thịt va chạm \"bạch bạch\" và mùi dâm thủy nồng nàn bao phủ khắp căn phòng. Hắn xoay vần giữa ba mỹ nhân, nhấp liên tục suốt cả đêm dài, khiến các nàng liên tục lên đỉnh, dâm thủy và tinh dịch trắng đục bắn tung tóe khắp đệm gấm. Sự gắn kết mệnh cách giữa hắn và ba nàng càng trở nên khăng khít hơn bao giờ hết qua cuộc giao hoan đầy nhục dục và nghệ thuật này.\nSáng hôm sau, khi những tia nắng sớm của kinh thành *Lạc Dương* rọi qua cửa sổ, *Diệp Thần* thức dậy với tinh thần sảng khoái tột độ. Ba vị thê tử vẫn còn đang ngủ say, gương mặt ai nấy đều hồng hào, rạng rỡ sinh khí sau một đêm mặn nồng. Hắn mặc lại bộ đạo bào chỉnh tề, dắt thanh *Bất Vãn* bên hông, chuẩn bị cho cuộc bái phỏng lần thứ hai tới *Thái Phủ*. Hắn biết rằng, sau những lời đe dọa và tiết lộ thiên cơ tối qua, *Thái Ung* chắc chắn đã có quyết định cho riêng mình.\nDưới sảnh tửu lâu, *Triệu Vân* đã đứng đợi sẵn, giáp bạc sáng ngời dưới nắng sớm. Những người phục vụ và khách khứa nhìn thấy đoàn người bước xuống đều vội vã cúi đầu né tránh, sự kính sợ dành cho \"vị công tử bí ẩn\" đã thâm căn cố đế chỉ sau một đêm."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tử Long, hôm nay chúng ta sẽ đi đón *Thái Văn Cơ*. Nếu lão già đó vẫn hồ đồ, chúng ta sẽ dùng biện pháp mạnh."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Tử Long tuân mệnh! Dẫu là quan gia hay quốc tặc, nếu cản đường công tử, Tử Long nhất định sẽ quét sạch."
+        },
+        {
+          "type": "narrative",
+          "content": "Đoàn người lại lên xe ngựa, hướng về phía phủ đệ của *Thái Ung*. Trên đường đi, *Diệp Thần* nhận thấy không khí *Lạc Dương* có chút khác thường, quân lính tuần tra dày đặc hơn, và những lời đồn về việc *Đổng Trác* sắp tiến kinh đang râm ran khắp các ngõ ngách. Thời gian của hắn không còn nhiều.\nKhi tới trước cổng *Thái Phủ*, lần này đích thân *Thái Ung* đã đứng chờ sẵn ở cửa, gương mặt lão già đi trông thấy, đôi mắt thâm quầng vì thức trắng đêm suy nghĩ. Bên cạnh lão là một thiếu nữ mặc áo lụa xanh nhạt, gương mặt thanh tú mang nét u buồn trầm mặc nhưng ánh mắt lại toát lên vẻ tò mò khi nhìn thấy *Diệp Thần*. Đó chính là *Thái Văn Cơ*."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Ung",
+          "content": "Diệp công tử... lời ngài nói tối qua khiến lão phu trăn trở khôn nguôi. Nếu những gì ngài nói về tương lai của *Văn Cơ* và dã tâm của *Đổng sư* là thật... thì lão phu đúng là đã suýt đẩy con gái vào hố lửa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đại nhân hiểu ra là tốt. Thiên cơ đã hiện, nếu ngài còn chần chừ, chỉ e họa đến sát lưng."
+        },
+        {
+          "type": "narrative",
+          "content": "*Thái Ung* nhìn sang con gái, rồi nhìn sang *Diệp Thần*, lão khẽ thở dài một tiếng đầy bất lực nhưng cũng đầy hy vọng. Lão ra hiệu cho *Thái Văn Cơ* tiến lên phía trước."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Văn Cơ",
+          "content": "Văn Cơ bái kiến công tử. Nghe phụ thân nói công tử là truyền nhân của tiên gia, có thể thấu thị quá khứ vị lai. Không biết công tử có thể chỉ dạy cho Văn Cơ về âm luật trừ ma mà ngài đã nhắc tới không?"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi nhìn sâu vào đôi mắt của nàng tài nữ, cảm nhận được khí vận thanh cao và cả nỗi buồn man mác của nàng. Việc thu phục được *Thái Văn Cơ* không chỉ là cứu một mạng người, mà là cứu lấy một linh hồn nghệ thuật vĩ đại của dân tộc."
+        }
+      ]
+    },
+    {
+      "id": "15e17539-827f-4cda-a3a1-25eed3ba9235",
+      "type": "user_custom_action",
+      "content": "'Cầm nghệ của ta không tốt lắm nếu Văn Cơ không chê ta đây liền bêu xấu 1 lần. Xin Văn Cơ cho ta mượn Tiêu Vĩ Cầm dùng 1 lát.' Thái Văn Cơ ra hiệu cho người hầu mang Tiêu Vĩ Cầm cho ngươi. Ngươi nhận lấy điều chỉnh dây cầm 1 lát rồi tấu khúc 'Thập Diện Mai Phục'. Thái Văn Cơ nghe như si như say. Sau khi khúc nhạc kết thúc, nàng vẫn còn ở trong 'cảnh' mà khúc nhạc mang lại. Ngươi phải lại gần chạm vào tay nàng thì nàng mới định thần lại."
+    },
+    {
+      "id": "41e0e006-3b48-40d7-8391-aa48a1c96161",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Trong gian khách sảnh rộng lớn và thanh nhã của *Thái Phủ*, mùi trầm hương từ lò đốt bằng đồng cổ tỏa ra nhẹ nhàng, quyện cùng mùi mực tàu và giấy cũ, tạo nên một không gian đậm chất thư hương của bậc đại túc nho. Ánh nắng ban mai xuyên qua những cánh cửa gỗ chạm trổ tinh xảo, rọi xuống mặt sàn lát gạch men xanh bóng loáng. *Diệp Thần* đứng giữa phòng, tà đạo bào nâu sẫm khẽ lay động, thần thái ung dung tự tại như một vị tiên nhân lạc bước chốn hồng trần. Hắn khẽ mỉm cười, ánh mắt thâm trầm nhìn về phía cây *Tiêu Vĩ Cầm* danh chấn thiên hạ đang đặt trên án gỗ, rồi quay sang nhìn *Thái Văn Cơ* với vẻ ôn hòa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Cầm nghệ của ta không tốt lắm, nếu *Văn Cơ* không chê, ta đây liền bêu xấu một lần. Xin *Văn Cơ* cho ta mượn *Tiêu Vĩ Cầm* dùng một lát."
+        },
+        {
+          "type": "narrative",
+          "content": "*Thái Văn Cơ* nghe vậy, đôi mắt phượng trong veo như nước hồ thu thoáng hiện vẻ ngạc nhiên. Nàng vốn là người tinh thông âm luật, coi cây đàn này như sinh mạng, hiếm khi để người lạ chạm vào. Thế nhưng, trước khí độ thanh cao và ánh mắt chân thành của *Diệp Thần*, nàng dường như không thể chối từ. Nàng khẽ nghiêng mình, ra hiệu cho người hầu mang cây cổ cầm quý giá tới trước mặt hắn."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Văn Cơ",
+          "content": "Công tử quá khiêm nhường rồi. Người có khí chất như ngài, cầm nghệ chắc chắn không phải hạng tầm thường. Mời ngài."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* ngồi xếp bằng trước án gỗ, đôi bàn tay thon dài khẽ lướt qua những dây đàn làm bằng tơ tằm thượng hạng. Hắn nhắm mắt lại, vận chuyển một luồng chân nguyên tinh thuần từ *Thái Bình Yếu Thuật* vào đầu ngón tay, rồi bắt đầu điều chỉnh dây cầm. Mỗi một nhịp gẩy, một tiếng \"tưng\" trong trẻo lại vang lên, khiến linh khí trong phòng bỗng chốc trở nên xao động. Sau khi đã chuẩn bị xong, hắn hít một hơi thật sâu, mười ngón tay bỗng chốc chuyển động nhanh như chớp giật, khai mở khúc nhạc quân sự lẫm liệt nhất cổ kim — *Thập Diện Mai Phục*.\n\"Tùng! Tùng! Tùng!\"\nTiếng đàn vừa cất lên đã mang theo một sức mạnh rung chuyển tâm can. Nó không còn là những âm thanh êm dịu thường thấy của chốn khuê phòng, mà là tiếng trống trận dồn dập, tiếng vó ngựa rầm rập xé rách không gian. *Diệp Thần* dùng linh lực để truyền tải ý cảnh, biến gian phòng khách sảnh của *Thái Phủ* bỗng chốc trở thành một chiến trường cổ xưa đầy sát khí. \n*Thái Văn Cơ* ngồi đối diện, nàng như bị hút hồn vào từng nốt nhạc. Trong thức hải của nàng, một ảo cảnh hùng tráng hiện ra: nàng thấy mình đang đứng giữa một thung lũng hẻm núi sâu thẳm, xung quanh là hàng vạn binh mã đang phục kích trong bóng tối. Tiếng đàn lúc trầm lúc bổng, lúc như tiếng gươm đao va chạm chát chúa, lúc lại như tiếng than khóc thê lương của binh sĩ tử trận. Nàng nghe như si như say, toàn bộ thần hồn đều đắm chìm vào trong trận chiến *Cai Hạ* năm nào, cảm nhận được cái bi tráng của vị anh hùng mạt lộ và sự tàn khốc của chiến tranh ma đạo mà *Diệp Thần* đang thầm kín gửi gắm.\n*Thái Ung* đứng bên cạnh, chiếc chén trà trên tay lão khẽ run rẩy. Lão vốn là bậc thầy về cầm nghệ, nhưng chưa bao giờ thấy ai có thể dùng tiếng đàn để kiến tạo nên một thế giới thực đến mức rợn người như vậy. Sát khí ngập trời từ khúc nhạc khiến lão cảm thấy lạnh toát sống lưng, mồ hôi lạnh rịn ra trên trán. Lão bỗng nhận ra, những lời cảnh báo về số phận của con gái mình và vận mệnh của triều đình mà vị truyền nhân *Nam Hoa* này nói tối qua, hoàn toàn không phải là hư ngôn. Một kẻ có thể điều khiển âm luật đạt đến mức hóa cảnh thế này, chắc chắn đã chạm tới ngưỡng của thiên cơ.\nKhúc nhạc kết thúc bằng một tiếng ngân dài vút tận cửu tiêu rồi đột ngột im bặt, để lại một sự tĩnh lặng đến mức nghe thấy cả tiếng lá rụng ngoài hiên. *Thái Văn Cơ* vẫn ngồi lặng yên, đôi mắt đờ đẫn, hơi thở dồn dập, dường như nàng vẫn còn đang mắc kẹt trong ảo ảnh của vòng vây mười phía, chưa thể thoát ra khỏi sự bi tráng của khúc nhạc. \nThấy nàng dâu tương lai có dấu hiệu bị chấn động thần hồn quá mạnh, *Diệp Thần* khẽ thở dài, hắn đứng dậy, bước lại gần nàng. Hắn vươn tay, nhẹ nhàng chạm vào bàn tay nhỏ nhắn, mềm mại nhưng đang lạnh ngắt của nàng. Một luồng chân nguyên ấm áp từ lòng bàn tay hắn truyền qua, như một dòng suối mát lành gột rửa mọi ảo ảnh tà mị."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Văn Cơ, tỉnh lại đi. Khúc nhạc đã tan, chiến trường cũng đã dứt."
+        },
+        {
+          "type": "narrative",
+          "content": "*Thái Văn Cơ* khẽ rùng mình, đôi mi dài run rẩy rồi từ từ mở ra. Nhìn thấy khuôn mặt tuấn tú của *Diệp Thần* đang ở sát bên cạnh, cảm nhận được hơi ấm từ bàn tay hắn, nàng bỗng chốc định thần lại. Đôi gò má trắng ngần của nàng nhanh chóng ửng hồng như rặng mây buổi sớm, một chút rung động tâm hồn sâu sắc len lỏi vào trái tim nàng tài nữ. Nàng nhìn hắn với ánh mắt chứa đầy sự ngưỡng mộ, kinh ngạc và một sự lệ thuộc vô hình vừa mới nhen nhóm."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Văn Cơ",
+          "content": "Công tử... cầm nghệ của ngài... thực sự là thần hồ kỳ kỹ. Văn Cơ từ nhỏ học đàn, chưa từng thấy ai có thể dùng âm thanh để vẽ nên một thế giới chân thực đến đau đớn như vậy. Đa tạ công tử đã cứu muội thoát khỏi ảo cảnh."
+        },
+        {
+          "type": "narrative",
+          "content": "*Thái Ung* lúc này mới thở phào một tiếng, lão đặt chén trà xuống bàn, bước tới chắp tay hành lễ với *Diệp Thần*, gương mặt đầy vẻ kính nể và hối lỗi:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Ung",
+          "content": "Diệp công tử, lão phu có mắt không thấy Thái Sơn. Tài năng và khí độ này của ngài, quả thực là truyền nhân chân chính của phái *Nam Hoa*. Những lời ngài nói về tương lai của *Văn Cơ*... lão phu giờ đây hoàn toàn tin tưởng. Một người có thể tấu lên khúc *Thập Diện Mai Phục* với tâm cảnh bao la thế này, tuyệt đối sẽ không nói lời lừa gạt."
+        },
+        {
+          "type": "narrative",
+          "content": "Bên ngoài cửa sổ, ba vị thê tử của *Diệp Thần* — *Hạ Hầu Khinh Y*, *Công Tôn Bảo Nguyệt* và *Vân Nhi* — cũng đang đứng quan sát. *Hạ Hầu Khinh Y* khẽ mỉm cười, nàng tự hào về phu quân của mình, nhưng trong đôi mắt cũng thoáng hiện một chút ghen tỵ nhẹ nhàng khi thấy ánh mắt của *Văn Cơ* nhìn hắn. *Công Tôn Bảo Nguyệt* thì khoanh tay trước ngực, nàng vốn là con nhà võ, nhưng cũng bị tiếng đàn lúc nãy làm cho rạo rực khí huyết."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Công Tôn Bảo Nguyệt",
+          "content": "Phu quân quả thực đi đâu cũng gieo rắc tương tư cho các cô nương. Xem ra *Thái* phủ hôm nay lại sắp có thêm một vị chủ mẫu rồi."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* quay lại nhìn các thê tử, khẽ lắc đầu cười khổ, rồi quay lại phía *Thái Ung*. Hắn biết, việc thu phục được lòng tin của đại danh sĩ này là bước đi quan trọng bậc nhất để thay đổi đại cục tại kinh thành *Lạc Dương*."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Thái đại nhân quá khen. Bần đạo chỉ là thuận theo thiên mệnh, không muốn thấy những bậc kỳ tài phải chịu cảnh vùi dập trong tay yêu ma và gian thần. Việc của tiểu thư, xin đại nhân hãy sớm định liệu. Vệ gia ở Hà Đông tuy giàu có, nhưng *Vệ Trọng Đạo* khí sắc suy kiệt, không phải là chỗ dựa lâu dài."
+        },
+        {
+          "type": "narrative",
+          "content": "*Thái Ung* gật đầu lia lịa, lão liếc nhìn con gái mình, thấy nàng vẫn đang chăm chú nhìn *Diệp Thần*, trong lòng lão bỗng nảy ra một ý định táo bạo."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Ung",
+          "content": "Công tử nói phải. Lão phu sẽ lập tức hủy bỏ hôn ước với Vệ gia. Chỉ là... giữa thời buổi đại loạn này, một mình lão phu e rằng khó lòng bảo vệ được nàng. Nếu công tử không chê con gái lão vụng về, lão phu muốn gửi gắm nàng đi theo công tử để học hỏi đạo pháp và cầm nghệ trừ ma, ngài thấy sao?"
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe thấy lời đề nghị của phụ thân, *Thái Văn Cơ* không những không phản đối mà trái lại còn cúi đầu e thẹn, đôi tay nhỏ bé bồn chồn vân vê tà áo lụa xanh. Ánh mắt nàng lén nhìn *Diệp Thần*, chờ đợi một câu trả lời. \nLúc này, từ phía cổng phủ bỗng vang lên tiếng bước chân dồn dập. Một tên gia nhân hớt hải chạy vào, gương mặt tái mét:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Gia nhân",
+          "content": "Báo... báo cáo đại nhân! Ngoài cửa có người của Vệ gia tới, dẫn đầu là *Vệ Trọng Đạo*. Hắn nói đã đến ngày định hôn, yêu cầu được vào gặp tiểu thư!"
+        },
+        {
+          "type": "narrative",
+          "content": "Bầu không khí trong phòng bỗng chốc trở nên căng thẳng. *Thái Ung* cau mày, lão nhìn sang *Diệp Thần* như muốn xin ý kiến. *Diệp Thần* khẽ nheo mắt, linh giác của hắn báo hiệu rằng trên người tên *Vệ Trọng Đạo* kia có một luồng hắc khí ma đạo quái dị, không giống như một người bệnh lao thông thường. Có vẻ như thế lực ma đạo phương Bắc đã bắt đầu thâm nhập vào các đại gia tộc ở Trung Nguyên để khống chế các nhân vật quan trọng.\nHắn nắm chặt chuôi kiếm *Bất Vãn* bên hông, khí thế lạnh lùng tỏa ra."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đến thật đúng lúc. Ta cũng muốn xem thử kẻ mang danh thiên tài Vệ gia này thực chất là người hay là quỷ."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* bước ra phía cửa, đi sau hắn là ba vị thê tử dũng cảm và các linh thú. *Triệu Vân* cũng đã cầm thương đứng sẵn ở hiên nhà, giáp bạc sáng ngời. Ngoài sân, một thiếu niên mặc áo gấm sang trọng nhưng gương mặt xanh xao, đôi mắt thâm quầng và hơi thở mang theo mùi hôi thối của xác chết đang đứng đó. Hắn nhìn thấy đoàn người của *Diệp Thần* bước ra, ánh mắt lóe lên một tia sáng đỏ tà mị."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Vệ Trọng Đạo",
+          "content": "Thái đại nhân, đây là ai? Tại sao trong phủ của ngài lại có nhiều người lạ mang theo binh khí như vậy? Chẳng lẽ ngài muốn bội ước với Vệ gia chúng ta?"
+        },
+        {
+          "type": "narrative",
+          "content": "Cuộc đối đầu tại *Thái Phủ* chính thức bắt đầu. *Diệp Thần* cảm nhận được luồng ma khí từ tên *Vệ Trọng Đạo* kia đang không ngừng khuếch tán, cố gắng xâm nhập vào tâm trí của những người xung quanh. Đây chắc chắn là một cái bẫy của *Thái Bình Đạo* nhằm bắt giữ cha con họ Thái."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Vệ công tử, nếu ngươi là người, ta sẽ khách sáo. Nhưng nếu ngươi đã hiến tế linh hồn cho ma quỷ để đổi lấy sự sống lay lắt này, thì hôm nay *Lạc Dương* chính là nơi chôn thây của ngươi."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* vung tay, một đạo phù chú thanh tẩy bùng cháy giữa không trung, soi rọi rõ bộ mặt thật của những kẻ đi theo *Vệ Trọng Đạo* — chúng đều là những *Hành Thi* được cải trang kỹ lưỡng. Một trận chiến ngay giữa lòng kinh đô chuẩn bị bùng nổ, và vận mệnh của tài nữ *Thái Văn Cơ* đang nằm gọn trong tay vị truyền nhân tiên gia kiêu hùng."
+        }
+      ]
+    },
+    {
+      "id": "a49aa6f3-e749-4df4-977b-62dc820760c3",
+      "type": "user_custom_action",
+      "content": "'Triệu Vân, bảo vệ các nàng cho tốt. Đám này giao cho ta.' Nói xong ngươi rút ra 3 lá Lôi phù kẹp vào tay đọc chú ngữ rồi tung lên trời. 3 lá phù bốc cháy ngay lập tức. Bầu trời giữa trưa đang nắng chói chang ngay lập tức mây đen bảo phủ che kín kinh thành Lạc Dương. Tiếng sấm rền vang lục tục rơi xuống đánh chính xác lên những Hành Thi. Vệ Trọng Đạo né trái né phải vô cùng chật vật. Thiên lôi chính là khắc tinh cao nhất của đám âm vật này. Ngươi nhìn thấy hắn nhảy nhót né tránh như vậy 1 lúc liền thấy nhàm chán nói: 'Vô vị. Ngươi chỉ có chút bản lĩnh này thì nên sớm chuyển kiếp đầu thai đi.' Nói xong ngươi lấy Lôi phù dán lên Bất Vãn. Sau đó rút kiếm nhanh chóng tiếp cận cắt đầu Vệ Trọng Đạo. Đám người Thái Ung, Thái Văn Cơ thấy ngươi có thể hô phong hoán vũ, lât tay gọi sấm liền càng tin tưởng ngươi. Thái Ung liền nói: 'Vệ Trọng Đạo đã chết, hôn ước của tiểu nữ cũng thuận theo không còn. Kính xin công tử thu nhận tiểu nữ.'"
+    },
+    {
+      "id": "751bb89d-68eb-4518-b0de-dfe57ff44c70",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ánh nắng ban trưa chói chang trên kinh thành *Lạc Dương* bỗng chốc bị thay thế bởi một màu xám xịt của mây đen cuồn cuộn vần vũ, che kín cả bầu trời. *Diệp Thần* đứng giữa sân *Thái Phủ*, khí thế bàng bạc tỏa ra từ thân thể khiến vạn vật như nín thở. Hắn đưa tay rút ra ba lá *Lôi phù*, kẹp chặt vào giữa hai ngón tay rồi niệm chú ngữ cổ xưa với âm điệu trầm hùng."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Thiên địa mượn lực, sấm sét giáng trần, TRỪ MA!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ba lá *Lôi phù* bốc cháy rực rỡ trong lòng bàn tay. Chỉ trong chớp mắt, tiếng sấm nổ vang rền từ hư không ập xuống, hàng loạt tia sét đánh chính xác vào thân hình của đám *Hành Thi* đang bao vây *Vệ Trọng Đạo*. Tên ma vật giả dạng này gào thét, nhảy nhót né tránh trong sự tuyệt vọng khi thiên lôi – khắc tinh cao nhất của âm vật – đang càn quét không chừa một góc sân. *Diệp Thần* quan sát sự chật vật của đối phương, ánh mắt hiện lên vẻ chán chường."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Vô vị. Ngươi chỉ có chút bản lĩnh này thì nên sớm chuyển kiếp đầu thai đi."
+        },
+        {
+          "type": "narrative",
+          "content": "Dứt lời, hắn dán một lá *Lôi phù* khác lên thân thanh thần binh *Bất Vãn*. Ánh bạc của kiếm hòa quyện cùng ánh điện tím xanh. *Diệp Thần* lướt mình như một cơn gió, nhanh chóng tiếp cận *Vệ Trọng Đạo* và vung kiếm, cắt đứt đầu tên ma vật. Mọi người trong sân sững sờ trước thần thông của hắn, hoàn toàn bị khuất phục. *Thái Ung* bước tới, chắp tay cúi đầu, giọng nói đầy vẻ kính cẩn và hy vọng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Ung",
+          "content": "Vệ Trọng Đạo đã chết, hôn ước của tiểu nữ cũng thuận theo không còn. Kính xin công tử thu nhận tiểu nữ, chỉ cần nàng được bình an, lão phu không còn mong cầu gì hơn."
+        },
+        {
+          "type": "narrative",
+          "content": "*Thái Văn Cơ* đứng phía sau cha, ánh mắt tôn sùng nhìn *Diệp Thần*, sự ngưỡng mộ đối với vị tiên nhân cứu rỗi cuộc đời mình đã đạt đến mức không thể lay chuyển. Cảnh tượng thiên lôi cuồng bạo đã xóa tan đi mọi hoài nghi, chỉ còn lại sự biết ơn chân thành.\nSau biến cố, phủ đệ trở lại vẻ tĩnh lặng cần thiết. *Diệp Thần* nhận thấy việc ở lại *Lạc Dương* lúc này mang đến nhiều cơ hội mới để củng cố thực lực. Cơn mưa sấm sét vừa qua không chỉ tiêu diệt ma vật mà còn giúp hắn tinh luyện thêm được một phần chân nguyên trong cơ thể. Nhìn ba người thê tử đang ân cần chuẩn bị trà nước, hắn thầm cảm thấy hài lòng với những gì đã đạt được. Tuy nhiên, luồng tử khí vẫn còn phảng phất đâu đó trong kinh thành, báo hiệu những thử thách cam go hơn sắp sửa ập đến.\n*Thái Ung* sau khi bình tâm lại, đã mời *Diệp Thần* vào thư phòng riêng để bàn luận về việc truyền dạy \"Hán Thư Trừ Ma Lục\", như một lời đáp tạ cho đại ân cứu tử. Đêm xuống, kinh thành *Lạc Dương* vốn phồn hoa nay dường như che giấu nhiều âm mưu dưới màn đêm. *Diệp Thần* hiểu rằng, kẻ cầm đầu đứng sau lũ ma vật này chắc chắn không hề đơn giản, và những bước đi kế tiếp cần phải vô cùng cẩn trọng."
+        }
+      ]
     }
   ],
   "choices": [
-    "Yêu cầu Triệu Vân thể hiện bản lĩnh võ học để khuất phục toán lính canh mà không gây ra đổ máu. {Tỷ lệ thành công: Cao. Hậu quả/Phần thưởng: Tạo dựng uy danh tại kinh thành, lính tuần tra nể sợ rút lui.}",
-    "Tự mình bước xuống xe, dùng đạo pháp trấn áp tâm trí của tên chỉ huy khiến hắn phải cúi đầu mở đường. {Tỷ lệ thành công: Trung bình. Hậu quả/Phần thưởng: Phô diễn sức mạnh thần bí, khiến người dân kinh sợ và ngưỡng mộ.}",
-    "Lấy ra tín vật của Thái Ung để tạo áp lực, ép tên chỉ huy phải rút quân ngay lập tức. {Tỷ lệ thành công: Rất cao. Hậu quả/Phần thưởng: Dễ dàng thông quan, nhưng có thể khiến hành tung bị Thái phủ theo dõi sát sao hơn.}",
-    "Giả vờ khiêm nhường, đưa hối lộ bằng vài món trang sức quý giá để chúng nhanh chóng giải tán. {Tỷ lệ thành công: Trung bình. Hậu quả/Phần thưởng: Tránh được sự chú ý không đáng có, nhưng có thể bị bọn lính coi là kẻ giàu có dễ bắt nạt.}"
+    "Đồng ý nhận sự chỉ dẫn của Thái Ung về bí thuật âm luật và phong ấn thư pháp. {Tỷ lệ thành công: Cao. Hậu quả/Phần thưởng: Thu thập thêm tri thức trừ ma và tăng hảo cảm của Thái Ung.}",
+    "Đề nghị Thái Ung thu xếp hành lý, rời bỏ Lạc Dương ngay trong đêm để tránh tai mắt của Đổng Trác. {Tỷ lệ thành công: Trung bình. Hậu quả/Phần thưởng: Đảm bảo an toàn cho gia đình Thái Ung nhưng có thể làm lộ hành tung.}",
+    "Dùng thần thông dò xét lại toàn bộ Thái Phủ để tìm kiếm những mầm mống ma đạo còn sót lại. {Tỷ lệ thành công: Cao. Hậu quả/Phần thưởng: Phát hiện thêm các âm mưu ẩn giấu trong triều đình.}",
+    "Đưa Thái Văn Cơ ra ngoài dạo bước quanh khu vườn tĩnh mịch để nàng bộc bạch tâm tư và truyền thụ cho nàng kỹ năng cơ bản về đạo pháp. {Tỷ lệ thành công: Rất cao. Hậu quả/Phần thưởng: Thắt chặt mối quan hệ tình cảm và bồi dưỡng thiên phú cho Văn Cơ.}"
   ],
   "gameMode": "EXPLORATION",
   "activeTrade": {
@@ -5190,5 +5726,5 @@
       "endTurn": 20
     }
   ],
-  "adventureTurnCount": 64
+  "adventureTurnCount": 67
 }
