@@ -10099,7 +10099,7 @@ const ActionComposer = ({ knownNpcPool, playerName, disabled, writeCtx, resetSig
 // COMPONENT 3: THAY THẾ TOÀN BỘ GAMEPLAYSCREEN
 const GameplayScreen = ({
     gameMode, goHome, gameSettings, restartGame, storyHistory, setGameSettings, setStoryHistory, isLoading, currentStory, handleActionRequest,
-    choices, handleChoice, formatStoryText, customActionInput, setCustomActionInput, composerResetSignal, retryableAction,
+    choices, handleChoice, formatStoryText, customActionInput, setCustomActionInput, composerResetSignal,
     canUndoTurn, onUndoTurn, isUndoingTurn, persistenceWarning,
     visibleBanner, onDismissBanner, hackModeEnabled, onToggleHackMode,
     onOpenApiSetup, aiSourceSummary,
@@ -10148,6 +10148,28 @@ const GameplayScreen = ({
     // gdd-06 A5: dimmed, not hidden - the controls stay in place so the layout
     // never jumps while a turn resolves.
     const writeControlOpacity = canSubmitWriteAction ? 1 : 0.38;
+    // "Gửi Lại": suy ra trực tiếp từ storyHistory thay vì giữ một cờ lỗi
+    // riêng - mỗi lượt chơi đẩy đúng 1 mục 'user_custom_action'/'user_choice'
+    // (nội dung nguyên văn hành động) vào storyHistory NGAY TRƯỚC KHI gọi AI
+    // (processPlayerAction), rồi chỉ đẩy tiếp một mục 'story' SAU KHI AI trả
+    // lời thành công. Vậy nếu mục CUỐI CÙNG trong lịch sử vẫn là hành động
+    // của người chơi (chưa có 'story' nối theo), lượt đó chắc chắn chưa
+    // hoàn tất - dù thất bại 1 giây trước hay từ một phiên đã refresh/đóng
+    // trình duyệt từ lâu, kể cả TRƯỚC KHI nút này tồn tại. Không cần lưu
+    // trạng thái lỗi riêng ở đâu cả - storyHistory vốn đã được autosave.
+    const lastNonTransientStoryItem = (() => {
+        for (let i = storyHistory.length - 1; i >= 0; i--) {
+            const it = storyHistory[i];
+            if (!it.transient || it.id === 'consolidated_placeholder') return it;
+        }
+        return null;
+    })();
+    const pendingResubmitAction = (
+        gameMode === 'EXPLORATION' &&
+        !isLoading && !isProcessingAction &&
+        lastNonTransientStoryItem &&
+        (lastNonTransientStoryItem.type === 'user_custom_action' || lastNonTransientStoryItem.type === 'user_choice')
+    ) ? lastNonTransientStoryItem : null;
     // Core UI D.7 "known NPC" source for the composer's speaker picker.
     // APPROXIMATION, not the literal `card_exists ∧ alive` predicate the GDD
     // specifies - Character Card & Identity (#14) has no `list_known_npc_names`
@@ -10950,14 +10972,16 @@ const renderDefaultActions = () => {
                     </div>
                 )}
                                 <div ref={messagesEndRef} className="h-4" />
-                                {/* Vị trí cố định theo yêu cầu: ngay dưới div.h-4 (điểm neo
-                                    cuối luồng truyện) - hiện khi lượt vừa gửi thất bại (model
-                                    quá tải/hết quota...), kể cả sau khi refresh trang (xem
-                                    persistPendingRetryAction/loadPendingRetryAction). */}
-                                {retryableAction && (
+                                {/* Vị trí cố định ngay dưới div.h-4 (điểm neo cuối luồng
+                                    truyện) - hiện khi mục cuối cùng của lịch sử vẫn là hành
+                                    động của người chơi, chưa có phản hồi 'story' nối theo
+                                    (xem pendingResubmitAction ở trên). Vì suy ra trực tiếp từ
+                                    storyHistory (đã autosave), nó khôi phục được NGAY CẢ với
+                                    một lượt lỗi từ trước khi nút này tồn tại. */}
+                                {pendingResubmitAction && (
                                     <button
                                         type="button"
-                                        onClick={retryableAction}
+                                        onClick={() => processPlayerAction(pendingResubmitAction.content, pendingResubmitAction.type)}
                                         className="w-full bg-[#8b1515]/10 border border-[#ff4d4d]/60 hover:bg-[#ff4d4d]/20 text-[#ff4d4d] font-bold py-3 uppercase tracking-widest text-sm transition-colors"
                                     >
                                         ⟳ Gửi Lại
@@ -17732,47 +17756,6 @@ const fetchFullSaveFromCloud = async (rowId) => {
     throw new Error("Không tìm thấy dữ liệu tệp lưu.");
 };
 
-// Lưu "hành động vừa gửi bị lỗi" xuống localStorage (KHÔNG chỉ giữ trong
-// state React) để nút "Gửi Lại" vẫn khôi phục được sau khi người chơi
-// refresh/đóng trình duyệt - lúc đó toàn bộ state trong bộ nhớ đã mất, nhưng
-// localStorage thì không. Chỉ lưu 1 hành động treo duy nhất (đủ dùng, vì chỉ
-// có 1 lượt có thể đang "chờ gửi lại" tại một thời điểm); gắn kèm `gameId` để
-// không vô tình gợi ý gửi lại một hành động của VÁN GAME KHÁC.
-const PENDING_RETRY_ACTION_STORAGE_KEY = 'aiStoryGame_pendingRetryAction';
-
-const persistPendingRetryAction = (gameId, payload) => {
-    try {
-        window.localStorage.setItem(PENDING_RETRY_ACTION_STORAGE_KEY, JSON.stringify({ gameId: gameId || null, ...payload, ts: Date.now() }));
-    } catch (storageError) {
-        console.warn('[systems] persistPendingRetryAction:', storageError);
-    }
-};
-
-const loadPendingRetryAction = (gameId) => {
-    try {
-        const raw = window.localStorage.getItem(PENDING_RETRY_ACTION_STORAGE_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (!parsed || !parsed.actionText) return null;
-        // Chỉ từ chối khi CẢ HAI bên đều có gameId và chúng khác nhau - một
-        // hành động treo chưa từng gắn gameId (ván mới, chưa kịp cấp id) vẫn
-        // được khôi phục.
-        if (parsed.gameId && gameId && parsed.gameId !== gameId) return null;
-        // Quá 24 giờ thì bỏ - tránh một lượt lỗi cổ lỗ, không còn liên quan,
-        // bất ngờ sống lại thành nút "Gửi Lại" trong một ván hoàn toàn khác.
-        if (!parsed.ts || Date.now() - parsed.ts > 24 * 60 * 60 * 1000) return null;
-        return parsed;
-    } catch (storageError) {
-        console.warn('[systems] loadPendingRetryAction:', storageError);
-        return null;
-    }
-};
-
-const clearPendingRetryAction = () => {
-    try { window.localStorage.removeItem(PENDING_RETRY_ACTION_STORAGE_KEY); }
-    catch (storageError) { /* best-effort - không có gì để dọn thì thôi */ }
-};
-
 // App Component , component App //
 const App = () => {
 const [cloudVipKey, setCloudVipKey] = useState('');
@@ -21443,24 +21426,6 @@ const handleGenerateImpromptu = async () => {
   };
 
   const [modalMessage, setModalMessage] = useState({ show: false, title: '', content: '', type: 'info' });
-  // Nút "Gửi Lại" hiển thị NGAY DƯỚI khung Hành động (không phải trong modal
-  // lỗi) khi lượt vừa gửi thất bại (model quá tải/hết quota...) - cho phép
-  // gửi lại đúng lượt đó mà không cần gõ tay lại. Lưu function bằng closure
-  // (dùng dạng updater `() => fn` cho setState để không bị React coi `fn` là
-  // updater và gọi luôn nó với state cũ). Bị xóa mỗi khi một lượt mới bắt đầu
-  // (kể cả chính lượt "Gửi Lại"), và chỉ được set lại nếu lượt đó lại thất bại.
-  const [retryableAction, setRetryableAction] = useState(null);
-  // Khôi phục nút "Gửi Lại" sau khi refresh/mở lại trang: mọi state React ở
-  // trên đã mất sạch lúc đó, nên phải đọc lại từ localStorage một khi ván
-  // game đang chơi đã xác định được currentGameId (tránh khôi phục nhầm
-  // hành động của một ván khác trước khi biết mình đang ở ván nào).
-  useEffect(() => {
-      if (!currentGameId) return;
-      const pending = loadPendingRetryAction(currentGameId);
-      if (pending) {
-          setRetryableAction(() => () => processPlayerAction(pending.actionText, pending.actionType, pending.flavorText));
-      }
-  }, [currentGameId]);
   const [confirmationModal, setConfirmationModal] = useState({ show: false, title: '', content: '', onConfirm: null, onCancel: null, confirmText: 'Xác nhận', cancelText: 'Hủy'});
   const [questNotification, setQuestNotification] = useState({ show: false, quest: null });
   const [customActionInput, setCustomActionInput] = useState('');
@@ -27548,18 +27513,7 @@ const convertCharacterStatsToNarrative = (character) => {
     return `Trạng thái cơ thể: ${hpDesc}.${statusDesc}`;
 };
 
-// `retryPayload` (optional, PHẢI là dữ liệu thuần JSON-hóa được, KHÔNG phải
-// closure): khi khác null và lượt này thất bại, được (a) lưu vào state
-// `retryableAction` để GameplayScreen hiện nút "Gửi Lại" NGAY DƯỚI khung Hành
-// động (không phải trong modal lỗi), và (b) ghi xuống localStorage
-// (persistPendingRetryAction) để nút đó VẪN khôi phục được sau khi người chơi
-// refresh trang - lúc đó mọi state trong bộ nhớ đã mất sạch. Chính vì phải
-// sống sót qua localStorage nên đây bắt buộc là dữ liệu thuần
-// { actionText, actionType, flavorText }, không phải một hàm đã đóng gói sẵn.
-// Chỉ nơi gọi nào giữ đủ ngữ cảnh để phát lại toàn bộ lượt một cách an toàn
-// (đi lại đúng vòng đời beginSystemsTurn/settleSystemsTurnAfterCall, không chỉ
-// gọi trần callGeminiAPI) mới nên truyền tham số này vào.
-const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowledgeToUse = knowledge, userActionForHistory = null, retryPayload = null) => {
+const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowledgeToUse = knowledge, userActionForHistory = null) => {
     let effectiveApiKey = "";
     let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent`;
     
@@ -27629,10 +27583,6 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
             // call must release the Turn Manager, or every later turn is locked out.
             abortSystemsTurn();
             setModalMessage({ show: true, title: 'Lỗi Giao Tiếp AI', content: error.message, type: 'error' });
-            if (retryPayload) {
-                setRetryableAction(() => () => processPlayerAction(retryPayload.actionText, retryPayload.actionType, retryPayload.flavorText));
-                persistPendingRetryAction(currentGameIdRef.current, retryPayload);
-            }
             if (options.isAITurn && activeCombatLoop) setTimeout(() => activeCombatLoop.nextTurn(), 1500);
             return null;
         } finally {
@@ -28028,10 +27978,6 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
         console.error('Lỗi trong quy trình 2 bước Hybrid:', error);
         abortSystemsTurn();
         setModalMessage({ show: true, title: 'Lỗi Giao Tiếp AI', content: error.message, type: 'error' });
-        if (retryPayload) {
-            setRetryableAction(() => () => processPlayerAction(retryPayload.actionText, retryPayload.actionType, retryPayload.flavorText));
-            persistPendingRetryAction(currentGameIdRef.current, retryPayload);
-        }
         return null;
     } finally {
         setIsLoading(false);
@@ -30878,13 +30824,6 @@ const processPlayerAction = async (actionText, actionType, flavorText = '') => {
     if (!trimmedAction || isProcessingAction) return;
     // gdd-03 Branch B: remember the player's own words for this turn.
     lastPlayerActionRef.current = trimmedAction;
-    // Một lượt mới bắt đầu (kể cả chính lượt được gọi lại từ nút "Gửi Lại")
-    // luôn thay thế nút "Gửi Lại" cũ - nó chỉ hiện lại nếu CHÍNH lượt này
-    // cũng thất bại (xem retryPayload trong callGeminiAPI). Xóa luôn bản đã
-    // ghi xuống localStorage - nếu lượt này lại thất bại, callGeminiAPI sẽ
-    // ghi đè bằng đúng payload của lượt hiện tại.
-    setRetryableAction(null);
-    clearPendingRetryAction();
     setPvpTurnTimeLeft(null);
 
     if (activeCriticalPromisesRef.current.length > 0) {
@@ -31590,15 +31529,7 @@ ${noNewEventReinforcementBlock}
         // `finally` so no early return or throw can strand the Turn Manager.
         beginSystemsTurn(trimmedAction);
         try {
-            // retryPayload là dữ liệu thuần (không phải closure) vì nó phải
-            // sống sót được qua localStorage (xem chú thích tại callGeminiAPI)
-            // - lúc thất bại, callGeminiAPI tự dựng lại lệnh gọi
-            // processPlayerAction(actionText, actionType, flavorText) từ đây,
-            // để một cú "Gửi Lại" luôn đi lại đúng
-            // beginSystemsTurn/settleSystemsTurnAfterCall thay vì mở một call
-            // AI mồ côi ngoài vòng đời Turn Manager.
-            await callGeminiAPI(promptToSendToAI, false, {}, knowledge, trimmedAction,
-                { actionText, actionType, flavorText });
+            await callGeminiAPI(promptToSendToAI, false, {}, knowledge, trimmedAction);
         } finally {
             settleSystemsTurnAfterCall();
         }
@@ -37442,7 +37373,6 @@ const formatStoryText = useCallback((text) => {
                                 setCustomActionInput={setCustomActionInput}
                                 handleCustomAction={handleCustomAction}
                                 composerResetSignal={composerResetSignal}
-                                retryableAction={retryableAction}
                                 setShowCharacterInfoModal={setShowCharacterInfoModal}
                                 isProcessingAction={isProcessingAction}
                                 setIsProcessingAction={setIsProcessingAction}
