@@ -273,6 +273,25 @@ export const DIRECTIVE_P1_GROUNDED_PRAISE =
   '  * SAI (trưởng lão Cấp 60 hảo cảm cao với người chơi Cấp 12): "Trưởng lão kinh ngạc: ngươi là kỳ tài trăm năm hiếm có." ' +
   'ĐÚNG: <dialogue speaker="Trưởng lão">Ừm. Bộ pháp có chút nền tảng. Về luyện thêm ba tháng rồi hãy nói chuyện.</dialogue>';
 
+/**
+ * Owner follow-up (2026-08-31): post-battle NPC lines kept collapsing into a
+ * formulaic "cheer + recap the locked result" template. Ban the template and
+ * steer toward personality-driven reactions (concern, relief, practical care).
+ */
+export const DIRECTIVE_P1_REACTION_NOT_FORMULAIC =
+  'PHẢN ỨNG SAU BIẾN CỐ KHÔNG RẬP KHUÔN: sau một trận chiến hay biến cố lớn, lời thoại NPC ' +
+  'TUYỆT ĐỐI KHÔNG theo khuôn "reo hò chúc mừng + kể lại kết quả vừa xảy ra" ' +
+  '("Chàng làm được rồi! Kẻ địch đã bị tiêu diệt, X đã được cứu!") — người chơi vừa đọc xong ' +
+  'diễn biến đó, NPC tóm tắt lại là thừa và giả tạo. Phản ứng phải chọn theo TÍNH CÁCH và ' +
+  'QUAN HỆ của từng NPC, ưu tiên các hướng đời thường: lo lắng kiểm tra thương thế, thở phào ' +
+  'nhẹ nhõm, lặng lẽ đỡ lấy đối phương, trách yêu vì dám liều lĩnh, hoặc lo việc thực tế trước ' +
+  'mắt (băng bó, cảnh giới xung quanh, thu dọn hiện trường). Lời khen (nếu có) phải theo quy tắc ' +
+  '"khen phải có căn cứ" ở trên và KHÔNG được là phản ứng mặc định sau mọi trận đánh.\n' +
+  '  * SAI (rập khuôn): <dialogue speaker="Tiểu Vân">Chàng thực sự đã làm được rồi! Ma vật đã bị ' +
+  'tiêu diệt hoàn toàn, linh mạch đã được cứu rồi!</dialogue> ' +
+  'ĐÚNG (quan tâm theo tính cách): <dialogue speaker="Tiểu Vân">Đừng nói gì vội… vết máu trên vai ' +
+  'chàng kìa. Ngồi xuống, để ta xem đã.</dialogue>';
+
 /** API-2 mirror of the "clouds of their own layer" rule. */
 export const DIRECTIVE_P1_NARRATION_NO_TOP_DOWN =
   'MÂY TẦNG NÀO GẶP GIÓ TẦNG NẤY (LỜI KỂ): không tự thêm cao thủ vượt tầm xuất hiện để gây sự, thử thách hay ' +
@@ -293,6 +312,7 @@ export const PILLAR1_DIRECTIVES_NARRATION: readonly string[] = [
   DIRECTIVE_P1_NARRATION_SELF_INTEREST,
   DIRECTIVE_P1_AFFECTION_NOT_APPRAISAL,
   DIRECTIVE_P1_GROUNDED_PRAISE,
+  DIRECTIVE_P1_REACTION_NOT_FORMULAIC,
   DIRECTIVE_P1_NARRATION_NO_TOP_DOWN,
   DIRECTIVE_P1_CANON_NOT_PLAYER_CENTRIC,
   DIRECTIVE_P1_EXAMPLES_NARRATION,

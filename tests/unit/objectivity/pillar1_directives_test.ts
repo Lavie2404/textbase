@@ -14,6 +14,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DIRECTIVE_P1_AFFECTION_NOT_APPRAISAL,
   DIRECTIVE_P1_GROUNDED_PRAISE,
+  DIRECTIVE_P1_REACTION_NOT_FORMULAIC,
   DIRECTIVE_P1_CANON_NOT_PLAYER_CENTRIC,
   DIRECTIVE_P1_HONEST_PROBABILITY,
   DIRECTIVE_P1_NO_TOP_DOWN_AGGRESSION,
@@ -35,8 +36,8 @@ describe('Pillar 1 directive content', () => {
     expect(PILLAR1_DIRECTIVES_LOGIC).toHaveLength(6);
   });
 
-  it('test_narration_set_has_six_directives', () => {
-    expect(PILLAR1_DIRECTIVES_NARRATION).toHaveLength(6);
+  it('test_narration_set_has_seven_directives', () => {
+    expect(PILLAR1_DIRECTIVES_NARRATION).toHaveLength(7);
   });
 
   it('test_npc_self_interest_forbids_plot_convenience', () => {
@@ -74,6 +75,17 @@ describe('Pillar 1 directive content', () => {
     // Ordering: grounded praise follows the affection rule it qualifies.
     const i = PILLAR1_DIRECTIVES_NARRATION.indexOf(DIRECTIVE_P1_AFFECTION_NOT_APPRAISAL);
     expect(PILLAR1_DIRECTIVES_NARRATION[i + 1]).toBe(DIRECTIVE_P1_GROUNDED_PRAISE);
+  });
+
+  it('test_reaction_variety_bans_cheer_recap_template', () => {
+    expect(DIRECTIVE_P1_REACTION_NOT_FORMULAIC).toContain('KHÔNG RẬP KHUÔN');
+    expect(DIRECTIVE_P1_REACTION_NOT_FORMULAIC).toContain('kiểm tra thương thế');
+    expect(DIRECTIVE_P1_REACTION_NOT_FORMULAIC).toContain('KHÔNG được là phản ứng mặc định');
+    expect(DIRECTIVE_P1_REACTION_NOT_FORMULAIC).toContain('SAI');
+    expect(DIRECTIVE_P1_REACTION_NOT_FORMULAIC).toContain('ĐÚNG');
+    // Ordering: the anti-template rule follows the grounded-praise rule it extends.
+    const i = PILLAR1_DIRECTIVES_NARRATION.indexOf(DIRECTIVE_P1_GROUNDED_PRAISE);
+    expect(PILLAR1_DIRECTIVES_NARRATION[i + 1]).toBe(DIRECTIVE_P1_REACTION_NOT_FORMULAIC);
   });
 
   it('test_outcome_field_directive_names_the_three_values', () => {
