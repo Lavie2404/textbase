@@ -2585,7 +2585,7 @@ const DialogueBubble = ({ speaker, content, playerName, characters, gameSettings
 };
 
 
-const StoryItem = React.memo(({ item, formatStoryText, playerName, onDelete, characters, gameSettings, retryableAction }) => {
+const StoryItem = React.memo(({ item, formatStoryText, playerName, onDelete, characters, gameSettings }) => {
     // Component bọc ngoài để xử lý hiệu ứng hover và hiển thị nút Xóa
     const Wrapper = ({ children, isSystemOrAction }) => (
         <div className={`relative group mb-5 ${isSystemOrAction ? '' : 'story-item'}`}>
@@ -2703,19 +2703,6 @@ const StoryItem = React.memo(({ item, formatStoryText, playerName, onDelete, cha
                     <div className="prose prose-invert max-w-none text-current whitespace-pre-line leading-relaxed font-medium scale-text-base">
                         {cleanedContent}
                     </div>
-                    {/* Chỉ truyền retryableAction cho ĐÚNG khung "Hành động:"/"Đã chọn:"
-                        của lượt vừa thất bại (nơi gọi ở GameplayScreen chỉ gắn nó vào
-                        item cuối cùng trong lịch sử) - cho phép gửi lại chính xác lượt
-                        đó ngay tại đây, không cần gõ tay lại. */}
-                    {(item.type === 'user_choice' || item.type === 'user_custom_action') && retryableAction && (
-                        <button
-                            type="button"
-                            onClick={retryableAction}
-                            className="mt-3 w-full bg-[#8b1515]/10 border border-[#ff4d4d]/60 hover:bg-[#ff4d4d]/20 text-[#ff4d4d] font-bold py-2 uppercase tracking-widest text-xs transition-colors"
-                        >
-                            ⟳ Gửi Lại
-                        </button>
-                    )}
                 </div>
             </Wrapper>
         );
@@ -10892,7 +10879,7 @@ const renderDefaultActions = () => {
                                     {storyHistory
                                         .filter(item => !item.transient || item.id === 'consolidated_placeholder')
                                         .slice(-visibleStoryCount)
-                                        .map((item, index, arr) => (
+                                        .map((item, index) => (
                                             <StoryItem
                                                 key={item.id || index}
                                                 item={item}
@@ -10901,10 +10888,6 @@ const renderDefaultActions = () => {
                                                 onDelete={handleDeleteStoryItem}
                                                 characters={knowledge.characters}
                                                 gameSettings={gameSettings}
-                                                // "Gửi Lại" chỉ có ý nghĩa gắn vào đúng khung "Hành động:"
-                                                // của LƯỢT vừa thất bại - luôn là mục cuối cùng trong lịch
-                                                // sử (chưa có mục 'story' nào của AI nối tiếp sau nó).
-                                                retryableAction={index === arr.length - 1 ? retryableAction : null}
                                             />
                                         ))
                                     }
@@ -10967,6 +10950,19 @@ const renderDefaultActions = () => {
                     </div>
                 )}
                                 <div ref={messagesEndRef} className="h-4" />
+                                {/* Vị trí cố định theo yêu cầu: ngay dưới div.h-4 (điểm neo
+                                    cuối luồng truyện) - hiện khi lượt vừa gửi thất bại (model
+                                    quá tải/hết quota...), kể cả sau khi refresh trang (xem
+                                    persistPendingRetryAction/loadPendingRetryAction). */}
+                                {retryableAction && (
+                                    <button
+                                        type="button"
+                                        onClick={retryableAction}
+                                        className="w-full bg-[#8b1515]/10 border border-[#ff4d4d]/60 hover:bg-[#ff4d4d]/20 text-[#ff4d4d] font-bold py-3 uppercase tracking-widest text-sm transition-colors"
+                                    >
+                                        ⟳ Gửi Lại
+                                    </button>
+                                )}
                             </div>
                         </div>
 
