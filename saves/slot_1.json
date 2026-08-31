@@ -1,8 +1,8 @@
 {
   "id": "4f9d4d67-3bc3-4512-8d9f-7c11ab4a0f5d",
-  "currentTurn": 42,
+  "currentTurn": 43,
   "saveVersion": "2.8",
-  "timestamp": "2026-08-31T03:32:21.654Z",
+  "timestamp": "2026-08-31T03:55:29.952Z",
   "gameSettings": {
     "storyTitle": "Tam Quốc Diệt Ma Truyền Kỳ",
     "theme": "Tên: Tam Quốc Diệt Ma Truyền Kỳ | Thể loại: Tiên Hiệp Lịch Sử | Thẻ: Tam Quốc, Đạo Pháp, Trừ Ma, Thường Sơn, Nam Hoa Lão Tiên",
@@ -325,7 +325,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 23.30000000000001,
+        "exp": 23.400000000000013,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": 0,
@@ -534,6 +534,20 @@
             "Consumable": true,
             "Equippable": false,
             "id": "078971bf-752a-48cc-8a77-49e74dc0515b",
+            "quantity": 1,
+            "Value": 14999850
+          },
+          {
+            "Weight": 1,
+            "adventureUsedescription": "Viên đan chứa đựng phong lực mãnh liệt của Sơn Linh, giúp người sử dụng gia tăng cực hạn tốc độ và lực công kích trong thời gian ngắn.",
+            "effectsString": "APPLY_DYNAMIC_STATUS:target=self,name=Phong Lực Sơn Linh,type=buff,duration=3,stat_changes=SPD_PERCENT:1666650,ATK_PERCENT:1666650",
+            "Name": "Hổ Đan Sơn Linh",
+            "description": "Viên đan chứa đựng tàn dư phong lực của Sơn Linh.",
+            "Type": "Đan dược",
+            "Rarity": "Hiếm",
+            "Consumable": true,
+            "Equippable": false,
+            "id": "aee7eb17-15cd-4626-8175-fcb0949e1c9f",
             "quantity": 1,
             "Value": 14999850
           }
@@ -1036,15 +1050,15 @@
           "turn": 26
         }
       ],
-      "lastExpResolvedTurn": 41
+      "lastExpResolvedTurn": 42
     },
     "loreQuests": [],
     "pendingCreations": [],
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 41,
-      "world_time": 41,
+      "turn_id": 42,
+      "world_time": 42,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -1058,120 +1072,6 @@
       }
     },
     "stateHistory": [
-      {
-        "time": {
-          "year": 0,
-          "month": 1,
-          "day": 10,
-          "hour": 18
-        },
-        "location_id": "1b86f08e-9043-49cb-aac7-5e63d3b49578",
-        "weather": "Sương mù dày đặc và tà khí ma hóa",
-        "characters": [
-          {
-            "id": "player",
-            "Name": "Diệp Thần",
-            "level": 1,
-            "exp": 23.10000000000001,
-            "hp": 2000,
-            "maxhp": 2000,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "b6de4eac-cd6e-43d9-b2ce-264c553ce5f7",
-            "Name": "Nam Hoa Lão Tiên",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "bd85e45e-f13c-41d2-a278-10ed93722c18",
-            "Name": "Hạ Hầu Khinh Y",
-            "level": 15,
-            "exp": 0,
-            "hp": 5880,
-            "maxhp": 5880,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
-            "Name": "Triệu Vân",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "62c26dd7-d1bf-419e-8d03-75db7b24bbc1",
-            "Name": "Sĩ quan lính canh",
-            "level": 1,
-            "exp": 0,
-            "hp": 1000,
-            "maxhp": 1000,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "e1a058f1-8ef1-4f4a-8b6b-36de2be32d57",
-            "Name": "Lão chủ tiệm thuốc",
-            "level": 1,
-            "exp": 0,
-            "hp": 1000,
-            "maxhp": 1000,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          }
-        ],
-        "quests": [
-          {
-            "id": "8c8183bd-fbdb-408d-adc4-120609a67fac",
-            "title": "Chăm sóc con của Bạch Hổ Sơn Linh",
-            "status": "active",
-            "objectives": [
-              {
-                "id": "rescue_baby_tiger",
-                "text": "Giải cứu Tiểu Bạch Hổ đang cùng Hạ Hầu Khinh Y bị vây hãm tại hậu viện.",
-                "type": "action",
-                "targetName": "Tiểu Bạch Hổ",
-                "requiredCount": 1,
-                "currentCount": 2,
-                "completed": true
-              },
-              {
-                "id": "purify_corruption",
-                "text": "Sử dụng chân nguyên của Thái Bình Yếu Thuật để thanh tẩy tà khí ma hóa trên người Tiểu Bạch Hổ.",
-                "type": "action",
-                "targetName": "Thanh tẩy tà khí",
-                "requiredCount": 1,
-                "currentCount": 1,
-                "completed": true
-              },
-              {
-                "id": "reach_tiger_cave",
-                "text": "Di chuyển đến sơn động bí ẩn theo tọa độ thần thức để bảo vệ an toàn cho hổ con.",
-                "type": "goto",
-                "targetName": "Sơn động Bạch Hổ",
-                "requiredCount": 1,
-                "currentCount": 0,
-                "completed": false
-              }
-            ]
-          }
-        ]
-      },
       {
         "time": {
           "year": 0,
@@ -1285,6 +1185,133 @@
                 "targetName": "Sơn động Bạch Hổ",
                 "requiredCount": 1,
                 "currentCount": 1,
+                "completed": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "time": {
+          "year": 0,
+          "month": 1,
+          "day": 11,
+          "hour": 6
+        },
+        "location_id": "aa92da1d-c85a-4c45-b287-136165fdea9d",
+        "weather": "Sương mù tản dần, linh khí thuần khiết",
+        "characters": [
+          {
+            "id": "player",
+            "Name": "Diệp Thần",
+            "level": 1,
+            "exp": 23.30000000000001,
+            "hp": 2000,
+            "maxhp": 2000,
+            "currency": 0,
+            "inventory": [
+              {
+                "Name": "Quả trứng màu xanh lục",
+                "quantity": 1
+              },
+              {
+                "Name": "Linh Thú Khế Ước (Tiểu Bạch)",
+                "quantity": 1
+              },
+              {
+                "Name": "Hổ Đan Sơn Linh",
+                "quantity": 1
+              }
+            ],
+            "longTermStatuses": []
+          },
+          {
+            "id": "b6de4eac-cd6e-43d9-b2ce-264c553ce5f7",
+            "Name": "Nam Hoa Lão Tiên",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "bd85e45e-f13c-41d2-a278-10ed93722c18",
+            "Name": "Hạ Hầu Khinh Y",
+            "level": 15,
+            "exp": 0,
+            "hp": 5880,
+            "maxhp": 5880,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
+            "Name": "Triệu Vân",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "62c26dd7-d1bf-419e-8d03-75db7b24bbc1",
+            "Name": "Sĩ quan lính canh",
+            "level": 1,
+            "exp": 0,
+            "hp": 1000,
+            "maxhp": 1000,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "e1a058f1-8ef1-4f4a-8b6b-36de2be32d57",
+            "Name": "Lão chủ tiệm thuốc",
+            "level": 1,
+            "exp": 0,
+            "hp": 1000,
+            "maxhp": 1000,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          }
+        ],
+        "quests": [
+          {
+            "id": "8c8183bd-fbdb-408d-adc4-120609a67fac",
+            "title": "Chăm sóc con của Bạch Hổ Sơn Linh",
+            "status": "ready_to_turn_in",
+            "objectives": [
+              {
+                "id": "rescue_baby_tiger",
+                "text": "Giải cứu Tiểu Bạch Hổ đang cùng Hạ Hầu Khinh Y bị vây hãm tại hậu viện.",
+                "type": "action",
+                "targetName": "Tiểu Bạch Hổ",
+                "requiredCount": 1,
+                "currentCount": 2,
+                "completed": true
+              },
+              {
+                "id": "purify_corruption",
+                "text": "Sử dụng chân nguyên của Thái Bình Yếu Thuật để thanh tẩy tà khí ma hóa trên người Tiểu Bạch Hổ.",
+                "type": "action",
+                "targetName": "Thanh tẩy tà khí",
+                "requiredCount": 1,
+                "currentCount": 1,
+                "completed": true
+              },
+              {
+                "id": "reach_tiger_cave",
+                "text": "Di chuyển đến sơn động bí ẩn theo tọa độ thần thức để bảo vệ an toàn cho hổ con.",
+                "type": "goto",
+                "targetName": "Sơn động Bạch Hổ",
+                "requiredCount": 1,
+                "currentCount": 2,
                 "completed": true
               }
             ]
@@ -3166,13 +3193,73 @@
           "content": "*Hạ Hầu Khinh Y* vui mừng khôn xiết, nàng lao tới ôm lấy cánh tay ngươi, gương mặt rạng rỡ niềm kiêu hãnh. *Tiểu Bạch* và *Tiểu Thanh* cũng rên rỉ vui sướng, quấn quýt xung quanh chủ nhân. Tuy nhiên, niềm vui chưa kéo dài được bao lâu, thì từ sâu trong lòng núi, một luồng chấn động tà ác khác lại bùng phát. Có vẻ như việc rút cây thần binh này đã vô tình làm suy yếu trận pháp trấn áp một thực thể ma đạo cổ xưa khác nằm sâu dưới chân núi *Thường Sơn*.\nTiếng gầm rú đục ngầu vọng lại từ phía vực sâu dưới hang động, và mùi hôi thối của tử khí lại bắt đầu lan tỏa. Ngươi nhận ra, việc thu phục thần binh chỉ là khởi đầu cho một chuỗi biến cố mới đầy rẫy hiểm nguy."
         }
       ]
+    },
+    {
+      "id": "b9be91af-d88c-43d4-9c5f-48dceb12f6ff",
+      "type": "user_custom_action",
+      "content": "Nhận người tiền tài thì phải thay người tiêu tai. Ta đã lấy đi Bách Điểu Triều Phụng thương vậy thì phải diệt trừ ma vật bị phong ấn bên dưới. Nói xong ngươi niệm chú rồi dán lá bùa phá sát lên Bách Điểu Triều Phụng thương giúp nó tăng uy lực khi chiến đáu với ma vật. Sau khi dặn dò Tiểu Bạch và Tiểu Thanh bảo vệ 2 người Khinh Y, ngươi liền cầm thương lao tới chiến với ma vật mới hình thành"
+    },
+    {
+      "id": "dd62a1fe-26d9-4538-88c7-734383784634",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Một tiếng nổ trầm đục, dữ dội thình lình phát ra từ sâu thẳm dưới lòng đất, làm chấn động toàn bộ vách đá cô tịch của hang động cổ kính trên *Đỉnh Núi Thường Sơn*. Những mảng thạch nhũ nghìn năm run rẩy kịch liệt, rơi loảng xoảng xuống nền đất bụi bặm. Từ khe nứt sâu hoắm ngay phía dưới đài đá cẩm thạch trắng, từng luồng hắc khí đặc quánh, đỏ tía như máu loãng cuồn cuộn trào lên, mang theo mùi tanh nồng của oán niệm và tiếng gào thét thê lương của một thực thể tà ác vừa mới thành hình. *Diệp Thần* đứng thẳng người trước đài đá, mái tóc đen tung bay trong luồng cuồng phong lạnh buốt, bàn tay hắn nắm chặt lấy cán của *Bách Điểu Triều Phụng thương* vừa mới thu phục. Hào quang bạc từ thân thương phản chiếu đôi mắt rực sáng ý chí quyết liệt của hắn. Không một chút do dự, hắn hét vang, âm thanh lẫm liệt vang dội khắp hang động:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Nhận người tiền tài thì phải thay người tiêu tai! Ta đã lấy đi *Bách Điểu Triều Phụng thương* này, dĩ nhiên phải giúp *Thường Sơn* diệt trừ thứ ma vật bị phong ấn bên dưới!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngay khi lời nói vừa dứt, *Diệp Thần* nhanh như cắt thọc tay vào đai lưng thắt bằng gỗ sồi cũ kỹ, rút ra một lá bùa phá sát màu vàng sẫm chứa đựng chính khí lôi đình. Hắn ngưng tụ toàn bộ luồng chân nguyên tinh thuần dồi dào trong đan điền vào đầu ngón tay trỏ, vạch nhanh những đường vân bùa chú ngoằn ngoèo đỏ rực lên mặt giấy bùa, rồi dán chặt lá bùa ấy lên ngay sát mũi của cây trường thương bạc. \n\"Bùm!\"\nLá bùa phá sát bùng cháy rực rỡ bằng một ngọn lửa lôi điện màu xanh tím hung hãn. Những tia sét nhỏ li ti bò trườn, quấn quýt lấy thân thương, kích hoạt toàn bộ linh tính phong lôi tiềm ẩn bên trong thần binh tuyệt thế. *Bách Điểu Triều Phụng thương* rít lên một tiếng rồng ngâm lẫm liệt, trăm loài chim ảo ảnh bỗng chốc hiện hình xung quanh lưỡi thương, tấu lên bản nhạc triều phụng đầy oai nghiêm, sẵn sàng quét sạch mọi tà ma ngoại đạo.\nHắn quay đầu lại nhìn *Hạ Hầu Khinh Y* và hai tỳ nữ đang đứng cảnh giác phía sau, cất giọng quả quyết ra lệnh cho hai linh thú hộ mệnh:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tiểu Bạch! Tiểu Thanh! Hai ngươi hãy dốc toàn lực bảo vệ Khinh Y và Tiểu Thúy, tuyệt đối không được để một tia ma khí nào xâm hại đến họ!"
+        },
+        {
+          "type": "narrative",
+          "content": "Chú hổ con *Tiểu Bạch* gầm lên một tiếng lẫm liệt đầy uy nghiêm của vương giả núi rừng, bộ lông trắng muốt dựng đứng, chắn ngay trước người *Hạ Hầu Khinh Y*. Chú rồng nhỏ *Tiểu Thanh* cũng vẫy đuôi bay lượn trên không trung, thân hình uốn lượn tạo thành một màng lọc linh quang màu xanh lục tươi mát che chở cho hai người con gái. *Hạ Hầu Khinh Y* nắm chặt chuôi kiếm *Thanh Thủy*, đôi mắt phượng chứa chan niềm tin yêu và lo lắng nhìn theo bóng lưng cương nghị của phu quân:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Phu quân, chàng phải cẩn thận! Ma vật này khí tức cực kỳ hung bạo, thiếp và các linh thú sẽ canh giữ ở đây chờ chàng chiến thắng trở về!"
+        },
+        {
+          "type": "narrative",
+          "content": "Không chút chậm trễ, *Diệp Thần* dẫm mạnh chân xuống mặt đất, mượn lực của phong kình từ *Linh Phong Thuật* bao bọc lấy thân thể, hóa thành một luồng ánh sáng bạc lướt thẳng xuống vực sâu tối tăm dưới lòng hang động, nơi ma vật vừa thành hình đang điên cuồng gào rú.\nBên dưới vực sâu, không gian u tối đến mức năm ngón tay cũng không nhìn rõ, chỉ có những dải ma khí đỏ tía phát ra thứ ánh sáng tà mị, rợn người. Thực thể ma vật vừa mới thành hình hiện ra trước mắt *Diệp Thần* là một con quái thú khổng lồ nửa người nửa rết, dài tới hơn ba trượng. Toàn thân nó được bao bọc bởi một lớp giáp sừng đen kịt, lởm chởm những gai nhọn dính đầy độc dịch màu đen bốc khói nghi ngút. Trăm chiếc chân nhọn hoắt như những lưỡi đao rỉ sét liên tục cào xé vào vách đá tạo nên những tiếng rít chói tai. Đôi mắt nó rực lửa đỏ tía, cái miệng khổng lồ đầy răng nanh nhọn hoắt phun ra những làn khói độc sương ma đạo tanh nồng mùi thối rữa.\nTrận quyết chiến sinh tử bùng nổ vô cùng dồn dập và tàn khốc. \n*Diệp Thần* áp sát mục tiêu với tốc độ kinh hồn. Cây thương bạc trong tay hắn múa tít tạo thành một vòng tròn lôi quang rực rỡ, đâm liên tiếp hàng chục nhát thương vào lớp giáp sừng của ma vật. \n\"Binh! Binh! Binh!\"\nNhững tiếng va chạm kim loại chói tai vang dội khắp hang động tối tăm, tia lửa bắn ra tung tóe nhuộm sáng cả một vùng vực sâu. Với sự cường hóa mạnh mẽ từ bùa phá sát, mỗi đường thương của *Diệp Thần* đều mang theo uy lực của sấm sét tiên gia, trực tiếp phá vỡ lớp phòng ngự bằng ma khí của quái thú. Lôi hỏa bùng lên rực rỡ tại những vết thương bị đâm trúng, thiêu rụi da thịt thối rữa của ma vật khiến nó đau đớn gầm rú điên cuồng.\nCon rết khổng lồ phẫn nộ vung chiếc đuôi dài đầy gai nhọn quất mạnh về phía hắn. Đòn đánh mang theo sức nặng vạn cân xé rách không khí tạo nên một tiếng nổ lớn. *Diệp Thần* không hề lùi bước, hắn vận chuyển chân nguyên quy nguyên vào hai chân, uốn cong người thực hiện một cú nhào lộn đầy kỹ thuật giữa không trung để né tránh, đồng thời vung thương quét ngang một đường hiểm hóc.\n\"Xoẹt!\"\nMũi thương sắc bén rạch một đường dài trên thân ma vật, dịch độc màu đen phun ra xối xả, ăn mòn những tảng đá xung quanh thành những vũng nước sủi bọt khét lẹt. Sức mạnh của *Bách Điểu Triều Phụng thương* lúc này đã hoàn toàn tương hợp với ý chí trừ ma của hắn, mỗi lần vung thương lại có tiếng chim hót vang dội cổ vũ tinh thần, xua tan đi sự đè nén của tử khí.\nỞ phía trên đài đá cao, cuộc chiến phòng thủ cũng diễn ra vô cùng căng thẳng. Những dải ma khí đỏ tía rỉ ra từ trận chiến bên dưới liên tục cố gắng tràn lên để xâm nhập vào cơ thể của *Hạ Hầu Khinh Y* và *Tiểu Thúy*. Thế nhưng, chú hổ con *Tiểu Bạch* không hề cho chúng cơ hội. Nó dẫm mạnh bốn chân, linh quang vương giả màu bạc bùng phát rực rỡ, phối hợp cùng những luồng phong kình do *Tiểu Thanh* tạo ra xé rách mọi luồng tà khí định tiếp cận. *Hạ Hầu Khinh Y* đứng giữa màng bảo hộ, tay cầm bảo kiếm sáng loáng, khí chất kiên nghị của nàng dâu mới kết duyên càng làm tăng thêm sức mạnh cho các linh thú.\nDưới đáy vực sâu, trận quyết chiến đã đi vào giai đoạn quyết định. *Diệp Thần* cảm thấy chân nguyên trong đan điền đã bắt đầu có phần xao động sau những đòn đánh liên tục với cường độ cực cao, nhưng ý chí sắt đá của một cựu đặc công không cho phép hắn chần chừ. Hắn dồn toàn bộ nguồn lực lượng tinh thuần cuối cùng vào thân thương, bùa phá sát trên mũi thương bùng cháy đến mức cực hạn, hóa thành một con phượng hoàng lửa rực rỡ bao bọc lấy toàn bộ cây trường thương bạc."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Nghiệt chướng! Hãy tan biến trước thiên lôi chính khí đi! Bách Điểu Triều Phụng!"
+        },
+        {
+          "type": "narrative",
+          "content": "Hắn quát lớn, thân hình như một luồng sấm sét màu trắng lao thẳng vào giữa lồng ngực của ma vật rết khổng lồ. Mũi thương sắc lẹm mang theo ngọn lửa lôi đình rực rỡ đâm xuyên qua lớp giáp sừng cứng nhất, cắm sâu tận tâm can của quái thú.\n\"Oanh!\"\nMột tiếng nổ kinh thiên động địa bùng phát từ bên trong cơ thể ma vật. Ngọn lửa lôi đình màu xanh tím điên cuồng bộc phát, thiêu rụi toàn bộ ma tính và oán niệm tích tụ ngàn năm của nó thành tro bụi. Con quái thú khổng lồ gầm rú thê lương một tiếng cuối cùng rồi hoàn toàn sụp đổ, hóa thành những mảng khói đen nhạt rồi tan biến vào hư không u tối. Trận pháp ma đạo dưới lòng đất bị đập tan hoàn toàn, trả lại sự trong sạch và linh khí thuần khiết vốn có cho linh mạch của *Thường Sơn*.\nKhi khói bụi tan đi, *Diệp Thần* gượng đứng vững bằng cách cắm mạnh cây *Bách Điểu Triều Phụng thương* xuống nền đá sần sùi. Hơi thở hắn dồn dập, mồ hôi lạnh chảy dài trên thái dương dính chút bụi bặm chiến trường, nhưng đan điền hắn lúc này lại vô cùng vững chắc và ấm áp nhờ sự phản hồi chính khí từ thiên địa sau khi hoàn thành đại công trừ ma. \nTừ phía trên cao, một bóng hồng lướt nhanh xuống vực sâu. *Hạ Hầu Khinh Y* với gương mặt rạng rỡ hạnh phúc, không màng đến vết bẩn dọc đường, lao thẳng vào lòng hắn, ôm chặt lấy eo hắn đầy ỷ lại:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Phu quân! Chàng thực sự đã làm được rồi! Ma vật hung hãn kia đã bị chàng tiêu diệt hoàn toàn, linh mạch Thường Sơn đã được cứu rỗi!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi ôm lấy thân thể mềm mại, thanh nhã của thê tử, khẽ mỉm cười tiêu sái xua đi sự mệt mỏi. Chú hổ con *Tiểu Bạch* nhảy phắt tới bên chân ngươi, đôi mắt hoàng kim rực sáng oai nghiêm, phát ra những tiếng gầm nhỏ đầy tự hào. Lúc này, một thông điệp từ thần thức truyền đến, báo hiệu chú hổ con đã chính thức trở thành đồng hành trung thành gắn kết sinh mệnh với ngươi, hoàn thành mỹ mãn lời hứa với Sơn Linh vĩ đại. Chú rồng nhỏ *Tiểu Thanh* cũng vui sướng bay lượn xung quanh hai người, tạo nên một khung cảnh vô cùng đầm ấm và kỳ ảo giữa lòng hang động cổ kính.\nTuy nhiên, ngay khi tà khí vừa tan biến hoàn toàn, từ phía sau bức tường đá nơi ma vật rết khổng lồ vừa sụp đổ, một lối đi thạch thất bí ẩn khác bỗng chốc hiện ra. Linh khí từ bên trong thạch thất tỏa ra vô cùng ôn hòa nhưng cũng đầy vẻ thần bí, báo hiệu những bí mật cổ xưa của vùng *Thường Sơn* này đang chờ đợi vị truyền nhân duy nhất của *Nam Hoa Lão Tiên* đến khám phá."
+        }
+      ]
     }
   ],
   "choices": [
-    "Vung thương thi triển Bách Điểu Triều Phụng thức để trấn áp luồng ma khí vừa trỗi dậy dưới lòng hang {Tỷ lệ thành công: 75%, Hậu quả/Phần thưởng: Tạm thời phong ấn khe nứt ma đạo, tôi luyện sự gắn kết với thần binh mới}",
-    "Dẫn theo Khinh Y và mọi người nhanh chóng rời khỏi hang trước khi trận pháp sụp đổ hoàn toàn {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Thoát ra ngoài an toàn nhưng để lại một mối họa ma đạo lớn tại linh mạch Thường Sơn}",
-    "Sử dụng Thái Bình Yếu Thuật kết hợp với linh lực của Tiểu Thanh để lập trận pháp gia cố lại điểm yếu của long mạch {Tỷ lệ thành công: 60%, Hậu quả/Phần thưởng: Bảo vệ được linh địa lâu dài, tinh tiến tu vi trận pháp nhưng tiêu hao rất nhiều chân nguyên}",
-    "Dùng Hổ Đan Sơn Linh vừa thu được để bồi bổ cho Tiểu Bạch, giúp nó đạt đến hình thể trưởng thành nhằm đối phó với thực thể dưới lòng đất {Tỷ lệ thành công: 50%, Hậu quả/Phần thưởng: Tiểu Bạch đột phá sức mạnh vượt bậc nhưng có rủi ro bị bạo tẩu do dược lực quá mạnh}"
+    "Khảo sát kỹ lưỡng thạch thất bí ẩn vừa lộ diện để tìm kiếm thêm công pháp hoặc báu vật cổ xưa của tiên gia trước khi rời khỏi Thường Sơn. {Tỷ lệ thành công: 75%, Hậu quả/Phần thưởng: Tìm thấy một số ghi chép cổ và linh thạch quý giá, giúp tinh tiến tu vi đan điền nhanh chóng hơn}",
+    "Dẫn theo Khinh Y và các linh thú quay trở ra ngoài hang động để nghỉ ngơi hồi phục thể lực dưới ánh nắng sớm mai trong lành. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Thể trạng hồi phục hoàn hảo, củng cố tình cảm khăng khít với thê tử và các linh thú trong cảnh yên bình}",
+    "Sử dụng đạo pháp của Thái Bình Yếu Thuật để phong ấn hoàn toàn lối đi thạch thất này lại nhằm tránh việc ma khí phương Bắc tiếp tục rình rập xâm nhập. {Tỷ lệ thành công: 80%, Hậu quả/Phần thưởng: Bảo vệ an toàn tuyệt đối cho linh mạch Thường Sơn, nhưng tạm thời bỏ lỡ những bí mật cổ xưa bên trong}",
+    "Lập tức thu dọn hành lý và rời khỏi khu vực sườn núi Thường Sơn để tiếp tục hành trình hướng về phía Trác Quận tìm kiếm cơ hội tham gia thảo phạt Hoàng Cân. {Tỷ lệ thành công: 70%, Hậu quả/Phần thưởng: Nhanh chóng tiếp cận chiến trường đại lộ quan trọng, nhưng thể lực chưa đạt trạng thái đỉnh phong nhất}"
   ],
   "gameMode": "EXPLORATION",
   "activeTrade": {
@@ -3185,5 +3272,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 41
+  "adventureTurnCount": 42
 }
