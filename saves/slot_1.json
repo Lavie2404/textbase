@@ -1,8 +1,8 @@
 {
   "id": "4f9d4d67-3bc3-4512-8d9f-7c11ab4a0f5d",
-  "currentTurn": 43,
+  "currentTurn": 48,
   "saveVersion": "2.8",
-  "timestamp": "2026-08-31T03:55:29.952Z",
+  "timestamp": "2026-08-31T06:07:14.761Z",
   "gameSettings": {
     "storyTitle": "Tam Quốc Diệt Ma Truyền Kỳ",
     "theme": "Tên: Tam Quốc Diệt Ma Truyền Kỳ | Thể loại: Tiên Hiệp Lịch Sử | Thẻ: Tam Quốc, Đạo Pháp, Trừ Ma, Thường Sơn, Nam Hoa Lão Tiên",
@@ -123,10 +123,10 @@
     "time": {
       "year": 0,
       "month": 1,
-      "day": 11,
-      "hour": 6
+      "day": 13,
+      "hour": 7
     },
-    "weather": "Sương mù tản dần, linh khí thuần khiết",
+    "weather": "Nắng sớm, sương mù tản dần",
     "narrativeCombatState": {
       "isActive": false,
       "combatants": []
@@ -246,6 +246,20 @@
         "description": "Một địa điểm vừa được khám phá.",
         "category": "Khu Vực",
         "tier": 3
+      },
+      {
+        "id": "dbf7998d-b96b-4ede-9b30-b89037905e22",
+        "Name": "Phủ Công Tôn",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      },
+      {
+        "id": "77c53e38-df08-4254-a040-3a567a3dc086",
+        "Name": "Miếu hoang ngoại vi Thường Sơn",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
       }
     ],
     "items": [],
@@ -299,6 +313,47 @@
         "failureDescription": "Tiểu Bạch Hổ bị tà khí ma hóa hoàn toàn thành Ma thú dữ tợn và phải bị tiêu diệt; Diệp Thần chịu phạt phản phệ đạo tâm cực nặng, giảm mạnh tốc độ tu luyện chân nguyên trong thời gian dài.",
         "deadline_hours": 24,
         "status": "ready_to_turn_in"
+      },
+      {
+        "id": "96338829-e702-42cd-89b2-479d06cce22e",
+        "title": "Giải kiếp cho Công Tôn Bảo Nguyệt",
+        "loreId": "lore_quest_giai_kiep_bao_nguyet",
+        "category": "hệ thống",
+        "completion_condition": "auto_complete",
+        "questGiver": "Hệ Thống",
+        "objectives": [
+          {
+            "id": "persuade_baonguyet",
+            "text": "Thuyết phục Công Tôn Bảo Nguyệt để lại thư từ biệt và rời khỏi phủ Công Tôn.",
+            "type": "talk",
+            "targetName": "Công Tôn Bảo Nguyệt",
+            "requiredCount": 1,
+            "currentCount": 1,
+            "completed": true
+          },
+          {
+            "id": "escape_tracquan",
+            "text": "Đưa Công Tôn Bảo Nguyệt thoát khỏi sự bao vây của sương mù ma đạo tại Trác Quận.",
+            "type": "goto",
+            "targetName": "Ngoại vi Trác Quận",
+            "requiredCount": 1,
+            "currentCount": 0,
+            "completed": false
+          },
+          {
+            "id": "defeat_lurking_evil",
+            "text": "Tiêu diệt các linh thể ma đạo đang bám theo để hoàn tất việc giải sát họa.",
+            "type": "kill",
+            "targetName": "Linh Thể Ma Đạo",
+            "requiredCount": 3,
+            "currentCount": 0,
+            "completed": false
+          }
+        ],
+        "rewardsDescription": "Hóa giải hoàn toàn kiếp nạn tử vong cho Công Tôn Bảo Nguyệt, tăng hảo cảm lên mức Yêu thích, nhận được sự trung thành tuyệt đối của nàng và gia tăng thiên mệnh khí vận của bản thân.",
+        "failureDescription": "Công Tôn Bảo Nguyệt gánh chịu sát họa dẫn đến tử vong; Diệp Thần bị phản phệ đạo pháp nghiêm trọng và mất đi cơ duyên liên kết với thế lực của Công Tôn Toản.",
+        "deadline_hours": 24,
+        "status": "active"
       }
     ],
     "trackedQuestId": "8c8183bd-fbdb-408d-adc4-120609a67fac",
@@ -325,7 +380,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 23.400000000000013,
+        "exp": 34.00000000000002,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": 0,
@@ -335,7 +390,7 @@
           "def": 0,
           "spd": 0
         },
-        "current_location_id": "aa92da1d-c85a-4c45-b287-136165fdea9d",
+        "current_location_id": "77c53e38-df08-4254-a040-3a567a3dc086",
         "baseHp": 2000,
         "baseAtk": 200,
         "baseDef": 100,
@@ -522,34 +577,6 @@
             "id": "365a305f-91da-4c33-8f1e-cca0c57dd688",
             "quantity": 1,
             "Value": 1499985000
-          },
-          {
-            "Weight": 1,
-            "adventureUsedescription": "Viên đan kết tinh từ tinh hoa phong lực của sơn linh, tỏa ra linh quang dịu nhẹ, giúp hỗ trợ đắc lực trong việc đột phá rào cản tu vi và thanh tẩy kinh mạch.",
-            "effectsString": "APPLY_DYNAMIC_STATUS:target=self,name=Linh Quang Sơn Linh,type=buff,duration=3,stat_changes=ATK_PERCENT:1666650,SPD_PERCENT:1666650",
-            "Name": "Hổ Đan Sơn Linh",
-            "description": "Viên đan kết tinh từ tinh hoa phong lực của sơn linh, tỏa ra linh quang dịu nhẹ, giúp hỗ trợ đắc lực trong việc đột phá rào cản tu vi và thanh tẩy kinh mạch.",
-            "Type": "Đan dược",
-            "Rarity": "Hiếm",
-            "Consumable": true,
-            "Equippable": false,
-            "id": "078971bf-752a-48cc-8a77-49e74dc0515b",
-            "quantity": 1,
-            "Value": 14999850
-          },
-          {
-            "Weight": 1,
-            "adventureUsedescription": "Viên đan chứa đựng phong lực mãnh liệt của Sơn Linh, giúp người sử dụng gia tăng cực hạn tốc độ và lực công kích trong thời gian ngắn.",
-            "effectsString": "APPLY_DYNAMIC_STATUS:target=self,name=Phong Lực Sơn Linh,type=buff,duration=3,stat_changes=SPD_PERCENT:1666650,ATK_PERCENT:1666650",
-            "Name": "Hổ Đan Sơn Linh",
-            "description": "Viên đan chứa đựng tàn dư phong lực của Sơn Linh.",
-            "Type": "Đan dược",
-            "Rarity": "Hiếm",
-            "Consumable": true,
-            "Equippable": false,
-            "id": "aee7eb17-15cd-4626-8175-fcb0949e1c9f",
-            "quantity": 1,
-            "Value": 14999850
           }
         ],
         "pendingSkillsToLearn": [],
@@ -1032,6 +1059,87 @@
         "incomingHealing": 1,
         "maxExp": 100,
         "skills": []
+      },
+      {
+        "id": "c985e31b-1ea3-4270-b35c-4035988055c1",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 25,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 58,
+          "atk": 54,
+          "def": 54,
+          "spd": 54
+        },
+        "current_location_id": "77c53e38-df08-4254-a040-3a567a3dc086",
+        "baseHp": 680,
+        "baseAtk": 68,
+        "baseDef": 34,
+        "baseSpd": 54,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 12280,
+        "maxhp": 12280,
+        "atk": 608,
+        "def": 574,
+        "spd": 594,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 15,
+        "Name": "Công Tôn Bảo Nguyệt",
+        "description": "",
+        "Stance": "Cảnh giác và dò xét. Nàng nhận thấy khí tức của Nam Hoa Lão Tiên trên người Diệp Thần nên muốn kiểm chứng thực lực và mục đích thực sự của hắn.",
+        "realm": "Giai Đoạn 3",
+        "incomingHealing": 1,
+        "maxExp": 40500,
+        "Role": "Quận chúa U Châu, Nữ tướng thống lĩnh kỵ binh Bạch Mã Nghĩa Tòng chuyên diệt ma.",
+        "Appearance": "Vẻ đẹp oai phong với bộ giáp bạc lấp lánh, áo choàng trắng tinh khôi như tuyết Thường Sơn. Nàng sở hữu đôi mắt phượng sắc sảo, đôi mày kiếm thanh tú, mái tóc buộc cao bằng dây lụa đỏ. Khí chất vừa có sự quý phái của tiểu thư khuê các, vừa có sự lạnh lùng của một chiến tướng dạn dày sương gió.",
+        "Backstory": "Con gái của Công Tôn Toản, sinh trưởng trong thời loạn lạc. Nàng không cam lòng nhìn bách tính lầm than vì oán khí chiến tranh sinh ra yêu ma, nên đã tự mình rèn luyện thương pháp kết hợp với linh lực. Nàng bí mật xây dựng một đội quân trừ tà ẩn trong kỵ binh Bạch Mã để bảo vệ biên cương khỏi sự xâm lấn của các thế lực siêu nhiên phương Bắc.",
+        "Personality": "Mạnh mẽ, cương trực, ghét sự dối trá và yêu ma quỷ quái. Nàng rất trọng nghĩa hiệp nhưng lại có cái tôi khá cao.",
+        "isAppraised": true
       }
     ],
     "sharedCooldowns": {
@@ -1048,17 +1156,21 @@
         {
           "reason": "Ký chủ thực hiện hành động cải trang, nâng cấp trang bị để đảm bảo tính an toàn và bí mật cho nhiệm vụ hộ tống Tiểu Bạch Hổ trong bối cảnh thành Trác Quận đang bị lính canh tuần tra gắt gao.",
           "turn": 26
+        },
+        {
+          "reason": "Hoàn thành thu phục thần binh Bất Vãn và củng cố mối quan hệ nhân duyên với Hạ Hầu Khinh Y, thể hiện tư chất của kẻ nắm giữ thiên mệnh.",
+          "turn": 43
         }
       ],
-      "lastExpResolvedTurn": 42
+      "lastExpResolvedTurn": 47
     },
     "loreQuests": [],
     "pendingCreations": [],
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 42,
-      "world_time": 42,
+      "turn_id": 47,
+      "world_time": 47,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -1077,135 +1189,16 @@
           "year": 0,
           "month": 1,
           "day": 11,
-          "hour": 6
+          "hour": 16
         },
-        "location_id": "cda2eeb4-7163-4dc4-ba90-f0af53a4e95b",
-        "weather": "Sương mù sớm mai, không khí trong lành",
+        "location_id": "dbf7998d-b96b-4ede-9b30-b89037905e22",
+        "weather": "Sương mù dày đặc",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 23.20000000000001,
-            "hp": 2000,
-            "maxhp": 2000,
-            "currency": 0,
-            "inventory": [
-              {
-                "Name": "Quả trứng màu xanh lục",
-                "quantity": 1
-              }
-            ],
-            "longTermStatuses": []
-          },
-          {
-            "id": "b6de4eac-cd6e-43d9-b2ce-264c553ce5f7",
-            "Name": "Nam Hoa Lão Tiên",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "bd85e45e-f13c-41d2-a278-10ed93722c18",
-            "Name": "Hạ Hầu Khinh Y",
-            "level": 15,
-            "exp": 0,
-            "hp": 5880,
-            "maxhp": 5880,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
-            "Name": "Triệu Vân",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "62c26dd7-d1bf-419e-8d03-75db7b24bbc1",
-            "Name": "Sĩ quan lính canh",
-            "level": 1,
-            "exp": 0,
-            "hp": 1000,
-            "maxhp": 1000,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "e1a058f1-8ef1-4f4a-8b6b-36de2be32d57",
-            "Name": "Lão chủ tiệm thuốc",
-            "level": 1,
-            "exp": 0,
-            "hp": 1000,
-            "maxhp": 1000,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          }
-        ],
-        "quests": [
-          {
-            "id": "8c8183bd-fbdb-408d-adc4-120609a67fac",
-            "title": "Chăm sóc con của Bạch Hổ Sơn Linh",
-            "status": "ready_to_turn_in",
-            "objectives": [
-              {
-                "id": "rescue_baby_tiger",
-                "text": "Giải cứu Tiểu Bạch Hổ đang cùng Hạ Hầu Khinh Y bị vây hãm tại hậu viện.",
-                "type": "action",
-                "targetName": "Tiểu Bạch Hổ",
-                "requiredCount": 1,
-                "currentCount": 2,
-                "completed": true
-              },
-              {
-                "id": "purify_corruption",
-                "text": "Sử dụng chân nguyên của Thái Bình Yếu Thuật để thanh tẩy tà khí ma hóa trên người Tiểu Bạch Hổ.",
-                "type": "action",
-                "targetName": "Thanh tẩy tà khí",
-                "requiredCount": 1,
-                "currentCount": 1,
-                "completed": true
-              },
-              {
-                "id": "reach_tiger_cave",
-                "text": "Di chuyển đến sơn động bí ẩn theo tọa độ thần thức để bảo vệ an toàn cho hổ con.",
-                "type": "goto",
-                "targetName": "Sơn động Bạch Hổ",
-                "requiredCount": 1,
-                "currentCount": 1,
-                "completed": true
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "time": {
-          "year": 0,
-          "month": 1,
-          "day": 11,
-          "hour": 6
-        },
-        "location_id": "aa92da1d-c85a-4c45-b287-136165fdea9d",
-        "weather": "Sương mù tản dần, linh khí thuần khiết",
-        "characters": [
-          {
-            "id": "player",
-            "Name": "Diệp Thần",
-            "level": 1,
-            "exp": 23.30000000000001,
+            "exp": 33.70000000000002,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
@@ -1216,6 +1209,14 @@
               },
               {
                 "Name": "Linh Thú Khế Ước (Tiểu Bạch)",
+                "quantity": 1
+              },
+              {
+                "Name": "Hổ Đan Sơn Linh",
+                "quantity": 1
+              },
+              {
+                "Name": "Hổ Đan Sơn Linh",
                 "quantity": 1
               },
               {
@@ -1313,6 +1314,186 @@
                 "requiredCount": 1,
                 "currentCount": 2,
                 "completed": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "time": {
+          "year": 0,
+          "month": 1,
+          "day": 12,
+          "hour": 7
+        },
+        "location_id": "77c53e38-df08-4254-a040-3a567a3dc086",
+        "weather": "Tia nắng đầu ngày nhuộm hồng rặng thông",
+        "characters": [
+          {
+            "id": "player",
+            "Name": "Diệp Thần",
+            "level": 1,
+            "exp": 33.90000000000002,
+            "hp": 2000,
+            "maxhp": 2000,
+            "currency": 0,
+            "inventory": [
+              {
+                "Name": "Quả trứng màu xanh lục",
+                "quantity": 1
+              },
+              {
+                "Name": "Linh Thú Khế Ước (Tiểu Bạch)",
+                "quantity": 1
+              },
+              {
+                "Name": "Hổ Đan Sơn Linh",
+                "quantity": 1
+              },
+              {
+                "Name": "Hổ Đan Sơn Linh",
+                "quantity": 1
+              },
+              {
+                "Name": "Hổ Đan Sơn Linh",
+                "quantity": 1
+              }
+            ],
+            "longTermStatuses": []
+          },
+          {
+            "id": "b6de4eac-cd6e-43d9-b2ce-264c553ce5f7",
+            "Name": "Nam Hoa Lão Tiên",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "bd85e45e-f13c-41d2-a278-10ed93722c18",
+            "Name": "Hạ Hầu Khinh Y",
+            "level": 15,
+            "exp": 0,
+            "hp": 5880,
+            "maxhp": 5880,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
+            "Name": "Triệu Vân",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "62c26dd7-d1bf-419e-8d03-75db7b24bbc1",
+            "Name": "Sĩ quan lính canh",
+            "level": 1,
+            "exp": 0,
+            "hp": 1000,
+            "maxhp": 1000,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "e1a058f1-8ef1-4f4a-8b6b-36de2be32d57",
+            "Name": "Lão chủ tiệm thuốc",
+            "level": 1,
+            "exp": 0,
+            "hp": 1000,
+            "maxhp": 1000,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "c985e31b-1ea3-4270-b35c-4035988055c1",
+            "Name": "Công Tôn Bảo Nguyệt",
+            "level": 25,
+            "exp": 0,
+            "hp": 12280,
+            "maxhp": 12280,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          }
+        ],
+        "quests": [
+          {
+            "id": "8c8183bd-fbdb-408d-adc4-120609a67fac",
+            "title": "Chăm sóc con của Bạch Hổ Sơn Linh",
+            "status": "ready_to_turn_in",
+            "objectives": [
+              {
+                "id": "rescue_baby_tiger",
+                "text": "Giải cứu Tiểu Bạch Hổ đang cùng Hạ Hầu Khinh Y bị vây hãm tại hậu viện.",
+                "type": "action",
+                "targetName": "Tiểu Bạch Hổ",
+                "requiredCount": 1,
+                "currentCount": 2,
+                "completed": true
+              },
+              {
+                "id": "purify_corruption",
+                "text": "Sử dụng chân nguyên của Thái Bình Yếu Thuật để thanh tẩy tà khí ma hóa trên người Tiểu Bạch Hổ.",
+                "type": "action",
+                "targetName": "Thanh tẩy tà khí",
+                "requiredCount": 1,
+                "currentCount": 1,
+                "completed": true
+              },
+              {
+                "id": "reach_tiger_cave",
+                "text": "Di chuyển đến sơn động bí ẩn theo tọa độ thần thức để bảo vệ an toàn cho hổ con.",
+                "type": "goto",
+                "targetName": "Sơn động Bạch Hổ",
+                "requiredCount": 1,
+                "currentCount": 2,
+                "completed": true
+              }
+            ]
+          },
+          {
+            "id": "96338829-e702-42cd-89b2-479d06cce22e",
+            "title": "Giải kiếp cho Công Tôn Bảo Nguyệt",
+            "status": "active",
+            "objectives": [
+              {
+                "id": "persuade_baonguyet",
+                "text": "Thuyết phục Công Tôn Bảo Nguyệt để lại thư từ biệt và rời khỏi phủ Công Tôn.",
+                "type": "talk",
+                "targetName": "Công Tôn Bảo Nguyệt",
+                "requiredCount": 1,
+                "currentCount": 0,
+                "completed": false
+              },
+              {
+                "id": "escape_tracquan",
+                "text": "Đưa Công Tôn Bảo Nguyệt thoát khỏi sự bao vây của sương mù ma đạo tại Trác Quận.",
+                "type": "goto",
+                "targetName": "Ngoại vi Trác Quận",
+                "requiredCount": 1,
+                "currentCount": 0,
+                "completed": false
+              },
+              {
+                "id": "defeat_lurking_evil",
+                "text": "Tiêu diệt các linh thể ma đạo đang bám theo để hoàn tất việc giải sát họa.",
+                "type": "kill",
+                "targetName": "Linh Thể Ma Đạo",
+                "requiredCount": 3,
+                "currentCount": 0,
+                "completed": false
               }
             ]
           }
@@ -3253,13 +3434,184 @@
           "content": "Ngươi ôm lấy thân thể mềm mại, thanh nhã của thê tử, khẽ mỉm cười tiêu sái xua đi sự mệt mỏi. Chú hổ con *Tiểu Bạch* nhảy phắt tới bên chân ngươi, đôi mắt hoàng kim rực sáng oai nghiêm, phát ra những tiếng gầm nhỏ đầy tự hào. Lúc này, một thông điệp từ thần thức truyền đến, báo hiệu chú hổ con đã chính thức trở thành đồng hành trung thành gắn kết sinh mệnh với ngươi, hoàn thành mỹ mãn lời hứa với Sơn Linh vĩ đại. Chú rồng nhỏ *Tiểu Thanh* cũng vui sướng bay lượn xung quanh hai người, tạo nên một khung cảnh vô cùng đầm ấm và kỳ ảo giữa lòng hang động cổ kính.\nTuy nhiên, ngay khi tà khí vừa tan biến hoàn toàn, từ phía sau bức tường đá nơi ma vật rết khổng lồ vừa sụp đổ, một lối đi thạch thất bí ẩn khác bỗng chốc hiện ra. Linh khí từ bên trong thạch thất tỏa ra vô cùng ôn hòa nhưng cũng đầy vẻ thần bí, báo hiệu những bí mật cổ xưa của vùng *Thường Sơn* này đang chờ đợi vị truyền nhân duy nhất của *Nam Hoa Lão Tiên* đến khám phá."
         }
       ]
+    },
+    {
+      "id": "a4d4e918-8ace-425f-a526-eb7811941700",
+      "type": "user_custom_action",
+      "content": "Thần binh đã về tay. Đã đến lúc đi gặp Thiên mệnh chi nữ thứ 2 rồi. Nàng không để ý nếu ta có rất nhiều rất nhiều vợ chứ Khinh Y?"
+    },
+    {
+      "id": "10f0a058-6c0b-4242-925d-cb172214f712",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Đúng như lời người chơi, hành động lấy *Bất Vãn* và hỏi *Hạ Hầu Khinh Y* về việc có để tâm nếu Diệp Thần có nhiều thê thiếp hay không đã diễn ra. *Hạ Hầu Khinh Y*, với tình cảm đã sớm dành trọn cho *Diệp Thần* sau những lần được cứu mạng và sự gắn kết mệnh cách đêm qua, không hề tỏ ra ghen tuông. Nàng chỉ khẽ đỏ mặt, cúi đầu đầy dịu dàng và chấp nhận sự thật rằng người đàn ông của mình là bậc tiên nhân nắm giữ thiên mệnh, việc có nhiều người bầu bạn cũng là lẽ thường tình, miễn là nàng vẫn ở trong trái tim hắn."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Thần binh đã về tay. Đã đến lúc đi gặp Thiên mệnh chi nữ thứ 2 rồi. Nàng không để ý nếu ta có rất nhiều rất nhiều vợ chứ *Khinh Y*?"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Chàng là tiên nhân, lại mang trên mình trọng trách cứu thế, thiếp... thiếp làm sao dám có ý kiến. Chỉ cần trong lòng chàng luôn có một góc nhỏ dành cho thiếp, thiếp đã mãn nguyện lắm rồi."
+        },
+        {
+          "type": "narrative",
+          "content": "Nàng khẽ đáp, giọng nói nhỏ dần như tiếng muỗi kêu, đôi bàn tay đan chặt vào nhau đầy e thẹn. *Diệp Thần* mỉm cười, hắn thu hồi thanh thần binh *Bất Vãn* vào vỏ, cảm nhận luồng khí thế trùng tiêu từ nó vẫn còn đọng lại trên đầu ngón tay. *Sơn động Bạch Hổ* lúc này trở nên yên tĩnh lạ thường, luồng linh khí thuần khiết sau trận chiến đã ổn định, chảy tràn trong không gian như sương khói mờ ảo. \nHắn xoay người, ánh mắt sắc bén nhìn về phía cửa hang đang rạng dần ánh sáng buổi sớm mai. Việc thu phục được thần binh chỉ là bước khởi đầu, vận mệnh của vùng đất *Đông Hán Lục Địa* này còn quá nhiều biến động. Hắn biết, ở phía xa kia, nơi con đường quan lộ hướng về phía Tây Nam, một thiên mệnh chi nữ khác đang chờ đợi — một mảnh ghép quan trọng trong bản đồ nhân duyên của hắn. *Khinh Y* lặng lẽ tiến lại gần, nàng chỉnh lại vạt áo cho hắn, đôi mắt dịu dàng nhìn vị phu quân vừa kiêu dũng vừa đào hoa của mình. Nàng không hề có vẻ gì là vướng bận bởi lời hỏi thăm vừa rồi, trái lại, sự thấu hiểu của nàng càng khiến *Diệp Thần* thêm phần trân trọng.\n*Diệp Thần* vỗ nhẹ lên vai nàng, lòng đầy sự kiêu hãnh của một kẻ nắm giữ thiên cơ. Hắn đã sẵn sàng cho chặng đường tiếp theo, nơi những bí mật của *Thường Sơn* và vận mệnh của các nàng công chúa thời loạn đang chờ đợi."
+        }
+      ]
+    },
+    {
+      "id": "89c10588-711b-4911-adaf-e53bd179ab48",
+      "type": "user_custom_action",
+      "content": "Người thứ 2 là Công Tôn Bảo Nguyệt. Giờ này chắc nàng ấy đang 1 mình ở phủ Công Tôn. Công Tôn Toản đã lĩnh binh đi thảo phạt Hoàng Cân rồi. Như vậy cũng tiện cho ta tiếp cận nàng ấy. Chúng ta lên đường thôi"
+    },
+    {
+      "id": "d7df2696-4513-400c-9f59-581052802e38",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Sương mù ban sớm chưa tan hết, khí lạnh của vùng *Thường Sơn* vẫn còn vương vấn trên từng tán lá. Toàn bộ chuỗi hành động của *Diệp Thần* diễn ra trọn vẹn. *Diệp Thần* cùng *Hạ Hầu Khinh Y*, *Tiểu Thúy* và *Tiểu Bạch* rời khỏi *Trác Quận*, nhanh chóng hướng tới *Phủ Công Tôn* để tìm kiếm *Công Tôn Bảo Nguyệt*. Trên đường đi, *Diệp Thần* vận dụng *Linh Phong Thuật* một cách điêu luyện, những luồng gió nhẹ bao bọc lấy cả nhóm, không chỉ xua tan đi sự mệt mỏi mà còn khéo léo che giấu hành tung khỏi những ánh mắt tò mò của binh lính tuần tra."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Mọi người hãy đi sát theo luồng phong kình của ta. Công Tôn Toản hiện đang dẫn đại quân đi thảo phạt quân *Hoàng Cân*, phủ đệ của lão giờ chỉ còn là một nơi tĩnh mịch. Đây là cơ hội tốt nhất để chúng ta tiếp cận *Công Tôn Bảo Nguyệt* mà không gây ra bất kỳ sự xáo trộn nào."
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* khẽ gật đầu, nàng siết chặt lấy chuôi kiếm, đôi mắt phượng nhìn về phía xa nơi mái ngói đỏ rực của *Phủ Công Tôn* bắt đầu thấp thoáng sau rặng cây. *Tiểu Thúy* cũng lặng lẽ bước theo sát, không gian quanh họ dường như bị một bức màn gió vô hình bảo vệ, mọi tiếng động lạ đều bị triệt tiêu hoàn toàn. Cả nhóm vượt qua con đường đất đỏ một cách nhanh chóng, chẳng mấy chốc đã đặt chân đến trước cổng lớn của phủ đệ họ *Công Tôn*. Đúng như những tin tức tình báo mà *Diệp Thần* đã nắm bắt, cánh cổng lớn đóng chặt, lác đác chỉ còn vài tên canh gác có vẻ lơ là, dường như mọi tráng sĩ dũng mãnh nhất đều đã theo chủ soái ra chiến trường. *Diệp Thần* ra hiệu cho mọi người dừng lại tại một lùm cây lớn ven đường, ánh mắt hắn sắc bén quan sát những lối đi dẫn vào bên trong. \n*Phủ Công Tôn* hiện ra với vẻ uy nghiêm nhưng vắng lặng đến rợn người. Những hàng lang dài hun hút được lót bằng đá xanh, những tiểu đình ven hồ sen giờ chỉ còn là nơi trú ngụ của những cánh sen tàn. Sự vắng mặt của *Công Tôn Toản* đã biến nơi đây thành một \"cánh cửa mở\" đối với những kẻ có ý đồ, và *Diệp Thần* chính là người đã nắm lấy chìa khóa ấy. Việc tiếp cận *Công Tôn Bảo Nguyệt* — người con gái mạnh mẽ nhưng đơn độc — giờ đây nằm ngay trong tầm tay. Hắn hít một hơi sâu, luồng chân nguyên trong đan điền lại một lần nữa cuộn trào, thanh *Bất Vãn* bên hông rung nhẹ như thể muốn được cùng chủ nhân chứng kiến màn hội ngộ đầy ý nghĩa này."
+        }
+      ]
+    },
+    {
+      "id": "12f82d06-3969-419d-8d5d-fc2ff55c76c9",
+      "type": "user_custom_action",
+      "content": "Trước tiên an bài cho Khinh Y và Tiểu Thúy ở 1 khách điếm tốt. Sau đó mặc đạo bào đến phủ Công Tôn cầu kiến. Công Tôn Bảo Nguyệt nghe lính gác báo có đạo sĩ tới cầu kiến liền vui vẻ chạy tới tiếp kiến. Nàng là lần đầu gặp đạo sĩ nên cực kỳ tò mò. Hỏi đông hỏi tây đủ thứ chuyện. Mới đó mà đã nói đến tận tối. Công Tôn Bảo Nguyệt yêu cầu thiết yến mời ngươi ở lại 1 đêm. Ngươi cũng không từ chối ở lại để 1 đêm tiện hành động vào ban đêm. Đêm nay ngươi quyết định phải thu được cô nàng này."
+    },
+    {
+      "id": "dc607aa6-d808-4498-829b-2477f97ed823",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Tiếng trống canh đêm vang vọng từ xa xôi, hòa cùng tiếng gió rít nhẹ qua những hàng hiên gỗ của *Phủ Công Tôn*. Ánh nến trong tẩm cung lay động, hắt lên vách tường những bóng người quấn quýt. *Diệp Thần* nhẹ nhàng đặt *Hạ Hầu Khinh Y* và *Tiểu Thúy* nghỉ ngơi tại một khách điếm uy tín ở trung tâm *Trác Quận*, rồi trong bộ đạo bào xám thô sơ, hắn thẳng tiến tới *Phủ Công Tôn* cầu kiến. Khi lính gác báo có vị đạo sĩ tới cầu kiến, *Công Tôn Bảo Nguyệt* – nữ tử kiêu hùng vốn đang chán nản vì *Công Tôn Toản* dẫn đại quân đi thảo phạt quân *Hoàng Cân* – đã vô cùng hiếu kỳ mà chạy thẳng ra tiếp đón."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Công Tôn Bảo Nguyệt",
+          "content": "Đạo sĩ? Trong thành *Trác Quận* này hiếm khi thấy người tu đạo lạ mặt. Ngươi từ đâu đến? Có biết xem tướng hay bói toán không?"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Bần đạo *Diệp Thần*, từ *Thường Sơn* xuống núi. Tướng mạo tiểu thư mang khí phách của bậc kỳ nữ, nhưng giữa thời loạn, e rằng vạn sự khó lường."
+        },
+        {
+          "type": "narrative",
+          "content": "Cuộc trò chuyện giữa hai người cứ thế kéo dài, từ chuyện đạo pháp trừ ma đến thời cuộc thiên hạ, khiến vị quận chúa họ *Công Tôn* vốn mạnh mẽ cũng phải chìm đắm trong sự uyên bác và khí chất thoát tục của *Diệp Thần*. Màn đêm buông xuống tự lúc nào, khi *Công Tôn Bảo Nguyệt* thiết yến mời rượu, ánh trăng bạc chiếu rọi khuôn mặt ửng hồng vì men say của nàng, nàng không chút ngần ngại mà lưu ngươi ở lại qua đêm. Trong bóng tối bao trùm lấy *Phủ Công Tôn*, ngươi lợi dụng thời cơ, đem hết bản lĩnh của một kẻ nắm giữ thiên mệnh để thu phục lòng người. Đêm ấy, tiếng rên rỉ ngọt ngào của *Công Tôn Bảo Nguyệt* hòa cùng hơi thở nam tính của ngươi, hai tâm hồn hòa quyện, tình cảm nảy nở và từ giây phút xác thịt giao thoa, mệnh cách của nàng đã hoàn toàn gắn kết chặt chẽ với *Diệp Thần*.\nSáng sớm hôm sau, sương mù dày đặc vẫn phủ lấy kinh thành. *Công Tôn Bảo Nguyệt* nằm cuộn tròn trong lòng ngươi, đôi mắt phượng khẽ mở, gương mặt đầy vẻ mãn nguyện và hạnh phúc của một người đàn bà vừa được khai phá. Nàng nhẹ nhàng tựa đầu vào ngực ngươi, không hề hay biết rằng mình đã bị kẻ trước mặt thu phục một cách tâm phục khẩu phục."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Công Tôn Bảo Nguyệt",
+          "content": "Diệp lang... thiếp không ngờ, chỉ sau một đêm mà mọi điều với thiếp đã thay đổi. Chàng thực sự là người của thiên mệnh, thiếp nguyện ý cùng chàng đối mặt với mọi sóng gió."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi nhìn nàng, nụ cười đầy vẻ đắc thắng của một kẻ nắm giữ bàn cờ nhân thế. Việc thu phục thành công vị quận chúa này không chỉ giúp ngươi có thêm một nguồn lực vững chãi ở *Trác Quận* mà còn là mắt xích quan trọng để sau này tiếp cận những binh quyền lớn hơn. *Tiểu Thanh* và *Tiểu Bạch* đang nằm cuộn tròn dưới chân giường, dường như cũng cảm nhận được khí vận của chủ nhân đang tăng tiến mạnh mẽ sau sự kiện này. Ngoài hiên, tiếng bước chân của gia nhân bắt đầu xôn xao, có vẻ như mọi người trong phủ đã bắt đầu một ngày mới, không hề hay biết quận chúa của họ vừa trải qua một đêm thay đổi cuộc đời."
+        }
+      ]
+    },
+    {
+      "id": "e193e40c-9c75-4a2e-a0ef-d4743b143c34",
+      "type": "user_custom_action",
+      "content": "Thực ra ta tính được số mệnh của nàng phải chịu 1 kiếp nạn mất mạng. Ta đến là để giúp nàng giải kiếp. Vì hồng nhan như nàng nên có 1 cuộc sống tốt đẹp hơn. Hơn nữa không chỉ nàng mà rất nhiều người như nàng trong thời loạn này. Sứ mệnh của ta là cứu hết những người như vậy. Nàng hãy để lại thư cho phụ thân rồi theo ta lên đường."
+    },
+    {
+      "id": "b68f2192-1e17-4d51-aed6-82b407e67a06",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Trong không gian tĩnh mịch của *Phủ Công Tôn*, ánh nến chập chờn hắt những cái bóng dài trên vách ngăn gỗ trầm hương. *Diệp Thần* đứng trước mặt *Công Tôn Bảo Nguyệt*, thần thái hắn bình thản nhưng ánh mắt lại chứa đựng sự thấu thị của bậc tiên gia. Hắn chậm rãi cất tiếng, từng câu chữ như những nhát búa nện thẳng vào tâm trí người thiếu nữ kiêu hùng vốn đang chán chường vì thời cuộc."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Thực ra ta tính được số mệnh của nàng phải chịu một kiếp nạn mất mạng. Ta đến là để giúp nàng giải kiếp. Vì hồng nhan như nàng nên có một cuộc sống tốt đẹp hơn. Hơn nữa không chỉ nàng mà rất nhiều người như nàng trong thời loạn này. Sứ mệnh của ta là cứu hết những người như vậy. Nàng hãy để lại thư cho phụ thân rồi theo ta lên đường."
+        },
+        {
+          "type": "narrative",
+          "content": "*Công Tôn Bảo Nguyệt* sững sờ, đôi mắt phượng vốn sắc bén thường ngày bỗng trở nên ngẩn ngơ. Nàng nhìn vào gương mặt tuấn tú, thoát tục của *Diệp Thần*, những ký ức về việc hắn đã cứu mạng nàng trong những lần hiểm nguy trước đó ùa về như một cơn thác lũ. Nỗi hoài nghi ban đầu dần tan biến, thay vào đó là sự tin tưởng tuyệt đối. Nàng hiểu rằng người đàn ông này không thuộc về thế giới phàm trần đầy mùi máu tanh của chiến tranh mà cha nàng đang theo đuổi. Với bàn tay run run, nàng cầm bút lông, viết những dòng thư từ biệt cuối cùng để lại cho *Công Tôn Toản*. Nàng xếp gọn vài bộ y phục đơn giản vào tay nải, rồi bước tới đứng cạnh *Diệp Thần*, ánh mắt nàng giờ đây tràn đầy sự phó thác."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Công Tôn Bảo Nguyệt",
+          "content": "Diệp lang, thiếp hiểu rồi. Phủ đệ này tuy lớn nhưng đối với thiếp chỉ là một chiếc lồng giam lỏng lẻo. Từ nay, vận mệnh và tình cảm của thiếp đều xin gửi trọn vào tay chàng."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi gật đầu, đưa tay nắm lấy bàn tay nàng. Lòng bàn tay nàng ấm áp, run rẩy nhẹ đầy e thẹn. Cả hai cùng bước ra khỏi *Phủ Công Tôn* dưới ánh trăng mờ nhạt. Bên ngoài phủ, *Hạ Hầu Khinh Y* và mọi người đã chuẩn bị sẵn sàng. Việc rời khỏi đây trong đêm tối giúp họ tránh được mọi ánh mắt soi mói của đám quân sĩ còn sót lại trong phủ. \nĐoàn người nhanh chóng tiến ra khỏi thành *Trác Quận*. Trong màn đêm tĩnh mịch, *Diệp Thần* thi triển *Linh Phong Thuật*, luồng phong kình nhẹ nhàng nâng đỡ bước chân cả đoàn, giúp họ lướt đi trên con đường mòn phủ đầy sương tuyết mà không gây ra bất kỳ âm thanh nào. Hắn biết, việc thu phục được *Công Tôn Bảo Nguyệt* không chỉ là một bước ngoặt về tình cảm, mà còn là mắt xích quan trọng để mở rộng ảnh hưởng của mình tại vùng đất *U Châu* đầy biến động này.\nDọc đường đi, *Diệp Thần* cảm nhận được linh khí từ *Bách Điểu Triều Phụng thương* dắt bên hông không ngừng truyền vào đan điền, giúp hắn giữ vững trạng thái đỉnh phong. *Khinh Y* và *Bảo Nguyệt* sánh bước bên cạnh, hai nàng tuy xuất thân khác nhau nhưng đều hướng ánh mắt về phía ngươi với sự ngưỡng mộ và ỷ lại không giấu diếm. Khi tia nắng đầu ngày bắt đầu nhuộm hồng rặng thông già, cả đoàn đã tiến đến khu vực bìa rừng thuộc vùng ngoại vi *Thường Sơn*. Tại đây, một ngôi miếu hoang cổ kính hiện ra trước mắt, đây chính là nơi ngươi dự định thiết lập một điểm dừng chân tạm thời để hoạch định kế hoạch tiếp theo trước khi làn sóng quân *Hoàng Cân* thực sự quét qua khu vực này.\nTuy nhiên, linh giác của ngươi bỗng nhiên báo động. Phía trước, gần lối vào ngôi miếu hoang, có những tia linh quang không thuộc về chính đạo đang chuyển động. Có vẻ như tàn quân của ma đạo vẫn chưa từ bỏ việc bám đuôi nhóm của ngươi, chúng đang âm thầm chờ đợi một cơ hội để ra tay vào thời điểm ngươi sơ hở nhất."
+        }
+      ]
+    },
+    {
+      "id": "76c8e40e-dd69-4e38-8cb7-0f2c765df17b",
+      "type": "user_custom_action",
+      "content": "Cả đoàn dừng lại tại ngôi miếu. Ngươi cũng tiện thể giới thiệu Khinh Y và Bảo Nguyệt để 2 nàng làm quen với nhau. Đêm nay cả đoàn nghỉ ngơi tại ngôi miếu. Ngươi tranh thủ tu luyện trong khi Khinh Y và Bảo Nguyệt thì nằm chung 1 góc miếu đang trò chuyện như tỷ muội thân thiết"
+    },
+    {
+      "id": "6de6882c-3099-46fa-930e-c27d49d32ba8",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Sương chiều buông xuống, nhuộm đỏ rặng thông già bao quanh *Miếu hoang ngoại vi Thường Sơn*. Toàn bộ chuỗi hành động diễn ra trọn vẹn đúng trình tự. Cả đoàn dừng chân tại ngôi miếu hoang cổ kính, nơi những mảng rêu phong bám đầy trên các bức tường gạch vỡ và không khí mang theo mùi gỗ mục cùng linh khí thanh khiết của núi rừng. *Diệp Thần* nhẹ nhàng gạt đi lớp bụi bặm trên một phiến đá lớn, quay sang nhìn hai nàng tuyệt sắc giai nhân đang đi cùng mình, khéo léo giới thiệu để *Hạ Hầu Khinh Y* và *Công Tôn Bảo Nguyệt* gỡ bỏ rào cản ban đầu."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Khinh Y, đây là Bảo Nguyệt, quận chúa vùng *U Châu*, cũng là một nữ trung hào kiệt mà ta vô cùng trân trọng. Bảo Nguyệt, đây là Khinh Y, nàng ấy đã cùng ta vượt qua sinh tử tại *Chân Định*. Từ nay chúng ta đều là người một nhà, mong hai nàng hãy tương trợ lẫn nhau."
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* khẽ mỉm cười, vẻ thanh nhã khuê các hiện rõ khi nàng chủ động tiến lên nắm lấy tay *Công Tôn Bảo Nguyệt*. Trong khi đó, *Công Tôn Bảo Nguyệt* vốn tính tình phóng khoáng của người con gái vùng biên thùy, thấy sự chân thành của *Khinh Y* cũng lập tức buông xuống vẻ cảnh giác thường ngày."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Công Tôn Bảo Nguyệt",
+          "content": "Thiếp đã nghe *Diệp lang* nhắc về tỷ tỷ suốt dọc đường. Nay được diện kiến, quả thực danh bất hư truyền. Từ nay muội muội có điều gì sơ suất, mong tỷ tỷ chỉ giáo thêm."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Muội muội quá lời rồi, chúng ta đều là phận nữ nhi đi theo phu quân giữa thời loạn, từ nay cứ gọi nhau là tỷ muội là được."
+        },
+        {
+          "type": "narrative",
+          "content": "Hai nàng nhanh chóng trở nên thân thiết như tỷ muội, cùng nhau dọn dẹp một góc miếu sạch sẽ. Đêm xuống, ngọn lửa trại bập bùng xua tan cái lạnh lẽo của vùng *Thường Sơn*. *Diệp Thần* ngồi xếp bằng ở trung tâm miếu, trước mặt hắn là viên *Hổ Đan Sơn Linh* tỏa ra linh quang xanh biếc dạt dào phong lực. Trong khi đó, ở góc miếu, *Khinh Y* và *Bảo Nguyệt* đang nằm chung trên một tấm đệm cỏ, rì rầm trò chuyện tâm tình, thỉnh thoảng lại vang lên tiếng cười khúc khích như thể họ đã quen biết từ lâu.\n*Diệp Thần* hít một hơi thật sâu, đưa viên *Hổ Đan* vào miệng. Ngay lập tức, một luồng phong kình cuồn cuộn như bão tố bùng phát trong đan điền. Hắn nhắm mắt, tập trung toàn bộ thần thức để hấp thu tinh hoa của *Sơn Linh*. Những luồng chân khí mạnh mẽ len lỏi qua từng kinh mạch, gột rửa và mở rộng chúng đến cực hạn. Sức mạnh của *Thái Bình Yếu Thuật* cộng hưởng với phong lực từ viên đan khiến cơ thể hắn tỏa ra luồng hào quang rực rỡ, lồng ngực phập phồng theo nhịp thở của đại ngàn.\nSau nhiều giờ tu luyện, khi chân nguyên đã hoàn toàn lắng dịu và đạt đến một tầm cao mới, *Diệp Thần* mở mắt ra. Cảm giác sức mạnh căng tràn khiến hắn thấy rạo rực khắp người. Hắn nhìn sang góc miếu, nơi hai thê tử xinh đẹp đang nằm trò chuyện. Ánh lửa bập bùng chiếu rọi lên làn da trắng ngần và những đường cong tuyệt mỹ của hai nàng, khơi dậy ngọn lửa dục vọng bùng cháy dữ dội trong lòng hắn.\nHắn đứng dậy, bước chậm rãi về phía hai nàng. *Khinh Y* và *Bảo Nguyệt* thấy phu quân đã hoàn thành tu luyện, gương mặt rạng rỡ hẳn lên. Nhưng khi thấy ánh mắt rực lửa và con cu đang bắt đầu cương cứng cộm lên sau lớp y phục của hắn, hai nàng đều hiểu điều gì sắp xảy ra."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Hai nàng tối nay trò chuyện vui vẻ chứ? Ta vừa đột phá, khí huyết đang sôi trào, cần hai nàng giúp ta điều hòa một chút."
+        },
+        {
+          "type": "narrative",
+          "content": "*Công Tôn Bảo Nguyệt* đỏ mặt nhưng tính tình bướng bỉnh và mạnh mẽ khiến nàng không lùi bước, nàng khẽ liếm môi, đôi mắt phượng nhìn chằm chằm vào đáy quần của hắn. *Hạ Hầu Khinh Y* thì thẹn thùng hơn, nàng khẽ cúi đầu, hai tay bám chặt vào mép đệm cỏ. \n*Diệp Thần* không đợi lâu, hắn thô bạo trút bỏ y phục thường dân, để lộ cơ thể tráng kiện với những múi cơ săn chắc và con cu khổng lồ, gân guộc dài tới hơn chín tấc đang giật mạnh liên hồi, đầu khấc đỏ hồng hừng hực bốc lên hơi nóng. Hắn lao tới, một tay kéo *Khinh Y*, một tay ôm lấy *Bảo Nguyệt* vào lòng. Hắn tham lam hôn ngấu nghiến đôi môi của cả hai, chiếc lưỡi tinh quái càn quét khắp khoang miệng thơm tho, mút mát lấy những chiếc lưỡi nhỏ nhắn của hai thê tử.\nHắn đẩy hai nàng nằm ngửa ra, đôi bàn tay gân guộc nhanh chóng lột sạch y phục của cả hai. Dưới ánh lửa trại, hai thân thể ngọc ngà hiện ra hoàn mỹ. *Hạ Hầu Khinh Y* với bầu ngực trắng ngần, căng mọng, đầu vú hồng hào đang se lại. *Công Tôn Bảo Nguyệt* thì mang vẻ đẹp khỏe khoắn hơn với vòng eo săn chắc và cặp đùi thon dài mượt mà. Giữa khe đùi của cả hai, những khu rừng đen nhánh rậm rạp che giấu những đóa hoa lồn đang bắt đầu rỉ ra những dòng dâm thủy lấp lánh.\n*Diệp Thần* cúi xuống, một tay bóp nắn vú của *Khinh Y*, miệng thì ngậm chặt lấy bầu ngực của *Bảo Nguyệt* mà mút mát dữ dội. Tiếng rên rỉ dâm đãng của hai nàng vang vọng khắp ngôi miếu hoang. Hắn đưa hai ngón tay vào, một bên đâm vào lồn của *Khinh Y*, một bên khuấy động âm hộ của *Bảo Nguyệt*.\n\"Ưm... á... phu quân... sướng quá... lồn thiếp chảy nước hết rồi...\" – *Công Tôn Bảo Nguyệt* rên rỉ, hai chân nàng co lại, kẹp chặt lấy hông hắn.\nKhi cảm thấy cả hai cái lồn đều đã ướt đẫm dâm thủy dính dầy dầy, *Diệp Thần* liền dựng con cu khổng lồ lên. Hắn chọn *Hạ Hầu Khinh Y* trước, dứt khoát dập mạnh một cái, đưa con cặc to dài ngập lút cán vào sâu tận tử cung của nàng.\n\"Áaaa! Phu quân... to quá... đâm nát lồn thiếp rồi!\" – *Khinh Y* khóc thét lên vì khoái lạc tột độ.\nSau khi nhấp cho *Khinh Y* lên đỉnh vài lần, dâm thủy bắn tung tóe, hắn lại rút ra, để lại cửa lồn của nàng đỏ hỏn, tớp mở liên tục. Hắn xoay sang *Công Tôn Bảo Nguyệt*, nâng hai chân nàng lên vai và đâm mạnh con cu còn đang dính đầy dâm thủy của *Khinh Y* vào lồn nàng. Lồn của *Bảo Nguyệt* khít khao và nóng bỏng, nó mút chặt lấy con cu của hắn như muốn vắt kiệt từng giọt tinh khí.\nHắn nhấp liên tục với tốc độ kinh hồn, tiếng thịt va chạm \"bạch bạch bạch\" chát chúa vang lên liên hồi. Hắn thay đổi tư thế liên tục, lúc thì bắt hai nàng quỳ sấp để hắn đâm từ phía sau, lúc thì để hai nàng ngồi lên người mình mà nhún nhảy. Con cu gân guộc liên tục ra vào, đầu khấc nóng hổi không ngừng cọ sát vào thành âm đạo nhạy cảm của cả hai nàng, khiến họ sướng phát điên, đầu óc trống rỗng.\nSau mấy canh giờ chiến đấu kịch liệt, khi cả hai nàng đều đã lên đỉnh cả chục lần, cơ thể rã rời, lồn sưng tấy và ngập ngụa tinh dịch trắng đục, *Diệp Thần* mới gầm lên một tiếng mãnh liệt, bắn thẳng những luồng tinh đặc nóng hổi vào sâu trong tử cung của *Bảo Nguyệt*. Hắn không rút ra ngay mà cứ thế nằm đè lên hai nàng, con cu vẫn cắm chặt trong lồn của *Bảo Nguyệt*, trong khi tay kia vẫn không ngừng mơn trớn bầu ngực của *Khinh Y*. Cả ba cứ thế quấn quýt lấy nhau, chìm vào giấc ngủ trong sự thỏa mãn tột cùng.\nSáng hôm sau, khi những tia nắng đầu tiên xuyên qua kẽ lá rọi vào ngôi miếu, *Diệp Thần* tỉnh dậy trước. Hắn cảm thấy chân nguyên trong người sau đêm giao hòa âm dương không những không suy giảm mà còn trở nên tinh thuần và mạnh mẽ hơn nhiều nhờ phong lực từ *Hổ Đan* đã hoàn toàn hòa nhập vào cơ thể. Hắn khẽ rút con cu vẫn còn hơi cứng ra khỏi lồn của *Bảo Nguyệt*, khiến một dòng tinh dịch trắng đục chảy tràn ra ngoài khe đùi nàng.\nHắn bước ra cửa miếu, hít thở không khí trong lành của *Thường Sơn*. *Tiểu Bạch* và *Tiểu Thanh* từ nãy giờ vẫn canh gác bên ngoài, thấy chủ nhân ra liền vẫy đuôi mừng rỡ. Nhưng linh giác của một kẻ nắm giữ thiên thư bỗng nhiên báo động. Phía dưới chân núi, có những tiếng vó ngựa dồn dập và tiếng binh khí va chạm. Dường như có một toán quân đang bị truy đuổi và hướng thẳng về phía ngôi miếu này.\nNgươi nhìn xuống thung lũng, màn sương mù tản ra lộ rõ một nhóm binh sĩ mặc giáp bạc, trên cờ hiệu khắc chữ \"Triệu\". Dẫn đầu là một nam tử cưỡi ngựa trắng, trên lưng cõng một đứa trẻ, đang vất vả chống trả lại vòng vây của hàng trăm tên giặc *Hoàng Cân* mặc áo vàng. Đôi mắt ngươi nheo lại — đó chẳng phải là cảnh tượng kinh điển trong sử sách sao? Nhưng sao nó lại diễn ra ở *Thường Sơn* vào lúc này?"
+        }
+      ]
     }
   ],
   "choices": [
-    "Khảo sát kỹ lưỡng thạch thất bí ẩn vừa lộ diện để tìm kiếm thêm công pháp hoặc báu vật cổ xưa của tiên gia trước khi rời khỏi Thường Sơn. {Tỷ lệ thành công: 75%, Hậu quả/Phần thưởng: Tìm thấy một số ghi chép cổ và linh thạch quý giá, giúp tinh tiến tu vi đan điền nhanh chóng hơn}",
-    "Dẫn theo Khinh Y và các linh thú quay trở ra ngoài hang động để nghỉ ngơi hồi phục thể lực dưới ánh nắng sớm mai trong lành. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Thể trạng hồi phục hoàn hảo, củng cố tình cảm khăng khít với thê tử và các linh thú trong cảnh yên bình}",
-    "Sử dụng đạo pháp của Thái Bình Yếu Thuật để phong ấn hoàn toàn lối đi thạch thất này lại nhằm tránh việc ma khí phương Bắc tiếp tục rình rập xâm nhập. {Tỷ lệ thành công: 80%, Hậu quả/Phần thưởng: Bảo vệ an toàn tuyệt đối cho linh mạch Thường Sơn, nhưng tạm thời bỏ lỡ những bí mật cổ xưa bên trong}",
-    "Lập tức thu dọn hành lý và rời khỏi khu vực sườn núi Thường Sơn để tiếp tục hành trình hướng về phía Trác Quận tìm kiếm cơ hội tham gia thảo phạt Hoàng Cân. {Tỷ lệ thành công: 70%, Hậu quả/Phần thưởng: Nhanh chóng tiếp cận chiến trường đại lộ quan trọng, nhưng thể lực chưa đạt trạng thái đỉnh phong nhất}"
+    "Lập tức gọi *Khinh Y* và *Bảo Nguyệt* dậy, cùng với hai linh thú lao xuống núi cứu viện nhóm binh sĩ họ Triệu. {Tỷ lệ thành công: 75%, Hậu quả/Phần thưởng: Nhận được sự biết ơn của gia tộc họ Triệu, có cơ hội chiêu mộ nhân tài và tăng uy danh tại Thường Sơn}",
+    "Sử dụng *Linh Phong Thuật* tạo ra một cơn cuồng phong từ trên đỉnh núi để giải vây cho nhóm người bên dưới mà không lộ diện trực tiếp. {Tỷ lệ thành công: 60%, Hậu quả/Phần thưởng: Giải cứu được mục tiêu nhưng tiêu hao nhiều chân nguyên, ma tà có thể phát hiện ra vị trí của ngươi}",
+    "Cùng các thê tử âm thầm quan sát, chờ đợi thời cơ khi hai bên lưỡng bại câu thương mới ra tay thu dọn tàn cuộc. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Bảo toàn được lực lượng, thu thập được nhiều trang bị từ xác binh lính nhưng có thể làm mất đi cơ hội kết giao với hào kiệt}",
+    "Sai *Tiểu Thanh* bay xuống phun sương mù che mắt quân địch để nhóm binh sĩ họ Triệu có cơ hội chạy thoát vào các khe núi hiểm trở. {Tỷ lệ thành công: 70%, Hậu quả/Phần thưởng: Linh thú được rèn luyện thực chiến, nhóm binh sĩ thoát nạn nhưng ma đạo sẽ truy dấu theo linh khí của tiểu Thanh Long}"
   ],
   "gameMode": "EXPLORATION",
   "activeTrade": {
@@ -3272,5 +3624,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 42
+  "adventureTurnCount": 47
 }
