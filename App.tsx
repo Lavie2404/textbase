@@ -92,7 +92,6 @@ import { TOUCH_TARGET_MIN } from './src-web/systems/ui/touchTarget';
 import {
     composerPayloadSubmitAllowed,
     fuzzyScore,
-    resetSpeakerOnTypeChange,
     resolveSpeaker,
     serializeComposerPayload,
 } from './src-web/systems/ui/composerPayload';
@@ -9871,249 +9870,217 @@ const getUniqueCombatantNames = (combatants) => {
 };
 
 
-// Core UI / Screen Navigation - Core Rule #3c, D.7 (2026-09-01 addendum):
-// "Composer hành động có cấu trúc", replacing the old freeform single-line
-// box. Fully self-contained (owns its own `segments`/draft state) so it
-// naturally survives S2 <-> S4 (Story Log) navigation without any extra
-// wiring (AC-82) - it just never unmounts, same as every other part of
-// GameplayScreen that stays resident for the whole play session.
+// Core UI / Screen Navigation - Core Rule #3c, D.7 (2026-09-01, revised
+// 2026-09-02 per project owner correction): "Composer hành động có cấu
+// trúc", replacing the old freeform single-line box. Fully self-contained
+// (owns its own `segments` state) so it naturally survives S2 <-> S4 (Story
+// Log) navigation without any extra wiring (AC-82) - it just never unmounts,
+// same as every other part of GameplayScreen that stays resident for the
+// whole play session.
 //
-// `handleSubmit` folds any in-flight draft into `segments` but does NOT wipe
-// them - that keeps AC-80 (Core Rule #9: preserve the full payload through an
-// AI timeout/error) trivially true, since nothing here ever races the AI
-// call's outcome. Clearing on an actual CONFIRMED turn is a separate concern,
+// UX model (2026-09-02 correction - "Tường thuật"/"Đối thoại" are ADD
+// buttons, not a type toggle for one shared draft): each tap on either
+// button appends a brand-new, immediately-editable block to `segments` -
+// there is no separate "draft" stage and no "+ Thêm đoạn" commit step.
+// Every block in the list is live: its own textarea (and, for a dialogue
+// block, its own speaker picker) writes straight into that block's entry in
+// `segments`. Tapping "Tường thuật" then "Đối thoại" yields exactly two
+// blocks on screen at once, in that order, each independently editable.
+//
+// `handleSubmit` sends the CURRENT `segments` as-is and does NOT clear them
+// - that keeps AC-80 (Core Rule #9: preserve the full payload through an AI
+// timeout/error) trivially true, since nothing here ever races the AI call's
+// outcome. Clearing on an actual CONFIRMED turn is a separate concern,
 // handled by the `resetSignal` prop below: App owns the one place that truly
 // knows the difference between "submitted" and "confirmed"
 // (`finalizeSystemsTurn`, gdd-01 A.4 phases 4-6) and bumps a counter there,
 // never on the timeout/error path. `ActionComposer` just watches it.
-const emptyComposerDraft = () => ({
-    type: 'narration',
-    text: '',
-    speakerRaw: '',
-    speaker: { kind: 'player' },
-});
-
 const ActionComposer = ({ knownNpcPool, playerName, disabled, writeCtx, resetSignal, onSubmit }) => {
     const [segments, setSegments] = useState([]);
-    const [draft, setDraft] = useState(emptyComposerDraft());
+    const segmentIdRef = useRef(0);
 
     // Core Rule #9 / AC-80 vs. project owner decision (2026-09-02): clear ONLY
     // on a real confirmed turn, never on submit itself (a timeout/error must
     // still show the exact payload that was sent). Guarding on `resetSignal >
     // 0` skips the redundant no-op reset on initial mount (signal starts at 0
-    // and `segments`/`draft` are already empty then).
+    // and `segments` is already empty then).
     useEffect(() => {
         if (resetSignal > 0) {
             setSegments([]);
-            setDraft(emptyComposerDraft());
         }
     }, [resetSignal]);
 
-    // UI Requirements "Ngoại lệ tiện dụng": an un-committed draft is folded in
-    // as the final segment at submit time (and used here to compute whether
-    // Gửi should be enabled at all) so the player never has to remember to
-    // tap "+ Thêm đoạn" before submitting a single-segment action.
-    const commitDraftIfNonEmpty = (baseSegments, d) => {
-        if (d.text.trim() === '') return baseSegments;
-        const seg = d.type === 'narration'
-            ? { type: 'narration', text: d.text }
-            : { type: 'dialogue', text: d.text, speaker: d.speaker };
-        return [...baseSegments, seg];
+    const submitAllowed = composerPayloadSubmitAllowed(segments, writeCtx);
+
+    const handleAddNarration = () => {
+        segmentIdRef.current += 1;
+        setSegments(prev => [...prev, { id: segmentIdRef.current, type: 'narration', text: '' }]);
     };
 
-    const effectivePayload = commitDraftIfNonEmpty(segments, draft);
-    const submitAllowed = composerPayloadSubmitAllowed(effectivePayload, writeCtx);
-
-    const handleTypeChange = (newType) => {
-        // AC-81: text is kept, speaker resets to player.
-        setDraft(d => resetSpeakerOnTypeChange(d, newType));
+    const handleAddDialogue = () => {
+        segmentIdRef.current += 1;
+        setSegments(prev => [...prev, {
+            id: segmentIdRef.current, type: 'dialogue', text: '', speakerRaw: '', speaker: { kind: 'player' },
+        }]);
     };
 
-    const handleSpeakerRawChange = (raw) => {
-        setDraft(d => ({ ...d, speakerRaw: raw }));
+    const updateSegment = (id, patch) => {
+        setSegments(prev => prev.map(s => (s.id === id ? { ...s, ...patch } : s)));
     };
 
-    // D.7 resolve_speaker: runs when the player leaves the search box, NOT
-    // deferred to submit time. Only the unambiguous `known_npc` case
-    // auto-commits; `ambiguous`/`new_npc` leave the raw text as-is so the
-    // live suggestion list below stays open for a manual pick or "Dùng tên
-    // mới" (AC-76: >=2 fuzzy candidates must never silently auto-resolve).
-    const handleSpeakerBlur = () => {
-        const raw = draft.speakerRaw.trim();
+    const handleDeleteSegment = (id) => {
+        // Any segment, not just the last one; relative order of the rest is
+        // preserved (Edge Cases "Xóa 1 đoạn giữa danh sách").
+        setSegments(prev => prev.filter(s => s.id !== id));
+    };
+
+    // D.7 resolve_speaker: runs when the player leaves a segment's search
+    // box, NOT deferred to submit time. Only the unambiguous `known_npc`
+    // case auto-commits; `ambiguous`/`new_npc` leave the raw text as-is so
+    // that segment's live suggestion list stays open for a manual pick or
+    // "Dùng tên mới" (AC-76: >=2 fuzzy candidates must never silently
+    // auto-resolve).
+    const handleSpeakerBlur = (seg) => {
+        const raw = seg.speakerRaw.trim();
         if (raw === '') return;
         const resolution = resolveSpeaker(raw, knownNpcPool);
         if (resolution.kind === 'known_npc') {
-            setDraft(d => ({ ...d, speaker: resolution, speakerRaw: resolution.display_name }));
+            updateSegment(seg.id, { speaker: resolution, speakerRaw: resolution.display_name });
         }
     };
 
-    const handlePickCandidate = (candidate) => {
-        setDraft(d => ({
-            ...d,
+    const handlePickCandidate = (seg, candidate) => {
+        updateSegment(seg.id, {
             speaker: { kind: 'known_npc', char_id: candidate.char_id, display_name: candidate.display_name },
             speakerRaw: candidate.display_name,
-        }));
+        });
     };
 
-    const handleUseNewName = () => {
-        const trimmed = draft.speakerRaw.trim();
+    const handleUseNewName = (seg) => {
+        const trimmed = seg.speakerRaw.trim();
         if (trimmed === '') return;
-        setDraft(d => ({ ...d, speaker: { kind: 'new_npc', proposed_name: trimmed } }));
-    };
-
-    const handleAddSegment = () => {
-        if (draft.text.trim() === '') return;
-        setSegments(prev => commitDraftIfNonEmpty(prev, draft));
-        setDraft(emptyComposerDraft());
-    };
-
-    const handleDeleteSegment = (index) => {
-        // Any segment, not just the last one; relative order of the rest is
-        // preserved (Edge Cases "Xóa 1 đoạn giữa danh sách").
-        setSegments(prev => prev.filter((_, i) => i !== index));
+        updateSegment(seg.id, { speaker: { kind: 'new_npc', proposed_name: trimmed } });
     };
 
     const handleSubmit = () => {
-        const finalPayload = commitDraftIfNonEmpty(segments, draft);
-        if (!composerPayloadSubmitAllowed(finalPayload, writeCtx)) return;
-        onSubmit(serializeComposerPayload(finalPayload, playerName || 'Ngươi'));
-        // Fold the draft into the committed list rather than clearing anything
-        // - see the file-level comment above for why nothing here is wiped.
-        setSegments(finalPayload);
-        setDraft(emptyComposerDraft());
+        if (!composerPayloadSubmitAllowed(segments, writeCtx)) return;
+        onSubmit(serializeComposerPayload(segments, playerName || 'Ngươi'));
+        // Do NOT clear here - see the file-level comment above for why
+        // nothing is wiped on submit itself, only on a confirmed turn.
     };
-
-    const segmentLabel = (seg) => {
-        if (seg.type === 'narration') return 'Tường thuật';
-        const who = seg.speaker.kind === 'player' ? (playerName || 'Ngươi')
-            : seg.speaker.kind === 'known_npc' ? seg.speaker.display_name
-            : seg.speaker.proposed_name;
-        return `${who} nói`;
-    };
-
-    const speakerRawTrimmed = draft.speakerRaw.trim();
-    const showSpeakerSuggestions = draft.type === 'dialogue' && draft.speaker.kind !== 'known_npc' && speakerRawTrimmed !== '';
-    const liveSuggestions = showSpeakerSuggestions
-        ? knownNpcPool.filter(e => fuzzyScore(e.display_name, speakerRawTrimmed) >= 0.3).slice(0, 6)
-        : [];
 
     return (
         <div className="flex flex-col gap-2 p-2 bg-[#0a0f0a]/30 border border-[#cda45e]/30">
+            <div className="flex gap-1.5">
+                <button
+                    type="button"
+                    onClick={handleAddNarration}
+                    disabled={disabled}
+                    style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                    className="flex-1 text-xs font-bold tracking-wide border px-2 bg-transparent border-[#cda45e]/40 text-[#8ba888] hover:bg-[#cda45e]/10 hover:text-[#e8d3a1] disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                    + Tường thuật
+                </button>
+                <button
+                    type="button"
+                    onClick={handleAddDialogue}
+                    disabled={disabled}
+                    style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                    className="flex-1 text-xs font-bold tracking-wide border px-2 bg-transparent border-[#cda45e]/40 text-[#8ba888] hover:bg-[#cda45e]/10 hover:text-[#e8d3a1] disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                    + Đối thoại
+                </button>
+            </div>
+
             {segments.length > 0 && (
-                <div className="flex flex-col gap-1 max-h-40 overflow-y-auto pr-1">
-                    {segments.map((seg, i) => (
-                        <div key={i} className="flex items-start gap-2 bg-[#0a0f0a]/60 border border-[#cda45e]/20 px-2 py-1.5">
-                            <div className="flex-grow min-w-0">
-                                <span className="text-[11px] font-light text-[#8ba888] block">{segmentLabel(seg)}</span>
-                                <span className="text-sm text-[#e8d3a1] break-words whitespace-pre-wrap">{seg.text}</span>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => handleDeleteSegment(i)}
-                                disabled={disabled}
-                                style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}
-                                className="flex-shrink-0 text-[#cda45e]/70 hover:text-[#cda45e] disabled:opacity-40 disabled:cursor-not-allowed"
-                                title="Xóa đoạn này"
-                            >
-                                ✕
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            <div className="flex flex-col gap-1.5">
-                <div className="flex gap-1.5">
-                    <button
-                        type="button"
-                        onClick={() => handleTypeChange('narration')}
-                        disabled={disabled}
-                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
-                        className={`flex-1 text-xs font-bold tracking-wide border px-2 disabled:opacity-40 disabled:cursor-not-allowed ${draft.type === 'narration' ? 'bg-[#cda45e]/20 border-[#cda45e] text-[#e8d3a1]' : 'bg-transparent border-[#cda45e]/40 text-[#8ba888]'}`}
-                    >
-                        Tường thuật
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => handleTypeChange('dialogue')}
-                        disabled={disabled}
-                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
-                        className={`flex-1 text-xs font-bold tracking-wide border px-2 disabled:opacity-40 disabled:cursor-not-allowed ${draft.type === 'dialogue' ? 'bg-[#cda45e]/20 border-[#cda45e] text-[#e8d3a1]' : 'bg-transparent border-[#cda45e]/40 text-[#8ba888]'}`}
-                    >
-                        Đối thoại
-                    </button>
-                </div>
-
-                {draft.type === 'dialogue' && (
-                    <div className="flex flex-col gap-1">
-                        <div className="flex gap-1.5">
-                            <button
-                                type="button"
-                                onClick={() => setDraft(d => ({ ...d, speaker: { kind: 'player' }, speakerRaw: '' }))}
-                                disabled={disabled}
-                                style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
-                                className={`text-xs border px-2 disabled:opacity-40 disabled:cursor-not-allowed ${draft.speaker.kind === 'player' ? 'bg-[#cda45e]/20 border-[#cda45e] text-[#e8d3a1]' : 'bg-transparent border-[#cda45e]/40 text-[#8ba888]'}`}
-                            >
-                                Nhân vật chính
-                            </button>
-                            <input
-                                type="text"
-                                value={draft.speakerRaw}
-                                onChange={(e) => handleSpeakerRawChange(e.target.value)}
-                                onBlur={(e) => handleSpeakerBlur(e.target.value)}
-                                disabled={disabled}
-                                placeholder="Tìm/gõ tên NPC..."
-                                className="flex-grow p-2 bg-[#0a0f0a]/60 border border-[#cda45e]/40 text-[#e8d3a1] text-xs outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                            />
-                        </div>
-                        {showSpeakerSuggestions && (
-                            <div className="flex flex-col gap-0.5 bg-[#0a0f0a]/80 border border-[#cda45e]/20 max-h-32 overflow-y-auto">
-                                {liveSuggestions.map(c => (
+                <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
+                    {segments.map((seg) => {
+                        const speakerRawTrimmed = (seg.speakerRaw || '').trim();
+                        const showSuggestions = seg.type === 'dialogue' && seg.speaker.kind !== 'known_npc' && speakerRawTrimmed !== '';
+                        const suggestions = showSuggestions
+                            ? knownNpcPool.filter(e => fuzzyScore(e.display_name, speakerRawTrimmed) >= 0.3).slice(0, 6)
+                            : [];
+                        return (
+                            <div key={seg.id} className="flex flex-col gap-1.5 bg-[#0a0f0a]/60 border border-[#cda45e]/20 px-2 py-2">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[11px] font-light text-[#8ba888]">
+                                        {seg.type === 'narration' ? 'Tường thuật' : 'Đối thoại'}
+                                    </span>
                                     <button
                                         type="button"
-                                        key={c.char_id}
-                                        onClick={() => handlePickCandidate(c)}
+                                        onClick={() => handleDeleteSegment(seg.id)}
                                         disabled={disabled}
-                                        className="text-left text-xs text-[#e8d3a1] px-2 py-1.5 hover:bg-[#cda45e]/10 disabled:opacity-40"
-                                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                        style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                        className="flex-shrink-0 text-[#cda45e]/70 hover:text-[#cda45e] disabled:opacity-40 disabled:cursor-not-allowed"
+                                        title="Xóa đoạn này"
                                     >
-                                        {c.display_name}
+                                        ✕
                                     </button>
-                                ))}
-                                <button
-                                    type="button"
-                                    onClick={handleUseNewName}
-                                    disabled={disabled}
-                                    className="text-left text-xs text-[#8ba888] italic px-2 py-1.5 hover:bg-[#cda45e]/10 disabled:opacity-40"
-                                    style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
-                                >
-                                    Dùng tên mới: "{speakerRawTrimmed}"
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
+                                </div>
 
-                <div className="flex gap-2">
-                    <textarea
-                        value={draft.text}
-                        onChange={(e) => setDraft(d => ({ ...d, text: e.target.value }))}
-                        rows={2}
-                        placeholder="Miêu tả hành động tùy ý..."
-                        disabled={disabled}
-                        className="flex-grow p-3 bg-[#0a0f0a]/60 border border-[#cda45e]/40 text-[#e8d3a1] focus:border-[#cda45e] outline-none text-sm placeholder-[#8ba888] disabled:opacity-50 disabled:cursor-not-allowed resize-y break-words whitespace-pre-wrap"
-                    />
-                    <button
-                        type="button"
-                        onClick={handleAddSegment}
-                        disabled={disabled || draft.text.trim() === ''}
-                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
-                        className="bg-transparent border border-[#cda45e]/60 hover:bg-[#cda45e]/10 text-[#cda45e] font-bold py-3 px-4 text-xs uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed self-start whitespace-nowrap"
-                    >
-                        + Thêm đoạn
-                    </button>
+                                {seg.type === 'dialogue' && (
+                                    <div className="flex flex-col gap-1">
+                                        <div className="flex gap-1.5">
+                                            <button
+                                                type="button"
+                                                onClick={() => updateSegment(seg.id, { speaker: { kind: 'player' }, speakerRaw: '' })}
+                                                disabled={disabled}
+                                                style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                                className={`text-xs border px-2 disabled:opacity-40 disabled:cursor-not-allowed ${seg.speaker.kind === 'player' ? 'bg-[#cda45e]/20 border-[#cda45e] text-[#e8d3a1]' : 'bg-transparent border-[#cda45e]/40 text-[#8ba888]'}`}
+                                            >
+                                                Nhân vật chính
+                                            </button>
+                                            <input
+                                                type="text"
+                                                value={seg.speakerRaw}
+                                                onChange={(e) => updateSegment(seg.id, { speakerRaw: e.target.value })}
+                                                onBlur={() => handleSpeakerBlur(seg)}
+                                                disabled={disabled}
+                                                placeholder="Tìm/gõ tên NPC..."
+                                                className="flex-grow p-2 bg-[#0a0f0a]/60 border border-[#cda45e]/40 text-[#e8d3a1] text-xs outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                                            />
+                                        </div>
+                                        {showSuggestions && (
+                                            <div className="flex flex-col gap-0.5 bg-[#0a0f0a]/80 border border-[#cda45e]/20 max-h-32 overflow-y-auto">
+                                                {suggestions.map(c => (
+                                                    <button
+                                                        type="button"
+                                                        key={c.char_id}
+                                                        onClick={() => handlePickCandidate(seg, c)}
+                                                        disabled={disabled}
+                                                        className="text-left text-xs text-[#e8d3a1] px-2 py-1.5 hover:bg-[#cda45e]/10 disabled:opacity-40"
+                                                        style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                                    >
+                                                        {c.display_name}
+                                                    </button>
+                                                ))}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleUseNewName(seg)}
+                                                    disabled={disabled}
+                                                    className="text-left text-xs text-[#8ba888] italic px-2 py-1.5 hover:bg-[#cda45e]/10 disabled:opacity-40"
+                                                    style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                                                >
+                                                    Dùng tên mới: "{speakerRawTrimmed}"
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                <textarea
+                                    value={seg.text}
+                                    onChange={(e) => updateSegment(seg.id, { text: e.target.value })}
+                                    rows={2}
+                                    placeholder={seg.type === 'narration' ? 'Miêu tả hành động, diễn biến...' : 'Nội dung lời nói...'}
+                                    disabled={disabled}
+                                    className="p-3 bg-[#0a0f0a]/60 border border-[#cda45e]/40 text-[#e8d3a1] focus:border-[#cda45e] outline-none text-sm placeholder-[#8ba888] disabled:opacity-50 disabled:cursor-not-allowed resize-y break-words whitespace-pre-wrap"
+                                />
+                            </div>
+                        );
+                    })}
                 </div>
-            </div>
+            )}
 
             <button
                 type="button"
