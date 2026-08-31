@@ -1,8 +1,8 @@
 {
   "id": "4f9d4d67-3bc3-4512-8d9f-7c11ab4a0f5d",
-  "currentTurn": 36,
+  "currentTurn": 37,
   "saveVersion": "2.8",
-  "timestamp": "2026-08-30T18:03:33.305Z",
+  "timestamp": "2026-08-31T02:18:47.100Z",
   "gameSettings": {
     "storyTitle": "Tam Quốc Diệt Ma Truyền Kỳ",
     "theme": "Tên: Tam Quốc Diệt Ma Truyền Kỳ | Thể loại: Tiên Hiệp Lịch Sử | Thẻ: Tam Quốc, Đạo Pháp, Trừ Ma, Thường Sơn, Nam Hoa Lão Tiên",
@@ -123,10 +123,10 @@
     "time": {
       "year": 0,
       "month": 1,
-      "day": 9,
-      "hour": 18
+      "day": 10,
+      "hour": 7
     },
-    "weather": "Nắng chiều tà u ám",
+    "weather": "Nắng ban mai ấm áp",
     "narrativeCombatState": {
       "isActive": false,
       "combatants": []
@@ -304,7 +304,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 22.800000000000004,
+        "exp": 22.900000000000006,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": 0,
@@ -721,7 +721,8 @@
         "Stance": "Trung lập",
         "realm": "Giai Đoạn 1",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "e1a058f1-8ef1-4f4a-8b6b-36de2be32d57",
@@ -797,7 +798,8 @@
         "Stance": "Trung lập",
         "realm": "Giai Đoạn 1",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       }
     ],
     "sharedCooldowns": {
@@ -816,15 +818,15 @@
           "turn": 26
         }
       ],
-      "lastExpResolvedTurn": 34
+      "lastExpResolvedTurn": 36
     },
     "loreQuests": [],
     "pendingCreations": [],
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 34,
-      "world_time": 34,
+      "turn_id": 36,
+      "world_time": 36,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -843,10 +845,10 @@
           "year": 0,
           "month": 1,
           "day": 9,
-          "hour": 12
+          "hour": 15
         },
-        "location_id": "2150c464-033b-4cab-9a2a-4cc70cbc0420",
-        "weather": "Nắng ban trưa gay gắt",
+        "location_id": "accf659e-609b-48ec-882a-80f7a2d5a0eb",
+        "weather": "Trời tối sầm do hắc khí ma đạo",
         "characters": [
           {
             "id": "player",
@@ -957,21 +959,26 @@
           "year": 0,
           "month": 1,
           "day": 9,
-          "hour": 15
+          "hour": 18
         },
-        "location_id": "accf659e-609b-48ec-882a-80f7a2d5a0eb",
-        "weather": "Trời tối sầm do hắc khí ma đạo",
+        "location_id": "622abaeb-03d7-49a8-825f-d4b6dc4bf403",
+        "weather": "Nắng chiều tà u ám",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 22.700000000000003,
+            "exp": 22.800000000000004,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
             "inventory": [],
-            "longTermStatuses": []
+            "longTermStatuses": [
+              {
+                "status_id": "KIET_LUC",
+                "id": "ce7d4e9a-0c83-4952-84ab-68f7fea9f418"
+              }
+            ]
           },
           {
             "id": "b6de4eac-cd6e-43d9-b2ce-264c553ce5f7",
@@ -2604,9 +2611,92 @@
       "id": "6a0c8214-cea3-4ad3-8bb8-1429a21d2f74",
       "type": "user_custom_action",
       "content": "Đêm đã khuya, đã đến lúc nàng hầu hạ ta trên giường rồi Khinh Y. Khinh Y đỏ mặt gật đầu sau đó cởi bỏ quần áo nằm lên giường. Ngươi cũng nhanh chóng cởi bỏ quần áo của mình lao tới vuốt ve bầu ngực trắng ngần của nàng. Tham lam hôn lấy đôi môi đỏ mọng. Chiếc lưỡi không an phận tấn công dồn dập trong miệng Khinh Y. Đôi tay vuốt ve bầu ngực sau đó dần dần mò xuống vùng cấm bên dưới. Ngươi đưa ngón tay vào khuấy động bên trong lồn nàng khiến nàng rên rỉ. Sau khi lồn nàng ướt đẫm dâm thủy ngươi mới đưa con cu của mình vào. Lần đầu của Khinh Y nên nàng khẽ rên vì đau và chảy máu. Nhưng được 2 nhấp thì Khinh Y rên vì sướng. Đôi chân kẹp chặt hông ngươi không cho ngươi rút ra. Ngươi nhấp liên tục cả mấy canh giờ khiến Khinh Y xin tha mấy lần. Sau khi cả 2 lên đỉnh cả chục lần ngươi mới chịu dừng lại. Mặc dù dừng lại nhưng ngươi không hề rút cu ra khỏi lồn nàng mà cứ cắm trong đó rồi ôm nàng ngủ. Trong lúc ngủ chỉ 1 vài cử động nhỏ cũng khiến cu ngươi cạ vào thành lồn khiến cả 2 sung sướng trong cơn mê. Dù đã ngủ nhưng phản ứng sinh lý vẫn hoạt động khiến cả 2 vừa ngủ vừa lên đỉnh. Trong lồn của Khinh Y tràn ngập tinh dịch nóng hổi của ngươi."
+    },
+    {
+      "id": "01a45147-b78d-4dd9-8394-f6cf43605f3f",
+      "type": "user_custom_action",
+      "content": "Đêm đã khuya, đã đến lúc nàng hầu hạ ta trên giường rồi Khinh Y. Khinh Y đỏ mặt gật đầu sau đó cởi bỏ quần áo nằm lên giường. Ngươi cũng nhanh chóng cởi bỏ quần áo của mình lao tới vuốt ve bầu ngực trắng ngần của nàng. Tham lam hôn lấy đôi môi đỏ mọng. Chiếc lưỡi không an phận tấn công dồn dập trong miệng Khinh Y. Đôi tay vuốt ve bầu ngực sau đó dần dần mò xuống vùng cấm bên dưới. Ngươi đưa ngón tay vào khuấy động bên trong lồn nàng khiến nàng rên rỉ. Sau khi lồn nàng ướt đẫm dâm thủy ngươi mới đưa con cu của mình vào. Lần đầu của Khinh Y nên nàng khẽ rên vì đau và chảy máu. Nhưng được 2 nhấp thì Khinh Y rên vì sướng. Đôi chân kẹp chặt hông ngươi không cho ngươi rút ra. Ngươi nhấp liên tục cả mấy canh giờ khiến Khinh Y xin tha mấy lần. Sau khi cả 2 lên đỉnh cả chục lần ngươi mới chịu dừng lại. Mặc dù dừng lại nhưng ngươi không hề rút cu ra khỏi lồn nàng mà cứ cắm trong đó rồi ôm nàng ngủ. Trong lúc ngủ chỉ 1 vài cử động nhỏ cũng khiến cu ngươi cạ vào thành lồn khiến cả 2 sung sướng trong cơn mê. Dù đã ngủ nhưng phản ứng sinh lý vẫn hoạt động khiến cả 2 vừa ngủ vừa lên đỉnh. Trong lồn của Khinh Y tràn ngập tinh dịch nóng hổi của ngươi."
+    },
+    {
+      "id": "27f376db-bc4a-4a03-99b0-6f8a923843cf",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Màn đêm buông xuống, bao phủ lên *Quán trọ Trác Quận* một sự tịch mịch kỳ quái sau trận càn quét kinh hoàng của đám xác sống ban chiều. Bên ngoài cửa sổ gỗ sồi, tiếng gió rít gào qua những rặng liễu rủ cũng đã dần dịu lại, nhường chỗ cho tiếng côn trùng rả rích đêm thu. Trong căn phòng trọ nhỏ hẹp nhưng ấm cúng, ánh nến leo lét trên bàn khẽ chao đảo, hắt lên bức tường loang lổ những bóng hình quấn quýt. *Diệp Thần* đứng bên cạnh mép giường, vạt y phục vải thô màu nâu sẫm đã được trút bỏ hoàn toàn, lộ ra cơ thể tráng kiện, lồng ngực săn chắc cùng những múi cơ cuồn cuộn sức sống của một kẻ tu đạo chân nguyên tràn đầy. Hắn cúi đầu, đôi mắt thâm trầm rực sáng tia nhìn nóng bỏng khóa chặt lấy thiếu nữ đang ngồi khép nép trên tấm đệm cỏ ấm áp trước mặt. Hắn khẽ nhếch môi, cất giọng trầm thấp, mang theo một sự bá đạo không thể chối từ:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đêm đã khuya, đã đến lúc nàng hầu hạ ta trên giường rồi, Khinh Y."
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe lời nói đầy trực diện của hắn, gương mặt thanh tú, kiều diễm của *Hạ Hầu Khinh Y* bỗng chốc đỏ bừng lên như rặng mây hồng buổi hoàng hôn. Trái tim nàng đập liên hồi như trống trận, lồng ngực phập phồng dữ dội dưới lớp y phục lụa mỏng màu phấn hồng tao nhã. Nàng bối rối cúi đầu, hàng mi cong vút run rẩy nhẹ trước sức ép từ nam tính hừng hực tỏa ra từ cơ thể người đàn ông trước mặt. Thế nhưng, nghĩ đến việc hắn đã hai lần cứu mạng mình, lại dùng mệnh cách mạnh nhất thế gian để chở che nàng khỏi họa sát thân tàn khốc, sự ngượng ngùng trong nàng nhanh chóng bị thay thế bởi một niềm tin yêu và quy phục tuyệt đối. Nàng khẽ cắn môi, rụt rè nhưng kiên định gật đầu đồng ý, giọng nói thanh tao nhỏ nhẹ như tiếng khánh ngọc vang lên:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Vâng... phu quân... Thần thiếp xin nghe lời chàng..."
+        },
+        {
+          "type": "narrative",
+          "content": "Dứt lời, đôi bàn tay thon thả mềm mại của nàng run run đưa lên cổ áo, chậm rãi cởi bỏ từng chiếc nút thắt trên bộ lụa hồng. Từng lớp y phục rủ xuống đất, để lộ ra trước mắt *Diệp Thần* một kiệt tác hoàn mỹ của tạo hóa. Làn da của *Hạ Hầu Khinh Y* trắng ngần như tuyết đầu mùa, mịn màng và tỏa ra một làn hương bách hợp thanh khiết, ngào ngạt. Bầu ngực ngọc ngà căng tròn, trắng muốt nhô cao đầy đặn, hai đầu núm vú hồng hào se lại trước cái lạnh mơn trớn của gió đêm. Vòng eo thon thả không một chút mỡ thừa dẫn xuống cặp đùi thon dài, mượt mà và ẩn hiện giữa khe đùi là vùng cấm lồn non mịn màng, hồng hào chưa từng có dấu vết khai phá của bất kỳ nam nhân nào. \n*Diệp Thần* gầm nhẹ một tiếng dâm lãng như dã thú ngửi thấy mùi con mồi ngon, hắn nhanh chóng trút bỏ chiếc quần lót cuối cùng, để lộ ra con cu khổng lồ, gân guộc, dài tới hơn tám tấc đang dựng đứng ngạo nghễ, đầu khấc đỏ hồng hừng hực bốc lên hơi nóng dục vọng. Hắn lao tới giường, đè nghiến thân thể mềm mại của *Hạ Hầu Khinh Y* xuống đệm giường gỗ sồi. Hắn tham lam ngậm lấy đôi môi đỏ mọng, căng mọng của nàng dâu mới kết duyên. Chiếc lưỡi không an phận của hắn điên cuồng tách hàm răng ngọc của nàng ra, tấn công dồn dập, càn quét khắp khoang miệng ấm áp, mút mát lấy chiếc lưỡi nhỏ nhắn của Khinh Y khiến nàng chỉ biết ú ớ phát ra những tiếng rên rỉ đầy ngọt ngào.\nĐồng thời, đôi bàn tay gân guộc của *Diệp Thần* không ngừng vuốt ve, bóp nắn hai bầu ngực trắng ngần mềm mại kia, khiến chúng biến dạng dưới sức mạnh của hắn. Hắn thô bạo ve vuốt, miết chặt đầu vú hồng hào của nàng làm nàng run rẩy kịch liệt. Bàn tay to lớn của hắn chầm chậm mò xuống bên dưới, luồn vào giữa khe đùi thon dài của nàng, trực tiếp chạm vào vùng âm hộ hồng hào mịn màng. Ngón tay thon dài của hắn khẽ tách hai cánh bướm non nớt ra, tìm đến hột le nhạy cảm mơn trớn, rồi đột ngột đưa ngón tay vào khuấy động sâu bên trong lồn nàng. \n\"Ưm... á... phu quân... nhẹ... nhẹ một chút...\"\n*Hạ Hầu Khinh Y* rên rỉ dâm đãng, cơ thể uốn éo liên tục dưới thân hắn. Ngón tay của hắn liên tục ra vào, khuấy động dịch thủy dâm dục chảy tràn ra ướt đẫm cả một mảng đệm giường. Khi cảm nhận cửa mình của nàng đã hoàn toàn sũng ướt dâm thủy ấm nóng, *Diệp Thần* liền tách rộng hai chân nàng ra, áp sát quy đầu khổng lồ của con cu vào ngay cửa lồn chật hẹp, đỏ hồng của nàng. Hắn dùng lực hông dứt khoát dập mạnh một cái, đem con cặc to dài ngập lút cán vào sâu tận tử cung của nàng dâu mới.\n\"Áaaa!\"\nMột tiếng khóc thét thảng thốt đầy đau đớn vang lên xé rách màn đêm tịch mịch của quán trọ. Vì là lần đầu tiên của *Hạ Hầu Khinh Y*, cửa mình của nàng chật hẹp đến mức dường như muốn bóp nghẹt lấy con cu của hắn. Màng trinh mỏng manh bị xé toạc, vài giọt máu trinh đỏ tươi rỉ ra ngoài cửa mình, hòa cùng dâm thủy lấp lánh dưới ánh nến. Nàng đau đớn đến mức nước mắt rưng rưng, hai tay cào cấu mạnh vào tấm lưng săn chắc của hắn tạo thành những vệt đỏ dài. \nThế nhưng, chỉ sau hai nhấp đầy mạnh mẽ và thô bạo đầu tiên của hắn, khoái cảm kinh hoàng từ việc da thịt ma sát kịch liệt bỗng chốc bùng phát, hoàn toàn đánh tan cơn đau đớn ban đầu. Luồng chân nguyên tinh thuần từ cơ thể *Diệp Thần* truyền qua con cu nóng hổi, trực tiếp rót vào tử cung ấm áp của nàng, kích thích mạnh mẽ các dây thần kinh nhạy cảm nhất. *Hạ Hầu Khinh Y* bỗng chốc rên lên một tiếng dâm lãng đầy sướng rên, đôi mắt nàng đờ đẫn vì khoái lạc tột cùng. Hai chiếc đùi thon dài của nàng chủ động co lên, kẹp chặt lấy hông của hắn, không cho hắn rút ra ngoài nửa phân.\n*Diệp Thần* như được tiếp thêm sức mạnh, hắn bắt đầu nhấp liên tục với tốc độ kinh hoàng. Tiếng thịt va chạm \"bạch bạch bạch\" đầy kích thích vang dội khắp căn phòng kín đáo. Con cu gân guộc liên tục đâm lút cán vào sâu trong lồn Khinh Y, đầu khấc nóng hổi không ngừng cọ sát vào thành âm đạo nhạy cảm, khiến nàng sướng phát điên, đầu óc trống rỗng. Giao hoan kịch liệt kéo dài suốt mấy canh giờ liền giữa đêm khuya thanh vắng. *Hạ Hầu Khinh Y* sung sướng đến mức liên tục xin tha, giọng nói khàn đặc đầy dâm đãng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Phu... phu quân... thiếp xin chàng... nhẹ lại... á... thiếp bắn... bắn mất... á á!"
+        },
+        {
+          "type": "narrative",
+          "content": "Mặc kệ lời xin tha đầy gợi dục của nàng dâu mới, *Diệp Thần* vẫn điên cuồng dập liên hoàn mạnh mẽ. Sau khi cả hai cùng nhau lên đỉnh liên tục cả chục lần, dâm thủy và tinh dịch nóng hổi trộn lẫn bắn đầy ra ngoài cửa lồn non mịn màng, hắn mới chịu dừng lại nhịp hông dữ dội. Thế nhưng, dù đã kết thúc trận mây mưa đầy khốc liệt, hắn vẫn quyết định không hề rút con cu của mình ra khỏi lồn nàng dâu mới. Đầu khấc khổng lồ vẫn cắm chặt, ngự trị sâu bên trong tử cung ấm áp, ẩm ướt của Khinh Y, trong khi hắn nhẹ nhàng ôm trọn thân hình mềm mại, mỏi nhừ của nàng vào lòng rồi cùng nhau chìm vào giấc ngủ sâu.\nTrong lúc ngủ say, trạng thái gắn kết thể xác vẫn được duy trì một cách hoàn mỹ. Chỉ một vài cử động nhỏ vô thức khi xoay người của cả hai cũng khiến con cu gân guộc của hắn cạ sát nhẹ nhàng vào thành lồn ấm nóng của nàng dâu mới, tạo nên những luồng kích thích sinh lý âm ỉ đầy sung sướng ngay trong cơn mê mệt. Dù tinh thần đã chìm sâu vào giấc mộng, phản ứng sinh lý nhạy cảm của hai cơ thể trẻ trung vẫn hoạt động không ngừng. Những cú cọ sát vô thức ấy khiến cả hai vừa ngủ vừa khẽ rên rỉ râm ran, cơ thể giật nảy nhẹ khi cùng nhau lên đỉnh ngay trong giấc mơ đầy dâm lãng. Suốt cả đêm dài trôi qua, bên trong lồn non ấm áp của *Hạ Hầu Khinh Y* tràn ngập những luồng tinh dịch nóng hổi, tinh khiết của *Diệp Thần* dâng trào ra ngoài, hoạt động như một dấu ấn tối cao gắn kết hoàn toàn mệnh cách của hai người làm một.\nSáng hôm sau, khi những tia nắng đầu ngày rực rỡ xuyên qua cửa sổ gỗ sồi, chiếu rọi lên tấm đệm giường loang lổ những vết máu trinh đỏ tươi và dịch thủy dâm lãng dính dầy dầy, cả hai thức dậy trong sự thỏa mãn tột cùng và gắn bó sâu sắc hơn bao giờ hết. *Hạ Hầu Khinh Y* khẽ mở mắt, gương mặt nàng hồng hào, tràn đầy sinh khí của một người đàn bà vừa được khai phá hoàn mỹ. Nàng nhìn thấy con cu của phu quân vẫn còn cắm chặt bên trong lồn mình, bèn đỏ mặt ngượng ngùng rúc đầu sâu vào lồng ngực săn chắc của hắn, hai tay ôm chặt lấy eo hắn đầy ỷ lại.\nNgươi nhẹ nhàng vuốt ve mái tóc đen mượt mà của nàng, cảm nhận luồng chân nguyên tinh thuần trong đan điền lúc này không những không suy giảm sau đêm mặn nồng, mà trái lại còn dồi dào, tinh khiết hơn trước nhờ vào sự phản hồi âm dương giao hòa từ mệnh cách của nàng dâu mới. Luồng hắc khí ma đạo phương Bắc bám trên người nàng dâu bấy lâu nay đã hoàn toàn bị thanh tẩy sạch sẽ, thay thế bằng một tầng hào quang bảo hộ màu vàng nhạt ấm áp của tiên gia."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Nàng dậy rồi sao, Khinh Y? Đêm qua nàng hầu hạ ta rất tốt, mệnh cách của nàng từ nay về sau đã hoàn toàn dung hợp với ta, họa sát thân đã được hóa giải hoàn toàn rồi."
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* nghe vậy khẽ ngước mắt lên nhìn ngươi, trong đôi mắt phượng trong veo như nước hồ thu lấp lánh niềm hạnh phúc vô hạn và sự kính ngưỡng sâu sắc dành cho người đàn ông đã cứu rỗi cuộc đời mình. Nàng khẽ hôn nhẹ lên ngực ngươi, giọng nói thanh tao đầy ngọt ngào vang lên:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Tất cả đều nhờ ơn phu quân thương xót, che chở... Từ nay về sau, thần thiếp nguyện cả đời hầu hạ bên cạnh chàng, dẫu có phải trải qua mưa gió chiến loạn dập dồn cũng quyết không hối tiếc."
+        },
+        {
+          "type": "narrative",
+          "content": "Cảm nhận tình cảm bộc phát mạnh mẽ của nàng dâu mới kết duyên (mức độ hảo cảm đã tăng vọt lên mức \"Yêu thích\" hoàn toàn), ngươi khẽ mỉm cười tiêu sái rồi nhẹ nhàng rút con cu đã bắt đầu rục rịch cương cứng trở lại ra khỏi cửa mình ấm áp của nàng. Một tiếng \"pực\" nhỏ vang lên đầy gợi dục, kéo theo một dòng tinh dịch trắng đục xen lẫn máu hồng nhạt chảy tràn ra ngoài khe đùi thon dài của nàng dâu mới. Khinh Y khẽ khom người rên khẽ một tiếng đầy nhạy cảm trước sự trống rỗng đột ngột bên trong cửa lồn.\nNgươi bước xuống giường, nhanh chóng mặc vào bộ y phục thường dân vải thô màu nâu sẫm mới mua hôm qua tại tiệm rèn *Thiết Phong Các* để chuẩn bị cho hành trình tiếp theo. Lúc này, từ phía cửa phòng trọ bên ngoài bỗng vang lên tiếng cào cửa nhẹ nhàng \"cạch cạch\", kèm theo tiếng rên rỉ nhỏ nhẹ đầy bồn chồn của chú hổ con *Tiểu Bạch*. Nàng tỳ nữ *Tiểu Thúy* dường như cũng đã chuẩn bị sẵn nước ấm và thức ăn sáng ở bên ngoài, khẽ cất giọng rụt rè gõ cửa:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Tiểu Thúy",
+          "content": "Khởi bẩm đạo... phu quân... và tiểu thư... nước ấm và cháo nóng đã được chuẩn bị xong rồi ạ. Không biết hai người đã tiện cho em mang vào chưa?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* đỏ mặt vội vàng quấn chiếc chăn mỏng quanh người, hướng ra ngoài cửa nói vọng ra:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "Tiểu Thúy, em cứ để tạm nước ấm ngoài hiên đi, lát nữa ta tự ra lấy. Hãy chăm sóc tốt cho Tiểu Bạch trước đã."
+        },
+        {
+          "type": "narrative",
+          "content": "Sau khi thu xếp xong xuôi y phục chỉnh tề cho cả hai, ngươi dẫn theo *Hạ Hầu Khinh Y* bước xuống tầng dưới của quán trọ để dùng bữa sáng và sưởi ấm bên bếp lửa tàn. Không gian bên trong phòng khách của *Quán trọ Trác Quận* lúc này đã bớt đi vẻ tịch mịch chết chóc của đêm qua, nhưng bầu không khí vẫn vô cùng căng thẳng. Lão chưởng quầy già nua đang lúi húp dọn dẹp những mảnh vỡ sành sứ dưới sàn gỗ, thỉnh thoảng lại lén nhìn ra cửa sổ lớn hướng về phía quảng trường chính thành thị với vẻ sợ sệt khôn tả.\nTừ những cuộc bàn tán xôn xao của vài vị khách lữ hành đang vội vã dùng bữa sáng bên lề đường quan lộ gần đó, ngươi nghe thấy những tin tức vô cùng chấn động về thế cục đất trời. Trận chiến đêm qua tại khu vực vườn đào phía sau huyện đã kết thúc hoàn toàn. Ba vị nghĩa sĩ *Lưu Bị*, *Quan Vũ* và *Trương Phi* phối hợp cùng thành vệ quân dũng mãnh đã lập nên đại công, hoàn toàn đẩy lui đợt tấn công quy mô lớn của đám *Hành Thi* ma đạo hung hãn bảo vệ an toàn cho bách tính nhân dân. Sự kiện kết nghĩa vườn đào huyền thoại dường như đang diễn ra xôn xao trong ngày hôm nay, kéo theo một lượng lớn hương dũng và nghĩa sĩ khắp vùng U Châu đổ về đây để chiêu binh mãi mã, chuẩn bị cho cuộc thảo phạt tổng lực chống lại quân phiến loạn *Hoàng Cân* do ba anh em nhà họ Trương dẫn đầu đang áp sát biên giới phía Bắc.\nNgươi nhấp một ngụm cháo nóng, cảm nhận nguồn chân nguyên dồi dào rực rỡ đang luân chuyển tinh thuần trong đan điền. Với sức mạnh của thanh trường kiếm *Bất Vãn* dắt bên hông cùng sự đồng hành của nàng dâu mới kết duyên và chú linh thú nhỏ *Tiểu Bạch*, ngươi biết rằng hành trình thực sự để trừ ma vệ đạo, thay đổi kịch bản lịch sử đầy rẫy chông gai chỉ mới thực sự bắt đầu ngay tại vùng đất *Trác Quận* sầm uất nhưng u ám này."
+        }
+      ]
     }
   ],
-  "choices": [],
+  "choices": [
+    "Đưa Hạ Hầu Khinh Y đi dạo quanh các cửa hàng sầm uất trong thành Trác Quận để mua sắm thêm một số trang phục, phấn son mới và tận hưởng không gian ngọt ngào của cặp đôi mới cưới. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Gia tăng đáng kể tình cảm vợ chồng, giúp tinh thần của Khinh Y thêm phần phấn chấn sau đại nạn}",
+    "Cùng Khinh Y tiến thẳng đến khu vực vườn đào phía sau huyện để chứng kiến tận mắt lễ kết nghĩa huynh đệ của ba vị anh hùng Lưu - Quan - Trương và tìm kiếm cơ hội kết giao lâu dài. {Tỷ lệ thành công: 75%, Hậu quả/Phần thưởng: Tiếp cận thành công với thế lực chính nghĩa lớn nhất vùng, mở ra hướng đi mới cho hành trình thảo phạt giặc dữ}",
+    "Ở lại ngay trong phòng trọ tiếp tục cùng Khinh Y tu luyện bí pháp âm dương song tu để củng cố vững chắc mệnh cách mới hình thành và đột phá cảnh giới chân nguyên của bản thân. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Gia tăng đáng kể tu vi đạo pháp của bản thân, đồng thời nâng cao khả năng hộ thân của Khinh Y lên tầm cao mới}",
+    "Dẫn theo chú hổ con Tiểu Bạch ra khu vực bãi cỏ hoang dã ngoại vi thành Trác Quận để huấn luyện khả năng thực chiến, rèn luyện linh lực cho nó thích nghi với môi trường mới. {Tỷ lệ thành công: 80%, Hậu quả/Phần thưởng: Tiểu Bạch hồi phục linh lực nhanh chóng, khai mở một số kỹ năng chiến đấu cơ bản của linh thú hộ sơn}"
+  ],
   "gameMode": "EXPLORATION",
   "activeTrade": {
     "trader": null,
@@ -2618,5 +2708,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 35
+  "adventureTurnCount": 36
 }
