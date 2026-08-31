@@ -134,6 +134,21 @@ M = ["gemini-3-flash-preview", "gemini-3.5-flash", "gemini-3.1-flash-lite",
 > JSON-schema + `thinkingConfig.thinkingLevel` request shape. Note the new rungs
 > reject the legacy `thinkingConfig.thinkingBudget` field (HTTP 400), so any call
 > that tunes thinking must use `thinkingLevel`.
+>
+> **Amendment 2026-08-31 (b) — owner decision, same day**: both "-lite" rungs
+> (`gemini-3.1-flash-lite`, `gemini-3.5-flash-lite`) are dropped — their
+> narration quality was judged not worth keeping even as last-resort fallbacks —
+> and the three surviving rungs are reordered strongest-to-weakest. The shipped
+> ladder is now:
+>
+> ```
+> M = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-3-flash-preview"]
+> ```
+>
+> Consequence: with fewer rungs, a burst of 503s exhausts the ladder sooner, so
+> the per-key 429/503 breakers and the 3-key pool carry more of the availability
+> burden. Asserted by `tests/unit/ai-llm/ai_config_prompt_test.ts`
+> (`test_default_ladder_matches_adr_0003_order`).
 
 This is project **config data**, not a hardcoded literal in gameplay code (Core Rule #4,
 `coding-standards.md` data-driven requirement) — it lives in the tuning resource described
@@ -141,7 +156,7 @@ under Key Interfaces below, so it can be edited without a code change if Google
 deprecates a model.
 
 **`ai_context_hard_token_budget` (closes QQ-01)**: a fixed registry constant, **not**
-derived from any model's context window. All five models in `M` carry a ~1,048,576-token
+derived from any model's context window. All models in `M` carry a ~1,048,576-token
 input context window (verified via Google's official Gemini API docs — see Alternatives
 Considered), so a window-derived budget would functionally never trigger World Memory's
 Formula #5 clamp, defeating its purpose. The real constraint this budget protects against

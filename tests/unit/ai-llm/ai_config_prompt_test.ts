@@ -30,16 +30,15 @@ import { lockedFixture } from './fixtures';
 
 describe('AiLlmTuningConfig (R4 / C.5)', () => {
   it('test_default_ladder_matches_adr_0003_order', () => {
-    // Tail amended 2026-08-31 (ADR-0003 amendment): Google retired the two
-    // 2.5 models; the replacements are the ones Google's 404 message names.
+    // Amended twice on 2026-08-31 (ADR-0003): first the retired 2.5 tail was
+    // replaced, then the owner dropped both "-lite" rungs and reordered the
+    // three survivors strongest-to-weakest.
     expect([...DEFAULT_AI_CONFIG.model_ladder]).toEqual([
-      'gemini-3-flash-preview',
-      'gemini-3.5-flash',
-      'gemini-3.1-flash-lite',
       'gemini-3.6-flash',
-      'gemini-3.5-flash-lite',
+      'gemini-3.5-flash',
+      'gemini-3-flash-preview',
     ]);
-    expect(GEMINI_TEXT_MODEL_FALLBACKS).toHaveLength(5);
+    expect(GEMINI_TEXT_MODEL_FALLBACKS).toHaveLength(3);
   });
 
   it('test_plan_c10_deviation_is_the_shipped_default', () => {

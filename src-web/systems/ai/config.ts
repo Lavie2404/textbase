@@ -22,17 +22,19 @@
 import { AI_KNOBS } from '../registry';
 
 /**
- * Order preserved from the shipped `App.tsx` ladder. Tail updated 2026-08-31:
- * Google retired `gemini-2.5-flash` / `gemini-2.5-flash-lite` (HTTP 404 "no
- * longer available to new users"), naming these two as the replacements; both
- * probed 200 with the game's JSON-schema + thinkingLevel request shape.
+ * Owner decision 2026-08-31 (second amendment of the day): the two "-lite"
+ * rungs (`gemini-3.1-flash-lite`, `gemini-3.5-flash-lite`) are dropped —
+ * their narration quality was not worth keeping as fallbacks — and the three
+ * remaining rungs are ordered strongest-to-weakest. Keep the `App.tsx`
+ * `GEMINI_TEXT_MODEL_FALLBACKS` mirror and `ai_config_prompt_test.ts` in sync
+ * with any future edit. (Earlier 2026-08-31 amendment: Google retired the
+ * `gemini-2.5-*` tail with HTTP 404; all current rungs probed 200 with the
+ * game's JSON-schema + thinkingLevel request shape.)
  */
 export const GEMINI_TEXT_MODEL_FALLBACKS: readonly string[] = [
-  'gemini-3-flash-preview',
-  'gemini-3.5-flash',
-  'gemini-3.1-flash-lite',
   'gemini-3.6-flash',
-  'gemini-3.5-flash-lite',
+  'gemini-3.5-flash',
+  'gemini-3-flash-preview',
 ];
 
 /** The single allowlisted AI endpoint host (P7 CI check AC-01). */

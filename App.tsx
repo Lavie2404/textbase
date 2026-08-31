@@ -5744,7 +5744,7 @@ const ApiSetupModal = ({
             <legend className="text-lg font-semibold text-amber-300 px-2">Model AI Ưu Tiên</legend>
             <p className="text-xs text-gray-400 mb-3">
                 Model được chọn sẽ được thử <b>đầu tiên</b>. Nếu nó báo quá tải (lỗi 503), hệ thống vẫn tự chuyển sang các model còn lại.
-                Khi <i>gemini-3-flash-preview</i> sập, hãy chọn <i>gemini-3.6-flash</i> để chơi tiếp ngay.
+                Khi <i>gemini-3.6-flash</i> sập, hãy chọn <i>gemini-3.5-flash</i> để chơi tiếp ngay.
             </p>
             <select
                 value={preferredIsCustom ? '__custom__' : preferredTextModel}
@@ -18687,7 +18687,7 @@ ${ITEM_CLASSIFY_RULES_TEXT}
         CHỈ trả về một đối tượng JSON duy nhất chứa 2 thuộc tính: 'category' và 'description'.
     `;
     const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { response_mime_type: "application/json", response_schema: ITEM_CLASSIFY_SCHEMA } };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     try {
         const jsonText = await fetchWithRetries(apiUrl, payload);
@@ -18716,7 +18716,7 @@ ${ITEM_CLASSIFY_RULES_TEXT}
         CHỈ trả về MỘT MẢNG JSON gồm ĐÚNG ${itemIdeas.length} phần tử: phần tử thứ i là kết quả giám định của VẬT PHẨM #i, mỗi phần tử chứa 2 thuộc tính 'category' và 'description'.
     `;
     const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { response_mime_type: "application/json", response_schema: { type: "ARRAY", items: ITEM_CLASSIFY_SCHEMA } } };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     try {
         const jsonText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'creation_drain');
@@ -18780,7 +18780,7 @@ const fetchNpcDetailsFromAI = async (npcBasicInfo, gameSettings, effectiveApiKey
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: { response_mime_type: "application/json", response_schema: schema }
     };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     try {
         const jsonText = await fetchWithRetries(apiUrl, payload);
@@ -18836,7 +18836,7 @@ const fetchInitialSkillDetails = async (skillIdea, effectiveApiKey, storyHistory
     `;
     const schema = { type: "OBJECT", properties: { skillType: { type: "STRING", enum: ["combat", "adventure"] }, skillCategory: { type: "STRING", enum: ["basic", "ultimate", "passive", "active"] } }, required: ["skillType", "skillCategory"], };
     const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { response_mime_type: "application/json", response_schema: schema } };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     try {
         const jsonText = await fetchWithRetries(apiUrl, payload);
@@ -18995,7 +18995,9 @@ const createAndFinalizeOfferedItem = async (itemIdea, trader, player, gameSettin
 // Tail updated 2026-08-31: Google retired the two 2.5 models (404); these are
 // the replacements Google's own error message names. Must stay in sync with
 // GEMINI_TEXT_MODEL_FALLBACKS in src-web/systems/ai/config.ts.
-const GEMINI_TEXT_MODEL_FALLBACKS = ['gemini-3-flash-preview', 'gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.6-flash', 'gemini-3.5-flash-lite'];
+// Owner decision 2026-08-31: bỏ 2 rung "-lite" (chất lượng kể chuyện kém), 3 rung còn lại
+// xếp từ mạnh đến yếu. Giữ đồng bộ với src-web/systems/ai/config.ts và ai_config_prompt_test.ts.
+const GEMINI_TEXT_MODEL_FALLBACKS = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3-flash-preview'];
 
 // "Cầu dao" 503: model nào vừa quá tải dai dẳng sẽ bị tạm bỏ qua trong khoảng thời gian cooldown,
 // để các lần gọi tiếp theo trong phiên đi thẳng tới model dự phòng đang khỏe thay vì đốt thời gian
@@ -20415,7 +20417,7 @@ const handleGenerateImpromptuCharacter = async () => {
         }
     };
     
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     try {
         const jsonText = await fetchWithRetries(apiUrl, payload);
@@ -20487,7 +20489,7 @@ const handleGenerateImpromptuCharacter = async () => {
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             generationConfig: { response_mime_type: "application/json", response_schema: schema }
         };
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
         try {
             const jsonText = await fetchWithRetries(apiUrl, payload);
@@ -20551,7 +20553,7 @@ const handleGenerateImpromptuCharacter = async () => {
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             generationConfig: { response_mime_type: "application/json", response_schema: schema }
         };
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
         
         try {
             const jsonText = await fetchWithRetries(apiUrl, payload);
@@ -22699,7 +22701,7 @@ const handleCreateNpc = async (npcData, options = {}) => {
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: { response_mime_type: "application/json", response_schema: schema }
     };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     try {
         const jsonText = await fetchWithRetries(apiUrl, payload);
@@ -22930,7 +22932,7 @@ const handleCreateLocation = async (locationData) => {
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: { response_mime_type: "application/json", response_schema: schema }
     };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     try {
         const jsonText = await fetchWithRetries(apiUrl, payload);
@@ -23699,7 +23701,7 @@ const prompt = `
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: { response_mime_type: "application/json", response_schema: schema }
     };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     try {
         const jsonText = await fetchWithRetries(apiUrl, payload);
@@ -24033,7 +24035,7 @@ const fetchGenericGeminiText = async (promptText) => {
     }
 
     const payload = { contents: [{ role: "user", parts: [{ text: promptText }] }] };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     try {
         // THAY ĐỔI CỐT LÕI NẰM Ở ĐÂY
@@ -24321,7 +24323,7 @@ const fetchItemDetailsFromAI = async (itemIdea, effectiveApiKey) => {
         contents: [{ role: "user", parts: [{ text: built.prompt }] }],
         generationConfig: { response_mime_type: "application/json", response_schema: built.schema }
     };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     try {
         const jsonText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'creation_drain');
@@ -24370,7 +24372,7 @@ const fetchItemDetailsBatchFromAI = async (itemIdeas, effectiveApiKey) => {
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: { response_mime_type: "application/json", response_schema: { type: "ARRAY", items: builtList[0].schema } }
     };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     try {
         const jsonText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'creation_drain');
@@ -24603,7 +24605,7 @@ ${skillIdea.requiredEffects ? `// - Mô tả Hiệu ứng mong muốn: "${skillI
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: { response_mime_type: "application/json", response_schema: schema }
     };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
     
     try {
         let jsonText;
@@ -25346,7 +25348,7 @@ NHIỆM VỤ CỦA AI: Ngươi là một Giám Định Sư nhiệm vụ bậc th
         contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
         generationConfig: { response_mime_type: "application/json", response_schema: schema }
     };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     try {
         const jsonText = await fetchWithRetries(apiUrl, payload, null, 2, 1000, 'creation_drain');
@@ -26574,7 +26576,7 @@ const handleHtabGacha = async (systemLevel) => {
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             generationConfig: { response_mime_type: "application/json", response_schema: schema }
         };
-        const text = await fetchWithRetries(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`, payload);
+        const text = await fetchWithRetries(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`, payload);
         const { name, description } = JSON.parse(text);
 
         setknowledge(prev => {
@@ -26639,7 +26641,7 @@ const handleHtabBlessing = async (systemLevel) => {
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             generationConfig: { response_mime_type: "application/json", response_schema: schema }
         };
-        const text = await fetchWithRetries(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`, payload);
+        const text = await fetchWithRetries(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`, payload);
         const aiResult = JSON.parse(text);
 
         let { year, month, day, hour } = knowledge.time;
@@ -26995,7 +26997,7 @@ const rollDiceAndChooseScenario = (scenarios) => {
 
 const callCombatAI = async (turnTaker, allCombatants, companionCommand = '') => {
       let effectiveApiKey = "";
-      let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent`;
+      let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent`;
       
       if (apiMode === 'userKey') {
           effectiveApiKey = apiKey;
@@ -27144,7 +27146,7 @@ const convertCharacterStatsToNarrative = (character) => {
 
 const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowledgeToUse = knowledge, userActionForHistory = null) => {
     let effectiveApiKey = "";
-    let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent`;
+    let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent`;
     
     if (apiMode === 'userKey') {
         effectiveApiKey = apiKey;
@@ -28549,7 +28551,7 @@ YÊU CẦU:
             contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
             generationConfig: { response_mime_type: "application/json", response_schema: outputSchema }
         };
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
         const jsonText = await fetchWithRetries(apiUrl, payload);
         const data = JSON.parse(jsonText);
         const generatedValue = data[targetFieldKey];
@@ -28662,7 +28664,7 @@ ${gameSettings.isDouLuoWorld
             contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
             generationConfig: { response_mime_type: "application/json", response_schema: outputSchema }
         };
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
         const jsonText = await fetchWithRetries(apiUrl, payload);
         const data = JSON.parse(jsonText);
 
@@ -28916,7 +28918,7 @@ const initializeGame = async (forceStart = false) => {
                 contents: [{ role: "user", parts: [{ text: singlePrompt }] }],
                 generationConfig: { response_mime_type: "application/json", response_schema: schema }
             };
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
             try {
                 const jsonText = await fetchWithRetries(apiUrl, payload);
@@ -31856,7 +31858,7 @@ QUY TẮC PHÁN QUYẾT:
     `.trim();
 
     const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     for (let i = 0; i < retries; i++) {
         try {
@@ -32043,7 +32045,7 @@ const handleAwakenHtab = async (reason = "MILESTONE_AWAKENING", forceAwaken = fa
         const [freezeNarrative, appraisalRaw] = await Promise.all([
             fetchGenericGeminiText(freezePrompt),
             fetchWithRetries(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`,
                 {
                     contents: [{ role: "user", parts: [{ text: appraisalPrompt }] }],
                     generationConfig: { response_mime_type: "application/json", response_schema: htabAppraisalSchema }
@@ -32318,7 +32320,7 @@ const handleHtabChat = async (userText) => {
 
         const effectiveApiKey = apiMode === 'userKey' ? apiKey : "";
         const response = await fetchWithRetries(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`,
             { contents: [{ role: "user", parts: [{ text: htabPrompt }] }] }
         );
         
@@ -32462,7 +32464,7 @@ const handleHtabChat = async (userText) => {
                 );
 
                 const transitionResponse = await fetchWithRetries(
-                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`,
+                    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`,
                     { contents: [{ role: "user", parts: [{ text: resumePrompt }] }] }
                 );
 
@@ -32711,7 +32713,7 @@ const generateNpcSkillIdea = async (npc, rarity, effectiveApiKey) => {
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: { response_mime_type: "application/json", response_schema: schema }
     };
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
 
     try {
         const jsonText = await fetchWithRetries(apiUrl, payload);
@@ -36255,7 +36257,7 @@ ${emotionDescriptions.join('\n')}
         try {
             const effectiveApiKey = apiMode === 'userKey' ? apiKey : "";
             const response = await fetchWithRetries(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`,
                 { contents: [{ role: "user", parts: [{ text: prompt }] }] }
             );
 
@@ -36334,7 +36336,7 @@ ${emotionDescriptions.join('\n')}
                     const resumePrompt = getHtabResumePrompt(lastStoryText, summarySummary);
 
                     const transitionResponse = await fetchWithRetries(
-                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${effectiveApiKey}`,
+                        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`,
                         { contents: [{ role: "user", parts: [{ text: resumePrompt }] }] }
                     );
 
