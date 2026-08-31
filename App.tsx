@@ -17733,6 +17733,47 @@ const fetchFullSaveFromCloud = async (rowId) => {
     throw new Error("Không tìm thấy dữ liệu tệp lưu.");
 };
 
+// Lưu "hành động vừa gửi bị lỗi" xuống localStorage (KHÔNG chỉ giữ trong
+// state React) để nút "Gửi Lại" vẫn khôi phục được sau khi người chơi
+// refresh/đóng trình duyệt - lúc đó toàn bộ state trong bộ nhớ đã mất, nhưng
+// localStorage thì không. Chỉ lưu 1 hành động treo duy nhất (đủ dùng, vì chỉ
+// có 1 lượt có thể đang "chờ gửi lại" tại một thời điểm); gắn kèm `gameId` để
+// không vô tình gợi ý gửi lại một hành động của VÁN GAME KHÁC.
+const PENDING_RETRY_ACTION_STORAGE_KEY = 'aiStoryGame_pendingRetryAction';
+
+const persistPendingRetryAction = (gameId, payload) => {
+    try {
+        window.localStorage.setItem(PENDING_RETRY_ACTION_STORAGE_KEY, JSON.stringify({ gameId: gameId || null, ...payload, ts: Date.now() }));
+    } catch (storageError) {
+        console.warn('[systems] persistPendingRetryAction:', storageError);
+    }
+};
+
+const loadPendingRetryAction = (gameId) => {
+    try {
+        const raw = window.localStorage.getItem(PENDING_RETRY_ACTION_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.actionText) return null;
+        // Chỉ từ chối khi CẢ HAI bên đều có gameId và chúng khác nhau - một
+        // hành động treo chưa từng gắn gameId (ván mới, chưa kịp cấp id) vẫn
+        // được khôi phục.
+        if (parsed.gameId && gameId && parsed.gameId !== gameId) return null;
+        // Quá 24 giờ thì bỏ - tránh một lượt lỗi cổ lỗ, không còn liên quan,
+        // bất ngờ sống lại thành nút "Gửi Lại" trong một ván hoàn toàn khác.
+        if (!parsed.ts || Date.now() - parsed.ts > 24 * 60 * 60 * 1000) return null;
+        return parsed;
+    } catch (storageError) {
+        console.warn('[systems] loadPendingRetryAction:', storageError);
+        return null;
+    }
+};
+
+const clearPendingRetryAction = () => {
+    try { window.localStorage.removeItem(PENDING_RETRY_ACTION_STORAGE_KEY); }
+    catch (storageError) { /* best-effort - không có gì để dọn thì thôi */ }
+};
+
 // App Component , component App //
 const App = () => {
 const [cloudVipKey, setCloudVipKey] = useState('');
@@ -21410,6 +21451,17 @@ const handleGenerateImpromptu = async () => {
   // updater và gọi luôn nó với state cũ). Bị xóa mỗi khi một lượt mới bắt đầu
   // (kể cả chính lượt "Gửi Lại"), và chỉ được set lại nếu lượt đó lại thất bại.
   const [retryableAction, setRetryableAction] = useState(null);
+  // Khôi phục nút "Gửi Lại" sau khi refresh/mở lại trang: mọi state React ở
+  // trên đã mất sạch lúc đó, nên phải đọc lại từ localStorage một khi ván
+  // game đang chơi đã xác định được currentGameId (tránh khôi phục nhầm
+  // hành động của một ván khác trước khi biết mình đang ở ván nào).
+  useEffect(() => {
+      if (!currentGameId) return;
+      const pending = loadPendingRetryAction(currentGameId);
+      if (pending) {
+          setRetryableAction(() => () => processPlayerAction(pending.actionText, pending.actionType, pending.flavorText));
+      }
+  }, [currentGameId]);
   const [confirmationModal, setConfirmationModal] = useState({ show: false, title: '', content: '', onConfirm: null, onCancel: null, confirmText: 'Xác nhận', cancelText: 'Hủy'});
   const [questNotification, setQuestNotification] = useState({ show: false, quest: null });
   const [customActionInput, setCustomActionInput] = useState('');
@@ -27497,14 +27549,18 @@ const convertCharacterStatsToNarrative = (character) => {
     return `Trạng thái cơ thể: ${hpDesc}.${statusDesc}`;
 };
 
-// `retryAction` (optional): khi khác null và lượt này thất bại, được lưu vào
+// `retryPayload` (optional, PHẢI là dữ liệu thuần JSON-hóa được, KHÔNG phải
+// closure): khi khác null và lượt này thất bại, được (a) lưu vào state
 // `retryableAction` để GameplayScreen hiện nút "Gửi Lại" NGAY DƯỚI khung Hành
-// động (không phải trong modal lỗi) - cho phép gọi lại đúng lượt vừa thất bại
-// (vd. do model quá tải/hết quota) mà không bắt người chơi gõ tay lại. Chỉ nơi
-// gọi nào giữ đủ ngữ cảnh để phát lại toàn bộ lượt một cách an toàn (đi lại
-// đúng vòng đời beginSystemsTurn/settleSystemsTurnAfterCall, không chỉ gọi
-// trần callGeminiAPI) mới nên truyền tham số này vào.
-const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowledgeToUse = knowledge, userActionForHistory = null, retryAction = null) => {
+// động (không phải trong modal lỗi), và (b) ghi xuống localStorage
+// (persistPendingRetryAction) để nút đó VẪN khôi phục được sau khi người chơi
+// refresh trang - lúc đó mọi state trong bộ nhớ đã mất sạch. Chính vì phải
+// sống sót qua localStorage nên đây bắt buộc là dữ liệu thuần
+// { actionText, actionType, flavorText }, không phải một hàm đã đóng gói sẵn.
+// Chỉ nơi gọi nào giữ đủ ngữ cảnh để phát lại toàn bộ lượt một cách an toàn
+// (đi lại đúng vòng đời beginSystemsTurn/settleSystemsTurnAfterCall, không chỉ
+// gọi trần callGeminiAPI) mới nên truyền tham số này vào.
+const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowledgeToUse = knowledge, userActionForHistory = null, retryPayload = null) => {
     let effectiveApiKey = "";
     let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent`;
     
@@ -27574,7 +27630,10 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
             // call must release the Turn Manager, or every later turn is locked out.
             abortSystemsTurn();
             setModalMessage({ show: true, title: 'Lỗi Giao Tiếp AI', content: error.message, type: 'error' });
-            if (retryAction) setRetryableAction(() => retryAction);
+            if (retryPayload) {
+                setRetryableAction(() => () => processPlayerAction(retryPayload.actionText, retryPayload.actionType, retryPayload.flavorText));
+                persistPendingRetryAction(currentGameIdRef.current, retryPayload);
+            }
             if (options.isAITurn && activeCombatLoop) setTimeout(() => activeCombatLoop.nextTurn(), 1500);
             return null;
         } finally {
@@ -27970,7 +28029,10 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
         console.error('Lỗi trong quy trình 2 bước Hybrid:', error);
         abortSystemsTurn();
         setModalMessage({ show: true, title: 'Lỗi Giao Tiếp AI', content: error.message, type: 'error' });
-        if (retryAction) setRetryableAction(() => retryAction);
+        if (retryPayload) {
+            setRetryableAction(() => () => processPlayerAction(retryPayload.actionText, retryPayload.actionType, retryPayload.flavorText));
+            persistPendingRetryAction(currentGameIdRef.current, retryPayload);
+        }
         return null;
     } finally {
         setIsLoading(false);
@@ -30819,8 +30881,11 @@ const processPlayerAction = async (actionText, actionType, flavorText = '') => {
     lastPlayerActionRef.current = trimmedAction;
     // Một lượt mới bắt đầu (kể cả chính lượt được gọi lại từ nút "Gửi Lại")
     // luôn thay thế nút "Gửi Lại" cũ - nó chỉ hiện lại nếu CHÍNH lượt này
-    // cũng thất bại (xem retryAction trong callGeminiAPI).
+    // cũng thất bại (xem retryPayload trong callGeminiAPI). Xóa luôn bản đã
+    // ghi xuống localStorage - nếu lượt này lại thất bại, callGeminiAPI sẽ
+    // ghi đè bằng đúng payload của lượt hiện tại.
     setRetryableAction(null);
+    clearPendingRetryAction();
     setPvpTurnTimeLeft(null);
 
     if (activeCriticalPromisesRef.current.length > 0) {
@@ -31526,12 +31591,15 @@ ${noNewEventReinforcementBlock}
         // `finally` so no early return or throw can strand the Turn Manager.
         beginSystemsTurn(trimmedAction);
         try {
-            // retryAction gọi lại chính processPlayerAction (không phải
-            // callGeminiAPI trần) để một cú "Gửi Lại" luôn đi lại đúng
+            // retryPayload là dữ liệu thuần (không phải closure) vì nó phải
+            // sống sót được qua localStorage (xem chú thích tại callGeminiAPI)
+            // - lúc thất bại, callGeminiAPI tự dựng lại lệnh gọi
+            // processPlayerAction(actionText, actionType, flavorText) từ đây,
+            // để một cú "Gửi Lại" luôn đi lại đúng
             // beginSystemsTurn/settleSystemsTurnAfterCall thay vì mở một call
             // AI mồ côi ngoài vòng đời Turn Manager.
             await callGeminiAPI(promptToSendToAI, false, {}, knowledge, trimmedAction,
-                () => processPlayerAction(actionText, actionType, flavorText));
+                { actionText, actionType, flavorText });
         } finally {
             settleSystemsTurnAfterCall();
         }
