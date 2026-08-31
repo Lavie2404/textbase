@@ -456,7 +456,7 @@ const useTypewriter = (steps, speed = 40, characterName) => {
             setIsFinished(true);
             
             // Dựng lại chuỗi cuối cùng để đảm bảo nó hoàn chỉnh
-            const finalOutput = stepsRef.current.map(step => (step || '').replace(/\[NC\]/g, characterName || "Ngươi")).join('\n');
+            const finalOutput = stepsRef.current.map(step => (step || '').replace(/\[NC\]/g, characterName || "ngươi")).join('\n');
             setDisplayedText(finalOutput);
             
             cancelAnimationFrame(animationFrameIdRef.current);
@@ -467,7 +467,7 @@ const useTypewriter = (steps, speed = 40, characterName) => {
         let output = '';
         let charsCounted = 0;
         for (const step of stepsRef.current) {
-            const stepText = (step || '').replace(/\[NC\]/g, characterName || "Ngươi");
+            const stepText = (step || '').replace(/\[NC\]/g, characterName || "ngươi");
             const stepLength = stepText.length;
 
             if (charsToShow > charsCounted + stepLength) {
@@ -14883,7 +14883,7 @@ const SystemAssistantOverlay = ({ assistantState, htabState, htabExitPending, on
         return [assistantState?.dialogue || ""];
     }, [assistantState?.dialogue]);
 
-    const [typedText] = useTypewriter(dialogueArray, 30, "Ngươi");
+    const [typedText] = useTypewriter(dialogueArray, 30, "ngươi");
 
     // --- ĐOẠN CODE THÊM MỚI: Khởi tạo ref quản lý cuộn ---
     const scrollContainerRef = useRef(null);
@@ -25681,7 +25681,11 @@ NHIỆM VỤ CỦA AI: Ngươi là một Giám Định Sư nhiệm vụ bậc th
 };
 
 const parseGeminiResponseAndUpdateState = async (text, knowledgeToUse, setActiveTrade) => {
-    const playerName = knowledgeToUse?.characters?.find(c => c.isPlayer)?.Name || "Ngươi";
+    // Khi nhân vật chính chưa có tên (chưa đặt tên riêng), [NC] phải được thay
+    // bằng đại từ nhân xưng thường "ngươi" (chữ thường) — KHÔNG viết hoa, để
+    // tránh đọc giống như đó là một cái tên riêng (sửa 2026-09-01, theo phản
+    // hồi người dùng: "NPC gọi Ngươi làm tên" khi chưa đặt tên nhân vật).
+    const playerName = knowledgeToUse?.characters?.find(c => c.isPlayer)?.Name || "ngươi";
     let storyContent = (text || "").replace(/\[NC\]/gi, playerName);
 
     // Sửa lỗi AI hay báo danh sai cấp độ (VD "Cấp 34" trong khi hồ sơ thật là "Cấp 40"):
@@ -27881,7 +27885,9 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
 
         // QUAN TRỌNG: phải thay [NC] bằng tên thật TRƯỚC khi lọc bỏ thẻ lệnh dạng [XXX] bên dưới —
         // nếu không, "[NC]" (khớp đúng mẫu thẻ lệnh không tham số) sẽ bị regex lọc thẻ lệnh xóa mất trước khi kịp thay thế.
-        const narrativeTextWithPlayerName = narrativeText.replace(/\[NC\]/gi, player?.Name || "Ngươi");
+        // Chưa đặt tên → thay [NC] bằng "ngươi" chữ thường (đại từ), không viết
+        // hoa như tên riêng (sửa 2026-09-01, cùng lý do với parseGeminiResponseAndUpdateState).
+        const narrativeTextWithPlayerName = narrativeText.replace(/\[NC\]/gi, player?.Name || "ngươi");
         const cleanNarrativeText = narrativeTextWithPlayerName.replace(/\[[A-Z_]+(?::\s*[^\]]+)?\]/g, "");
         const combinedRawText = `${chosenScenario.commands}\n\n${cleanNarrativeText}`;
 
@@ -28391,6 +28397,12 @@ ${PILLAR1_DIRECTIVES_NARRATION.map(x => '//    * ' + x).join('\n')}
 //    - VÍ DỤ SAI: NPC nữ A vừa gọi NPC nữ B là "muội muội" (xác lập vai chị-em), nhưng ngay câu sau A lại tự xưng "Thiếp... thiếp cứ sợ không bao giờ được gặp lại muội nữa!" — "thiếp" là đại từ chỉ dùng khi nói với chồng/người yêu nam, không thể xuất hiện giữa hai người phụ nữ xưng tỷ muội.
 //    - VÍ DỤ ĐÚNG: <dialogue speaker="Thái Văn Cơ">Tú Nhi muội muội! Trời ơi, muội thực sự đã bình an rồi! Tỷ... tỷ cứ sợ không bao giờ được gặp lại muội nữa!</dialogue>
 //    - TỰ KIỂM TRA: trước khi hoàn tất, với MỌI đoạn hội thoại NPC-với-NPC, xác định quan hệ + giới tính thật của cả hai, rồi rà lại xem đại từ tự xưng có đối xứng đúng với cách họ vừa gọi nhau không.
+
+// 2.6c. QUY TẮC KHÔNG VIẾT HOA ĐẠI TỪ NHÂN XƯNG GIỮA CÂU (BẮT BUỘC — CHỐNG NHẦM THÀNH TÊN RIÊNG):
+//    - Các đại từ nhân xưng trong lời thoại/tường thuật ("ngươi", "ta", "hắn", "nàng", "chàng", "thiếp", "muội", "huynh"...) là TỪ LOẠI ĐẠI TỪ, KHÔNG PHẢI tên riêng — CHỈ được viết hoa chữ cái đầu khi từ đó ĐÚNG LÀ TỪ ĐẦU TIÊN của một câu trọn vẹn (ngay sau dấu chấm/dấu chấm than/dấu chấm hỏi, hoặc ở đầu đoạn văn). TUYỆT ĐỐI KHÔNG viết hoa các đại từ này khi chúng xuất hiện Ở GIỮA CÂU — kể cả ngay sau dấu phẩy, ngay sau một từ gọi/hô ("Này,", "Ơi,"...), hay trong cấu trúc gọi-đáp lặp đại từ.
+//    - VÍ DỤ SAI: <dialogue speaker="Phương Nhi">Này Ngươi, ngươi xem tình hình dạo này xem.</dialogue> — "Ngươi" viết hoa ngay sau "Này" khiến câu đọc như đang gọi tên một người tên là "Ngươi".
+//    - VÍ DỤ ĐÚNG: <dialogue speaker="Phương Nhi">Này, ngươi xem tình hình dạo này xem.</dialogue>
+//    - Quy tắc này áp dụng cho MỌI đại từ nhân xưng, không riêng "ngươi": không viết hoa "Ta", "Hắn", "Nàng"... khi chúng không phải từ đầu câu.
 
 // 2.7. QUY TẮC NHẬN THỨC CỦA NPC "NGƯỜI LẠ" (BẮT BUỘC — CHỐNG BIẾT TRƯỚC):
 //    - Nếu độ hảo cảm (affinity) của một NPC dành cho nhân vật chính đang ở mức 0 hoặc gần 0 ("Người lạ", chưa từng tương tác/gặp mặt trước lượt này), NPC đó TUYỆT ĐỐI KHÔNG được thể hiện đã biết tính cách, thói quen, biệt danh, hay quá khứ của nhân vật chính (ví dụ: gọi nhân vật chính là "tên lười biếng", "gã háo sắc",...) — trừ khi thông tin đó là danh tiếng đã lan truyền công khai trong thế giới (có thể nêu rõ trong bối cảnh) hoặc đã được giới thiệu/thể hiện ngay trong lượt chơi hiện tại hoặc các lượt trước đó mà NPC này có mặt.
