@@ -1,0 +1,480 @@
+{
+  "id": "a0f9cc1a-0258-425b-be01-ca06583ced77",
+  "currentTurn": 2,
+  "saveVersion": "2.8",
+  "timestamp": "2026-08-31T21:01:08.476Z",
+  "gameSettings": {
+    "storyTitle": "Tam quốc chí",
+    "theme": "Dã sử, Huyền Huyễn, Tu Tiên, Quân sự, Cổ đại",
+    "setting": "1 năm trước khi Hoàng Cân nổi dậy",
+    "playStyle": "RPG",
+    "uiTheme": "DARK_GOLD",
+    "textScale": 100,
+    "customThemeConfig": {
+      "bgMain": "#050505",
+      "bgPanel": "#1a1a24",
+      "accentMain": "#00f3ff",
+      "textMain": "#ffffff",
+      "textMuted": "#8888aa",
+      "bgImage": "",
+      "colorLocation": "#5eead4",
+      "colorItem": "#a5b4fc",
+      "colorUnknown": "#fef3c7",
+      "bubblePlayerFrom": "#162216",
+      "bubblePlayerTo": "#0a0f0a",
+      "bubbleNpcFrom": "#0a0f0a",
+      "bubbleNpcTo": "#101a10",
+      "bubblePlayerText": "#ffffff",
+      "bubbleNpcText": "#ffffff"
+    },
+    "bgmUrl": "",
+    "bgmVolume": 0.5,
+    "narratorPronoun": "Để AI quyết định",
+    "fanFicCharacterType": "Khởi Sinh",
+    "characterName": "Diệp Thần",
+    "characterPersonality": "Tùy chỉnh...",
+    "customCharacterPersonality": "Lạc quan, Bí ẩn, Thông minh",
+    "characterGender": "Nam",
+    "characterBackstory": "Lập trình viên đột quỵ khi đang tăng ca được xuyên không về thời tam quốc trong hình hài của 1 cậu bé 15 tuổi mồ côi",
+    "playerAvatarUrl": null,
+    "playerAvatarStoredLocally": false,
+    "difficulty": "Ác Mộng",
+    "difficultydescription": "",
+    "allowNsfw": true,
+    "customNsfwText": "",
+    "isNsfwMode": false,
+    "enableParasiticSystem": false,
+    "initialWorldElements": [
+      {
+        "id": "1ff92308-bd19-4ad3-9194-7836bdd4d6a6",
+        "type": "NPC",
+        "name": "Phương Nhi",
+        "description": "Cô gái cùng thế kỷ với Diệp Thần không may lạc vào vòng xoáy thời không và bị đưa đến thế giới Tam quốc trong hình hài 1 thiếu nữ 11 tuổi mồ côi sống cạnh nhà Diệp Thần"
+      }
+    ],
+    "useCharacterGoal": false,
+    "characterGoal": "Cứu vớt tất cả mỹ nhân bạc mệnh",
+    "allowCustomActionInput": true,
+    "currencyName": "Bạc, Vàng",
+    "isFanFictionMode": false,
+    "fanFicOriginalWork": "",
+    "fanFicPlotSummary": "",
+    "fanFicCharacter": "Diệp Thần",
+    "fanFicEntryMethod": "Xuyên không",
+    "customFanFicEntryMethod": "",
+    "skipCrisis": true,
+    "isDouLuoWorld": false,
+    "initialMartialSouls": [],
+    "initialTraits": [
+      {
+        "id": "f2c59fe6-d618-43ca-8841-e13b598268c4",
+        "name": "Phong Quyển Tàn Vân",
+        "description": "Kiếm khí trùng tiêu tam vạn lý\nNhất kiếm quang hàn thập cửu châu",
+        "category": "Kỹ năng",
+        "rarity": "Thần Thoại",
+        "stats": "ATK: 999999999",
+        "effects": "Tấn công tất cả kẻ địch, bỏ qua giáp và gây [Trọng Thương]\n[Trọng Thương]: ATK giảm 50%, SPD giảm 50%, không thể hồi máu bằng thuốc hoặc kỹ năng",
+        "equipmentType": "",
+        "usageCondition": "",
+        "skillCategoryChoice": "Chủ động",
+        "cooldown": "0"
+      },
+      {
+        "id": "e6667682-91f7-4f04-b409-a9b0725fcf66",
+        "name": "Bách Điểu Triều Phụng",
+        "description": "Tuyệt kỹ thương pháp đỉnh cao tấn công nhanh chóng như bách điểu triều phụng, quét ngang tất cả kẻ địch",
+        "category": "Kỹ năng",
+        "rarity": "Thần Thoại",
+        "stats": "ATK: 999999999",
+        "effects": "Tấn công tất cả kẻ địch, bỏ qua giáp, đẩy lùi và gây [Xuất Huyết]\n[Xuất Huyết]: Mỗi hiệp mất 5% máu tối đa, không thể thanh tẩy. Có thể cộng dồn tối đa 5 tầng",
+        "equipmentType": "",
+        "usageCondition": "",
+        "skillCategoryChoice": "Chủ động",
+        "cooldown": "0"
+      }
+    ],
+    "defaultCombatBackground": "",
+    "defaultEnemyImages": {
+      "base": "",
+      "idle": "",
+      "attack_normal": ""
+    },
+    "characterRole": "Lập trình viên đột tử khi đang tăng ca được xuyên không về Tam quốc ",
+    "characterAppearance": "Trích tiên hạ phàm. Dung mạo khiến tất cả các mỹ nhân như Điêu Thuyền, Thái Văn Cơ, Chân Cơ, Đại Kiều, Tiểu Kiều,... đều yêu ngay từ cái nhìn đầu tiên"
+  },
+  "knowledge": {
+    "time": {
+      "year": 0,
+      "month": 1,
+      "day": 1,
+      "hour": 18
+    },
+    "weather": "Trời trong",
+    "loreLocations": [],
+    "loreNpcs": [],
+    "loreItems": [],
+    "locations": [
+      {
+        "id": "loc_cu_loc",
+        "description": "Vùng đất rộng lớn thuộc Ký Châu, nơi mầm mống ngọn lửa Thái Bình Đạo đang âm thầm tích tụ trước biến cố lịch sử.",
+        "category": "Quốc Gia",
+        "tier": 2,
+        "Name": "Cự Lộc Quận"
+      },
+      {
+        "id": "loc_thon_an_binh",
+        "description": "Một thôn trang nhỏ nằm yên bình dưới chân núi Cự Lộc, xa rời sự nhốn nháo của các thành trì lớn.",
+        "category": "Thành Trì",
+        "tier": 3,
+        "parentLocationId": "loc_cu_loc",
+        "Name": "Thôn An Bình"
+      }
+    ],
+    "items": [],
+    "worldItems": [],
+    "relationships": [],
+    "quests": [],
+    "trackedQuestId": null,
+    "realmProgressionList": [
+      "Phàm Cốt",
+      "Dưỡng Mạch",
+      "Ngưng Khí",
+      "Thông Huyền",
+      "Trúc Cơ",
+      "Tông Sư",
+      "Hóa Đan",
+      "Nguyên Thần",
+      "Động Thiên",
+      "Đạo Cảnh",
+      "Độ Kiếp",
+      "Chân Tiên"
+    ],
+    "knownRecipes": [],
+    "eventHistory": [],
+    "unlearnedSkillScrolls": [],
+    "pendingItemsToCreate": [],
+    "pendingSkillCreations": [],
+    "characters": [
+      {
+        "id": "player",
+        "isPlayer": true,
+        "loreId": null,
+        "level": 1,
+        "exp": 0.1,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 5,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 0,
+          "atk": 0,
+          "def": 0,
+          "spd": 0
+        },
+        "current_location_id": "loc_thon_an_binh",
+        "baseHp": 2000,
+        "baseAtk": 200,
+        "baseDef": 100,
+        "baseSpd": 300,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 2000,
+        "maxhp": 2000,
+        "atk": 200,
+        "def": 100,
+        "spd": 300,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": {
+            "id": "dc7316c7-f870-4e9d-90ac-a7012f798160",
+            "sourceIdeaId": "f2c59fe6-d618-43ca-8841-e13b598268c4",
+            "skillType": "combat",
+            "Name": "Phong Quyển Tàn Vân",
+            "description": "Kiếm khí trùng tiêu tam vạn lý, nhất kiếm quang hàn thập cửu châu. Cơn bão kiếm khí cuồng phong quét sạch mọi vạn vật trên chiến trường.",
+            "technicaldescription": "Gây sát thương bằng 999999999% ATK lên toàn bộ kẻ địch, bỏ qua 100% giáp. Áp dụng trạng thái [Trọng Thương] làm giảm 50% ATK và 50% SPD của kẻ địch trong 2 lượt.",
+            "Stats": "atk_percent:999999999",
+            "Rarity": "Thần Thoại",
+            "cooldown": 0,
+            "effects": [
+              {
+                "action": {
+                  "type": "damage",
+                  "target": {
+                    "type": "all_enemies"
+                  },
+                  "visual_effects": {
+                    "vfxType": "rapid_slashes",
+                    "moveType": "dash_through",
+                    "color": "#00ffff",
+                    "vfxCount": 3
+                  }
+                },
+                "conditions": null
+              }
+            ],
+            "skillCategory": "basic",
+            "currentCooldown": 0,
+            "exp": 0,
+            "maxExp": null,
+            "slotKey": null
+          },
+          "combat_basic_2": {
+            "id": "aa9521bf-410e-4df9-8f60-6346f847f98d",
+            "sourceIdeaId": "e6667682-91f7-4f04-b409-a9b0725fcf66",
+            "skillType": "combat",
+            "Name": "Bách Điểu Triều Phụng",
+            "description": "Tuyệt kỹ thương pháp đỉnh cao tấn công nhanh chóng như hàng ngàn chim phượng cùng hót, quét ngang và đâm thấu qua toàn bộ đội hình kẻ địch.",
+            "technicaldescription": "Gây sát thương vật lý bằng 999999999% ATK lên toàn bộ kẻ địch, bỏ qua 100% giáp. Đồng thời gắn trạng thái [Xuất Huyết] (mỗi hiệp gây sát thương bằng 5% Max HP, không thể thanh tẩy, duy trì 3 lượt).",
+            "Stats": "atk_percent:999999999",
+            "Rarity": "Thần Thoại",
+            "cooldown": 0,
+            "effects": [
+              {
+                "action": {
+                  "type": "damage",
+                  "target": {
+                    "type": "all_enemies"
+                  },
+                  "visual_effects": {
+                    "vfxType": "rapid_slashes",
+                    "moveType": "dash_through",
+                    "color": "#ffaa00",
+                    "vfxCount": 5
+                  }
+                },
+                "conditions": null
+              },
+              {
+                "action": {
+                  "type": "apply_status",
+                  "target": {
+                    "type": "all_enemies"
+                  },
+                  "visual_effects": {
+                    "vfxType": "strike",
+                    "moveType": "stay",
+                    "color": "#cc0000",
+                    "vfxCount": 1
+                  }
+                },
+                "conditions": null
+              }
+            ],
+            "skillCategory": "basic",
+            "currentCooldown": 0,
+            "exp": 0,
+            "maxExp": null,
+            "slotKey": null
+          },
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "Name": "Diệp Thần",
+        "Gender": "Nam",
+        "Role": "Lập trình viên đột tử khi đang tăng ca được xuyên không về Tam quốc ",
+        "Appearance": "Trích tiên hạ phàm. Dung mạo khiến tất cả các mỹ nhân như Điêu Thuyền, Thái Văn Cơ, Chân Cơ, Đại Kiều, Tiểu Kiều,... đều yêu ngay từ cái nhìn đầu tiên",
+        "Backstory": "Lập trình viên đột quỵ khi đang tăng ca được xuyên không về thời tam quốc trong hình hài của 1 cậu bé 15 tuổi mồ côi",
+        "MartialSouls": [],
+        "Personality": "Lạc quan, Bí ẩn, Thông minh",
+        "isAppraised": true,
+        "description": "",
+        "isCompanion": false,
+        "maxExp": 100,
+        "realm": "Phàm Cốt",
+        "incomingHealing": 1
+      },
+      {
+        "id": "npc_phuong_nhi",
+        "isPlayer": false,
+        "loreId": "1ff92308-bd19-4ad3-9194-7836bdd4d6a6",
+        "level": 1,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 2,
+          "atk": 1,
+          "def": 1,
+          "spd": 1
+        },
+        "current_location_id": null,
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 600,
+        "maxhp": 600,
+        "atk": 30,
+        "def": 20,
+        "spd": 40,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "description": "Cô gái cùng thế kỷ với ngươi không may rơi vào vòng xoáy thời không, hiện sống trong hình hài thiếu nữ 11 tuổi mồ côi cạnh nhà ngươi.",
+        "stance": "Thân thiện",
+        "personality": "Lanh lẹ, thông minh",
+        "Gender": "Nữ",
+        "sizeCategory": "1",
+        "Name": "Phương Nhi",
+        "realm": "Phàm Cốt",
+        "incomingHealing": 1,
+        "maxExp": 100
+      }
+    ],
+    "sharedCooldowns": {
+      "tactical": 0,
+      "potion": 0
+    },
+    "adventureSkillCooldowns": {},
+    "requestNpcDesign": null,
+    "progression": {
+      "recentMeaningfulActions": [],
+      "lastExpResolvedTurn": 0
+    },
+    "loreQuests": [],
+    "systemAssistant": {
+      "isActive": false,
+      "dialogue": "",
+      "expression": "idle",
+      "images": {
+        "base": null,
+        "idle": null,
+        "smile": null,
+        "sad": null,
+        "angry": null,
+        "laugh": null
+      }
+    },
+    "pendingCreations": [],
+    "deathState": {},
+    "isDeathTurn": false,
+    "lastLockedResult": {
+      "turn_id": 0,
+      "world_time": 0,
+      "is_death_turn": false,
+      "in_combat": false,
+      "battle_active": false,
+      "outcome": {
+        "type": "none",
+        "winner_id": null,
+        "loser_id": null
+      },
+      "fields": {
+        "exp_delta_player": 0.1
+      }
+    }
+  },
+  "storyHistory": [
+    {
+      "id": "c75d4995-419b-4c2b-9ee4-fb75f1f4b101",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Hoàng hôn đỏ rực như máu dốc ngược xuống ngọn *Núi Cự Lộc*, nhuộm thắm mái rạ đơn sơ của *Thôn An Bình*. Gió thu hiu quạnh thổi qua những ruộng lúa cằn cỗi, mang theo cái lạnh đầu mùa và mùi khói bếp ngai ngái. \nĐông Hán năm nay bão gián liên miên, thuế quan nặng nề khiến dân chúng khắp nơi oằn mình gánh nặng. Ngươi ngồi trước hiên nhà, chậm rãi vót cành trúc nhỏ, ánh mắt xa xăm quan sát khoảng trời chiều đang dần tối sầm. Dù bề ngoài chỉ là một thanh niên bình thường sống ẩn dật nơi thôn quê, nhưng sâu trong tâm trí, ngươi biết rõ nhịp đập của thời đại này — chỉ còn một năm nữa, cờ vàng của Thái Bình Đạo sẽ rợp trời, mở đầu cho một thời kỳ đại loạn chưa từng có.\nTiếng bước chân nhỏ nhắn nhẹ nhàng vang lên từ con đường đất nhỏ bên cạnh. Một thiếu nữ vóc dáng nhỏ nhắn, chừng mười một tuổi, trên tay ôm hai củ khoai nướng nóng hổi đang bốc khói nghi ngút tiến lại gần. Đó là *Phương Nhi*, người hàng xóm nhỏ tuổi nhưng mang cùng một bí mật thiên cổ như ngươi: cả hai đều đến từ một thời đại hoàn toàn khác.\n*Phương Nhi* ngồi xuống bệ đá bên cạnh ngươi, phủi phủi vạt áo gai thô sạm màu, đưa một củ khoai nướng về phía ngươi."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Phương Nhi",
+          "content": "Huynh lại ngồi ngơ ngác gọt trúc nữa rồi. Muội vừa nghe mấy người buôn ngoài đầu thôn nói, dạo này đạo sĩ áo vàng xuất hiện ở quanh *Cự Lộc Quận* ngày một đông, phát bùa trị bệnh không lấy tiền đấy."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi nhận lấy củ khoai nướng, hơi ấm lan tỏa qua lòng bàn tay. Đôi mắt thiếu nữ ẩn chứa sự sắc sảo vượt xa độ tuổi thật của thể xác này. Nàng nhìn ngươi với vẻ tò mò, dường như muốn nghe góc nhìn của ngươi về những chuyển biến âm thầm đang diễn ra xung quanh.\nTrời đất bao la, thiên hạ sắp đại loạn, mà ngươi lúc này vẫn là một phàm nhân giữa biển đời mênh mông, tự do và không bị ràng buộc bởi bất kỳ gông xiềng nào."
+        }
+      ]
+    },
+    {
+      "id": "fe1d4b1e-b737-4ad8-81a6-871dfecfb6a3",
+      "type": "user_custom_action",
+      "content": "[Đoạn 1 - Lời Diệp Thần]: \"Phương Nhi, muội từng nói là rất mê tiểu thuyết Tam quốc chí phải không? Vậy muội có nhớ hết các sự kiện trong đó không\"\n[Đoạn 2 - Tường thuật]: \"Phương Nhi vỗ ngực tự tin đáp:\"\n[Đoạn 3 - Lời Phương Nhi]: \"Tất nhiên rồi. Muội đảm bảo nhớ toàn bộ sự kiện lịch sử cũng như tên tuổi của các vị danh tướng\"\n[Đoạn 4 - Lời Diệp Thần]: \"Vậy muội nói xem khi nào thì loạn Hoàng Cân mới xảy ra\"\n[Đoạn 5 - Lời Phương Nhi]: \"Đại khái khoảng 1 năm nữa\"\n[Đoạn 6 - Tường thuật]: \"Phương Nhi vừa ăn vừa đáp\"\n[Đoạn 7 - Tường thuật]: \"Ngươi nghe được đáp án có chút trầm ngâm nói\"\n[Đoạn 8 - Lời Diệp Thần]: \"1 năm nữa thiên hạ đại loạn, chúng ta cũng cần phải nghĩ cách sống sót trong loạn thế. Ở đây chỉ có muội cùng thế giới với ta, muội có muốn làm thê tử của ta không\"\n[Đoạn 9 - Tường thuật]: \"Phương Nhi nghe vậy 2 mắt liền sáng như sao, quăng luôn củ khoai đang ăn dở trong tay, 2 tay nắm lấy bàn tay ngươi hỏi:\"\n[Đoạn 10 - Lời Phương Nhi]: \"Thật sao? Huynh không được lừa muội đâu đấy\"\n[Đoạn 11 - Tường thuật]: \"Phương Nhi tuy còn nhỏ nhưng rất xinh đẹp, dáng người cân đối chỗ cần nở thì nở, chỗ cần thon thì thon hơn nữa lại rất mê trai đẹp. Diện mạo của ngươi lại như trích tiên hạ phàm khiến nàng hận không thể ngày ngày bám dính lấy ngươi\"\n[Đoạn 12 - Lời Diệp Thần]: \"Thật. Nếu muội không tin ngay đêm nay chúng ta động phòng luôn\"\n[Đoạn 13 - Tường thuật]: \"Ngươi nửa đùa nửa thật đáp. Phải nói ngươi cũng cực kỳ thích Phương Nhi. Khuôn mặt xinh đẹp chắc chắn không thua gì những đại mỹ nhân như Điêu Thuyền, Chân Cơ,... Mặc dù ngươi cũng chưa từng thấy họ nhưng ngươi dám khẳng định Phương Nhi khi lớn lên chắc chắn xinh hơn họ. Phương Nhi nghe ngươi nói vậy liền đỏ mặt trợn má nhéo ngươi 1 cái vào eo\"\n[Đoạn 14 - Lời Phương Nhi]: \"Sắc lang, dù ta thích huynh thật nhưng không thể cho huynh dễ dàng như vậy được. Tuy nhiên huynh có thể ôm ta ngủ. Không được vượt giới hạn. Khi nào ta 15 tuổi thì mới cho huynh.\"\n[Đoạn 15 - Tường thuật]: \"Ngươi phì cười đáp:\"\n[Đoạn 16 - Lời Diệp Thần]: \"Được được. Đều nghe theo muội. Vậy từ giờ muội chuyển sang nhà ta đi. Ngày mai ta sẽ sửa sang lại 2 ngôi nhà. Bức tường này cần đập đi. Sửa lại 2 ngôi nhà thành 1 nhà 2 phòng. 1 phòng ngủ và 1 phòng khách. Đêm nay muội qua phòng ta luôn nhé. Ta rất mong chờ được ngủ chung với muội đấy\"\n[Đoạn 17 - Lời Phương Nhi]: \"Đừng có nhân lúc muội ngủ mà bắt nạt muội đấy. Nếu không muội sẽ không tha cho huynh đâu\""
+    }
+  ],
+  "choices": [],
+  "gameMode": "EXPLORATION",
+  "activeTrade": {
+    "trader": null,
+    "playerOffer": [],
+    "npcOffer": null,
+    "offerType": "sell",
+    "sellMultiplier": 0,
+    "itemSpecificSellBonuses": {},
+    "itemSpecificBuyBonuses": {}
+  },
+  "storySummaries": [],
+  "adventureTurnCount": 1
+}
