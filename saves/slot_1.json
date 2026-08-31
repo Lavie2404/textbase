@@ -1,8 +1,8 @@
 {
   "id": "4f9d4d67-3bc3-4512-8d9f-7c11ab4a0f5d",
-  "currentTurn": 60,
+  "currentTurn": 63,
   "saveVersion": "2.8",
-  "timestamp": "2026-08-31T08:25:00.955Z",
+  "timestamp": "2026-08-31T09:11:13.606Z",
   "gameSettings": {
     "storyTitle": "Tam Quốc Diệt Ma Truyền Kỳ",
     "theme": "Tên: Tam Quốc Diệt Ma Truyền Kỳ | Thể loại: Tiên Hiệp Lịch Sử | Thẻ: Tam Quốc, Đạo Pháp, Trừ Ma, Thường Sơn, Nam Hoa Lão Tiên",
@@ -123,16 +123,22 @@
     "time": {
       "year": 0,
       "month": 1,
-      "day": 16,
+      "day": 17,
       "hour": 21
     },
-    "weather": "Trời đêm thanh khiết, trăng sáng sau khi đã thanh tẩy ma khí",
+    "weather": "Nắng sớm ban mai, mây xám kéo về từ phương xa",
     "narrativeCombatState": {
       "isActive": false,
       "combatants": []
     },
     "loreLocations": [],
-    "loreNpcs": [],
+    "loreNpcs": [
+      {
+        "id": "lore_npc_thai_ung",
+        "description": "Một đại danh sĩ, túc nho cuối thời Đông Hán, cha của Thái Văn Cơ.",
+        "Name": "Thái Ung"
+      }
+    ],
     "loreItems": [],
     "locations": [
       {
@@ -295,6 +301,13 @@
         "description": "Một địa điểm vừa được khám phá.",
         "category": "Khu Vực",
         "tier": 3
+      },
+      {
+        "id": "3c24b0ff-0280-4cad-93b9-ecbd525bc092",
+        "Name": "Thái Phủ, Lạc Dương",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
       }
     ],
     "items": [],
@@ -303,14 +316,38 @@
       {
         "id": "99964536-fbd3-4f2a-afb8-187cb812fe8c",
         "NPC": "Hạ Hầu Khinh Y",
-        "Standing": "Thân thiết",
-        "Reason": "Nàng cảm thấy bất an và chỉ tin tưởng dựa dẫm vào ngươi."
+        "Standing": "Yêu thích",
+        "Reason": "Được tướng công chiều chuộng mua sắm tại kinh thành"
       },
       {
         "id": "8d840cb4-8841-42d8-8f96-f701e153f309",
         "NPC": "Triệu Sâm",
         "Standing": "Kính nể",
         "Reason": "Ngươi đã cứu mạng hắn và đứa trẻ khỏi tay ma đạo."
+      },
+      {
+        "id": "ffe1c4aa-5d79-4b62-8f33-a27d15b372cb",
+        "NPC": "Triệu Vân",
+        "Standing": "Trung thành",
+        "Reason": "Cứu mạng muội muội và Triệu An, chỉ điểm minh chủ và thu phục bằng nhân nghĩa."
+      },
+      {
+        "id": "bf8c7c15-106e-4943-878e-22ee8f6f608a",
+        "NPC": "Triệu Vũ",
+        "Standing": "Yêu thích",
+        "Reason": "Sự quan tâm và che chở của tướng công"
+      },
+      {
+        "id": "57082976-bf7a-402d-a77f-010f4aed9fcf",
+        "NPC": "Thái Ung",
+        "Standing": "Chấn động",
+        "Reason": "Tiết lộ thiên cơ về vận mệnh Thái Diễm và Đổng Trác"
+      },
+      {
+        "id": "e9f98925-5f70-4606-9e15-2e48ed344562",
+        "NPC": "Công Tôn Bảo Nguyệt",
+        "Standing": "Kính nể",
+        "Reason": "Sự bá đạo và chu đáo của phu quân"
       }
     ],
     "quests": [
@@ -433,7 +470,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 35.000000000000036,
+        "exp": 35.30000000000004,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": 0,
@@ -443,7 +480,7 @@
           "def": 0,
           "spd": 0
         },
-        "current_location_id": "850c87d8-c5ec-44b1-bf15-3e4f7cf8ac46",
+        "current_location_id": "3c24b0ff-0280-4cad-93b9-ecbd525bc092",
         "baseHp": 2000,
         "baseAtk": 200,
         "baseDef": 100,
@@ -886,32 +923,32 @@
         "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
         "isPlayer": false,
         "loreId": null,
-        "level": 1,
+        "level": 85,
         "exp": 0,
         "progressionState": "Tu Luyện Thường",
         "ap": 0,
         "currency": 0,
         "allocatedPoints": {
-          "hp": 2,
-          "atk": 1,
-          "def": 1,
-          "spd": 1
+          "hp": 439,
+          "atk": 437,
+          "def": 437,
+          "spd": 437
         },
         "current_location_id": "01e3354f-b784-40bd-a075-f8b47dfa6ddc",
-        "baseHp": 200,
-        "baseAtk": 20,
-        "baseDef": 10,
-        "baseSpd": 30,
+        "baseHp": 1880,
+        "baseAtk": 188,
+        "baseDef": 94,
+        "baseSpd": 114,
         "baseCr": 15,
         "baseCdmg": 200,
         "baseDmgAmp": 100,
         "baseDmgRes": 100,
         "baseEvasion": 100,
-        "hp": 600,
-        "maxhp": 600,
-        "atk": 30,
-        "def": 20,
-        "spd": 40,
+        "hp": 89680,
+        "maxhp": 89680,
+        "atk": 4558,
+        "def": 4464,
+        "spd": 4484,
         "cr": 15,
         "cdmg": 200,
         "dmgAmp": 100,
@@ -950,14 +987,20 @@
           "Dị thường": null
         },
         "isCompanion": false,
-        "affinity": 0,
+        "affinity": 15,
         "Name": "Triệu Vân",
-        "description": "Một nhân vật xuất hiện trong câu chuyện.",
-        "Stance": "Trung lập",
-        "realm": "Giai Đoạn 1",
+        "description": "",
+        "Stance": "Huynh đệ gắn kết, luôn sẵn sàng xả thân bảo vệ và hỗ trợ Diệp Thần trong hành trình trừ ma.",
+        "realm": "Giai Đoạn 9",
         "incomingHealing": 1,
-        "maxExp": 100,
-        "skills": []
+        "maxExp": 8635916,
+        "skills": [],
+        "affinityDirection": "đang ấm lên",
+        "Role": "Danh tướng nhà Thục Hán, sư đệ đồng môn của Diệp Thần dưới trướng Nam Hoa Lão Tiên",
+        "Appearance": "Vóc dáng cao ráo, cân đối, gương mặt cương nghị, thanh tú nhưng không kém phần uy vũ. Mặc giáp bạc sáng loáng, bên trong là trường bào trắng thêu họa tiết mây, tay cầm Ngân Thương, khí chất chính trực, thanh cao.",
+        "Backstory": "Được Nam Hoa Lão Tiên nhận làm đệ tử từ nhỏ, cùng Diệp Thần học đạo và võ nghệ trên núi Thường Sơn. Sau khi xuống núi, chàng mang theo khát vọng dùng võ học và đạo pháp để cứu đời. Luôn coi Diệp Thần như huynh đệ ruột thịt và là người đồng hành đáng tin cậy nhất.",
+        "Personality": "Trượng nghĩa, điềm tĩnh, trung thành, dũng cảm và có tư duy chiến lược sắc bén.",
+        "isAppraised": true
       },
       {
         "id": "62c26dd7-d1bf-419e-8d03-75db7b24bbc1",
@@ -1199,32 +1242,32 @@
         "id": "d7b85753-38ce-4c1b-b173-affc6e0aa0b0",
         "isPlayer": false,
         "loreId": null,
-        "level": 1,
+        "level": 8,
         "exp": 0,
         "progressionState": "Tu Luyện Thường",
         "ap": 0,
         "currency": 0,
         "allocatedPoints": {
-          "hp": 4,
-          "atk": 1,
-          "def": 1,
-          "spd": 1
+          "hp": 14,
+          "atk": 11,
+          "def": 11,
+          "spd": 11
         },
         "current_location_id": "47489337-97f5-4b32-94e8-1d2bcfae0eb5",
-        "baseHp": 200,
-        "baseAtk": 20,
-        "baseDef": 10,
-        "baseSpd": 30,
+        "baseHp": 340,
+        "baseAtk": 34,
+        "baseDef": 17,
+        "baseSpd": 37,
         "baseCr": 15,
         "baseCdmg": 200,
         "baseDmgAmp": 100,
         "baseDmgRes": 100,
         "baseEvasion": 100,
-        "hp": 1000,
-        "maxhp": 1000,
-        "atk": 30,
-        "def": 20,
-        "spd": 40,
+        "hp": 3140,
+        "maxhp": 3140,
+        "atk": 144,
+        "def": 127,
+        "spd": 147,
         "cr": 15,
         "cdmg": 200,
         "dmgAmp": 100,
@@ -1265,13 +1308,18 @@
         "isCompanion": false,
         "affinity": 15,
         "Name": "Triệu Sâm",
-        "description": "Một nhân vật xuất hiện trong câu chuyện.",
-        "Stance": "Trung lập",
+        "description": "",
+        "Stance": "Thử thách và đánh giá năng lực của người chơi trước khi đặt niềm tin.",
         "affinityDirection": "đang ấm lên",
         "realm": "Giai Đoạn 1",
         "incomingHealing": 1,
-        "maxExp": 100,
-        "skills": []
+        "maxExp": 2262,
+        "skills": [],
+        "Role": "Đội trưởng dân binh thôn Thường Lạc, cựu binh biên ải.",
+        "Appearance": "Dáng người cao ráo, sạm nắng với những thớ cơ săn chắc của người luyện võ lâu năm. Ông mặc một bộ giáp da cũ kỹ đã qua nhiều lần tu sửa, ngang hông giắt một thanh liễu diệp đao rỉ sét nhẹ ở bao. Ánh mắt ông sắc lẹm, luôn nhìn chằm chằm vào đối phương như muốn dò xét, khuôn mặt hằn sâu những vết chân chim của sự sương gió.",
+        "Backstory": "Triệu Sâm vốn là một binh sĩ dưới trướng Công Tôn Toản, sau khi bị thương trong một trận chiến với quân Khăn Vàng đã lui về quy ẩn tại quê nhà Thường Sơn. Khi oán khí tích tụ khiến yêu ma xuất hiện, ông buộc phải cầm vũ khí một lần nữa để bảo vệ dân làng. Ông đã nghe danh Nam Hoa Lão Tiên nhưng lại có cái nhìn khá tiêu cực về những 'đạo sĩ' chỉ biết nói suông trong khi bách tính lầm than.",
+        "Personality": "Thực tế, cứng rắn, trọng nghĩa khinh tài nhưng lại vô cùng đa nghi với người lạ.",
+        "isAppraised": true
       },
       {
         "id": "551b87f0-89ab-4ede-b692-507031afc7d8",
@@ -1353,7 +1401,91 @@
         "Backstory": "Sinh trưởng tại chân núi Thường Sơn, Triệu Vũ sớm bộc lộ thiên phú võ học. Khi oán khí khiến yêu ma trỗi dậy tàn phá quê hương, anh đã tình nguyện gia nhập quân ngũ địa phương để bảo vệ dân lành. Trong một lần tuần tra, anh bắt gặp Diệp Thần đang trong trạng thái suy kiệt sau khi xuyên không. Nhận thấy khí chất đạo gia thanh khiết từ Diệp Thần, Triệu Vũ tin rằng đây chính là cứu tinh mà vùng đất này đang chờ đợi và quyết định đi theo phò tá.",
         "Personality": "Nhiệt huyết, bộc trực và vô cùng trượng nghĩa. Tuy có chút nóng nảy của tuổi trẻ nhưng lại cực kỳ trung thành và luôn sẵn lòng xả thân vì đồng đội.",
         "Stance": "Kính trọng và tin tưởng tuyệt đối vào sứ mệnh của Diệp Thần.",
-        "isAppraised": true
+        "isAppraised": true,
+        "skills": []
+      },
+      {
+        "id": "d6799360-4022-4890-9896-7ddc7cdae278",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 5,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 9,
+          "atk": 7,
+          "def": 7,
+          "spd": 7
+        },
+        "current_location_id": "850c87d8-c5ec-44b1-bf15-3e4f7cf8ac46",
+        "baseHp": 280,
+        "baseAtk": 28,
+        "baseDef": 14,
+        "baseSpd": 34,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 2080,
+        "maxhp": 2080,
+        "atk": 98,
+        "def": 84,
+        "spd": 104,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 30,
+        "Name": "Thái Văn Cơ",
+        "description": "",
+        "Stance": "Cảm kích sau khi được nhân vật chính cứu giúp trong một vụ tập kích của ma vật, hiện đang tin tưởng và mong muốn tìm hiểu về đạo pháp của Diệp Thần.",
+        "Personality": "Ôn nhu, điềm tĩnh, trọng tình nghĩa nhưng nội tâm kiên cường, giàu lòng trắc ẩn với chúng sinh.",
+        "Gender": "Nữ",
+        "sizeCategory": 2,
+        "incomingHealing": 1,
+        "maxExp": 1118,
+        "Role": "Đại gia khuê tú, truyền nhân văn chương, người nắm giữ bí tịch thất lạc về âm luật trừ ma",
+        "Appearance": "Dáng người thanh tao, y phục màu thiên thanh thướt tha, mái tóc đen dài cài trâm ngọc. Gương mặt thanh tú phảng phất nỗi u buồn của thời loạn, ánh mắt sáng như sao ẩn chứa khí chất thoát tục.",
+        "Backstory": "Là con gái của danh sĩ Thái Ung, từ nhỏ đã tinh thông cầm kỳ thi họa. Sau khi cha bị lưu đày và qua đời, nàng lưu lạc giữa loạn thế. Tương truyền, tiếng đàn của nàng có khả năng trấn áp oán khí, vô tình thu hút sự chú ý của các thế lực tà ác.",
+        "isAppraised": true,
+        "realm": "Giai Đoạn 1"
       }
     ],
     "sharedCooldowns": {
@@ -1376,15 +1508,15 @@
           "turn": 43
         }
       ],
-      "lastExpResolvedTurn": 59
+      "lastExpResolvedTurn": 62
     },
     "loreQuests": [],
     "pendingCreations": [],
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 59,
-      "world_time": 59,
+      "turn_id": 62,
+      "world_time": 62,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -1402,17 +1534,17 @@
         "time": {
           "year": 0,
           "month": 1,
-          "day": 15,
+          "day": 16,
           "hour": 21
         },
         "location_id": "850c87d8-c5ec-44b1-bf15-3e4f7cf8ac46",
-        "weather": "Trời tối, mây đen hình đầu lâu, ma khí bao phủ nặng nề",
+        "weather": "Trời đêm thanh khiết, trăng sáng sau khi đã thanh tẩy ma khí",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 34.80000000000003,
+            "exp": 35.10000000000004,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
@@ -1453,10 +1585,10 @@
           {
             "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
             "Name": "Triệu Vân",
-            "level": 1,
+            "level": 85,
             "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
+            "hp": 89680,
+            "maxhp": 89680,
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
@@ -1497,10 +1629,10 @@
           {
             "id": "d7b85753-38ce-4c1b-b173-affc6e0aa0b0",
             "Name": "Triệu Sâm",
-            "level": 1,
+            "level": 8,
             "exp": 0,
-            "hp": 1000,
-            "maxhp": 1000,
+            "hp": 3140,
+            "maxhp": 3140,
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
@@ -1512,6 +1644,17 @@
             "exp": 0,
             "hp": 1680,
             "maxhp": 1680,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "d6799360-4022-4890-9896-7ddc7cdae278",
+            "Name": "Thái Văn Cơ",
+            "level": 5,
+            "exp": 0,
+            "hp": 2080,
+            "maxhp": 2080,
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
@@ -1555,7 +1698,7 @@
           {
             "id": "96338829-e702-42cd-89b2-479d06cce22e",
             "title": "Giải kiếp cho Công Tôn Bảo Nguyệt",
-            "status": "ready_to_turn_in",
+            "status": "completed",
             "objectives": [
               {
                 "id": "persuade_baonguyet",
@@ -1592,17 +1735,17 @@
         "time": {
           "year": 0,
           "month": 1,
-          "day": 16,
-          "hour": 5
+          "day": 17,
+          "hour": 9
         },
-        "location_id": "247ba85b-7a69-42fe-8dca-52c65bd8746a",
-        "weather": "Trời quang mây tạnh, hừng đông thanh khiết",
+        "location_id": "3c24b0ff-0280-4cad-93b9-ecbd525bc092",
+        "weather": "Nắng sớm ban mai, mây xám kéo về từ phương xa",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 34.900000000000034,
+            "exp": 35.20000000000004,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
@@ -1643,10 +1786,10 @@
           {
             "id": "a0c6daba-8625-4645-8bea-e6b369fbc453",
             "Name": "Triệu Vân",
-            "level": 1,
+            "level": 85,
             "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
+            "hp": 89680,
+            "maxhp": 89680,
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
@@ -1687,10 +1830,10 @@
           {
             "id": "d7b85753-38ce-4c1b-b173-affc6e0aa0b0",
             "Name": "Triệu Sâm",
-            "level": 1,
+            "level": 8,
             "exp": 0,
-            "hp": 1000,
-            "maxhp": 1000,
+            "hp": 3140,
+            "maxhp": 3140,
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
@@ -1702,6 +1845,17 @@
             "exp": 0,
             "hp": 1680,
             "maxhp": 1680,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "d6799360-4022-4890-9896-7ddc7cdae278",
+            "Name": "Thái Văn Cơ",
+            "level": 5,
+            "exp": 0,
+            "hp": 2080,
+            "maxhp": 2080,
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
@@ -1796,6 +1950,12 @@
         "d7b85753-38ce-4c1b-b173-affc6e0aa0b0": {
           "save_life": {
             "last_event_turn": 49,
+            "streak": 1
+          }
+        },
+        "a0c6daba-8625-4645-8bea-e6b369fbc453": {
+          "save_life": {
+            "last_event_turn": 60,
             "streak": 1
           }
         }
@@ -4800,13 +4960,195 @@
           "content": "*Diệp Thần* mỉm cười, đỡ *Triệu Vân* dậy. Hắn biết, sau đêm nay, không chỉ thành trì này được cứu, mà một trang sử mới rực rỡ của thời đại Tam Quốc đã được hắn trực tiếp viết lại bằng chính đôi tay và đạo pháp của mình."
         }
       ]
+    },
+    {
+      "id": "642810e6-3e96-46e0-a171-101b6c247af9",
+      "type": "user_custom_action",
+      "content": "'Tử Long không cần đa lễ. Trước đây khi ngươi đến đạo quán trên núi tìm ta hỏi về minh chủ có thể phò tá ta đã nói chúng ta tuổi tác tương đương cứ coi nhau như huynh đệ mà đối xử. Chưa kể hiện nay ngươi còn là anh vợ của ta nữa' Nói đến đây Triệu Vũ phùng 2 má đỏ hồng nhéo eo ngươi 1 cái. Ngươi cười cười xoa đầu nàng. Triệu Vân vẫn không đồng ý đáp: 'Không thể được. Lúc đó chúng ta là huynh đệ ngài đã cứu mạng và chỉ điểm ta. Bây giờ lại cứu cả muội muội và Triệu An. Ta không thể coi như không được. Từ nay về sau nguyện nghe tiên sinh sai sử.' Ngươi thở dài nói: 'Được rồi Tử Long. Hành trình của ta vốn rất khó khăn. Mang theo nhiều nữ tử mang thiên mệnh như vậy cũng rất khó chiếu cố chu toàn cho các nàng. Tử Long nay nguyện theo ta thì có thể giúp ta chiếu cố các nàng là được. Từ nay gọi ta là công tử đi.' Triệu Vân bái lạy đáp: 'Tử Long thề chết bảo vệ chủ mẫu' Ngươi đỡ tay Triệu Vân đứng dậy nói: 'Trương Giác đại thế đã mất, đại khải khoảng nửa năm 1 năm nữa là sẽ vong mạng. Chúng ta không cần quản đám giặc Hoàng Cân này nữa. Vũ đài này không phải của chúng ta. Giờ hãy theo ta đi tìm Thái Ung. Đừng để lão hồ đồ này gả Văn Cơ cho Vệ Trọng'"
+    },
+    {
+      "id": "c16c8512-c9a8-48da-a695-1b3f19ca280b",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Dưới ánh nắng vàng rực rỡ của buổi sớm mai, không gian tại vùng ngoại vi thành *Trác Quận* bỗng trở nên tĩnh lặng một cách kỳ lạ. Những lời nói quả quyết, chân thành của *Diệp Thần* như dòng suối mát lành gột rửa mọi nghi ngại trong lòng *Triệu Vân*. Vị mãnh tướng trẻ tuổi, người mang trong mình khí khái của một bậc đại trượng phu, không mảy may do dự, quỳ rạp xuống nền đất sũng sương, đôi mắt sáng rực niềm tin tuyệt đối vào vị quân chủ tương lai."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tử Long không cần đa lễ. Trước đây khi ngươi đến đạo quán trên núi tìm ta hỏi về minh chủ có thể phò tá, ta đã nói chúng ta tuổi tác tương đương, cứ coi nhau như huynh đệ mà đối xử. Chưa kể hiện nay ngươi còn là anh vợ của ta nữa."
+        },
+        {
+          "type": "narrative",
+          "content": "Vừa dứt lời, *Triệu Vũ* bên cạnh khẽ phùng hai má đỏ hồng, nàng thẹn thùng nhéo nhẹ vào eo ngươi một cái, đôi mắt long lanh đầy vẻ hờn dỗi đáng yêu. Ngươi mỉm cười, đưa tay xoa nhẹ lên mái tóc đen mượt của nàng, hành động thân mật khiến *Triệu Vân* khẽ khựng lại, rồi trên gương mặt lạnh lùng của vị tướng quân ấy dần hiện lên một nụ cười ấm áp. Tuy nhiên, *Triệu Vân* vẫn lắc đầu, vẻ mặt vô cùng nghiêm nghị:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Không thể được. Lúc đó chúng ta là huynh đệ, ngài đã cứu mạng và chỉ điểm ta. Bây giờ lại cứu cả muội muội và *Triệu An*. Ta không thể coi như không được. Từ nay về sau, nguyện nghe tiên sinh sai sử!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi khẽ thở dài, vẻ mặt đầy thấu đáo nhưng cũng đầy vẻ lo âu khi nghĩ đến hành trình dài đằng đẵng phía trước. Ngươi đỡ *Triệu Vân* đứng dậy, ánh mắt nhìn thẳng về phương xa:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Được rồi, Tử Long. Hành trình của ta vốn rất khó khăn. Mang theo nhiều nữ tử mang thiên mệnh như vậy cũng rất khó chiếu cố chu toàn cho các nàng. Tử Long nay nguyện theo ta thì có thể giúp ta chiếu cố các nàng là được. Từ nay gọi ta là công tử đi."
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vân* cúi đầu bái lạy, giọng nói vang vọng lòng kiên định:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Tử Long thề chết bảo vệ chủ mẫu!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi đỡ tay *Triệu Vân* đứng dậy, ánh mắt sắc sảo nhìn về hướng thành trì, nơi mây đen ma đạo đang dần tan biến dưới ánh sáng chính đạo:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Trương Giác đại thế đã mất, đại khởi khoảng nửa năm, một năm nữa là sẽ vong mạng. Chúng ta không cần quản đám giặc Hoàng Cân này nữa. Vũ đài này không phải của chúng ta. Giờ hãy theo ta đi tìm *Thái Ung*. Đừng để lão hồ đồ này gả *Văn Cơ* cho *Vệ Trọng*."
+        },
+        {
+          "type": "narrative",
+          "content": "Đoàn người nhanh chóng lên đường. Khung cảnh dọc đường đi qua những cánh rừng thông cổ thụ mang theo cảm giác tĩnh mịch đầy kỳ bí. *Diệp Thần* dẫn đầu, trong tâm trí không ngừng suy tính về việc tiếp cận *Thái Ung*. Vị đại danh sĩ này là chìa khóa để bảo vệ *Thái Văn Cơ*, đồng thời cũng là bước đệm quan trọng để ngươi củng cố thanh thế trong giới văn nhân, những người nắm giữ tiếng nói quan trọng bậc nhất trong triều đình đang suy tàn.\nTrong khi xe ngựa lăn bánh trên con đường đất đỏ, *Triệu Vân* cưỡi ngựa đi cạnh cửa xe, ánh mắt luôn cảnh giác nhìn về phía những rặng núi mờ sương. Sự trung thành của hắn hiện rõ qua từng cử chỉ. *Vân Nhi*, *Khinh Y* và *Bảo Nguyệt* ngồi trong xe, thỉnh thoảng lại khẽ vén rèm nhìn ra ngoài, vẻ mặt đầy hy vọng. Họ biết, với sự bảo vệ của *Diệp Thần* và sự hộ tống của *Triệu Vân*, hành trình đến với *Thái Ung* chắc chắn sẽ thuận lợi.\nCàng tiến về phía gần nơi ở của *Thái Ung*, linh khí trong không gian càng trở nên trong lành hơn, dường như sự hiện diện của một đại túc nho có thể xua tan mọi tà khí. Tuy nhiên, ngươi vẫn cảm nhận được những tia nhìn soi mói từ phía những tán cây rậm rạp — dường như vẫn có kẻ không muốn ngươi thành công trong việc ngăn cản cuộc hôn nhân của *Thái Văn Cơ*."
+        }
+      ]
+    },
+    {
+      "id": "cbb2dbc7-fe54-49ef-86c8-5bd0a4d3b7fe",
+      "type": "system",
+      "content": "**[He thong]** Thái độ của **Triệu Vân** với ngươi đã ấm lên: **Trung lập** → **Thiện cảm**.",
+      "transient": true
+    },
+    {
+      "id": "fc654759-5a1a-41b7-b2fb-a07aab1a6570",
+      "type": "user_custom_action",
+      "content": "Mấy thứ tiểu yêu này phiền phức quá. Nói xong ngươi lấy Linh Phong phù và Tấn Lôi phù dán lên xe ngựa, Xe ngựa của ngươi giờ có 2 con kéo xe, tốc độ càng nhanh hơn. Ngồi ngoài đánh xe là Triệu Vân và Triệu Sâm. Bên trong vẫn là ngươi và 3 mỹ nhân. Cộng thêm Tiểu Thúy, Tiểu Bạch và Tiểu Thanh. Sau khi dán 2 lá phù, xe ngựa đi nhanh như gió, đám yêu vật không dám lại gần vì uy lực của Tấn Lôi phù. Cả đoàn nhanh chóng tới Lạc Dương, Thái phủ."
+    },
+    {
+      "id": "31677941-69af-4bcc-beb8-e5a51f7b3094",
+      "type": "story",
+      "content": [
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Mấy thứ tiểu yêu này phiền phức quá!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* hừ lạnh một tiếng, vạt đạo bào màu nâu sẫm phấp phới trong cơn gió đêm lạnh lẽo của vùng ngoại vi *Chân Định*. Ánh mắt hắn sắc lẹm nhìn về phía những bóng đen dật dờ đang lẩn khuất sau những rặng liễu rủ ven đường, nơi những tiếng gầm gừ đục ngầu của đám *Hành Thi* đang không ngừng vang lên. Không một chút chần chừ, hắn đưa tay vào đai lưng gỗ sồi, nhanh như chớp giật rút ra hai lá phù chú rực rỡ sắc vàng — chính là *Linh Phong phù* và *Tấn Lôi phù* — những bí bảo của *Thái Bình Yếu Thuật* mà hắn đã dày công luyện chế. \nBàn tay thon dài của hắn kẹp chặt hai lá phù, miệng khẽ niệm chú ngữ bằng cổ âm uy nghiêm, trầm hùng. Chân nguyên tinh thuần trong đan điền bỗng chốc rúng động, cuồn cuộn đổ dồn vào đầu ngón tay. \"Vèo! Vèo!\" Hai lá phù bỗng chốc bùng cháy, tỏa ra luồng linh quang xanh lam và tím ngắt rực rỡ, rồi bay vút tới, dán chặt vào thành xe ngựa đang đứng đợi sẵn. \nCỗ xe ngựa của đoàn người lúc này đã được trang bị hai con tuấn mã lực lưỡng nhất vùng *Thường Sơn*, được cầm lái bởi vị mãnh tướng *Triệu Vân* giáp bạc hiên ngang và lão binh dày dạn kinh nghiệm *Triệu Sâm*. Bên trong toa xe rộng rãi, lót đệm lụa êm ái, ba nàng tuyệt sắc thê tử *Hạ Hầu Khinh Y*, *Công Tôn Bảo Nguyệt* và *Vân Nhi* đang nép sát vào nhau, ánh mắt vừa lo lắng vừa chứa chan sự tin cậy dành cho phu quân. Nàng tỳ nữ *Tiểu Thúy* ôm chặt chú hổ con *Tiểu Bạch* và rồng nhỏ *Tiểu Thanh* ngồi ngay cửa xe, đôi mắt tròn xoe kinh ngạc nhìn những biến hóa thần kỳ sắp diễn ra.\nNgay khi hai lá phù chạm vào thành gỗ, một tiếng nổ trầm đục của lôi điện vang lên, bao bọc lấy toàn bộ cỗ xe trong một tầng linh quang huyền ảo. *Linh Phong phù* tỏa ra những luồng gió xoáy cực mạnh, nâng đỡ bánh xe thoát khỏi mặt đất ẩm ướt, trong khi *Tấn Lôi phù* liên tục phát ra những tia điện tím hung hãn, quấn quýt lấy chân ngựa và nan hoa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tử Long, Triệu Sâm! Khởi hành! Chúng ta phải tới Lạc Dương ngay trong đêm nay!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vân* và *Triệu Sâm* đồng thanh nhận mệnh, dây cương quất mạnh. Cỗ xe ngựa bỗng chốc rùng mình, phát ra một tiếng rít xé gió kinh hồn. Dưới tác động của phong kình và lôi điện cường hóa, hai con ngựa như hóa thành thần thú trong truyền thuyết, bốn vó không còn chạm đất mà đạp lên không trung mà chạy. Cỗ xe lao đi vun vút như một cơn lốc sấm sét giữa đêm đen mịt mù, để lại phía sau những vệt linh quang tím biếc dài hàng chục trượng.\nĐám yêu vật, *Hành Thi* ven đường chưa kịp định thần đã bị luồng uy áp và lôi điện tỏa ra từ cỗ xe đánh văng ra xa. Những kẻ dám bén mảng tới gần đều bị tử điện thiêu rụi thành tro bụi chỉ trong nháy mắt. Tiếng vó ngựa dồn dập hòa cùng tiếng sấm nổ đanh gọn vang vọng khắp núi rừng, tạo nên một bản nhạc hào hùng của sự chinh phục. \nBên trong toa xe, cảm giác tốc độ kinh hoàng khiến các nàng thê tử phải bám chặt vào thành ghế. *Diệp Thần* ngồi ở giữa, một tay ôm lấy eo *Hạ Hầu Khinh Y*, một tay nắm chặt tay *Vân Nhi*, còn *Công Tôn Bảo Nguyệt* thì tựa đầu vào vai hắn, cảm nhận sự an toàn tuyệt đối. Chú rồng nhỏ *Tiểu Thanh* hưng phấn bay lượn vòng quanh, phun ra những làn hơi sương xanh lục để ổn định áp suất bên trong toa xe, trong khi *Tiểu Bạch* gầm nhẹ một tiếng đầy kiêu hãnh.\nCuộc hành trình tốc hành xuyên đêm diễn ra trong sự tĩnh lặng của những người anh hùng. Lướt qua những cánh đồng hoang vu, những con sông cuồn cuộn và cả những thành trì đang rên xiết dưới khói lửa chiến tranh, cỗ xe thần kỳ của *Diệp Thần* vẫn giữ vững tốc độ không tưởng. Dưới sự dẫn dắt của linh giác và thần thông, họ băng qua hàng nghìn dặm quan lộ chỉ trong mười hai giờ đồng hồ ngắn ngủi. \nKhi những tia nắng đầu tiên của buổi sớm mai bắt đầu nhuộm hồng rặng mây phía Đông, những bức tường thành sừng sững, uy nghiêm của kinh đô *Lạc Dương* đã hiện ra ở đường chân trời. Khác với vẻ hoang tàn của vùng biên ải, *Lạc Dương* dẫu đang trong thời kỳ suy tàn vẫn mang một vẻ bề thế, rực rỡ với những cung điện nguy nga và những hàng phố xá sầm uất bắt đầu thức giấc.\nCỗ xe ngựa dần giảm tốc độ khi tiến gần đến khu vực nội đô. Những luồng phong kình và lôi điện tản mác đi, bánh xe lại chạm xuống mặt đường lát đá xanh phẳng lì của kinh thành. *Triệu Vân* ghì chặt dây cương, điều khiển xe ngựa rẽ vào con phố lớn dẫn đến khu vực phủ đệ của các bậc danh sĩ triều đình. Sau khi hỏi thăm vài người dân đi đường, cả đoàn đã chính thức dừng chân trước cổng lớn của một dinh thự mang đậm vẻ thanh tao, cổ kính, trên biển ngạch đề hai chữ lớn dát vàng: *Thái Phủ*.\n*Diệp Thần* bước xuống xe, vạt đạo bào xám đã nhuốm chút bụi đường nhưng thần thái vẫn vô cùng tiêu sái, thoát tục. Hắn nhìn lên cánh cổng phủ đệ của đại danh sĩ *Thái Ung*, cảm nhận một luồng linh khí thư hương thanh khiết tỏa ra từ bên trong, nhưng ẩn sâu trong đó là một nỗi u buồn trầm mặc của một triều đại đang sắp sửa lụi tàn."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tử Long, Triệu Sâm, hai người hãy ở lại đây trông nom xe ngựa và các linh thú. Khinh Y, Bảo Nguyệt, Vân Nhi, ba nàng hãy cùng ta vào bái phỏng Thái đại nhân."
+        },
+        {
+          "type": "narrative",
+          "content": "Ba nàng thê tử nhanh chóng thu xếp lại y phục, mỗi người mang một vẻ đẹp nghiêng nước nghiêng thành khiến những gia nhân của *Thái Phủ* vừa mở cửa đã phải ngẩn ngơ sững sờ. *Diệp Thần* tiến tới trước cửa, chắp tay hành lễ theo nghi thức của tiên gia, giọng nói trầm ổn vang vọng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Thường Sơn đạo sĩ *Diệp Thần*, ngưỡng mộ danh tiếng đại danh sĩ *Thái Ung* đã lâu, hôm nay đặc biệt đưa gia quyến tới bái phỏng, mong được diện kiến đại nhân."
+        },
+        {
+          "type": "narrative",
+          "content": "Tên gia nhân thấy khí độ của ngươi bất phàm, lại thấy hộ vệ giáp bạc cưỡi ngựa trắng phía sau đầy vẻ dũng mãnh, không dám chậm trễ mà vội vàng chạy vào báo cáo. Chỉ một lát sau, một lão nhân râu tóc bạc phơ, mặc áo gấm thanh nhã, gương mặt mang đậm nét túc nho nhưng lại phảng phất vẻ ưu tư, đích thân bước ra đón khách. Đó chính là *Thái Ung*.\nLão nheo mắt nhìn ngươi, rồi nhìn sang ba nàng tuyệt sắc thê tử phía sau, đôi lông mày bạc khẽ mướn lên đầy kinh ngạc. Lão vốn là người tinh thông âm luật và tướng số, nhìn qua khí vận bao quanh đoàn người liền biết đây không phải hạng phàm phu tục tử."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Ung",
+          "content": "Lão phu là *Thái Ung*, không hay có quý khách từ phương xa tới vậy. Nhìn khí độ của công tử thanh cao thoát tục, lẽ nào là truyền nhân của bậc ẩn sĩ nào đó? Mời vào trong đàm đạo."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi dẫn theo ba vị thê tử bước qua ngưỡng cửa gỗ sưa thơm ngát, tiến vào gian khách sảnh rộng lớn của *Thái Phủ*. Khắp nơi đều là những giá sách đầy ắp, những bức tranh cổ và đặc biệt là một cây cổ cầm đặt ngay chính giữa phòng, tỏa ra những luồng linh âm trầm mặc. Ngươi nhận thấy trong góc phòng, một bóng dáng thiếu nữ mặc áo lụa xanh nhạt đang cúi đầu lau chùi những trang sách cũ — đó chắc chắn là *Thái Văn Cơ*, người con gái mang thiên mệnh mà ngươi đang tìm kiếm.\nBầu không khí trong phủ vô cùng tĩnh lặng, dường như mọi ồn ào của kinh thành *Lạc Dương* đều bị ngăn cách bên ngoài bức tường đá. *Thái Ung* mời ngươi ngồi xuống chiếc ghế trạm trổ, tự tay rót trà mời khách."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đa tạ đại nhân. Bần đạo từ phương Bắc tới đây, dọc đường thấy quân *Hoàng Cân* nổi lên khắp nơi, ma khí phương Bắc đang xâm thực khí mạch trung nguyên, lòng cảm thấy vô cùng bất an cho vận mệnh của những bậc hiền tài."
+        },
+        {
+          "type": "narrative",
+          "content": "*Thái Ung* thở dài, đặt chén trà xuống bàn, đôi mắt mờ đục nhìn ra cửa sổ, nơi những dải mây xám đang bắt đầu kéo về từ phương xa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thái Ung",
+          "content": "Công tử nói không sai. Triều đình hủ bại, gian thần lộng hành, bách tính lầm than. Ngay cả một kẻ chỉ biết chữ nghĩa như lão phu cũng cảm thấy ngày tàn của vương triều đang đến gần. Lão phu đang định gả con gái *Văn Cơ* cho thiếu gia nhà họ *Vệ* ở *Hà Đông* để mong nàng tìm được chốn dung thân an ổn giữa thời loạn này, nhưng lòng vẫn cứ không yên."
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe đến đây, *Diệp Thần* khẽ mỉm cười, ánh mắt lóe lên tia sáng kiên định. Hắn biết mình đã đến đúng lúc. Số mệnh của *Thái Văn Cơ* trong sử sách vốn đầy rẫy những đau khổ và ly tán khi phải gả cho một kẻ yểu mệnh như *Vệ Trọng Đạo*, rồi sau đó bị quân *Hồ* bắt giữ. Với tư cách là kẻ nghịch thiên cải mệnh, hắn không bao giờ để bi kịch đó lặp lại."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đại nhân nghĩ sao về việc gả một đóa kỳ hoa như tiểu thư cho một gia tộc dẫu giàu sang nhưng lại mang mệnh yểu? Bần đạo bấm ngón tay tính toán, thấy duyên phận của tiểu thư không nằm ở phương Tây, mà nằm ở chính nơi có chính khí bao phủ này."
+        },
+        {
+          "type": "narrative",
+          "content": "*Thái Ung* giật mình, chiếc chén trà trong tay khẽ run rẩy. Lão nhìn chằm chằm vào ngươi, sự tò mò và kính sợ bắt đầu hiện rõ. Gian khách sảnh bỗng chốc trở nên im lặng đến mức có thể nghe thấy tiếng gió rít qua những khe cửa gỗ. Cuộc đàm đạo giữa vị truyền nhân tiên gia và đại danh sĩ triều đình bắt đầu đi vào những tầng sâu kín nhất của vận mệnh."
+        }
+      ]
+    },
+    {
+      "id": "acf96609-1a08-4392-8fd3-77d32b8f5176",
+      "type": "user_custom_action",
+      "content": "'Ta là đệ tử của Nam Hoa Lão Tiên, sứ mệnh của ta là cứu vớt những đóa hoa yểu mệnh thời loạn thế này. 3 vị phu nhân của ta đều là như vậy. Vận mệnh của Thái Diễm cũng không khác họ. Nếu không được ta trợ giúp, sau khi Vệ Trọng qua đời, nàng sẽ bị Hung Nô bắt, sau khi bị đám Hung Nô giày vò, may mắn được cứu thoát khi Hung Nô diệt vong. Ngài thử nghĩ xem lúc này nàng ấy sẽ nghĩ sao? Hơn nữa ngài được Đổng Trác đề bạt, muốn tận trung tận nghĩa với hắn. Nhưng Đổng Trác là người thế nào ngài hiểu rõ hơn ta. Hoàng Cân diệt, hắn sẽ tự phong làm Thái sư ép Thiên Tử lệnh chư hầu. Chính là Quốc tặc tương lai. Ngài muốn tận trung với hắn ta không xen vào nhưng Thái Diễm không đáng phải chịu vận mệnh như vậy. Ngài hãy cân nhắc cho tốt. Sáng mai ta sẽ lại đến bái phỏng. Hy vọng lúc đó ngài có thể cho ta 1 câu trả lời thỏa mãn' Nói xong ngươi chắp tay cáo từ rồi đưa gia quyến rời khỏi Thái phủ để Thái Ung trầm ngâm trong đống thông tin vừa rồi. Ngươi đưa các nàng đi dạo quanh Lạc Dương, mua những bộ y phục, những món trang sức mà các nàng thích. Sau đó 4 người quay lại xe ngựa rồi kêu đám người Tử Long đánh xe tới Tửu Lâu sang trọng nhất thuê phòng nghỉ lại 1 đêm. Ngươi với Khinh Y, Bảo Nguyệt, Triệu Vũ 1 phòng, Tử Long, Triệu Sâm 1 phòng, Tiểu Thúy, Tiểu Bạch và Tiểu Thanh 1 phòng. Trong lúc dùng bữa, có mấy tên công tử ăn chơi kéo tới muốn 'làm quen' với 3 người Khinh Y. Triệu Vân lập tức đứng dậy đánh cho mỗi tên 1 trận. Bọn chúng kêu la báo gia môn với hy vọng sẽ dọa được nhưng không có tác dụng. Ngươi bảo Triệu Vân cắt đi công cụ hành sự của cả bọn để chúng không gây họa được cho dân chúng nữa"
+    },
+    {
+      "id": "00dfa3e7-f6b5-4d00-bcaa-c1f05d3bf8e9",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Toàn bộ chuỗi hành động diễn ra trọn vẹn đúng trình tự. Sau khi những lời tiên tri của *Diệp Thần* về tương lai của *Thái Diễm* và dã tâm của *Đổng Trác* được thốt ra, không khí trong *Thái Phủ* trở nên đặc quánh. *Thái Ung* – vị danh sĩ túc nho vang danh thiên hạ – đứng chôn chân tại chỗ, đôi tay già nua run rẩy cầm cuốn trục thư, sững sờ trước những sự thật vừa được phơi bày. Những lời tiên tri sắc lẹm, lạnh lùng như nhát dao cắt đứt mọi ảo tưởng về sự trung nghĩa mù quáng của lão với *Đổng Trác*. Khi *Diệp Thần* chắp tay cáo từ, xoay người bước đi cùng gia quyến, lão chỉ biết đứng lặng im trong tĩnh lặng, những thông tin đó như những hòn đá tảng đè nặng lên tâm khảm, khiến lão rơi vào trạng thái trầm tư mặc niệm không lối thoát."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ta là đệ tử của *Nam Hoa Lão Tiên*, sứ mệnh của ta là cứu vớt những đóa hoa yểu mệnh thời loạn thế này. Ba vị phu nhân của ta đều là như vậy. Vận mệnh của *Thái Diễm* cũng không khác họ. Nếu không được ta trợ giúp, sau khi *Vệ Trọng* qua đời, nàng sẽ bị *Hung Nô* bắt, sau khi bị đám *Hung Nô* giày vò, may mắn được cứu thoát khi *Hung Nô* diệt vong. Ngài thử nghĩ xem lúc này nàng ấy sẽ nghĩ sao? Hơn nữa ngài được *Đổng Trác* đề bạt, muốn tận trung tận nghĩa với hắn. Nhưng *Đổng Trác* là người thế nào ngài hiểu rõ hơn ta. *Hoàng Cân* diệt, hắn sẽ tự phong làm Thái sư ép Thiên Tử lệnh chư hầu. Chính là Quốc tặc tương lai. Ngài muốn tận trung với hắn ta không xen vào nhưng *Thái Diễm* không đáng phải chịu vận mệnh như vậy. Ngài hãy cân nhắc cho tốt. Sáng mai ta sẽ lại đến bái phỏng. Hy vọng lúc đó ngài có thể cho ta một câu trả lời thỏa mãn."
+        },
+        {
+          "type": "narrative",
+          "content": "Rời khỏi *Thái Phủ*, *Diệp Thần* đưa các mỹ nhân dạo quanh *Lạc Dương*. Ánh nắng rực rỡ của kinh thành phản chiếu trên những món trang sức lấp lánh mà *Hạ Hầu Khinh Y*, *Công Tôn Bảo Nguyệt* và *Triệu Vũ* ướm thử. Tâm trạng các nàng vô cùng phấn chấn, tiếng cười giòn tan xóa tan đi những lo âu về thời cuộc. Khi màn đêm buông xuống, cỗ xe ngựa sang trọng dừng lại trước tửu lâu nguy nga nhất kinh thành. Ngươi cho thuê nhiều phòng để sắp xếp nghỉ ngơi: ngươi cùng ba vị phu nhân ở một phòng, còn đám người *Triệu Vân*, *Triệu Sâm* và các nàng hầu cận được bố trí nơi khác.\nTrong lúc dùng bữa tối tại tửu lâu, một nhóm công tử bột con cháu quan lại đi ngang qua, ánh mắt kẻ cả, suồng sã dán chặt vào ba vị mỹ nhân của *Diệp Thần*. Một tên trong đám, kẻ dường như đã ngấm men rượu, tiến lại gần định giở trò \"làm quen\" khiếm nhã. Không để hắn kịp chạm tay vào bàn tiệc, *Triệu Vân* đã như một cơn gió lạnh lướt tới. \n*Triệu Vân* nhẹ nhàng nhưng quyết liệt, đánh cho mỗi tên một trận nhừ tử ngay giữa tửu lâu. Bọn chúng đau đớn kêu la, gào thét báo gia môn, đem quyền thế phụ huynh ra dọa nạt, nhưng *Triệu Vân* vẫn bình thản như không."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tử Long, lũ người này cậy quyền ức hiếp dân lành đã quen, để chúng tiếp tục thì họa hại vô cùng. Cắt đi công cụ hành sự của cả bọn, để chúng vĩnh viễn không còn khả năng gây họa cho dân chúng nữa."
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vân* gật đầu, vung kiếm vạch một đường ngọt lẹm, vĩnh viễn tước đi \"bản lĩnh\" của đám công tử bột, để lại những tiếng kêu thảm thiết vang dội khắp tửu lâu. Cả kinh thành *Lạc Dương* dường như chấn động sau hành động quyết liệt ấy, không ai dám hó hé phản đối trước uy thế của công tử họ *Diệp*.\nĐêm về khuya, không gian trong căn phòng sang trọng tại tửu lâu trở nên ấm áp và tĩnh mịch. *Diệp Thần* ngồi tựa lưng vào giường, cảm nhận được sự gắn kết linh lực từ ba thê tử đang vây quanh. *Hạ Hầu Khinh Y* khẽ tựa vào vai hắn, đôi mắt dịu dàng; *Công Tôn Bảo Nguyệt* ngồi bên, khí chất mạnh mẽ có phần nhu hòa đi sau khi được hắn dẫn dắt; còn *Triệu Vũ* thì vẫn còn e thẹn nhưng ánh mắt đầy vẻ ngưỡng mộ. Hắn biết rằng, với việc *Thái Ung* đã bắt đầu lung lay và đám công tử bột ở *Lạc Dương* đã bị trừng trị, thanh thế của hắn tại kinh thành đang dần khẳng định.\nNgày mai, khi bình minh lên, hắn sẽ tiếp tục quay lại *Thái Phủ*. Sự trầm mặc của *Thái Ung* tối nay chính là dấu hiệu của một trận bão lòng. Nếu lão danh sĩ này thực sự thấu hiểu chân lý, vận mệnh của *Thái Văn Cơ* – cũng như số phận của *Đông Hán* – sẽ được viết lại dưới bàn tay của hắn."
+        }
+      ]
     }
   ],
   "choices": [
-    "Đề nghị Triệu Vân cùng gia nhập đoàn lữ hành để cùng nhau chinh phạt tàn quân ma đạo đang rút chạy về phương Bắc. {Tỷ lệ thành công: Cao. Hậu quả/Phần thưởng: Gia tăng sức mạnh quân sự cho tổ đội, mở khóa các kỹ năng phối hợp với mãnh tướng.}",
-    "Yêu cầu Triệu Vân ở lại trấn thủ thành Chân Định và bảo vệ bách tính, trong khi ngươi và các thê tử tiếp tục hành trình thám hiểm. {Tỷ lệ thành công: Rất cao. Hậu quả/Phần thưởng: Thiết lập một căn cứ địa vững chắc, tăng danh vọng với quan quân triều đình.}",
-    "Dùng đạo pháp thanh tẩy toàn bộ dư âm ma khí còn lại trong thành Chân Định trước khi trời sáng để đảm bảo an toàn tuyệt đối. {Tỷ lệ thành công: Trung bình. Hậu quả/Phần thưởng: Tiêu hao chân nguyên lớn nhưng sẽ cứu sống thêm nhiều dân lành, nhận được khí vận công đức.}",
-    "Tổ chức một buổi đại tiệc mừng chiến thắng ngay tại quảng trường thành để nâng cao sĩ khí và gắn kết tình cảm giữa các thành viên. {Tỷ lệ thành công: Rất cao. Hậu quả/Phần thưởng: Tăng mạnh độ hảo cảm của các nàng thê tử và Triệu Vân, hồi phục thể lực cho cả đoàn.}"
+    "Sáng mai quay lại Thái Phủ tiếp tục thuyết phục Thái Ung để thay đổi ý định gả Thái Văn Cơ cho Vệ Trọng Đạo. {Tỷ lệ thành công: Cao. Hậu quả/Phần thưởng: Sự thay đổi trong ý chí của Thái Ung sẽ mở ra con đường đưa Thái Văn Cơ về dưới trướng của công tử.}",
+    "Dẫn các thê tử đi dạo chơi ở phía Tây kinh thành để tránh mặt đám gia tộc của những tên công tử vừa bị trừng trị đang đi tìm cách trả đũa. {Tỷ lệ thành công: Tuyệt đối. Hậu quả/Phần thưởng: Đảm bảo sự an toàn cho các phu nhân trong lúc chờ đợi tình hình lắng xuống.}",
+    "Trực tiếp đến phủ của Đổng Trác để thăm dò động thái của hắn trước khi hắn kịp thâu tóm quyền lực triều đình. {Tỷ lệ thành công: Trung bình. Hậu quả/Phần thưởng: Nắm bắt được âm mưu sớm hơn nhưng sẽ đưa công tử vào tầm ngắm của các thế lực tà ác.}",
+    "Tập hợp Triệu Vân và nhóm người để luyện tập thêm về các trận pháp bảo hộ đã học được từ Nam Hoa Lão Tiên nhằm đề phòng bất trắc tại kinh thành. {Tỷ lệ thành công: Cao. Hậu quả/Phần thưởng: Tăng cường sức mạnh phòng thủ cho cả đoàn, giúp công tử sẵn sàng ứng phó với mọi cuộc tấn công bất ngờ.}"
   ],
   "gameMode": "EXPLORATION",
   "activeTrade": {
@@ -4827,5 +5169,5 @@
       "endTurn": 20
     }
   ],
-  "adventureTurnCount": 59
+  "adventureTurnCount": 62
 }
