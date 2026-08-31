@@ -1,6 +1,13 @@
 {
   "slots": [
-    null,
+    {
+      "gameId": "a0f9cc1a-0258-425b-be01-ca06583ced77",
+      "timestamp": "2026-08-31T21:01:08.476Z",
+      "characterName": "Diệp Thần",
+      "storyTitle": "Tam quốc chí",
+      "difficulty": "Ác Mộng",
+      "currentTurn": 2
+    },
     null,
     null,
     null,
