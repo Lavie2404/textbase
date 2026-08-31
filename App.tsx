@@ -36638,6 +36638,29 @@ const formatStoryText = useCallback((text) => {
                 .animate-text-glow {
                     animation: text-glow 5s ease-in-out infinite;
                 }
+                /* Phẩm chất THẦN THOẠI (trên Huyền Thoại): chữ gradient 7 màu cầu vồng
+                   chuyển động. Class được getItemRarityColor/getRarityColorCSS tham chiếu
+                   từ trước nhưng chưa từng được định nghĩa nên chữ rơi về màu mực đen. */
+                @keyframes mythical-rainbow {
+                    0% { background-position: 0% 50%; }
+                    100% { background-position: 200% 50%; }
+                }
+                .rarity-mythical {
+                    background-image: linear-gradient(90deg, #e11d48, #f97316, #eab308, #16a34a, #0ea5e9, #4f46e5, #9333ea, #e11d48);
+                    background-size: 200% auto;
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                    color: transparent !important;
+                    -webkit-text-fill-color: transparent;
+                    animation: mythical-rainbow 3s linear infinite;
+                    filter: drop-shadow(0 0 6px rgba(234, 179, 8, 0.35));
+                }
+                /* Bản nền (chấm/thanh phẩm chất) — cùng dải 7 màu, không clip chữ */
+                .rarity-mythical-dot {
+                    background-image: linear-gradient(135deg, #e11d48, #f97316, #eab308, #16a34a, #0ea5e9, #4f46e5, #9333ea, #e11d48);
+                    background-size: 200% auto;
+                    animation: mythical-rainbow 3s linear infinite;
+                }
                 /* --- HIỆU ỨNG TRƯỢT LÊN CỦA HTAB --- */
                 @keyframes slideUpHtab {
                     0% { transform: translate(-50%, 120%); opacity: 0; filter: brightness(2) blur(10px); }
