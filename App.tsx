@@ -25375,6 +25375,15 @@ const parseGeminiResponseAndUpdateState = async (text, knowledgeToUse, setActive
         storyContent = storyContent.replace(rankAnnouncementRegex, `$1${c.level}`);
     });
 
+    // Lưới lọc tín hiệu nội bộ (2026-08-31): câu xác nhận "Toàn bộ chuỗi hành động...
+    // diễn ra trọn vẹn đúng trình tự" là ám hiệu API-1 → API-2, không bao giờ là văn
+    // tiểu thuyết hợp lệ. Nếu người kể vẫn lỡ chép nó (hoặc biến thể) vào truyện,
+    // xóa tất định cả câu trước khi hiển thị.
+    storyContent = storyContent
+        .replace(/[^.!?\n]*chuỗi hành động[^.!?\n]*(?:trọn vẹn|đúng trình tự)[^.!?\n]*[.!?]?/gi, '')
+        .replace(/[^.!?\n]*(?:trọn vẹn|đúng trình tự)[^.!?\n]*chuỗi hành động[^.!?\n]*[.!?]?/gi, '')
+        .replace(/ {2,}/g, ' ');
+
     const updates = {
 
         inventory: [], npcs: [], items: [], locations: [], relationships: [],
@@ -27241,7 +27250,7 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
             ĐỐI VỚI KỊCH BẢN ĐÃ CHỐT, YÊU CẦU CUNG CẤP:
             1. 'probability': Tỷ lệ phần trăm (0-100) ngươi tự đánh giá kịch bản này xảy ra trong thực tế. Phải đánh giá trung thực dựa trên tình tiết hiện tại, đặc biệt là tính cách nhân vật. (Hành động phi logic thì kết quả chốt phải nghiêng về thất bại).
             2. 'summary': Vài câu thể hiện nội dung kịch bản, chủ yếu nói về phản ứng của sự vật, sự việc phản ứng với lựa chọn của người chơi. Ghi nhớ: Đừng bịa ra người chơi làm gì thêm trong câu này. BẮT BUỘC: câu đầu tiên (hoặc các câu đầu) phải thể hiện chính hành động người chơi vừa mô tả đang/đã xảy ra — kể cả khi kịch bản có yếu tố chen ngang, phải viết rõ hành động gốc trước rồi mới đến sự chen ngang, TUYỆT ĐỐI không mở đầu summary bằng một sự việc/nhân vật không liên quan rồi mới nhắc hoặc bỏ hẳn hành động gốc.
-               - LƯU Ý KHI HÀNH ĐỘNG NGƯỜI CHƠI TỰ VIẾT SẴN THÀNH MỘT ĐOẠN TƯỜNG THUẬT DÀI (nhiều câu, nhiều diễn biến/khoảnh khắc nối tiếp nhau, không chỉ một ý định ngắn gọn): KHÔNG chép lại nguyên văn toàn bộ đoạn đó vào 'summary'. Chỉ cần mở đầu 'summary' bằng MỘT CÂU NGẮN xác nhận toàn bộ chuỗi diễn biến người chơi mô tả đã thực sự diễn ra đúng trình tự (ví dụ: "Toàn bộ chuỗi hành động người chơi mô tả diễn ra trọn vẹn đúng trình tự."), rồi dành phần còn lại của 'summary' cho KẾT QUẢ và PHẢN ỨNG của thế giới/NPC. API 2 luôn nhận được NGUYÊN VĂN hành động gốc của người chơi ở một trường riêng nên 'summary' không cần lặp lại nội dung đó — nhưng TUYỆT ĐỐI không được mâu thuẫn, thay thế hay bỏ qua bất kỳ diễn biến nào người chơi đã mô tả.
+               - LƯU Ý KHI HÀNH ĐỘNG NGƯỜI CHƠI TỰ VIẾT SẴN THÀNH MỘT ĐOẠN TƯỜNG THUẬT DÀI (nhiều câu, nhiều diễn biến/khoảnh khắc nối tiếp nhau, không chỉ một ý định ngắn gọn): KHÔNG chép lại nguyên văn toàn bộ đoạn đó vào 'summary'. Chỉ cần mở đầu 'summary' bằng ĐÚNG NGUYÊN VĂN câu tín hiệu sau, không biến tấu chữ nào: "Toàn bộ chuỗi hành động người chơi mô tả diễn ra trọn vẹn đúng trình tự." — đây là TÍN HIỆU NỘI BỘ để API 2 hiểu mọi bước đều đã xảy ra, KHÔNG phải câu văn của truyện. Sau câu tín hiệu đó, dành phần còn lại của 'summary' cho KẾT QUẢ và PHẢN ỨNG của thế giới/NPC. API 2 luôn nhận được NGUYÊN VĂN hành động gốc của người chơi ở một trường riêng nên 'summary' không cần lặp lại nội dung đó — nhưng TUYỆT ĐỐI không được mâu thuẫn, thay thế hay bỏ qua bất kỳ diễn biến nào người chơi đã mô tả.
             3. 'classification_tags': Mảng các nhãn để định hướng API 2.
                - BẮT BUỘC chọn chính xác 1 nhãn độ dài:
                  + 'dai' (Tả cảnh, thế giới, tình tiết sắc, tâm lý sâu sắc, đối thoại 2 hoặc nhiều người).
@@ -27495,6 +27504,7 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
                     ${detailedEntitiesPrompt}
 
                     --- RÀNG BUỘC MỞ ĐẦU TƯỜNG THUẬT (CỰC KỲ QUAN TRỌNG, ĐỌC KỸ) ---
+                    "KẾT QUẢ ĐÃ ĐỊNH" là CHỈ THỊ NỘI BỘ dành cho ngươi, KHÔNG phải văn bản của truyện: TUYỆT ĐỐI KHÔNG chép nguyên văn hay diễn đạt lại câu chữ của nó thành câu văn trong bài viết. Đặc biệt, nếu nó mở đầu bằng câu tín hiệu "Toàn bộ chuỗi hành động người chơi mô tả diễn ra trọn vẹn đúng trình tự." thì đó là ÁM HIỆU HỆ THỐNG báo rằng mọi bước trong hành động gốc đều đã xảy ra — ngươi phải THỂ HIỆN điều đó bằng cách kể đầy đủ từng bước thành văn, TUYỆT ĐỐI KHÔNG viết câu ám hiệu đó (hay bất kỳ biến thể nào của nó) vào truyện. Văn tường thuật cũng KHÔNG được chứa các từ ngữ máy móc ngoài-truyện như "chuỗi hành động", "đúng trình tự", "kịch bản", "người chơi", "hệ thống đã phê duyệt".
                     "KẾT QUẢ ĐÃ ĐỊNH" ở trên mô tả hành động nhân vật chính vừa thực hiện (kể cả lời thoại/tiếng hét, nếu có) NHƯ MỘT SỰ VIỆC ĐANG XẢY RA NGAY BÂY GIỜ trong lượt này — KHÔNG PHẢI chuyện đã xảy ra xong xuôi từ trước.
                     Đoạn văn MỞ ĐẦU của bài viết BẮT BUỘC phải khắc họa TRỰC TIẾP, SỐNG ĐỘNG khoảnh khắc hành động đó đang diễn ra (ví dụ: nếu có tiếng hét/lời thoại cụ thể, phải viết ra cảnh nhân vật chính thực sự cất tiếng nói/hét đúng nội dung đó bằng thẻ <dialogue speaker="...">).
                     TUYỆT ĐỐI CẤM: mở đầu bằng dư âm, hồi tưởng, hậu quả, hoặc trạng thái "đã rồi" của hành động (ví dụ cấm các kiểu mở đầu như "dư âm của... vẫn còn", "sau khi đã...", "still recovering from...") — hành động phải được TƯỜNG THUẬT NHƯ ĐANG DIỄN RA, không phải được nhắc lại như ký ức.
