@@ -10099,7 +10099,7 @@ const ActionComposer = ({ knownNpcPool, playerName, disabled, writeCtx, resetSig
 // COMPONENT 3: THAY THẾ TOÀN BỘ GAMEPLAYSCREEN
 const GameplayScreen = ({
     gameMode, goHome, gameSettings, restartGame, storyHistory, setGameSettings, setStoryHistory, isLoading, currentStory, handleActionRequest,
-    choices, handleChoice, formatStoryText, customActionInput, setCustomActionInput, composerResetSignal,
+    choices, handleChoice, formatStoryText, customActionInput, setCustomActionInput, composerResetSignal, retryableAction,
     canUndoTurn, onUndoTurn, isUndoingTurn, persistenceWarning,
     visibleBanner, onDismissBanner, hackModeEnabled, onToggleHackMode,
     onOpenApiSetup, aiSourceSummary,
@@ -10682,6 +10682,20 @@ const renderDefaultActions = () => {
                             resetSignal={composerResetSignal}
                             onSubmit={(serializedAction) => processPlayerAction(serializedAction, 'user_custom_action')}
                         />
+                    )}
+                    {/* Hiện ngay dưới khung Hành động (không phải trong modal lỗi) khi
+                        lượt vừa gửi thất bại (model quá tải/hết quota...) - bấm vào gửi
+                        lại đúng lượt đó, không cần gõ tay lại. */}
+                    {retryableAction && (
+                        <button
+                            type="button"
+                            onClick={retryableAction}
+                            disabled={isProcessingAction}
+                            style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
+                            className="mt-2 w-full bg-[#8b1515]/10 border border-[#ff4d4d]/60 hover:bg-[#ff4d4d]/20 text-[#ff4d4d] font-bold py-2.5 uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            ⟳ Gửi Lại
+                        </button>
                     )}
                     <label className="flex items-center gap-2 mt-2 text-xs text-[#8ba888] cursor-pointer select-none w-fit">
                         <input
@@ -21389,6 +21403,13 @@ const handleGenerateImpromptu = async () => {
   };
 
   const [modalMessage, setModalMessage] = useState({ show: false, title: '', content: '', type: 'info' });
+  // Nút "Gửi Lại" hiển thị NGAY DƯỚI khung Hành động (không phải trong modal
+  // lỗi) khi lượt vừa gửi thất bại (model quá tải/hết quota...) - cho phép
+  // gửi lại đúng lượt đó mà không cần gõ tay lại. Lưu function bằng closure
+  // (dùng dạng updater `() => fn` cho setState để không bị React coi `fn` là
+  // updater và gọi luôn nó với state cũ). Bị xóa mỗi khi một lượt mới bắt đầu
+  // (kể cả chính lượt "Gửi Lại"), và chỉ được set lại nếu lượt đó lại thất bại.
+  const [retryableAction, setRetryableAction] = useState(null);
   const [confirmationModal, setConfirmationModal] = useState({ show: false, title: '', content: '', onConfirm: null, onCancel: null, confirmText: 'Xác nhận', cancelText: 'Hủy'});
   const [questNotification, setQuestNotification] = useState({ show: false, quest: null });
   const [customActionInput, setCustomActionInput] = useState('');
@@ -27476,7 +27497,14 @@ const convertCharacterStatsToNarrative = (character) => {
     return `Trạng thái cơ thể: ${hpDesc}.${statusDesc}`;
 };
 
-const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowledgeToUse = knowledge, userActionForHistory = null) => {
+// `retryAction` (optional): khi khác null và lượt này thất bại, được lưu vào
+// `retryableAction` để GameplayScreen hiện nút "Gửi Lại" NGAY DƯỚI khung Hành
+// động (không phải trong modal lỗi) - cho phép gọi lại đúng lượt vừa thất bại
+// (vd. do model quá tải/hết quota) mà không bắt người chơi gõ tay lại. Chỉ nơi
+// gọi nào giữ đủ ngữ cảnh để phát lại toàn bộ lượt một cách an toàn (đi lại
+// đúng vòng đời beginSystemsTurn/settleSystemsTurnAfterCall, không chỉ gọi
+// trần callGeminiAPI) mới nên truyền tham số này vào.
+const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowledgeToUse = knowledge, userActionForHistory = null, retryAction = null) => {
     let effectiveApiKey = "";
     let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent`;
     
@@ -27546,6 +27574,7 @@ const callGeminiAPI = async (prompt, isInitialCall = false, options = {}, knowle
             // call must release the Turn Manager, or every later turn is locked out.
             abortSystemsTurn();
             setModalMessage({ show: true, title: 'Lỗi Giao Tiếp AI', content: error.message, type: 'error' });
+            if (retryAction) setRetryableAction(() => retryAction);
             if (options.isAITurn && activeCombatLoop) setTimeout(() => activeCombatLoop.nextTurn(), 1500);
             return null;
         } finally {
@@ -27941,6 +27970,7 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
         console.error('Lỗi trong quy trình 2 bước Hybrid:', error);
         abortSystemsTurn();
         setModalMessage({ show: true, title: 'Lỗi Giao Tiếp AI', content: error.message, type: 'error' });
+        if (retryAction) setRetryableAction(() => retryAction);
         return null;
     } finally {
         setIsLoading(false);
@@ -30787,6 +30817,10 @@ const processPlayerAction = async (actionText, actionType, flavorText = '') => {
     if (!trimmedAction || isProcessingAction) return;
     // gdd-03 Branch B: remember the player's own words for this turn.
     lastPlayerActionRef.current = trimmedAction;
+    // Một lượt mới bắt đầu (kể cả chính lượt được gọi lại từ nút "Gửi Lại")
+    // luôn thay thế nút "Gửi Lại" cũ - nó chỉ hiện lại nếu CHÍNH lượt này
+    // cũng thất bại (xem retryAction trong callGeminiAPI).
+    setRetryableAction(null);
     setPvpTurnTimeLeft(null);
 
     if (activeCriticalPromisesRef.current.length > 0) {
@@ -31492,7 +31526,12 @@ ${noNewEventReinforcementBlock}
         // `finally` so no early return or throw can strand the Turn Manager.
         beginSystemsTurn(trimmedAction);
         try {
-            await callGeminiAPI(promptToSendToAI, false, {}, knowledge, trimmedAction);
+            // retryAction gọi lại chính processPlayerAction (không phải
+            // callGeminiAPI trần) để một cú "Gửi Lại" luôn đi lại đúng
+            // beginSystemsTurn/settleSystemsTurnAfterCall thay vì mở một call
+            // AI mồ côi ngoài vòng đời Turn Manager.
+            await callGeminiAPI(promptToSendToAI, false, {}, knowledge, trimmedAction,
+                () => processPlayerAction(actionText, actionType, flavorText));
         } finally {
             settleSystemsTurnAfterCall();
         }
@@ -37336,6 +37375,7 @@ const formatStoryText = useCallback((text) => {
                                 setCustomActionInput={setCustomActionInput}
                                 handleCustomAction={handleCustomAction}
                                 composerResetSignal={composerResetSignal}
+                                retryableAction={retryableAction}
                                 setShowCharacterInfoModal={setShowCharacterInfoModal}
                                 isProcessingAction={isProcessingAction}
                                 setIsProcessingAction={setIsProcessingAction}
