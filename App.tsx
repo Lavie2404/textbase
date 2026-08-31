@@ -2585,7 +2585,7 @@ const DialogueBubble = ({ speaker, content, playerName, characters, gameSettings
 };
 
 
-const StoryItem = React.memo(({ item, formatStoryText, playerName, onDelete, characters, gameSettings }) => {
+const StoryItem = React.memo(({ item, formatStoryText, playerName, onDelete, characters, gameSettings, retryableAction }) => {
     // Component bọc ngoài để xử lý hiệu ứng hover và hiển thị nút Xóa
     const Wrapper = ({ children, isSystemOrAction }) => (
         <div className={`relative group mb-5 ${isSystemOrAction ? '' : 'story-item'}`}>
@@ -2703,6 +2703,19 @@ const StoryItem = React.memo(({ item, formatStoryText, playerName, onDelete, cha
                     <div className="prose prose-invert max-w-none text-current whitespace-pre-line leading-relaxed font-medium scale-text-base">
                         {cleanedContent}
                     </div>
+                    {/* Chỉ truyền retryableAction cho ĐÚNG khung "Hành động:"/"Đã chọn:"
+                        của lượt vừa thất bại (nơi gọi ở GameplayScreen chỉ gắn nó vào
+                        item cuối cùng trong lịch sử) - cho phép gửi lại chính xác lượt
+                        đó ngay tại đây, không cần gõ tay lại. */}
+                    {(item.type === 'user_choice' || item.type === 'user_custom_action') && retryableAction && (
+                        <button
+                            type="button"
+                            onClick={retryableAction}
+                            className="mt-3 w-full bg-[#8b1515]/10 border border-[#ff4d4d]/60 hover:bg-[#ff4d4d]/20 text-[#ff4d4d] font-bold py-2 uppercase tracking-widest text-xs transition-colors"
+                        >
+                            ⟳ Gửi Lại
+                        </button>
+                    )}
                 </div>
             </Wrapper>
         );
@@ -10683,20 +10696,6 @@ const renderDefaultActions = () => {
                             onSubmit={(serializedAction) => processPlayerAction(serializedAction, 'user_custom_action')}
                         />
                     )}
-                    {/* Hiện ngay dưới khung Hành động (không phải trong modal lỗi) khi
-                        lượt vừa gửi thất bại (model quá tải/hết quota...) - bấm vào gửi
-                        lại đúng lượt đó, không cần gõ tay lại. */}
-                    {retryableAction && (
-                        <button
-                            type="button"
-                            onClick={retryableAction}
-                            disabled={isProcessingAction}
-                            style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}
-                            className="mt-2 w-full bg-[#8b1515]/10 border border-[#ff4d4d]/60 hover:bg-[#ff4d4d]/20 text-[#ff4d4d] font-bold py-2.5 uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                            ⟳ Gửi Lại
-                        </button>
-                    )}
                     <label className="flex items-center gap-2 mt-2 text-xs text-[#8ba888] cursor-pointer select-none w-fit">
                         <input
                            type="checkbox"
@@ -10893,15 +10892,19 @@ const renderDefaultActions = () => {
                                     {storyHistory
                                         .filter(item => !item.transient || item.id === 'consolidated_placeholder')
                                         .slice(-visibleStoryCount)
-                                        .map((item, index) => (
-                                            <StoryItem 
-                                                key={item.id || index} 
-                                                item={item} 
-                                                formatStoryText={formatStoryText} 
+                                        .map((item, index, arr) => (
+                                            <StoryItem
+                                                key={item.id || index}
+                                                item={item}
+                                                formatStoryText={formatStoryText}
                                                 playerName={gameSettings.characterName}
-                                                onDelete={handleDeleteStoryItem} 
+                                                onDelete={handleDeleteStoryItem}
                                                 characters={knowledge.characters}
                                                 gameSettings={gameSettings}
+                                                // "Gửi Lại" chỉ có ý nghĩa gắn vào đúng khung "Hành động:"
+                                                // của LƯỢT vừa thất bại - luôn là mục cuối cùng trong lịch
+                                                // sử (chưa có mục 'story' nào của AI nối tiếp sau nó).
+                                                retryableAction={index === arr.length - 1 ? retryableAction : null}
                                             />
                                         ))
                                     }
