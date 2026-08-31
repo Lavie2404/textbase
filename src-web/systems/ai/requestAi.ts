@@ -121,10 +121,20 @@ export interface AiLogEntry {
 }
 
 export interface AiEvent {
-  type: 'retrying_network' | 'model_switch' | 'request_start' | 'key_switch';
+  type: 'retrying_network' | 'model_switch' | 'request_start' | 'key_switch' | 'attempt_end';
   model: string;
   elapsed_ms: number;
   error_class?: ErrorClass;
+  /**
+   * `attempt_end` only: how the single HTTP attempt ended — the HTTP status
+   * code, or `'aborted'` (per-request deadline hit) / `'network_error'`.
+   * Added 2026-08-31 so a console can show per-model latency and outcome
+   * ("which model is overloaded, which one answered") instead of only the
+   * logical call's final verdict.
+   */
+  attempt_outcome?: number | 'aborted' | 'network_error';
+  /** `attempt_end` only: duration of this single HTTP attempt in ms. */
+  attempt_ms?: number;
   /** `key_switch` only: pool index of the key the call is switching TO. */
   key_index?: number;
   /**
@@ -616,7 +626,16 @@ export async function requestAi(req: AiRequest, deps: AiDeps): Promise<AiResult>
         // game (App.tsx today has no timeout at all).
         const perRequestSec = Math.min(budget.request_timeout_default, t_rem);
         emit({ type: 'request_start', model, elapsed_ms: deps.clock() - t_start });
+        const t_attempt = deps.clock();
         const outcome = await httpAttempt(deps, cfg, model, body, key, perRequestSec, timer);
+        emit({
+          type: 'attempt_end',
+          model,
+          elapsed_ms: deps.clock() - t_start,
+          attempt_ms: deps.clock() - t_attempt,
+          attempt_outcome: outcome.kind === 'response' ? (outcome.status ?? 0) : outcome.kind,
+          detail: outcome.detail,
+        });
         if (outcome.detail) lastDetail = outcome.detail;
         lastWasEmptyText = false;
 

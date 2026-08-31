@@ -5744,7 +5744,7 @@ const ApiSetupModal = ({
             <legend className="text-lg font-semibold text-amber-300 px-2">Model AI Ưu Tiên</legend>
             <p className="text-xs text-gray-400 mb-3">
                 Model được chọn sẽ được thử <b>đầu tiên</b>. Nếu nó báo quá tải (lỗi 503), hệ thống vẫn tự chuyển sang các model còn lại.
-                Khi <i>gemini-3-flash-preview</i> sập, hãy chọn <i>gemini-2.5-flash</i> để chơi tiếp ngay.
+                Khi <i>gemini-3-flash-preview</i> sập, hãy chọn <i>gemini-3.6-flash</i> để chơi tiếp ngay.
             </p>
             <select
                 value={preferredIsCustom ? '__custom__' : preferredTextModel}
@@ -18954,7 +18954,10 @@ const createAndFinalizeOfferedItem = async (itemIdea, trader, player, gameSettin
 // Danh sách model text dự phòng, thử lần lượt khi model đang gọi hết quota/không khả dụng.
 // Chỉ gồm các model "Text-out" tương thích generateContent - không gồm bản TTS/Live (khác API)
 // hay bản Pro (tài khoản free thường không có quota cho Pro).
-const GEMINI_TEXT_MODEL_FALLBACKS = ['gemini-3-flash-preview', 'gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+// Tail updated 2026-08-31: Google retired the two 2.5 models (404); these are
+// the replacements Google's own error message names. Must stay in sync with
+// GEMINI_TEXT_MODEL_FALLBACKS in src-web/systems/ai/config.ts.
+const GEMINI_TEXT_MODEL_FALLBACKS = ['gemini-3-flash-preview', 'gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.6-flash', 'gemini-3.5-flash-lite'];
 
 // "Cầu dao" 503: model nào vừa quá tải dai dẳng sẽ bị tạm bỏ qua trong khoảng thời gian cooldown,
 // để các lần gọi tiếp theo trong phiên đi thẳng tới model dự phòng đang khỏe thay vì đốt thời gian
@@ -19094,6 +19097,29 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
                 credentials,
                 onEvent: (event) => {
                     if (event.type === 'retrying_network' && onRetry) onRetry(1, maxRetries);
+                    // Per-attempt console trace (2026-08-31, user request): which model
+                    // was called, how long it took, how it answered — so "đang rơi vào
+                    // fallback?" and "model nào quá tải?" are readable live from the
+                    // console instead of inferred from the final verdict alone.
+                    if (event.type === 'request_start') {
+                        console.log(`[Gemini][${callSite}] → gọi ${event.model} (t+${(event.elapsed_ms / 1000).toFixed(1)}s)`);
+                    }
+                    if (event.type === 'attempt_end') {
+                        const secs = ((event.attempt_ms || 0) / 1000).toFixed(1);
+                        let verdict;
+                        if (event.attempt_outcome === 200) verdict = 'HTTP 200 — trả lời OK';
+                        else if (event.attempt_outcome === 503) verdict = 'HTTP 503 — QUÁ TẢI (model nghỉ 90s, chuyển model kế tiếp)';
+                        else if (event.attempt_outcome === 429) verdict = 'HTTP 429 — HẾT QUOTA key hiện tại';
+                        else if (event.attempt_outcome === 'aborted') verdict = 'TREO — quá hạn chờ nên bị hủy';
+                        else if (event.attempt_outcome === 'network_error') verdict = 'LỖI MẠNG';
+                        else verdict = `HTTP ${event.attempt_outcome}`;
+                        const line = `[Gemini][${callSite}] ← ${event.model}: ${verdict} sau ${secs}s`;
+                        if (event.attempt_outcome === 200) console.log(line);
+                        else console.warn(line + (event.detail ? ` — ${String(event.detail).slice(0, 150)}` : ''));
+                    }
+                    if (event.type === 'model_switch') {
+                        console.warn(`[Gemini][${callSite}] model ${event.model} không khả dụng với key này (403/404) — bỏ qua, chuyển model kế tiếp.`);
+                    }
                     if (event.type === 'key_switch') {
                         // Diagnostic (2026-08-28): Google's own error message for the key just
                         // dropped, previously discarded on a successful rollover. Without this,
@@ -19110,7 +19136,22 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
         // Diagnostic (2026-08-28): one line per LOGICAL AI call (not per HTTP attempt),
         // with a running session total, so "1 lượt tốn mấy lệnh gọi?" is answerable by
         // reading the console during play instead of guessed at from code.
-        console.log(`[Gemini] Lệnh gọi #${aiSessionState.log.length} — loại=${callSite} nền=${background ? 'có' : 'không'} kết quả=${result.ok ? `OK (model=${result.model}, attempts=${result.attempts})` : `${result.label} (attempts=${result.attempts})`}`);
+        console.log(`[Gemini] Lệnh gọi #${aiSessionState.log.length} — loại=${callSite} nền=${background ? 'có' : 'không'} kết quả=${result.ok ? `OK (model=${result.model}, attempts=${result.attempts})` : `${result.label} (attempts=${result.attempts})`} mất ${(result.elapsed_ms / 1000).toFixed(1)}s`);
+
+        // Ladder health snapshot (2026-08-31, user request): printed whenever it
+        // carries information — a failed call, or at least one model cooling down —
+        // so the console answers "model nào đang quá tải, model nào còn khỏe".
+        {
+            const nowSec = Date.now() / 1000;
+            const anyCooling = config.model_ladder.some(m => (aiSessionState.cooldown_until[m] || 0) > nowSec);
+            if (!result.ok || anyCooling) {
+                const statusLine = config.model_ladder.map(m => {
+                    const left = Math.ceil((aiSessionState.cooldown_until[m] || 0) - nowSec);
+                    return left > 0 ? `${m}: NGHỈ ${left}s (vừa quá tải/treo)` : `${m}: sẵn sàng`;
+                }).join(' | ');
+                console.log(`[Gemini] Thang model: ${statusLine}`);
+            }
+        }
 
         if (result.ok) return result.text;
 
@@ -27061,9 +27102,11 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
                 response_schema: logicSchema,
                 // API-1 is schema-constrained bookkeeping, not prose; letting the
                 // model "think" first was measured (2026-08-31) to push a logic
-                // call past the 120s per-request abort. thinkingBudget: 0 was
-                // probed OK (HTTP 200) on every live model of the ladder.
-                thinkingConfig: { thinkingBudget: 0 }
+                // call past the 120s per-request abort. `thinkingLevel` (NOT the
+                // older `thinkingBudget: 0`, which the 3.6/3.5-lite rungs reject
+                // with HTTP 400) probed OK on ALL FIVE ladder models — and a 400
+                // is a hard config_error that never falls back down the ladder.
+                thinkingConfig: { thinkingLevel: 'minimal' }
             }
         };
 

@@ -210,7 +210,9 @@ describe('A3 - in_flight is released on every path', () => {
     });
     const r = await requestAi(narration, h.deps);
     expect(r).toMatchObject({ ok: true });
-    expect(seen).toHaveLength(1);
+    // One successful attempt = request_start + attempt_end (2026-08-31), and the
+    // throw inside the handler swallowed BOTH times without wedging the call.
+    expect(seen.map((e) => e.type)).toEqual(['request_start', 'attempt_end']);
     expect(h.deps.session.in_flight).toBe(false);
   });
 

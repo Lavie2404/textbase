@@ -85,6 +85,45 @@ describe('happy path', () => {
   });
 });
 
+describe('attempt_end diagnostics event (2026-08-31)', () => {
+  it('test_every_http_attempt_emits_attempt_end_with_status_and_duration', async () => {
+    // Arrange: A answers 503 after 700ms, B answers 200 after 800ms.
+    const h = makeHarness(
+      (_u, _i, i) =>
+        i === 0 ? { status: 503, delayMs: 700 } : { status: 200, body: okBody('ok'), delayMs: 800 },
+      LADDER,
+    );
+    const events: { type: string; model: string; attempt_outcome?: unknown; attempt_ms?: number }[] = [];
+    h.deps.onEvent = (e) => events.push(e);
+
+    // Act
+    await requestAi(narration, h.deps);
+
+    // Assert: one attempt_end per HTTP attempt, carrying outcome + latency.
+    const ends = events.filter((e) => e.type === 'attempt_end');
+    expect(ends).toHaveLength(2);
+    expect(ends[0]).toMatchObject({ model: 'A', attempt_outcome: 503, attempt_ms: 700 });
+    expect(ends[1]).toMatchObject({ model: 'B', attempt_outcome: 200, attempt_ms: 800 });
+  });
+
+  it('test_a_transport_failure_reports_network_error_as_the_attempt_outcome', async () => {
+    const h = makeHarness(
+      (_u, _i, i) =>
+        i === 0
+          ? { status: 0, throwError: 'connection reset', delayMs: 100 }
+          : { status: 200, body: okBody('ok') },
+      LADDER,
+    );
+    const events: { type: string; attempt_outcome?: unknown }[] = [];
+    h.deps.onEvent = (e) => events.push(e);
+
+    await requestAi(narration, h.deps);
+
+    const ends = events.filter((e) => e.type === 'attempt_end');
+    expect(ends[0]).toMatchObject({ attempt_outcome: 'network_error' });
+  });
+});
+
 describe('error classification (R5)', () => {
   it('test_503_marks_a_cooldown_and_falls_through_to_the_next_model_AC07', async () => {
     const h = makeHarness(

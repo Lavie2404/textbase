@@ -126,6 +126,15 @@ M = ["gemini-3-flash-preview", "gemini-3.5-flash", "gemini-3.1-flash-lite",
      "gemini-2.5-flash", "gemini-2.5-flash-lite"]
 ```
 
+> **Amendment 2026-08-31**: Google retired the last two rungs (`gemini-2.5-flash`,
+> `gemini-2.5-flash-lite` now return HTTP 404 "no longer available to new users").
+> The shipped ladder (`src-web/systems/ai/config.ts` `GEMINI_TEXT_MODEL_FALLBACKS`)
+> replaces them with `gemini-3.6-flash` and `gemini-3.5-flash-lite` — the models
+> Google's own 404 message names — both live-probed 200 with the game's
+> JSON-schema + `thinkingConfig.thinkingLevel` request shape. Note the new rungs
+> reject the legacy `thinkingConfig.thinkingBudget` field (HTTP 400), so any call
+> that tunes thinking must use `thinkingLevel`.
+
 This is project **config data**, not a hardcoded literal in gameplay code (Core Rule #4,
 `coding-standards.md` data-driven requirement) — it lives in the tuning resource described
 under Key Interfaces below, so it can be edited without a code change if Google

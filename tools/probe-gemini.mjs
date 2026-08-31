@@ -28,8 +28,8 @@ const LADDER = [
   'gemini-3-flash-preview',
   'gemini-3.5-flash',
   'gemini-3.1-flash-lite',
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-lite',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash-lite',
 ];
 const BASE = 'https://generativelanguage.googleapis.com/v1beta';
 const PER_REQUEST_TIMEOUT_MS = 30_000;

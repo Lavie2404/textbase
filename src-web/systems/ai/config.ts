@@ -21,13 +21,18 @@
 
 import { AI_KNOBS } from '../registry';
 
-/** Verbatim from `App.tsx:17944` (`GEMINI_TEXT_MODEL_FALLBACKS`), order preserved. */
+/**
+ * Order preserved from the shipped `App.tsx` ladder. Tail updated 2026-08-31:
+ * Google retired `gemini-2.5-flash` / `gemini-2.5-flash-lite` (HTTP 404 "no
+ * longer available to new users"), naming these two as the replacements; both
+ * probed 200 with the game's JSON-schema + thinkingLevel request shape.
+ */
 export const GEMINI_TEXT_MODEL_FALLBACKS: readonly string[] = [
   'gemini-3-flash-preview',
   'gemini-3.5-flash',
   'gemini-3.1-flash-lite',
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-lite',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash-lite',
 ];
 
 /** The single allowlisted AI endpoint host (P7 CI check AC-01). */
