@@ -1,8 +1,8 @@
 {
   "id": "a0f9cc1a-0258-425b-be01-ca06583ced77",
-  "currentTurn": 29,
+  "currentTurn": 30,
   "saveVersion": "2.8",
-  "timestamp": "2026-09-01T16:35:54.369Z",
+  "timestamp": "2026-09-01T16:42:49.080Z",
   "gameSettings": {
     "storyTitle": "Tam quốc chí",
     "theme": "Dã sử, Huyền Huyễn, Tu Tiên, Quân sự, Cổ đại",
@@ -107,7 +107,7 @@
       "year": 1,
       "month": 2,
       "day": 29,
-      "hour": 7
+      "hour": 19
     },
     "weather": "Nắng ban mai",
     "narrativeCombatState": {
@@ -157,6 +157,13 @@
       {
         "id": "fd18294d-0a8b-426c-b401-499c42502ddf",
         "Name": "Hạ Hầu phủ",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      },
+      {
+        "id": "3c4885aa-b377-4a46-93c2-d5cf62dd6ff0",
+        "Name": "Binh Trại Trác Quận",
         "description": "Một địa điểm vừa được khám phá.",
         "category": "Khu Vực",
         "tier": 3
@@ -229,7 +236,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 32.40000000000003,
+        "exp": 32.50000000000003,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": 0,
@@ -239,7 +246,7 @@
           "def": 0,
           "spd": 0
         },
-        "current_location_id": "fd18294d-0a8b-426c-b401-499c42502ddf",
+        "current_location_id": "3c4885aa-b377-4a46-93c2-d5cf62dd6ff0",
         "baseHp": 2000,
         "baseAtk": 200,
         "baseDef": 100,
@@ -562,7 +569,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Cốt",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "2f2416de-d7cf-4273-8e4c-40b4b175b425",
@@ -638,7 +646,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Cốt",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "npc_ha_hau_kiet",
@@ -722,7 +731,8 @@
         "Backstory": "Xuất thân từ thế gia Hạ Hầu lừng lẫy, Hạ Hầu Kiệt dùng thế lực dòng họ để giữ chức Thái thú Chân Định. Ông luôn coi trọng vị thế gia tộc và muốn mượn hôn nhân của con gái Hạ Hầu Khinh Y để kết giao với các thế lực lớn hơn. Trước sự trỗi dậy ngầm của Thái Bình Đạo, ông vô cùng chủ quan và coi đó chỉ là lũ dân ngu bạo loạn.",
         "Personality": "Kiêu ngạo, coi trọng gia thế, thực dụng, coi thường kẻ nghèo hèn.",
         "Stance": "Lạnh nhạt khinh khỉnh, coi nhân vật chính là kẻ vô danh tiểu tào không đáng để mắt tới.",
-        "isAppraised": true
+        "isAppraised": true,
+        "skills": []
       },
       {
         "id": "e170e78c-e6b4-43ed-87f4-1e2bf86dcfec",
@@ -798,7 +808,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Cốt",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "4f98e7bc-d0f0-4084-9c7f-6e369faa76ef",
@@ -879,7 +890,8 @@
         "Appearance": "Tóc đen dài búi nửa đầu bằng trâm ngọc, vóc dáng cao ráo thon thả khoác bạch y thêu viền kim tuyến. Ánh mắt thanh linh sắc sảo, hông đeo thanh kiếm Khinh Thủy toát ra tiên khí ôn hòa nhưng nguy hiểm.",
         "Backstory": "Là ái nữ của danh tộc Hạ Hầu gia, từ nhỏ đã được định sẵn con đường đại tộc nhưng lại đam mê kiếm đạo và tiên thuật. Một năm trước khi thiên hạ đại loạn, nàng cải trang trốn khỏi phủ để ngao du sơn thủy, tìm kiếm duyên khởi duyên diệt.",
         "Personality": "Kiêu hãnh, trượng nghĩa, thông tuệ nhưng đôi lúc mang tính cách tiểu thư có phần ngang bạnh.",
-        "isAppraised": true
+        "isAppraised": true,
+        "skills": []
       },
       {
         "id": "23021bfa-edcd-4a40-b02b-5c787f244efe",
@@ -960,7 +972,8 @@
         "Appearance": "Một lão giả râu tóc bạc phơ nhưng tiên phong đạo cốt, đôi mắt sắc bén như chim ưng có thể nhìn thấu tâm can người đối diện. Dù bận bộ áo vải thô màu xám đơn sơ, vóc dáng ông vẫn thẳng tắp như ngọn thương đâm xuyên mây xanh, phía sau lưng quấn một cuộn vải dài giấu đi thần binh.",
         "Backstory": "Nổi danh khắp Trung Nguyên với tuyệt kỹ Bách Điểu Triều Phượng Thương, Đồng Uyên từng là đỉnh cao mà mọi võ giả đều muốn vượt qua. Sau khi đào tạo nên những đệ tử lừng lẫy, ông lui về ẩn dật. Nhận thấy sát khí thiên hạ đang trỗi dậy trước thềm đại loạn Hoàng Cân, ông xuất sơn để quan sát nhân gian và tìm kiếm truyền nhân cuối cùng.",
         "Personality": "Trầm tĩnh, nghiêm khắc, trọng nghĩa khí, có cái nhìn thấu đáo và luôn xem trọng căn cơ, nhân phẩm hơn là thiên tài bộc phát.",
-        "isAppraised": true
+        "isAppraised": true,
+        "skills": []
       },
       {
         "id": "npc_trieu_van",
@@ -1046,14 +1059,15 @@
         "Personality": "Trọng nghĩa khinh tài, trung hậu, điềm tĩnh, vô cùng dũng cảm và kiên định.",
         "Stance": "Yêu thương, tin tưởng và luôn sẵn sàng xả thân che chở cho người em của mình.",
         "isAppraised": true,
-        "affinityDirection": "đang ấm lên"
+        "affinityDirection": "đang ấm lên",
+        "skills": []
       },
       {
         "id": "npc_trieu_vu",
         "isPlayer": false,
         "loreId": null,
         "level": 30,
-        "exp": 273.672,
+        "exp": 326.91,
         "progressionState": "Tu Luyện Thường",
         "ap": 0,
         "currency": 0,
@@ -1218,7 +1232,7 @@
           "turn": 17
         }
       ],
-      "lastExpResolvedTurn": 26
+      "lastExpResolvedTurn": 29
     },
     "loreQuests": [],
     "systemAssistant": {
@@ -1238,8 +1252,8 @@
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 26,
-      "world_time": 26,
+      "turn_id": 29,
+      "world_time": 29,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -1254,138 +1268,6 @@
       }
     },
     "stateHistory": [
-      {
-        "time": {
-          "year": 1,
-          "month": 2,
-          "day": 28,
-          "hour": 7
-        },
-        "location_id": "fd18294d-0a8b-426c-b401-499c42502ddf",
-        "weather": "Nắng ban mai",
-        "characters": [
-          {
-            "id": "player",
-            "Name": "Diệp Thần",
-            "level": 1,
-            "exp": 32.200000000000024,
-            "hp": 2000,
-            "maxhp": 2000,
-            "currency": 0,
-            "inventory": [
-              {
-                "Name": "Thương Sắt Tinh Thiết",
-                "quantity": 1
-              },
-              {
-                "Name": "Bách Điểu Triều Phượng Thương",
-                "quantity": 1
-              }
-            ],
-            "longTermStatuses": []
-          },
-          {
-            "id": "npc_phuong_nhi",
-            "Name": "Phương Nhi",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "3f81fa92-6f49-424a-b033-0bc0b59c4f02",
-            "Name": "Đường Lão",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "2f2416de-d7cf-4273-8e4c-40b4b175b425",
-            "Name": "Tướng thổ phỉ",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "npc_ha_hau_kiet",
-            "Name": "Hạ Hầu Kiệt",
-            "level": 32,
-            "exp": 0,
-            "hp": 24220,
-            "maxhp": 24220,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "e170e78c-e6b4-43ed-87f4-1e2bf86dcfec",
-            "Name": "Quản gia",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "4f98e7bc-d0f0-4084-9c7f-6e369faa76ef",
-            "Name": "Hạ Hầu Khinh Y",
-            "level": 18,
-            "exp": 0,
-            "hp": 7140,
-            "maxhp": 7140,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "23021bfa-edcd-4a40-b02b-5c787f244efe",
-            "Name": "Đồng Uyên",
-            "level": 95,
-            "exp": 0,
-            "hp": 109480,
-            "maxhp": 109480,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "npc_trieu_van",
-            "Name": "Triệu Vân",
-            "level": 25,
-            "exp": 0,
-            "hp": 16880,
-            "maxhp": 16880,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "npc_trieu_vu",
-            "Name": "Triệu Vũ",
-            "level": 30,
-            "exp": 167.196,
-            "hp": 18380,
-            "maxhp": 18380,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          }
-        ],
-        "quests": []
-      },
       {
         "time": {
           "year": 1,
@@ -1509,6 +1391,134 @@
             "Name": "Triệu Vũ",
             "level": 30,
             "exp": 220.434,
+            "hp": 18380,
+            "maxhp": 18380,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          }
+        ],
+        "quests": []
+      },
+      {
+        "time": {
+          "year": 1,
+          "month": 2,
+          "day": 29,
+          "hour": 7
+        },
+        "location_id": "fd18294d-0a8b-426c-b401-499c42502ddf",
+        "weather": "Nắng ban mai",
+        "characters": [
+          {
+            "id": "player",
+            "Name": "Diệp Thần",
+            "level": 1,
+            "exp": 32.40000000000003,
+            "hp": 2000,
+            "maxhp": 2000,
+            "currency": 0,
+            "inventory": [
+              {
+                "Name": "Bách Điểu Triều Phượng Thương",
+                "quantity": 1
+              }
+            ],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_phuong_nhi",
+            "Name": "Phương Nhi",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "3f81fa92-6f49-424a-b033-0bc0b59c4f02",
+            "Name": "Đường Lão",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "2f2416de-d7cf-4273-8e4c-40b4b175b425",
+            "Name": "Tướng thổ phỉ",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_ha_hau_kiet",
+            "Name": "Hạ Hầu Kiệt",
+            "level": 32,
+            "exp": 0,
+            "hp": 24220,
+            "maxhp": 24220,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "e170e78c-e6b4-43ed-87f4-1e2bf86dcfec",
+            "Name": "Quản gia",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "4f98e7bc-d0f0-4084-9c7f-6e369faa76ef",
+            "Name": "Hạ Hầu Khinh Y",
+            "level": 18,
+            "exp": 0,
+            "hp": 7140,
+            "maxhp": 7140,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "23021bfa-edcd-4a40-b02b-5c787f244efe",
+            "Name": "Đồng Uyên",
+            "level": 95,
+            "exp": 0,
+            "hp": 109480,
+            "maxhp": 109480,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_trieu_van",
+            "Name": "Triệu Vân",
+            "level": 25,
+            "exp": 0,
+            "hp": 16880,
+            "maxhp": 16880,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_trieu_vu",
+            "Name": "Triệu Vũ",
+            "level": 30,
+            "exp": 273.672,
             "hp": 18380,
             "maxhp": 18380,
             "currency": 0,
@@ -4035,9 +4045,92 @@
       "type": "system",
       "content": "**[Hệ thống]** Vì mang vác quá nặng, ngươi đã vô tình đánh rơi Thương Sắt Tinh Thiết!",
       "transient": true
+    },
+    {
+      "id": "e3ce57b1-dad1-434b-9d8d-d735aefb44d0",
+      "type": "user_custom_action",
+      "content": "[Đoạn 1 - Tường thuật]: \"Ngươi trầm tư suy nghĩ rồi nói\"\n[Đoạn 2 - Lời Diệp Thần]: \"Thiên quân dễ kiếm, hổ tướng khó cầu. Chiêu binh không khó. Cái khó là chiêu tướng tài. Nay Hoàng Cân khởi nghĩa thiên hạ đại loạn. Chư hầu khắp nơi đều sẽ tiến tới thảo phạt. Chúng ta cũng không thể kém cạnh. Sư phụ người không muốn dấn thân vào khói lửa đệ tử mạo muội xin sư phụ ẩn cư tại Hạ Hầu phủ bảo vệ thành phủ. Tứ đệ đã học chân truyền của sư phụ không biết có bằng lòng theo sư huynh chinh chiến bát phương lập nên thiên thu đại nghiệp?\"\n[Đoạn 3 - Tường thuật]: \"Đồng Uyên vuốt vuốt râu gật đầu. Triệu Vân đứng ra hành lễ\"\n[Đoạn 4 - Lời Triệu Vân]: \"Triệu Vân thề chết phò tá sư huynh\"\n[Đoạn 5 - Tường thuật]: \"Ngươi đỡ lấy Triệu Vân liên tục nói\"\n[Đoạn 6 - Lời Diệp Thần]: \"Tốt. Tốt. Tốt. Dựa theo phân chia thực lực chiến lực đỉnh tiêm của chúng ta chỉ có ta và đệ. Nhạc phụ người vẫn cần chủ trì Chân Định. Không thể tất cả cùng đi được. Như vậy rất dễ bị kẻ gian thừa cơ tấn công căn cơ của ta. Quân sư hiện tại đã có Phương Nhi rồi. Đừng nhìn muội ấy tuổi nhỏ. Bản lĩnh của muội ấy không nhỏ đâu. Tuy nhiên nhân tài của chúng ta vẫn còn thiếu nhiều lắm. Trước tiên, cứ chiêu mộ 1 vạn binh lính xuất phát từ Chân Định đánh Hoàng Cân ở Trác Quận. Khi danh tiếng chúng ta tăng cao tự nhiên sẽ có kỳ nhân tới bái phỏng\"\n[Đoạn 7 - Tường thuật]: \"Mọi người trong sảnh gật đầu khen phải. Ngươi truyền lệnh xuống\"\n[Đoạn 8 - Lời Diệp Thần]: \"Người đâu, truyền lệnh của ta. Phụng thiên thảo phạt Hoàng Cân, Diệp Thần ta chiêu mộ 1 vạn trai tráng khỏe mạnh thành lập Bạch Hổ binh. Giết giặc khăn vàng kiến công lập nghiệp. Lệnh Phương Nhi làm Giám quân, Tử Long làm Tiên phong dẫn 3000 khinh kỵ binh. Ta dẫn 2000 bộ binh, 2000 cung binh trung quân và tả hữu 3000 trọng kỵ binh. Ngày mai xuất phát đến Trác Quận kiến công lập nghiệp\"\n[Đoạn 9 - Tường thuật]: \"Triệu Vũ thấy Phương Nhi được theo quân mà mình phải ở nhà bèn hờn dỗi yêu cầu ngươi dẫn theo. Ngươi bất đắc dĩ phong nàng làm Thân vệ của Phương Nhi. Bảo đảm an toàn cho nàng. Triệu Vũ vui mừng hò reo. Chỉ có Khinh Y võ lực không đủ phải ở nhà. Triệu Vũ và Phương Nhi biết ý nên nhường cả đêm cho Khinh Y. 2 nàng ngủ ở phòng khác, còn ngươi và Khinh Y ngủ chung. Ngươi chiến đấu suốt đêm với Khinh Y để an ủi nàng. Khinh Y cũng vô cùng phối hợp làm đủ mọi tư thế với ngươi cả đêm. Từ dùng miệng lau cây thương thịt cho ngươi đến hôn nồng cháy gần 1 canh giờ đến khi lưỡi mởi nhừ. Ngươi cũng mút mát đôi nhũ hoa của nàng đến đỏ bừng căng cứng. Sau đó lại dùng lưỡi khám phá hang động hồng hào không cọng lông. Nước trong hang chảy suốt mấy canh giờ không dừng. Cây thương thịt cũng rút ra cắm vào liên tục cả đêm, dâm thủy chảy ướt sũng tấm đệm như vừa dính nước mưa. Tinh dịch nóng hổi trào ra liên tục nhiều lần suốt đêm. Khi Khinh Y đã thấm mệt vì ra liên tục, nàng vẫn như cũ nằm sấp lên người ngươi để cây thương cắm vào hang. Lần này ngươi lại không ngủ mà cả đêm thúc thương vào hang. Khinh Y mệt lử thiếp đi ngươi vẫn hăng say công tác. Tinh dịch phun liên tục mỗi cú nhấp. Đến sáng, Khinh Y mỏi nhừ cả người cố gắng để cả 2 lên đỉnh 1 lần nữa trước khi ngươi đi. Nàng vừa nhún hông vừa hôn ngươi nồng cháy. Sau đó ngươi đè nàng nằm ngửa xuống dập liên tục tần suất cao rồi cả 2 lên đỉnh ngươi mới từ từ rút cây thương ra mặc quần áo. Sau đó hôn Khinh Y 1 cái thật sâu nữa rồi mới ra khỏi phòng\""
+    },
+    {
+      "id": "99c2b19f-a53d-41db-9995-c7946a81e2b3",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ngươi trầm tư suy nghĩ rồi khẽ đứng dậy giữa sảnh chính rộng lớn của *Hạ Hầu phủ*. Ánh ban mai vàng nhạt xuyên qua những ô cửa lụa mỏng, rọi lên bộ bạch y tinh khiết và tôn lên vóc dáng thẳng tắp như ngọn thương đâm trời của ngươi. Nhìn thẳng vào đại danh *Thương Tôn* *Đồng Uyên* đang trầm mặc và *Triệu Vân* hiên ngang đứng bên cạnh, ngươi cất giọng trầm hùng đầy khí phách:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Thiên quân dễ kiếm, hổ tướng khó cầu. Chiêu binh không khó. Cái khó là chiêu tướng tài. Nay Hoàng Cân khởi nghĩa thiên hạ đại loạn. Chư hầu khắp nơi đều sẽ tiến tới thảo phạt. Chúng ta cũng không thể kém cạnh. Sư phụ người không muốn dấn thân vào khói lửa, đệ tử mạo muội xin sư phụ ẩn cư tại Hạ Hầu phủ bảo vệ thành phủ. Tứ đệ đã học chân truyền của sư phụ, không biết có bằng lòng theo sư huynh chinh chiến bát phương, lập nên thiên thu đại nghiệp?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Đồng Uyên* khẽ vuốt chòm râu xám dài, khẽ gật đầu tỏ vẻ đồng ý với sự sắp xếp thấu đáo này. Đứng bên cạnh, *Triệu Vân* lập tức bước ra giữa sảnh, hai tay ôm quyền hành lễ dứt khoát, ánh mắt rực lửa trung nghĩa:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Triệu Vân thề chết phò tá sư huynh!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi bước tới, vươn hai tay đỡ lấy bả vai săn chắc của *Triệu Vân*, trong lòng dâng lên hào khí vạn trượng, liên tục nói:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tốt! Tốt! Tốt! Dựa theo phân chia thực lực, chiến lực đỉnh tiêm của chúng ta chỉ có ta và đệ. Nhạc phụ người vẫn cần chủ trì Chân Định, không thể tất cả cùng đi được. Như vậy rất dễ bị kẻ gian thừa cơ tấn công căn cơ của ta. Quân sư hiện tại đã có Phương Nhi rồi. Đừng nhìn muội ấy tuổi nhỏ, bản lĩnh của muội ấy không nhỏ đâu. Tuy nhiên nhân tài của chúng ta vẫn còn thiếu nhiều lắm. Trước tiên, cứ chiêu mộ một vạn binh lính xuất phát từ Chân Định đánh Hoàng Cân ở Trác Quận. Khi danh tiếng chúng ta tăng cao, tự nhiên sẽ có kỳ nhân tới bái phỏng."
+        },
+        {
+          "type": "narrative",
+          "content": "Mọi người hiện diện trong sảnh nghe xong đều gật đầu khen phải, khí thế bừng bừng. Ngươi lập tức vung tay truyền lệnh xuống cho toàn quân:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Người đâu, truyền lệnh của ta! Phụng thiên thảo phạt Hoàng Cân, Diệp Thần ta chiêu mộ một vạn trai tráng khỏe mạnh thành lập Bạch Hổ binh. Giết giặc khăn vàng, kiến công lập nghiệp! Lệnh Phương Nhi làm Giám quân, Tử Long làm Tiên phong dẫn ba ngàn khinh kỵ binh. Ta dẫn hai ngàn bộ binh, hai ngàn cung binh trung quân và tả hữu ba ngàn trọng kỵ binh. Ngày mai xuất phát đến Trác Quận kiến công lập nghiệp!"
+        },
+        {
+          "type": "narrative",
+          "content": "Đứng bên cạnh, *Triệu Vũ* nghe thấy *Phương Nhi* dẫu nhỏ tuổi vẫn được theo quân làm Giám quân, còn mình võ nghệ đầy mình lại phải ở nhà, lập tức phùng má hờn dỗi. Nàng nắm lấy cánh tay ngươi lắc mạnh, nũng nịu yêu cầu được theo quân chinh chiến. Ngươi bất đắc dĩ đành phải thỏa hiệp, vỗ vai nàng cười bảo:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Được rồi, ta phong muội làm Thân vệ của Giám quân Phương Nhi, chịu trách nhiệm bảo đảm an toàn tuyệt đối cho muội ấy."
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vũ* nghe xong liền vui mừng hò reo, ôm chầm lấy ngươi đầy phấn khích. Lúc này, chỉ còn duy nhất *Hạ Hầu Khinh Y* vì kiếm đạo chưa đại thành, võ lực không đủ nên đành phải ở lại giữ phủ. Nhận ra sự buồn bã trong mắt nàng, *Triệu Vũ* và *Phương Nhi* vô cùng biết ý. Hai nàng chủ động thu dọn đồ đạc sang ngủ phòng khác, nhường trọn vẹn không gian gian phòng tân hôn rợp sắc đỏ lại cho ngươi và *Hạ Hầu Khinh Y* để cả hai có thời gian an ủi nhau trước ngày xuất chinh.\nKhi cánh cửa phòng khép chặt, chỉ còn lại ánh nến đỏ lay động mông lung, *Hạ Hầu Khinh Y* nhào vào lòng ngươi, đôi mắt phượng ngấn lệ vì sắp phải xa phu quân. Ngươi không nói lời nào, ghì chặt lấy thân thể mềm mại của nàng, dâng trào ngọn lửa dục vọng mãnh liệt để an ủi nàng suốt cả đêm xuân dài.\nNàng quỳ sụp dưới chân ngươi, ngước khuôn mặt kiều diễm đẫm tình lên, chủ động vươn chiếc lưỡi hồng hào liếm láp xung quanh đầu khấc gân guốc của ngươi. Bờ môi chúm chím của nàng ngậm trọn lấy cây cặc khổng lồ, dương vật gân guốc sưng to cứng đờ. Nàng vừa dùng lưỡi lau chùi cây cặc cho ngươi vừa hôn nồng cháy, ngậm mút mải miết gần một canh giờ đồng hồ cho đến khi chiếc lưỡi nhỏ nhắn mỏi nhừ, dâm dịch đầu khấc quyện cùng nước bọt chảy ròng ròng xuống hai hòn dái săn chắc phía dưới.\nNgươi ôm lấy bả vai trần của nàng, kéo nàng đứng dậy rồi đè ngửa lên chiếc giường gụ ấm áp. Hai bàn tay ngươi hoạt động hết công suất, vần vò bóp mạnh hai bầu ngực trắng ngần nõn nà của nàng. Đôi bầu vú căng tròn của nàng nảy lên theo từng nhịp tay xoa nắn, hai đầu vú đỏ hồng được ngươi dùng miệng ngậm chặt, mút mát dồn dập đến mức căng cứng, đỏ bừng lên đầy kích thích. \nKhi *Hạ Hầu Khinh Y* bắt đầu rên rỉ thở dốc, ngươi đưa đầu xuống phía dưới vùng cấm địa, dùng lưỡi dứt khoát khám phá lỗ lồn hồng hào, nhẵn nhụi se khít không một cọng lông của nàng. Chiếc lưỡi linh hoạt lách sâu vào bên trong khe lồn ẩm ướt, liếm láp hạt âm vật nhạy cảm khiến nàng uốn cong bờ mông, phát ra những tiếng rên rỉ dâm dật tột cùng. Nước lồn trong hang động tuôn chảy xối xả suốt mấy canh giờ không dừng, ướt sũng cả một mảng đệm gấm như vừa trải qua một trận mưa rào đầu mùa.\nKhông thể nhịn thêm được nữa, ngươi đưa cây cặc gân guốc găm thẳng vào lỗ lồn đẫm dâm thủy của nàng. Cả đêm hôm đó, cây cặc to lớn liên tục rút ra cắm vào không ngừng nghỉ, tiếng thịt va chạm *bạch... bạch... bạch...* vang lên dồn dập khắp gian phòng tân hôn. Tinh dịch nóng hổi của ngươi trào phun liên tục hết lần này đến lần khác sâu vào tận tử cung ấm nóng của nàng.\nĐến nửa đêm, khi *Hạ Hầu Khinh Y* đã hoàn toàn mệt lử vì liên tục lên đỉnh, nàng vẫn quyến luyến không muốn rời xa phu quân, liền chủ động leo lên người ngươi nằm sấp, để mặc cho cây cặc gân guốc của ngươi vẫn cắm chặt bên trong hang lồn nóng ấm của mình rồi thiếp đi. Nhưng ngươi dường như không biết mệt mỏi, suốt cả đêm vẫn hăng say công tác, thắt lưng liên tục thúc mạnh cây cặc vào sâu bên trong lồn nàng, tinh dịch nóng hổi phun ra dạt dào sau mỗi cú nhấp dũng mãnh.\nĐến sáng sớm, khi những tia nắng bình minh đầu tiên rọi qua khe cửa, *Hạ Hầu Khinh Y* mỏi nhừ cả người nhưng vẫn cố gắng gượng dậy để cả hai cùng lên đỉnh một lần cuối trước giờ xuất quân. Nàng chủ động nhún hông lên xuống trên cây cặc của ngươi, đôi môi dán chặt lấy môi ngươi hôn nồng cháy đầy lưu luyến. Ngươi lật người đè nàng nằm ngửa xuống đệm, dập liên tục với tần suất cao dồn dập cho đến khi cả hai cùng gầm lên thỏa mãn, dòng tinh dịch nóng hổi một lần nữa bắn ngập tử cung nàng. \nKhi đã thỏa mãn hoàn toàn, ngươi mới từ từ rút cây cặc đã mềm ra ngoài, mặc lại bộ giáp chiến oai phong, cúi xuống trao cho *Hạ Hầu Khinh Y* một nụ hôn sâu đầy hứa hẹn rồi dứt khoát đẩy cửa bước ra khỏi phòng.\nNgoài sân phủ, một vạn chiến sĩ *Bạch Hổ binh* đã tập hợp đông đủ, giáp trụ sáng ngời, cờ xuy rợp trời, khí thế ngút ngàn. Ngươi nhảy lên lưng chiến mã, vung thần binh *Bách Điểu Triều Phượng Thương* chỉ thẳng về phía bắc, hô lớn một tiếng chấn động trời đất, dẫn đầu đại quân chính thức khởi hành tiến phát về phía *Trác Quận*.\n...\nMười hai giờ trôi qua tựa như một cái chớp mắt dầm sương dãi nắng trên lưng ngựa. \nĐêm thu lạnh giá buông xuống bao phủ lấy vùng biên thùy *Trác Quận*. Dưới ánh trăng mờ nhạt, hàng ngàn lều trại của quân doanh *Bạch Hổ binh* mọc lên san sát giữa thung lũng, ngọn lửa trại bập bùng cháy tỏa ra hơi ấm dịu nhẹ xua đi cái buốt giá của gió rừng phương Bắc. Tiếng binh sĩ canh gác tuần tra và tiếng mài gươm giáo đều đặn vang lên bên tai. Ngươi ngồi bên trong soái trướng của *Binh Trại Trác Quận*, tay nhẹ nhàng vuốt ve sống cây thương sắt bách luyện cổ kính, đôi mắt trầm ngâm nhìn bản đồ hành quân đặt trên bàn gỗ.\n*Triệu Vân* bước vào soái trướng, chắp tay bẩm báo:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Khởi bẩm sư huynh, khinh kỵ binh của đệ đã hoàn thành trinh sát xung quanh địa giới *Trác Quận*. Quân Hoàng Cân của Trình Chí Viễn đang đóng quân cách chúng ta ba mươi dặm về phía bắc, số lượng ước chừng lên tới năm vạn quân, đang cướp bóc bách tính vô cùng tàn bạo."
+        },
+        {
+          "type": "narrative",
+          "content": "*Phương Nhi* và *Triệu Vũ* cũng bước vào bên cạnh ngươi. *Phương Nhi* chau mày nhìn bản đồ quân sự, cất giọng nghiêm túc của một vị Giám quân thực thụ:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Phương Nhi",
+          "content": "Trình Chí Viễn dẫu đông quân nhưng chỉ là lũ dân tị nạn tập hợp, thiếu kỷ luật và binh pháp. Chúng ta chỉ cần dụ chúng vào hẻm núi sâu, dùng trọng kỵ binh đánh úp hai sườn là có thể phá tan quân giặc."
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi đứng dậy, khí thế đỉnh cấp võ tướng bộc phát cuồn cuộn trong lồng ngực. Bạch Hổ binh vừa mới thành lập, trận chiến đầu tiên tại *Binh Trại Trác Quận* này chính là cơ hội vàng để ngươi chấn động thiên hạ, mở ra con đường kiến công lập nghiệp dũng mãnh.\nNgươi sẽ lựa chọn hành động tiếp theo như thế nào giữa doanh trại quân đội đầy nghiêm trang?"
+        }
+      ]
     }
   ],
-  "choices": [],
+  "choices": [
+    "Triệu tập toàn bộ tướng lĩnh Bạch Hổ binh thảo luận chi tiết phương án dụ địch vào hẻm núi để tiêu diệt {Tỷ lệ thành công: 95%, Hậu quả/Phần thưởng: Thống nhất ý chí chỉ huy, gia tăng danh tiếng quân sự trong lòng binh sĩ}",
+    "Đích thân dắt theo Triệu Vân cùng ba trăm khinh kỵ binh tiến hành tập kích ban đêm vào tiền đồn Hoàng Cân {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Làm hao tổn nhuệ khí địch nhân, có cơ hội bắt sống thám báo lấy thông tin}",
+    "Giao phó cho Phương Nhi và Triệu Vũ tăng cường tuần tra, phòng thủ chặt chẽ kho lương thảo của doanh trại trước thềm trận đấu {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Bảo đảm an toàn tuyệt đối cho căn cơ hậu cần, ngăn chặn thám tử Hoàng Cân phóng hỏa}",
+    "Cho toàn bộ quân lính nghỉ ngơi dưỡng sức trọn vẹn đêm nay, chuẩn bị cho trận quyết chiến trực diện vào sáng sớm mai {Tỷ lệ thành công: 95%, Hậu quả/Phần thưởng: Toàn quân khôi phục thể lực ở trạng thái đỉnh phong, tinh thần chiến đấu sục sôi}"
+  ],
   "gameMode": "EXPLORATION",
   "activeTrade": {
     "trader": null,
@@ -4049,5 +4142,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 28
+  "adventureTurnCount": 29
 }
