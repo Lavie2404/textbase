@@ -10134,7 +10134,8 @@ const GameplayScreen = ({
     pvpTurnTimeLeft, setPvpTurnTimeLeft, onSetTheme, onOpenThemeEditor, onOpenCacheManager, handleAwakenHtab, isHtabChatActive, setIsHtabChatActive, currentHtabDialogue, handleHtabChat,
     htabExitPending, htabPendingResumeData, resumeWorldFromHtab,
     showHtabInfoModal, setShowHtabInfoModal,
-    allowUnexpectedEvent, setAllowUnexpectedEvent
+    allowUnexpectedEvent, setAllowUnexpectedEvent,
+    markPendingTurnStartScroll
 }) => {
 
     // gdd-06 A4 D.1 `write_action_allowed(action, tm_state, screen)`: the play
@@ -10550,6 +10551,7 @@ const GameplayScreen = ({
                                         setIsProcessingAction(true);
                                         
                                         const turnTaker = activeCombatLoop.currentTurnTaker;
+                                        markPendingTurnStartScroll();
                                         setStoryHistory(prev => [...prev, { id: crypto.randomUUID(), type: 'user_choice', content: `Dùng đan dược: ${item.Name}` }]);
                                         
                                         handleActionRequest(turnTaker, false, { 
@@ -22341,6 +22343,22 @@ const [quantitySelector, setQuantitySelector] = useState({ show: false, item: nu
 
 const isInitialMount = useRef(true);
 const lastStoryLengthRef = useRef(0);
+// Bug cuộn màn hình tự ý (phát hiện qua video ghi màn hình 2026-09-02): màn
+// hình đang đứng yên ở đáy (khu Gợi Ý Hành Động hiện đủ) bỗng tự mượt cuộn
+// LÊN đầu một lượt cũ rồi ngay lập tức TỰ NHẢY THẲNG về đáy - không do người
+// chơi thao tác gì (chuột đứng yên suốt). Nguyên nhân: điều kiện cũ suy luận
+// "vừa có lượt chơi mới" chỉ bằng cách dò `item.type.includes('user')` trong
+// NHỮNG MỤC MỚI ĐƯỢC THÊM — quá lỏng lẻo, khớp nhầm với BẤT KỲ chỗ nào khác
+// trong code từng/sẽ đẩy một mục kiểu 'user_*' vào storyHistory (kể cả một
+// tác vụ nền không phải do người chơi vừa bấm gửi), khiến nó cuộn tới lượt
+// SAI rồi bị hiệu ứng khác kéo về đáy ngay sau đó — tạo cảm giác "cuộn
+// lung tung". Cờ dưới đây thay thế suy luận ngầm đó: CHỈ đúng những nơi
+// người chơi vừa thật sự bấm gửi/chọn một lượt mới (processPlayerAction,
+// dùng đan dược trong combat, dâng hiến, dung hợp) mới được bật cờ này
+// ngay trước khi đẩy entry vào storyHistory - effect dưới đây chỉ cuộn khi
+// cờ đang bật, rồi tắt ngay sau khi dùng, nên một mục 'user_*' xuất hiện từ
+// bất kỳ nguồn nào khác sẽ không còn kích hoạt cuộn màn hình nữa.
+const pendingTurnStartScrollRef = useRef(false);
 
 useLayoutEffect(() => {
     const currentLength = storyHistory.length;
@@ -22358,22 +22376,21 @@ useLayoutEffect(() => {
 
     // CHỈ kích hoạt hành vi cuộn khi có lượt truyện mới thực sự được đẩy vào cuối danh sách
     if (wasNewItemAdded) {
-        // Chỉ cuộn lên đầu lượt (turn-start) nếu trong ĐÚNG những mục VỪA được thêm vào lần này có
-        // một hành động "user" mới. Trước đây tìm ngược trong TOÀN BỘ storyHistory nên sau khi kết thúc
-        // trận đấu (tường thuật hậu chiến được thêm vào nhưng không có hành động "user" mới nào, vì lượt
-        // đấu diễn ra trong combatLog riêng chứ không nằm trong storyHistory), nó lại tìm ra một hành động
-        // "user" CŨ từ trước khi vào trận và kéo cả màn hình lên tận đó.
-        // Nếu KHÔNG có hành động "user" mới (đúng trường hợp hậu chiến đấu) thì TUYỆT ĐỐI không cuộn đi
-        // đâu cả — giữ nguyên vị trí cuộn hiện tại (vị trí từ trước khi vào trận).
-        const newlyAddedItems = storyHistory.slice(previousLength);
-        const newUserAction = [...newlyAddedItems].reverse().find(item => item.type && item.type.includes('user'));
+        // Chỉ cuộn lên đầu lượt (turn-start) khi CHÍNH lượt vừa gửi này bật cờ
+        // pendingTurnStartScrollRef (xem chú thích khai báo cờ ở trên) - không
+        // chỉ dựa vào "có mục nào type chứa 'user' trong số mục mới thêm".
+        if (pendingTurnStartScrollRef.current) {
+            pendingTurnStartScrollRef.current = false;
+            const newlyAddedItems = storyHistory.slice(previousLength);
+            const newUserAction = [...newlyAddedItems].reverse().find(item => item.type && item.type.includes('user'));
 
-        if (newUserAction) {
-            const elementId = `turn-start-${newUserAction.id}`;
-            const element = document.getElementById(elementId);
+            if (newUserAction) {
+                const elementId = `turn-start-${newUserAction.id}`;
+                const element = document.getElementById(elementId);
 
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             }
         }
     }
@@ -27156,6 +27173,7 @@ const handleHtabDonate = (expAmount, currencyCost, itemIdToDonate) => {
     }
 
     // Đẩy hành động này vào giao diện dưới dạng hành động của người chơi
+    pendingTurnStartScrollRef.current = true;
     setStoryHistory(prev => [...prev, {
         id: crypto.randomUUID(),
         type: 'user_custom_action',
@@ -30228,6 +30246,7 @@ YÊU CẦU CHO AI:
 ${coreRules}`;
 
     setknowledge(knowledgeAfterCrafting);
+    pendingTurnStartScrollRef.current = true;
     setStoryHistory(prev => [...prev, { id: crypto.randomUUID(), type: 'user_custom_action', content: actionText }]);
     setShowCraftingModal(false);
     setCurrentStory('');
@@ -31025,7 +31044,11 @@ const processPlayerAction = async (actionText, actionType, flavorText = '') => {
             }
             
             const userActionEntry = { id: crypto.randomUUID(), type: actionType, content: trimmedAction };
-            setStoryHistory(prev => [...prev, userActionEntry]);;
+            // Bật cờ NGAY TRƯỚC khi đẩy vào storyHistory - xem chú thích tại
+            // pendingTurnStartScrollRef: chỉ lượt người chơi vừa thật sự gửi
+            // mới được phép kéo màn hình tới đầu lượt.
+            pendingTurnStartScrollRef.current = true;
+            setStoryHistory(prev => [...prev, userActionEntry]);
         
         let promptToSendToAI = '';
         const timeOfDay = formatTimeOfDay(knowledge.time.hour);
@@ -37373,6 +37396,11 @@ const formatStoryText = useCallback((text) => {
                                 setCustomActionInput={setCustomActionInput}
                                 handleCustomAction={handleCustomAction}
                                 composerResetSignal={composerResetSignal}
+                                // Xem chú thích pendingTurnStartScrollRef: GameplayScreen tự đẩy
+                                // trực tiếp 1 mục 'user_choice' vào storyHistory khi dùng đan dược
+                                // trong combat (không đi qua processPlayerAction) - cần cách này để
+                                // hành động đó cũng được cuộn tới đầu lượt đúng như mọi lượt khác.
+                                markPendingTurnStartScroll={() => { pendingTurnStartScrollRef.current = true; }}
                                 setShowCharacterInfoModal={setShowCharacterInfoModal}
                                 isProcessingAction={isProcessingAction}
                                 setIsProcessingAction={setIsProcessingAction}
