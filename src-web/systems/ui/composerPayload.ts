@@ -108,10 +108,18 @@ export function resolveSpeaker(rawInput: string, knownNpcPool: KnownNpcEntry[]):
   const fuzzy = knownNpcPool.filter(
     (e) => fuzzyScore(e.display_name, rawInput) >= UI_KNOBS.npc_fuzzy_match_threshold,
   );
-  if (fuzzy.length >= 2) return { kind: 'ambiguous', candidates: fuzzy };
-  if (fuzzy.length === 1) {
-    return { kind: 'known_npc', char_id: fuzzy[0].char_id, display_name: fuzzy[0].display_name };
-  }
+  // Project owner correction (2026-09-02): fuzzy match is a SEARCH AID, never
+  // a forced rename. A single close-but-not-exact candidate used to
+  // auto-resolve straight to `known_npc`, silently overwriting what the
+  // player typed - e.g. typing "Bạch Hổ Binh A" (a deliberately distinct,
+  // numbered mob instance) got auto-corrected to the existing "Bạch Hổ binh"
+  // NPC, because their names overlap almost entirely as trigrams. Any
+  // non-exact fuzzy match (1 candidate or more) now surfaces as `ambiguous`
+  // instead - the player sees it as a clickable suggestion (existing
+  // suggestion-list UI) but must actively pick it or "Dùng tên mới" to keep
+  // their own text; only a truly EXACT match (handled above) still
+  // auto-resolves, since re-typing an existing name verbatim is unambiguous.
+  if (fuzzy.length >= 1) return { kind: 'ambiguous', candidates: fuzzy };
 
   return { kind: 'new_npc', proposed_name: rawInput.trim() };
 }

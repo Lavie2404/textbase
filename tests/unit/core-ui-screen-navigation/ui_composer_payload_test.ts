@@ -93,6 +93,22 @@ describe('D.7 resolveSpeaker', () => {
     expect(result.kind === 'ambiguous' && result.candidates.length).toBeGreaterThanOrEqual(2);
   });
 
+  it('regression (2026-09-02): a single fuzzy-but-not-exact match is a suggestion, never a forced rename', () => {
+    // Reported bug: typing "Bạch Hổ Binh A" (a deliberately distinct, numbered
+    // mob instance) got silently overwritten with the existing "Bạch Hổ binh"
+    // NPC's name, because the typed text is a near-total trigram superset of
+    // the existing name and was the ONLY fuzzy candidate - the old code
+    // treated "exactly 1 fuzzy match" as certain enough to auto-resolve like
+    // an exact match. Fuzzy match must only ever assist search, never force
+    // an existing name onto text the player deliberately typed differently -
+    // so even a single non-exact candidate must come back as `ambiguous`
+    // (a pickable suggestion the UI's "Dùng tên mới" escape hatch still
+    // covers), exactly like the >=2 candidate case in AC-76 above.
+    const result = resolveSpeaker('Bùi Lan A', POOL);
+    expect(result.kind).toBe('ambiguous');
+    expect(result.kind === 'ambiguous' && result.candidates.map((c) => c.char_id)).toEqual(['bui_lan']);
+  });
+
   it('AC-77: no match at all falls through to new_npc, never blocked', () => {
     const result = resolveSpeaker('Hoàn Toàn Người Lạ', POOL);
     expect(result).toEqual({ kind: 'new_npc', proposed_name: 'Hoàn Toàn Người Lạ' });
