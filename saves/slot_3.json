@@ -1,8 +1,8 @@
 {
   "id": "a0f9cc1a-0258-425b-be01-ca06583ced77",
-  "currentTurn": 30,
+  "currentTurn": 38,
   "saveVersion": "2.8",
-  "timestamp": "2026-09-01T16:42:49.080Z",
+  "timestamp": "2026-09-02T10:48:34.852Z",
   "gameSettings": {
     "storyTitle": "Tam quốc chí",
     "theme": "Dã sử, Huyền Huyễn, Tu Tiên, Quân sự, Cổ đại",
@@ -105,9 +105,9 @@
   "knowledge": {
     "time": {
       "year": 1,
-      "month": 2,
-      "day": 29,
-      "hour": 19
+      "month": 3,
+      "day": 1,
+      "hour": 5
     },
     "weather": "Nắng ban mai",
     "narrativeCombatState": {
@@ -164,6 +164,27 @@
       {
         "id": "3c4885aa-b377-4a46-93c2-d5cf62dd6ff0",
         "Name": "Binh Trại Trác Quận",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      },
+      {
+        "id": "77248389-3c85-45cc-9807-e1aae32c2f39",
+        "Name": "Phủ Thành Chủ Trác Quận",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      },
+      {
+        "id": "0d3a5dff-10e4-4a3b-bb80-7561e4f55ce6",
+        "Name": "Chiến trường Kế Thành",
+        "description": "Một địa điểm vừa được khám phá.",
+        "category": "Khu Vực",
+        "tier": 3
+      },
+      {
+        "id": "3a9db803-a659-467a-9066-b8fa474d506e",
+        "Name": "Phủ Thành Chủ Kế Thành",
         "description": "Một địa điểm vừa được khám phá.",
         "category": "Khu Vực",
         "tier": 3
@@ -236,7 +257,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 32.50000000000003,
+        "exp": 33.30000000000004,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": 0,
@@ -246,7 +267,7 @@
           "def": 0,
           "spd": 0
         },
-        "current_location_id": "3c4885aa-b377-4a46-93c2-d5cf62dd6ff0",
+        "current_location_id": "3a9db803-a659-467a-9066-b8fa474d506e",
         "baseHp": 2000,
         "baseAtk": 200,
         "baseDef": 100,
@@ -379,6 +400,30 @@
             "id": "a4e9f7b6-0c67-4899-9c4d-fd67d96b85f1",
             "quantity": 1,
             "Value": 99999000
+          },
+          {
+            "Weight": 1.5,
+            "Name": "Chiếu Thư Chinh Bắc Tướng Quân",
+            "description": "Chiếu thư triều đình sắc phong Diệp Thần làm Chinh Bắc Tướng Quân.",
+            "Type": "Tín vật",
+            "Rarity": "Thường",
+            "Consumable": true,
+            "Equippable": false,
+            "id": "e68b5e25-61cc-4e27-a14f-0149d072b51a",
+            "quantity": 1,
+            "Value": 2999970
+          },
+          {
+            "Weight": 1.5,
+            "Name": "Lụa Tơ Tằm Thượng Hạng",
+            "description": "Lụa là vô số được triều đình ban thưởng.",
+            "Type": "Tạp vật",
+            "Rarity": "Thường",
+            "Consumable": true,
+            "Equippable": false,
+            "id": "c3158b33-eb0f-46d8-aea6-9171eac4619a",
+            "quantity": 10,
+            "Value": 499995
           }
         ],
         "pendingSkillsToLearn": [],
@@ -1067,7 +1112,7 @@
         "isPlayer": false,
         "loreId": null,
         "level": 30,
-        "exp": 326.91,
+        "exp": 752.8140000000003,
         "progressionState": "Tu Luyện Thường",
         "ap": 0,
         "currency": 0,
@@ -1209,6 +1254,462 @@
             "maxExp": 200
           }
         ]
+      },
+      {
+        "id": "54f7b38f-5970-4d38-8b3b-931a3a56162d",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 6,
+          "atk": 2,
+          "def": 2,
+          "spd": 2
+        },
+        "current_location_id": "3c4885aa-b377-4a46-93c2-d5cf62dd6ff0",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 1400,
+        "maxhp": 1400,
+        "atk": 40,
+        "def": 30,
+        "spd": 50,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Các Tướng",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Phàm Cốt",
+        "incomingHealing": 1,
+        "maxExp": 100
+      },
+      {
+        "id": "b4e45ef3-6ff7-4193-b63c-8d0a75f3d086",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 6,
+          "atk": 2,
+          "def": 2,
+          "spd": 2
+        },
+        "current_location_id": "3c4885aa-b377-4a46-93c2-d5cf62dd6ff0",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 1400,
+        "maxhp": 1400,
+        "atk": 40,
+        "def": 30,
+        "spd": 50,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Trình Viễn Chí",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Phàm Cốt",
+        "incomingHealing": 1,
+        "maxExp": 100
+      },
+      {
+        "id": "7b0b6302-29a3-4319-abfc-43f7a7a23987",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 6,
+          "atk": 2,
+          "def": 2,
+          "spd": 2
+        },
+        "current_location_id": "3c4885aa-b377-4a46-93c2-d5cf62dd6ff0",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 1400,
+        "maxhp": 1400,
+        "atk": 40,
+        "def": 30,
+        "spd": 50,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Bạch Hổ binh",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Phàm Cốt",
+        "incomingHealing": 1,
+        "maxExp": 100
+      },
+      {
+        "id": "ebe94827-fa81-4096-bc3c-2eb4c644a601",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 6,
+          "atk": 2,
+          "def": 2,
+          "spd": 2
+        },
+        "current_location_id": "3c4885aa-b377-4a46-93c2-d5cf62dd6ff0",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 1400,
+        "maxhp": 1400,
+        "atk": 40,
+        "def": 30,
+        "spd": 50,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Quân Hoàng Cân",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Phàm Cốt",
+        "incomingHealing": 1,
+        "maxExp": 100
+      },
+      {
+        "id": "b0cfc918-ddee-4e69-b62e-d1c3e61c14ef",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 6,
+          "atk": 2,
+          "def": 2,
+          "spd": 2
+        },
+        "current_location_id": "77248389-3c85-45cc-9807-e1aae32c2f39",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 1400,
+        "maxhp": 1400,
+        "atk": 40,
+        "def": 30,
+        "spd": 50,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Trinh sát",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Phàm Cốt",
+        "incomingHealing": 1,
+        "maxExp": 100
+      },
+      {
+        "id": "b1a44e67-50fd-41b1-81ce-2ed7657d348f",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 6,
+          "atk": 2,
+          "def": 2,
+          "spd": 2
+        },
+        "current_location_id": "0d3a5dff-10e4-4a3b-bb80-7561e4f55ce6",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 1400,
+        "maxhp": 1400,
+        "atk": 40,
+        "def": 30,
+        "spd": 50,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Lưu Yên",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Phàm Cốt",
+        "incomingHealing": 1,
+        "maxExp": 100
       }
     ],
     "sharedCooldowns": {
@@ -1232,7 +1733,7 @@
           "turn": 17
         }
       ],
-      "lastExpResolvedTurn": 29
+      "lastExpResolvedTurn": 37
     },
     "loreQuests": [],
     "systemAssistant": {
@@ -1252,8 +1753,8 @@
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 29,
-      "world_time": 29,
+      "turn_id": 37,
+      "world_time": 37,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -1271,29 +1772,33 @@
       {
         "time": {
           "year": 1,
-          "month": 2,
-          "day": 28,
-          "hour": 21
+          "month": 3,
+          "day": 1,
+          "hour": 5
         },
-        "location_id": "fd18294d-0a8b-426c-b401-499c42502ddf",
+        "location_id": "3a9db803-a659-467a-9066-b8fa474d506e",
         "weather": "Nắng ban mai",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 32.300000000000026,
+            "exp": 33.10000000000004,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
             "inventory": [
               {
-                "Name": "Thương Sắt Tinh Thiết",
+                "Name": "Bách Điểu Triều Phượng Thương",
                 "quantity": 1
               },
               {
-                "Name": "Bách Điểu Triều Phượng Thương",
+                "Name": "Chiếu Thư Chinh Bắc Tướng Quân",
                 "quantity": 1
+              },
+              {
+                "Name": "Lụa Tơ Tằm Thượng Hạng",
+                "quantity": 10
               }
             ],
             "longTermStatuses": []
@@ -1390,9 +1895,75 @@
             "id": "npc_trieu_vu",
             "Name": "Triệu Vũ",
             "level": 30,
-            "exp": 220.434,
+            "exp": 646.3380000000002,
             "hp": 18380,
             "maxhp": 18380,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "54f7b38f-5970-4d38-8b3b-931a3a56162d",
+            "Name": "Các Tướng",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "b4e45ef3-6ff7-4193-b63c-8d0a75f3d086",
+            "Name": "Trình Viễn Chí",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "7b0b6302-29a3-4319-abfc-43f7a7a23987",
+            "Name": "Bạch Hổ binh",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "ebe94827-fa81-4096-bc3c-2eb4c644a601",
+            "Name": "Quân Hoàng Cân",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "b0cfc918-ddee-4e69-b62e-d1c3e61c14ef",
+            "Name": "Trinh sát",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "b1a44e67-50fd-41b1-81ce-2ed7657d348f",
+            "Name": "Lưu Yên",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
@@ -1403,18 +1974,18 @@
       {
         "time": {
           "year": 1,
-          "month": 2,
-          "day": 29,
-          "hour": 7
+          "month": 3,
+          "day": 1,
+          "hour": 5
         },
-        "location_id": "fd18294d-0a8b-426c-b401-499c42502ddf",
+        "location_id": "3a9db803-a659-467a-9066-b8fa474d506e",
         "weather": "Nắng ban mai",
         "characters": [
           {
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 32.40000000000003,
+            "exp": 33.20000000000004,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 0,
@@ -1422,6 +1993,14 @@
               {
                 "Name": "Bách Điểu Triều Phượng Thương",
                 "quantity": 1
+              },
+              {
+                "Name": "Chiếu Thư Chinh Bắc Tướng Quân",
+                "quantity": 1
+              },
+              {
+                "Name": "Lụa Tơ Tằm Thượng Hạng",
+                "quantity": 10
               }
             ],
             "longTermStatuses": []
@@ -1518,9 +2097,75 @@
             "id": "npc_trieu_vu",
             "Name": "Triệu Vũ",
             "level": 30,
-            "exp": 273.672,
+            "exp": 699.5760000000002,
             "hp": 18380,
             "maxhp": 18380,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "54f7b38f-5970-4d38-8b3b-931a3a56162d",
+            "Name": "Các Tướng",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "b4e45ef3-6ff7-4193-b63c-8d0a75f3d086",
+            "Name": "Trình Viễn Chí",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "7b0b6302-29a3-4319-abfc-43f7a7a23987",
+            "Name": "Bạch Hổ binh",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "ebe94827-fa81-4096-bc3c-2eb4c644a601",
+            "Name": "Quân Hoàng Cân",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "b0cfc918-ddee-4e69-b62e-d1c3e61c14ef",
+            "Name": "Trinh sát",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "b1a44e67-50fd-41b1-81ce-2ed7657d348f",
+            "Name": "Lưu Yên",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
@@ -4123,13 +4768,688 @@
           "content": "Ngươi đứng dậy, khí thế đỉnh cấp võ tướng bộc phát cuồn cuộn trong lồng ngực. Bạch Hổ binh vừa mới thành lập, trận chiến đầu tiên tại *Binh Trại Trác Quận* này chính là cơ hội vàng để ngươi chấn động thiên hạ, mở ra con đường kiến công lập nghiệp dũng mãnh.\nNgươi sẽ lựa chọn hành động tiếp theo như thế nào giữa doanh trại quân đội đầy nghiêm trang?"
         }
       ]
+    },
+    {
+      "id": "14a285fb-ee7d-4a35-aedb-b4df6c729e85",
+      "type": "user_custom_action",
+      "content": "[Đoạn 1 - Lời Diệp Thần]: \"Quân ta vừa di chuyển 1 chặng đường dài, tối nay chắc chắn kẻ địch sẽ tới cướp trại. Chúng muốn cướp thì ta cho chúng cướp. Truyền lệnh của ta, toàn quân hạ trại nấu cơm nghỉ ngơi. Đêm nay chiến đấu. Sau khi chúng xông vào trại thì vây 3 thả 1. chặn 3 hướng quay về Trác Quận thả cho chúng chạy hướng Chân Định sau đó phóng hỏa tiễn. Triệu Vân ở đâu\"\n[Đoạn 2 - Tường thuật]: \"Triệu Vân tiến lên ôm quyền đáp\"\n[Đoạn 3 - Lời Triệu Vân]: \"Có mạt tướng\"\n[Đoạn 4 - Lời Diệp Thần]: \"Lệnh cho ngươi dẫn 1500 khinh kỵ mai phục hướng Nam. Thấy Trình Chí Viễn thì giết không cần hỏi\"\n[Đoạn 5 - Lời Triệu Vân]: \"Mạt tướng tuân lệnh\"\n[Đoạn 6 - Lời Diệp Thần]: \"Triệu Vũ ở đâu\"\n[Đoạn 7 - Tường thuật]: \"Triệu Vũ tiến lên ôm quyền đáp\"\n[Đoạn 8 - Lời Triệu Vũ]: \"Có mạt tướng\"\n[Đoạn 9 - Lời Diệp Thần]: \"Lệnh cho ngươi dẫn 1500 trọng kỵ binh mai phục hướng Tây. Thấy tín hiệu thì phóng hỏa tiễn sau đó xung phong\"\n[Đoạn 10 - Lời Triệu Vũ]: \"Mạt tướng tuân lệnh\"\n[Đoạn 11 - Lời Diệp Thần]: \"Ta sẽ đích thân dẫn 1500 trọng kỵ binh mai phục hướng Đông. Còn hướng Bắc giao cho Phương Nhi chỉ huy 2000 bộ binh, 2000 cung binh và 1500 khinh kỵ trấn giữ trung quân. Sau khi phóng tiễn thì 1500 khinh kỵ xung phong, bộ binh và cung binh canh giữ tại chỗ. Chúng thấy hướng Bắc có trọng binh sẽ không đột phá theo hướng đó. Mệnh lệnh tối cao an toàn là thứ nhất, giết địch là thứ 2\"\n[Đoạn 12 - Tường thuật]: \"Chúng tướng lĩnh ôm quyền đáp: Mạt tướng tuân lệnh\"\n[Đoạn 13 - Tường thuật]: \"Đêm đó đúng như những gì ngươi dự liệu, Trình Viễn Chí dẫn theo 5000 tinh binh đi tập doanh. Tưởng đâu quân doanh đi đường xa mệt mỏi đến canh gác cũng không có, hắn cho người giết thẳng vào doanh. Sau khi toàn quân vào doanh kiểm tra mới biết bên trong không có 1 bóng người. Hơn nữa trên vải trại thoang thoảng mùi dầu hỏa. Lúc này Trình Viễn Chí mới biết bản thân mắc bẫy lớn giọng quát lớn\"\n[Đoạn 14 - Lời Trình Viễn Chí]: \"Mắc bẫy rồi, toàn quân rúi lui\"\n[Đoạn 15 - Tường thuật]: \"Ngay lúc này, pháo hiệu thăng thiên cùng mưa tên lửa từ 3 phía phóng tới. Doanh trại nhanh chóng chìm trong biển lửa. Sau đó 3 hướng Đông Tây Bắc đều có tiếng hô xung phong\"\n[Đoạn 16 - Lời Diệp Thần]: \"Mau. Hướng cửa Nam phá vây.\"\n[Đoạn 17 - Tường thuật]: \"Lúc này ngươi và Triệu Vũ đã dẫn người đánh tới. Ngươi mặc kệ đám binh tôm tướng cá cưỡi Bạch Mã cầm Bách Điểu Triều Phụng thương giết thẳng hướng Trình Viễn Chí. Trình Viễn Chí cầm vũ khí đón đỡ. Đỡ được 2 chiêu hổ khẩu đã vỡ ra bắt đầu chảy máu. Hắn biết mình đánh không lại liền liều mạng chạy tới cửa phía Nam doanh trại. Ngươi cũng mặc kệ cho hắn chạy. Sau đó chặn hết 4 cửa hô to\"\n[Đoạn 18 - Lời Diệp Thần]: \"Trình Viễn Chí đã bỏ chạy, kẻ hàng không giết\"\n[Đoạn 19 - Tường thuật]: \"Nghe được lời này, quân địch nhao nhao buông vũ khí. Ngươi sai Triệu Vũ trông chừng bọn họ rồi mượn 1 cây cung và 1 mũi tên của binh sĩ rồi đuổi theo Trình Viễn Chí. Chạy được 3 dặm liền thấy Trình Viễn Chí đang giao đấu với Triệu Vân. Ngươi giương cung ngắm thẳng đầu ngựa của Trình Viễn Chí sau đó bắn. Ngựa của Trình Viễn Chí trúng tên lập tức nằm ra đất chết. 2 người Trình Viễn Chí và Triệu Vân đang giao đấu đột nhiên Trình Viễn Chí ngã ngựa. Triệu Vân chớp cơ hội 1 thương chém bay đầu kẻ địch. Ngươi tiến lên hội hợp với Triệu Vân bắt hết những kẻ địch còn lại sau đó về trại. Lúc này Triệu Vũ cũng đã bắt hết những kẻ địch đầu hàng, Phương Nhi cũng đã dẫn quân quay lại.\"\n[Đoạn 20 - Lời Diệp Thần]: \"Kiểm kê số lượng thương vong và tù binh sau đó báo lại cho ta\""
+    },
+    {
+      "id": "bff1442a-4a58-4a53-921a-e93b53ed7f53",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Đêm thu lạnh giá bao phủ lấy *Binh Trại Trác Quận*, gió phương Bắc rít qua các cọc gỗ dựng doanh trại mang theo cái buốt hanh khô và không khí ngột ngạt của chiến tranh cận kề. Bên trong soái trướng trung quân, ánh đèn dầu lung linh hắt bóng những vị tướng lĩnh đứng vây quanh chiếc bàn gỗ trải rộng bản đồ quân sự. *Diệp Thần* đứng ở vị trí chủ tọa, tay siết nhẹ thân thần binh *Bách Điểu Triều Phượng Thương*, đôi mắt đâm đăm nhìn dải đồi phía nam rồi quay sang nhìn *Triệu Vân*, *Triệu Vũ* và *Phương Nhi*, cất giọng trầm hùng ra lệnh:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Quân ta vừa di chuyển một chặng đường dài, tối nay chắc chắn kẻ địch sẽ tới cướp trại. Chúng muốn cướp thì ta cho chúng cướp. Truyền lệnh của ta, toàn quân hạ trại nấu cơm nghỉ ngơi. Đêm nay chiến đấu. Sau khi chúng xông vào trại thì vây ba thả một, chặn ba hướng quay về *Trác Quận*, thả cho chúng chạy hướng *Chân Định* sau đó phóng hỏa tiễn. Triệu Vân ở đâu?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vân* thân hình dũng mãnh hiên ngang, tay siết chặt ngọn *Kim thương*, tức tốc bước tiến lên một bước, chắp hai tay ôm quyền đáp lại dứt khoát:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Có mạt tướng!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi nhìn vị hổ tướng uy phong lẫm liệt trước mặt, dồn lực vào từng câu chữ phân công tác chiến:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Lệnh cho ngươi dẫn một ngàn năm trăm khinh kỵ mai phục hướng Nam. Thấy Trình Chí Viễn thì giết không cần hỏi!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vân* đôi mắt phượng sáng quắc lên sát khí cuồn cuộn, cúi đầu nhận lệnh không chút chần chừ:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Mạt tướng tuân lệnh!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi xoay người, ánh mắt sắc lẹm hướng về phía vị nữ tướng kiều diễm đang dắt đoản kiếm bên hông:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Triệu Vũ ở đâu?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vũ* tiến lên một bước, vạt áo lụa xanh khẽ phất phơ theo nhịp bước chân nhanh nhẹn, hai tay ôm quyền hiên ngang đáp lời phu quân:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vũ",
+          "content": "Có mạt tướng!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Lệnh cho ngươi dẫn một ngàn năm trăm trọng kỵ binh mai phục hướng Tây. Thấy tín hiệu thì phóng hỏa tiễn, sau đó xung phong!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vũ* ngẩng cao gương mặt thanh tú anh vũ, ánh mắt tràn đầy sự tin tưởng và quyết tâm:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vũ",
+          "content": "Mạt tướng tuân lệnh!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ngươi quay sang nhìn thiếu nữ nhỏ nhắn *Phương Nhi* đang đứng ở bàn quân sư, rồi dứt khoát phân bố lực lượng còn lại:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ta sẽ đích thân dẫn một ngàn năm trăm trọng kỵ binh mai phục hướng Đông. Còn hướng Bắc giao cho Phương Nhi chỉ huy hai ngàn bộ binh, hai ngàn cung binh và một ngàn năm trăm khinh kỵ trấn giữ trung quân. Sau khi phóng tiễn thì một ngàn năm trăm khinh kỵ xung phong, bộ binh và cung binh canh giữ tại chỗ. Chúng thấy hướng Bắc có trọng binh sẽ không đột phá theo hướng đó. Mệnh lệnh tối cao: an toàn là thứ nhất, giết địch là thứ hai!"
+        },
+        {
+          "type": "narrative",
+          "content": "Toàn thể tướng lĩnh trong soái trướng cùng *Triệu Vân*, *Triệu Vũ* và *Phương Nhi* đồng thanh ôm quyền, âm thanh hô vang chấn động cả căn lều gỗ:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Các Tướng",
+          "content": "Mạt tướng tuân lệnh!"
+        },
+        {
+          "type": "narrative",
+          "content": "Đêm mười hai giờ, không gian ngoài *Binh Trại Trác Quận* chìm vào bóng tối mịt mùng và sự tĩnh mịch quỷ dị. Sương mù phương Bắc buông xuống dày đặc. \nĐúng như những gì ngươi đã dự liệu từ trước, tên tướng *Hoàng Cân* *Trình Viễn Chí* dẫn theo năm ngàn tinh binh lặng lẽ áp sát doanh trại *Bạch Hổ binh*. Thấy quân doanh đi đường xa mệt mỏi, đến cả binh sĩ canh gác trên chòi cao cũng không có, *Trình Viễn Chí* nhếch môi cười khoái trá, tưởng rằng đối phương đã lơ là cảnh giác. Hắn giơ cao đại đao, quát lớn cho năm ngàn quân rầm rộ xông thẳng vào cướp doanh trại!\n*Rầm! Rầm! Rầm!*\nĐám quân *Hoàng Cân* nhố nhăng đập phá các gian lều, đâm chém loạn xạ vào những đống chăn màn giả lập bên trong. Tuy nhiên, khi toàn bộ năm ngàn quân giặc đã tràn ngập vào trung tâm doanh trại, *Trình Viễn Chí* mới bàng hoàng nhận ra xung quanh không hề có một bóng người nào! Hơn nữa, trên các tấm vải bạt lều trại và mặt đất thoang thoảng mùi dầu hỏa nồng nặc. Làn gió thu thổi qua mang theo sát khí lạnh sống lưng. Lúc này, *Trình Viễn Chí* mới biến sắc mặt, biết bản thân đã rơi vào bẫy lớn, liền lớn giọng gầm lên trong kinh hoàng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Trình Viễn Chí",
+          "content": "Mắc bẫy rồi! Toàn quân rút lui!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Đoành!*\nNgay khoảnh khắc lời quát của tên tướng giặc vừa thốt ra, một mũi pháo hiệu thăng thiên xé rách màn đêm chói lọi trên không trung. Ngay lập tức, từ ba hướng Đông, Tây và Bắc, hàng ngàn mưa tên lửa sáng rực tựa như sao sa đồng loạt phóng tới!\n*Phập! Phập! Phập! Hù u u!*\nLửa gặp dầu hỏa bùng cháy mãnh liệt! Toàn bộ khu doanh trại rộng lớn trong chớp mắt chìm ngập trong một biển lửa rực trời. Tiếng la hét thảm thiết của quân giặc hòa cùng tiếng gầm rung trời chuyển đất từ ba hướng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Bạch Hổ binh",
+          "content": "Sát! Sát! Sát!"
+        },
+        {
+          "type": "narrative",
+          "content": "Tiếng hô xung phong chấn động màng nhĩ vang lên dồn dập. Đám quân *Hoàng Cân* hoảng loạn như ong vỡ tổ, giậm đạp lên nhau mà chết trong biển lửa. Thấy ba hướng Đông, Tây, Bắc đều có hỏa tiễn và tiếng kỵ binh dậm đất rầm rộ, lũ tàn quân vô thức dồn hết về hướng cửa Nam trống trải. Đám tàn quân xô đẩy nhau, thất thanh gào khóc:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Quân Hoàng Cân",
+          "content": "Mau! Hướng cửa Nam phá vây!"
+        },
+        {
+          "type": "narrative",
+          "content": "Chờ đúng khoảnh khắc quân địch hoảng loạn tháo chạy về cửa Nam, ngươi cùng *Triệu Vũ* đã dẫn theo trọng kỵ binh đánh úp tới. Ngươi cưỡi trên lưng con Bạch Mã tuyết trắng, tay lăm lăm thần binh *Bách Điểu Triều Phụng Thương* tỏa ra ánh đồng cổ kính sắc lẹm, mặc kệ đám binh tôm tướng cá nhếch nhác xung quanh, cưỡi ngựa giết thẳng về hướng tên tướng giặc *Trình Viễn Chí*!\n*Trình Viễn Chí* thấy ngươi lao tới như một luồng sấm sét liền hoảng hốt vung đại đao lên đón đỡ.\n*Keng! Keng!*\nChỉ mới giao tranh đúng hai chiêu, lực tay thiên sinh thần lực kết hợp với uy lực dũng mãnh của *Bách Điểu Triều Phụng Thương* đã chấn động làm hai hổ khẩu tay của *Trình Viễn Chí* vỡ nát, máu tươi chảy ra đầm đìa. Hắn kinh hãi nhận ra bản thân hoàn toàn không phải đối thủ của ngươi, liền liều mạng quay đầu ngựa, dốc sức phi thẳng ra phía ngoài cửa Nam doanh trại để giữ lấy mạng sống.\nNgươi nhếch môi cười lạnh, cố tình mặc kệ cho hắn bỏ chạy ra xa. Sau đó, ngươi cùng kỵ binh chặn đứng toàn bộ bốn cửa doanh trại, giơ ngọn thương sắt lên trời, vận khí gầm lớn một tiếng chấn động hẻm núi:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Trình Viễn Chí đã bỏ chạy, kẻ hàng không giết!"
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe được tiếng hô đanh thép của ngươi vang vọng khắp biển lửa, năm ngàn quân *Hoàng Cân* mất đi chủ tướng, tinh thần hoàn toàn sụp đổ. Chúng nhao nhao buông bỏ đao thương, quỳ sụp xuống đất xin hàng. Ngươi sai *Triệu Vũ* cùng lực lượng trọng kỵ binh ở lại trông chừng và tước binh khí của đám tù binh, rồi vươn tay mượn một cây cung lớn cùng một mũi tên sắt từ binh sĩ bên cạnh, một mình cưỡi Bạch Mã dũng mãnh đuổi theo hướng *Trình Viễn Chí* tháo chạy.\nĐuổi theo được khoảng ba dặm đường núi ngập tràn ánh trăng mờ, trước mặt ngươi hiện ra cảnh *Trình Viễn Chí* đang cuống cuồng giao đấu với *Triệu Vân*. *Triệu Vân* tay múa *Kim thương* chặn đứng đường lùi của hắn. \nNgươi không chút gián đoạn, trên lưng ngựa dứt khoát giương cung, kéo căng dây cung như hình mặt trăng tròn rồi ngắm thẳng vào đầu con chiến mã của *Trình Viễn Chí* mà buông tay!\n*Vút! Phập!*\nMũi tên sắt xé gió cắm chuẩn xác vào giữa trán con ngựa. Con chiến mã của *Trình Viễn Chí* hý lên một tiếng đau đớn rồi đổ rạp xuống mặt đường đất. *Trình Viễn Chí* đang văng đao chống đỡ đột nhiên bị ngã ngựa nhếch nhác, thân hình lăn lộn mấy vòng trên đất. \n*Triệu Vân* chớp lấy cơ hội ngàn năm có một, đôi mắt sáng quắc sát khí, ngọn *Kim thương* trong tay quét ra một đường thương phong ngân chói lọi!\n*Xược!*\nMột đòn thương chém bay đầu tên tướng giặc *Trình Viễn Chí* khỏi cổ! Máu tươi phun vọt lên không trung trước khi cái đầu hắn rơi thủm xuống thảm cỏ đêm.\nNgươi thúc Bạch Mã tiến lên hội hợp với *Triệu Vân*, cả hai phối hợp bắt gọn toàn bộ đám tàn quân thân tín đi theo hắn rồi thong thả quay trở về *Binh Trại Trác Quận*. Lúc này, lửa trong doanh trại đã được dập tắt. *Triệu Vũ* đã thu dọn xong hiện trường, bắt giữ toàn bộ quân địch đầu hàng, còn *Phương Nhi* cũng đã dẫn lực lượng trung quân quay trở lại soái trướng an toàn.\nNgươi bước xuống chiến mã, thu thần binh *Bách Điểu Triều Phụng Thương* dắt sau lưng, nhìn *Triệu Vân*, *Triệu Vũ* và *Phương Nhi* đang đứng vây quanh, cất giọng trầm êm ra lệnh:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Kiểm kê số lượng thương vong và tù binh, sau đó báo lại cho ta."
+        },
+        {
+          "type": "narrative",
+          "content": "Một canh giờ sau, ánh đuốc bập bùng chiếu sáng không gian ngoài soái trướng *Binh Trại Trác Quận*. Mùi khói dầu hòa quyện với hơi sương đêm lành lạnh. *Phương Nhi* tay cầm cuốn sổ ghi chép bằng trúc tiến lại gần ngươi, gương mặt nhỏ nhắn rạng rỡ niềm vui thắng trận:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Phương Nhi",
+          "content": "Khởi bẩm phu quân! Chúng ta đã kiểm kê xong trọn vẹn. Trận chiến đêm nay quân ta đại thắng! Phía giặc *Hoàng Cân* bị tiêu diệt hơn một ngàn năm trăm tên trong biển lửa, bắt sống gần ba ngàn rưỡi tù binh, thu hồi hơn bốn ngàn bộ binh khí cùng năm trăm chiến mã. Về phía *Bạch Hổ binh* của chúng ta, nhờ kế hoạch 'vây ba thả một' và đánh úp bất ngờ, chỉ có hơn năm mươi binh sĩ bị thương nhẹ, tuyệt đối không có ai tử trận!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vân* và *Triệu Vũ* đứng bên cạnh nghe xong báo cáo cũng gật đầu tán thưởng, sĩ khí toàn quân *Bạch Hổ binh* lúc này đang dâng cao tới đỉnh điểm. Chiến thắng oai hùng ngay trong trận đầu ra quân tại *Trác Quận* không chỉ khẳng định uy danh đỉnh cấp võ tướng của ngươi mà còn đặt nền móng vững chắc cho quân đội vừa mới thành lập.\nNgươi đứng trước soái trướng, nhìn hàng ngàn tù binh *Hoàng Cân* đang quỳ trật tự ngoài sân trại và những đống chiến lợi phẩm thu thập được.\nNgươi sẽ lựa chọn làm gì tiếp theo để củng cố lực lượng và chuẩn bị cho bước tiến chiến lược tiếp theo?"
+        }
+      ]
+    },
+    {
+      "id": "0579ae17-3f8d-4f3f-b804-4ddd45e25281",
+      "type": "user_custom_action",
+      "content": "[Đoạn 1 - Lời Diệp Thần]: \"3500 tù binh chọn ra trai tráng khỏe mạnh đưa về Chân Định huấn luyện, số còn lại thả cho về quê làm ruộng. Nếu không có nhà thì cho về Chân Định làm ruộng. Ngươi, mang thư của ta về cho Hạ Hầu Thái thú. Ông ấy sẽ tự biết sắp xếp\"\n[Đoạn 2 - Tường thuật]: \"Ngươi chọn 1 bách phu trưởng áp giải những tù binh về Chân Định sau đó lệnh 3 quân tiến về nhập chủ Trác Quận. Ngươi mang đầu của Trình Chí Viễn giơ cao trước cổng thành hô lớn\"\n[Đoạn 3 - Lời Diệp Thần]: \"Trình Viễn Chí đã chết, các ngươi mau mau mở cửa thành đầu hàng. Kẻ hàng không giết\"\n[Đoạn 4 - Tường thuật]: \"1 lúc sau, cửa thành từ từ mở ra. Các gia tộc trong thành bắt hết 4 vạn 5000 giặc Hoàng Cân quỳ trước cổng thành chắp tay dâng ấn tín Trác Quận. Triệu Vân tiến lên nhận ấn tín đưa cho ngươi. Ngươi giục ngựa tiến vào phủ thành chủ. Ngồi trên chủ tọa, ngươi lại cho người đi sắp xếp an bài cho đám tù binh. Trai tráng khỏe mạnh thì giữ lại huấn luyện bổ sung, người già yếu bệnh tật thì cấp ruộng cho làm. Ngươi cũng không định ở lại đây. Hỏi thành chủ là ai sau đó giao lại ấn tín cho hắn hỏi hắn có quy phục ngươi không. Thành chủ không dám nói không gật đầu như gà mổ thóc. Sau khi dặn dò hắn điều chỉnh lại chính vụ, giảm thuế cho dân, hỗ trợ dân nghèo có ruộng thì ngươi về nghỉ ngơi. Dù rất muốn thiết yến khao quân nhưng đang trong thời kỳ chiến tranh kỵ nhất là uống rượu nên chỉ đành hoãn lại đợi ngày về Chân Định sẽ tổ chức sau. Đám người Hạ Hầu Kiệt ở Chân Định nhận thư của ngươi thì vui mừng, nhanh chóng an bài người huấn luyện tù binh được chọn, lại cấp cho những tù binh không được chọn 1 mẫu đất 1 căn nhà nhỏ để tự sinh nhai. Sau đó ngươi lại sai người đi tìm hiểu tình hình chiến sự giữa các chư hầu và giặc khăn vàng\""
+    },
+    {
+      "id": "ef066a4f-ddaa-4d7c-b096-7de5cc69e0d5",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ánh đuốc bập bùng soi rọi căn soái trướng của *Binh Trại Trác Quận*, không khí sau chiến thắng đầu tiên ngập tràn sự nghiêm trang và đĩnh đạc của một đại quân đội ngũ chỉnh tề. *Diệp Thần* đứng trước chiếc bàn gỗ lớn trải rộng bản đồ địa giới Ký Châu, xung quanh là *Triệu Vân*, *Triệu Vũ* và *Phương Nhi*. Hắn vung tay chỉ vào bản đồ, dứt khoát đưa ra những khẩu lệnh đanh thép:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "3500 tù binh chọn ra trai tráng khỏe mạnh đưa về *Chân Định* huấn luyện, số còn lại thả cho về quê làm ruộng. Nếu không có nhà thì cho về *Chân Định* làm ruộng. Ngươi, mang thư của ta về cho *Hạ Hầu* Thái thú. Ông ấy sẽ tự biết sắp xếp."
+        },
+        {
+          "type": "narrative",
+          "content": "Tên binh sĩ liên lạc lập tức ôm quyền nhận thư, vội vã lui ra ngoài phi ngựa xé màn đêm tiến về hướng *Chân Định*. Ngay sau đó, *Diệp Thần* chọn ra một vị Bách phu trưởng lão luyện, trung thành để áp giải đoàn tù binh ba ngàn năm trăm người xuôi về phía nam. \nKhi hậu phương đã được thu xếp chu toàn, *Diệp Thần* bước ra khỏi soái trướng, vung thần binh *Bách Điểu Triều Phượng Thương* lên không trung, ngọn thương sắt tỏa ra luồng khí tức uy nghi lẫm liệt. Hắn truyền lệnh cho ba quân: ba ngàn khinh kỵ binh của *Triệu Vân*, ba ngàn trọng kỵ binh của *Triệu Vũ* cùng bốn ngàn trung quân lập tức nhổ cọc dựng trại, rầm rộ tiến về nhập chủ *Trác Quận*.\nDưới ánh nắng ban mai rực rỡ, quân đoàn *Bạch Hổ binh* dũng mãnh tiến đến trước cổng thành *Trác Quận*. Khói bụi cuốn tung trời, cờ hiệu hình mãnh hổ tung bay phập phới trước gió thu. *Diệp Thần* thúc chiến mã bước lên phía trước, tay cầm cọc tre cắm cái đầu sừng sỏ của tên tướng giặc *Trình Viễn Chí* giơ cao lên bầu trời ngay trước cổng thành uy nghi, vận khí gầm lớn một tiếng chấn động vách đá:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Trình Viễn Chí đã chết, các ngươi mau mau mở cửa thành đầu hàng! Kẻ hàng không giết!"
+        },
+        {
+          "type": "narrative",
+          "content": "Âm thanh trầm hùng tựa sấm nổ vang vọng khắp các ngõ ngách trong thành *Trác Quận*. Binh sĩ *Hoàng Cân* gác trên đầu tường nhìn thấy chiếc đầu lâu đẫm máu của đại tướng *Trình Viễn Chí* thì mặt cắt không còn một hạt máu, đao thương trong tay rơi rụng *keng keng* xuống đất. \nChỉ một lúc sau, tiếng then cửa gỗ nặng trịch *rắc... rắc...* chậm rãi vang lên. Hai cánh cửa thành *Trác Quận* từ từ mở rộng ra hai bên. Các đại gia tộc và hào cường địa phương trong thành vì muốn lập công chuộc tội đã đồng lòng nổi dậy, trói chặt toàn bộ bốn vạn năm ngàn quân giặc *Hoàng Cân* còn lại, bắt chúng quỳ thành những hàng dài thẳng tắp kéo dài từ ngoài cổng thành vào tận nội khu. Các vị tộc trưởng đại diện nâng cao khay gỗ chứa ấn tín hành chính của *Trác Quận*, chắp tay quỳ gối dâng lên.\n*Triệu Vân* cưỡi Bạch Mã tiến lên phía trước, hai tay kính cẩn nhận lấy mâm ấn tín rồi giục ngựa quay lại trước mặt *Diệp Thần*, dâng ấn tín lên ngang ngực:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Mời Diệp Thần tiếp nhận ấn tín *Trác Quận*, bình định bờ cõi!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* mỉm cười nhận lấy quan ấn bằng đồng cổ kính. Hắn giục chiến mã thong thả dẫn đầu đoàn quân *Bạch Hổ binh* tiến qua cổng thành, chính thức nhập chủ *Trác Quận* trong sự tung hô nghênh đón của bách tính. \nĐến *Phủ Thành Chủ* nguy nga, *Diệp Thần* bước lên sảnh chính, ung dung ngồi xuống vị trí chủ tọa. *Phương Nhi*, *Triệu Vũ* và *Triệu Vân* đứng hầu hai bên. Nhìn đại sảnh chật nạm quan lại địa phương đang run rẩy, *Diệp Thần* lập tức hạ lệnh an bài cho số lượng tù binh khổng lồ vừa thu phục. Bốn vạn năm ngàn giặc *Hoàng Cân* được phân loại kỹ lưỡng: những trai tráng lực điền khỏe mạnh được tuyển chọn giữ lại để bổ sung vào hàng ngũ *Bạch Hổ binh*, rèn luyện kỷ luật quân ngũ; còn những người già yếu, bệnh tật hoặc tàn tật thì được phát thẻ bài nhận ruộng, phân bố về các làng xã lân cận để tự canh tác sinh nhai.\nGiải quyết xong việc tù binh, *Diệp Thần* hướng ánh mắt sắc lẹm về phía vị Thành chủ cũ của *Trác Quận* đang quỳ mọp dưới thềm đá. Hắn không có ý định nán lại *Trác Quận* lâu dài, bèn cất giọng trầm êm hỏi:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ngươi là Thành chủ nơi đây sao? Trao lại ấn tín cho ngươi, ngươi có bằng lòng quy phục ta, cùng ta an định bách tính không?"
+        },
+        {
+          "type": "narrative",
+          "content": "Tên Thành chủ ngẩng đầu lên, nhìn thấy khí chất bá vương thoát tục cùng thần binh *Bách Điểu Triều Phượng Thương* đặt bên cạnh *Diệp Thần*, trong lòng hoảng sợ không dám nói nửa từ \"không\", vội vàng gật đầu lia lịa như gà mổ thóc, dập đầu lia lịa xuống sàn gạch:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Thành chủ Trác Quận",
+          "content": "Đại nhân khai ân! Hạ quan nguyện dốc lòng quy phục Diệp Thần, tuyệt không hai lòng! Xin đại nhân chỉ dạy chính vụ!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* ném lại quan ấn xuống bàn, dặn dò hắn phải lập tức điều chỉnh lại toàn bộ chính sách hành chính: giảm bớt thuế quan nặng nề cho dân nghèo, mở kho lương cứu tế kẻ đói khổ và hỗ trợ nông dân có công cụ làm ruộng. \nSau khi giao phó xong việc quân chính, *Diệp Thần* cảm thấy mệt mỏi sau một chặng đường dài chinh chiến nên đứng dậy trở về hậu viện nghỉ ngơi. Dù trong lòng rất muốn tổ chức tiệc yến linh đình để khao thưởng tướng sĩ mừng thắng trận đầu, nhưng *Diệp Thần* biết rõ đang trong thời kỳ chiến tranh đại loạn, điều kỵ nhất của người làm tướng là uống rượu say sưa làm mất cảnh giác. Do đó, hắn dứt khoát hoãn lại việc khao quân, hẹn ngày thắng trận trở về *Chân Định* sẽ tổ chức đại yến sau.\nTrong khi đó, tại *Chân Định*, Thái thú *Hạ Hầu Kiệt* cùng các quan lại nhận được thư do liên lạc viên của *Diệp Thần* mang về thì vui mừng khôn xiết. Tin tức *Diệp Thần* chỉ dùng một vạn *Bạch Hổ binh* đã thu phục trọn vẹn *Trác Quận*, chém đầu *Trình Viễn Chí* khiến uy danh của hắn tăng vọt khắp vùng Ký Châu. *Hạ Hầu Kiệt* cười lớn hãnh diện vì chọn đúng vị hiên tế thiên tài, lập tức cho người an bài các võ tướng rèn luyện ba ngàn năm trăm tân binh được gửi về. Đồng thời, lão hạ lệnh cấp cho mỗi gia đình tù binh không tham gia quân ngũ một mẫu đất tươi tốt và một căn nhà nhỏ đơn sơ để họ an cư lập nghiệp. Chính sách khoan hòa này khiến bách tính *Chân Định* và *Trác Quận* hết lòng hưởng ứng, nô nức khen ngợi nhân đức của *Diệp Thần*.\nTrở lại *Phủ Thành Chủ* ở *Trác Quận*, sau khi cùng hai vị thê tử *Phương Nhi* và *Triệu Vũ* dùng bữa tối đơn sơ, *Diệp Thần* lập tức sai các thám tử và trinh sát nhạy bén nhất chia làm nhiều hướng, bí mật rời thành đi tìm hiểu tình hình chiến sự biến động giữa các chư hầu và lực lượng chính của giặc *Hoàng Cân* trên khắp thiên hạ.\nMàn đêm thu buông xuống *Trác Quận* tĩnh mịch. Bên trong gian phòng nghỉ ngơi ấm cúng của *Phủ Thành Chủ*, ngọn đèn dầu hắt lên những vệt sáng vàng dịu nhẹ. *Diệp Thần* nằm trên chiếc giường gụ rộng rãi, hai bên là *Phương Nhi* và *Triệu Vũ* đang rúc đầu vào lồng ngực ấm áp của hắn. \n*Phương Nhi* đôi mắt đen láy rực sáng sự tinh anh, khẽ vươn ngón tay nhỏ nhắn vỗ nhẹ lên ngực hắn, mỉm cười hóm hỉnh:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Phương Nhi",
+          "content": "Huynh xử lý chính sự và an đinh tù binh nhanh gọn thật đấy. Việc giảm thuế và phát ruộng này sẽ giúp uy danh *Bạch Hổ binh* của chúng ta truyền đi rất xa. Chắc chắn trong vài ngày tới, tin tức về chiến thắng *Trác Quận* sẽ làm chấn động các phe chư hầu đấy!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vũ* nằm bên cánh tay trái của hắn cũng gật đầu đồng tình, gương mặt anh vũ kiều diễm đong đầy sự ngưỡng mộ nhìn phu quân:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vũ",
+          "content": "Chàng xử lý rất minh đoán. Mù kỵ uống rượu khi đóng quân ở thành mới thu phục là bài học vạn người phải ghi nhớ. Thiếp và ca ca càng thêm nể phục sự điềm tĩnh của chàng."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* mỉm cười dịu dàng, vươn hai tay luồn qua lớp y phục mỏng nắn bóp nhẹ nhàng bầu ngực mềm mại của hai vị thê tử, tận hưởng những phút giây thư thái hiếm hoi giữa chốn chiến trường. Cả ba quấn quýt bên nhau chìm vào giấc ngủ bình yên, chờ đợi tin tức trinh sát truyền về vào ngày mai.\nSáng hôm sau, khi ánh nắng ban mai vừa rỡ trên đỉnh các công trình kiến trúc của *Trác Quận*, *Diệp Thần* thức dậy, tinh thần vô cùng minh mẫn. Hắn khoác lên mình bộ chiến giáp sáng ngời, vác thần binh *Bách Điểu Triều Phượng Thương* bước ra đại sảnh. Lúc này, các thám tử tinh anh được cử đi đêm qua đã phi ngựa trở về, quỳ gối trước thềm đá chờ đợi bẩm báo tình hình chiến sự toàn cõi Đông Hán.\nNgươi sẽ lựa chọn làm gì tiếp theo tại *Trác Quận*?"
+        }
+      ]
+    },
+    {
+      "id": "72a43f99-ffca-47ad-8d5c-3442fb44096e",
+      "type": "user_choice",
+      "content": "Cùng Triệu Vân và Triệu Vũ tiến ra ngoại thành trực tiếp kiểm tra việc huấn luyện bốn vạn năm ngàn tù binh mới gia nhập Bạch Hổ binh. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Tăng cường kỷ luật quân ngũ, nâng cao lòng trung thành của tân binh}"
+    },
+    {
+      "id": "02750751-8e3d-4c8c-9ce2-765fb7b33ad3",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ánh nắng sớm mùa thu hanh hao vừa rỡ trên những đỉnh tháp cao của thành *Trác Quận*, xua tan đi lớp sương mù buông phủ khắp dải đồng bằng phía bắc. Gió thu lạnh buốt thổi qua những ngọn cờ hiệu hình mãnh hổ tung bay phập phới trước đại môn *Phủ Thành Chủ Trác Quận*. \n*Diệp Thần* khoác lên mình bộ ngân giáp chiến oai phong, lưng đeo thần binh *Bách Điểu Triều Phượng Thương* tỏa ra ánh đồng cổ kính và luồng sát khí đao phong nhiếp phục. Hắn cùng *Triệu Vân* mặc chiến giáp xám bạc, giắt *Kim thương* bên hông, và *Triệu Vũ* khoác linh giáp gọn nhẹ màu bạc kết hợp vạt áo lụa xanh, tay cầm *Ngân thương*, ba người đồng loạt nhún người nhảy lên lưng ba con chiến mã tuyết trắng dũng mãnh. \n*Hí...í...í!*\nTiếng vó ngựa rầm rộ nghiến trên con đường lát đá, ba người thẳng hướng ngoại thành *Trác Quận* mà phi tới. Nơi đây là khoảng bãi tập trận bao la rộng lớn hàng trăm mẫu, bao quanh bởi những rặng thông cổ thụ và vách đá sừng sững. Bốn vạn năm ngàn tù binh giặc *Hoàng Cân* vừa được thu phục và tuyển chọn từ trận chiến *Trác Quận* đã tập hợp đông đủ từ lúc bình minh chưa tỏ.\nNhìn từ trên đài cao chỉ huy, bốn vạn năm ngàn tân binh đứng ken đặc thành những hình vuông trận khổng lồ. Mặc dù họ đã được phân chia thành từng quân đoàn dưới quyền các Bách phu trưởng và Thiên phu trưởng, nhưng vì vốn là dân tị nạn và cướp đường vừa hạ vũ khí quy phục, đội ngũ vẫn còn nhiều chỗ xộc xệch, tiếng thì thầm bàn tán xôn xao vang lên như ong vỡ tổ, hàng ngũ chưa thực sự thẳng tắp.\n*Diệp Thần* thúc chiến mã tiến lên mép đài cao chỉ huy. *Triệu Vân* và *Triệu Vũ* chia làm hai bên tả hữu, thần thái uy nghiêm đứng hộ vệ. *Diệp Thần* đưa đôi mắt sắc lẹm chứa đựng khí phách đỉnh cấp võ tướng quét qua toàn bộ bốn vạn năm ngàn con người phía dưới. Âm thanh rì rầm lập tức nhỏ dần rồi tắt hẳn dưới áp lực uy nghi từ ánh mắt của hắn."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tất cả lặng nghe lệnh ta! Các ngươi trước đây vốn là bách tính lương thiện, bị thế sự ép vào đường cùng mới phải mang băng vàng làm cướp đường. Nay quy phục dưới trướng *Bạch Hổ binh* của Diệp Thần ta, các ngươi không còn là giặc nát nữa, mà là binh sĩ chính quy bảo quốc an dân!"
+        },
+        {
+          "type": "narrative",
+          "content": "Âm thanh trầm hùng, cuồn cuộn khí lực của *Diệp Thần* vang vọng khắp khoảng bãi tập rộng lớn, truyền thẳng vào tai từng người chiến sĩ. Hắn dứt lời liền tháo thần binh *Bách Điểu Triều Phượng Thương* trên lưng xuống. \n*Vút!*\n*Diệp Thần* nhún người nhảy khỏi lưng chiến mã, đáp xuống khoảng đất trống ngay trước mặt hàng ngũ tân binh. Hắn vận dồn toàn bộ lực đạo thiên sinh thần lực vào cánh tay, vung ngọn thương bách luyện đâm ra một đường thương phong xé rách không khí!\n*Chát! Bùng!*\nNgọn thương lá lúa sáng quắc vung ra một vòng cung thần thánh, tạo nên tiếng nổ đanh thép tựa như phượng hoàng vút bay. Lực thương chấn động làm mặt đất nứt ra từng vệt dài chục thước, bụi đất và đá hộc bay tung tóe lên không trung. Tuyệt kỹ thương pháp xuất thần nhập hóa cùng dũng lực rợp trời ấy khiến bốn vạn năm ngàn tân binh chứng kiến mà đồng loạt trợn tròn mắt, sống lưng lạnh ngắt, trong lòng dâng lên sự thán phục và khiếp sợ tột cùng trước vị chủ tướng tuổi trẻ tài cao."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Muốn làm người của *Bạch Hổ binh*, điều đầu tiên phải nhớ kỹ chính là: Kỷ luật! Kỷ luật tạo nên sức mạnh bất diệt! Quân lệnh như núi, kẻ nào vi phạm lệnh cấm, cướp bóc bách tính sẽ bị chém đầu không tha! Ngược lại, kẻ nào dốc sức xông xáo, tuân thủ kỷ luật, gia đình các ngươi ở *Chân Định* và *Trác Quận* sẽ được phát ruộng đất, miễn thuế, có nhà ở an cư lập nghiệp!"
+        },
+        {
+          "type": "narrative",
+          "content": "Lời hứa hẹn khoan hòa nhưng đanh thép của *Diệp Thần* tựa như dòng nước ấm rót thẳng vào tâm khảm bốn vạn năm ngàn tân binh. Họ vốn dĩ dấn thân vào loạn thế cũng chỉ vì một miếng ăn và mong muốn gia đình sống sót. Nay được trao cơ hội có nhà có ruộng, lại được phụng sự một vị tướng quân sở hữu bản lĩnh như thần như rồng, ngọn lửa trung thành và tự hào trong lòng họ lập tức bùng cháy mãnh liệt.\n*Triệu Vân* thúc ngựa tiến xuống giữa hàng ngũ kỵ binh, tay múa *Kim thương* uốn nắn từng thế ngồi trên lưng ngựa, chỉ bảo cách cầm giáo, giữ thăng bằng và phối hợp đội hình xung phong. Voice *Tử Long* vang lên điềm tĩnh nhưng chứa đựng sự uy phong của một vị kỵ tướng thiên tài:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Kỵ binh là lưỡi đao của *Bạch Hổ binh*! Khi xung phong phải tập trung thành một khối, giáo chĩa về phía trước, không được tự ý tách hàng! Ai giữ đúng đội hình, đòn đánh sẽ tăng thêm mười phần uy lực!"
+        },
+        {
+          "type": "narrative",
+          "content": "Ở hướng bên kia bãi tập, *Triệu Vũ* dắt theo thân vệ quân tiến vào khu vực luyện tập của bộ binh và cung thủ. Nàng đích thân rút một cây cung lớn, kéo căng dây cung rồi bắn liên tiếp ba mũi tên trúng phập vào tâm bia cách đó trăm thước. Nữ tướng kiều diễm đứng trước hàng ngàn binh sĩ, gạt bỏ vẻ dịu dàng thường ngày mà khoác lên thần thái anh vũ dũng mãnh:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vũ",
+          "content": "Cung thủ phải giữ tay vững như đá, mắt khóa chặt mục tiêu! Bộ binh khi giơ thuẫn牌 phải đứng sát vai nhau thành bức tường thép! Bất kỳ mắt xích nào tan rã, toàn đội sẽ sụp đổ!"
+        },
+        {
+          "type": "narrative",
+          "content": "Dưới sự trực tiếp kiểm tra, uốn nắn và hướng dẫn dốc lòng của *Diệp Thần*, *Triệu Vân* và *Triệu Vũ*, bốn vạn năm ngàn tân binh gạt bỏ hoàn toàn sự thô kịch và tản mát của quân cướp đường khi xưa. Họ bắt đầu nhịp nhàng di chuyển theo tiếng trống trận, chuyển đổi từ thế trận hình vuông sang thế trận phòng thủ thuẫn牌 và kỵ binh vuốt sườn một cách thuần thục. \nTrôi qua bốn tiếng đồng hồ huấn luyện liên tục dầm mưa nắng thu hăng hái, mồ hôi ướt đầm đìa trên giáp trụ của các sĩ binh, nhưng không một ai cất lời than mệt. Kỷ luật của *Bạch Hổ binh* gia tăng rõ rệt qua từng nhịp trống, ánh mắt của bốn vạn năm ngàn tân binh nhìn về phía *Diệp Thần* và *Triệu Vân* tràn ngập sự kính trọng, kiên định và lòng trung thành tuyệt đối. Họ đã hoàn toàn lột xác thành một lực lượng quân đội tinh anh, sẵn sàng vì *Diệp Thần* mà vào sinh ra tử trên mọi chiến trường.\nĐến giữa trưa, khi mặt trời đứng bóng chiếu rọi qua những ngọn thông, *Diệp Thần* cho toàn quân thu binh nghỉ ngơi dùng bữa. Ba người giục chiến mã quay trở về *Phủ Thành Chủ Trác Quận*.\nVừa bước qua ngưỡng cửa đại sảnh *Phủ Thành Chủ*, *Phương Nhi* trong bộ y phục gọn gàng đã chạy ra đón. Thiếu nữ lanh lợi tay cầm tách trà mát lạnh bưng lên cho *Diệp Thần*, gò má mỉm cười rạng rỡ:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Phương Nhi",
+          "content": "Phu quân, *Tử Long* huynh và *Khinh Vân* tỷ tỷ vất vả rồi! Trinh sát mà chúng ta phái đi đêm qua đã phi ngựa trở về bẩm báo tình hình chiến sự toàn cõi Đông Hán rồi đây này!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* nhận lấy tách trà húp một hơi mát rượi, rồi cùng *Triệu Vân* và *Triệu Vũ* tiến lại chiếc bàn gỗ lớn giữa sảnh. Tên thám tử tinh anh quỳ gối dưới thềm đá, hai tay dâng lên cuộn thư bằng trúc bẩm báo chi tiết:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Trinh sát",
+          "content": "Khởi bẩm Chủ công! Tin tức từ khắp các châu quận truyền về: Hiện tại ba anh em *Trương Giác*, *Trương Bảo*, *Trương Lương* đang dẫn hàng chục vạn quân giặc *Hoàng Cân* càn quét vùng *Dĩnh Chuyện* và *Cự Lộc*. Triều đình *Lạc Dương* đã cử ba vị Đại tướng là *Lô Thực*, *Hoàng Phủ Tung* và *Chu Tuấn* dẫn hoàng quân đi thảo phạt. Ngoài ra, chư hầu khắp nơi như *Tào Tháo*, *Viên Thiệu*, *Tôn Kiên* và ba huynh muội *Lưu Bị*, *Quan Vũ*, *Trương Phi* cũng đang tích cực chiêu mộ binh mã kiến công!"
+        },
+        {
+          "type": "narrative",
+          "content": "Trinh sát ngừng một chút rồi bẩm báo tiếp về tình hình khu vực lân cận:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Trinh sát",
+          "content": "Riêng tại khu vực *U Châu* giáp ranh chúng ta, Thái thú *U Châu* là *Lưu Yên* đang bị một nhánh tàn quân *Hoàng Cân* gồm hơn ba vạn giặc do tên tướng *Đặng Mậu* cầm đầu vây hãm nghiêm trọng tại thành *Kế Thành*. *Lưu Yên* đã phát cáo thị chiêu mộ nghĩa binh giải cứu *U Châu*!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Phương Nhi* chống cằm suy ngẫm, đôi mắt đen láy rực sáng sự tinh anh của một cô gái hiện đại, quay sang nói với *Diệp Thần*:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Phương Nhi",
+          "content": "Phu quân, *U Châu* ngay sát *Trác Quận* của chúng ta. *Đặng Mậu* dẫu có ba vạn quân nhưng chỉ là lũ ô hợp. Nếu chúng ta dẫn *Bạch Hổ binh* thừa thắng xông lên giải vây *Kế Thành*, không chỉ thu phục được sự biết ơn của Thái thú *Lưu Yên* mà còn có thể mở rộng địa bàn ra toàn cõi *U Châu*, nâng cao uy danh lừng lẫy thiên hạ!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vân* đứng bên cạnh nghe xong bèn ôm quyền, ánh mắt rực lửa hào khí:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Tử Long nguyện làm Tiên phong, dẫn ba ngàn khinh kỵ binh đi trước mở đường, quét sạch quân giặc *Đặng Mậu*!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vũ* cũng mỉm cười bước tới, tay siết nhẹ chuôi đoản kiếm:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vũ",
+          "content": "Thiếp cũng nguyện dẫn trọng kỵ binh hỗ trợ phu quân và ca ca chinh phạt *U Châu*!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* nhìn bản đồ quân sự trải rộng trên bàn, trong lòng cuộn trào khí thế bá vương. Bốn vạn năm ngàn tân binh *Bạch Hổ binh* vừa được huấn luyện chỉnh tề, sĩ khí đang dâng cao tới đỉnh điểm. Đây chính là thời cơ vàng để hắn thừa thắng xông lên, khẳng định vị thế đỉnh cấp võ tướng và mở rộng cơ đồ giữa thời đại đại loạn này.\nNgươi sẽ lựa chọn bước đi chiến lược tiếp theo như thế nào cho *Bạch Hổ binh* tại *Trác Quận*?"
+        }
+      ]
+    },
+    {
+      "id": "bd39f2b4-a699-4072-9207-18418040c53c",
+      "type": "user_choice",
+      "content": "Lập tức hạ lệnh xuất quân, tự mình dẫn bốn vạn binh sĩ Bạch Hổ binh tiến phát về Kế Thành thuộc U Châu để tiêu diệt Đặng Mậu và giải vây cho Thái thú Lưu Yên. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Mở rộng địa bàn sang U Châu, thu phục lòng dân và nhận được sự nể trọng của chư hầu}"
+    },
+    {
+      "id": "2580294d-aea1-497e-81fa-cf82d4194f10",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Trước sảnh chính nguy nga của *Phủ Thành Chủ Trác Quận*, gió thu phương Bắc gầm rít qua những tán thông cổ thụ, thổi tung dải cờ hiệu hình mãnh hổ cuồng bạo tung bay trên không trung. Ánh nắng trưa hanh hao rọi xuống hàng ngũ giáp trụ sáng ngời, phản chiếu ánh đồng cổ kính từ thân cây thần binh *Bách Điểu Triều Phượng Thương* dắt sau lưng *Diệp Thần*.\nThần thái hiên ngang tựa trích tiên hạ phàm nhưng lại cuồn cuộn khí thế đỉnh cấp võ tướng, *Diệp Thần* tuốt nhẹ dải thắt lưng da thú, tiến thẳng lên bậc đá cao nhất, đưa đôi mắt sắc lẹm chứa đựng khí bạt núi sông quét qua *Triệu Vân*, *Triệu Vũ* và *Phương Nhi* đang đứng nghiêm cẩn bên dưới. Hắn vung mạnh cánh tay dũng mãnh, tiếng quát chấn động cả khoảng sân rộng lớn:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Lập tức ban hạ quân lệnh! Toàn quân *Bạch Hổ binh* chuẩn bị xuất chinh!"
+        },
+        {
+          "type": "narrative",
+          "content": "Âm thanh đanh thép vang vọng khiến các sĩ binh canh gác xung quanh không khỏi rùng mình, thẳng tắp sống lưng. *Diệp Thần* dồn lực vào từng câu chữ, phân công tác chiến dứt khoát:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tử Long, ngươi dẫn ba ngàn khinh kỵ binh đi trước làm Tiên phong mở đường! Triệu Vũ, ngươi mang hai ngàn trọng kỵ binh kề cận bảo vệ Giám quân Phương Nhi! Ta sẽ đích thân thống lĩnh ba ngàn trọng kỵ binh tả hữu cùng hai ngàn bộ cung binh trung quân mãnh tiến! Mục tiêu lần này: tiến phát về thẳng *U Châu*, tiêu diệt tên trùm giặc *Đặng Mậu*, giải vây *Kế Thành* cho Thái thú *Lưu Yên*!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vân* thân hình dũng mãnh hiên ngang, đôi mắt phượng rực sáng lên ngọn lửa trung nghĩa cuồng nhiệt. Hắn tức tốc bước tiến lên một bước, hai tay ôm quyền dứt khoát:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Mạt tướng tuân lệnh! Nhất định không phụ sự kỳ vọng của sư huynh, quyết quét sạch giặc cướp làm cỏ mở đường!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vũ* khoác trên mình bộ linh giáp màu bạc tinh xảo, vạt áo lụa xanh phất phơi trước gió, tay siết chặt cây *Ngân thương* gia truyền. Nàng ngẩng khuôn mặt thanh tú anh vũ lên nhìn phu quân bằng ánh mắt đong đầy sự kiêu hãnh và yêu thương:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vũ",
+          "content": "Thiếp nguyện đem hết võ nghệ gia truyền, bảo vệ vững chắc trung quân và Giám quân, cùng phu quân lập nên thiên thu đại nghiệp!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Phương Nhi* trong bộ y phục gọn gàng của vị Giám quân trẻ tuổi, tay cầm chiếc gậy chỉ huy nhỏ nhắn, đôi mắt đen láy rực sáng sự tinh anh của một linh hồn hiện đại. Thiếu nữ mỉm cười rạng rỡ, gật đầu đầy tự tin:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Phương Nhi",
+          "content": "Phu quân yên tâm! Bản đồ đường đi và phương án tác chiến tại *U Châu* muội đã ghi nhớ kỹ lưỡng rồi, nhất định sẽ làm chỗ dựa vững chắc cho huynh!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tốt! Toàn quân xuất phát!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* dậm mạnh chân, nhún người nhảy tót lên lưng con chiến mã tuyết trắng dũng mãnh. Hắn vung thần binh *Bách Điểu Triều Phượng Thương* chỉ thẳng về hướng bắc, phát lệnh xuất quân. \n*Rầm! Rầm! Rầm!*\nTiếng trống trận *Thần Hổ* rung trời chuyển đất vang lên dồn dập. Cánh cổng lớn của *Phủ Thành Chủ Trác Quận* và đại môn thành *Trác Quận* mở rộng ra hai bên. Khói bụi cuốn tung trời, một vạn chiến sĩ tinh anh *Bạch Hổ binh* dưới sự chỉ huy trực tiếp của *Diệp Thần*, *Triệu Vân*, *Triệu Vũ* và *Phương Nhi* bắt đầu rầm rộ tiến lên đường, hàng ngũ ngay ngắn tựa dải lụa thép rạch đôi mảnh đất phương Bắc.\nSáu giờ đồng hồ hành quân thần tốc trôi qua tựa như một cái chớp mắt dầm sương dãi nắng trên lưng ngựa. \nDưới ánh nắng chiều thu ngả màu vàng ươm chói chang, đoàn quân *Bạch Hổ binh* vượt qua hàng trăm dặm đường quan đạo gập ghềnh, băng qua những triền đồi cỏ dại ngả màu cằn cỗi và những dòng suối cạn trôi về phía bắc. Bụi đỏ mịt mờ đọng trên vệt giáp bạc của *Triệu Vũ* và gấu áo của *Phương Nhi*, nhưng ánh mắt của toàn quân vẫn ngạt ngào sĩ khí hừng hực, không một ai cất lời than mệt. \nSuốt chặng đường di chuyển, *Triệu Vân* liên tục dẫn ba ngàn khinh kỵ binh phi như cơn lốc phía trước, dọn sạch những toán tàn quân giặc nhỏ lẻ dò đường, giữ cho hành trình của trung quân tuyệt đối thông suốt. Trong khi đó, *Phương Nhi* cưỡi ngựa sóng đôi bên *Diệp Thần*, liên tục dùng sự nhạy bén và kiến thức lịch sử sâu rộng của mình để phân tích về tình hình *U Châu*:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Phương Nhi",
+          "content": "Phu quân, *U Châu* vốn là vùng biên thùy hiểm yếu, Thái thú *Lưu Yên* tuy có lòng an dân nhưng quân đội địa phương lại mỏng yếu. Tên tướng giặc *Đặng Mậu* thừa cơ hội đó gom tụ hơn ba vạn giặc khăn vàng tiến đánh. Lũ giặc này tuy đông nhưng kỷ luật vô cùng xốc xếch, hoàn toàn ỷ vào quân số để đè người. Chỉ cần chúng ta dùng đòn sấm sét đánh sập trung quân của *Đặng Mậu*, vạn quân giặc tự khắc sẽ tan rã như cát bụi!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* khẽ nhếch môi mỉm cười cưng chiều, vươn tay cốc nhẹ vào trán thiếu nữ:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Nói rất hay! Lần này đến *U Châu*, ta sẽ cho tên *Đặng Mậu* kia nếm thử uy lực thực sự của *Bách Điểu Triều Phụng Thương*!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vũ* đi bên cạnh nhìn cử chỉ âu yếm của hai người thì khẽ mỉm cười dịu dàng. Nàng siết chặt cán thương, ánh mắt anh vũ đâm đăm nhìn dải núi mù sương phía xa:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vũ",
+          "content": "Phu quân, phía trước chính là địa giới *Kế Thành* thuộc *U Châu* rồi. Thiếp đã nhìn thấy khói đen bốc lên nghi ngút từ phía chân trời."
+        },
+        {
+          "type": "narrative",
+          "content": "Quả đúng như lời *Triệu Vũ*, khi đoàn quân *Bạch Hổ binh* tiến vượt qua ngọn đồi cuối cùng chắn ngang quan đạo, khung cảnh thảm khốc của chiến trường *Kế Thành* lập tức đập vào mắt mọi người.\nCách đó chừng ba dặm, thành *Kế Thành* sừng sững gạch đá đang bị bao vây chặt chẽ bởi một biển người nhung nhúc dải khăn vàng. Hơn ba vạn giặc *Hoàng Cân* do tên tướng giặc *Đặng Mậu* cầm đầu đang như bầy mối khổng lồ xông lên đánh phá. Tiếng la hét chém giết *sát... sát...*, tiếng gạch đá và gỗ gụ va đập rầm rầm vào cổng thành vang vọng chấn động cả một vùng thung lũng. \nTrên bờ tường thành *Kế Thành*, cờ hiệu của Thái thú *Lưu Yên* đã rách rưới nghiêng ngả. Mấy ngàn quân thủ thành yếu ớt đang chật vật chống đỡ trước mưa tên và những thang mây áp sát của giặc. Khói đen ngút ngàn bốc lên từ các chòi quan sát, tình thế nguy cấp tựa ngàn cân treo sợi tóc!\n*Vút!*\n*Triệu Vân* từ phía trước phi chiến mã ngược trở lại, ghìm dây sừng cho con tuyết mã chồm hai chân trước lên, hai tay ôm quyền bẩm báo dồn dập:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Khởi bẩm sư huynh! *Đặng Mậu* đang tập trung toàn bộ lực lượng hơn ba vạn quân giặc ồ ạt phá cổng chính phía Nam của *Kế Thành*! Hậu phương và hai sườn Đông Tây của chúng hoàn toàn bỏ trống, không hề có phòng bị!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* đứng trên đỉnh đồi cao, thần thái uy nghi tột đỉnh. Hắn nhìn xuống biển người dải khăn vàng đang nhung nhúc dưới chân thành, lồng ngực cuộn trào khí thế bá vương lẫm lẫy. Hắn tháo thần binh *Bách Điểu Triều Phượng Thương* dắt sau lưng xuống, mũi thương lá lúa tỏa ra ánh đồng cổ kính sắc lẹm và luồng sát khí đao phong nhiếp phục cả đất trời."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đặng Mậu mờ mắt vì lợi lộc, dồn toàn lực công thành mà bỏ hở lưng trần trước mũi thương của *Bạch Hổ binh* ta! Đây chính là lúc trời cướp mạng hắn!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* quay sang nhìn *Triệu Vân*, *Triệu Vũ* và *Phương Nhi*, dồn lực ra lệnh tác chiến dứt khoát:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tử Long! Ngươi dẫn ba ngàn khinh kỵ binh đánh úp vào sườn Đông quân giặc, cắt đứt đường lui của chúng! Triệu Vũ! Ngươi dẫn hai ngàn trọng kỵ binh bảo vệ Phương Nhi và trung quân đánh thọc sâu vào sườn Tây! Ta sẽ đích thân dẫn ba ngàn trọng kỵ binh còn lại làm mũi nhọn, xông thẳng vào sườn lưng gạt phăng trung quân của Đặng Mậu!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Mạt tướng tuân lệnh!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vũ",
+          "content": "Mạt tướng tuân lệnh!"
+        },
+        {
+          "type": "narrative",
+          "content": "Toàn thể chiến sĩ *Bạch Hổ binh* tuốt đao rút giáo, sát khí trào dâng cuồn cuộn. *Diệp Thần* thúc mạnh hai gót chân vào hông chiến mã, Bạch Mã cất tiếng hý vang lừng không gian. Hắn vung *Bách Điểu Triều Phượng Thương* quét ra một đường thương phong xé rách không khí, dẫn đầu vạn đại quân lao thẳng xuống đồi tựa như một trận lốc xoáy bằng thép!"
+        }
+      ]
+    },
+    {
+      "id": "fc0c7c25-4aa3-4cb3-8aed-149c5ec9ea4d",
+      "type": "user_choice",
+      "content": "Thừa thắng xông lên, đích thân cầm *Bách Điểu Triều Phượng Thương* phi mã xông thẳng vào chướng đài trung quân, nhắm trực diện đầu gã tướng giặc *Đặng Mậu* mà đâm tới. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Trảm trùm giặc trong chớp mắt, làm tan rã toàn bộ ba vạn quân Hoàng Cân và chấn động uy danh}"
+    },
+    {
+      "id": "b65082a3-c43b-4d60-99e0-ece099f8bc61",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Tiếng vó ngựa rầm rộ xé rách màng đêm sương mù phương Bắc, tựa như hàng ngàn tiếng sấm dội dồn dập xuống mặt đất gập ghềnh ngoài thành *Kế Thành*. Trên lưng con tuyết mã dũng mãnh, *Diệp Thần* mặc bạch giáp bạc sáng ngời, thân hình đứng thẳng tắp như cây thông sừng sững giữa ngàn trùng gió thu. Tay phải hắn siết chặt lấy cán gỗ bách luyện của thần binh *Bách Điểu Triều Phượng Thương*, mũi thương lá lúa ánh lên sắc đồng cổ kính, tỏa ra luồng sát khí cuồn cuộn làm ngột ngạt cả không gian chiến trường.\nNơi phía trước, trung quân chướng đài của giặc *Hoàng Cân* đang sừng sững giữa biển người ba vạn dải khăn vàng. Tên tướng giặc *Đặng Mậu* mình khoác giáp sắt thô, tay lăm lăm cây đại đao răng cưa, đang cuồng vọng tháo chạy và tháo thét chỉ huy quân sĩ chống đỡ. Nhìn thấy bóng dáng gã trùm giặc hiển hiện ngay trước mắt, đôi mắt *Diệp Thần* rực sáng lên ngọn lửa sát phạt cuồng bạo. Hắn dồn toàn bộ khí lực thiên sinh thần lực vào hai đùi, kẹp chặt hông ngựa, gầm lên một tiếng chấn động thung lũng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đặng Mậu tiểu nhân! Nhận lấy một thương này của ta!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Hí...í...í!*\nCon tuyết mã hý lên một tiếng xé trời, bùng nổ tốc độ lao đi tựa như luồng điện xẹt! *Diệp Thần* một tay ghìm dây sườn, tay kia đưa *Bách Điểu Triều Phượng Thương* ra trước mặt. Ngọn thương sắt trong tay hắn xé gió múa vòng, bộc phát ra tuyệt kỹ *Bách Điểu Triều Phụng Thương* độc nhất vô nhị chốn giang hồ. Thương phong rực rỡ, chiêu thức biến ảo tựa như hàng trăm loài chim thần tung cánh hướng về chầu phượng hoàng!\n*Phập! Phập! Phập!*\nMấy chục gã thân vệ giặc khiên gỗ chắn đường lập tức bị luồng thương phong xé rách lồng ngực, máu tươi bắn tung tóe lên không trung. *Diệp Thần* cưỡi ngựa xông thẳng vào chướng đài trung quân như chốn không người! Toàn bộ chướng đài gô rơm rập rình sụp đổ dưới sức tông dũng mãnh của con chiến mã.\n*Đặng Mậu* giật mình hoảng hốt, mặt cắt không còn một hạt máu. Hắn vội vã vung cây đại đao răng cưa lên ngang ngực, dốc toàn bộ tàn lực đâm trả để giữ lấy mạng sống. Nhưng trước tốc độ và uy lực áp đảo của đỉnh cấp võ tướng, đòn đao của hắn chẳng khác nào châu chấu đá xe!\n*Bạch!*\nMũi thương lá lúa của *Bách Điểu Triều Phượng Thương* biến ảo khôn lường, lách qua lưỡi đao thô kịch trong gang tấc. Một đường thương dũng mãnh dứt khoát xé rách không khí, đâm thẳng vào cuống họng *Đặng Mậu* rồi quật mạnh một đường vòng cung tuyệt mỹ!\n*Xược!*\nTrong chớp mắt, đầu gã tướng giặc *Đặng Mậu* đã lìa khỏi cổ! Máu tươi phun vọt lên cao như một ngọn suối đỏ rực trước khi cái thân hình đồ sộ của hắn đổ gục xuống sàn chướng đài. \n*Diệp Thần* thu thương nhanh như chớp, ngọn thương sắt đâm chuẩn xác xuyên qua búi tóc của thủ cấp *Đặng Mậu*, rồi cuộn lực cánh tay giơ cao tột đỉnh giữa không trung! \nThủ cấp đẫm máu của tên trùm giặc bêu cao trên đỉnh ngọn thần binh *Bách Điểu Triều Phượng Thương*, tỏa ra sát khí cuồn cuộn át cả mây trời. *Diệp Thần* đứng trên tàn tích chướng đài, vóc dáng uy nghi tựa chiến thần hạ phàm, vận khí gầm lên một tiếng đanh thép vang vọng khắp ba vạn quân giặc:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Trùm giặc Đặng Mậu đã đứt đầu! Bạch Hổ binh phụng thiên thảo phạt, kẻ buông binh khí đầu hàng không giết!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Trình Chí Viễn, Đặng Mậu đã đứt đầu! Kẻ hàng không giết!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vũ",
+          "content": "Kẻ hàng không giết!"
+        },
+        {
+          "type": "narrative",
+          "content": "Tiếng gầm của *Diệp Thần* hòa cùng tiếng hô uy phong của *Triệu Vân*, *Triệu Vũ* và một vạn chiến sĩ *Bạch Hổ binh* tạo thành một làn sóng âm thanh cuồng bạo chấn động cả thung lũng *Kế Thành*. \nChứng kiến thủ cấp của chủ tướng *Đặng Mậu* đang đung đưa đẫm máu trên đỉnh ngọn thần binh của *Diệp Thần*, toàn bộ ba vạn quân *Hoàng Cân* lập tức rơi vào hoảng loạn tột cùng. Tinh thần chiến đấu của chúng hoàn toàn sụp đổ trong chớp mắt. Đao thương, giáo mác rơi rụng *keng keng* xuống đất như ngả rạ. Hàng ngàn giặc khăn vàng ôm đầu quỳ sụp xuống đất van xin khai ân, số còn lại hoảng hốt dẫm đạp lên nhau tháo chạy hỗn loạn vào các triền rừng sâu, toàn bộ ba vạn quân giặc tan rã hoàn toàn!\nTrên bờ tường thành *Kế Thành*, Thái thú *U Châu* là *Lưu Yên* cùng các quan lại thủ thành chứng kiến cảnh tượng một thiếu niên anh hùng cầm thương phi mã trảm tướng diệt giặc trong chớp mắt thì toàn thân chấn động, kinh hãi đến mức không thốt nên lời."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Lưu Yên",
+          "content": "Trời ơi... Chiêu thương pháp phượng múa long phi ấy... Một thương trảm trùm giặc giữa ba vạn quân! Đây... đây thực sự là thiên hạ vô song mãnh tướng! *U Châu* ta được cứu rồi!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Lưu Yên* gạt nước mắt xúc động, vội vàng truyền lệnh mở rộng bốn cửa thành *Kế Thành*. Tiếng chuông đồng báo hiệu chiến thắng vang lên rộn rã khắp vùng không gian Ký Châu và U Châu.\nHai giờ đồng hồ trôi qua tựa như một giấc mộng giữa chiến trường tàn cuộc. \nÁnh nắng chiều thu hanh hao rọi xuống dải đồng bằng ngoài thành *Kế Thành*, chiếu sáng những hàng ngũ tù binh *Hoàng Cân* đang quỳ trật tự dưới sự kiểm soát chặt chẽ của *Bạch Hổ binh*. *Triệu Vân* cùng khinh kỵ binh dọn dẹp sạch sẽ hiện trường, thu hồi hàng ngàn ngựa chiến và trang bị; trong khi *Phương Nhi* và *Triệu Vũ* điều hành trọng kỵ binh phân loại tù binh dứt khoát.\nĐại môn thành *Kế Thành* mở rộng trọn vẹn. Thái thú *Lưu Yên* khoác bộ quan phục trang trọng, dắt theo hàng trăm quan lại và hàng vạn bách tính thành *Kế Thành* rầm rộ bước ra khỏi cửa thành để nghênh đón vị ân nhân cứu mạng.\n*Diệp Thần* cưỡi Bạch Mã thong thả tiến lại gần. Mũi thương *Bách Điểu Triều Phượng Thương* đã được lau sạch vệt máu tươi, tỏa ra sắc đồng uy nghi dắt sau lưng hắn. *Triệu Vân*, *Triệu Vũ* và *Phương Nhi* sánh bước hộ vệ ba bên.\nThái thú *Lưu Yên* tiến vội lại trước đầu ngựa của *Diệp Thần*, hai tay chắp lại cúi gập người hành lễ kính cẩn nhất, giọng nói run rẩy vì biết ơn sâu sắc:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Lưu Yên",
+          "content": "Hạ quan Lưu Yên — Thái thú *U Châu*, xin đại diện cho toàn thể quan dân *Kế Thành* bái tạ ơn cứu mạng của Diệp tướng quân! Nếu không có tướng quân đích thân dẫn *Bạch Hổ binh* thần tốc chi viện, một thương trảm rơi đầu gã trùm giặc *Đặng Mậu*, *Kế Thành* e rằng hôm nay đã vĩnh viễn chìm trong biển máu!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* thong thả bước xuống chiến mã, chìa hai tay ra đỡ lấy bả vai Thái thú *Lưu Yên*, cất giọng hòa nhã nhưng ngạt ngào khí phách:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Lưu Thái thú mau mau đứng dậy. Ta cùng *Bạch Hổ binh* Phụng thiên thảo phạt giặc cướp, dẹp tan Hoàng Cân cũng là vì bảo quốc an dân, quét sạch tai họa cho bách tính thương sinh. Thái thú không cần phải hành đại lễ như vậy."
+        },
+        {
+          "type": "narrative",
+          "content": "*Lưu Yên* ngẩng đầu lên, nhìn thấy gương mặt tuấn tú tựa trích tiên hạ phàm nhưng ánh mắt chứa đựng uy danh bá vương của *Diệp Thần*, trong lòng lại càng thêm phần nể trọng và thán phục tột cùng. Lão nắm chặt lấy tay *Diệp Thần*, hào hứng reo lên:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Lưu Yên",
+          "content": "Tướng quân vừa khiêm tốn lại vừa sở hữu bản lĩnh như thần như rồng! Uy danh của Diệp tướng quân và *Bạch Hổ binh* hôm nay nhất định sẽ chấn động toàn bộ vùng *U Châu* và thiên hạ! Mời tướng quân cùng các vị tướng lĩnh tiến vào phủ thành chủ, hạ quan đã cho chuẩn bị đại yến tiệc để dâng rượu mừng công!"
+        },
+        {
+          "type": "narrative",
+          "content": "Bách tính hai bên đường thành *Kế Thành* chen chúc nhau đông đúc, rầm rộ hò reo chúc tụng *Diệp Thần* và *Bạch Hổ binh*. Lòng dân *U Châu* hoàn toàn quy phục trước nhân đức và sức mạnh vô song của hắn.\nĐêm thu buông xuống *Kế Thành*, không gian sầm uất ngạt ngào hương rượu nồng và tiếng ca hát ăn mừng chiến thắng trận đại thắng. Bên trong đại sảnh *Phủ Thành Chủ Kế Thành*, ngọn đèn đĩa treo cao soi rọi bàn tiệc linh đình với đủ loại cao lương mỹ vị. \nThái thú *Lưu Yên* liên tục nâng chén chúc rượu *Diệp Thần*, *Triệu Vân*, *Triệu Vũ* và *Phương Nhi*. Trên bàn tiệc, *Lưu Yên* không ngần ngại ngỏ ý muốn dâng toàn bộ quyền quản lý quân chính vùng *U Châu* và hỗ trợ lương thảo tốt nhất cho *Bạch Hổ binh* để *Diệp Thần* đứng ra bảo hộ toàn cõi biên thùy.\n*Phương Nhi* ngồi bên cạnh *Diệp Thần*, đôi mắt đen láy rực sáng sự tinh anh của một cô gái hiện đại. Thiếu nữ khẽ ghé sát vành tai hắn, thì thầm hóm hỉnh:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Phương Nhi",
+          "content": "Phu quân, chiến thắng *Kế Thành* này đã giúp chúng ta thâu tóm trọn vẹn cả *Trác Quận* lẫn *U Châu* rồi đó! Uy danh của huynh giờ đây đã ngang hàng với các đại chư hầu lớn rồi. Chúng ta nên thừa thắng xông lên củng cố chính trị và mở rộng thế lực thôi!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vũ* cũng mỉm cười dịu dàng, nếm ngụm trà thơm rồi khẽ cất lời:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vũ",
+          "content": "Thiếp và ca ca *Tử Long* đều nguyện theo sát phu quân, giúp phu quân rèn luyện thêm binh sĩ *U Châu* thành những đạo quân thép!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* thong thả nhấp ngụm rượu thơm, ánh mắt thâm trầm nhìn ra khoảng sân đại sảnh ngợp ánh đuốc hồng. Trận đại thắng trảm *Đặng Mậu* đã giải quyết trọn vẹn mối đe dọa tại *U Châu*, đưa uy danh của hắn và *Bạch Hổ binh* lên tới đỉnh cao chói lọi. Giờ đây, địa bàn rộng lớn, quân sĩ dũng mãnh và lòng dân quy phục đã nằm trọn trong tay hắn.\nTrời đã về khuya, không khí sau đại yến tiệc lắng xuống trong sự yên bình của *Kế Thành*. *Diệp Thần* trở về phòng nghỉ ngơi cao cấp do Thái thú *Lưu Yên* đặc biệt chuẩn bị.\nNgươi sẽ lựa chọn bước đi chiến lược tiếp theo như thế nào để phát triển cơ đồ sau trận đại thắng chấn động *U Châu* này?"
+        }
+      ]
+    },
+    {
+      "id": "873c7d0f-b0a8-4538-bea7-93332851b056",
+      "type": "user_custom_action",
+      "content": "1 ngày nọ, ngươi đang bàn bạc với Lưu Yên về tình hình chiến sự thì nhận được chiếu thư phong làm Chinh Bắc tướng quân. Ban thưởng gồm có đất phong, vàng bạc 10 rương, lụa là vô số"
+    },
+    {
+      "id": "551694cf-c45c-4212-87c1-3c24ade7bda7",
+      "type": "user_custom_action",
+      "content": "1 ngày nọ, ngươi đang bàn bạc với Lưu Yên về tình hình chiến sự thì nhận được chiếu thư phong làm Chinh Bắc tướng quân. Ban thưởng gồm có đất phong Kiến Nghiệp, vàng bạc châu báu 10 rương, lụa là gấm vóc 10 rương."
+    },
+    {
+      "id": "d4e3589a-457b-4242-bbb6-e5f0a3854860",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ánh nắng sớm mùa thu màu vàng ươm chiếu xuyên qua những ô cửa sổ chạm khắc hoa văn tinh xảo của *Phủ Thành Chủ Kế Thành*, rọi lên bản đồ sa bàn quân sự trải rộng giữa đại sảnh. Mùi hương trầm từ đỉnh đồng tỏa ra quyện cùng làn gió lạnh hanh khô của vùng biên thùy. *Diệp Thần* trong bộ chiến giáp bạc sừng sững đứng trước bàn gỗ, tay chỉ vào dải đồi phía bắc *U Châu*, thong thả bàn bạc cùng Thái thú *Lưu Yên* về cục diện dẹp loạn giặc *Hoàng Cân* còn sót lại. Đứng hầu hai bên hắn là *Triệu Vân* uy phong lẫm liệt, *Triệu Vũ* anh vũ dũng mãnh và *Phương Nhi* lanh lợi tinh anh."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Lưu Yên",
+          "content": "Diệp tướng quân, nhờ có *Bạch Hổ binh* thần tốc chi viện, trảm gã trùm giặc *Đặng Mậu*, vùng *U Châu* ta mới có được sự bình yên này. Tuy nhiên, tàn quân *Hoàng Cân* tại các quận lân cận vẫn còn rải rác. Huyện quân chúng ta nên thừa thắng xông lên, củng cố đồn bốt để phòng ngừa bất trắc."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* thong thả húp ngụm trà mát lạnh, gật đầu phân tích:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Lưu Thái thú nói không sai. Việc dẹp loạn cần sự kiên trì, không chỉ đánh bại giặc trên chiến trường mà còn phải an định lòng dân, phát ruộng cấp nhà thì căn cơ mới vững vàng được."
+        },
+        {
+          "type": "narrative",
+          "content": "*Đang lúc hai người trò chuyện sương gió về binh pháp chính sự, từ ngoài cổng đại môn *Phủ Thành Chủ Kế Thành* đột ngột vang lên tiếng kèn đồng âm vang vang vọng cả một góc trời *cúc... cúc... cúc...!* Tiếng vó ngựa dồn dập rầm rộ nghiến trên con đường lát đá dẫn thẳng vào sân đại sảnh.*\nMột toán quan thị vệ triều đình mặc quan phục gấm đỏ thêu phượng, tay cầm cờ hiệu rực rỡ, hộ tống một vị Khâm sứ triều đình tay nâng cao cuộn gấm vàng bước thẳng vào đại sảnh. Lão Khâm sứ cất giọng xướng lớn đầy vẻ uy nghiêm:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Khâm sứ Triều Đình",
+          "content": "Thánh chỉ tới! Thái thú *Lưu Yên* và *Bạch Hổ binh* Thống lĩnh *Diệp Thần* tiếp chỉ!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Lưu Yên* cùng các quan lại lập tức chắp tay cúi đầu nghiêng mình kính cẩn. *Diệp Thần* đứng thẳng lưng, thần thái hiên ngang tựa ngọn thương đâm trời, ôn hòa chắp tay tiếp đón. Lão Khâm sứ từ từ mở cuộn gấm vàng lỏng lẻo, cất giọng sang sảng đọc lớn từng câu chữ chiếu thư sắc phong của triều đình *Lạc Dương*:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Khâm sứ Triều Đình",
+          "content": "Phụng thiên thừa vận, Hoàng đế chiếu曰: *Bạch Hổ binh* Thống lĩnh *Diệp Thần*, thiên sinh thần lực, thương pháp vô song. Lập công lớn trảm tướng diệt giặc *Hoàng Cân* tại *Trác Quận* và *U Châu*, dẹp yên biên thùy, an định bách tính thương sinh, công lao chấn động thiên hạ! Nay đặc biệt sắc phong *Diệp Thần* làm Chinh Bắc Tướng Quân, ban quyền cai quản đất phong *Kiến Nghiệp* phồn hoa. Ban thưởng thêm mười rương vàng bạc châu báu và mười rương lụa là gấm vóc thượng hạng để biểu dương uy danh!"
+        },
+        {
+          "type": "narrative",
+          "content": "Lời chiếu thư vừa dứt, Thái thú *Lưu Yên* cùng toàn thể quan lại có mặt tại *Phủ Thành Chủ Kế Thành* lập tức vỡ òa trong niềm vui mừng khôn xiết. Tiếng chúc tụng vang vọng khắp đại sảnh:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Lưu Yên",
+          "content": "Chúc mừng Diệp tướng quân! Không... nay phải gọi là Chinh Bắc Tướng Quân rồi! Sắc phong Chinh Bắc Tướng Quân và đất phong *Kiến Nghiệp* là phần thưởng xứng đáng nhất cho thiên hạ vô song dũng tướng!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Chúc mừng sư huynh! Danh xưng Chinh Bắc Tướng Quân chấn động thiên hạ, *Kiến Nghiệp* đất lành chờ đón bước chân *Bạch Hổ binh* chúng ta!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vũ",
+          "content": "Phu quân tuyệt vời quá! Nay đã là Chinh Bắc Tướng Quân chính thức của triều đình rồi!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Phương Nhi* đôi mắt đen láy rực sáng sự tinh anh của một cô gái hiện đại, thiếu nữ lanh lợi mỉm cười rạng rỡ, vỗ tay reo lên đầy hãnh diện:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Phương Nhi",
+          "content": "Chúc mừng phu quân! Đất phong *Kiến Nghiệp* vùng *Giang Nam* là nơi trù phú, lương thảo dồi dào bậc nhất. Có được *Kiến Nghiệp* và chức vị Chinh Bắc Tướng Quân, cơ đồ của chúng ta coi như đã có chỗ dựa vững như bàn thạch rồi!"
+        },
+        {
+          "type": "narrative",
+          "content": "Lão Khâm sứ mỉm cười kính cẩn, hai tay nâng cuộn *Chiếu Thư Chinh Bắc Tướng Quân* làm từ gấm vàng thêu rồng phượng tinh xảo dâng lên trước mặt hắn. Ngay sau đó, hàng chục thị vệ triều đình khiêng vào đại sảnh mười chiếc rương gỗ gụ nặng trịch bọc đồng. Khi nắp rương được mở ra, mười rương vàng bạc châu báu lấp lánh tỏa ánh sáng kim ngân chói lọi cả gian phòng, hòa cùng mười rương *Lụa Tơ Tằm Thượng Hạng* mềm mịn như nước, rực rỡ muôn màu sắc khuê các.\n*Diệp Thần* hai tay nhận lấy *Chiếu Thư Chinh Bắc Tướng Quân*, cảm nhận được trọng lượng trách nhiệm và uy danh cuồn cuộn truyền vào lòng bàn tay. Hắn nhìn mười rương vàng bạc và lụa là thượng hạng, mỉm cười tạ ơn Khâm sứ:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đa tạ hảo ý của Thánh thượng và Khâm sứ đại nhân. Diệp Thần ta nhất định dốc lòng bảo quốc an dân, không làm phụ danh hiệu Chinh Bắc Tướng Quân!"
+        },
+        {
+          "type": "narrative",
+          "content": "Lão Khâm sứ sau khi trao xong chiếu thư và lễ vật bèn chắp tay cáo từ, quay trở về *Lạc Dương* bẩm báo. \nTrong đại sảnh *Phủ Thành Chủ Kế Thành*, ngọn lửa mừng công lại bùng cháy rộn rã. *Lưu Yên* vội vàng sai hạ nhân dọn thêm trà thơm rượu ngọt, các quan lại địa phương thi nhau tiến lại nâng ly chúc tụng vị tân Chinh Bắc Tướng Quân. *Diệp Thần* thong thả thưởng thức trà thơm, ánh mắt đâm đăm nhìn cuộn *Chiếu Thư Chinh Bắc Tướng Quân* đặt trên bàn gỗ cùng danh xưng đất phong *Kiến Nghiệp*. \n*Kiến Nghiệp* — vùng đất trù phú phương Nam với dòng sông *Trường Giang* hiểm trở và đồng ruộng mênh mông — chính là bệ phóng hoàn hảo để hắn cùng *Bạch Hổ binh* gây dựng thế lực đỉnh phong trong loạn thế này.\n*Phương Nhi* kéo tay *Triệu Vũ* tiến lại gần *Diệp Thần*, nũng nịu ngắm nghía những xấp *Lụa Tơ Tằm Thượng Hạng* mượt mà trong rương gấm, khẽ thì thì thầm hóm hỉnh:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Phương Nhi",
+          "content": "Phu quân, số lụa tơ tằm thượng hạng này đẹp quá! May hỷ phục hay trang phục mùa đông cho muội, tỷ tỷ *Khinh Y* và tỷ tỷ *Khinh Vân* thì không còn gì bằng. Với lại mười rương vàng bạc này đủ để chúng ta chiêu mộ thêm hàng vạn binh sĩ tinh anh rồi đấy!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vũ* mỉm cười ân cần, vỗ nhẹ lên vai *Phương Nhi* rồi quay sang nhìn *Diệp Thần*:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vũ",
+          "content": "Phu quân, hiện tại danh tiếng Chinh Bắc Tướng Quân của chàng đã lan xa. Chúng ta nên sớm tính toán việc tiếp quản đất phong *Kiến Nghiệp* và gửi tin vui này về *Chân Định* cho *Hạ Hầu* đại nhân cùng *Khinh Y* tỷ tỷ."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* vươn tay ôm lấy bờ vai mềm mại của hai vị thê tử, cảm nhận niềm hạnh phúc trọn vẹn và chí lớn ngút ngàn trong lồng ngực. Chiến thắng *U Châu* cùng danh hiệu Chinh Bắc Tướng Quân chính là dấu mốc chói lọi mở ra một chương mới cho cuộc hành trình chinh chiến bát phương của hắn.\nTrời thu xanh ngắt phủ lên *Kế Thành* một sắc vàng tươi tắn. *Diệp Thần* đứng giữa đại sảnh *Phủ Thành Chủ Kế Thành*, lưng dắt thần binh *Bách Điểu Triều Phượng Thương*, tay siết chặt *Chiếu Thư Chinh Bắc Tướng Quân*, sẵn sàng cho những bước đi vĩ đại tiếp theo.\nNgươi sẽ lựa chọn làm gì tiếp theo?"
+        }
+      ]
     }
   ],
   "choices": [
-    "Triệu tập toàn bộ tướng lĩnh Bạch Hổ binh thảo luận chi tiết phương án dụ địch vào hẻm núi để tiêu diệt {Tỷ lệ thành công: 95%, Hậu quả/Phần thưởng: Thống nhất ý chí chỉ huy, gia tăng danh tiếng quân sự trong lòng binh sĩ}",
-    "Đích thân dắt theo Triệu Vân cùng ba trăm khinh kỵ binh tiến hành tập kích ban đêm vào tiền đồn Hoàng Cân {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Làm hao tổn nhuệ khí địch nhân, có cơ hội bắt sống thám báo lấy thông tin}",
-    "Giao phó cho Phương Nhi và Triệu Vũ tăng cường tuần tra, phòng thủ chặt chẽ kho lương thảo của doanh trại trước thềm trận đấu {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Bảo đảm an toàn tuyệt đối cho căn cơ hậu cần, ngăn chặn thám tử Hoàng Cân phóng hỏa}",
-    "Cho toàn bộ quân lính nghỉ ngơi dưỡng sức trọn vẹn đêm nay, chuẩn bị cho trận quyết chiến trực diện vào sáng sớm mai {Tỷ lệ thành công: 95%, Hậu quả/Phần thưởng: Toàn quân khôi phục thể lực ở trạng thái đỉnh phong, tinh thần chiến đấu sục sôi}"
+    "Mở tiệc yến mừng công tại Phủ Thành Chủ Kế Thành cùng Lưu Yên và khao thưởng toàn bộ chiến sĩ Bạch Hổ binh trước khi thu xếp quân ngũ. {Tỷ lệ thành công: 95%, Hậu quả/Phần thưởng: Gia tăng mạnh mẽ sĩ khí quân sĩ và thắt chặt tình bằng hữu với chính quyền U Châu}",
+    "Sai liên lạc viên mang thư cùng một rương lụa tơ tằm thượng hạng về Chân Định báo tin vui cho Hạ Hầu Khinh Y và Hạ Hầu Kiệt. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: An lòng hậu phương, làm Hạ Hầu gia vô cùng hãnh diện và chuẩn bị đón tiếp}",
+    "Thảo luận cùng Phương Nhi và Triệu Vân về kế hoạch di chuyển lực lượng nòng cốt tiến về vùng đất phong Kiến Nghiệp để đặt nền móng thế lực lâu dài. {Tỷ lệ thành công: 88%, Hậu quả/Phần thưởng: Xây dựng lộ trình chiến lược rõ ràng, chuẩn bị cho việc nhập chủ vùng đất trù phú Giang Nam}",
+    "Tiến ra ngoại thành Kế Thành để trực tiếp ban thưởng vàng bạc và y phục mới cho các tân binh vừa lập công trong trận trảm Đặng Mậu. {Tỷ lệ thành công: 92%, Hậu quả/Phần thưởng: Nâng cao lòng trung thành tuyệt đối của tân binh U Châu dành cho Chinh Bắc Tướng Quân}"
   ],
   "gameMode": "EXPLORATION",
   "activeTrade": {
@@ -4142,5 +5462,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 29
+  "adventureTurnCount": 37
 }
