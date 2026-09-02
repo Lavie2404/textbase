@@ -1,8 +1,8 @@
 {
   "id": "a0f9cc1a-0258-425b-be01-ca06583ced77",
-  "currentTurn": 38,
+  "currentTurn": 40,
   "saveVersion": "2.8",
-  "timestamp": "2026-09-02T10:48:34.852Z",
+  "timestamp": "2026-09-02T13:52:32.625Z",
   "gameSettings": {
     "storyTitle": "Tam quốc chí",
     "theme": "Dã sử, Huyền Huyễn, Tu Tiên, Quân sự, Cổ đại",
@@ -1329,7 +1329,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Cốt",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "b4e45ef3-6ff7-4193-b63c-8d0a75f3d086",
@@ -1405,7 +1406,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Cốt",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "7b0b6302-29a3-4319-abfc-43f7a7a23987",
@@ -1481,7 +1483,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Cốt",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "ebe94827-fa81-4096-bc3c-2eb4c644a601",
@@ -1557,7 +1560,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Cốt",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "b0cfc918-ddee-4e69-b62e-d1c3e61c14ef",
@@ -1633,7 +1637,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Cốt",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "b1a44e67-50fd-41b1-81ce-2ed7657d348f",
@@ -1709,7 +1714,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Cốt",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       }
     ],
     "sharedCooldowns": {
@@ -5334,11 +5340,6 @@
       ]
     },
     {
-      "id": "873c7d0f-b0a8-4538-bea7-93332851b056",
-      "type": "user_custom_action",
-      "content": "1 ngày nọ, ngươi đang bàn bạc với Lưu Yên về tình hình chiến sự thì nhận được chiếu thư phong làm Chinh Bắc tướng quân. Ban thưởng gồm có đất phong, vàng bạc 10 rương, lụa là vô số"
-    },
-    {
       "id": "551694cf-c45c-4212-87c1-3c24ade7bda7",
       "type": "user_custom_action",
       "content": "1 ngày nọ, ngươi đang bàn bạc với Lưu Yên về tình hình chiến sự thì nhận được chiếu thư phong làm Chinh Bắc tướng quân. Ban thưởng gồm có đất phong Kiến Nghiệp, vàng bạc châu báu 10 rương, lụa là gấm vóc 10 rương."
@@ -5443,14 +5444,19 @@
           "content": "*Diệp Thần* vươn tay ôm lấy bờ vai mềm mại của hai vị thê tử, cảm nhận niềm hạnh phúc trọn vẹn và chí lớn ngút ngàn trong lồng ngực. Chiến thắng *U Châu* cùng danh hiệu Chinh Bắc Tướng Quân chính là dấu mốc chói lọi mở ra một chương mới cho cuộc hành trình chinh chiến bát phương của hắn.\nTrời thu xanh ngắt phủ lên *Kế Thành* một sắc vàng tươi tắn. *Diệp Thần* đứng giữa đại sảnh *Phủ Thành Chủ Kế Thành*, lưng dắt thần binh *Bách Điểu Triều Phượng Thương*, tay siết chặt *Chiếu Thư Chinh Bắc Tướng Quân*, sẵn sàng cho những bước đi vĩ đại tiếp theo.\nNgươi sẽ lựa chọn làm gì tiếp theo?"
         }
       ]
+    },
+    {
+      "id": "51953b85-c0e4-4ccd-a553-835fffc58b1f",
+      "type": "user_custom_action",
+      "content": "[Đoạn 1 - Tường thuật]: \"Ngươi viết 1 phong thư giao cho Triệu Vân mang về Chân Định đưa cho Hạ Hầu Thái thú sau đó đón Khinh Y và Đồng Uyên đến Kiến Nghiệp.\"\n[Đoạn 2 - Lời Diệp Thần]: \"Tử Long, thư này giao cho Hạ Hầu Thái thú bảo ông ấy tự giữ lại số binh lính Khăn Vàng lúc trước lại tự huấn luyện rồi cho vào biên chế. Hiện tại ta đã có hơn 55000 binh lính rồi không cần đến chỗ binh ấy nữa. Ngươi đem 5000 binh lính xuất phát đến Chân Định hộ tống Khinh Y và Đồng Uyên sư phụ đến đây\"\n[Đoạn 3 - Lời Triệu Vân]: \"Tử Long tuân lệnh. Nhất định hoàn thành yêu cầu của tướng quân\"\n[Đoạn 4 - Tường thuật]: \"Sau đó ngươi sai người bên dưới làm soái kỳ hình bạch hổ, bên trên thêu 1 chữ Diệp cắm toàn thành Kiến Nghiệp. Lưu Yên vốn là Thái thú Kiến Nghiệp nay bị điều đi Ngô Quận nhậm chức. Ngươi chính thức trở thành chủ nhân của tòa thành này. Lúc này danh tiếng của ngươi cũng khá tốt nên chiêu cáo chiêu binh mãi mã tìm kiếm kỳ nhân. Chỉ cần có tài không màng xuất thân đều được ngươi trọng dụng. Chưa đầy 3 ngày, quân lính đến báo có 1 tráng sĩ vóc dáng đồ sộ, cơ bắp cuồn cuộn, chí khí hơn người. Diện mạo dữ tợn, râu tóc cứng cựa, ánh mắt sắc lẹm đến đầu quân. Đám Bách phu trưởng Bạch Hổ binh đều đã thử đấu với tráng sĩ nhưng đều không qua nổi 1 chiêu đã bại. Ngươi kinh hỷ bảo:\"\n[Đoạn 5 - Lời Diệp Thần]: \"Mau, mau mời người tới\"\n[Đoạn 6 - Tường thuật]: \"1 lát sau, binh sĩ dẫn người đến ngươi liền hỏi:\"\n[Đoạn 7 - Lời Diệp Thần]: \"Không biết tráng sĩ tên họ là gì, là người ở đâu?\"\n[Đoạn 8 - Lời Diệp Thần]: \"Thảo dân Điển Vị, là người quận Trần Lưu. Nay thấy tướng quân uy danh vang xa muốn tới đầu quân\"\n[Đoạn 9 - Tường thuật]: \"Trong lòng ngươi mừng thầm: 'Không ngờ lại là Ác Lai Điển Vi'\"\n[Đoạn 10 - Lời Diệp Thần]: \"Điển Vi, ta thấy ngươi sức mạnh như hổ có muốn đánh với ta 1 trận không?\"\n[Đoạn 11 - Lời Diệp Thần]: \"Chuyện... Chuyện này\"\n[Đoạn 12 - Lời Diệp Thần]: \"Đừng lo, 2 chúng ta giao lưu vài hiệp là được rồi. Ta muốn biết thực lực của ta hiện nay đến đâu\"\n[Đoạn 13 - Lời Diệp Thần]: \"Vậy tướng quân cẩn thận. Sức lực của ta có hơi lớn\"\n[Đoạn 14 - Lời Diệp Thần]: \"Ha ha ha ha. Ta chỉ sợ sức lực của ngươi không lớn. Đi. Chúng ta đi Diễn võ trường\"\n[Đoạn 15 - Tường thuật]: \"Ngươi dẫn Điển Vi đến Diễn võ trường, bảo binh lính đi lấy Bách Điểu Triều Phượng thương của ngươi.\"\n[Đoạn 16 - Lời Diệp Thần]: \"Lão Điển, ngươi dùng binh khí gì\"\n[Đoạn 17 - Lời Diệp Thần]: \"Thảo dân quen dùng vũ khí nặng. Tướng quân ban cho ta 2 cây binh khí nặng là được rồi\"\n[Đoạn 18 - Lời Diệp Thần]: \"Được. Người đâu. Mang 2 cây đoản kích thật nặng ra cho lão Điển\"\n[Đoạn 19 - Tường thuật]: \"Điển Vi nhận vũ khí làm quen 1 chút sau đó nhắc:\"\n[Đoạn 20 - Lời Diệp Thần]: \"Tướng quân cẩn thận đấy\"\n[Đoạn 21 - Tường thuật]: \"Nói xong hắn múa kích lao tới. 2 cây kích nặng mà hắn cầm nhẹ như không dùng hết sức chém tới\"\n[Đoạn 22 - Lời Diệp Thần]: \"Đến hay lắm\"\n[Đoạn 23 - Tường thuật]: \"Ngươi quát to 1 tiếng múa thương đón đỡ. 2 người đánh với nhau mấy chục hiệp. Ban đầu Điển Vi còn sợ làm ngươi bị thương nên không dùng hết thiên sinh thần lực của mình. Nhưng sau khi va chạm với thương của ngươi khiến 2 tay của hắn tê rần mới biết vị tướng quân này không hề tầm thường. Sau khi ăn quả đắng hắn liền nghiêm túc dùng bản lĩnh thật sự đánh hết sức với ngươi. 2 bên công thủ hoán đổi liên tục đánh mấy trăm hiệp. Người xem càng lúc càng nhiều\"\n[Đoạn 24 - Lời Diệp Thần]: \"Các vị quan gia đang xem gì vậy? Người đang đánh nhau kia là ai?\"\n[Đoạn 25 - Lời Binh lính A]: \"Ngươi không biết sao? Người cầm thương kia là thành chủ mới của thành chúng ta. Người còn lại đang múa song kích thì là tráng sĩ mới đến báo danh. Ta cũng không biết tên hắn\"\n[Đoạn 26 - Lời Diệp Thần]: \"Quan gia ngài nói xem trận này ai sẽ thắng?\"\n[Đoạn 27 - Lời Diệp Thần]: \"Ta cũng không biết. Ban nãy tráng sĩ kia đã đánh thắng 10 vị Bách phu trưởng của Bạch Hổ Binh đấy. Ngươi có biết Bạch Hổ Binh có ý nghĩa gì không? Có biết Bách phu trưởng của Bạch Hổ Binh mạnh thế nào không? 100 người như ta cũng không đánh thắng 1 Bách phu trưởng của Bạch Hổ Binh. Vậy mà tráng sĩ kia chỉ dùng 1 chiêu đã đánh bại 1 người. 10 người chỉ dùng đúng 10 chiêu không hơn không kém.\"\n[Đoạn 28 - Lời Diệp Thần]: \"Thật vậy sao? Vậy thành chủ của chúng ta chẳng phải thua chắc rồi sao?\"\n[Đoạn 29 - Lời Diệp Thần]: \"Cái đó thì chưa chắc. Ban đầu ta cũng nghĩ như vậy nhưng 2 người đã đánh hơn 500 hiệp rồi vẫn chưa phân thắng bại. Ta cũng không biết cuối cùng ai thắng ai thua nữa.\"\n[Đoạn 30 - Lời Diệp Thần]: \"Thành chủ của chúng ta lợi hại như vậy sao? Trẻ như vậy chắc cũng mới 15-16 tuổi thôi. Vậy mà đã có bản lĩnh lớn như vậy rồi\"\n[Đoạn 31 - Tường thuật]: \"Trong lúc đó, ngươi và Điển Vi đánh tới gần 1000 hiệp bất phân thắng bại.\"\n[Đoạn 32 - Lời Diệp Thần]: \"Thống khoái. Lão Điển à. Chúng ta nên kết thúc rồi\"\n[Đoạn 33 - Lời Diệp Thần]: \"Đúng vậy tướng quân. Nên kết thúc rồi.\"\n[Đoạn 34 - Tường thuật]: \"Cả 2 hiểu ý dùng ra đòn mạnh nhất\"\n[Đoạn 35 - Lời Diệp Thần]: \"Bách Điểu Triều Phụng\"\n[Đoạn 36 - Lời Điển Vi]: \"Tu La Ác Kích\"\n[Đoạn 37 - Tường thuật]: \"2 Tuyệt Kỹ va chạm. Khói bụi bay mù mịt. Bóng thương va chạm bóng kích. 1 lúc sau khi khói tan đi, Diệp Thần tay cầm chéo thương đứng thẳng trong khi Điển Vi 1 chân quỳ xuống, 2 tay chống 2 kích xuống đất. Thắng bại đã rõ\""
+    },
+    {
+      "id": "f40c8361-5fe8-45f5-8e4a-c3a3e4215a58",
+      "type": "user_custom_action",
+      "content": "[Đoạn 1 - Tường thuật]: \"Ngươi viết 1 phong thư giao cho Triệu Vân mang về Chân Định đưa cho Hạ Hầu Thái thú sau đó đón Khinh Y và Đồng Uyên đến Kiến Nghiệp.\"\n[Đoạn 2 - Lời Diệp Thần]: \"Tử Long, thư này giao cho Hạ Hầu Thái thú bảo ông ấy tự giữ lại số binh lính Khăn Vàng lúc trước lại tự huấn luyện rồi cho vào biên chế. Hiện tại ta đã có hơn 55000 binh lính rồi không cần đến chỗ binh ấy nữa. Ngươi đem 5000 binh lính xuất phát đến Chân Định hộ tống Khinh Y và Đồng Uyên sư phụ đến đây\"\n[Đoạn 3 - Lời Triệu Vân]: \"Tử Long tuân lệnh. Nhất định hoàn thành yêu cầu của tướng quân\"\n[Đoạn 4 - Tường thuật]: \"Sau đó ngươi sai người bên dưới làm soái kỳ hình bạch hổ, bên trên thêu 1 chữ Diệp cắm toàn thành Kiến Nghiệp. Lưu Yên vốn là Thái thú Kiến Nghiệp nay bị điều đi Ngô Quận nhậm chức. Ngươi chính thức trở thành chủ nhân của tòa thành này. Lúc này danh tiếng của ngươi cũng khá tốt nên chiêu cáo chiêu binh mãi mã tìm kiếm kỳ nhân. Chỉ cần có tài không màng xuất thân đều được ngươi trọng dụng. Chưa đầy 3 ngày, quân lính đến báo có 1 tráng sĩ vóc dáng đồ sộ, cơ bắp cuồn cuộn, chí khí hơn người. Diện mạo dữ tợn, râu tóc cứng cựa, ánh mắt sắc lẹm đến đầu quân. Đám Bách phu trưởng Bạch Hổ binh đều đã thử đấu với tráng sĩ nhưng đều không qua nổi 1 chiêu đã bại. Ngươi kinh hỷ bảo:\"\n[Đoạn 5 - Lời Diệp Thần]: \"Mau, mau mời người tới\"\n[Đoạn 6 - Tường thuật]: \"1 lát sau, binh sĩ dẫn người đến ngươi liền hỏi:\"\n[Đoạn 7 - Lời Diệp Thần]: \"Không biết tráng sĩ tên họ là gì, là người ở đâu?\"\n[Đoạn 8 - Lời Diệp Thần]: \"Thảo dân Điển Vị, là người quận Trần Lưu. Nay thấy tướng quân uy danh vang xa muốn tới đầu quân\"\n[Đoạn 9 - Tường thuật]: \"Trong lòng ngươi mừng thầm: 'Không ngờ lại là Ác Lai Điển Vi'\"\n[Đoạn 10 - Lời Diệp Thần]: \"Điển Vi, ta thấy ngươi sức mạnh như hổ có muốn đánh với ta 1 trận không?\"\n[Đoạn 11 - Lời Diệp Thần]: \"Chuyện... Chuyện này\"\n[Đoạn 12 - Lời Diệp Thần]: \"Đừng lo, 2 chúng ta giao lưu vài hiệp là được rồi. Ta muốn biết thực lực của ta hiện nay đến đâu\"\n[Đoạn 13 - Lời Diệp Thần]: \"Vậy tướng quân cẩn thận. Sức lực của ta có hơi lớn\"\n[Đoạn 14 - Lời Diệp Thần]: \"Ha ha ha ha. Ta chỉ sợ sức lực của ngươi không lớn. Đi. Chúng ta đi Diễn võ trường\"\n[Đoạn 15 - Tường thuật]: \"Ngươi dẫn Điển Vi đến Diễn võ trường, bảo binh lính đi lấy Bách Điểu Triều Phượng thương của ngươi.\"\n[Đoạn 16 - Lời Diệp Thần]: \"Lão Điển, ngươi dùng binh khí gì\"\n[Đoạn 17 - Lời Diệp Thần]: \"Thảo dân quen dùng vũ khí nặng. Tướng quân ban cho ta 2 cây binh khí nặng là được rồi\"\n[Đoạn 18 - Lời Diệp Thần]: \"Được. Người đâu. Mang 2 cây đoản kích thật nặng ra cho lão Điển\"\n[Đoạn 19 - Tường thuật]: \"Điển Vi nhận vũ khí làm quen 1 chút sau đó nhắc:\"\n[Đoạn 20 - Lời Diệp Thần]: \"Tướng quân cẩn thận đấy\"\n[Đoạn 21 - Tường thuật]: \"Nói xong hắn múa kích lao tới. 2 cây kích nặng mà hắn cầm nhẹ như không dùng hết sức chém tới\"\n[Đoạn 22 - Lời Diệp Thần]: \"Đến hay lắm\"\n[Đoạn 23 - Tường thuật]: \"Ngươi quát to 1 tiếng múa thương đón đỡ. 2 người đánh với nhau mấy chục hiệp. Ban đầu Điển Vi còn sợ làm ngươi bị thương nên không dùng hết thiên sinh thần lực của mình. Nhưng sau khi va chạm với thương của ngươi khiến 2 tay của hắn tê rần mới biết vị tướng quân này không hề tầm thường. Sau khi ăn quả đắng hắn liền nghiêm túc dùng bản lĩnh thật sự đánh hết sức với ngươi. 2 bên công thủ hoán đổi liên tục đánh mấy trăm hiệp. Người xem càng lúc càng nhiều\"\n[Đoạn 24 - Lời Diệp Thần]: \"Các vị quan gia đang xem gì vậy? Người đang đánh nhau kia là ai?\"\n[Đoạn 25 - Lời Binh lính A]: \"Ngươi không biết sao? Người cầm thương kia là thành chủ mới của thành chúng ta. Người còn lại đang múa song kích thì là tráng sĩ mới đến báo danh. Ta cũng không biết tên hắn\"\n[Đoạn 26 - Lời Diệp Thần]: \"Quan gia ngài nói xem trận này ai sẽ thắng?\"\n[Đoạn 27 - Lời Diệp Thần]: \"Ta cũng không biết. Ban nãy tráng sĩ kia đã đánh thắng 10 vị Bách phu trưởng của Bạch Hổ Binh đấy. Ngươi có biết Bạch Hổ Binh có ý nghĩa gì không? Có biết Bách phu trưởng của Bạch Hổ Binh mạnh thế nào không? 100 người như ta cũng không đánh thắng 1 Bách phu trưởng của Bạch Hổ Binh. Vậy mà tráng sĩ kia chỉ dùng 1 chiêu đã đánh bại 1 người. 10 người chỉ dùng đúng 10 chiêu không hơn không kém.\"\n[Đoạn 28 - Lời Diệp Thần]: \"Thật vậy sao? Vậy thành chủ của chúng ta chẳng phải thua chắc rồi sao?\"\n[Đoạn 29 - Lời Diệp Thần]: \"Cái đó thì chưa chắc. Ban đầu ta cũng nghĩ như vậy nhưng 2 người đã đánh hơn 500 hiệp rồi vẫn chưa phân thắng bại. Ta cũng không biết cuối cùng ai thắng ai thua nữa.\"\n[Đoạn 30 - Lời Diệp Thần]: \"Thành chủ của chúng ta lợi hại như vậy sao? Trẻ như vậy chắc cũng mới 15-16 tuổi thôi. Vậy mà đã có bản lĩnh lớn như vậy rồi\"\n[Đoạn 31 - Tường thuật]: \"Trong lúc đó, ngươi và Điển Vi đánh tới gần 1000 hiệp bất phân thắng bại.\"\n[Đoạn 32 - Lời Diệp Thần]: \"Thống khoái. Lão Điển à. Chúng ta nên kết thúc rồi\"\n[Đoạn 33 - Lời Diệp Thần]: \"Đúng vậy tướng quân. Nên kết thúc rồi.\"\n[Đoạn 34 - Tường thuật]: \"Cả 2 hiểu ý dùng ra đòn mạnh nhất\"\n[Đoạn 35 - Lời Diệp Thần]: \"Bách Điểu Triều Phụng\"\n[Đoạn 36 - Lời Điển Vi]: \"Tu La Ác Kích\"\n[Đoạn 37 - Tường thuật]: \"2 Tuyệt Kỹ va chạm. Khói bụi bay mù mịt. Bóng thương va chạm bóng kích. 1 lúc sau khi khói tan đi, Diệp Thần tay cầm chéo thương đứng thẳng trong khi Điển Vi 1 chân quỳ xuống, 2 tay chống 2 kích xuống đất. Thắng bại đã rõ\""
     }
   ],
-  "choices": [
-    "Mở tiệc yến mừng công tại Phủ Thành Chủ Kế Thành cùng Lưu Yên và khao thưởng toàn bộ chiến sĩ Bạch Hổ binh trước khi thu xếp quân ngũ. {Tỷ lệ thành công: 95%, Hậu quả/Phần thưởng: Gia tăng mạnh mẽ sĩ khí quân sĩ và thắt chặt tình bằng hữu với chính quyền U Châu}",
-    "Sai liên lạc viên mang thư cùng một rương lụa tơ tằm thượng hạng về Chân Định báo tin vui cho Hạ Hầu Khinh Y và Hạ Hầu Kiệt. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: An lòng hậu phương, làm Hạ Hầu gia vô cùng hãnh diện và chuẩn bị đón tiếp}",
-    "Thảo luận cùng Phương Nhi và Triệu Vân về kế hoạch di chuyển lực lượng nòng cốt tiến về vùng đất phong Kiến Nghiệp để đặt nền móng thế lực lâu dài. {Tỷ lệ thành công: 88%, Hậu quả/Phần thưởng: Xây dựng lộ trình chiến lược rõ ràng, chuẩn bị cho việc nhập chủ vùng đất trù phú Giang Nam}",
-    "Tiến ra ngoại thành Kế Thành để trực tiếp ban thưởng vàng bạc và y phục mới cho các tân binh vừa lập công trong trận trảm Đặng Mậu. {Tỷ lệ thành công: 92%, Hậu quả/Phần thưởng: Nâng cao lòng trung thành tuyệt đối của tân binh U Châu dành cho Chinh Bắc Tướng Quân}"
-  ],
+  "choices": [],
   "gameMode": "EXPLORATION",
   "activeTrade": {
     "trader": null,
@@ -5462,5 +5468,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 37
+  "adventureTurnCount": 39
 }
