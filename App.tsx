@@ -19583,8 +19583,22 @@ const fetchWithRetries = async (apiUrl, payload, onRetry = null, maxRetries = 2,
             busyError.isBusyError = true;
             throw busyError;
         }
+        if (label === 'no_models_left') {
+            // 2026-09-01: nhánh riêng vì thông báo kỹ thuật cũ ("no_models_left" + nguyên văn
+            // tiếng Anh của Google) khiến người chơi tưởng nhầm là hết quota key. Thực tế
+            // no_models_left nghĩa là ĐÃ THỬ HẾT thang model mà mọi bậc đều không phản hồi
+            // (thường do máy chủ Google quá tải 503 cho free-tier) — khác hẳn 429 hết quota.
+            const googleDetail = result.detail ? `\n\n[Chi tiết từ Google]: ${result.detail}` : '';
+            const noModelsError = new Error(
+                'Toàn bộ các model AI đều đang quá tải phía máy chủ Google (lỗi 503) nên lượt này không thể thực hiện. '
+                + 'Đây là nghẽn ở phía Google, KHÔNG phải hết quota API key của ngươi — đổi key cũng không giúp. '
+                + 'Tình trạng này thường theo đợt; hãy đợi vài phút rồi bấm thử lại.'
+                + googleDetail
+            );
+            noModelsError.isOverloadedError = true;
+            throw noModelsError;
+        }
         const lastError = new Error(`AI không phản hồi hợp lệ sau khi thử tất cả các model (${label}${result.detail ? ': ' + result.detail : ''}).`);
-        lastError.isOverloadedError = label === 'no_models_left';
         throw lastError;
     };
 
