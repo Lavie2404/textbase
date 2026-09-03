@@ -1,8 +1,8 @@
 {
   "id": "e3b06da5-e8e3-47e0-a8d8-14216eb92dff",
-  "currentTurn": 5,
+  "currentTurn": 7,
   "saveVersion": "2.8",
-  "timestamp": "2026-09-03T09:22:26.178Z",
+  "timestamp": "2026-09-03T17:25:01.050Z",
   "gameSettings": {
     "storyTitle": "Tam quốc chí",
     "theme": "Dã sử, Huyền Huyễn, Tu Tiên, Quân sự, Cổ đại",
@@ -64,6 +64,7 @@
     "customFanFicEntryMethod": "",
     "skipCrisis": true,
     "isDouLuoWorld": false,
+    "isTamQuocWorld": false,
     "initialMartialSouls": [],
     "initialTraits": [
       {
@@ -110,6 +111,10 @@
       "hour": 23
     },
     "weather": "Trời đêm thanh tĩnh, se lạnh",
+    "narrativeCombatState": {
+      "isActive": false,
+      "combatants": []
+    },
     "loreLocations": [],
     "loreNpcs": [],
     "loreItems": [],
@@ -349,7 +354,8 @@
         "isCompanion": false,
         "maxExp": 100,
         "realm": "Phàm Thai",
-        "incomingHealing": 1
+        "incomingHealing": 1,
+        "skills": []
       },
       {
         "id": "npc_lao_luong_01",
@@ -428,7 +434,8 @@
         "Name": "Lão Lương",
         "realm": "Phàm Thai",
         "incomingHealing": 1,
-        "maxExp": 282
+        "maxExp": 282,
+        "skills": []
       },
       {
         "id": "world_npc_dieu_thuyen",
@@ -475,7 +482,37 @@
           "combat_basic_6": null,
           "combat_basic_7": null,
           "combat_basic_8": null,
-          "combat_ultimate": null,
+          "combat_ultimate": {
+            "id": "36182c8b-f594-415b-a686-990de31c7d16",
+            "skillType": "combat",
+            "Name": "Nghê Thường Vũ Nhạc",
+            "description": "Điêu Thuyền thực hiện điệu múa linh thiêng triệu hồi ánh nguyệt hoa huyền ảo, giúp hồi phục sinh lực cho đồng minh đồng thời phóng ra các luồng sóng âm năng lượng làm mê hoặc và giảm sức tấn công của toàn bộ kẻ địch xung quanh.",
+            "technicaldescription": "Hồi máu cho toàn đội dựa trên 250% Công vật lý/phép thuật của bản thân. Đồng thời gây sát thương diện rộng bằng 350% Công lên toàn bộ kẻ địch và giảm 40% sức tấn công của chúng trong vòng 2 lượt.",
+            "Stats": "",
+            "Rarity": "Cực Phẩm",
+            "cooldown": 0,
+            "effects": [
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "all_allies"
+                  },
+                  "visual_effects": {
+                    "vfxType": "aura_up",
+                    "moveType": "stay",
+                    "color": "#00ffcc",
+                    "vfxCount": null
+                  }
+                },
+                "conditions": null
+              }
+            ],
+            "skillCategory": "ultimate",
+            "currentCooldown": 0,
+            "exp": 0,
+            "maxExp": 4000
+          },
           "adventure_1": null,
           "adventure_2": null,
           "adventure_3": null
@@ -514,7 +551,41 @@
         "Personality": "Ngoan ngoãn, hiểu chuyện đến đau lòng, kiên cường nhưng cũng rất nhạy cảm. Nàng chỉ bộc lộ vẻ tinh nghịch, hoạt bát và sự ỷ lại tuyệt đối khi ở bên cạnh Diệp Thần.",
         "Stance": "Coi Diệp Thần là người quan trọng nhất sinh mệnh, tin tưởng và bám lấy không rời.",
         "isAppraised": true,
-        "inParty": true
+        "inParty": true,
+        "skills": [
+          {
+            "id": "36182c8b-f594-415b-a686-990de31c7d16",
+            "skillType": "combat",
+            "Name": "Nghê Thường Vũ Nhạc",
+            "description": "Điêu Thuyền thực hiện điệu múa linh thiêng triệu hồi ánh nguyệt hoa huyền ảo, giúp hồi phục sinh lực cho đồng minh đồng thời phóng ra các luồng sóng âm năng lượng làm mê hoặc và giảm sức tấn công của toàn bộ kẻ địch xung quanh.",
+            "technicaldescription": "Hồi máu cho toàn đội dựa trên 250% Công vật lý/phép thuật của bản thân. Đồng thời gây sát thương diện rộng bằng 350% Công lên toàn bộ kẻ địch và giảm 40% sức tấn công của chúng trong vòng 2 lượt.",
+            "Stats": "",
+            "Rarity": "Cực Phẩm",
+            "cooldown": 0,
+            "effects": [
+              {
+                "action": {
+                  "type": "heal",
+                  "target": {
+                    "type": "all_allies"
+                  },
+                  "visual_effects": {
+                    "vfxType": "aura_up",
+                    "moveType": "stay",
+                    "color": "#00ffcc",
+                    "vfxCount": null
+                  }
+                },
+                "conditions": null
+              }
+            ],
+            "skillCategory": "ultimate",
+            "currentCooldown": 0,
+            "exp": 0,
+            "maxExp": 4000
+          }
+        ],
+        "isCompanionSetupDone": true
       }
     ],
     "sharedCooldowns": {
@@ -1111,14 +1182,14 @@
           "content": "Ngươi mỉm cười hài lòng, khẽ phẩy tay đóng bảng thuộc tính ảo lại. Nhìn xuống cô bé *Tú Nhi* bên cạnh đã ngủ say sưa vì mệt nhoài sau cuộc vận động kịch liệt, ngươi kéo chiếc chăn mỏng ấm áp đắp lên cơ thể mềm mại dính đầy dấu vết ái ân của nàng, rồi nhẹ nhàng đặt một nụ hôn dịu dàng lên vầng trán thanh tú còn lấm tấm mồ mồ hôi hạt.\nLàm xong mọi việc, ngươi nhanh chóng mặc lại bộ y phục vải thô gọn gàng. Tay phải khẽ động, từ khoảng không gian hệ thống vô hình hốt nhiên hiện ra một luồng ánh sáng lạnh lẽo. Thần binh *Bách Điểu Triều Phượng thương* xuất hiện đầy uy dũng trên tay ngươi. Cây thương dài một trượng, nặng bốn mươi cân, thân thương bằng thép lạnh khắc họa tinh xảo hình ảnh bách điểu chầu phượng lấp lánh ánh kim dường như đang rung lên nhè nhẹ, ẩn chứa một luồng linh lực ngùn ngụt trực trào bộc phát. Dù là lần đầu tiên cầm súng thương nặng như thế, nhưng nhờ thuộc tính cơ thể tăng vọt và kỹ năng đạt mức Đại thành, ngươi cảm giác nó nhẹ nhàng và gắn kết như một phần xương thịt của chính mình suốt hàng chục năm qua. Ngươi khẽ xoay nhẹ mũi thương, tạo ra những vệt gió rít gầm rú đầy uy lực vang dội ngoài khoảng sân nhỏ se lạnh.\nNgươi sải bước đi ra ngoài khoảng sân tĩnh mịch của ngôi nhà tranh. Gió đêm thu thổi tung mái tóc đen nhánh, ánh trăng bạc rọi xuống lưỡi thương sắc lẹm tỏa ra sát khí vô hình lấp lánh lạnh lẽo. Ngươi cắm mạnh chuôi thương xuống nền đất đỏ, hai mắt nhắm nghiền, đứng dưỡng thần giữa khoảng sân hoang vu, lặng lẽ chờ đợi toán quan binh hung hãn sắp sửa ập đến gieo rắc tai ương cho thôn dã nghèo nàn này."
         }
       ]
+    },
+    {
+      "id": "31286549-9f5f-4144-b85e-10bb1610b772",
+      "type": "user_custom_action",
+      "content": "[Đoạn 1 - Tường thuật]: \"Ngươi biết đám người này rất có thể là lính của Vương Doãn. Trong lịch sử, Vương Doãn nhận nuôi Điêu Thuyền từ bé. Sau đó dùng nàng ấy để thực hiện liên hoàn kế ly gián Đổng Trác và Lữ Bố. Lần này ngươi tuyệt đối không cho phép chuyện đó xảy ra. Cách tốt nhất chính là không để Điêu Thuyền đi theo Vương Doãn ngay từ bây giờ. Ngươi ngồi xuống cạnh bàn ăn, trên bàn chỉ còn lại 1 vò nước và 2 chiếc bát trống. Ngươi ngồi đó đợi đám binh lính đi tới. Không lâu sau, 6 bóng đen từ phía xa lại gần. Dẫn đầu không phải là Vương Doãn mà là 1 tên lính vóc dáng mập mạp, vẻ mặt đầy ngạo mạn có vẻ là Ngũ trưởng của 5 tên phía sau. Ngươi khẽ lắc đầu tỏ vẻ chán ghét.\"\n[Đoạn 2 - Lời Binh lính A]: \"Tiểu tử, mau mau giao nộp thuế lương thực tháng này ra đây\"\n[Đoạn 3 - Lời Diệp Thần]: \"Tháng này ta đã nộp thuế lương thực rồi\"\n[Đoạn 4 - Lời Binh lính B]: \"Đó là thuế nộp lên triều đình. Còn bây giờ là thuế lương thực nộp cho Vương Doãn đại nhân\"\n[Đoạn 5 - Lời Diệp Thần]: \"Từ khi nào mà bọn ta phải nộp thuế cho Vương đại nhân?\"\n[Đoạn 6 - Lời Binh lính C]: \"Từ bây giờ\"\n[Đoạn 7 - Lời Diệp Thần]: \"Các ngươi làm vậy Vương đại nhân có biết hay không\"\n[Đoạn 8 - Lời Ngũ trưởng của 5 tên lính]: \"Biết hay không không phải chuyện của ngươi. Mau mau giao nộp thuế lương thực, thuế gạo, thuế muối,... nếu không ta sẽ bắt ngươi giam vào nhà lao\"\n[Đoạn 9 - Lời Diệp Thần]: \"Các ngươi nói thế thì ta yên tâm rồi\"\n[Đoạn 10 - Tường thuật]: \"Nghe như vậy ngươi liền biết đám lính này hoàn toàn là thu lợi riêng. Cấp trên của bọn chúng không hề hay biết. Có lẽ trong lịch sử, Điêu Thuyền không có lương thực nộp thuế liền bị bọn chúng bắt mang về. Tình cờ được Vương Doãn nhìn thấy rồi nhận nuôi. Với hành vi này của bọn chúng thì có chết cũng không đáng tiếc.\"\n[Đoạn 11 - Lời Diệp Thần]: \"Thuế thì không có. Nhưng nắm đấm của ta thì có cái đấy. Các ngươi có muốn thử không?\"\n[Đoạn 12 - Lời Diệp Thần]: \"Khốn kiếp tên oắt con dám láo xược. Ăn 1 đao của ta\"\n[Đoạn 13 - Tường thuật]: \"Dứt lời tên lính liền vung Hán đao xông tới. Ngươi nhanh chân nhảy lên đá 1 cước vào bụng khiến gã đập thẳng vào bờ tường. Bờ tường được xếp bằng đá đổ sập xuống chôn vùi nửa thân dưới của hắn. Ngươi phủi phủi tay nói\"\n[Đoạn 14 - Lời Diệp Thần]: \"1 tên\"\n[Đoạn 15 - Tường thuật]: \"4 tên lính với tên Ngũ trưởng thấy vậy liền rút Hán đao ra đồng loạt lao tới. Ngươi bình tĩnh lấy Bách Điểu Triều Phượng thương trong không gian Hệ thống ra đón đỡ. Sau đó 2 tay phát lực quét 1 vòng đẩy 5 tên ra xa. Sau đó ngươi liền lấy bọn chúng luyện tay lấy thêm kinh nghiệm thực chiến và làm quen với chiến đấu đông người. Với chỉ số tứ duy đều gấp đôi người bình thường, ngươi áp đảo bọn chúng hoàn toàn chưa cần nói tới thương pháp đại thành khiến việc dùng thương của ngươi như ăn cơm uống nước vậy. Đánh qua lại nửa canh giờ, ngươi cảm thấy đã đủ rồi liền dứt điểm 1 lần. Kỹ năng Bách Điểu Triều Phượng phát động, 100 loại linh điểu từ thân thương bay ra tấn công. Tiếng phượng minh lanh lảnh, sau đó là bóng phượng hoàng đỏ rực mang theo sức nóng kinh người bay thẳng lên trời rồi lao về phía 5 tên lính. Ầm... 1 tiếng nổ vang trời khiến khu vực tường nhà ngươi chỉ còn là đống đổ nát. cả đám 6 tên bao gồm cả tên đầu tiên bị đá chôn vùi dưới tường đá đều bị ngọn lửa phượng hoàng thiêu cháy kinh mạch và lục phủ ngũ tạng, trong khi đó làn da bên ngoài vẫn bình thường không có vết bỏng nào. Lão Lương nghe tiếng nổ lớn liền chạy đến xem thì chỉ thấy 6 tên nằm trong đống đổ nát đã tắt thở.\"\n[Đoạn 16 - Lời Lão Lương]: \"Tiểu Diệp tử, ngươi... ngươi...\"\n[Đoạn 17 - Lời Diệp Thần]: \"Thôn trưởng, ông cứ đổ hết tội lên đầu ta là được. Đừng để dân làng bị liên lụy. Ngày mai ta và Tú Nhi sẽ rời khỏi đây. Tạm biệt\"\n[Đoạn 18 - Tường thuật]: \"Lão Lương thở dài gật đầu rời đi. Ngươi quay lại phòng ngủ, Điêu Thuyền vẫn đang say giấc. Tiếng thở đều đều phát ra. Ngươi cởi chiếc áo bám đầy bụi đất quẳng xuống đất sau đó chui vào chăn nằm cạnh nàng. Như cảm thấy có hơi ấm quen thuộc, Điêu Thuyền quay cơ thể xinh đẹp trần trụi sang ôm lấy cổ ngươi ngủ ngon lành. Ngươi khẽ hôn lên trán nàng rồi cũng đi vào giấc ngủ. Sáng hôm sau, ngay khi gà gáy hết canh 5 thì Điêu Thuyền tỉnh dậy\"\n[Đoạn 19 - Lời Điêu Thuyền]: \"AAAAAA\"\n[Đoạn 20 - Tường thuật]: \"Ngươi bật dậy hỏi\"\n[Đoạn 21 - Lời Diệp Thần]: \"Tú Nhi, có chuyện gì thế\"\n[Đoạn 22 - Lời Điêu Thuyền]: \"Sao... Sao ta lại ngủ ở đây? Chuyện... Chuyện này là như thế nào? Y phục của ta đâu?\"\n[Đoạn 23 - Tường thuật]: \"Ngươi dụi dụi mắt còn ngái ngủ, uể oải nói:\"\n[Đoạn 24 - Lời Diệp Thần]: \"Muội quên hết chuyện tối qua rồi sao? Y phục của muội ở trên bàn cạnh đầu giường đó.\"\n[Đoạn 25 - Tường thuật]: \"Điêu Thuyền mặc lại y phục rồi đỏ mặt nhớ lại những gì đã xảy ra đêm qua. Nàng lấy 2 tay che mặt ngồi trên ghế\"\n[Đoạn 26 - Lời Điêu Thuyền]: \"Aaaaa. Xấu hổ chết mất. Diệp ca ca là đồ lưu manh... ~\"\n[Đoạn 27 - Tường thuật]: \"Mặc dù là bị nàng mắng là đồ lưu manh nhưng giọng trẻ con của nàng nghe không ra sắc thái mắng người mà giống như đang làm nũng. Ngươi vươn vai cười nói:\"\n[Đoạn 28 - Lời Diệp Thần]: \"Chẳng phải muội cũng hưởng thụ quá trình lắm sao? Lại nói nếu không làm vậy thì đêm qua chúng ta đã bị quan binh bắt rồi\"\n[Đoạn 29 - Tường thuật]: \"Như sực nhớ ra điều gì, Điêu Thuyền lo lắng hỏi\"\n[Đoạn 30 - Lời Điêu Thuyền]: \"Đúng rồi. Quan binh hôm qua đến thu thuế lương đâu rồi? Chúng ta sẽ không bị truy nã chứ?\"\n[Đoạn 31 - Lời Diệp Thần]: \"Bị truy nã hay không thì ta không biết nhưng bọn chúng đã chết rồi\"\n[Đoạn 32 - Tường thuật]: \"Ngươi vừa nói vừa chỉ tay ra sân. Bên ngoài vẫn còn vết tích đống đổ nát của trận đại chiến hôm qua nhưng 6 cái xác đã không còn. Ngươi nghĩ thầm:\"\n[Đoạn 33 - Lời Diệp Thần]: \"Có lẽ Lão Lương đã cho người xử lý rồi. Chỉ là không biết có khai chúng ta ra không. Nhưng cô nàng này đêm qua ngủ cũng say thật đấy. Nhà Lão Lương ở đầu làng còn nghe thấy tiếng nổ, nàng ấy thì hay rồi, nằm ngay cạnh mà vẫn ngủ ngon được\"\n[Đoạn 34 - Lời Điêu Thuyền]: \"Chết... Chết rồi? Sao lại chết rồi? Tối qua sau khi làm chuyện đó ta mệt quá ngủ thiếp đi. Sau đó tỉnh lại thì trời đã sáng...\"\n[Đoạn 35 - Lời Diệp Thần]: \"Chính là chết rồi. Bị ta đánh chết rồi. Thế nên hôm nay ta phải chạy thôi. Tạm biệt Tú Nhi\"\n[Đoạn 36 - Tường thuật]: \"Ngươi nửa đùa nửa thật nói bằng giọng trêu đùa\"\n[Đoạn 37 - Lời Điêu Thuyền]: \"Huynh?\"\n[Đoạn 38 - Lời Diệp Thần]: \"Ta\"\n[Đoạn 39 - Lời Điêu Thuyền]: \"Đánh chết quan binh\"\n[Đoạn 40 - Lời Diệp Thần]: \"Đánh chết quan binh\"\n[Đoạn 41 - Tường thuật]: \"Ngươi lặp lại như khẳng định\"\n[Đoạn 42 - Lời Điêu Thuyền]: \"Vậy huynh còn vào ngủ? Sao không gọi muội dậy đi trốn?\"\n[Đoạn 43 - Lời Diệp Thần]: \"Ta thấy muội ngủ ngon quá không nỡ gọi. Tiếng nổ lớn như vậy muội còn không dậy thì hẳn là muội mệt lắm. Có điều giết người là 1 mình ta làm. Có trốn thì cũng chỉ 1 mình ta trốn thôi chứ. Gọi muội dậy làm gì?\"\n[Đoạn 44 - Tường thuật]: \"Ngươi vẫn dùng giọng trêu chọc nói\"\n[Đoạn 45 - Lời Điêu Thuyền]: \"Huynh còn nói. Chuyện đó cũng đã làm rồi. Huynh dám bỏ rơi muội sao? Huynh định không chịu trách nhiệm?\"\n[Đoạn 46 - Tường thuật]: \"Vừa nói Điêu Thuyền vừa rưng rưng nước mắt. Ngươi nhịn không được phì cười lấy tay lau nước mắt cho nàng\"\n[Đoạn 47 - Lời Diệp Thần]: \"Được rồi đừng khóc. Ta chỉ trêu muội thôi. Nếu ta không chịu trách nhiệm thì sao còn đi vào ngủ với muội? Ta phải sớm rời đi từ đêm qua rồi. Ta vào ngủ là đợi muội đi cùng đó. Mau mau thu dọn đồ đạc rồi chạy thôi. Không biết lúc nào quan binh lại sai người tới đâu\"\n[Đoạn 48 - Lời Điêu Thuyền]: \"Thật không?\"\n[Đoạn 49 - Lời Diệp Thần]: \"Thật\"\n[Đoạn 50 - Lời Điêu Thuyền]: \"Đươc. Muội tin huynh. Bây giờ chúng ta thu dọn đồ đạc rồi chạy trốn\"\n[Đoạn 51 - Tường thuật]: \"Sau đó 2 người thu dọn đồ đạc cá nhân. Đồ đạc cũng không có gì, chỉ vài bộ quần áo và 1 ít lương khô cho vào tay nải. Xong xuôi, ngươi dắt Điêu Thuyền rời khỏi nhà. Đi được 5 bước cả 2 quay đầu nhìn lại lưu luyến ngôi nhà đã gắn bó 8 năm. Cảm giác có chút không nỡ\"\n[Đoạn 52 - Lời Diệp Thần]: \"Không nỡ rời khỏi nơi này sao?\"\n[Đoạn 53 - Tường thuật]: \"Điêu Thuyền lắc đầu đáp\"\n[Đoạn 54 - Lời Điêu Thuyền]: \"Không phải. Ta chỉ không nỡ rời bỏ ký ức của chúng ta ở đây mà thôi\"\n[Đoạn 55 - Tường thuật]: \"Ngươi xoa đầu nàng nói\"\n[Đoạn 56 - Lời Diệp Thần]: \"Không sao. Chỉ cần ở cạnh nhau thì sẽ có kỷ niệm mới\"\n[Đoạn 57 - Tường thuật]: \"Điêu Thuyền gật đầu\"\n[Đoạn 58 - Lời Điêu Thuyền]: \"Chúng ta đi thôi\""
     }
   ],
-  "choices": [
-    "Chủ động tiến ra đầu thôn, ẩn mình dưới rặng tre để phục kích toán quan binh ngay khi chúng vừa đặt chân đến làng. {Tỷ lệ thành công: 80%, Hậu quả/Phần thưởng: Tạo thế chủ động bất ngờ, tiêu diệt nhanh gọn toán quân tiên phong nhưng có nguy cơ bị bao vây nếu kẻ địch quá đông}",
-    "Tiếp tục đứng yên giữa sân tĩnh mịch dưỡng thần, lấy tĩnh chế động, chờ đợi toán quan binh tự xông vào để dùng thương pháp Bách Điểu Triều Phượng quét sạch chúng. {Tỷ lệ thành công: 75%, Hậu quả/Phần thưởng: Thể hiện khí phách uy nghiêm, bảo vệ trực tiếp phòng ngủ của Điêu Thuyền nhưng sân nhà sẽ bị tàn phá nặng nề}",
-    "Sử dụng bộ pháp nhanh nhạy leo lên mái nhà tranh của căn hộ, quan sát toàn cảnh hướng di chuyển của địch từ trên cao để đưa ra đối sách vây bắt tối ưu. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Chiếm lĩnh cao điểm dễ dàng né tránh đòn đánh tầm xa, nắm rõ số lượng quân số đối phương nhưng tốn thời gian chuẩn bị}",
-    "Vận hành chân khí chạy dọc thân thương để làm nóng vũ khí, tạo ra những đường thương thử nghiệm uy lực nhằm khởi động cơ thể trước trận huyết chiến đầu tiên. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Đưa trạng thái chiến đấu lên mức cao nhất, tinh thần phấn chấn tột độ nhưng tiếng rít gió của ngọn thương có thể đánh động kẻ địch từ sớm}"
-  ],
+  "choices": [],
   "gameMode": "EXPLORATION",
   "activeTrade": {
     "trader": null,
@@ -1130,5 +1201,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 4
+  "adventureTurnCount": 6
 }
