@@ -1,8 +1,8 @@
 {
   "id": "a0f9cc1a-0258-425b-be01-ca06583ced77",
-  "currentTurn": 40,
+  "currentTurn": 41,
   "saveVersion": "2.8",
-  "timestamp": "2026-09-02T13:52:32.625Z",
+  "timestamp": "2026-09-03T02:03:42.839Z",
   "gameSettings": {
     "storyTitle": "Tam quốc chí",
     "theme": "Dã sử, Huyền Huyễn, Tu Tiên, Quân sự, Cổ đại",
@@ -228,6 +228,12 @@
         "NPC": "Triệu Vân",
         "Standing": "Kính nể",
         "Reason": "Chấp nhận làm sư huynh phò tá đại nghiệp"
+      },
+      {
+        "id": "64da7442-a977-48d8-9805-1ad90b025b02",
+        "NPC": "Điển Vi",
+        "Standing": "Trung thành",
+        "Reason": "Thán phục võ nghệ và sức mạnh vô song của ngươi sau trận so tài tại diễn võ trường."
       }
     ],
     "quests": [],
@@ -257,7 +263,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 33.30000000000004,
+        "exp": 33.40000000000004,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": 0,
@@ -1112,7 +1118,7 @@
         "isPlayer": false,
         "loreId": null,
         "level": 30,
-        "exp": 752.8140000000003,
+        "exp": 806.0520000000004,
         "progressionState": "Tu Luyện Thường",
         "ap": 0,
         "currency": 0,
@@ -1716,6 +1722,318 @@
         "incomingHealing": 1,
         "maxExp": 100,
         "skills": []
+      },
+      {
+        "id": "world_npc_dien_vi",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 35,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 129,
+          "atk": 124,
+          "def": 124,
+          "spd": 124
+        },
+        "current_location_id": "3a9db803-a659-467a-9066-b8fa474d506e",
+        "baseHp": 880,
+        "baseAtk": 88,
+        "baseDef": 44,
+        "baseSpd": 64,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 26680,
+        "maxhp": 26680,
+        "atk": 1328,
+        "def": 1284,
+        "spd": 1304,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 15,
+        "description": "",
+        "stance": "Thân thiện",
+        "Gender": "Nam",
+        "sizeCategory": "2",
+        "Name": "Điển Vi",
+        "realm": "Dưỡng Mạch",
+        "incomingHealing": 1,
+        "maxExp": 120759,
+        "Role": "Du hiệp ẩn dật / Cường hào mãnh sĩ",
+        "Appearance": "Thân hình cao lớn như ngọn núi nhỏ, vai rộng lưng dày, cơ bắp cuồn cuộn như đúc bằng sắt thép. Mái tóc đen búi thô xơ xác, râu xồm xoàm cứng cựa, ánh mắt rực lửa như hổ dữ. Hắn khoác áo vải thô rách xơ xướp để lộ lồng ngực vạm vỡ hằn sâu nhiều vết sẹo, tay cầm đôi song kích sắt nặng trịch tỏa ra sát khí cuồn cuộn.",
+        "Backstory": "Điển Vi vừa trốn chạy khỏi sự truy nã của quan phủ sau khi một mình vác binh khí giết chết một hào cường ác bá ở huyện Kỷ để trả thù cho bạn. Hắn lẩn khuất trong rừng sâu vùng Trần Lưu, sống bằng nghề săn mãnh thú bằng tay không. Dù bị coi là kẻ giang hồ liều mạng, hắn luôn khao khát gặp được một minh chủ thực sự để cống hiến sức mạnh vô song của mình.",
+        "Personality": "Bộc trực, nóng nảy, dũng mãnh vô song, coi trọng nghĩa khí, tuyệt đối trung thành với người mình kính phục.",
+        "Stance": "Tò mò và tò mò quan sát hành động của nhân vật chính.",
+        "isAppraised": true
+      },
+      {
+        "id": "2025d180-e36d-4884-9935-515bd3aec2f9",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 6,
+          "atk": 2,
+          "def": 2,
+          "spd": 2
+        },
+        "current_location_id": "3a9db803-a659-467a-9066-b8fa474d506e",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 1400,
+        "maxhp": 1400,
+        "atk": 40,
+        "def": 30,
+        "spd": 50,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Binh lính B",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Phàm Cốt",
+        "incomingHealing": 1,
+        "maxExp": 100
+      },
+      {
+        "id": "a057df98-18ce-4491-8645-8b8be2efb969",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 6,
+          "atk": 2,
+          "def": 2,
+          "spd": 2
+        },
+        "current_location_id": "3a9db803-a659-467a-9066-b8fa474d506e",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 1400,
+        "maxhp": 1400,
+        "atk": 40,
+        "def": 30,
+        "spd": 50,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Quan gia A",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Phàm Cốt",
+        "incomingHealing": 1,
+        "maxExp": 100
+      },
+      {
+        "id": "33e35694-81ba-47d5-8c29-edf2d04c3851",
+        "isPlayer": false,
+        "loreId": null,
+        "level": 1,
+        "exp": 0,
+        "progressionState": "Tu Luyện Thường",
+        "ap": 0,
+        "currency": 0,
+        "allocatedPoints": {
+          "hp": 6,
+          "atk": 2,
+          "def": 2,
+          "spd": 2
+        },
+        "current_location_id": "3a9db803-a659-467a-9066-b8fa474d506e",
+        "baseHp": 200,
+        "baseAtk": 20,
+        "baseDef": 10,
+        "baseSpd": 30,
+        "baseCr": 15,
+        "baseCdmg": 200,
+        "baseDmgAmp": 100,
+        "baseDmgRes": 100,
+        "baseEvasion": 100,
+        "hp": 1400,
+        "maxhp": 1400,
+        "atk": 40,
+        "def": 30,
+        "spd": 50,
+        "cr": 15,
+        "cdmg": 200,
+        "dmgAmp": 100,
+        "dmgRes": 0,
+        "evasion": 0,
+        "learnedSkills": [],
+        "equippedSkills": {
+          "combat_basic_1": null,
+          "combat_basic_2": null,
+          "combat_basic_3": null,
+          "combat_basic_4": null,
+          "combat_basic_5": null,
+          "combat_basic_6": null,
+          "combat_basic_7": null,
+          "combat_basic_8": null,
+          "combat_ultimate": null,
+          "adventure_1": null,
+          "adventure_2": null,
+          "adventure_3": null
+        },
+        "potionCooldown": 0,
+        "longTermStatuses": [],
+        "combatStatuses": [],
+        "inventory": [],
+        "pendingSkillsToLearn": [],
+        "equippedItems": {
+          "Đầu": null,
+          "Thân": null,
+          "Chân": null,
+          "Vũ khí chính": null,
+          "Vũ khí phụ": null,
+          "Phụ kiện 1": null,
+          "Phụ kiện 2": null,
+          "Phương tiện": null,
+          "Trữ vật": null,
+          "Dị thường": null
+        },
+        "isCompanion": false,
+        "affinity": 0,
+        "Name": "Binh lính A",
+        "description": "Một nhân vật xuất hiện trong câu chuyện.",
+        "Stance": "Trung lập",
+        "realm": "Phàm Cốt",
+        "incomingHealing": 1,
+        "maxExp": 100
       }
     ],
     "sharedCooldowns": {
@@ -1739,7 +2057,7 @@
           "turn": 17
         }
       ],
-      "lastExpResolvedTurn": 37
+      "lastExpResolvedTurn": 40
     },
     "loreQuests": [],
     "systemAssistant": {
@@ -1759,8 +2077,8 @@
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 37,
-      "world_time": 37,
+      "turn_id": 40,
+      "world_time": 40,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -1775,208 +2093,6 @@
       }
     },
     "stateHistory": [
-      {
-        "time": {
-          "year": 1,
-          "month": 3,
-          "day": 1,
-          "hour": 5
-        },
-        "location_id": "3a9db803-a659-467a-9066-b8fa474d506e",
-        "weather": "Nắng ban mai",
-        "characters": [
-          {
-            "id": "player",
-            "Name": "Diệp Thần",
-            "level": 1,
-            "exp": 33.10000000000004,
-            "hp": 2000,
-            "maxhp": 2000,
-            "currency": 0,
-            "inventory": [
-              {
-                "Name": "Bách Điểu Triều Phượng Thương",
-                "quantity": 1
-              },
-              {
-                "Name": "Chiếu Thư Chinh Bắc Tướng Quân",
-                "quantity": 1
-              },
-              {
-                "Name": "Lụa Tơ Tằm Thượng Hạng",
-                "quantity": 10
-              }
-            ],
-            "longTermStatuses": []
-          },
-          {
-            "id": "npc_phuong_nhi",
-            "Name": "Phương Nhi",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "3f81fa92-6f49-424a-b033-0bc0b59c4f02",
-            "Name": "Đường Lão",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "2f2416de-d7cf-4273-8e4c-40b4b175b425",
-            "Name": "Tướng thổ phỉ",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "npc_ha_hau_kiet",
-            "Name": "Hạ Hầu Kiệt",
-            "level": 32,
-            "exp": 0,
-            "hp": 24220,
-            "maxhp": 24220,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "e170e78c-e6b4-43ed-87f4-1e2bf86dcfec",
-            "Name": "Quản gia",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "4f98e7bc-d0f0-4084-9c7f-6e369faa76ef",
-            "Name": "Hạ Hầu Khinh Y",
-            "level": 18,
-            "exp": 0,
-            "hp": 7140,
-            "maxhp": 7140,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "23021bfa-edcd-4a40-b02b-5c787f244efe",
-            "Name": "Đồng Uyên",
-            "level": 95,
-            "exp": 0,
-            "hp": 109480,
-            "maxhp": 109480,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "npc_trieu_van",
-            "Name": "Triệu Vân",
-            "level": 25,
-            "exp": 0,
-            "hp": 16880,
-            "maxhp": 16880,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "npc_trieu_vu",
-            "Name": "Triệu Vũ",
-            "level": 30,
-            "exp": 646.3380000000002,
-            "hp": 18380,
-            "maxhp": 18380,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "54f7b38f-5970-4d38-8b3b-931a3a56162d",
-            "Name": "Các Tướng",
-            "level": 1,
-            "exp": 0,
-            "hp": 1400,
-            "maxhp": 1400,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "b4e45ef3-6ff7-4193-b63c-8d0a75f3d086",
-            "Name": "Trình Viễn Chí",
-            "level": 1,
-            "exp": 0,
-            "hp": 1400,
-            "maxhp": 1400,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "7b0b6302-29a3-4319-abfc-43f7a7a23987",
-            "Name": "Bạch Hổ binh",
-            "level": 1,
-            "exp": 0,
-            "hp": 1400,
-            "maxhp": 1400,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "ebe94827-fa81-4096-bc3c-2eb4c644a601",
-            "Name": "Quân Hoàng Cân",
-            "level": 1,
-            "exp": 0,
-            "hp": 1400,
-            "maxhp": 1400,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "b0cfc918-ddee-4e69-b62e-d1c3e61c14ef",
-            "Name": "Trinh sát",
-            "level": 1,
-            "exp": 0,
-            "hp": 1400,
-            "maxhp": 1400,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "b1a44e67-50fd-41b1-81ce-2ed7657d348f",
-            "Name": "Lưu Yên",
-            "level": 1,
-            "exp": 0,
-            "hp": 1400,
-            "maxhp": 1400,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          }
-        ],
-        "quests": []
-      },
       {
         "time": {
           "year": 1,
@@ -2104,6 +2220,208 @@
             "Name": "Triệu Vũ",
             "level": 30,
             "exp": 699.5760000000002,
+            "hp": 18380,
+            "maxhp": 18380,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "54f7b38f-5970-4d38-8b3b-931a3a56162d",
+            "Name": "Các Tướng",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "b4e45ef3-6ff7-4193-b63c-8d0a75f3d086",
+            "Name": "Trình Viễn Chí",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "7b0b6302-29a3-4319-abfc-43f7a7a23987",
+            "Name": "Bạch Hổ binh",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "ebe94827-fa81-4096-bc3c-2eb4c644a601",
+            "Name": "Quân Hoàng Cân",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "b0cfc918-ddee-4e69-b62e-d1c3e61c14ef",
+            "Name": "Trinh sát",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "b1a44e67-50fd-41b1-81ce-2ed7657d348f",
+            "Name": "Lưu Yên",
+            "level": 1,
+            "exp": 0,
+            "hp": 1400,
+            "maxhp": 1400,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          }
+        ],
+        "quests": []
+      },
+      {
+        "time": {
+          "year": 1,
+          "month": 3,
+          "day": 1,
+          "hour": 5
+        },
+        "location_id": "3a9db803-a659-467a-9066-b8fa474d506e",
+        "weather": "Nắng ban mai",
+        "characters": [
+          {
+            "id": "player",
+            "Name": "Diệp Thần",
+            "level": 1,
+            "exp": 33.30000000000004,
+            "hp": 2000,
+            "maxhp": 2000,
+            "currency": 0,
+            "inventory": [
+              {
+                "Name": "Bách Điểu Triều Phượng Thương",
+                "quantity": 1
+              },
+              {
+                "Name": "Chiếu Thư Chinh Bắc Tướng Quân",
+                "quantity": 1
+              },
+              {
+                "Name": "Lụa Tơ Tằm Thượng Hạng",
+                "quantity": 10
+              }
+            ],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_phuong_nhi",
+            "Name": "Phương Nhi",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "3f81fa92-6f49-424a-b033-0bc0b59c4f02",
+            "Name": "Đường Lão",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "2f2416de-d7cf-4273-8e4c-40b4b175b425",
+            "Name": "Tướng thổ phỉ",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_ha_hau_kiet",
+            "Name": "Hạ Hầu Kiệt",
+            "level": 32,
+            "exp": 0,
+            "hp": 24220,
+            "maxhp": 24220,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "e170e78c-e6b4-43ed-87f4-1e2bf86dcfec",
+            "Name": "Quản gia",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "4f98e7bc-d0f0-4084-9c7f-6e369faa76ef",
+            "Name": "Hạ Hầu Khinh Y",
+            "level": 18,
+            "exp": 0,
+            "hp": 7140,
+            "maxhp": 7140,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "23021bfa-edcd-4a40-b02b-5c787f244efe",
+            "Name": "Đồng Uyên",
+            "level": 95,
+            "exp": 0,
+            "hp": 109480,
+            "maxhp": 109480,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_trieu_van",
+            "Name": "Triệu Vân",
+            "level": 25,
+            "exp": 0,
+            "hp": 16880,
+            "maxhp": 16880,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_trieu_vu",
+            "Name": "Triệu Vũ",
+            "level": 30,
+            "exp": 752.8140000000003,
             "hp": 18380,
             "maxhp": 18380,
             "currency": 0,
@@ -5446,17 +5764,307 @@
       ]
     },
     {
-      "id": "51953b85-c0e4-4ccd-a553-835fffc58b1f",
+      "id": "35e5163b-2e6b-49ed-8c56-6d7d5b6146dd",
       "type": "user_custom_action",
       "content": "[Đoạn 1 - Tường thuật]: \"Ngươi viết 1 phong thư giao cho Triệu Vân mang về Chân Định đưa cho Hạ Hầu Thái thú sau đó đón Khinh Y và Đồng Uyên đến Kiến Nghiệp.\"\n[Đoạn 2 - Lời Diệp Thần]: \"Tử Long, thư này giao cho Hạ Hầu Thái thú bảo ông ấy tự giữ lại số binh lính Khăn Vàng lúc trước lại tự huấn luyện rồi cho vào biên chế. Hiện tại ta đã có hơn 55000 binh lính rồi không cần đến chỗ binh ấy nữa. Ngươi đem 5000 binh lính xuất phát đến Chân Định hộ tống Khinh Y và Đồng Uyên sư phụ đến đây\"\n[Đoạn 3 - Lời Triệu Vân]: \"Tử Long tuân lệnh. Nhất định hoàn thành yêu cầu của tướng quân\"\n[Đoạn 4 - Tường thuật]: \"Sau đó ngươi sai người bên dưới làm soái kỳ hình bạch hổ, bên trên thêu 1 chữ Diệp cắm toàn thành Kiến Nghiệp. Lưu Yên vốn là Thái thú Kiến Nghiệp nay bị điều đi Ngô Quận nhậm chức. Ngươi chính thức trở thành chủ nhân của tòa thành này. Lúc này danh tiếng của ngươi cũng khá tốt nên chiêu cáo chiêu binh mãi mã tìm kiếm kỳ nhân. Chỉ cần có tài không màng xuất thân đều được ngươi trọng dụng. Chưa đầy 3 ngày, quân lính đến báo có 1 tráng sĩ vóc dáng đồ sộ, cơ bắp cuồn cuộn, chí khí hơn người. Diện mạo dữ tợn, râu tóc cứng cựa, ánh mắt sắc lẹm đến đầu quân. Đám Bách phu trưởng Bạch Hổ binh đều đã thử đấu với tráng sĩ nhưng đều không qua nổi 1 chiêu đã bại. Ngươi kinh hỷ bảo:\"\n[Đoạn 5 - Lời Diệp Thần]: \"Mau, mau mời người tới\"\n[Đoạn 6 - Tường thuật]: \"1 lát sau, binh sĩ dẫn người đến ngươi liền hỏi:\"\n[Đoạn 7 - Lời Diệp Thần]: \"Không biết tráng sĩ tên họ là gì, là người ở đâu?\"\n[Đoạn 8 - Lời Diệp Thần]: \"Thảo dân Điển Vị, là người quận Trần Lưu. Nay thấy tướng quân uy danh vang xa muốn tới đầu quân\"\n[Đoạn 9 - Tường thuật]: \"Trong lòng ngươi mừng thầm: 'Không ngờ lại là Ác Lai Điển Vi'\"\n[Đoạn 10 - Lời Diệp Thần]: \"Điển Vi, ta thấy ngươi sức mạnh như hổ có muốn đánh với ta 1 trận không?\"\n[Đoạn 11 - Lời Diệp Thần]: \"Chuyện... Chuyện này\"\n[Đoạn 12 - Lời Diệp Thần]: \"Đừng lo, 2 chúng ta giao lưu vài hiệp là được rồi. Ta muốn biết thực lực của ta hiện nay đến đâu\"\n[Đoạn 13 - Lời Diệp Thần]: \"Vậy tướng quân cẩn thận. Sức lực của ta có hơi lớn\"\n[Đoạn 14 - Lời Diệp Thần]: \"Ha ha ha ha. Ta chỉ sợ sức lực của ngươi không lớn. Đi. Chúng ta đi Diễn võ trường\"\n[Đoạn 15 - Tường thuật]: \"Ngươi dẫn Điển Vi đến Diễn võ trường, bảo binh lính đi lấy Bách Điểu Triều Phượng thương của ngươi.\"\n[Đoạn 16 - Lời Diệp Thần]: \"Lão Điển, ngươi dùng binh khí gì\"\n[Đoạn 17 - Lời Diệp Thần]: \"Thảo dân quen dùng vũ khí nặng. Tướng quân ban cho ta 2 cây binh khí nặng là được rồi\"\n[Đoạn 18 - Lời Diệp Thần]: \"Được. Người đâu. Mang 2 cây đoản kích thật nặng ra cho lão Điển\"\n[Đoạn 19 - Tường thuật]: \"Điển Vi nhận vũ khí làm quen 1 chút sau đó nhắc:\"\n[Đoạn 20 - Lời Diệp Thần]: \"Tướng quân cẩn thận đấy\"\n[Đoạn 21 - Tường thuật]: \"Nói xong hắn múa kích lao tới. 2 cây kích nặng mà hắn cầm nhẹ như không dùng hết sức chém tới\"\n[Đoạn 22 - Lời Diệp Thần]: \"Đến hay lắm\"\n[Đoạn 23 - Tường thuật]: \"Ngươi quát to 1 tiếng múa thương đón đỡ. 2 người đánh với nhau mấy chục hiệp. Ban đầu Điển Vi còn sợ làm ngươi bị thương nên không dùng hết thiên sinh thần lực của mình. Nhưng sau khi va chạm với thương của ngươi khiến 2 tay của hắn tê rần mới biết vị tướng quân này không hề tầm thường. Sau khi ăn quả đắng hắn liền nghiêm túc dùng bản lĩnh thật sự đánh hết sức với ngươi. 2 bên công thủ hoán đổi liên tục đánh mấy trăm hiệp. Người xem càng lúc càng nhiều\"\n[Đoạn 24 - Lời Diệp Thần]: \"Các vị quan gia đang xem gì vậy? Người đang đánh nhau kia là ai?\"\n[Đoạn 25 - Lời Binh lính A]: \"Ngươi không biết sao? Người cầm thương kia là thành chủ mới của thành chúng ta. Người còn lại đang múa song kích thì là tráng sĩ mới đến báo danh. Ta cũng không biết tên hắn\"\n[Đoạn 26 - Lời Diệp Thần]: \"Quan gia ngài nói xem trận này ai sẽ thắng?\"\n[Đoạn 27 - Lời Diệp Thần]: \"Ta cũng không biết. Ban nãy tráng sĩ kia đã đánh thắng 10 vị Bách phu trưởng của Bạch Hổ Binh đấy. Ngươi có biết Bạch Hổ Binh có ý nghĩa gì không? Có biết Bách phu trưởng của Bạch Hổ Binh mạnh thế nào không? 100 người như ta cũng không đánh thắng 1 Bách phu trưởng của Bạch Hổ Binh. Vậy mà tráng sĩ kia chỉ dùng 1 chiêu đã đánh bại 1 người. 10 người chỉ dùng đúng 10 chiêu không hơn không kém.\"\n[Đoạn 28 - Lời Diệp Thần]: \"Thật vậy sao? Vậy thành chủ của chúng ta chẳng phải thua chắc rồi sao?\"\n[Đoạn 29 - Lời Diệp Thần]: \"Cái đó thì chưa chắc. Ban đầu ta cũng nghĩ như vậy nhưng 2 người đã đánh hơn 500 hiệp rồi vẫn chưa phân thắng bại. Ta cũng không biết cuối cùng ai thắng ai thua nữa.\"\n[Đoạn 30 - Lời Diệp Thần]: \"Thành chủ của chúng ta lợi hại như vậy sao? Trẻ như vậy chắc cũng mới 15-16 tuổi thôi. Vậy mà đã có bản lĩnh lớn như vậy rồi\"\n[Đoạn 31 - Tường thuật]: \"Trong lúc đó, ngươi và Điển Vi đánh tới gần 1000 hiệp bất phân thắng bại.\"\n[Đoạn 32 - Lời Diệp Thần]: \"Thống khoái. Lão Điển à. Chúng ta nên kết thúc rồi\"\n[Đoạn 33 - Lời Diệp Thần]: \"Đúng vậy tướng quân. Nên kết thúc rồi.\"\n[Đoạn 34 - Tường thuật]: \"Cả 2 hiểu ý dùng ra đòn mạnh nhất\"\n[Đoạn 35 - Lời Diệp Thần]: \"Bách Điểu Triều Phụng\"\n[Đoạn 36 - Lời Điển Vi]: \"Tu La Ác Kích\"\n[Đoạn 37 - Tường thuật]: \"2 Tuyệt Kỹ va chạm. Khói bụi bay mù mịt. Bóng thương va chạm bóng kích. 1 lúc sau khi khói tan đi, Diệp Thần tay cầm chéo thương đứng thẳng trong khi Điển Vi 1 chân quỳ xuống, 2 tay chống 2 kích xuống đất. Thắng bại đã rõ\""
     },
     {
-      "id": "f40c8361-5fe8-45f5-8e4a-c3a3e4215a58",
-      "type": "user_custom_action",
-      "content": "[Đoạn 1 - Tường thuật]: \"Ngươi viết 1 phong thư giao cho Triệu Vân mang về Chân Định đưa cho Hạ Hầu Thái thú sau đó đón Khinh Y và Đồng Uyên đến Kiến Nghiệp.\"\n[Đoạn 2 - Lời Diệp Thần]: \"Tử Long, thư này giao cho Hạ Hầu Thái thú bảo ông ấy tự giữ lại số binh lính Khăn Vàng lúc trước lại tự huấn luyện rồi cho vào biên chế. Hiện tại ta đã có hơn 55000 binh lính rồi không cần đến chỗ binh ấy nữa. Ngươi đem 5000 binh lính xuất phát đến Chân Định hộ tống Khinh Y và Đồng Uyên sư phụ đến đây\"\n[Đoạn 3 - Lời Triệu Vân]: \"Tử Long tuân lệnh. Nhất định hoàn thành yêu cầu của tướng quân\"\n[Đoạn 4 - Tường thuật]: \"Sau đó ngươi sai người bên dưới làm soái kỳ hình bạch hổ, bên trên thêu 1 chữ Diệp cắm toàn thành Kiến Nghiệp. Lưu Yên vốn là Thái thú Kiến Nghiệp nay bị điều đi Ngô Quận nhậm chức. Ngươi chính thức trở thành chủ nhân của tòa thành này. Lúc này danh tiếng của ngươi cũng khá tốt nên chiêu cáo chiêu binh mãi mã tìm kiếm kỳ nhân. Chỉ cần có tài không màng xuất thân đều được ngươi trọng dụng. Chưa đầy 3 ngày, quân lính đến báo có 1 tráng sĩ vóc dáng đồ sộ, cơ bắp cuồn cuộn, chí khí hơn người. Diện mạo dữ tợn, râu tóc cứng cựa, ánh mắt sắc lẹm đến đầu quân. Đám Bách phu trưởng Bạch Hổ binh đều đã thử đấu với tráng sĩ nhưng đều không qua nổi 1 chiêu đã bại. Ngươi kinh hỷ bảo:\"\n[Đoạn 5 - Lời Diệp Thần]: \"Mau, mau mời người tới\"\n[Đoạn 6 - Tường thuật]: \"1 lát sau, binh sĩ dẫn người đến ngươi liền hỏi:\"\n[Đoạn 7 - Lời Diệp Thần]: \"Không biết tráng sĩ tên họ là gì, là người ở đâu?\"\n[Đoạn 8 - Lời Diệp Thần]: \"Thảo dân Điển Vị, là người quận Trần Lưu. Nay thấy tướng quân uy danh vang xa muốn tới đầu quân\"\n[Đoạn 9 - Tường thuật]: \"Trong lòng ngươi mừng thầm: 'Không ngờ lại là Ác Lai Điển Vi'\"\n[Đoạn 10 - Lời Diệp Thần]: \"Điển Vi, ta thấy ngươi sức mạnh như hổ có muốn đánh với ta 1 trận không?\"\n[Đoạn 11 - Lời Diệp Thần]: \"Chuyện... Chuyện này\"\n[Đoạn 12 - Lời Diệp Thần]: \"Đừng lo, 2 chúng ta giao lưu vài hiệp là được rồi. Ta muốn biết thực lực của ta hiện nay đến đâu\"\n[Đoạn 13 - Lời Diệp Thần]: \"Vậy tướng quân cẩn thận. Sức lực của ta có hơi lớn\"\n[Đoạn 14 - Lời Diệp Thần]: \"Ha ha ha ha. Ta chỉ sợ sức lực của ngươi không lớn. Đi. Chúng ta đi Diễn võ trường\"\n[Đoạn 15 - Tường thuật]: \"Ngươi dẫn Điển Vi đến Diễn võ trường, bảo binh lính đi lấy Bách Điểu Triều Phượng thương của ngươi.\"\n[Đoạn 16 - Lời Diệp Thần]: \"Lão Điển, ngươi dùng binh khí gì\"\n[Đoạn 17 - Lời Diệp Thần]: \"Thảo dân quen dùng vũ khí nặng. Tướng quân ban cho ta 2 cây binh khí nặng là được rồi\"\n[Đoạn 18 - Lời Diệp Thần]: \"Được. Người đâu. Mang 2 cây đoản kích thật nặng ra cho lão Điển\"\n[Đoạn 19 - Tường thuật]: \"Điển Vi nhận vũ khí làm quen 1 chút sau đó nhắc:\"\n[Đoạn 20 - Lời Diệp Thần]: \"Tướng quân cẩn thận đấy\"\n[Đoạn 21 - Tường thuật]: \"Nói xong hắn múa kích lao tới. 2 cây kích nặng mà hắn cầm nhẹ như không dùng hết sức chém tới\"\n[Đoạn 22 - Lời Diệp Thần]: \"Đến hay lắm\"\n[Đoạn 23 - Tường thuật]: \"Ngươi quát to 1 tiếng múa thương đón đỡ. 2 người đánh với nhau mấy chục hiệp. Ban đầu Điển Vi còn sợ làm ngươi bị thương nên không dùng hết thiên sinh thần lực của mình. Nhưng sau khi va chạm với thương của ngươi khiến 2 tay của hắn tê rần mới biết vị tướng quân này không hề tầm thường. Sau khi ăn quả đắng hắn liền nghiêm túc dùng bản lĩnh thật sự đánh hết sức với ngươi. 2 bên công thủ hoán đổi liên tục đánh mấy trăm hiệp. Người xem càng lúc càng nhiều\"\n[Đoạn 24 - Lời Diệp Thần]: \"Các vị quan gia đang xem gì vậy? Người đang đánh nhau kia là ai?\"\n[Đoạn 25 - Lời Binh lính A]: \"Ngươi không biết sao? Người cầm thương kia là thành chủ mới của thành chúng ta. Người còn lại đang múa song kích thì là tráng sĩ mới đến báo danh. Ta cũng không biết tên hắn\"\n[Đoạn 26 - Lời Diệp Thần]: \"Quan gia ngài nói xem trận này ai sẽ thắng?\"\n[Đoạn 27 - Lời Diệp Thần]: \"Ta cũng không biết. Ban nãy tráng sĩ kia đã đánh thắng 10 vị Bách phu trưởng của Bạch Hổ Binh đấy. Ngươi có biết Bạch Hổ Binh có ý nghĩa gì không? Có biết Bách phu trưởng của Bạch Hổ Binh mạnh thế nào không? 100 người như ta cũng không đánh thắng 1 Bách phu trưởng của Bạch Hổ Binh. Vậy mà tráng sĩ kia chỉ dùng 1 chiêu đã đánh bại 1 người. 10 người chỉ dùng đúng 10 chiêu không hơn không kém.\"\n[Đoạn 28 - Lời Diệp Thần]: \"Thật vậy sao? Vậy thành chủ của chúng ta chẳng phải thua chắc rồi sao?\"\n[Đoạn 29 - Lời Diệp Thần]: \"Cái đó thì chưa chắc. Ban đầu ta cũng nghĩ như vậy nhưng 2 người đã đánh hơn 500 hiệp rồi vẫn chưa phân thắng bại. Ta cũng không biết cuối cùng ai thắng ai thua nữa.\"\n[Đoạn 30 - Lời Diệp Thần]: \"Thành chủ của chúng ta lợi hại như vậy sao? Trẻ như vậy chắc cũng mới 15-16 tuổi thôi. Vậy mà đã có bản lĩnh lớn như vậy rồi\"\n[Đoạn 31 - Tường thuật]: \"Trong lúc đó, ngươi và Điển Vi đánh tới gần 1000 hiệp bất phân thắng bại.\"\n[Đoạn 32 - Lời Diệp Thần]: \"Thống khoái. Lão Điển à. Chúng ta nên kết thúc rồi\"\n[Đoạn 33 - Lời Diệp Thần]: \"Đúng vậy tướng quân. Nên kết thúc rồi.\"\n[Đoạn 34 - Tường thuật]: \"Cả 2 hiểu ý dùng ra đòn mạnh nhất\"\n[Đoạn 35 - Lời Diệp Thần]: \"Bách Điểu Triều Phụng\"\n[Đoạn 36 - Lời Điển Vi]: \"Tu La Ác Kích\"\n[Đoạn 37 - Tường thuật]: \"2 Tuyệt Kỹ va chạm. Khói bụi bay mù mịt. Bóng thương va chạm bóng kích. 1 lúc sau khi khói tan đi, Diệp Thần tay cầm chéo thương đứng thẳng trong khi Điển Vi 1 chân quỳ xuống, 2 tay chống 2 kích xuống đất. Thắng bại đã rõ\""
+      "id": "05597d32-a182-432b-a273-d5ea1b79759f",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Ánh nắng ban mai ấm áp rọi qua vòm cây cổ thụ, hắt những vệt sáng óng ả xuống ngạch cửa cao uy nghi của *Phủ Thành Chủ Kiến Nghiệp*. Hương trầm xuân dịu nhẹ tỏa ra từ các đỉnh đồng cổ kính, hòa quyện với làn gió mát lành thổi từ dòng sông xa. Ngồi bên chiếc bàn gỗ gụ chạm khắc hoa văn tinh xảo giữa đại sảnh, *Diệp Thần* tay cầm ngọn bút lông, múa những nét chữ phượng múa rồng bay dứt khoát trên tờ giấy tuyên gấm. \nViết xong phong thư, hắn cẩn thận đóng ấn triện đỏ thắm rồi ngẩng đầu nhìn *Triệu Vân* đang đứng nghiêm cẩn bên cạnh. *Triệu Vân* khoác trên mình bộ ngân giáp chiến oai phong, lưng giắt *Kim thương*, thần thái dũng mãnh hiên ngang. *Diệp Thần* đưa phong thư về phía hắn, cất giọng dặn dò:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Tử Long, thư này giao cho Hạ Hầu Thái thú bảo ông ấy tự giữ lại số binh lính Khăn Vàng lúc trước lại tự huấn luyện rồi cho vào biên chế. Hiện tại ta đã có hơn năm mươi lăm ngàn binh lính rồi, không cần đến chỗ binh ấy nữa. Ngươi đem năm ngàn binh lính xuất phát đến Chân Định hộ tống Khinh Y và Đồng Uyên sư phụ đến đây."
+        },
+        {
+          "type": "narrative",
+          "content": "*Triệu Vân* chắp hai tay ôm quyền dứt khoát, ánh mắt rực sáng niềm trung thành tuyệt đối, dõng dạc đáp lời:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Triệu Vân",
+          "content": "Tử Long tuân lệnh! Nhất định hoàn thành yêu cầu của tướng quân!"
+        },
+        {
+          "type": "narrative",
+          "content": "Nói xong, *Triệu Vân* dội gót chân, xoay người sải bước hiên ngang ra khỏi đại sảnh, tức tốc tập hợp năm ngàn tinh binh *Bạch Hổ binh* rầm rộ lên đường tiến về phía quận *Chân Định*.\nSau khi *Triệu Vân* rời đi, *Diệp Thần* lập tức hạ lệnh cho quân sĩ bên dưới chế tác Soái kỳ hoàn toàn mới. Thắt lưng soái kỳ được làm bằng vải lụa trắng muốt, bề mặt thêu hình một con bạch hổ gầm vang dũng mãnh, chính giữa nổi bật một chữ *Diệp* bằng chỉ kim tuyến ánh vàng rực rỡ. Hàng trăm ngọn Soái kỳ *Bạch Hổ* nhanh chóng được cắm uy nghi khắp các tường thành, cổng lớn và tuyến đường chính của thành *Kiến Nghiệp*, tung bay phập phới trước gió thu. \nVốn dĩ Thái thú *Kiến Nghiệp* là *Lưu Yên* vừa nhận chiếu thư điều động của triều đình sang *Ngô Quận* nhậm chức, *Diệp Thần* danh chính ngôn thuận tiếp quản quyền hành, chính thức trở thành chủ nhân tối cao của tòa thành *Kiến Nghiệp* trù phú này. \nSở hữu trong tay địa bàn rộng lớn cùng lực lượng binh mã hùng hậu, *Diệp Thần* liền cho dán thông cáo chiêu binh mãi mã khắp các ngã tư, cầu hiền tài từ mọi phương trời. Tờ thông cáo ghi rõ: *\"Bất kể xuất thân hàn môn hay quý tộc, chỉ cần có tài năng võ nghệ hoặc mưu lược hơn người, Diệp Thần ta đều trọng dụng như tri kỷ!\"*\nDanh tiếng của *Diệp Thần* sau chuỗi trận chiến dẹp giặc *Hoàng Cân* vốn đã vang xa khắp cõi, nên tờ chiêu cáo vừa tung ra đã thu hút vô số nghĩa sĩ kéo về. Chưa đầy ba ngày sau, vào một buổi sáng sớm khi mặt trời vừa ló rạng qua cổng thành, một tên Bách phu trưởng *Bạch Hổ binh* lật đật chạy xộc vào đại sảnh *Phủ Thành Chủ Kiến Nghiệp*, gương mặt vừa hớt hơ hớt hải lại vừa ngạt ngào sự thán phục, quỳ gối tâu lớn:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Binh lính B",
+          "content": "Khởi bẩm Chủ công! Ngoài cổng thành có một tráng sĩ thân hình đồ sộ tựa ngọn núi đá, cơ bắp cuồn cuộn, râu tóc cứng cựa như chông, ánh mắt dữ tợn sắc lẹm đến đầu quân! Mấy huynh đệ Bách phu trưởng *Bạch Hổ binh* chúng thần ra thử sức luận bàn, nhưng... nhưng kẻ đó lực mạnh như hổ, chỉ dùng đúng một chiêu quật tay đã đánh bại từng người một, không ai chống nổi quá một chiêu!"
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe những lời mô tả về vóc dáng phi thường cùng sức mạnh vô song ấy, *Diệp Thần* trong lòng chấn động, đôi mắt rực sáng lên niềm kinh hỷ tột cùng. Hắn đập tay xuống bàn đứng phắt dậy, quát lớn:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Mau! Mau mời người tới đây!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Binh lính B",
+          "content": "Tuân lệnh Chủ công!"
+        },
+        {
+          "type": "narrative",
+          "content": "Chỉ một lát sau, tiếng bước chân nặng trịch tựa như búa nện xuống nền đá *Phủ Thành Chủ Kiến Nghiệp* vang lên rầm rầm. Tên binh sĩ dẫn đường bước vào, theo sau là một tráng sĩ thân hình vạm vỡ vô cùng. Kẻ đó cao hơn tám thước, vai rộng bằng tấm phản, lồng ngực săn chắc như đúc bằng đồng xanh, vòm râu tóc cứng cựa bao quanh gương mặt dữ tợn nhưng đong đầy chí khí lẫm liệt của một vị mãnh tướng.\n*Diệp Thần* bước xuống khỏi thềm đá đại sảnh, ánh mắt dò xét đong đầy sự tán thưởng, ôn hòa cất tiếng hỏi:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Không biết tráng sĩ tên họ là gì, là người ở đâu?"
+        },
+        {
+          "type": "narrative",
+          "content": "Tráng sĩ ấy chắp hai bàn tay thô ráp như hai chiếc quạt xòe ra ôm quyền, cất giọng ồm ồm tựa sấm dội:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Điển Vi",
+          "content": "Thảo dân *Điển Vi*, là người quận *Trần Lưu*. Nay thấy tướng quân uy danh vang xa, khí phách bảo quốc an dân nên muốn tới đầu quân phò tá!"
+        },
+        {
+          "type": "narrative",
+          "content": "Nghe hai chữ *Điển Vi* thốt ra, trong lòng *Diệp Thần* mừng thầm không xiết: *\"Quả nhiên không ngoài dự đoán! Đây chính là Ác Lai *Điển Vi* — vị mãnh tướng dũng mãnh hàng đầu Tam Quốc!\"*\nGạt đi sự phấn khích trong tâm trí, *Diệp Thần* nhìn vóc dáng như gấu lớn của đối phương, khóe môi nhếch lên nụ cười thách thức hào hùng, thử thách cất lời:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Điển Vi, ta thấy ngươi sức mạnh như hổ, có muốn đánh với ta một trận không?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Điển Vi* nghe vậy liền hơi ngẩn người, hai gò má thoáng chút ngập ngừng gãi đầu:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Điển Vi",
+          "content": "Chuyện... Chuyện này..."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* phẩy tay bật cười xua tan sự e ngại của hắn:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đừng lo, hai chúng ta giao lưu vài hiệp là được rồi. Ta muốn biết thực lực của ta hiện nay đến đâu!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Điển Vi* nhìn vị thiếu niên chủ tướng bạch y tuấn tú trước mặt, thấy khí độ thâm trầm tựa núi cao của hắn liền ngẩng đầu đáp:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Điển Vi",
+          "content": "Vậy tướng quân cẩn thận đấy. Sức lực của thảo dân có hơi lớn..."
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* ngửa đầu sảng khoái cười lớn:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Ha ha ha ha! Ta chỉ sợ sức lực của ngươi không lớn thôi! Đi, chúng ta đi *Diễn Võ Trường Kiến Nghiệp*!"
+        },
+        {
+          "type": "narrative",
+          "content": "Nói rồi, *Diệp Thần* hăng hái dẫn *Điển Vi* tiến thẳng ra *Diễn Võ Trường Kiến Nghiệp* — một khoảng bãi tập rộng hàng chục mẫu được lát đá xanh vững chãi, bao quanh bởi những hàng giá để binh khí kim ngân rực rỡ. Hắn xoay người dặn dò tên quân sĩ hầu cận:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Người đâu, đi lấy thần binh *Bách Điểu Triều Phượng Thương* ra đây cho ta!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Binh lính B",
+          "content": "Tuân lệnh Chủ công!"
+        },
+        {
+          "type": "narrative",
+          "content": "Quay sang nhìn vị tráng sĩ họ Điển đang đứng khoanh tay giữa bãi tập, *Diệp Thần* tò mò hỏi:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Lão Điển, ngươi dùng binh khí gì?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Điển Vi* nhìn quanh các giá binh khí rồi ồm ồm đáp:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Điển Vi",
+          "content": "Thảo dân quen dùng vũ khí nặng. Tướng quân ban cho ta hai cây binh khí nặng là được rồi!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* gật đầu khen phải, lập tức truyền lệnh:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Được! Người đâu, mang hai cây đoản kích thật nặng ra cho lão Điển!"
+        },
+        {
+          "type": "narrative",
+          "content": "Hai tên binh sĩ chật vật khiêng ra hai cây song đoản kích đúc bằng sắt thô nặng mỗi cây tới bốn mươi cân, dâng lên trước mặt *Điển Vi*. *Điển Vi* vươn hai bàn tay thô ráp bắt lấy chuôi kích, dễ dàng nhấc bổng hai cây kích nặng trịch lên không trung rồi vung nhẹ một đường, gió kích xé ra tiếng *ù...u...u* trầm đục đanh thép. Hắn làm quen với vũ khí một chút rồi ngẩng đầu nhắc nhở:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Điển Vi",
+          "content": "Tướng quân cẩn thận đấy!"
+        },
+        {
+          "type": "narrative",
+          "content": "Dứt lời, *Điển Vi* gầm lên một tiếng tựa mãnh hổ xuất sơn! Hai chân hắn đạp mạnh xuống sàn đá làm nứt ra từng vệt dài, thân hình đồ sộ lao thẳng về phía *Diệp Thần*. Hai cây đoản kích nặng tám mươi cân trong tay hắn được múa nhẹ như không, xé rách không khí chém ngang tới với toàn bộ sát khí cuồng bạo!\n*Diệp Thần* đôi mắt nheo lại, hai tay siết chặt lấy thân thần binh *Bách Điểu Triều Phượng Thương* vừa được dâng tới. Mũi thương lá lúa sáng quắc phản chiếu ánh mặt trời. Hắn quát lớn một tiếng vang dội:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Đến hay lắm!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Keng! Keng! Keng!*\n*Diệp Thần* múa thương đón đỡ. Tiếng binh khí va chạm vang lên đanh thép tựa sấm nổ giữa trời quang, tia lửa bắn tung tóe khắp *Diễn Võ Trường Kiến Nghiệp*. Ban đầu, *Điển Vi* vì e sợ vị tướng quân trẻ tuổi bị thương nên chưa dùng hết thiên sinh thần lực của mình. Thế nhưng, ngay trong đòn va chạm trực diện đầu tiên với ngọn *Bách Điểu Triều Phượng Thương*, một luồng dũng lực kinh thiên động địa từ cán thương quật ngược lại khiến hai cánh tay săn chắc của *Điển Vi* tê rần, bước chân phải thối lùi lại nửa bước!\n*Điển Vi* chấn động trong lòng, bấy giờ mới nhận ra vị tướng quân mười sáu tuổi này sở hữu sức mạnh dũng mãnh đến mức phi lý, tuyệt đối không phải kẻ thường! Sau khi ăn quả đắng, đôi mắt hắn bùng lên ngọn lửa mãnh tướng cuồng nhiệt, hắn nghiêm túc vận toàn bộ bản lĩnh thật sự, dùng thiên sinh thần lực gầm lên công kích hết sức!\nHai bên công thủ hoán đổi liên tục, bóng thương bách luyện tựa rồng bay, bóng kích bạt núi tựa hổ giận, quấn quýt lấy nhau đánh giao tranh dồn dập suốt mấy trăm hiệp liền! \nTiếng binh khí nổ rộ và sát khí cuồn cuộn trên *Diễn Võ Trường Kiến Nghiệp* nhanh chóng thu hút đám đông binh sĩ và quan lại trong thành kéo đến xem mỗi lúc một đông đúc. Từng tầng người vây kín xung quanh bãi tập, chen chúc nhau kiễng chân theo dõi trận luận bàn kinh thiên động địa. \nTrong đám đông, một tên quan gia trẻ tuổi vội vã chen vào, ngơ ngác hỏi tên binh sĩ bên cạnh:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Quan gia A",
+          "content": "Các vị quan gia đang xem gì vậy? Người đang đánh nhau trên bãi kia là ai thế?"
+        },
+        {
+          "type": "narrative",
+          "content": "Tên binh sĩ gác cổng *Binh lính A* quay lại, giọng điệu tự hào đáp lời:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Binh lính A",
+          "content": "Ngươi không biết sao? Người cầm thương lụa bạch kia chính là Thành chủ mới của thành chúng ta — Chinh Bắc Tướng Quân *Diệp Thần* đấy! Còn người còn lại đang múa song kích dũng mãnh kia là tráng sĩ mới đến báo danh đầu quân, ta cũng không rõ danh tính hắn."
+        },
+        {
+          "type": "narrative",
+          "content": "Tên quan gia nuốt ngụm nước bọt, căng mắt nhìn bóng kích cuồn cuộn trên bãi, tò mò hỏi tiếp:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Quan gia A",
+          "content": "Quan gia ngài nói xem trận này ai sẽ thắng?"
+        },
+        {
+          "type": "narrative",
+          "content": "Tên binh sĩ *Binh lính A* tặc lưỡi lắc đầu phân tích:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Binh lính A",
+          "content": "Ta làm sao biết được! Ban nãy tráng sĩ kia vừa tới đã đánh thắng mười vị Bách phu trưởng của *Bạch Hổ binh* chúng ta đấy! Ngươi có biết *Bạch Hổ binh* có ý nghĩa gì không? Có biết Bách phu trưởng của *Bạch Hổ binh* mạnh thế nào không? Mười kẻ như ta hợp lại cũng không đánh thắng nổi một Bách phu trưởng! Vậy mà tráng sĩ kia chỉ dùng đúng một chiêu đã đánh bại một người, mười vị Bách phu trưởng chỉ dùng đúng mười chiêu không hơn không kém!"
+        },
+        {
+          "type": "narrative",
+          "content": "Tên quan gia giật mình lè lưỡi hãi hùng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Quan gia A",
+          "content": "Thật vậy sao?! Vậy Thành chủ của chúng ta chẳng phải thua chắc rồi sao?"
+        },
+        {
+          "type": "narrative",
+          "content": "Tên binh sĩ *Binh lính A* xua tay xửa lại:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Binh lính A",
+          "content": "Cái đó thì chưa chắc! Ban đầu ta cũng nghĩ như ngươi, nhưng hai người họ đã đánh hơn năm trăm hiệp rồi vẫn chưa phân thắng bại! Chiêu thương của Thành chủ uyển chuyển dũng mãnh tới mức không một ngọn kích nào lách qua nổi. Ta cũng chịu, không biết cuối cùng ai thắng ai thua nữa!"
+        },
+        {
+          "type": "narrative",
+          "content": "Tên quan gia nhìn bóng dáng bạch y hiên ngang của *Diệp Thần* giữa quầng thương phong, thán phục thốt lên:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Quan gia A",
+          "content": "Thành chủ của chúng ta lợi hại như vậy sao? Trẻ như vậy chắc cũng mới mười lăm mười sáu tuổi thôi, vậy mà đã sở hữu bản lĩnh lớn đến mức này rồi!"
+        },
+        {
+          "type": "narrative",
+          "content": "Trời trôi về chiều, trận chiến trên *Diễn Võ Trường Kiến Nghiệp* càng lúc càng dồn dập đến mức nghẹt thở. *Diệp Thần* và *Điển Vi* đã đánh tới gần một ngàn hiệp bất phân thắng bại! Mặt đá dưới chân cả hai bị cày xới thành vô số vệt rãnh sâu, mồ hôi ướt đẫm giáp trụ nhưng thần thái ai nấy đều bừng bừng hào khí.\n*Diệp Thần* vọt người lùi lại nửa bước, thương phong rung lên rầm rộ, ngửa đầu cười sảng khoái:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Thống khoái! Lão Điển à, chúng ta nên kết thúc thôi!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Điển Vi* hai tay siết chặt song kích, lồng ngực phập phồng dồn dập, đôi mắt rực sáng lên sự thán phục tột cùng, gầm lớn đáp lời:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Điển Vi",
+          "content": "Đúng vậy tướng quân! Nên kết thúc rồi!"
+        },
+        {
+          "type": "narrative",
+          "content": "Cả hai cùng hiểu ý, đồng loạt vận toàn bộ dũng lực thiên sinh và chiêu thức bá đạo nhất đời mình cho đòn quyết định cuối cùng! \n*Diệp Thần* vận công xoay tròn thần binh, ngọn *Bách Điểu Triều Phượng Thương* bùng nổ luồng thương khí đao phong chấn động, quát lớn:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Bách Điểu Triều Phụng!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Điển Vi* giậm chân rống to tựa như hung thần tái thế, hai ngọn đoản kích giơ cao bổ xuống một vệt đen cuồng bạo:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Điển Vi",
+          "content": "Tu La Ác Kích!"
+        },
+        {
+          "type": "narrative",
+          "content": "*ĐOÀNH!*\nHai tuyệt kỹ chạm nhau phát ra một tiếng nổ kinh thiên động địa! Khói bụi và đất đá bay mù mịt khắp *Diễn Võ Trường Kiến Nghiệp*, che khuất tầm mắt của hàng ngàn người xem. Bóng thương bách luyện va chạm nồng nhiệt với bóng kích cuồng bạo làm rung chuyển cả không gian bãi tập.\nMột lúc lâu sau, khi ngọn gió thu chậm rãi thổi qua xua tan lớp khói bụi mù mịt, khung cảnh phân định thắng bại hiện ra trọn vẹn trước mắt toàn thể quân dân *Kiến Nghiệp*.\n*Diệp Thần* khoác bạch giáp đứng thẳng tắp như ngọn núi sừng sững, tay cầm chéo ngọn thần binh *Bách Điểu Triều Phượng Thương* chỉ xuống đất, hơi thở đĩnh đạc hiên ngang. Trong khi đó, *Điển Vi* một chân quỳ gập xuống mặt đá nứt nẻ, hai tay cắm chặt hai cây đoản kích xuống đất để chống đỡ thân hình đồ sộ, ngẩng đầu nhìn *Diệp Thần* với ánh mắt hoàn toàn quy phục.\nThắng bại đã rõ ràng!\n*Điển Vi* buông chuôi kích, hai tay ôm quyền quỳ sụp xuống trước mặt *Diệp Thần*, cất giọng chấn động:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Điển Vi",
+          "content": "Tướng quân võ nghệ vô song, thần lực áp đảo! Thảo dân Điển Vi xin tâm phục khẩu phục, nguyện đem hết sức tàn phò tá tướng quân lập nên thiên thu đại nghiệp!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* bước tới, chìa hai tay đỡ *Điển Vi* đứng dậy, mỉm cười rạng rỡ:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Có được lão Điển giúp ta, *Bạch Hổ binh* như hổ thêm cánh! Mau đứng dậy!"
+        },
+        {
+          "type": "narrative",
+          "content": "Toàn thể quân dân và sĩ binh *Kiến Nghiệp* xung quanh lập tức vỡ òa trong tiếng reo hò vang dậy cả một góc trời."
+        }
+      ]
     }
   ],
-  "choices": [],
+  "choices": [
+    "Tiến hành tổ chức đại tiệc mừng thu phục mãnh tướng *Điển Vi* và bổ nhiệm hắn làm Thống lĩnh Thân vệ quân bảo vệ *Phủ Thành Chủ Kiến Nghiệp*. {Tỷ lệ thành công: 95%, Hậu quả/Phần thưởng: Lòng trung thành của Điển Vi đạt mức tối đa, an ninh phủ thành chủ trở nên bất khả xâm phạm}",
+    "Cùng *Điển Vi* và *Phương Nhi* ra bến cảng sông *Trường Giang* kiểm tra việc đóng chiến thuyền chuẩn bị cho thủy quân *Kiến Nghiệp*. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Mở rộng tiềm lực quân sự trên sông, phát hiện thêm tài nguyên thủy chiến}",
+    "Dẫn *Điển Vi* đi tuần tra các tuyến đường thương mại và nông trang ngoại thành *Kiến Nghiệp* để nắm bắt tình hình đời sống bách tính. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Tăng cường độ hài lòng của dân chúng, phát hiện thêm các nguy cơ cướp bóc nhỏ lẻ}",
+    "Trở về phòng thư lại trong phủ, cùng *Phương Nhi* rà soát lại sổ sách lương thảo và chờ đợi đoàn người của *Triệu Vân*, *Khinh Y* và sư phụ *Đồng Uyên* tới thành. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Nắm rõ tiềm lực kinh tế, sẵn sàng cho việc đón tiếp hậu phương}"
+  ],
   "gameMode": "EXPLORATION",
   "activeTrade": {
     "trader": null,
@@ -5468,5 +6076,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 39
+  "adventureTurnCount": 40
 }
