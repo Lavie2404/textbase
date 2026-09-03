@@ -6054,6 +6054,23 @@ const GameSetupScreen = ({
                             </div>
                         </div>
                     </label>
+                    <label htmlFor="tamquoc-toggle" className="relative cursor-pointer group flex-1">
+                        <input
+                            type="checkbox" id="tamquoc-toggle" name="isTamQuocWorld" className="sr-only"
+                            checked={gameSettings.isTamQuocWorld} onChange={handleInputChange}
+                        />
+                        <div className={`flex items-center p-5 bg-[#101a10] border transition-all duration-300 shadow-inner group-hover:bg-[#162216] h-full ${gameSettings.isTamQuocWorld ? 'border-[#cda45e]/80 shadow-[0_0_15px_rgba(205,164,94,0.1)]' : 'border-[#cda45e]/30'}`}>
+                            <div className={`relative w-12 h-6 rounded-sm border transition-colors shrink-0 mr-4 ${gameSettings.isTamQuocWorld ? 'bg-[#cda45e]/20 border-[#cda45e]' : 'bg-[#0a0f0a] border-[#4a6b4a]'}`}>
+                                <div className={`absolute top-1 w-4 h-4 rounded-sm transition-all duration-300 shadow-md ${gameSettings.isTamQuocWorld ? 'left-1 translate-x-6 bg-[#cda45e]' : 'left-1 translate-x-0 bg-[#8ba888]'}`}></div>
+                            </div>
+                            <div className="text-left">
+                                <span className={`font-bold font-ngoc-an text-lg tracking-wider transition-colors ${gameSettings.isTamQuocWorld ? 'text-[#cda45e]' : 'text-[#8ba888]'}`}>
+                                    Thế Giới Tam Quốc
+                                </span>
+                                <p className="text-xs text-[#8ba888] font-sans mt-1">Bối cảnh Tam Quốc: mọi nhân vật lịch sử hoặc nhân vật quan trọng đều có Tự (tên chữ). Gọi thân mật dùng tự thay cho tên húy (VD: Thái Văn Cơ tự Diễm → gọi Thái Diễm / Diễm nhi).</p>
+                            </div>
+                        </div>
+                    </label>
                 </div>
             </div>
         </div>
@@ -8004,6 +8021,9 @@ const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledg
     let headerDescription = (entity.description || "Chưa có mô tả chi tiết.").replace(/\*/g, '');
     if (type === 'character' && (entity.isPlayer || entity.isAppraised)) {
         headerDescription = entity.Role ? `Thân phận: ${entity.Role}` : (entity.Personality ? `Tính cách: ${entity.Personality}` : "");
+        if (entity.CourtesyName) {
+            headerDescription = headerDescription ? `Tự: ${entity.CourtesyName} · ${headerDescription}` : `Tự: ${entity.CourtesyName}`;
+        }
     }
 
     const renderCharacterDetails = () => {
@@ -8060,7 +8080,18 @@ const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledg
                             {finalStats.titles?.length > 0 && (
                                 <p className="scale-text-sm text-pink-300">({finalStats.titles.join(', ')})</p>
                             )}
-                            {card.profile.fields.filter(f => (f.text !== '' && f.text !== 'null') || f.badge).map(f => <CardFieldLine key={f.key} field={f} />)}
+                            {(() => {
+                                // Dòng "Tự" (tên chữ) chèn ngay sau dòng "Tên" — nằm ngoài card module
+                                // thuần (cùng cách xử lý với "Thái độ"/Stance bên dưới).
+                                const rows = card.profile.fields.filter(f => (f.text !== '' && f.text !== 'null') || f.badge).map(f => <CardFieldLine key={f.key} field={f} />);
+                                if (finalStats.CourtesyName) {
+                                    const nameIdx = rows.findIndex(r => r.key === 'name');
+                                    rows.splice(nameIdx + 1, 0, (
+                                        <p key="courtesy_name" className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Tự (tên chữ):</strong> {finalStats.CourtesyName}</p>
+                                    ));
+                                }
+                                return rows;
+                            })()}
                             {finalStats.Stance && <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Thái độ:</strong> {finalStats.Stance}</p>}
                             {card.statusLines.length > 0 && (
                                 <p className="scale-text-xs text-[#a3b8a3] italic">{card.statusLines.join(' · ')}</p>
@@ -14005,6 +14036,7 @@ const QuickReferenceModal = ({ show, onClose, knowledge, onSelectForChat, player
                                  </div>
                                  
                                  <div className="space-y-2 text-sm text-[#a3b8a3]">
+                                     {npc.CourtesyName && <p><strong className="text-[#8ba888]">Tự:</strong> {npc.CourtesyName}</p>}
                                      {npc.Role && <p><strong className="text-[#8ba888]">Thân phận:</strong> {npc.Role}</p>}
                                      {npc.Personality && <p><strong className="text-[#8ba888]">Tính cách:</strong> {npc.Personality}</p>}
                                      <p className="italic leading-relaxed mt-2 text-[#e8d3a1]">"{npc.description || npc.Backstory || 'Chưa có thông tin.'}"</p>
@@ -17290,6 +17322,7 @@ const INITIAL_GAME_SETTINGS = {
     customFanFicEntryMethod: '',
     skipCrisis: false,
     isDouLuoWorld: false, // Bật thế giới Đấu La Đại Lục: mở Võ Hồn + bộ thuật ngữ Hồn kỹ / Võ Hồn Chân Thân
+    isTamQuocWorld: false, // Bật thế giới Tam Quốc: nhân vật lịch sử/quan trọng bắt buộc có Tự (tên chữ), gọi thân mật bằng tự thay vì tên húy
     initialMartialSouls: [{
         id: crypto.randomUUID(),
         name: '',
@@ -18127,6 +18160,9 @@ const handleAppraiseNpc = async (npcId) => {
                 charToUpdate.Backstory = detailedNpcProfile.Backstory;
                 charToUpdate.Personality = detailedNpcProfile.Personality;
                 charToUpdate.Stance = detailedNpcProfile.Stance;
+                if (String(detailedNpcProfile.CourtesyName || '').trim()) {
+                    charToUpdate.CourtesyName = detailedNpcProfile.CourtesyName.trim();
+                }
 
                 // Chỉ áp Hảo Cảm khởi điểm do AI đánh giá nếu NPC chưa từng có biến động hảo cảm thực tế (vẫn đang ở mức mặc định 0)
                 if ((charToUpdate.affinity ?? 0) === 0 && typeof detailedNpcProfile.Affinity === 'number') {
@@ -19105,6 +19141,12 @@ const fetchNpcDetailsFromAI = async (npcBasicInfo, gameSettings, effectiveApiKey
            - NPC trung lập/người lạ thông thường: khoảng 0.
            - NPC có thiện cảm/thân thiện sẵn: 10 đến 50 (dương).
            - NPC thù địch/căm ghét/kẻ địch/không có thiện cảm: BẮT BUỘC là số ÂM, mức độ căm ghét càng sâu thì càng âm (địch nhẹ/cảnh giác: -10 đến -30, thù hằn rõ rệt: -40 đến -70, tử thù/sát ý muốn giết: -80 đến -100).
+        10. "CourtesyName": Tên tự (tên chữ) của nhân vật — CHỈ phần tự, KHÔNG kèm họ (VD: Thái Văn Cơ có tự là "Diễm"; Quan Vũ có tự là "Vân Trường").
+           ${gameSettings.isTamQuocWorld
+            ? `- ĐÂY LÀ THẾ GIỚI TAM QUỐC: trường này BẮT BUỘC phải có giá trị, KHÔNG được để trống.
+           - Nếu NPC là nhân vật lịch sử/danh nhân có thật trong sử sách hoặc trong Tam Quốc Diễn Nghĩa: PHẢI dùng ĐÚNG tên tự được ghi chép (VD: Tào Tháo → "Mạnh Đức", Lưu Bị → "Huyền Đức", Quan Vũ → "Vân Trường", Triệu Vân → "Tử Long", Thái Văn Cơ → "Diễm").
+           - Nếu NPC là nhân vật hư cấu không có trong sử sách: ngươi PHẢI TỰ NGHĨ và ĐẶT một tên tự Hán Việt 1-2 chữ phù hợp với thân phận, tính cách và họ tên của nhân vật.`
+            : `- Chỉ đặt tên tự nếu bối cảnh thế giới là cổ trang/lịch sử Á Đông VÀ nhân vật thuộc tầng lớp có học thức/danh môn (văn nhân, quý tộc, danh sĩ...). Nếu không phù hợp, trả về chuỗi rỗng "".`}
 
         CHỈ TRẢ VỀ JSON THEO ĐÚNG SCHEMA KHÔNG KÈM GIẢI THÍCH.
     `;
@@ -19120,9 +19162,10 @@ const fetchNpcDetailsFromAI = async (npcBasicInfo, gameSettings, effectiveApiKey
             Stance: { type: "STRING" },
             level: { type: "NUMBER" },
             sizeCategory: { type: "NUMBER" },
-            Affinity: { type: "NUMBER" }
+            Affinity: { type: "NUMBER" },
+            CourtesyName: { type: "STRING" }
         },
-        required: ["Gender", "Role", "Appearance", "Backstory", "Personality", "Stance", "level", "sizeCategory", "Affinity"]
+        required: ["Gender", "Role", "Appearance", "Backstory", "Personality", "Stance", "level", "sizeCategory", "Affinity", "CourtesyName"]
     };
 
     const payload = {
@@ -22486,7 +22529,10 @@ useEffect(() => {
                             charToUpdate.Backstory = detailedNpcProfile.Backstory;
                             charToUpdate.Personality = detailedNpcProfile.Personality;
                             charToUpdate.Stance = detailedNpcProfile.Stance;
-                            
+                            if (String(detailedNpcProfile.CourtesyName || '').trim()) {
+                                charToUpdate.CourtesyName = detailedNpcProfile.CourtesyName.trim();
+                            }
+
                             if (detailedNpcProfile.level !== charToUpdate.level) {
                                 charToUpdate.level = detailedNpcProfile.level;
                                 charToUpdate.baseHp = 200 + (charToUpdate.level - 1) * 20;
@@ -22608,6 +22654,9 @@ useEffect(() => {
                     charToUpdate.Backstory = detailedNpcProfile.Backstory;
                     charToUpdate.Personality = detailedNpcProfile.Personality;
                     charToUpdate.Stance = detailedNpcProfile.Stance;
+                    if (String(detailedNpcProfile.CourtesyName || '').trim()) {
+                        charToUpdate.CourtesyName = detailedNpcProfile.CourtesyName.trim();
+                    }
 
                     // Chỉ áp Hảo Cảm khởi điểm do AI đánh giá nếu NPC chưa từng có biến động hảo cảm thực tế (vẫn đang ở mức mặc định 0)
                     if ((charToUpdate.affinity ?? 0) === 0 && typeof detailedNpcProfile.Affinity === 'number') {
@@ -23043,7 +23092,10 @@ const handleCreateNpc = async (npcData, options = {}) => {
 
         NHIỆM VỤ:
         1.  **Sáng tạo:** Dựa vào mô tả, hãy tự suy luận ra các thuộc tính sau cho NPC: 'level' (gần bằng hoặc thấp hơn cấp người chơi), 'Stance' (Thái độ ban đầu), 'Personality' (Tính cách), 'Gender' (Giới tính: Nam, Nữ, Khác), và 'sizeCategory' (Chiều cao: 1:dáng người nhỏ nhắn, 2:dáng người trung bình, kích cỡ vừa phải, 3:dáng cao ráo, kích cỡ khá lớn, 4:dáng to cao vạm vỡ, 5:khồng lồ, cực kỳ lớn).
-        2.  **Định dạng:** Chỉ trả về một đối tượng JSON duy nhất chứa các thuộc tính: level, Stance, Personality, Gender, sizeCategory.
+        2.  **Tên tự ('CourtesyName'):** CHỈ phần tự, KHÔNG kèm họ (VD: Quan Vũ tự "Vân Trường", Thái Văn Cơ tự "Diễm"). ${gameSettings.isTamQuocWorld
+            ? `ĐÂY LÀ THẾ GIỚI TAM QUỐC nên trường này BẮT BUỘC có giá trị: nhân vật lịch sử/danh nhân dùng ĐÚNG tự trong sử sách; nhân vật hư cấu thì ngươi PHẢI TỰ NGHĨ một tên tự Hán Việt phù hợp thân phận và họ tên.`
+            : `Chỉ đặt nếu bối cảnh cổ trang Á Đông và nhân vật thuộc tầng lớp có học thức/danh môn; nếu không, trả về chuỗi rỗng "".`}
+        3.  **Định dạng:** Chỉ trả về một đối tượng JSON duy nhất chứa các thuộc tính: level, Stance, Personality, Gender, sizeCategory, CourtesyName.
     `;
 
     const schema = {
@@ -23053,9 +23105,10 @@ const handleCreateNpc = async (npcData, options = {}) => {
             Stance: { type: "STRING", enum: ["Thân thiện", "Thù địch", "Trung lập", "Sợ hãi", "Nghi ngờ"] },
             Personality: { type: "STRING" },
             Gender: { type: "STRING", enum: ["Nam", "Nữ", "Khác", "Không xác định"] },
-            sizeCategory: { type: "NUMBER" } 
+            sizeCategory: { type: "NUMBER" },
+            CourtesyName: { type: "STRING" }
         },
-        required: ["level", "Stance", "Personality", "Gender", "sizeCategory"]
+        required: ["level", "Stance", "Personality", "Gender", "sizeCategory", "CourtesyName"]
     };
     
     const payload = {
@@ -23081,7 +23134,10 @@ const handleCreateNpc = async (npcData, options = {}) => {
                 description: npcData.description,
                 ...aiData
             };
-            
+            // Tên tự rỗng (thế giới không dùng tự) thì bỏ hẳn trường này khỏi thẻ nhân vật.
+            if (!String(newNpc.CourtesyName || '').trim()) delete newNpc.CourtesyName;
+            else newNpc.CourtesyName = newNpc.CourtesyName.trim();
+
             newNpc.baseHp = 200 + (newNpc.level - 1) * 20;
             newNpc.baseAtk = 20 + (newNpc.level - 1) * 2;
             newNpc.baseDef = 10 + (newNpc.level - 1) * 1;
@@ -24122,6 +24178,15 @@ const handleInputChange = useCallback((e) => {
             const allowed = checked ? DOULUO_SKILL_CATEGORY_CHOICES : GENERIC_SKILL_CATEGORY_CHOICES;
             newSettings.initialTraits = (prev.initialTraits || []).map(t =>
                 allowed.includes(t.skillCategoryChoice) ? t : { ...t, skillCategoryChoice: '' }
+            );
+            if (checked) newSettings.isTamQuocWorld = false;
+        }
+        // Hai thế giới đặc thù (Đấu La / Tam Quốc) loại trừ lẫn nhau. Bật Tam Quốc thì tắt Đấu La
+        // và dọn các lựa chọn thiên phú chỉ tồn tại trong bộ từ vựng Đấu La (Hồn kỹ, Võ Hồn Chân Thân).
+        if (name === "isTamQuocWorld" && checked && prev.isDouLuoWorld) {
+            newSettings.isDouLuoWorld = false;
+            newSettings.initialTraits = (prev.initialTraits || []).map(t =>
+                GENERIC_SKILL_CATEGORY_CHOICES.includes(t.skillCategoryChoice) ? t : { ...t, skillCategoryChoice: '' }
             );
         }
         // Ở chế độ Đồng Nhân, "Danh Xưng / Tên" (characterName) và "Tên Nhân Vật Hóa Thân/Của Bạn" (fanFicCharacter)
@@ -27631,7 +27696,7 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
                  + [CHARACTER_UPDATE: Name="...", Stats="..."] (Chỉ dùng cập nhật tiền tệ, trạng thái đồng hành hoặc tiêu hao vật phẩm).
                  + [ITEM_IDEA_GAINED: name="...", description="...", category="...", rarity="...", quantity=X] (Thêm vật phẩm vào túi; category BẮT BUỘC chọn từ danh sách loại hợp lệ — xem mục QUẢN LÝ SỞ HỮU).
                  + [WORLD_ITEM: id="...", name="...", description="...", quantity=X] (Rơi đồ dã ngoại dập tắt sau chiến đấu).
-                 + [WORLD_NPC: id="...", name="...", description="...", level=X, stance="...", loreId="..."] (Tạo nhân vật xuất hiện trước mặt; thuộc tính loreId CHỈ điền khi hiện thực hóa NPC từ danh sách tin đồn).
+                 + [WORLD_NPC: id="...", name="...", description="...", level=X, stance="...", loreId="...", courtesyName="..."] (Tạo nhân vật xuất hiện trước mặt; thuộc tính loreId CHỈ điền khi hiện thực hóa NPC từ danh sách tin đồn. courtesyName = tên tự/tên chữ của nhân vật, CHỈ phần tự không kèm họ${gameSettings.isTamQuocWorld ? ' — THẾ GIỚI TAM QUỐC: BẮT BUỘC điền cho MỌI nhân vật lịch sử có thật hoặc nhân vật hư cấu quan trọng; nhân vật lịch sử dùng ĐÚNG tự trong sử sách (Tào Tháo→"Mạnh Đức", Quan Vũ→"Vân Trường", Thái Văn Cơ→"Diễm"...), nhân vật hư cấu thì ngươi tự nghĩ và đặt một tên tự Hán Việt phù hợp' : '; chỉ điền khi bối cảnh cổ trang Á Đông và nhân vật có tên tự phù hợp, không thì bỏ qua thuộc tính này'}).
                  + [WORLD_LOCATION: id="...", name="...", category="...", tier=X, loreId="..."] (Kiến tạo địa điểm vật lý mới; loreId CHỈ điền khi hiện thực hóa địa điểm từ danh sách tin đồn).
                  + [LORE_NPC: id="...", name="...", description="..."] (Tin đồn về NPC chưa gặp — CHỈ dùng cho nhân vật KHÔNG xuất hiện trực tiếp trong kịch bản).
                  + [LORE_LOCATION: id="...", name="...", category="..."] (Tin đồn địa điểm chưa tới).
@@ -27829,7 +27894,7 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
                     .filter(c => c.isCompanion && !c.isPermanentlyDead)
                     .map(c => {
                         const profile = c.isAppraised ? `Tính cách: ${c.Personality}. Ngoại hình: ${c.Appearance}.  Tiểu sử: ${c.Backstory}` : `Mô tả: ${c.description}`;
-                        return `${c.Name} (${profile} | HP: ${c.hp}/${c.maxhp})`;
+                        return `${c.Name}${c.CourtesyName ? ` (Tự: ${c.CourtesyName})` : ''} (${profile} | HP: ${c.hp}/${c.maxhp})`;
                     })
                     .join('\n      - ') || 'Ngươi đang đi một mình (không có đồng hành)';
 
@@ -27847,7 +27912,7 @@ ${PILLAR1_DIRECTIVES_LOGIC.map(d => '               - ' + d).join('\n')}
                     })
                     .map(npc => {
                         const profile = npc.isAppraised ? `Vai trò: ${npc.Role}. Thái độ: ${npc.Stance}. Tính cách: ${npc.Personality}. Ngoại hình: ${npc.Appearance}. Quá khứ: ${npc.Backstory}` : `Ghi chú: ${npc.description}`;
-                        return `${npc.Name} (Cấp ${npc.level} - ${profile})${gapInjuryPromptSuffix(npc)}`;
+                        return `${npc.Name}${npc.CourtesyName ? ` (Tự: ${npc.CourtesyName})` : ''} (Cấp ${npc.level} - ${profile})${gapInjuryPromptSuffix(npc)}`;
                     })
                     .join('\n      - ') || "Không có ai khác ở quanh đây";
 
@@ -28284,7 +28349,12 @@ ${customRulesBlock}
 
 // --- III. THỰC TẾ (WORLD) VS TIN ĐỒN (LORE) ---
 // A. GẶP GỠ THỰC TẾ (Hiện diện tại chỗ)
-//    - Xuất hiện NPC mới tại hiện trường: [WORLD_NPC: id="...", loreId="...", name="...", description="...", level=X, stance="...", personality="...", Gender="...", sizeCategory=Y]
+//    - Xuất hiện NPC mới tại hiện trường: [WORLD_NPC: id="...", loreId="...", name="...", description="...", level=X, stance="...", personality="...", Gender="...", sizeCategory=Y, courtesyName="..."]
+//      * courtesyName = tên tự (tên chữ) của nhân vật, CHỈ phần tự không kèm họ — chỉ điền khi nhân vật có tên tự phù hợp bối cảnh (xem QUY TẮC TÊN TỰ).
+${gameSettings.isTamQuocWorld ? `//      * QUY TẮC TÊN TỰ — THẾ GIỚI TAM QUỐC (BẮT BUỘC): MỌI nhân vật lịch sử có thật trong sử sách/Tam Quốc Diễn Nghĩa và MỌI nhân vật hư cấu quan trọng của cốt truyện đều PHẢI có tên tự.
+//        + Nhân vật lịch sử: dùng ĐÚNG tên tự được ghi chép (Tào Tháo→"Mạnh Đức", Lưu Bị→"Huyền Đức", Quan Vũ→"Vân Trường", Trương Phi→"Dực Đức", Triệu Vân→"Tử Long", Gia Cát Lượng→"Khổng Minh", Thái Văn Cơ→"Diễm"...).
+//        + Nhân vật hư cấu quan trọng: nếu chưa có tự, ngươi PHẢI TỰ NGHĨ và ĐẶT một tên tự Hán Việt 1-2 chữ hợp với họ tên, thân phận — TUYỆT ĐỐI không bỏ trống.
+//        + Khi xuất thẻ [WORLD_NPC] cho các nhân vật đó, BẮT BUỘC kèm thuộc tính courtesyName="tên tự".` : ''}
 //      * KHI NÀO KÍCH HOẠT: Khi nhân vật chính giáp mặt, đối thoại trực tiếp hoặc bị tấn công bởi một thực thể sinh linh mới xuất hiện tại chỗ.
 //      * QUY TẮC TUYỆT ĐỐI BẮT BUỘC — KHÔNG ĐƯỢC BỎ QUA DƯỚI BẤT KỲ HOÀN CẢNH NÀO: BẤT KỲ nhân vật nào có lời thoại trong thẻ <dialogue speaker="Tên..."> ở phần văn tường thuật của phản hồi này, HOẶC được nhân vật chính chủ động gọi tên/nói chuyện trực tiếp cùng trong hành động của họ, ĐỀU BẮT BUỘC phải có một thẻ [WORLD_NPC] tương ứng đặt ở ĐẦU CÙNG phản hồi đó — trừ khi nhân vật đó là "Ngươi" (nhân vật chính) hoặc đã tồn tại sẵn trong danh sách nhân vật/đồng hành/NPC hiện tại (không cần tạo lại). TUYỆT ĐỐI KHÔNG được để bất kỳ speaker nào trong <dialogue> mà không có thẻ nhân vật tương ứng — thiếu thẻ sẽ khiến nhân vật đó bị coi là không tồn tại, mất toàn bộ hồ sơ/chỉ số, đây là LỖI NGHIÊM TRỌNG phải tránh tuyệt đối. Trước khi kết thúc phản hồi, ngươi PHẢI tự rà soát lại: đối chiếu từng speaker xuất hiện trong <dialogue> với danh sách thẻ [WORLD_NPC] đã phát ra + danh sách nhân vật đã biết, đảm bảo không sót ai.
 //      * VÍ DỤ: [WORLD_NPC: id="npc_lao_toan_01", name="Lão Toàn", description="Một lão say xỉn ôm bình rượu bên góc đường.", level=3, stance="Trung lập", personality="Lôi thôi", Gender="Nam", sizeCategory=2]
@@ -28426,6 +28496,14 @@ ${PILLAR1_DIRECTIVES_NARRATION.map(x => '//    * ' + x).join('\n')}
 //      * VÍ DỤ (Đạo Lữ, hệ cổ trang): <dialogue speaker="Mã Tiểu Đào">Chàng có thấy hạnh phúc khi ở bên thiếp không, [NC]?</dialogue>
 //      * VÍ DỤ (đang theo đuổi): <dialogue speaker="Ngươi">Nàng đừng lo, có ta ở đây.</dialogue>
 
+// 2.5b. QUY TẮC GỌI BẰNG TỰ / TÊN CHỮ (BẮT BUỘC KHI NHÂN VẬT CÓ "Tự"):
+//    - Một số nhân vật trong danh sách nhân vật có ghi "Tự: ..." (tên chữ). Với các nhân vật này:
+//      + GỌI THÂN MẬT (bạn thân, tri kỷ, người yêu, trưởng bối gọi vãn bối, người ngang hàng thân thiết): BẮT BUỘC gọi bằng TỰ thay cho tên húy — dùng dạng "Họ + Tự" (VD: Thái Văn Cơ tự Diễm → gọi "Thái Diễm") hoặc dạng nựng "Tự + nhi" với nữ/vãn bối thân thiết (VD: "Diễm nhi"). TUYỆT ĐỐI KHÔNG gọi thẳng tên húy trong ngữ cảnh thân mật.
+//      + GỌI TRANG TRỌNG / NGƯỜI LẠ / CẤP DƯỚI GỌI CẤP TRÊN: dùng họ tên đầy đủ, chức danh, tước vị hoặc "họ + chức danh" như bình thường — không dùng tự một cách suồng sã với người có vai vế cao hơn mình.
+//      + Tự chỉ dùng để GỌI NGƯỜI KHÁC hoặc tự giới thiệu ("tại hạ họ Quan, tên Vũ, tự Vân Trường") — nhân vật không tự xưng bằng tự của chính mình trong hội thoại thường.
+//    - Văn tường thuật (narrator) vẫn dùng tên chính của nhân vật; tự chủ yếu xuất hiện trong LỜI THOẠI và lời giới thiệu.
+${gameSettings.isTamQuocWorld ? `//    - THẾ GIỚI TAM QUỐC: khi một nhân vật lịch sử/nhân vật quan trọng xuất hiện lần đầu hoặc tự giới thiệu, hãy giới thiệu kèm tên tự một cách tự nhiên (VD: "*Triệu Vân*, tự *Tử Long*"). Các nhân vật có giao tình gọi nhau bằng tự đúng lễ nghi thời Hán (VD: Lưu Bị gọi Quan Vũ là "Vân Trường", KHÔNG gọi "Vũ").` : ''}
+
 // 2.6. QUY TẮC DANH XƯNG VỢ CHỒNG THEO ĐÚNG GIỚI TÍNH (BẮT BUỘC — CHỐNG NHẦM LẪN):
 //    - "Phu quân"/"Chàng" CHỈ dùng để chỉ/gọi một người NAM (vai trò chồng). "Phu nhân"/"Thê tử"/"Nương tử"/"Thiếp" CHỈ dùng để chỉ/gọi một người NỮ (vai trò vợ).
 //    - TRƯỚC KHI viết một câu thoại có nhắc đến các từ trên, BẮT BUỘC kiểm tra lại giới tính (Gender) thật của NHÂN VẬT ĐANG NÓI và NHÂN VẬT ĐƯỢC NHẮC ĐẾN trong danh sách nhân vật — không được suy đoán giới tính chỉ dựa vào diễn biến hay khuôn mẫu.
@@ -28548,7 +28626,7 @@ ${narrative}
 
     return { logicRules: logic, narrativeRules: narrative, coreRules: core };
 
-}, [gameSettings.theme, gameSettings.currencyName, knowledge.customRules, gameSettings.playStyle, getModeInstruction]);
+}, [gameSettings.theme, gameSettings.currencyName, gameSettings.isTamQuocWorld, knowledge.customRules, gameSettings.playStyle, getModeInstruction]);
 
 const postCombatRules = useMemo(() => {
     let customRulesBlock = '';
@@ -28633,7 +28711,7 @@ ${customRulesBlock}
 //      * NHIỆM VỤ: Ngươi BẮT BUỘC phải tự tạo một 'id' duy nhất cho mục lore này, theo quy tắc: "lore_npc_" + tên nhân vật viết liền không dấu.
 //      * VÍ DỤ: [LORE_NPC: id="lore_npc_doccocaubai", name="Độc Cô Cầu Bại", description="..."]
 //
-//    - [WORLD_NPC: id="...", loreId="...", name="...", description="...", level=X, stance="...", personality="..."]
+//    - [WORLD_NPC: id="...", loreId="...", name="...", description="...", level=X, stance="...", personality="...", courtesyName="..."]
 //      * KHI NÀO DÙNG: Khi một nhân vật hoặc sinh vật mới xuất hiện trước mặt, có tương tác với nhân vật chính.
 //      * NHIỆM VỤ: Tạo ra một thực thể sống mới trong thế giới. Nếu hiện thực hóa từ LORE, hãy dùng 'loreId'.
 //      * VÍ DỤ: [WORLD_NPC: id="npc_lao_truong", name="Lão Trương", description="Một lão nông khắc khổ.", level=3, stance="Thân thiện"]
@@ -31263,7 +31341,7 @@ ${questDetails}
                 .filter(c => c.isCompanion && !c.isPermanentlyDead && c.inParty !== false)
                 .map(c => {
                     const profile = c.isAppraised ? `Tính cách: ${c.Personality}. Ngoại hình: ${c.Appearance}. Tiểu sử: ${c.Backstory}` : `Mô tả: ${c.description}`;
-                    return `${c.Name} (${profile} | HP: ${c.hp}/${c.maxhp})${getCharacterStatusesString(c)}${getCharacterTitleTag(c)}`;
+                    return `${c.Name}${c.CourtesyName ? ` (Tự: ${c.CourtesyName})` : ''} (${profile} | HP: ${c.hp}/${c.maxhp})${getCharacterStatusesString(c)}${getCharacterTitleTag(c)}`;
                 })
                 .join('\n      - ') || 'Không có';
 
@@ -31283,7 +31361,7 @@ ${questDetails}
                 })
                 .map(npc => {
                     const profile = npc.isAppraised ? `Vai trò: ${npc.Role}. Thái độ: ${npc.Stance}. Tính cách: ${npc.Personality}. Ngoại hình: ${npc.Appearance}. Quá khứ: ${npc.Backstory}` : `Ghi chú: ${npc.description}`;
-                    return `${npc.Name} (Cấp ${npc.level} - ${profile})${gapInjuryPromptSuffix(npc)}${getCharacterStatusesString(npc)}${getCharacterTitleTag(npc)}`;
+                    return `${npc.Name}${npc.CourtesyName ? ` (Tự: ${npc.CourtesyName})` : ''} (Cấp ${npc.level} - ${profile})${gapInjuryPromptSuffix(npc)}${getCharacterStatusesString(npc)}${getCharacterTitleTag(npc)}`;
                 })
                 .join('\n      - ') || "Không có ai khác ở quanh đây";
             
@@ -34078,6 +34156,13 @@ const applyUpdates = (currentKnowledge, updates, currentGameMode, commandBlock =
                     const name = normalizedNpcData.Name;
                     if (!name) return;
 
+                    // Chuẩn hóa tên tự: thẻ [WORLD_NPC] dùng attr courtesyName (viết thường),
+                    // nội bộ lưu CourtesyName (viết hoa, cùng convention với Role/Personality).
+                    const rawCourtesy = normalizedNpcData.CourtesyName ?? normalizedNpcData.courtesyName;
+                    delete normalizedNpcData.courtesyName;
+                    if (String(rawCourtesy || '').trim()) normalizedNpcData.CourtesyName = String(rawCourtesy).trim();
+                    else delete normalizedNpcData.CourtesyName;
+
                     if (isLoreOnly) {
                         if (!newKnowledge.loreNpcs) newKnowledge.loreNpcs = [];
                         updateOrCreateInArray(newKnowledge.loreNpcs, normalizedNpcData, 'Name');
@@ -36839,6 +36924,7 @@ const formatEntityForPrompt = (entityInfo) => {
         if (isGapInjured(data)) details += `, Thương thế: ${GAP_INJURY_PROMPT_HINT}`;
         if (attitudeLine) details += `, Hảo cảm với ngươi: ${attitudeLine}`;
         details += `, Tính cách: ${data.Personality || 'Bình thường'}`;
+        if (data.CourtesyName) details += `, Tự: ${data.CourtesyName}`;
         if (data.Role) details += `, Thân phận: ${data.Role}`;
         details += `)`;
     } else if (type === 'Địa điểm') {
