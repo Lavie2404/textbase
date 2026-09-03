@@ -5970,11 +5970,47 @@ const GameSetupScreen = ({
                     </button>
                 </div>
 
-                <div className="w-full max-w-3xl px-4 flex flex-col md:flex-row gap-6 justify-center items-stretch border-t border-[#cda45e]/20 pt-8">
-                    
-                    <label htmlFor="crisis-toggle" className="relative cursor-pointer group flex-1">
-                        <input 
-                            type="checkbox" id="crisis-toggle" name="skipCrisis" className="sr-only" 
+                <div className="w-full max-w-3xl px-4 flex flex-col gap-6 justify-center items-stretch border-t border-[#cda45e]/20 pt-8">
+
+                    <label htmlFor="tamquoc-toggle" className="relative cursor-pointer group w-full">
+                        <input
+                            type="checkbox" id="tamquoc-toggle" name="isTamQuocWorld" className="sr-only"
+                            checked={gameSettings.isTamQuocWorld} onChange={handleInputChange}
+                        />
+                        <div className={`flex items-center p-5 bg-[#101a10] border transition-all duration-300 shadow-inner group-hover:bg-[#162216] h-full ${gameSettings.isTamQuocWorld ? 'border-[#cda45e]/80 shadow-[0_0_15px_rgba(205,164,94,0.1)]' : 'border-[#cda45e]/30'}`}>
+                            <div className={`relative w-12 h-6 rounded-sm border transition-colors shrink-0 mr-4 ${gameSettings.isTamQuocWorld ? 'bg-[#cda45e]/20 border-[#cda45e]' : 'bg-[#0a0f0a] border-[#4a6b4a]'}`}>
+                                <div className={`absolute top-1 w-4 h-4 rounded-sm transition-all duration-300 shadow-md ${gameSettings.isTamQuocWorld ? 'left-1 translate-x-6 bg-[#cda45e]' : 'left-1 translate-x-0 bg-[#8ba888]'}`}></div>
+                            </div>
+                            <div className="text-left">
+                                <span className={`font-bold font-ngoc-an text-lg tracking-wider transition-colors ${gameSettings.isTamQuocWorld ? 'text-[#cda45e]' : 'text-[#8ba888]'}`}>
+                                    Thế Giới Tam Quốc
+                                </span>
+                                <p className="text-xs text-[#8ba888] font-sans mt-1">Bối cảnh Tam Quốc: mọi nhân vật lịch sử hoặc nhân vật quan trọng đều có Tự (tên chữ). Gọi thân mật dùng tự thay cho tên húy (VD: Thái Văn Cơ tự Diễm → gọi Thái Diễm / Diễm nhi).</p>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label htmlFor="douluo-toggle" className="relative cursor-pointer group w-full">
+                        <input
+                            type="checkbox" id="douluo-toggle" name="isDouLuoWorld" className="sr-only"
+                            checked={gameSettings.isDouLuoWorld} onChange={handleInputChange}
+                        />
+                        <div className={`flex items-center p-5 bg-[#101a10] border transition-all duration-300 shadow-inner group-hover:bg-[#162216] h-full ${gameSettings.isDouLuoWorld ? 'border-[#cda45e]/80 shadow-[0_0_15px_rgba(205,164,94,0.1)]' : 'border-[#cda45e]/30'}`}>
+                            <div className={`relative w-12 h-6 rounded-sm border transition-colors shrink-0 mr-4 ${gameSettings.isDouLuoWorld ? 'bg-[#cda45e]/20 border-[#cda45e]' : 'bg-[#0a0f0a] border-[#4a6b4a]'}`}>
+                                <div className={`absolute top-1 w-4 h-4 rounded-sm transition-all duration-300 shadow-md ${gameSettings.isDouLuoWorld ? 'left-1 translate-x-6 bg-[#cda45e]' : 'left-1 translate-x-0 bg-[#8ba888]'}`}></div>
+                            </div>
+                            <div className="text-left">
+                                <span className={`font-bold font-ngoc-an text-lg tracking-wider transition-colors ${gameSettings.isDouLuoWorld ? 'text-[#cda45e]' : 'text-[#8ba888]'}`}>
+                                    Thế Giới Đấu La
+                                </span>
+                                <p className="text-xs text-[#8ba888] font-sans mt-1">Bối cảnh Đấu La Đại Lục: mở Võ Hồn, Hồn Kỹ và Võ Hồn Chân Thân. Tắt thì kỹ năng chỉ chia Chủ động / Bị động.</p>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label htmlFor="crisis-toggle" className="relative cursor-pointer group w-full">
+                        <input
+                            type="checkbox" id="crisis-toggle" name="skipCrisis" className="sr-only"
                             checked={gameSettings.skipCrisis} onChange={handleInputChange}
                         />
                         <div className={`flex items-center p-5 bg-[#101a10] border transition-all duration-300 shadow-inner group-hover:bg-[#162216] h-full ${gameSettings.skipCrisis ? 'border-[#5eead4]/80 shadow-[0_0_15px_rgba(94,234,212,0.1)]' : 'border-[#5eead4]/30'}`}>
@@ -5990,9 +6026,9 @@ const GameSetupScreen = ({
                         </div>
                     </label>
 
-                    <label htmlFor="nsfw-toggle" className="relative cursor-pointer group flex-1">
-                        <input 
-                            type="checkbox" id="nsfw-toggle" name="allowNsfw" className="sr-only" 
+                    <label htmlFor="nsfw-toggle" className="relative cursor-pointer group w-full">
+                        <input
+                            type="checkbox" id="nsfw-toggle" name="allowNsfw" className="sr-only"
                             checked={gameSettings.allowNsfw} onChange={handleInputChange}
                         />
                         <div className={`flex items-center p-5 bg-[#101a10] border transition-all duration-300 shadow-inner group-hover:bg-[#162216] h-full ${gameSettings.allowNsfw ? 'border-[#ff4d4d]/80 shadow-[0_0_15px_rgba(255,77,77,0.1)]' : 'border-[#8b1515]/50'}`}>
@@ -6020,9 +6056,10 @@ const GameSetupScreen = ({
                             />
                         </div>
                     )}
-                    <label htmlFor="htab-toggle" className="relative cursor-pointer group flex-1">
-                        <input 
-                            type="checkbox" id="htab-toggle" name="enableParasiticSystem" className="sr-only" 
+
+                    <label htmlFor="htab-toggle" className="relative cursor-pointer group w-full">
+                        <input
+                            type="checkbox" id="htab-toggle" name="enableParasiticSystem" className="sr-only"
                             checked={gameSettings.enableParasiticSystem} onChange={handleInputChange}
                         />
                         <div className={`flex items-center p-5 bg-[#101a10] border transition-all duration-300 shadow-inner group-hover:bg-[#162216] h-full ${gameSettings.enableParasiticSystem ? 'border-[#a5b4fc]/80 shadow-[0_0_15px_rgba(165,180,252,0.1)]' : 'border-[#a5b4fc]/30'}`}>
@@ -6034,40 +6071,6 @@ const GameSetupScreen = ({
                                     Ký Sinh Tâm Linh
                                 </span>
                                 <p className="text-xs text-[#8ba888] font-sans mt-1">Bật một AI độc lập bám theo tâm trí nhân vật chính.</p>
-                            </div>
-                        </div>
-                    </label>
-                    <label htmlFor="douluo-toggle" className="relative cursor-pointer group flex-1">
-                        <input
-                            type="checkbox" id="douluo-toggle" name="isDouLuoWorld" className="sr-only"
-                            checked={gameSettings.isDouLuoWorld} onChange={handleInputChange}
-                        />
-                        <div className={`flex items-center p-5 bg-[#101a10] border transition-all duration-300 shadow-inner group-hover:bg-[#162216] h-full ${gameSettings.isDouLuoWorld ? 'border-[#cda45e]/80 shadow-[0_0_15px_rgba(205,164,94,0.1)]' : 'border-[#cda45e]/30'}`}>
-                            <div className={`relative w-12 h-6 rounded-sm border transition-colors shrink-0 mr-4 ${gameSettings.isDouLuoWorld ? 'bg-[#cda45e]/20 border-[#cda45e]' : 'bg-[#0a0f0a] border-[#4a6b4a]'}`}>
-                                <div className={`absolute top-1 w-4 h-4 rounded-sm transition-all duration-300 shadow-md ${gameSettings.isDouLuoWorld ? 'left-1 translate-x-6 bg-[#cda45e]' : 'left-1 translate-x-0 bg-[#8ba888]'}`}></div>
-                            </div>
-                            <div className="text-left">
-                                <span className={`font-bold font-ngoc-an text-lg tracking-wider transition-colors ${gameSettings.isDouLuoWorld ? 'text-[#cda45e]' : 'text-[#8ba888]'}`}>
-                                    Thế Giới Đấu La
-                                </span>
-                                <p className="text-xs text-[#8ba888] font-sans mt-1">Bối cảnh Đấu La Đại Lục: mở Võ Hồn, Hồn Kỹ và Võ Hồn Chân Thân. Tắt thì kỹ năng chỉ chia Chủ động / Bị động.</p>
-                            </div>
-                        </div>
-                    </label>
-                    <label htmlFor="tamquoc-toggle" className="relative cursor-pointer group flex-1">
-                        <input
-                            type="checkbox" id="tamquoc-toggle" name="isTamQuocWorld" className="sr-only"
-                            checked={gameSettings.isTamQuocWorld} onChange={handleInputChange}
-                        />
-                        <div className={`flex items-center p-5 bg-[#101a10] border transition-all duration-300 shadow-inner group-hover:bg-[#162216] h-full ${gameSettings.isTamQuocWorld ? 'border-[#cda45e]/80 shadow-[0_0_15px_rgba(205,164,94,0.1)]' : 'border-[#cda45e]/30'}`}>
-                            <div className={`relative w-12 h-6 rounded-sm border transition-colors shrink-0 mr-4 ${gameSettings.isTamQuocWorld ? 'bg-[#cda45e]/20 border-[#cda45e]' : 'bg-[#0a0f0a] border-[#4a6b4a]'}`}>
-                                <div className={`absolute top-1 w-4 h-4 rounded-sm transition-all duration-300 shadow-md ${gameSettings.isTamQuocWorld ? 'left-1 translate-x-6 bg-[#cda45e]' : 'left-1 translate-x-0 bg-[#8ba888]'}`}></div>
-                            </div>
-                            <div className="text-left">
-                                <span className={`font-bold font-ngoc-an text-lg tracking-wider transition-colors ${gameSettings.isTamQuocWorld ? 'text-[#cda45e]' : 'text-[#8ba888]'}`}>
-                                    Thế Giới Tam Quốc
-                                </span>
-                                <p className="text-xs text-[#8ba888] font-sans mt-1">Bối cảnh Tam Quốc: mọi nhân vật lịch sử hoặc nhân vật quan trọng đều có Tự (tên chữ). Gọi thân mật dùng tự thay cho tên húy (VD: Thái Văn Cơ tự Diễm → gọi Thái Diễm / Diễm nhi).</p>
                             </div>
                         </div>
                     </label>
