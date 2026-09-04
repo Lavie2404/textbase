@@ -2592,7 +2592,12 @@ const StoryItem = React.memo(({ item, formatStoryText, playerName, onDelete, cha
             {children}
             <button
                 onClick={() => onDelete && onDelete(item.id)}
-                className="absolute top-2 right-2 p-2 bg-[#0a0f0a]/90 border border-[#8b1515]/50 hover:bg-[#8b1515] hover:border-[#ff4d4d] rounded-sm text-[#ff4d4d] hover:text-white opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 shadow-[0_0_10px_rgba(139,21,21,0.5)]"
+                // opacity-0 + group-hover từng khiến nút này VÔ HÌNH và không thể
+                // bấm được trên điện thoại (không có trạng thái hover). Chỉ ẩn theo
+                // hover trên thiết bị thực sự có con trỏ chuột ([@media(hover:hover)]);
+                // trên cảm ứng luôn hiện mờ (opacity-40) để còn bấm được.
+                className="absolute top-2 right-2 p-2 flex items-center justify-center bg-[#0a0f0a]/90 border border-[#8b1515]/50 hover:bg-[#8b1515] hover:border-[#ff4d4d] rounded-sm text-[#ff4d4d] hover:text-white opacity-40 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-300 z-10 shadow-[0_0_10px_rgba(139,21,21,0.5)]"
+                style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}
                 title="Xóa khỏi lịch sử"
             >
                 <TrashIcon className="w-4 h-4" />
@@ -5431,7 +5436,7 @@ const MagicEraserModal = ({ show, imageUrl, onClose, onSave }) => {
                     <h3 className="text-lg font-bold text-[#cda45e] uppercase tracking-widest flex items-center">
                         <MagicWandIcon className="mr-2" /> Đũa Thần Cắt Nền
                     </h3>
-                    <button onClick={onClose} className="text-[#8ba888] hover:text-white font-bold text-xl">&times;</button>
+                    <button onClick={onClose} className="text-[#8ba888] hover:text-white font-bold text-xl flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>&times;</button>
                 </div>
 
                 <p className="text-xs text-[#a3b8a3] italic mb-3 text-center flex-shrink-0">Bấm trực tiếp vào các mảng màu nền bị kẹt giữa 2 chân, 2 tay, vũ khí... để xóa chúng.</p>
@@ -8578,7 +8583,7 @@ const SettingsMenu = ({
 
                 <div className="px-5 py-4 border-b border-[#cda45e]/30 flex justify-between items-center bg-[#0a0f0a]">
                     <h3 className="text-xl font-bold text-[#cda45e] flex items-center gap-2 tracking-widest" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}><Cog6ToothIcon className="w-6 h-6 text-[#cda45e]"/> Thiết Lập</h3>
-                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-3xl font-bold leading-none">&times;</button>
+                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-3xl font-bold leading-none flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>&times;</button>
                 </div>
 
                 <div className="p-5 overflow-y-auto max-h-[75vh] space-y-6 scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-transparent">
@@ -8768,7 +8773,7 @@ const SettingsMenu = ({
                     </div>
                     <div>
                         <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Lưu trữ tiến trình</h4>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             {/* plan.md C-2: IndexedDB is the source of truth; GitHub is a
                                 multi-device BACKUP, which is what the label now says. */}
                             <MenuItem icon={<SaveIcon />} label="Sao lưu lên GitHub" onClick={onSaveToLocal} disabled={isCombatOrTrade} colorClass="text-[#cda45e]" subtext={isCombatOrTrade ? "Khóa khi chiến đấu" : "Bản sao dự phòng (5 slot)"} />
@@ -8779,14 +8784,14 @@ const SettingsMenu = ({
                     <div>
                         <h4 className="text-[10px] font-bold text-[#cda45e] uppercase tracking-widest mb-2 border-b border-[#cda45e]/20 pb-1 inline-block">Tệp Tin (Ngoại Tuyến)</h4>
                         <div className="space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <MenuItem icon={<Upload />} label="Xuất Tệp Đầy Đủ" onClick={() => onSaveToFile(true)} disabled={isCombatOrTrade} colorClass="text-[#cda45e]" subtext={isCombatOrTrade ? "Chặn khi đang chiến đấu" : "Kèm ảnh nhân vật"} />
                                 <MenuItem icon={<Upload />} label="Xuất Tệp Nhẹ" onClick={() => onSaveToFile(false)} disabled={isCombatOrTrade} colorClass="text-[#a3b8a3]" subtext={isCombatOrTrade ? "Chặn khi đang chiến đấu" : "Chỉ lưu chữ"} />
                             </div>
                             <MenuItem icon={<ArrowPathIcon />} label="Nhập Tệp" onClick={onLoadFromFile} colorClass="text-[#e8d3a1]" subtext="Tải file save từ máy lên" />
                             {/* gdd-05 B8: the keepsake + QA exports, and the contract
                                 session log of gdd-01 B.5 (AI & Dữ liệu group). */}
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                 <MenuItem icon={<Upload />} label="Xuất kỷ vật (văn bản)" onClick={onExportKeepsake} colorClass="text-[#e8d3a1]" subtext="Chép lại quyển sổ, chỉ văn kể" />
                                 <MenuItem icon={<Upload />} label="Xuất nhật ký QA" onClick={onExportQaLog} colorClass="text-[#a3b8a3]" subtext="5 trường cho kiểm thử" />
                                 <MenuItem icon={<Upload />} label="Nhật ký khế ước" onClick={onExportContractLog} colorClass="text-[#8ba888]" subtext="Thống kê rò rỉ số liệu" />
@@ -8875,8 +8880,8 @@ const MobileFunctionsModal = ({
     return ( 
         <div className="fixed inset-0 bg-[#0a0f0a]/90 backdrop-blur-sm z-[60] flex flex-col p-4 sm:p-6 animate-fade-in-up"> 
             <div className="flex justify-between items-center mb-4 sm:mb-8 flex-shrink-0 border-b border-[#cda45e]/30 pb-4"> 
-                <h2 className="text-3xl sm:text-4xl font-bold text-[#cda45e] tracking-widest uppercase" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Bảng Chức Năng</h2> 
-                <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors">×</button> 
+                <h2 className="text-3xl sm:text-4xl font-bold text-[#cda45e] tracking-widest uppercase" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Bảng Chức Năng</h2>
+                <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>×</button>
             </div> 
             <div className="flex-grow grid grid-cols-2 sm:grid-cols-4 landscape:grid-cols-4 gap-3 sm:gap-5 content-start overflow-y-auto pr-2 pb-20 scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-transparent"> 
                 <FunctionButton icon={<BackpackIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#e8d3a1]" />} label="Hành Trang" onClick={onShowInventory} /> 
@@ -9041,7 +9046,7 @@ const CustomizationModal = ({
         <div className="fixed inset-0 bg-[#0a0f0a]/90 backdrop-blur-sm z-[60] flex flex-col p-4 sm:p-6 animate-fade-in-up">
             <div className="flex justify-between items-center mb-4 flex-shrink-0 pb-4 border-b border-[#cda45e]/30">
                 <h2 className="text-3xl font-bold text-[#cda45e] tracking-widest uppercase" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Tùy Chỉnh</h2>
-                <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors">×</button>
+                <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>×</button>
             </div>
             <p className="text-xs text-[#a5b4fc] mb-4 italic flex-shrink-0">Mọi thay đổi ở đây áp dụng tức thì, KHÔNG ghi vào lịch sử cốt truyện.</p>
             <div className="flex-grow overflow-y-auto pr-2 space-y-5 scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-[#0a0f0a]">
@@ -9335,8 +9340,8 @@ const MobileInfoModal = ({
     return ( 
         <div className="fixed inset-0 bg-[#0a0f0a]/90 backdrop-blur-sm z-[60] flex flex-col p-4 sm:p-6 animate-fade-in-up"> 
             <div className="flex justify-between items-center mb-4 sm:mb-8 flex-shrink-0 border-b border-[#cda45e]/30 pb-4"> 
-                <h2 className="text-3xl sm:text-4xl font-bold text-[#e8d3a1] tracking-widest uppercase" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Bảng Thông Tin</h2> 
-                <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors">×</button> 
+                <h2 className="text-3xl sm:text-4xl font-bold text-[#e8d3a1] tracking-widest uppercase" style={{ fontFamily: "'Protest Revolution', sans-serif" }}>Bảng Thông Tin</h2>
+                <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>×</button>
             </div> 
             <div className="flex-grow grid grid-cols-2 sm:grid-cols-4 landscape:grid-cols-4 gap-3 sm:gap-5 content-start overflow-y-auto pr-2 pb-20 scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-transparent"> 
                 <InfoButton icon={<CharacterSheetIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#8ba888]" />} label="Nhân Vật" onClick={onShowCharacter} /> 
@@ -9695,7 +9700,7 @@ const SaveSlotModal = ({ show, onClose, onConfirm, savedGames = [], currentTurn,
 
     return (
         <div className="fixed inset-0 bg-[#0a0f0a]/80 backdrop-blur-sm flex items-center justify-center p-4 z-[160] animate-fade-in">
-            <div className="bg-[#162216] p-6 shadow-[0_0_30px_rgba(10,20,10,0.9)] w-full max-w-lg border border-[#cda45e]/50 relative">
+            <div className="bg-[#162216] p-6 shadow-[0_0_30px_rgba(10,20,10,0.9)] w-full max-w-lg max-h-[90vh] flex flex-col border border-[#cda45e]/50 relative overflow-y-auto">
                 {/* Góc kim loại */}
                 <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[#cda45e] pointer-events-none"></div>
                 <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-[#cda45e] pointer-events-none"></div>
@@ -9802,7 +9807,8 @@ const ChoiceButton = React.memo(({ choice, index, disabled, onClick, onShowDetai
                     {parsed.mainAction.replace(/\*/g, '')}
                 </span>
                 <div
-                    className="info-button-trigger p-1.5 hover:bg-[#cda45e]/20 flex-shrink-0 transition-colors border border-transparent hover:border-[#cda45e]/50"
+                    className="info-button-trigger p-1.5 hover:bg-[#cda45e]/20 flex-shrink-0 transition-colors border border-transparent hover:border-[#cda45e]/50 flex items-center justify-center"
+                    style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}
                     aria-label="Xem chi tiết"
                     onClick={(e) => {
                         e.stopPropagation();
@@ -11514,7 +11520,7 @@ const LocalCacheManagerModal = ({ show, onClose, savedGames, currentGameId, setM
                     <h2 className="text-xl sm:text-2xl font-bold text-[#cda45e] uppercase tracking-widest flex items-center" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
                         <TrashIcon className="w-6 h-6 mr-2.5 text-[#cda45e]"/> Quản Lý Bộ Nhớ Ảnh Trình Duyệt
                     </h2>
-                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors">&times;</button>
+                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>&times;</button>
                 </div>
 
                 <div className="flex gap-2 mb-4 flex-shrink-0">
@@ -11757,7 +11763,7 @@ const VisualGalleryModal = ({ show, onClose, knowledge, gameSettings }) => {
                     <h2 className="text-xl sm:text-2xl font-bold text-[#cda45e] uppercase tracking-widest flex items-center" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
                         <PhotoIcon className="w-6 h-6 mr-2.5 text-[#cda45e]"/> Tệp Ảnh Vũ Trụ
                     </h2>
-                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors">&times;</button>
+                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>&times;</button>
                 </div>
 
                 <div className="flex border-b border-[#cda45e]/20 mb-4 flex-shrink-0">
@@ -12308,7 +12314,7 @@ CRITICAL INSTRUCTION: PURE SOLID #000000 BLACK BACKGROUND ONLY. ABSOLUTELY NO SC
                     <h2 className="text-2xl sm:text-3xl font-bold text-[#cda45e] uppercase tracking-widest flex items-center" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
                         <WrenchScrewdriverIcon className="w-6 h-6 mr-3"/> Lò Đúc & Ngọc Giản
                     </h2>
-                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-3xl font-bold leading-none">&times;</button>
+                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-3xl font-bold leading-none flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>&times;</button>
                 </div>
 
                 <div className="bg-[#101a10] border border-[#cda45e]/50 p-4 mb-4 flex items-center gap-4">
@@ -12746,7 +12752,7 @@ const SkillManagementModal = ({ show, onClose, knowledge, handleEquipSkill, hand
                     <h2 className="text-2xl sm:text-3xl font-bold text-[#cda45e] flex items-center tracking-widest uppercase" style={{ fontFamily: "'Noto Serif Vietnamese', serif", textShadow: '0 0 10px rgba(205,164,94,0.3)' }}>
                         <BoltIcon className="w-7 h-7 sm:w-9 sm:h-9 mr-3 text-[#cda45e]"/> Quản Lý Kỹ Năng
                     </h2>
-                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors">×</button>
+                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>×</button>
                 </div>
 
                 
@@ -13274,7 +13280,7 @@ const CharacterEquipModal = ({ show, onClose, knowledge, handleEquipItem, handle
                         <h2 className="text-2xl sm:text-3xl font-bold text-[#cda45e] flex items-center tracking-widest uppercase" style={{ fontFamily: "'Noto Serif Vietnamese', serif", textShadow: '0 0 10px rgba(205,164,94,0.3)' }}>
                             <ArmorIcon className="w-7 h-7 sm:w-9 sm:h-9 mr-3 text-[#cda45e]"/> Trang Bị
                         </h2>
-                        <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors">×</button>
+                        <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>×</button>
                     </div>
 
                     {/* Thanh Tab điều hướng cho màn hình dọc di động */}
@@ -14163,7 +14169,7 @@ const QuickReferenceModal = ({ show, onClose, knowledge, onSelectForChat, player
                     <h2 className="text-2xl sm:text-3xl font-bold text-[#cda45e] flex items-center tracking-widest uppercase" style={{ fontFamily: "'Noto Serif Vietnamese', serif", textShadow: '0 0 10px rgba(205,164,94,0.3)' }}>
                         <BookOpenIcon className="w-7 h-7 sm:w-9 sm:h-9 mr-3 text-[#cda45e]"/> Tra Cứu Nhanh
                     </h2>
-                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors">×</button>
+                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-4xl leading-none font-bold transition-colors flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>×</button>
                 </div>
                 
                 <div className="flex border-b border-[#cda45e]/20 mb-5 flex-shrink-0">
@@ -15735,7 +15741,7 @@ const HtabInfoModal = ({
                         <button onClick={() => setActiveTab('actions')} className={`px-4 sm:px-5 py-2 text-xs font-bold tracking-widest uppercase transition-colors duration-300 ${activeTab === 'actions' ? 'bg-[#cda45e]/10 text-[#e8d3a1] border-b-2 border-[#cda45e]' : 'text-[#8ba888] hover:text-[#cda45e] border-b border-transparent'}`}>Hành Động</button>
                         <button onClick={() => setActiveTab('visuals')} className={`px-4 sm:px-5 py-2 text-xs font-bold tracking-widest uppercase transition-colors duration-300 ${activeTab === 'visuals' ? 'bg-[#cda45e]/10 text-[#e8d3a1] border-b-2 border-[#cda45e]' : 'text-[#8ba888] hover:text-[#cda45e] border-b border-transparent'}`}>Tùy Chỉnh Biểu Cảm (Model)</button>
                     </div>
-                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-3xl font-semibold leading-none">&times;</button>
+                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-3xl font-semibold leading-none flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>&times;</button>
                 </div>
 
                 <div className="overflow-y-auto flex-grow pr-2 scrollbar-thin scrollbar-thumb-[#cda45e] scrollbar-track-[#0a0f0a] min-h-0">
@@ -17159,7 +17165,7 @@ const TradeModal = ({
                              <button onClick={() => setActiveView('sell')} className={`px-4 py-1.5 text-xs font-bold tracking-widest uppercase transition-colors rounded-sm ${activeView === 'sell' ? 'bg-[#cda45e]/20 text-[#e8d3a1] border border-[#cda45e]/40' : 'text-[#8ba888] hover:text-[#cda45e]'}`}>Bán Đồ</button>
                              <button onClick={() => setActiveView('buy')} className={`px-4 py-1.5 text-xs font-bold tracking-widest uppercase transition-colors rounded-sm ${activeView === 'buy' ? 'bg-[#cda45e]/20 text-[#e8d3a1] border border-[#cda45e]/40' : 'text-[#8ba888] hover:text-[#cda45e]'}`}>Mua Đồ</button>
                          </div>
-                         <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-3xl font-semibold leading-none">&times;</button>
+                         <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-3xl font-semibold leading-none flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>&times;</button>
                     </div>
                 </div>
                 
@@ -17435,7 +17441,7 @@ const FirebaseConfigModal = ({ show, onClose, onConnectSuccess }) => {
                     <h3 className="text-xl font-bold text-[#cda45e] tracking-widest" style={{ fontFamily: "'Noto Serif Vietnamese', serif" }}>
                         KẾT NỐI MÁY CHỦ
                     </h3>
-                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#ff4d4d] text-2xl font-bold leading-none">&times;</button>
+                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#ff4d4d] text-2xl font-bold leading-none flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>&times;</button>
                 </div>
 
                 <p className="text-[#8ba888] text-sm mb-4 leading-relaxed">
@@ -30899,6 +30905,12 @@ ${postCombatRules}
 const processPlayerAction = async (actionText, actionType, flavorText = '') => {
     const trimmedAction = (actionText || '').trim();
     if (!trimmedAction || isProcessingAction) return;
+    // Khóa giao diện NGAY khi bấm, đồng bộ — trước đây cờ này chỉ được bật bên
+    // trong setTimeout(..., 0) ở BƯỚC 2 phía dưới, nên nút không đổi trạng thái
+    // (mờ/disabled) cho tới khi macrotask đó chạy, khiến người chơi cảm thấy
+    // nút "không phản hồi" trong lúc chờ. Cùng pattern đã dùng ở
+    // handleTargetSelection (khóa trước, mở setTimeout sau).
+    setIsProcessingAction(true);
     // gdd-03 Branch B: remember the player's own words for this turn.
     lastPlayerActionRef.current = trimmedAction;
     setPvpTurnTimeLeft(null);
@@ -33554,7 +33566,7 @@ const HandbookModal = ({ show, onClose }) => {
                     <h2 className="text-xl sm:text-3xl font-bold text-[#cda45e] flex items-center tracking-widest uppercase" style={{ fontFamily: "'Noto Serif Vietnamese', serif", textShadow: '0 0 10px rgba(205,164,94,0.3)' }}>
                         <BookOpenIcon className="w-6 h-6 sm:w-8 sm:h-8 mr-2.5 text-[#cda45e]"/> Cẩm Nang Phiêu Lưu
                     </h2>
-                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-3xl sm:text-4xl leading-none font-bold transition-colors">×</button>
+                    <button onClick={onClose} className="text-[#a3b8a3] hover:text-[#e8d3a1] text-3xl sm:text-4xl leading-none font-bold transition-colors flex items-center justify-center" style={{ minWidth: TOUCH_TARGET_MIN + 'px', minHeight: TOUCH_TARGET_MIN + 'px' }}>×</button>
                 </div>
 
                 {/* Grid chia ô: Ép chặt chiều cao và ẩn phần tràn vĩ mô */}
