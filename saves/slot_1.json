@@ -1,15 +1,15 @@
 {
   "id": "e3b06da5-e8e3-47e0-a8d8-14216eb92dff",
-  "currentTurn": 15,
+  "currentTurn": 16,
   "saveVersion": "2.8",
-  "timestamp": "2026-09-04T09:53:33.631Z",
+  "timestamp": "2026-09-04T17:54:39.226Z",
   "gameSettings": {
     "storyTitle": "Tam quốc chí",
     "theme": "Dã sử, Huyền Huyễn, Tu Tiên, Quân sự, Cổ đại",
     "setting": "1 năm trước khi Hoàng Cân nổi dậy",
-    "playStyle": "RPG",
+    "playStyle": "STORY",
     "uiTheme": "DARK_GOLD",
-    "textScale": 100,
+    "textScale": 90,
     "customThemeConfig": {
       "bgMain": "#050505",
       "bgPanel": "#1a1a24",
@@ -169,8 +169,8 @@
       {
         "id": "99b2a22c-624d-4450-b478-81cb7e506e42",
         "NPC": "Hạ Hầu Khinh Y",
-        "Standing": "Yêu thích",
-        "Reason": "Cảm phục lòng trung thành và sự chu toàn của Diệp Thần dẫu nàng có chút hờn dỗi nhẹ"
+        "Standing": "Kính nể",
+        "Reason": "Chủ động đứng ra đoạn hậu bảo vệ nàng trước nguy hiểm"
       },
       {
         "id": "5140ebef-aeea-4570-bb89-3b9ca16eef30",
@@ -209,7 +209,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 1.0999999999999999,
+        "exp": 1.2,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": 50,
@@ -474,7 +474,7 @@
         "isPlayer": false,
         "loreId": null,
         "level": 1,
-        "exp": 0.7999999999999999,
+        "exp": 0.8999999999999999,
         "progressionState": "Tu Luyện Thường",
         "ap": 0,
         "currency": 0,
@@ -693,7 +693,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Thai",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "b187908c-46bc-4165-9123-ef9828e54043",
@@ -769,7 +770,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Thai",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "05f692ab-0762-42a1-827b-1bc37f6894a2",
@@ -845,7 +847,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Thai",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "f187d475-db34-4572-8ea0-170288f439f9",
@@ -921,7 +924,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Thai",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       },
       {
         "id": "world_npc_ha_hau_khinh_y",
@@ -1005,7 +1009,8 @@
         "Backstory": "Là thiên kim tiểu thư của Hạ Hầu kiệt tộc tại Chân Định, từ nhỏ đã được nuông chiều nhưng lại không thích cầm kỳ thi họa mà chỉ say mê võ nghệ. Nàng lén lút học kiếm pháp từ các hộ vệ trong phủ và luôn khao khát được hành hiệp trượng nghĩa. Trước thềm biến loạn Hoàng Cân, nàng thường xuyên lén trốn khỏi phủ để khám phá thế giới bên ngoài.",
         "Personality": "Tinh nghịch, phóng khoáng, trọng tình nghĩa, thích tò mò và cực kỳ ghét sự gò bó của lễ giáo phong kiến.",
         "Stance": "Thấy nhân vật chính là một kẻ mới vào giang hồ đầy thú vị, nàng tỏ ra tò mò và muốn kết giao để cùng trải nghiệm những điều mới lạ.",
-        "isAppraised": true
+        "isAppraised": true,
+        "skills": []
       },
       {
         "id": "world_npc_ve_khiem",
@@ -1090,7 +1095,8 @@
         "Personality": "Trung dũng, thận trọng, nghiêm khắc với cấp dưới nhưng cực kỳ nuông chiều và chu đáo với chủ nhân, đặc biệt là Hạ Hầu Khinh Y.",
         "Stance": "Cảnh giác nhưng giữ lễ nghĩa. Đối với người lạ có tu vi thấp như người chơi, ông ta sẽ không chú ý nhiều trừ khi người chơi tiếp cận quá gần tiểu thư.",
         "CourtesyName": "Tử Cẩn",
-        "isAppraised": true
+        "isAppraised": true,
+        "skills": []
       },
       {
         "id": "8b6a5c03-aed0-48fd-a2df-d9df91aed6d8",
@@ -1166,7 +1172,8 @@
         "Stance": "Trung lập",
         "realm": "Phàm Thai",
         "incomingHealing": 1,
-        "maxExp": 100
+        "maxExp": 100,
+        "skills": []
       }
     ],
     "sharedCooldowns": {
@@ -1177,7 +1184,7 @@
     "requestNpcDesign": null,
     "progression": {
       "recentMeaningfulActions": [],
-      "lastExpResolvedTurn": 14
+      "lastExpResolvedTurn": 15
     },
     "loreQuests": [],
     "systemAssistant": {
@@ -1197,8 +1204,8 @@
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 14,
-      "world_time": 14,
+      "turn_id": 15,
+      "world_time": 15,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -1213,123 +1220,6 @@
       }
     },
     "stateHistory": [
-      {
-        "time": {
-          "year": 0,
-          "month": 1,
-          "day": 2,
-          "hour": 18
-        },
-        "location_id": "f5f512cf-b85b-41d9-a141-21dd6e5e9a6f",
-        "weather": "Hoàng hôn lịm tắt, gió núi lạnh thấu xương",
-        "characters": [
-          {
-            "id": "player",
-            "Name": "Diệp Thần",
-            "level": 1,
-            "exp": 0.8999999999999999,
-            "hp": 2000,
-            "maxhp": 2000,
-            "currency": 50,
-            "inventory": [
-              {
-                "Name": "Bách Điểu Triều Phượng thương",
-                "quantity": 1
-              }
-            ],
-            "longTermStatuses": []
-          },
-          {
-            "id": "npc_lao_luong_01",
-            "Name": "Lão Lương",
-            "level": 2,
-            "exp": 0,
-            "hp": 1020,
-            "maxhp": 1020,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "world_npc_dieu_thuyen",
-            "Name": "Điêu Thuyền",
-            "level": 1,
-            "exp": 0.6,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "997a32cf-0e21-448e-a6c7-681bee18dedf",
-            "Name": "Binh lính A",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "b187908c-46bc-4165-9123-ef9828e54043",
-            "Name": "Binh lính B",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "05f692ab-0762-42a1-827b-1bc37f6894a2",
-            "Name": "Binh lính C",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "f187d475-db34-4572-8ea0-170288f439f9",
-            "Name": "Ngũ trưởng",
-            "level": 1,
-            "exp": 0,
-            "hp": 600,
-            "maxhp": 600,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "world_npc_ha_hau_khinh_y",
-            "Name": "Hạ Hầu Khinh Y",
-            "level": 15,
-            "exp": 0,
-            "hp": 5880,
-            "maxhp": 5880,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          },
-          {
-            "id": "world_npc_ve_khiem",
-            "Name": "Vệ Khiêm",
-            "level": 28,
-            "exp": 0,
-            "hp": 18140,
-            "maxhp": 18140,
-            "currency": 0,
-            "inventory": [],
-            "longTermStatuses": []
-          }
-        ],
-        "quests": []
-      },
       {
         "time": {
           "year": 0,
@@ -1440,6 +1330,134 @@
             "exp": 0,
             "hp": 18140,
             "maxhp": 18140,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          }
+        ],
+        "quests": []
+      },
+      {
+        "time": {
+          "year": 0,
+          "month": 1,
+          "day": 3,
+          "hour": 5
+        },
+        "location_id": "4af84cdf-7394-4697-88ae-df5271941752",
+        "weather": "Sương mù dày đặc, gió sớm buốt lạnh",
+        "characters": [
+          {
+            "id": "player",
+            "Name": "Diệp Thần",
+            "level": 1,
+            "exp": 1.0999999999999999,
+            "hp": 2000,
+            "maxhp": 2000,
+            "currency": 50,
+            "inventory": [
+              {
+                "Name": "Bách Điểu Triều Phượng thương",
+                "quantity": 1
+              }
+            ],
+            "longTermStatuses": []
+          },
+          {
+            "id": "npc_lao_luong_01",
+            "Name": "Lão Lương",
+            "level": 2,
+            "exp": 0,
+            "hp": 1020,
+            "maxhp": 1020,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "world_npc_dieu_thuyen",
+            "Name": "Điêu Thuyền",
+            "level": 1,
+            "exp": 0.7999999999999999,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "997a32cf-0e21-448e-a6c7-681bee18dedf",
+            "Name": "Binh lính A",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "b187908c-46bc-4165-9123-ef9828e54043",
+            "Name": "Binh lính B",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "05f692ab-0762-42a1-827b-1bc37f6894a2",
+            "Name": "Binh lính C",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "f187d475-db34-4572-8ea0-170288f439f9",
+            "Name": "Ngũ trưởng",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "world_npc_ha_hau_khinh_y",
+            "Name": "Hạ Hầu Khinh Y",
+            "level": 15,
+            "exp": 0,
+            "hp": 5880,
+            "maxhp": 5880,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "world_npc_ve_khiem",
+            "Name": "Vệ Khiêm",
+            "level": 28,
+            "exp": 0,
+            "hp": 18140,
+            "maxhp": 18140,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
+          },
+          {
+            "id": "8b6a5c03-aed0-48fd-a2df-d9df91aed6d8",
+            "Name": "Binh lính Hoàng Cân",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
@@ -2881,13 +2899,64 @@
           "content": "Sự căng thẳng tột độ bao trùm lấy thung lũng hoa dại se lạnh, tiếng gió rít qua những khe thông dường như cũng trở nên ngột ngạt hơn bao giờ hết. *Hạ Hầu Khinh Y* khẽ nấp sau vai ngươi, đôi bàn tay nhỏ nhắn nắm chặt lấy chuôi đoản kiếm gỗ, đôi mắt lộ rõ vẻ căng thẳng dẫu tính khí vẫn kiên cường. Ở bên cạnh, tiểu *Điêu Thuyền* ôm lấy cánh tay ngươi đầy run rẩy, nhưng ánh mắt nhìn ngươi vẫn tràn đầy niềm tin sắt đá rằng ca ca của nàng nhất định sẽ bảo vệ nàng bình an vô sự trước mọi giông bão thế cục."
         }
       ]
+    },
+    {
+      "id": "b798db88-19eb-4376-b052-ac58e3f824db",
+      "type": "user_custom_action",
+      "content": "[Đoạn 1 - Lời Diệp Thần]: \"Tú Nhi đưa tiểu thư lên xe ngựa rời khỏi đây. 2 vị ám vệ bảo vệ tiểu thư. Ta đoạn hậu\"\n[Đoạn 2 - Tường thuật]: \"Dứt lời, ngươi rút cây trường thương sắt gắn ở xe ngựa ra chắn ngang đường đi của đám Hoàng Cân binh\""
+    },
+    {
+      "id": "4fbaf19e-3bb8-4c82-ad7e-4b58abb7e1e5",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "Không khí buổi sớm mai tại thung lũng dã ngoại *Ngoại ô phía Bắc Chân Định* bỗng chốc đưng cứng lại, ngột ngạt đến mức tưởng chừng như một tàn lửa nhỏ rơi xuống cũng đủ bùng lên cơn đại hỏa. Sương mù buốt giá cuồn cuộn chảy qua các khe đá rậm rạp, mang theo mùi sương đẫm cùng vị rỉ sắt nồng nặc phát ra từ những thanh Hán đao rỉ sét trên tay ba tên trinh sát *Hoàng Cân*. \nNgay khoảnh khắc lưỡi đao sắc lạnh của kẻ địch vắt ngang không trung, *Diệp Thần* không một chút nao núng. Hắn sải bước dài, thân hình nhỏ nhắn nhưng sừng sững như một ngọn núi đá đứng sừng sững chắn ngay trước mặt tiểu *Điêu Thuyền* và đại tiểu thư *Hạ Hầu Khinh Y*. Đôi mắt đen thẳm của hắn lóe lên luồng sát khí thầm lặng, khí thái điềm nhiên đến lạnh người bộc phát khiến đống cỏ dại dưới chân như đứng khựng lại trước gió thu. \nHắn cất giọng trầm hùng, dứt khoát, âm thanh đanh thép vang vọng xé tan màn sương mù tĩnh mịch:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "*Tú Nhi*, muội mau đưa tiểu thư lên xe ngựa rời khỏi đây ngay lập tức! Hai vị ám vệ hãy mau chóng xuất hiện bảo vệ tiểu thư chu toàn! Ở đây cứ để ta đoạn hậu!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Keng!*\nLời vừa dứt, đôi bàn tay rắn chắc của *Diệp Thần* đã vòng ra sau cỗ xe thồ thô sơ, nắm chặt lấy thân cây trường thương bằng sắt đen tuyền vốn được buộc chặt dọc theo thành xe. Hắn vần lực cánh tay, dùng sức giật mạnh! Tiếng ma sát giữa kim loại và gỗ vang lên chói tai, thanh trường thương sắt nặng trịch được hắn rút ra khỏi bao đầy dứt khoát. \n*Xoẹt! Bập!*\n*Diệp Thần* xoay ngang thân thương, lưỡi thương sắt lạnh ngắt rít lên trong không khí rùng rợn, xé toạc làn sương mù sớm mai. Hắn dậm mạnh chân trái xuống nền đất đỏ ẩm ướt, cắm phập đuôi thương sắt xuống mặt đường sỏi đá, tạo thành một hàng rào độc đạo chắn ngang lối đi duy nhất của ba tên lính *Hoàng Cân*. Mũi thương sáng quắc, lạnh lẽo chĩa thẳng vào cổ họng tên chỉ huy cưỡi ngựa đi đầu!\nNhìn thấy hành động quyết đoán cùng khí thái đại tướng quân bộc phát từ một thiếu niên chín tuổi, tiểu *Điêu Thuyền* dẫu trong lòng dâng lên niềm lo lắng xót xa đến xé ruột xé gan, nhưng bằng sự tin tưởng tuyệt đối dành cho *Diệp Thần ca ca*, nàng không hề do dự một giây nào. Nàng nhanh nhẹn kéo lấy tà áo gấm màu hồng phấn của *Hạ Hầu Khinh Y*, nhanh như sóc dắt đại tiểu thư lao về phía cỗ xe ngựa."
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Điêu Thuyền",
+          "content": "Tiểu thư! Mau nghe lời *Diệp Thần* ca ca! Chúng ta ở lại chỉ làm huynh ấy vướng chân vướng tay thôi, mau lên xe!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* lúc này hoàn toàn bàng hoàng. Đôi mắt to tròn, lấp lánh của vị đại tiểu thư vốn bướng bỉnh, tinh nghịch trợn ngược lên vì chấn động. Nàng nhìn trối trăng vào bóng lưng gầy guộc nhưng uy nghi như bàn thạch của *Diệp Thần* — người thiếu niên trạc tuổi nàng, tay cầm thương sắt độc thủ chắn ngang hàng ngũ kẻ địch mạnh mẽ, bình thản nhận lấy toàn bộ hiểm nguy về mình chỉ để đổi lấy sự an toàn cho nàng. \nTrong sâu thẳm tâm trí của cô tiểu thư khuê các từ nhỏ vốn sống trong nhung lụa, hình ảnh ấy như một ngọn lửa rực rỡ khắc sâu vào tâm khảm. Sự kinh ngạc ban đầu nhanh chóng biến thành niềm ngưỡng mộ, kính nể tột cùng dành cho hắn. Nàng chưa từng thấy một ai — dù là các võ sư hay hộ vệ lực lưỡng trong phủ Thái thú — lại sở hữu khí khái lẫm liệt, xem thường sinh tử và trọng tình trọng nghĩa đến nhường ấy!\nTừ trong rặng thông già rậm rạp phía xa, hai bóng đen mặc y phục xám tro — hai ám vệ tinh anh do Hộ vệ trưởng *Vệ Khiêm* bí mật phái đi theo bảo vệ — lập tức tung người đáp xuống. Nhận thấy mệnh lệnh đoạn hậu cực kỳ sáng suốt và bản lĩnh gánh vác đại cục của *Diệp Thần*, họ không hề chậm trễ, lập tức vung đao bảo vệ hai bên hông cỗ xe ngựa, nhảy lên gác đao cầm dây cương, quát lớn thúc ngựa quay đầu ch chỏm chạy trốn về hướng thành *Chân Định*!\n*Nhếch! Lạch cạch! Lạch cạch!*\nTiếng bánh xe gỗ nghiến dồn dập trên nền sỏi đá khô khốc vang lên mỗi lúc một xa. Từ ô cửa sổ nhỏ khảm ngọc của cỗ xe ngựa đang lao đi vun vút, *Hạ Hầu Khinh Y* thò hẳn nửa người ra ngoài, đôi bàn tay nhỏ nhắn bấu chặt vào thành xe, ánh mắt đong đầy sự lo lắng lẫn kính nể sâu sắc hướng về phía thiếu niên đang đơn độc đứng giữa thung lũng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "*Diệp Thần*! Ngươi... ngươi nhất định phải sống sót trở về đấy! Ta sẽ bảo phụ thân mang toàn bộ quân binh trong phủ ra đón ngươi!"
+        },
+        {
+          "type": "narrative",
+          "content": "Tiếng gọi thất thanh của nàng hòa vào tiếng gió bấc rít qua khe núi rồi dần chìm nghỉm. Tiểu *Điêu Thuyền* ngồi bên trong xe, hai tay chắp chặt trước ngực, giọt nước mắt lo âu khẽ lăn dài trên má, thầm cầu nguyện cho người thân duy nhất của mình bình an vô sự vượt qua kiếp nạn này.\nTrong khi đó, ở giữa con đường mòn bãi sỏi của *Ngoại ô phía Bắc Chân Định*, không khí đã giọt xuống mức độ băng điểm. Ba tên binh lính trinh sát của quân *Hoàng Cân* chứng kiến cảnh tượng cỗ xe thồ sang trọng cùng hai cô bé xinh đẹp chạy thoát ngay trước mắt mình, gò má chúng giật giật vì uất hận và tức giận tột độ. \nSự ngạo mạn, coi thường ban đầu của chúng khi nhìn thấy một đứa trẻ chín tuổi lập tức tan biến, thay vào đó là sự nhục nhã và phẫn nộ ngút trời. Một gã ranh con hỉ mũi chưa sạch, ăn mặc rách rưới mà lại dám dùng một cây thương sắt chắn đường, ra lệnh đoạn hậu như thể xem ba gã tráng sĩ dạn dẫm sương gió như cỏ rác!\nTên chỉ huy trinh sát gầm lên một tiếng như dã thú bị thương, khuôn mặt xám xịt hằn lên những thớ thịt hung tợn, tay siết chặt lấy chuôi Hán đao rỉ sét, chĩa thẳng lưỡi đao sáng quắc vào mặt *Diệp Thần*:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Binh lính Hoàng Cân",
+          "content": "Tên oắt con ranh ma! Mày thật sự tìm chết rồi! Mất đi cỗ xe cùng hai con nha đầu kia, tao sẽ lột da, róc thịt mày để trút cơn giận này! Anh em, xông lên băm vằn nó ra cho tao!"
+        },
+        {
+          "type": "narrative",
+          "content": "<sound>Tiếng vó ngựa dậm cuồng loạn trên nền đá dội lên cộc cộc!</sound>\nHai tên lính phía sau gầm lên sát khí ngút ngàn, đồng loạt thúc mạnh vào hông hai con chiến mã gầy gò. Tiếng rít xé gió của hai cây trường thương thô sơ cùng lưỡi Hán đao sáng quắc bổ dọc từ trên cao xuống, nhắm thẳng vào đầu và ngực của *Diệp Thần* mà lao tới với tốc độ kinh người!\n*Diệp Thần* đứng yên như pho tượng đá giữa luồng kình phong buốt giá. Tà áo võ phục màu xám xanh của hắn tung bay xào xạc theo nhịp gió thu. Hắn khẽ nheo đôi mắt tinh anh lại, con ngươi đen thẳm khóa chặt từng quỹ đạo di chuyển cùng sơ hở chết người trong bộ pháp xốc xếch của ba tên lính *Hoàng Cân*. \nTrong tâm trí hắn, mọi chuyển động của kẻ địch như chậm lại vài phần. Hắn điều hòa nhịp thở trở nên êm ái, kình lực cuồn cuộn từ các thớ cơ bắp được hệ thống tăng cường bộc phát âm thầm, chạy dọc theo hai cánh tay giắt chặt vào thân thương sắt. Hắn không hề bộc lộ ra nửa phần năng lượng dị thường hay chiêu thức hoa mỹ, mà chỉ đơn thuần vận dụng bản năng phản xạ thực chiến đỉnh cao cùng nguyên lý cơ bản nhất của thương pháp.\nKhi mũi thương của tên lính đi đầu chỉ còn cách trán hắn chừng nửa thước, *Diệp Thần* hốt nhiên chuyển động! Thân hình hắn nghiêng nhẹ sang bên phải một khoảng cách cực kỳ tối thiểu, vừa vặn để mũi thương sắt của kẻ địch đâm sượt qua tà áo, xé rách một vệt không khí buốt lạnh!\n*Keng!*\nNgay khoảnh khắc ngàn cân treo sợi tóc ấy, tay trái của *Diệp Thần* nhấc nhẹ đuôi thương sắt lên, tay phải phát lực đẩy mạnh! Thân thương sắt đen tuyền vung ra một đường vòng cung hoàn hảo, đập thẳng vào sống đao của tên lính thứ hai đang chém xuống, hất văng lưỡi đao của hắn lệch sang một bên trong tiếng va chạm kim loại chói tai!\nThực lực bộc phát từ một thiếu niên chín tuổi nhưng mang sức mạnh gấp đôi người bình thường khiến hai tên lính *Hoàng Cân* dính đòn cảm thấy tê dại cả bàn tay, hai con chiến mã bị chấn động liền chệch hướng lao về phía bụi rậm hai bên đường. \nChỉ còn lại tên chỉ huy trinh sát mặt hung tợn! Hắn nhận ra sự bất thường chết người của đứa trẻ trước mặt, đôi mắt ti hí hiện lên sự kinh hoàng bạt vía. Nhưng vì đà ngựa đang lao nhanh, hắn không thể dừng lại, đành gầm lên dữ dội, dốc toàn bộ sức mạnh cơ bắp vung Hán đao chém chéo một đòn chí mạng nhắm thẳng vào cổ họng *Diệp Thần*!\nLuồng gió đao buốt giá rít lên rùng rợn. *Diệp Thần* nhếch môi nở một nụ cười lạnh ngắt, đôi mắt không chút gợn sóng. Hắn xoay người lướt nhẹ bộ pháp, cây trường thương sắt trong tay bắt đầu rung lên bần bật, chuẩn bị đưa ra đòn đáp trả quyết định trước sự vung đao cuồng loạn của kẻ địch giữa thung lũng *Ngoại ô phía Bắc Chân Định*.\nNgươi sẽ xử lý tình huống giao chiến sinh tử này thế nào?"
+        }
+      ]
     }
   ],
   "choices": [
-    "Đưa hai cô bé lùi lại phía sau xe ngựa bảo an, đồng thời ra ám hiệu cho hai hộ vệ ngầm của phủ Hạ Hầu lập tức xuất thủ để giải quyết nhanh gọn toán trinh sát Hoàng Cân này. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Bảo đảm an toàn tuyệt đối cho hai cô gái, tiêu diệt được mối nguy hại nhưng tiếng động lớn có thể thu hút thêm nhiều quân Hoàng Cân gần đó kéo tới.}",
-    "Bình tĩnh đứng chắn phía trước, khéo léo dùng danh nghĩa của phủ Thái thú Chân Định để cảnh cáo và dò hỏi mục đích của toán binh này nhằm kéo dài thời gian chờ viện binh. {Tỷ lệ thành công: 75%, Hậu quả/Phần thưởng: Tránh được một cuộc xung đột trực diện ngay lập tức, thu thập được tin tức về hành tung của quân Hoàng Cân nhưng khiến chúng sinh lòng nghi ngờ và cảnh giác cao độ.}",
-    "Lén ra ám hiệu cho hai hộ vệ ngầm bất ngờ áp sát từ hai cánh rặng thông để bao vây phong tỏa đường lui, chuẩn bị một đòn dứt điểm gọn gàng không để lại dấu vết. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Tiêu diệt toán địch êm đẹp không tiếng động, thu hoạch được chiến mã và binh khí dã chiến nhưng đòi hỏi sự phối hợp kịch tính.}",
-    "Yêu cầu Điêu Thuyền và Hạ Hầu Khinh Y lánh vào trong xe ngựa, bản thân cầm trường thương gỗ bước lên đối mặt trực diện để thử thách thực chiến và thương pháp đại thành của mình trước áp lực kỵ binh. {Tỷ lệ thành công: 80%, Hậu quả/Phần thưởng: Rèn luyện thực chiến tuyệt vời, tích lũy thêm điểm thuộc tính và nâng cao độ thuần thục võ kỹ nhưng có thể khiến hai cô gái vô cùng lo lắng, sợ hãi cho an nguy của ngươi.}"
+    "Sử dụng kỹ năng thương pháp cơ bản khéo léo gạt phăng lưỡi đao của tên chỉ huy, sau đó đâm thương đả thương chân hắn để khống chế gã làm con mồi nhử hai tên còn lại. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Nhanh chóng làm chủ chiến trường, thu thập được tin tức tình báo quân sự quý giá từ miệng tên chỉ huy Hoàng Cân.}",
+    "Vận dụng toàn bộ sức mạnh физи thể chất lướt tới áp sát, dùng đuôi thương sắt đập mạnh vào ngực tên chỉ huy hất gã văng khỏi lưng ngựa, tạo uy áp khiến hai tên lâu la hoảng sợ tháo chạy. {Tỷ lệ thành công: 80%, Hậu quả/Phần thưởng: Kết thúc trận chiến một cách nhanh gọn không tốn nhiều sức, thu giữ được ba con chiến mã phòng thân.}",
+    "Giả vờ lùi lại tỏ vẻ yếu thế để dẫn dụ cả ba tên lính Hoàng Cân đuổi theo vào sâu trong rặng thông rậm rạp, tận dụng địa hình hiểm trở để tiêu diệt gọn từng tên một. {Tỷ lệ thành công: 75%, Hậu quả/Phần thưởng: Bảo đảm không để lọt lưới kẻ nào, thu hoạch được một số trang bị vũ khí và lương khô giắt lưng của giặc.}",
+    "Giữ khoảng cách an toàn phòng thủ kiên cố, vừa đánh vừa lùi dần về hướng cỗ xe ngựa đã rút lui để đảm bảo không bị chúng bất ngờ vòng qua đòn đoạn hậu đánh lén. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: An toàn tuyệt đối, dễ dàng hội quân cùng ám vệ và hai cô bé nhưng tốn nhiều thời gian di chuyển.}"
   ],
   "gameMode": "EXPLORATION",
   "activeTrade": {
@@ -2900,5 +2969,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 14
+  "adventureTurnCount": 15
 }
