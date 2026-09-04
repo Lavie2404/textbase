@@ -25836,9 +25836,18 @@ const parseGeminiResponseAndUpdateState = async (text, knowledgeToUse, setActive
     // diễn ra trọn vẹn đúng trình tự" là ám hiệu API-1 → API-2, không bao giờ là văn
     // tiểu thuyết hợp lệ. Nếu người kể vẫn lỡ chép nó (hoặc biến thể) vào truyện,
     // xóa tất định cả câu trước khi hiển thị.
+    // Rò rỉ ký tự ngoại lai (2026-09-05): AI thỉnh thoảng tự chèn nhầm chữ Hán/
+    // Kana/Hangul/Cyrillic vào giữa câu tiếng Việt (VD thực tế đã gặp: "sức mạnh
+    // физи thể chất", "tâm念 vừa động" — không phải Hán Việt phiên âm, mà là ký tự
+    // gốc trực tiếp/chữ ngoại ngữ khác lẫn vào). Áp dụng CHO CẢ tường thuật lẫn 4
+    // gợi ý hành động vì cả hai đều tách ra từ storyContent này. Cắt riêng các ký
+    // tự đó (không xóa cả câu) để phần tiếng Việt còn lại vẫn đọc được trọn vẹn.
+    const FOREIGN_SCRIPT_LEAK_RE = /[Ѐ-ӿ぀-ヿ一-鿿가-힣]+/g;
+
     storyContent = storyContent
         .replace(/[^.!?\n]*chuỗi hành động[^.!?\n]*(?:trọn vẹn|đúng trình tự)[^.!?\n]*[.!?]?/gi, '')
         .replace(/[^.!?\n]*(?:trọn vẹn|đúng trình tự)[^.!?\n]*chuỗi hành động[^.!?\n]*[.!?]?/gi, '')
+        .replace(FOREIGN_SCRIPT_LEAK_RE, '')
         .replace(/ {2,}/g, ' ');
 
     const updates = {
@@ -28488,6 +28497,14 @@ ${PILLAR1_DIRECTIVES_NARRATION.map(x => '//    * ' + x).join('\n')}
 //    - BẮT BUỘC bao bọc TẤT CẢ tên riêng (Nhân vật, Địa điểm, Vật phẩm, Kỹ năng, Nhiệm vụ) bằng dấu sao (*). 
 //    - LƯU Ý ĐẶC BIỆT: Đại từ "ngươi" KHÔNG PHẢI là tên riêng. TUYỆT ĐỐI KHÔNG đặt từ "ngươi" trong dấu sao (SAI: *ngươi*, ĐÚNG: ngươi). 
 //    - TUYỆT ĐỐI KHÔNG để dấu sao đứng mồ côi (SAI: * áp lưng vào tường..., ĐÚNG: Ngươi áp lưng vào tường...).
+
+// 1.5. CHỈ VIẾT BẰNG CHỮ QUỐC NGỮ (TUYỆT ĐỐI CẤM CHỮ VIẾT NGOÀI TIẾNG VIỆT):
+//    - Toàn bộ văn tường thuật, hội thoại, và 4 gợi ý hành động PHẢI 100% bằng chữ Quốc ngữ (bảng chữ Latin có dấu tiếng Việt). TUYỆT ĐỐI KHÔNG được để lẫn bất kỳ ký tự/từ nào của ngôn ngữ khác vào giữa câu tiếng Việt — kể cả chỉ một chữ Hán/Kana/Hangul/Kirin (Nga) đơn lẻ, dù chỉ một âm tiết.
+//    - Muốn diễn đạt khái niệm gốc Hán (võ công, công pháp, danh xưng, tâm pháp...), BẮT BUỘC dùng từ Hán Việt đã phiên âm sang chữ Quốc ngữ (VD: "niệm", "chân nguyên", "tâm ma"), TUYỆT ĐỐI KHÔNG viết trực tiếp ký tự Hán gốc (VD: 念, 心, 氣).
+//    - VÍ DỤ SAI (lẫn tiếng Nga): "Vận dụng toàn bộ sức mạnh физи thể chất lướt tới áp sát..." — "физи" là ký tự ngoại lai vô nghĩa trong câu, TUYỆT ĐỐI không được xuất hiện.
+//    - VÍ DỤ SAI (lẫn chữ Hán thay vì Hán Việt): "Ngươi tâm念 vừa động, chuôi thần binh... hiện ra" — phải viết trọn "niệm" bằng chữ Quốc ngữ: "Ngươi tâm niệm vừa động".
+//    - VÍ DỤ ĐÚNG: "Vận dụng toàn bộ sức mạnh thể chất lướt tới áp sát...", "Ngươi tâm niệm vừa động, chuôi thần binh... hiện ra".
+//    - TỰ KIỂM TRA BẮT BUỘC TRƯỚC KHI TRẢ VỀ PHẢN HỒI: rà lại toàn bộ văn bản một lượt; nếu phát hiện bất kỳ ký tự nào ngoài bảng chữ Latin (có dấu tiếng Việt) và dấu câu thông thường, PHẢI xóa hoặc thay bằng từ tiếng Việt tương ứng trước khi hoàn tất.
 
 // 2. ĐỊNH DẠNG HỘI THOẠI (NGHIÊM CẤM ĐỂ TRỐNG SPEAKER):
 //    - Mọi câu nói trực tiếp của nhân vật PHẢI được bọc trong thẻ XML <dialogue>.
