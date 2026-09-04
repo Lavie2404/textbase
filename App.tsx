@@ -17361,8 +17361,18 @@ const INITIAL_GAME_SETTINGS = {
     defaultEnemyImages: { base: '', idle: '', attack_normal: '' }, // Dáng mặc định cho kẻ thù chưa có ảnh riêng
 };
 
+// AI thỉnh thoảng tự bịa ra thẻ mô tả hiệu ứng âm thanh kiểu <sound>...</sound>
+// (không phải cú pháp được dạy trong prompt, không hệ thống nào xử lý nó) —
+// nếu không lọc, thẻ lọt nguyên văn vào tường thuật hiển thị cho người chơi.
+// Cắt bỏ toàn bộ khối này (kể cả nội dung bên trong) trước khi tách <dialogue>,
+// cùng cách các thẻ lệnh [TAG] lạ khác bị strip thay vì hiển thị nguyên văn.
+const STRAY_SOUND_TAG_RE = /<sound\b[^>]*\/>|<sound\b[^>]*>[\s\S]*?<\/sound>/gi;
+
 const parseStoryWithDialogue = (text) => {
     if (!text || typeof text !== 'string') return [];
+
+    const cleanedText = text.replace(STRAY_SOUND_TAG_RE, '').trim();
+    if (!cleanedText) return [];
 
     const segments = [];
     let lastIndex = 0;
@@ -17370,10 +17380,10 @@ const parseStoryWithDialogue = (text) => {
     const regex = /<dialogue speaker="([^"]+)">([\s\S]*?)<\/dialogue>/g;
     let match;
 
-    while ((match = regex.exec(text)) !== null) {
+    while ((match = regex.exec(cleanedText)) !== null) {
         // 1. Lấy phần văn kể chuyện đứng TRƯỚC thẻ dialogue
         if (match.index > lastIndex) {
-            const narrativeContent = text.substring(lastIndex, match.index).trim();
+            const narrativeContent = cleanedText.substring(lastIndex, match.index).trim();
             if (narrativeContent) {
                 segments.push({
                     type: 'narrative',
@@ -17393,8 +17403,8 @@ const parseStoryWithDialogue = (text) => {
     }
 
     // 3. Lấy phần văn kể chuyện còn lại SAU thẻ dialogue cuối cùng
-    if (lastIndex < text.length) {
-        const remainingContent = text.substring(lastIndex).trim();
+    if (lastIndex < cleanedText.length) {
+        const remainingContent = cleanedText.substring(lastIndex).trim();
         if (remainingContent) {
             segments.push({
                 type: 'narrative',
@@ -17404,8 +17414,8 @@ const parseStoryWithDialogue = (text) => {
     }
 
     // Nếu không tìm thấy thẻ dialogue nào, trả về toàn bộ text là narrative
-    if (segments.length === 0 && text.trim()) {
-        segments.push({ type: 'narrative', content: text.trim() });
+    if (segments.length === 0 && cleanedText.trim()) {
+        segments.push({ type: 'narrative', content: cleanedText.trim() });
     }
 
     return segments;
