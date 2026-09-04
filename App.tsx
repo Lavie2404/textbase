@@ -11031,7 +11031,23 @@ const renderDefaultActions = () => {
                         </div>
 
                         <div className="mt-auto flex-shrink-0 bg-[#0a0f0a] border-t-2 border-[#cda45e]/50 z-20 shadow-[0_-10px_20px_rgba(10,20,10,0.9)] relative">
-                            <SystemAssistantOverlay 
+                            {/* Neo theo mép TRÊN của chính khung hành động (-top, không phải
+                                bottom đo từ đáy màn hình) — trước đây dùng style={{bottom:
+                                '260px'}} đoán chiều cao khung hành động + thanh điều hướng dưới,
+                                nên khi khung này cao/thấp khác đi (combat/trade/htab-chat, có
+                                thêm dòng "+ Tường thuật"/"+ Đối thoại"...) nút liền đè lên nút
+                                Hành Động. Neo theo -top của chính khung này luôn đúng bất kể
+                                khung cao bao nhiêu. */}
+                            {showScrollDownButton && (
+                                <button
+                                    onClick={scrollToBottom}
+                                    className="absolute right-4 -top-14 z-50 bg-[#162216]/90 border border-[#cda45e] text-[#cda45e] hover:bg-[#cda45e]/20 hover:text-[#e8d3a1] p-3 rounded-full shadow-[0_0_15px_rgba(205,164,94,0.3)] transition-all transform hover:scale-110 animate-fade-in"
+                                    title="Trôi xuống"
+                                >
+                                    <ArrowDownCircleIcon className="w-6 h-6" />
+                                </button>
+                            )}
+                            <SystemAssistantOverlay
                                 assistantState={knowledge.systemAssistant} 
                                 htabState={knowledge.htab}
                                 htabExitPending={htabExitPending}
@@ -11199,16 +11215,6 @@ const renderDefaultActions = () => {
                 onClose={() => setDetailedChoice(null)} 
             />
 
-            {showScrollDownButton && (
-                <button 
-                    onClick={scrollToBottom}
-                    className="absolute right-4 z-50 bg-[#162216]/90 border border-[#cda45e] text-[#cda45e] hover:bg-[#cda45e]/20 hover:text-[#e8d3a1] p-3 rounded-full shadow-[0_0_15px_rgba(205,164,94,0.3)] transition-all transform hover:scale-110 animate-fade-in"
-                    style={{ bottom: '260px' }}
-                    title="Trôi xuống"
-                >
-                    <ArrowDownCircleIcon className="w-6 h-6" />
-                </button>
-            )}
         </div>
     );
 };
