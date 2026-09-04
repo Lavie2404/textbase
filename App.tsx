@@ -8819,8 +8819,8 @@ const SettingsMenu = ({
                                     <span className="block font-bold text-xs tracking-wide text-[#e8d3a1]">Tùy chỉnh nhân vật</span>
                                     <span className="block text-[9px] text-[#8ba888] mt-1 leading-tight">Mặc định TẮT. Bật để hiện nút mở bảng tùy chỉnh.</span>
                                 </span>
-                                <span className={'w-12 h-7 flex-shrink-0 border relative transition-colors ' + (hackModeEnabled ? 'border-[#cda45e] bg-[#1b2a1b]' : 'border-[#8ba888]/40 bg-[#0a0f0a]')}>
-                                    <span className={'absolute top-0.5 w-5 h-5 bg-[#e8d3a1] transition-transform ' + (hackModeEnabled ? 'translate-x-6' : 'translate-x-1')}></span>
+                                <span className={'w-12 h-7 flex-shrink-0 border rounded-full relative transition-colors ' + (hackModeEnabled ? 'border-[#cda45e] bg-[#1b2a1b]' : 'border-[#8ba888]/40 bg-[#0a0f0a]')}>
+                                    <span className={'absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-[#e8d3a1] transition-transform ' + (hackModeEnabled ? 'translate-x-5' : 'translate-x-0')}></span>
                                 </span>
                             </button>
                             {customizeVisibility !== 'hidden' && (
