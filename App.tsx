@@ -25852,9 +25852,10 @@ const parseGeminiResponseAndUpdateState = async (text, knowledgeToUse, setActive
     // bừa theo hình dạng ASCII sẽ phá câu hợp lệ. Nên chỉ xử lý ĐÚNG những từ đã
     // ghi nhận rò rỉ, khớp nguyên từ (word boundary), không phân biệt hoa/thường:
     // từ nào có nghĩa tương đương tiếng Việt rõ ràng, không mơ hồ thì THAY THẾ
-    // (vd "under" luôn có nghĩa "dưới" trong ngữ cảnh này); còn lại thì CẮT BỎ.
-    const ENGLISH_LEAK_REPLACEMENTS = { under: 'dưới' };
-    const ENGLISH_LEAK_STRIP_WORDS = ['curtains'];
+    // (vd "under" = "dưới"; "curtains" = "màn/rèm", ở đây trong cụm "hạ màn" nên
+    // dùng "màn"); còn lại (chưa xác định được nghĩa thay thế an toàn) thì CẮT BỎ.
+    const ENGLISH_LEAK_REPLACEMENTS = { under: 'dưới', curtains: 'màn' };
+    const ENGLISH_LEAK_STRIP_WORDS = [];
     const ENGLISH_LEAK_RE = new RegExp(
         '\\b(' + [...Object.keys(ENGLISH_LEAK_REPLACEMENTS), ...ENGLISH_LEAK_STRIP_WORDS].join('|') + ')\\b',
         'gi',
@@ -25866,8 +25867,9 @@ const parseGeminiResponseAndUpdateState = async (text, knowledgeToUse, setActive
         .replace(FOREIGN_SCRIPT_LEAK_RE, '')
         .replace(ENGLISH_LEAK_RE, (match) => ENGLISH_LEAK_REPLACEMENTS[match.toLowerCase()] ?? '')
         .replace(/ {2,}/g, ' ')
-        // Một từ bị cắt ngay trước dấu câu (vd "...thu hạ curtains." → "...thu hạ .")
-        // để lại khoảng trắng mồ côi trước dấu câu — dọn nốt cho câu liền mạch.
+        // Nếu một từ trong ENGLISH_LEAK_STRIP_WORDS (không có bản dịch an toàn) bị
+        // cắt ngay trước dấu câu, nó để lại khoảng trắng mồ côi (vd "...abc ." thay
+        // vì "...abc.") — dọn nốt cho câu liền mạch, dù danh sách đó hiện đang rỗng.
         .replace(/ +([.,!?;:])/g, '$1');
 
     const updates = {
