@@ -7983,7 +7983,7 @@ const CharacterInfoModal = ({
     );
 };
 
-const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledge, getRealmInfoFromLevel, handleUserUploadNpcAvatar, handleUserUploadPlayerAvatar, handleAutoGenerateAvatar, handleAppraiseNpc, generatingAvatars, handleRecruitCompanion, handleSongTu, isProcessingAction, handleManifestLoreNpc, onSetCourtesyName }) => {
+const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledge, getRealmInfoFromLevel, handleUserUploadNpcAvatar, handleUserUploadPlayerAvatar, handleAutoGenerateAvatar, handleAppraiseNpc, generatingAvatars, handleRecruitCompanion, handleSongTu, isProcessingAction, handleManifestLoreNpc, onSetCourtesyName, onGenerateCourtesyName }) => {
     // Trạng thái sửa/thêm Tự (tên chữ) — đặt TRƯỚC early-return để không đổi số
     // lượt gọi hook giữa các lần render (component này vốn đã return null sớm ở
     // dưới trước khi gọi useMemo, nhưng do được mount/unmount theo `show` từ nơi
@@ -8138,13 +8138,22 @@ const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledg
                                         </p>
                                     );
                                 } else {
+                                    // "Thêm" = để AI tự nghĩ (khác với "(sửa)" ở nhánh trên, nơi
+                                    // người chơi tự gõ tay) — theo đúng phân biệt người dùng yêu cầu.
                                     courtesyNameRow = (
                                         <p key="courtesy_name_add">
-                                            <button onClick={startEditingCourtesyName} className="text-[#8ba888] hover:text-[#cda45e] underline decoration-dashed underline-offset-2 scale-text-xs">+ Thêm Tự (tên chữ)</button>
+                                            <button
+                                                onClick={() => onGenerateCourtesyName?.(finalStats.id)}
+                                                disabled={isProcessingAction}
+                                                title="AI sẽ tự nghĩ Tự dựa trên tên, thân phận và tính cách của nhân vật"
+                                                className="inline-flex items-center gap-1 text-[#8ba888] hover:text-[#cda45e] underline decoration-dashed underline-offset-2 scale-text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <SparklesIcon className="w-3 h-3" /> Thêm Tự (AI tự nghĩ)
+                                            </button>
                                         </p>
                                     );
                                 }
-                                if (onSetCourtesyName) rows.splice(nameIdx + 1, 0, courtesyNameRow);
+                                if (onSetCourtesyName || onGenerateCourtesyName) rows.splice(nameIdx + 1, 0, courtesyNameRow);
                                 return rows;
                             })()}
                             {finalStats.Stance && <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Thái độ:</strong> {finalStats.Stance}</p>}
@@ -19254,6 +19263,51 @@ const fetchNpcDetailsFromAI = async (npcBasicInfo, gameSettings, effectiveApiKey
         return null;
     }
 };
+
+// Gọi AI CHỈ để gợi ý Tự (tên chữ) cho một NPC đã tồn tại (nút "+ Thêm Tự" trong
+// bảng thông tin) — KHÔNG dùng lại fetchNpcDetailsFromAI ở trên vì hàm đó trả về
+// cả level/Personality/Affinity..., re-roll toàn bộ hồ sơ sẽ ghi đè những giá trị
+// đã ổn định của NPC (level đã "Giám Định" trước đó chẳng hạn) chỉ để thêm một Tự.
+const fetchCourtesyNameFromAI = async (npc, gameSettings, effectiveApiKey) => {
+    const prompt = `
+        VAI TRÒ: Ngươi là một học giả am hiểu văn hóa xưng hô, đặt tên tự (tên chữ) kiểu Á Đông cổ trang.
+        BỐI CẢNH GAME: Thế giới "${gameSettings.theme}", Bối cảnh: "${gameSettings.setting}".
+
+        THÔNG TIN NHÂN VẬT:
+        - Tên: "${npc.Name}"
+        - Giới tính: ${npc.Gender || 'Không rõ'}
+        - Thân phận: ${npc.Role || 'Không rõ'}
+        - Tính cách: ${npc.Personality || 'Không rõ'}
+        - Mô tả/Tiểu sử: ${npc.description || npc.Backstory || 'Không có'}
+
+        NHIỆM VỤ: Nhân vật này CHƯA có Tự. Hãy TỰ NGHĨ một tên tự Hán Việt 1-2 chữ phù hợp với họ tên, giới tính, thân phận và tính cách của nhân vật.
+        - CHỈ trả về phần TỰ, KHÔNG kèm họ (VD: Quan Vũ tự "Vân Trường", Thái Văn Cơ tự "Diễm").
+        - Nếu nhân vật là danh nhân lịch sử có thật, dùng ĐÚNG tên tự đã ghi chép trong sử sách.
+
+        CHỈ TRẢ VỀ JSON THEO ĐÚNG SCHEMA KHÔNG KÈM GIẢI THÍCH.
+    `;
+
+    const schema = {
+        type: "OBJECT",
+        properties: { CourtesyName: { type: "STRING" } },
+        required: ["CourtesyName"]
+    };
+
+    const payload = {
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { response_mime_type: "application/json", response_schema: schema }
+    };
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL_FALLBACKS[0]}:generateContent?key=${effectiveApiKey}`;
+
+    try {
+        const jsonText = await fetchWithRetries(apiUrl, payload);
+        const parsed = JSON.parse(jsonText);
+        return (parsed?.CourtesyName || '').trim();
+    } catch (error) {
+        console.error(`Lỗi khi AI gợi ý Tự cho '${npc.Name}':`, error);
+        return null;
+    }
+};
 // Ánh xạ lựa chọn "Loại kỹ năng" (người chơi tự chọn trong form Thiên phú khởi đầu) sang skillType/skillCategory thật của hệ thống.
 const SKILL_CATEGORY_CHOICE_MAP = {
     // Đấu La Đại Lục vocabulary (gameSettings.isDouLuoWorld = true)
@@ -23309,6 +23363,32 @@ const handleSetCourtesyName = useCallback((characterId, newCourtesyName) => {
         return { ...prev, characters: newCharacters };
     });
 }, [setknowledge]);
+
+// Nút "+ Thêm Tự" trong bảng thông tin: để AI tự nghĩ (khác với "(sửa)" ở trên,
+// nơi người chơi tự gõ tay). Dùng isProcessingAction làm cờ khóa/loading — cùng
+// pattern handleAppraiseNpc đã dùng cho một tác vụ AI nền tương tự.
+const handleGenerateCourtesyName = async (npcId) => {
+    const npc = knowledge.characters.find(c => c.id === npcId);
+    if (!npc) return;
+
+    setIsProcessingAction(true);
+    setModalMessage({ show: true, title: 'Đang Suy Nghĩ...', content: `Đang tra cứu điển tích để đặt Tự phù hợp cho [${npc.Name}]...`, type: 'info' });
+
+    try {
+        const effectiveApiKey = apiMode === 'userKey' ? apiKey : "";
+        if (apiMode === 'userKey' && !effectiveApiKey) throw new Error("API Key chưa được cấu hình.");
+
+        const courtesyName = await fetchCourtesyNameFromAI(npc, gameSettings, effectiveApiKey);
+        if (!courtesyName) throw new Error("AI không thể nghĩ ra tên tự phù hợp lúc này.");
+
+        handleSetCourtesyName(npcId, courtesyName);
+        setModalMessage({ show: true, title: 'Thành Công', content: `Đã đặt Tự "${courtesyName}" cho [${npc.Name}].`, type: 'success' });
+    } catch (error) {
+        setModalMessage({ show: true, title: 'Lỗi', content: error.message || 'Không thể tạo Tự lúc này.', type: 'error' });
+    } finally {
+        setIsProcessingAction(false);
+    }
+};
 
 const handleLoadSetupFromFile = (event) => {
     const file = event.target.files[0];
@@ -37875,6 +37955,7 @@ const formatStoryText = useCallback((text) => {
         isProcessingAction={isProcessingAction}
         handleManifestLoreNpc={handleManifestLoreNpc}
         onSetCourtesyName={handleSetCourtesyName}
+        onGenerateCourtesyName={handleGenerateCourtesyName}
     />
 )}
       <SuggestionsModal
