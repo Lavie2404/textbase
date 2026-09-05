@@ -8135,6 +8135,15 @@ const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledg
                                         <p key="courtesy_name" className="scale-text-sm text-[#e8d3a1]">
                                             <strong className="text-[#8ba888]">Tự (tên chữ):</strong> {finalStats.CourtesyName}{' '}
                                             <button onClick={startEditingCourtesyName} className="text-[#8ba888] hover:text-[#cda45e] underline decoration-dashed underline-offset-2 scale-text-xs">(sửa)</button>
+                                            {' · '}
+                                            <button
+                                                onClick={() => onGenerateCourtesyName?.(finalStats.id)}
+                                                disabled={isProcessingAction}
+                                                title="Để AI nghĩ một Tự khác thay cho Tự hiện tại"
+                                                className="inline-flex items-center gap-1 text-[#8ba888] hover:text-[#cda45e] underline decoration-dashed underline-offset-2 scale-text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <SparklesIcon className="w-3 h-3" /> Đổi lại
+                                            </button>
                                         </p>
                                     );
                                 } else {
@@ -19268,7 +19277,7 @@ const fetchNpcDetailsFromAI = async (npcBasicInfo, gameSettings, effectiveApiKey
 // bảng thông tin) — KHÔNG dùng lại fetchNpcDetailsFromAI ở trên vì hàm đó trả về
 // cả level/Personality/Affinity..., re-roll toàn bộ hồ sơ sẽ ghi đè những giá trị
 // đã ổn định của NPC (level đã "Giám Định" trước đó chẳng hạn) chỉ để thêm một Tự.
-const fetchCourtesyNameFromAI = async (npc, gameSettings, effectiveApiKey) => {
+const fetchCourtesyNameFromAI = async (npc, gameSettings, effectiveApiKey, excludeCourtesyName) => {
     const prompt = `
         VAI TRÒ: Ngươi là một học giả am hiểu văn hóa xưng hô, đặt tên tự (tên chữ) kiểu Á Đông cổ trang.
         BỐI CẢNH GAME: Thế giới "${gameSettings.theme}", Bối cảnh: "${gameSettings.setting}".
@@ -19280,7 +19289,9 @@ const fetchCourtesyNameFromAI = async (npc, gameSettings, effectiveApiKey) => {
         - Tính cách: ${npc.Personality || 'Không rõ'}
         - Mô tả/Tiểu sử: ${npc.description || npc.Backstory || 'Không có'}
 
-        NHIỆM VỤ: Nhân vật này CHƯA có Tự. Hãy TỰ NGHĨ một tên tự Hán Việt 1-2 chữ phù hợp với họ tên, giới tính, thân phận và tính cách của nhân vật.
+        NHIỆM VỤ: ${excludeCourtesyName
+            ? `Nhân vật này hiện đang có Tự là "${excludeCourtesyName}" nhưng người chơi muốn đổi sang một cái khác. Hãy TỰ NGHĨ một tên tự Hán Việt 1-2 chữ KHÁC, TUYỆT ĐỐI KHÔNG được trùng hoặc chỉ đổi thanh điệu/chính tả của "${excludeCourtesyName}".`
+            : `Nhân vật này CHƯA có Tự. Hãy TỰ NGHĨ một tên tự Hán Việt 1-2 chữ phù hợp với họ tên, giới tính, thân phận và tính cách của nhân vật.`}
         - CHỈ trả về phần TỰ, KHÔNG kèm họ (VD: Quan Vũ tự "Vân Trường", Thái Văn Cơ tự "Diễm").
         - Nếu nhân vật là danh nhân lịch sử có thật, dùng ĐÚNG tên tự đã ghi chép trong sử sách.
 
@@ -23371,18 +23382,22 @@ const handleGenerateCourtesyName = async (npcId) => {
     const npc = knowledge.characters.find(c => c.id === npcId);
     if (!npc) return;
 
+    // Có sẵn Tự rồi thì đây là "Đổi lại" (yêu cầu AI nghĩ tên KHÁC, xem
+    // excludeCourtesyName trong fetchCourtesyNameFromAI); chưa có thì là "Thêm".
+    const isRerolling = !!npc.CourtesyName;
+
     setIsProcessingAction(true);
-    setModalMessage({ show: true, title: 'Đang Suy Nghĩ...', content: `Đang tra cứu điển tích để đặt Tự phù hợp cho [${npc.Name}]...`, type: 'info' });
+    setModalMessage({ show: true, title: 'Đang Suy Nghĩ...', content: `Đang tra cứu điển tích để ${isRerolling ? 'đổi sang một Tự khác' : 'đặt Tự phù hợp'} cho [${npc.Name}]...`, type: 'info' });
 
     try {
         const effectiveApiKey = apiMode === 'userKey' ? apiKey : "";
         if (apiMode === 'userKey' && !effectiveApiKey) throw new Error("API Key chưa được cấu hình.");
 
-        const courtesyName = await fetchCourtesyNameFromAI(npc, gameSettings, effectiveApiKey);
+        const courtesyName = await fetchCourtesyNameFromAI(npc, gameSettings, effectiveApiKey, npc.CourtesyName);
         if (!courtesyName) throw new Error("AI không thể nghĩ ra tên tự phù hợp lúc này.");
 
         handleSetCourtesyName(npcId, courtesyName);
-        setModalMessage({ show: true, title: 'Thành Công', content: `Đã đặt Tự "${courtesyName}" cho [${npc.Name}].`, type: 'success' });
+        setModalMessage({ show: true, title: 'Thành Công', content: `Đã ${isRerolling ? 'đổi' : 'đặt'} Tự "${courtesyName}" cho [${npc.Name}].`, type: 'success' });
     } catch (error) {
         setModalMessage({ show: true, title: 'Lỗi', content: error.message || 'Không thể tạo Tự lúc này.', type: 'error' });
     } finally {
