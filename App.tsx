@@ -19279,7 +19279,7 @@ const fetchNpcDetailsFromAI = async (npcBasicInfo, gameSettings, effectiveApiKey
 // đã ổn định của NPC (level đã "Giám Định" trước đó chẳng hạn) chỉ để thêm một Tự.
 const fetchCourtesyNameFromAI = async (npc, gameSettings, effectiveApiKey, excludeCourtesyName) => {
     const prompt = `
-        VAI TRÒ: Ngươi là một học giả am hiểu văn hóa xưng hô, đặt tên tự (tên chữ) kiểu Á Đông cổ trang.
+        VAI TRÒ: Ngươi là một học giả am hiểu văn hóa xưng hô, đặt tên tự (tên chữ) THỜI TAM QUỐC.
         BỐI CẢNH GAME: Thế giới "${gameSettings.theme}", Bối cảnh: "${gameSettings.setting}".
 
         THÔNG TIN NHÂN VẬT:
