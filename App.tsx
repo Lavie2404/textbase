@@ -7983,7 +7983,14 @@ const CharacterInfoModal = ({
     );
 };
 
-const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledge, getRealmInfoFromLevel, handleUserUploadNpcAvatar, handleUserUploadPlayerAvatar, handleAutoGenerateAvatar, handleAppraiseNpc, generatingAvatars, handleRecruitCompanion, handleSongTu, isProcessingAction, handleManifestLoreNpc }) => {
+const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledge, getRealmInfoFromLevel, handleUserUploadNpcAvatar, handleUserUploadPlayerAvatar, handleAutoGenerateAvatar, handleAppraiseNpc, generatingAvatars, handleRecruitCompanion, handleSongTu, isProcessingAction, handleManifestLoreNpc, onSetCourtesyName }) => {
+    // Trạng thái sửa/thêm Tự (tên chữ) — đặt TRƯỚC early-return để không đổi số
+    // lượt gọi hook giữa các lần render (component này vốn đã return null sớm ở
+    // dưới trước khi gọi useMemo, nhưng do được mount/unmount theo `show` từ nơi
+    // gọi nên chưa gây lỗi; thêm hook mới ở đây vẫn an toàn hơn thêm sau return).
+    const [editingCourtesyName, setEditingCourtesyName] = useState(false);
+    const [courtesyNameDraft, setCourtesyNameDraft] = useState('');
+
     if (!show || !loreItem || !loreItem.entity) return null;
 
     const { entity: initialEntity, type } = loreItem;
@@ -8092,12 +8099,52 @@ const QuickLoreModal = ({ loreItem, show, onClose, calculateFinalStats, knowledg
                                 // Dòng "Tự" (tên chữ) chèn ngay sau dòng "Tên" — nằm ngoài card module
                                 // thuần (cùng cách xử lý với "Thái độ"/Stance bên dưới).
                                 const rows = card.profile.fields.filter(f => (f.text !== '' && f.text !== 'null') || f.badge).map(f => <CardFieldLine key={f.key} field={f} />);
-                                if (finalStats.CourtesyName) {
-                                    const nameIdx = rows.findIndex(r => r.key === 'name');
-                                    rows.splice(nameIdx + 1, 0, (
-                                        <p key="courtesy_name" className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Tự (tên chữ):</strong> {finalStats.CourtesyName}</p>
-                                    ));
+                                const nameIdx = rows.findIndex(r => r.key === 'name');
+
+                                const startEditingCourtesyName = () => {
+                                    setCourtesyNameDraft(finalStats.CourtesyName || '');
+                                    setEditingCourtesyName(true);
+                                };
+                                const saveCourtesyName = () => {
+                                    onSetCourtesyName?.(finalStats.id, courtesyNameDraft);
+                                    setEditingCourtesyName(false);
+                                };
+
+                                let courtesyNameRow;
+                                if (editingCourtesyName) {
+                                    // Sửa/thêm Tự trực tiếp tại đây — bù cho trường hợp AI bỏ sót Tự
+                                    // của một NPC danh môn đáng lẽ phải có (theo phản hồi người dùng).
+                                    courtesyNameRow = (
+                                        <div key="courtesy_name_edit" className="flex items-center gap-2 flex-wrap">
+                                            <strong className="scale-text-sm text-[#8ba888]">Tự (tên chữ):</strong>
+                                            <input
+                                                type="text"
+                                                value={courtesyNameDraft}
+                                                onChange={(e) => setCourtesyNameDraft(e.target.value)}
+                                                onKeyDown={(e) => { if (e.key === 'Enter') saveCourtesyName(); if (e.key === 'Escape') setEditingCourtesyName(false); }}
+                                                placeholder="VD: Vân Trường"
+                                                autoFocus
+                                                className="flex-grow min-w-[100px] bg-[#0a0f0a] border border-[#cda45e]/50 focus:border-[#cda45e] outline-none px-2 py-1 scale-text-sm text-[#e8d3a1]"
+                                            />
+                                            <button onClick={saveCourtesyName} className="px-2 py-1 scale-text-xs font-bold uppercase tracking-widest text-[#101a10] bg-[#cda45e] hover:bg-[#e8d3a1]" style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}>Lưu</button>
+                                            <button onClick={() => setEditingCourtesyName(false)} className="px-2 py-1 scale-text-xs uppercase tracking-widest text-[#8ba888] hover:text-[#e8d3a1] border border-[#8ba888]/40" style={{ minHeight: TOUCH_TARGET_MIN + 'px' }}>Hủy</button>
+                                        </div>
+                                    );
+                                } else if (finalStats.CourtesyName) {
+                                    courtesyNameRow = (
+                                        <p key="courtesy_name" className="scale-text-sm text-[#e8d3a1]">
+                                            <strong className="text-[#8ba888]">Tự (tên chữ):</strong> {finalStats.CourtesyName}{' '}
+                                            <button onClick={startEditingCourtesyName} className="text-[#8ba888] hover:text-[#cda45e] underline decoration-dashed underline-offset-2 scale-text-xs">(sửa)</button>
+                                        </p>
+                                    );
+                                } else {
+                                    courtesyNameRow = (
+                                        <p key="courtesy_name_add">
+                                            <button onClick={startEditingCourtesyName} className="text-[#8ba888] hover:text-[#cda45e] underline decoration-dashed underline-offset-2 scale-text-xs">+ Thêm Tự (tên chữ)</button>
+                                        </p>
+                                    );
                                 }
+                                if (onSetCourtesyName) rows.splice(nameIdx + 1, 0, courtesyNameRow);
                                 return rows;
                             })()}
                             {finalStats.Stance && <p className="scale-text-sm text-[#e8d3a1]"><strong className="text-[#8ba888]">Thái độ:</strong> {finalStats.Stance}</p>}
@@ -23246,6 +23293,23 @@ const handleRenameNpc = useCallback((npcId, newName, newDescription) => {
     });
 }, [setModalMessage]);
 
+// Cho phép người chơi tự điền/sửa Tự (tên chữ) trực tiếp từ bảng thông tin nhân
+// vật (QuickLoreModal) — bù lại những trường hợp AI bỏ sót Tự cho NPC danh môn
+// dù đáng lẽ phải có (xem quy tắc CourtesyName trong prompt). Chuỗi rỗng xóa Tự.
+const handleSetCourtesyName = useCallback((characterId, newCourtesyName) => {
+    const trimmed = (newCourtesyName || '').trim();
+    setknowledge(prev => {
+        const charIndex = prev.characters.findIndex(c => c.id === characterId);
+        if (charIndex === -1) return prev;
+        const newCharacters = prev.characters.slice();
+        const updatedChar = { ...newCharacters[charIndex] };
+        if (trimmed) updatedChar.CourtesyName = trimmed;
+        else delete updatedChar.CourtesyName;
+        newCharacters[charIndex] = updatedChar;
+        return { ...prev, characters: newCharacters };
+    });
+}, [setknowledge]);
+
 const handleLoadSetupFromFile = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -37810,6 +37874,7 @@ const formatStoryText = useCallback((text) => {
         handleSongTu={handleSongTu}
         isProcessingAction={isProcessingAction}
         handleManifestLoreNpc={handleManifestLoreNpc}
+        onSetCourtesyName={handleSetCourtesyName}
     />
 )}
       <SuggestionsModal
