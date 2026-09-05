@@ -1,8 +1,8 @@
 {
   "id": "e3b06da5-e8e3-47e0-a8d8-14216eb92dff",
-  "currentTurn": 16,
+  "currentTurn": 17,
   "saveVersion": "2.8",
-  "timestamp": "2026-09-04T17:54:39.226Z",
+  "timestamp": "2026-09-05T12:10:42.710Z",
   "gameSettings": {
     "storyTitle": "Tam quốc chí",
     "theme": "Dã sử, Huyền Huyễn, Tu Tiên, Quân sự, Cổ đại",
@@ -175,8 +175,8 @@
       {
         "id": "5140ebef-aeea-4570-bb89-3b9ca16eef30",
         "NPC": "Vệ Khiêm",
-        "Standing": "Tin tưởng",
-        "Reason": "Đối luyện thấu đáo, biết tiến biết lui, căn cơ vững vàng"
+        "Standing": "Kính nể",
+        "Reason": "Cảm phục bản lĩnh đoạn hậu và lòng trung dũng bảo vệ đại tiểu thư."
       }
     ],
     "quests": [],
@@ -209,7 +209,7 @@
         "isPlayer": true,
         "loreId": null,
         "level": 1,
-        "exp": 1.2,
+        "exp": 1.3,
         "progressionState": "Tu Luyện Thường",
         "ap": 5,
         "currency": 50,
@@ -474,7 +474,7 @@
         "isPlayer": false,
         "loreId": null,
         "level": 1,
-        "exp": 0.8999999999999999,
+        "exp": 0.9999999999999999,
         "progressionState": "Tu Luyện Thường",
         "ap": 0,
         "currency": 0,
@@ -1184,7 +1184,7 @@
     "requestNpcDesign": null,
     "progression": {
       "recentMeaningfulActions": [],
-      "lastExpResolvedTurn": 15
+      "lastExpResolvedTurn": 16
     },
     "loreQuests": [],
     "systemAssistant": {
@@ -1204,8 +1204,8 @@
     "deathState": {},
     "isDeathTurn": false,
     "lastLockedResult": {
-      "turn_id": 15,
-      "world_time": 15,
+      "turn_id": 16,
+      "world_time": 16,
       "is_death_turn": false,
       "in_combat": false,
       "battle_active": false,
@@ -1234,7 +1234,7 @@
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 0.9999999999999999,
+            "exp": 1.0999999999999999,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 50,
@@ -1261,7 +1261,7 @@
             "id": "world_npc_dieu_thuyen",
             "Name": "Điêu Thuyền",
             "level": 1,
-            "exp": 0.7,
+            "exp": 0.7999999999999999,
             "hp": 600,
             "maxhp": 600,
             "currency": 0,
@@ -1333,6 +1333,17 @@
             "currency": 0,
             "inventory": [],
             "longTermStatuses": []
+          },
+          {
+            "id": "8b6a5c03-aed0-48fd-a2df-d9df91aed6d8",
+            "Name": "Binh lính Hoàng Cân",
+            "level": 1,
+            "exp": 0,
+            "hp": 600,
+            "maxhp": 600,
+            "currency": 0,
+            "inventory": [],
+            "longTermStatuses": []
           }
         ],
         "quests": []
@@ -1351,7 +1362,7 @@
             "id": "player",
             "Name": "Diệp Thần",
             "level": 1,
-            "exp": 1.0999999999999999,
+            "exp": 1.2,
             "hp": 2000,
             "maxhp": 2000,
             "currency": 50,
@@ -1378,7 +1389,7 @@
             "id": "world_npc_dieu_thuyen",
             "Name": "Điêu Thuyền",
             "level": 1,
-            "exp": 0.7999999999999999,
+            "exp": 0.8999999999999999,
             "hp": 600,
             "maxhp": 600,
             "currency": 0,
@@ -1537,11 +1548,6 @@
           "content": "Ngươi mỉm cười gỡ con cá ra khỏi đầu gậy, thả nó vào trong chiếc giỏ mây đã được lót sẵn một lớp cỏ tươi ẩm ướt để giữ cho cá sống lâu. Thừa thắng xông lên, ngươi tiếp tục kiên nhẫn đứng đợi giữa dòng suối. Chỉ trong vòng chưa đầy nửa canh giờ, bằng kỹ năng săn bắt thuần thục và sự khéo léo của mình, ngươi đã liên tiếp đâm trúng thêm ba con cá trắm cỏ khỏe mạnh nữa. Chiếc giỏ mây giờ đây đã nặng trịch, những con cá béo tròn liên tục quẫy đuôi sàn sạt bên trong.\nNắm chắc số chiến lợi phẩm đủ cho một bữa tối no nê, ngươi hài lòng bước lên bờ sỏi khô ráo. Ngươi vắt khô nước ở gấu quần, rồi nhanh chóng bắt tay vào công việc chuẩn bị nướng cá. Ngươi nhặt nhạnh những cành cây khô rơi vãi quanh bờ suối, xếp chúng thành một đống nhỏ ngăn nắp trên dải sỏi phẳng. Lấy từ trong ngực áo ra bộ đá đánh lửa và mồi tùi khô, ngươi khéo léo tạo ra những tia lửa nhỏ. \nChỉ một chút sau, ngọn lửa vàng cam ấm áp đã bùng lên bập bùng, tỏa ra hơi nóng dễ chịu và làn khói mỏng mang theo mùi gỗ thông thơm nồng. Ngươi dùng con dao nhỏ mang theo bên người để làm sạch vảy cá, rửa sạch sẽ dưới dòng nước suối mát lành, rồi dùng những que trúc mảnh xiên dọc qua thân từng con cá. \nNgươi găm những xiên cá quanh đống lửa hồng, bắt đầu xoay đều tay. Ánh lửa bập bùng chiếu rọi lên khuôn mặt tuấn tú, điềm nhiên của ngươi. Mùi mỡ cá chảy xèo xèo rơi xuống than hồng bắt đầu tỏa ra một hương thơm béo ngậy, ngọt ngào rủ rê khắp một vùng bờ suối yên bình. Ngươi thong thả ngồi xếp bằng trên tảng đá, vừa xoay xiên cá vừa nhẩm tính thời gian đem cá chín về cho cô bé *Tú Nhi* đang đợi ở nhà."
         }
       ]
-    },
-    {
-      "id": "d84a9322-54ed-421f-9253-55a7cabb7812",
-      "type": "user_custom_action",
-      "content": "[Đoạn 1 - Lời Diệp Thần]: \"4 con cá trắm. Mỗi con 4 cân. 1 con nướng cùng Tú Nhi ăn tối nay, 3 con còn lại thì mang lên chợ bán.\"\n[Đoạn 2 - Tường thuật]: \"Ngươi mang cá ra chợ bán đổi lấy gạo và muối sau đó trở về nhà nấu cơm. Đang hì hục nấu cơm thì Điêu Thuyền ngó đầu qua tường nhà ngươi gọi\"\n[Đoạn 3 - Lời Điêu Thuyền]: \"Diệp ca ca huynh đang nấu cơm sao? Hôm nay muội hái được nhiều rau dại và nấm rừng lắm có muốn cùng ăn cơm không?\"\n[Đoạn 4 - Lời Diệp Thần]: \"Được đó. Hôm nay huynh bắt được con cá hơn 4 cân. Muội sang giúp ta nấu cơm để ta nướng cá\"\n[Đoạn 5 - Tường thuật]: \"Điêu Thuyền vui vẻ cầm giỏ rau chạy sang giúp ngươi nấu cơm. Ngươi chặt cá làm 2 khúc, phần đầu thì đưa Điêu Thuyền nấu canh cá với rau rừng và nấm, phần còn lại thì ngươi ướp chút muối rồi mang đi nướng\"\n[Đoạn 6 - Lời Điêu Thuyền]: \"Thơm quá đi. Diệp ca ca cho gì vào đó mà thơm vậy? Ăn vào rồi có phải sẽ bị 'nghiện' như ăn kẹp hồ lô không?\"\n[Đoạn 7 - Tường thuật]: \"Từ 'nghiện' là từ hiện đại mà ngươi đã vô tình nói ra khi Điêu Thuyền suốt ngày nhớ thương hương vị kẹo hồ lô. Sau đó ngươi phải giải thích cho nàng ý nghĩa của nó và giờ nàng áp dụng rất thuần thục\"\n[Đoạn 8 - Lời Diệp Thần]: \"Không nghiện được không  nghiện được. Món này nếu đầy đủ gia vị thì mới nghiện. Bây giờ chỉ có chút muối này thì còn lâu mới nghiện. Muội đó, lúc nào cũng nhớ thương kẹo hồ lô. Cẩn thận đau răng đó\"\n[Đoạn 9 - Tường thuật]: \"Điêu Thuyền phùng má chống tay\"\n[Đoạn 10 - Lời Điêu Thuyền]: \"Huynh mới đau răng. Ăn kẹo hồ lô không đau răng\"\n[Đoạn 11 - Tường thuật]: \"Ngươi mỉm cười xoa đầu nàng\"\n[Đoạn 12 - Lời Diệp Thần]: \"Được được được. Ta đau răng, Tú Nhi không đau răng. Cá sắp chín rồi. Muội dọn bát đũa ra sân nhé. Thức ăn cứ để ta mang ra cho\"\n[Đoạn 13 - Tường thuật]: \"Điêu Thuyền được ngươi xoa đầu rất vui vẻ đồng ý. Nàng vừa dọn bát đũa vừa ngâm nga giai điệu mới nghĩ ra\"\n[Đoạn 14 - Lời Điêu Thuyền]: \"Ăn cơm thôi, ăn cơm thôi\""
     },
     {
       "id": "d81ae574-5b21-46a6-a46d-becf68f42471",
@@ -2950,13 +2956,109 @@
           "content": "<sound>Tiếng vó ngựa dậm cuồng loạn trên nền đá dội lên cộc cộc!</sound>\nHai tên lính phía sau gầm lên sát khí ngút ngàn, đồng loạt thúc mạnh vào hông hai con chiến mã gầy gò. Tiếng rít xé gió của hai cây trường thương thô sơ cùng lưỡi Hán đao sáng quắc bổ dọc từ trên cao xuống, nhắm thẳng vào đầu và ngực của *Diệp Thần* mà lao tới với tốc độ kinh người!\n*Diệp Thần* đứng yên như pho tượng đá giữa luồng kình phong buốt giá. Tà áo võ phục màu xám xanh của hắn tung bay xào xạc theo nhịp gió thu. Hắn khẽ nheo đôi mắt tinh anh lại, con ngươi đen thẳm khóa chặt từng quỹ đạo di chuyển cùng sơ hở chết người trong bộ pháp xốc xếch của ba tên lính *Hoàng Cân*. \nTrong tâm trí hắn, mọi chuyển động của kẻ địch như chậm lại vài phần. Hắn điều hòa nhịp thở trở nên êm ái, kình lực cuồn cuộn từ các thớ cơ bắp được hệ thống tăng cường bộc phát âm thầm, chạy dọc theo hai cánh tay giắt chặt vào thân thương sắt. Hắn không hề bộc lộ ra nửa phần năng lượng dị thường hay chiêu thức hoa mỹ, mà chỉ đơn thuần vận dụng bản năng phản xạ thực chiến đỉnh cao cùng nguyên lý cơ bản nhất của thương pháp.\nKhi mũi thương của tên lính đi đầu chỉ còn cách trán hắn chừng nửa thước, *Diệp Thần* hốt nhiên chuyển động! Thân hình hắn nghiêng nhẹ sang bên phải một khoảng cách cực kỳ tối thiểu, vừa vặn để mũi thương sắt của kẻ địch đâm sượt qua tà áo, xé rách một vệt không khí buốt lạnh!\n*Keng!*\nNgay khoảnh khắc ngàn cân treo sợi tóc ấy, tay trái của *Diệp Thần* nhấc nhẹ đuôi thương sắt lên, tay phải phát lực đẩy mạnh! Thân thương sắt đen tuyền vung ra một đường vòng cung hoàn hảo, đập thẳng vào sống đao của tên lính thứ hai đang chém xuống, hất văng lưỡi đao của hắn lệch sang một bên trong tiếng va chạm kim loại chói tai!\nThực lực bộc phát từ một thiếu niên chín tuổi nhưng mang sức mạnh gấp đôi người bình thường khiến hai tên lính *Hoàng Cân* dính đòn cảm thấy tê dại cả bàn tay, hai con chiến mã bị chấn động liền chệch hướng lao về phía bụi rậm hai bên đường. \nChỉ còn lại tên chỉ huy trinh sát mặt hung tợn! Hắn nhận ra sự bất thường chết người của đứa trẻ trước mặt, đôi mắt ti hí hiện lên sự kinh hoàng bạt vía. Nhưng vì đà ngựa đang lao nhanh, hắn không thể dừng lại, đành gầm lên dữ dội, dốc toàn bộ sức mạnh cơ bắp vung Hán đao chém chéo một đòn chí mạng nhắm thẳng vào cổ họng *Diệp Thần*!\nLuồng gió đao buốt giá rít lên rùng rợn. *Diệp Thần* nhếch môi nở một nụ cười lạnh ngắt, đôi mắt không chút gợn sóng. Hắn xoay người lướt nhẹ bộ pháp, cây trường thương sắt trong tay bắt đầu rung lên bần bật, chuẩn bị đưa ra đòn đáp trả quyết định trước sự vung đao cuồng loạn của kẻ địch giữa thung lũng *Ngoại ô phía Bắc Chân Định*.\nNgươi sẽ xử lý tình huống giao chiến sinh tử này thế nào?"
         }
       ]
+    },
+    {
+      "id": "678cd569-68ef-46a6-a4aa-713be5b7650d",
+      "type": "user_custom_action",
+      "content": "Ngươi không chủ động tấn công, vừa thủ vừa lùi đợi cứu viện. Trình độ đám Hoàng Cân binh này không cao nhưng ngươi phải che giấu thực lực. Chỉ phòng thủ, lâu lâu cố ý bị thương nhẹ và đợi cứu viện. Không lâu sau, Vệ Khiêm dẫn binh lính đến tiếp ứng. Ngươi giả vờ dốc sức 1 đòn giết chết tên lính cầm đầu Hoàng Cân binh rồi bị thương sau đó trốn về sau quân tiếp ứng. Vệ Khiêm sai người quét dọn đám tàn binh còn lại"
+    },
+    {
+      "id": "11479fb4-03fd-46da-aa25-42477c76f198",
+      "type": "story",
+      "content": [
+        {
+          "type": "narrative",
+          "content": "*Loảng xoảng!*\nLưỡi Hán đao rỉ sét chém chéo xé toạc màn sương mù buốt giá, mang theo luồng gió đao sắc lạnh nhắm thẳng vào cổ họng *Diệp Thần*! Trong khoảnh khắc ngàn cân treo sợi tóc ấy, *Diệp Thần* không hề vội vã bộc phát toàn bộ kình lực hay thi triển những tuyệt kỹ hoa mỹ. Hắn biết rõ thời thế đảo điên, kẻ thắng chưa chắc sống sót nếu lộ hết bài tẩy trước mắt thế gian. Hắn chủ động chọn cách vừa thủ vừa lùi, nheo đôi mắt tinh anh khóa chặt từng quỹ đạo đao thương của ba tên trinh sát *Hoàng Cân*.\n*Keng! Binh!*\nCây trường thương sắt đen tuyền trên tay *Diệp Thần* xoay nhẹ một vòng, sống thương gạt phắt lưỡi đao của tên chỉ hữu sang một bên. Hắn thoắt cái lướt bộ pháp lùi lại hai bước, lưng tựa khẽ vào tảng đá dã ngoại ven đường. Đám binh lính *Hoàng Cân* cậy gầy cậy khỏe, thấy đối phương chỉ là một thiếu niên chín tuổi liên tục chống đỡ thụ động thì lại càng thêm ngạo mạn. Hai tên cầm thương dài phía sau gầm lên sát khí, đồng loạt đâm tới hai đường thương độc địa nhắm vào sườn và ngực hắn!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Binh lính Hoàng Cân",
+          "content": "Tên ranh con trụ không nổi rồi! Băm vằn nó ra!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* vờ như hoảng loạn, bộ pháp dưới chân khẽ trượt một cái đầy vẻ loạng ạng. Hắn nghiêng mình đỡ gạt, nhưng cố ý để mũi thương thô sơ của tên lính sượt qua bả vai trái!\n*Xoẹt!*\nLớp áo võ phục màu xám xanh bị xé rách một đường dài, máu tươi đỏ thẫm lập tức ỉu ra, nhuộm hồng một mảng vải thô. Hắn khẽ hừ nhẹ một tiếng, gương mặt tuấn lãng nhăn lại vẻ đau đớn, nhưng trong sâu thẳm con ngươi đen thẳm lại hoàn toàn tỉnh táo và lạnh lùng. Hắn lùi thêm ba bước, tay siết chặt thân thương sắt phòng thủ kín kẽ như thành đồng vách sắt, liên tục hóa giải các đòn hiểm nhưng tuyệt đối không chủ động phản công, kiên nhẫn kéo dài thời gian.\nTrận chiến giằng co kéo dài giữa màn sương thu buốt giá. Đám lính *Hoàng Cân* càng đánh càng sốt ruột, đao pháp bắt đầu trở nên hoảng, thở hổn hển vì tiêu hao kình lực. Đúng lúc này, từ phía con lộ dẫn về *thành Chân Định*, tiếng vó ngựa dậm cuồng loạn trên nền sỏi đá như sấm rung dội tới!\n*Đùng! Đùng! Đùng!*"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Vệ Khiêm",
+          "content": "Lũ giặc *Hoàng Cân* dâm loạn! Cả gan đụng đến cận vệ của Hạ Hầu phủ ta sao?! Mau buông vũ khí xuống!"
+        },
+        {
+          "type": "narrative",
+          "content": "Tiếng gầm như sấm truyền của Hộ vệ trưởng *Vệ Khiêm* vang vọng khắp thung lũng. Giữa màn sương mờ ảo, hơn hai mươi kỵ binh bọc giáp sáng quắc under sự dẫn dắt của *Vệ Khiêm* đang lao tới như vũ bão!\nNhận thấy cứu viện đã tới đúng thời điểm, *Diệp Thần* biết màn kịch của mình đã đến lúc thu hạ curtains. Gương mặt hắn hốt nhiên lộ ra vẻ nghiến răng dốc toàn lực, hai mắt trợn ngược như gã đường cùng dồn hết tàn lực sinh mệnh vào một đòn cuối cùng! Hắn gầm lên một tiếng xé lòng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "Chết đi lũ giặc bạo tàn!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Xoẹt! Bập!*\nThân thương sắt trong tay hắn đột ngột đâm ra nhanh như tia chớp xuyên qua màn sương! Mũi thương sắt lạnh ngắt găm phập thẳng qua yết hầu tên chỉ huy trinh sát *Hoàng Cân*, xuyên từ trước ra sau cổ! Tên lính trinh sát trợn ngược mắt, máu tươi từ miệng trào ra ùng ục, đổ gục xuống lưng ngựa chết ngay tại chỗ. \nĐồng thời với đòn dốc lực đó, *Diệp Thần* giả vờ bị ngạt khí, cơ thể lảo đảo nghiêng sang bên, để lưỡi đao chém loạn của tên lính bên cạnh sượt nhẹ qua mạn sườn, tạo thêm một vết thương ngoài da đầy máu. Hắn ôm lấy mạn sườn, gương mặt tái nhợt, ôm thương vội vã thối lui liên tiếp vài trượng, lẩn thẳng vào sau lưng hàng ngũ kỵ binh của *Vệ Khiêm* vừa trô tới!"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Vệ Khiêm",
+          "content": "Tốt lắm tiểu tử! Cứ giao phần còn lại cho ta!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Vệ Khiêm* cưỡi chiến mã lướt qua người ngươi, ánh mắt lộ rõ sự kinh ngạc lẫn cảm phục tột cùng trước bản lĩnh đoạn hậu và lòng trung dũng thà chết không lùi của một thiếu niên chín tuổi. Ông vung trường kiếm sáng quắc, ra lệnh cho quân tiếp ứng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Vệ Khiêm",
+          "content": "Tàn binh *Hoàng Cân* xuất hiện gần Chân Định, giết sạch không chừa một tên! Quét dọn hiện trường!"
+        },
+        {
+          "type": "narrative",
+          "content": "Các kỵ binh phủ Thái thú lập tức vây hãm hai tên trinh sát *Hoàng Cân* còn lại. Trước sức mạnh áp đảo của quân chính quy, chỉ trong vòng vài nhịp thở, tiếng đao kiếm va chạm và tiếng gầm hú uất hận đã hoàn toàn tắt lịm. Hai cái xác lính *Hoàng Cân* gục ngã trên đống cỏ dại đẫm máu.\nSương mù buổi sớm mai dần bị ánh nắng thu xuyên qua, xua tan đi bầu không khí ngột ngạt, tanh nồng mùi máu tươi vừa bao trùm thung lũng dã ngoại. *Vệ Khiêm* xoay người xuống ngựa, lập tức tiến lại gần *Diệp Thần*. Nhìn thấy thiếu niên người đầy máu, áo võ phục rách rưới nhưng tay vẫn nắm chặt cán thương sắt bảo vệ lối thoát cho đại tiểu thư, lòng vị hộ vệ trưởng lừng lẫy dấy lên một niềm kính nể sâu sắc. Ông bước lại vỗ mạnh lên bả vai không bị thương của ngươi, cất giọng vô cùng xúc động:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Vệ Khiêm",
+          "content": "*Diệp Thần*! Ngươi quả thực là một thiếu niên dũng cảm, trung nghĩa hiếm có trên đời! Một mình dũng cảm chắn ngang sinh tử, lại có thể hạ gục tên cầm đầu để bảo vệ đại tiểu thư an toàn rút lui... Bản thống lĩnh thật sự kính nể bản lĩnh và tấm lòng của ngươi!"
+        },
+        {
+          "type": "narrative",
+          "content": "Đúng lúc đó, cỗ xe ngựa của *Hạ Hầu Khinh Y* dưới sự hộ tiống của hai ám vệ cũng đã quay trở lại. Vừa nhìn thấy *Diệp Thần* đứng vững giữa đống xác kẻ địch, tà áo đẫm máu tươi, tiểu *Điêu Thuyền* đã không thể kìm nén được nữa. Nàng lao ra khỏi xe, nước mắt giàn giụa chảy tràn trên gò má thanh tú, thoăn thoắt chạy tới ôm chầm lấy cánh tay ngươi đầy run rẩy:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Điêu Thuyền",
+          "content": "Diệp Thần ca ca! Huynh... huynh bị thương rồi! Trời ơi, máu chảy nhiều thế này... Muội sợ lắm... Huynh có làm sao không ca ca?"
+        },
+        {
+          "type": "narrative",
+          "content": "*Hạ Hầu Khinh Y* cũng bước xuống xe, gương mặt nhỏ nhắn trắng bệch vì hối hận và chấn động. Nàng nhìn thấy vết máu trên vai và mạn sườn của *Diệp Thần*, sự giận dỗi hay nghi ngờ ban sáng hoàn toàn biến mất, thay vào đó là niềm áy náy và kính trọng vô bờ. Nàng tiến lại gần, giọng điệu ngập ngừng, mắt đỏ ửng:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Hạ Hầu Khinh Y",
+          "content": "*Diệp Thần*... Ta... ta xin lỗi vì ban sáng đã trách nhầm ngươi. Ngươi vì bảo vệ ta mà bị thương thế này... Từ nay về sau, ngươi chính là ân nhân lớn nhất của *Hạ Hầu Khinh Y* này!"
+        },
+        {
+          "type": "narrative",
+          "content": "*Diệp Thần* khẽ nén cơn đau giả vờ, mỉm cười điềm tĩnh, đưa tay lau đi giọt nước mắt trên má *Tú Nhi*, cất giọng ấm áp:"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Ngươi",
+          "content": "*Tú Nhi* đừng khóc, ta chỉ bị thương nhẹ ngoài da thôi mà. Bảo vệ đại tiểu thư bình an chính là trách nhiệm của cận vệ, ta làm sao có thể lùi bước được chứ?"
+        },
+        {
+          "type": "narrative",
+          "content": "Bầu không khí căng thẳng sau trận chiến sinh tử lắng xuống, nhường chỗ cho sự ấm áp, gắn kết chân thành giữa những con người vừa trải qua hoạn nạn. *Vệ Khiêm* nhanh chóng sai quân lính băng bó vết thương sơ bộ cho *Diệp Thần*, thu dọn chiến trường rồi hộ tống toàn bộ đoàn người quay trở về *thành Chân Định* để đề phòng giặc *Hoàng Cân* đông đảo tiếp tục mò tới.\nThành lũy Chân Định uy nghi hiện ra dưới ánh nắng trưa rực rỡ. *Diệp Thần* được đưa trở về khu hậu viện riêng để dưỡng thương. Sự việc hắn đơn thương độc mã đoạn hậu đánh chết thủ lĩnh trinh sát *Hoàng Cân* nhanh chóng lan truyền khắp phủ Thái thú, khiến các hộ vệ và gia nhân nhìn hắn bằng ánh mắt kính cẩn hoàn toàn khác trước.\nNgươi ngồi trên giường gỗ trong gian phòng thanh tĩnh, *Tú Nhi* dịu dàng bên cạnh cẩn thận thay băng gạc mới cho ngươi, trong khi *Vệ Khiêm* đứng ở cửa phòng gật đầu khích lệ. Ngươi sẽ lựa chọn làm gì tiếp theo?"
+        }
+      ]
     }
   ],
   "choices": [
-    "Sử dụng kỹ năng thương pháp cơ bản khéo léo gạt phăng lưỡi đao của tên chỉ huy, sau đó đâm thương đả thương chân hắn để khống chế gã làm con mồi nhử hai tên còn lại. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Nhanh chóng làm chủ chiến trường, thu thập được tin tức tình báo quân sự quý giá từ miệng tên chỉ huy Hoàng Cân.}",
-    "Vận dụng toàn bộ sức mạnh физи thể chất lướt tới áp sát, dùng đuôi thương sắt đập mạnh vào ngực tên chỉ huy hất gã văng khỏi lưng ngựa, tạo uy áp khiến hai tên lâu la hoảng sợ tháo chạy. {Tỷ lệ thành công: 80%, Hậu quả/Phần thưởng: Kết thúc trận chiến một cách nhanh gọn không tốn nhiều sức, thu giữ được ba con chiến mã phòng thân.}",
-    "Giả vờ lùi lại tỏ vẻ yếu thế để dẫn dụ cả ba tên lính Hoàng Cân đuổi theo vào sâu trong rặng thông rậm rạp, tận dụng địa hình hiểm trở để tiêu diệt gọn từng tên một. {Tỷ lệ thành công: 75%, Hậu quả/Phần thưởng: Bảo đảm không để lọt lưới kẻ nào, thu hoạch được một số trang bị vũ khí và lương khô giắt lưng của giặc.}",
-    "Giữ khoảng cách an toàn phòng thủ kiên cố, vừa đánh vừa lùi dần về hướng cỗ xe ngựa đã rút lui để đảm bảo không bị chúng bất ngờ vòng qua đòn đoạn hậu đánh lén. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: An toàn tuyệt đối, dễ dàng hội quân cùng ám vệ và hai cô bé nhưng tốn nhiều thời gian di chuyển.}"
+    "Thể hiện thái độ khiêm tốn trước lời khen của *Vệ Khiêm*, nhấn mạnh lòng trung thành và coi việc bảo vệ tiểu thư là bổn phận. {Tỷ lệ thành công: 95%, Hậu quả/Phần thưởng: Gia tăng mạnh hảo cảm với Vệ Khiêm, củng cố vững chắc địa vị cận vệ số một trong phủ Thái thú.}",
+    "Dành thời gian an ủi tiểu *Tú Nhi*, khéo léo trêu chọc để xua tan nỗi sợ hãi trong lòng nàng sau biến cố sinh tử. {Tỷ lệ thành công: 90%, Hậu quả/Phần thưởng: Tăng sâu sắc tình cảm thanh mai trúc mã với Điêu Thuyền, mở khóa hội thoại tình cảm đặc biệt.}",
+    "Tranh thủ lúc *Vệ Khiêm* có mặt, đề xuất việc thu thập thông tin trinh sát từ xác đám lính *Hoàng Cân* để chuẩn bị cho biến động lớn sắp tới. {Tỷ lệ thành công: 85%, Hậu quả/Phần thưởng: Nhận được tin tức tình báo quan trọng về động thái quân sự của Thái Bình Đạo tại quận Cự Lộc.}",
+    "Đề nghị *Vệ Khiêm* cho phép ngươi bắt đầu luyện tập binh pháp và võ học chính quy của phủ Thái thú để nhanh chóng hồi phục và tăng cường thực lực công khai. {Tỷ lệ thành công: 80%, Hậu quả/Phần thưởng: Tiếp cận bí tịch võ học quân sự của phủ Hạ Hầu, nâng cao danh tiếng trong giới võ sư Chân Định.}"
   ],
   "gameMode": "EXPLORATION",
   "activeTrade": {
@@ -2969,5 +3071,5 @@
     "itemSpecificBuyBonuses": {}
   },
   "storySummaries": [],
-  "adventureTurnCount": 15
+  "adventureTurnCount": 16
 }
