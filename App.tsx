@@ -25844,11 +25844,31 @@ const parseGeminiResponseAndUpdateState = async (text, knowledgeToUse, setActive
     // tự đó (không xóa cả câu) để phần tiếng Việt còn lại vẫn đọc được trọn vẹn.
     const FOREIGN_SCRIPT_LEAK_RE = /[Ѐ-ӿ぀-ヿ一-鿿가-힣]+/g;
 
+    // Rò rỉ NGUYÊN TỪ tiếng Anh (2026-09-05): vẫn là chữ Latin nên
+    // FOREIGN_SCRIPT_LEAK_RE ở trên không bắt được (VD thực tế: "...bọc giáp
+    // sáng quắc under sự dẫn dắt của...", "...màn kịch của mình đã đến lúc thu
+    // hạ curtains."). KHÔNG thể liệt kê chặn mọi từ tiếng Anh có thể lẫn vào —
+    // một số âm tiết tiếng Việt không dấu (la, do, co, the...) là từ thật, xóa
+    // bừa theo hình dạng ASCII sẽ phá câu hợp lệ. Nên chỉ xử lý ĐÚNG những từ đã
+    // ghi nhận rò rỉ, khớp nguyên từ (word boundary), không phân biệt hoa/thường:
+    // từ nào có nghĩa tương đương tiếng Việt rõ ràng, không mơ hồ thì THAY THẾ
+    // (vd "under" luôn có nghĩa "dưới" trong ngữ cảnh này); còn lại thì CẮT BỎ.
+    const ENGLISH_LEAK_REPLACEMENTS = { under: 'dưới' };
+    const ENGLISH_LEAK_STRIP_WORDS = ['curtains'];
+    const ENGLISH_LEAK_RE = new RegExp(
+        '\\b(' + [...Object.keys(ENGLISH_LEAK_REPLACEMENTS), ...ENGLISH_LEAK_STRIP_WORDS].join('|') + ')\\b',
+        'gi',
+    );
+
     storyContent = storyContent
         .replace(/[^.!?\n]*chuỗi hành động[^.!?\n]*(?:trọn vẹn|đúng trình tự)[^.!?\n]*[.!?]?/gi, '')
         .replace(/[^.!?\n]*(?:trọn vẹn|đúng trình tự)[^.!?\n]*chuỗi hành động[^.!?\n]*[.!?]?/gi, '')
         .replace(FOREIGN_SCRIPT_LEAK_RE, '')
-        .replace(/ {2,}/g, ' ');
+        .replace(ENGLISH_LEAK_RE, (match) => ENGLISH_LEAK_REPLACEMENTS[match.toLowerCase()] ?? '')
+        .replace(/ {2,}/g, ' ')
+        // Một từ bị cắt ngay trước dấu câu (vd "...thu hạ curtains." → "...thu hạ .")
+        // để lại khoảng trắng mồ côi trước dấu câu — dọn nốt cho câu liền mạch.
+        .replace(/ +([.,!?;:])/g, '$1');
 
     const updates = {
 
@@ -28499,12 +28519,13 @@ ${PILLAR1_DIRECTIVES_NARRATION.map(x => '//    * ' + x).join('\n')}
 //    - TUYỆT ĐỐI KHÔNG để dấu sao đứng mồ côi (SAI: * áp lưng vào tường..., ĐÚNG: Ngươi áp lưng vào tường...).
 
 // 1.5. CHỈ VIẾT BẰNG CHỮ QUỐC NGỮ (TUYỆT ĐỐI CẤM CHỮ VIẾT NGOÀI TIẾNG VIỆT):
-//    - Toàn bộ văn tường thuật, hội thoại, và 4 gợi ý hành động PHẢI 100% bằng chữ Quốc ngữ (bảng chữ Latin có dấu tiếng Việt). TUYỆT ĐỐI KHÔNG được để lẫn bất kỳ ký tự/từ nào của ngôn ngữ khác vào giữa câu tiếng Việt — kể cả chỉ một chữ Hán/Kana/Hangul/Kirin (Nga) đơn lẻ, dù chỉ một âm tiết.
+//    - Toàn bộ văn tường thuật, hội thoại, và 4 gợi ý hành động PHẢI 100% bằng chữ Quốc ngữ (bảng chữ Latin có dấu tiếng Việt). TUYỆT ĐỐI KHÔNG được để lẫn bất kỳ ký tự/từ nào của ngôn ngữ khác vào giữa câu tiếng Việt — kể cả chỉ một chữ Hán/Kana/Hangul/Kirin (Nga) đơn lẻ, dù chỉ một âm tiết, VÀ kể cả một TỪ TIẾNG ANH nguyên vẹn (dù cùng dùng chữ Latin như tiếng Việt) — mọi từ, kể cả từ đơn giản/thông dụng, PHẢI dịch hẳn sang tiếng Việt, không được giữ nguyên văn gốc tiếng Anh.
 //    - Muốn diễn đạt khái niệm gốc Hán (võ công, công pháp, danh xưng, tâm pháp...), BẮT BUỘC dùng từ Hán Việt đã phiên âm sang chữ Quốc ngữ (VD: "niệm", "chân nguyên", "tâm ma"), TUYỆT ĐỐI KHÔNG viết trực tiếp ký tự Hán gốc (VD: 念, 心, 氣).
 //    - VÍ DỤ SAI (lẫn tiếng Nga): "Vận dụng toàn bộ sức mạnh физи thể chất lướt tới áp sát..." — "физи" là ký tự ngoại lai vô nghĩa trong câu, TUYỆT ĐỐI không được xuất hiện.
 //    - VÍ DỤ SAI (lẫn chữ Hán thay vì Hán Việt): "Ngươi tâm念 vừa động, chuôi thần binh... hiện ra" — phải viết trọn "niệm" bằng chữ Quốc ngữ: "Ngươi tâm niệm vừa động".
-//    - VÍ DỤ ĐÚNG: "Vận dụng toàn bộ sức mạnh thể chất lướt tới áp sát...", "Ngươi tâm niệm vừa động, chuôi thần binh... hiện ra".
-//    - TỰ KIỂM TRA BẮT BUỘC TRƯỚC KHI TRẢ VỀ PHẢN HỒI: rà lại toàn bộ văn bản một lượt; nếu phát hiện bất kỳ ký tự nào ngoài bảng chữ Latin (có dấu tiếng Việt) và dấu câu thông thường, PHẢI xóa hoặc thay bằng từ tiếng Việt tương ứng trước khi hoàn tất.
+//    - VÍ DỤ SAI (lẫn nguyên từ tiếng Anh): "...bọc giáp sáng quắc under sự dẫn dắt của..." (phải viết "dưới sự dẫn dắt của"); "...màn kịch của mình đã đến lúc thu hạ curtains." (phải viết trọn ý bằng tiếng Việt, VD "đã đến lúc hạ màn.", KHÔNG được giữ từ "curtains").
+//    - VÍ DỤ ĐÚNG: "Vận dụng toàn bộ sức mạnh thể chất lướt tới áp sát...", "Ngươi tâm niệm vừa động, chuôi thần binh... hiện ra", "...bọc giáp sáng quắc dưới sự dẫn dắt của...", "...màn kịch của mình đã đến lúc hạ màn.".
+//    - TỰ KIỂM TRA BẮT BUỘC TRƯỚC KHI TRẢ VỀ PHẢN HỒI: rà lại toàn bộ văn bản một lượt, kể cả những từ trông "vô hại" xen giữa câu tiếng Việt; nếu phát hiện bất kỳ ký tự/từ nào không phải chữ Quốc ngữ (kể cả một từ tiếng Anh thông dụng) hoặc dấu câu thông thường, PHẢI xóa hoặc dịch hẳn sang tiếng Việt trước khi hoàn tất.
 
 // 2. ĐỊNH DẠNG HỘI THOẠI (NGHIÊM CẤM ĐỂ TRỐNG SPEAKER):
 //    - Mọi câu nói trực tiếp của nhân vật PHẢI được bọc trong thẻ XML <dialogue>.
